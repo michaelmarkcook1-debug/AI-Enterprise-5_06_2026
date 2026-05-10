@@ -312,8 +312,12 @@ async function runOneSource(
         proposedRawScore: classification?.finalRawScore ?? proposal.proposedRawScore,
         sourceUrl: entry.url,
         capturedAt: now,
+        // 0.5 + null rationale is the documented "classifier unavailable"
+        // sentinel detected by lib/services/triage-runner.ts.
+        // Do NOT fall through to extractor rationale on classifier failure
+        // — that would mask the failure from the triage policy.
         classifierConfidence: classification?.confidence ?? 0.5,
-        classifierRationale: classification?.rationale ?? proposal.rationale,
+        classifierRationale: classification?.rationale ?? null,
         status: "pending" as const,
       }));
       const created = await client.evidenceProposal.createMany({ data });

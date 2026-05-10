@@ -55,7 +55,15 @@ async function main() {
   console.log(`recommend_reject : ${report.laneCounts.recommend_reject}`);
   console.log(`human_review     : ${report.laneCounts.human_review_required}`);
   console.log(`applied (live)   : ${report.appliedCount}`);
+  console.log(`classifier fallback rows : ${report.classifierFallbackCount}`);
   console.log(`audit lines      : ${report.auditWritten} → ${TRIAGE_AUDIT_FILE}`);
+  console.log("\n─── Reason breakdown ───");
+  for (const r of report.reasonCounts.slice(0, 15)) {
+    console.log(`  ${String(r.count).padStart(4)}  ${r.reason}`);
+  }
+  if (report.reasonCounts.length > 15) {
+    console.log(`  … and ${report.reasonCounts.length - 15} more reasons`);
+  }
   if (report.applicationErrors.length > 0) {
     console.log("\napplication errors:");
     for (const e of report.applicationErrors) {

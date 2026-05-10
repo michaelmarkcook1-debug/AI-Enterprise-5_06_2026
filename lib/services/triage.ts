@@ -49,6 +49,11 @@ export interface TriageInput {
   dataStatus?: string | null;
   /** Optional explicit freshness label from the connector. */
   freshnessStatus?: "fresh" | "aging" | "stale" | "unknown";
+  /** Set when classifierConfidence is the runner's missing-value fallback
+   * (i.e. the LLM classifier never returned a value). When true the rule
+   * treats the confidence number as UNKNOWN and routes to human review
+   * regardless of how high or low the stamped value is. */
+  confidenceIsFallback?: boolean;
 }
 
 export interface TriageDecision {
@@ -88,6 +93,14 @@ export type UnsafeCategory =
 
 /** Default confidence threshold for auto-approve. Configurable per-run. */
 export const DEFAULT_AUTO_APPROVE_CONFIDENCE = 0.85;
+
+/** Minimum confidence for the recommend_approve band (below this we can't
+ * recommend approval). Anything between this and the auto-approve threshold
+ * is "medium confidence — human-eyeball". */
+export const RECOMMEND_APPROVE_MIN_CONFIDENCE = 0.6;
+
+/** Below this we recommend reject when no other strong signal contradicts. */
+export const RECOMMEND_REJECT_MAX_CONFIDENCE = 0.4;
 
 /** How fresh the evidence must be (in days) for auto-approve. */
 export const AUTO_APPROVE_FRESHNESS_DAYS = 365;
@@ -218,16 +231,48 @@ export function triageProposal(
 
   const reasons: string[] = [];
 
-  // Always-block conditions (force human review or recommend_reject regardless
-  // of any positive signals).
+  // ── Always-record diagnostics ────────────────────────────────────────────
+  if (input.confidenceIsFallback)
+    reasons.push("classifier unavailable — confidence is fallback default");
   if (input.hasSourceConflict) reasons.push("source conflict flagged on this claim");
   if (unsafeCategory) reasons.push(`unsafe category: ${unsafeCategory.replace(/_/g, " ")}`);
   if (!hasSource) reasons.push("missing source URL / sourceIds");
   if (!hasEntityMatch) reasons.push("no vendor entity match");
   if (input.proposedGrade === "E0") reasons.push("E0 evidence cannot be approved");
+  if (!notStale) reasons.push("captured > 365d ago — stale");
+  if (!notInferred) reasons.push("inferred / hedged language detected");
+  if (!gradeOk && input.proposedGrade !== "E0")
+    reasons.push(`grade ${input.proposedGrade} below E2 floor`);
 
-  // Auto-approve gate: every signal must be true AND no unsafe category.
+  // ── Lane decision ────────────────────────────────────────────────────────
+  // Order matters. Each block returns a definitive lane.
+
+  // 1) HUMAN REVIEW REQUIRED — high-impact / unsafe / unresolved ambiguity.
+  //    These conditions BLOCK every other lane, regardless of confidence.
+  const requiresHumanReview =
+    unsafeCategory !== null ||
+    input.hasSourceConflict ||
+    !hasEntityMatch ||
+    !hasSource ||
+    input.confidenceIsFallback;
+
+  // 2) RECOMMEND_REJECT — weak/low-quality evidence that's not unsafe.
+  //    Hedged or inferred excerpt, very low real confidence, stale, or
+  //    E0/E1 with low real confidence. Confidence-fallback never lands
+  //    here (it's handled by human_review above).
+  const realConf = input.confidenceIsFallback ? null : input.classifierConfidence;
+  const isWeakEvidence =
+    !input.confidenceIsFallback && (
+      !notInferred ||
+      !notStale ||
+      (input.proposedGrade === "E0") ||
+      (realConf !== null && realConf < RECOMMEND_REJECT_MAX_CONFIDENCE) ||
+      (input.proposedGrade === "E1" && realConf !== null && realConf < RECOMMEND_APPROVE_MIN_CONFIDENCE)
+    );
+
+  // 3) AUTO_APPROVE — every gate green AND no unsafe/conflict/fallback.
   const allSignalsGreen =
+    !requiresHumanReview &&
     gradeOk &&
     confidenceOk &&
     hasSource &&
@@ -239,51 +284,53 @@ export function triageProposal(
     notUnsafeCategory &&
     notMissingSource;
 
+  // 4) RECOMMEND_APPROVE — source-backed, medium real confidence, no conflict.
+  //    Anything that would auto-approve EXCEPT product linkage missing OR
+  //    confidence in [0.6, threshold).
+  const isRecommendApprove =
+    !requiresHumanReview &&
+    !isWeakEvidence &&
+    gradeOk &&
+    hasSource &&
+    hasEntityMatch &&
+    notStale &&
+    notInferred &&
+    notDisputed &&
+    realConf !== null &&
+    realConf >= RECOMMEND_APPROVE_MIN_CONFIDENCE;
+
   let lane: TriageLane;
   if (allSignalsGreen) {
     lane = "auto_approve";
     reasons.unshift(
       `auto_approve: ${input.proposedGrade} · conf ${(input.classifierConfidence * 100).toFixed(0)}% · vendor + product match · fresh · official source`,
     );
-  } else if (
-    unsafeCategory ||
-    input.hasSourceConflict ||
-    input.proposedGrade === "E0" ||
-    !hasSource ||
-    !hasEntityMatch
-  ) {
-    // Hard-block conditions → human review (NEVER auto-approve, NEVER
-    // recommend_approve). We push to human_review unless the record looks
-    // outright bogus, in which case recommend_reject.
-    if (
-      input.proposedGrade === "E0" &&
-      (input.classifierConfidence < 0.4 || !hasSource)
-    ) {
-      lane = "recommend_reject";
-      reasons.push("E0 + low confidence or missing source — recommend reject");
-    } else {
-      lane = "human_review_required";
+  } else if (requiresHumanReview) {
+    lane = "human_review_required";
+  } else if (isWeakEvidence) {
+    lane = "recommend_reject";
+    if (realConf !== null && realConf < RECOMMEND_REJECT_MAX_CONFIDENCE) {
+      reasons.push(`low classifier confidence ${(realConf * 100).toFixed(0)}%`);
     }
-  } else if (gradeOk && confidenceOk && notStale && notInferred) {
-    // Looks promising but not enough for auto-approve (e.g. product not
-    // matched, or fuzzy language in the excerpt). Surface as recommend.
+    if (input.proposedGrade === "E1" && realConf !== null && realConf < RECOMMEND_APPROVE_MIN_CONFIDENCE) {
+      reasons.push(`E1 grade with confidence ${(realConf * 100).toFixed(0)}% — recommend reject`);
+    }
+  } else if (isRecommendApprove) {
     lane = "recommend_approve";
     if (!hasProductMatch) reasons.push("product linkage missing — operator confirm");
-  } else if (
-    !confidenceOk &&
-    input.classifierConfidence < 0.4
-  ) {
-    lane = "recommend_reject";
-    reasons.push(`low classifier confidence ${(input.classifierConfidence * 100).toFixed(0)}%`);
-  } else {
-    lane = "human_review_required";
-    if (!gradeOk) reasons.push(`grade ${input.proposedGrade} below E2 floor`);
-    if (!confidenceOk)
+    if (realConf !== null && realConf < threshold) {
       reasons.push(
-        `classifier confidence ${(input.classifierConfidence * 100).toFixed(0)}% below ${(threshold * 100).toFixed(0)}% threshold`,
+        `medium confidence ${(realConf * 100).toFixed(0)}% (below ${(threshold * 100).toFixed(0)}% auto-approve threshold)`,
       );
-    if (!notStale) reasons.push("captured > 365d ago — stale");
-    if (!notInferred) reasons.push("inferred / hedged language detected");
+    }
+  } else {
+    // Fallthrough — covers grade-below-floor with non-low real confidence,
+    // and other ambiguous mid-band cases.
+    lane = "human_review_required";
+    if (!confidenceOk && realConf !== null)
+      reasons.push(
+        `classifier confidence ${(realConf * 100).toFixed(0)}% below ${(threshold * 100).toFixed(0)}% threshold`,
+      );
   }
 
   return {
@@ -315,4 +362,23 @@ export function summariseLanes(decisions: TriageDecision[]): Record<TriageLane, 
   };
   for (const d of decisions) out[d.lane] += 1;
   return out;
+}
+
+/** Roll-up of reason → count, ordered most common first. Reason strings are
+ * normalised by stripping numeric percentages so "confidence 50%" and
+ * "confidence 30%" collapse onto the same bucket "low classifier confidence". */
+export function summariseReasons(decisions: TriageDecision[]): { reason: string; count: number }[] {
+  const counts = new Map<string, number>();
+  for (const d of decisions) {
+    for (const r of d.reasons) {
+      const key = r
+        .replace(/\d+%/g, "N%")
+        .replace(/E[0-5]\b/g, "E?")
+        .trim();
+      counts.set(key, (counts.get(key) ?? 0) + 1);
+    }
+  }
+  return [...counts.entries()]
+    .map(([reason, count]) => ({ reason, count }))
+    .sort((a, b) => b.count - a.count);
 }

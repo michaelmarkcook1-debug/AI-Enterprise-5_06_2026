@@ -3,6 +3,7 @@ import {
   triageProposal,
   triageBatch,
   summariseLanes,
+  summariseReasons,
   detectUnsafeCategory,
   type TriageInput,
 } from "./triage";
@@ -230,6 +231,15 @@ describe("recommend_approve lane", () => {
     expect(decision.reasons.some((r) => /product linkage missing/.test(r))).toBe(true);
   });
 
+  it("routes medium-confidence (0.6 ≤ conf < 0.85) source-backed E2+ to recommend_approve", () => {
+    const decision = triageProposal(
+      base({ classifierConfidence: 0.7 }),
+      { now: NOW },
+    );
+    expect(decision.lane).toBe("recommend_approve");
+    expect(decision.reasons.some((r) => /medium confidence/.test(r))).toBe(true);
+  });
+
   it("matches productMention against knownProductNames to allow auto_approve", () => {
     const decision = triageProposal(
       base({ productId: null, productMention: "Microsoft 365 Copilot" }),
@@ -239,8 +249,35 @@ describe("recommend_approve lane", () => {
   });
 });
 
+describe("classifier-fallback handling", () => {
+  it("confidenceIsFallback always routes to human_review_required regardless of how high the stamped value is", () => {
+    const decision = triageProposal(
+      base({ classifierConfidence: 0.99, confidenceIsFallback: true }),
+      { now: NOW },
+    );
+    expect(decision.lane).toBe("human_review_required");
+    expect(decision.reasons.some((r) => /classifier unavailable/.test(r))).toBe(true);
+  });
+
+  it("confidenceIsFallback blocks auto_approve even when every other gate is green", () => {
+    const decision = triageProposal(
+      base({ confidenceIsFallback: true }),
+      { now: NOW },
+    );
+    expect(decision.lane).toBe("human_review_required");
+  });
+
+  it("confidenceIsFallback does NOT trigger recommend_reject (we don't reject for missing classifier output)", () => {
+    const decision = triageProposal(
+      base({ classifierConfidence: 0.5, confidenceIsFallback: true }),
+      { now: NOW },
+    );
+    expect(decision.lane).not.toBe("recommend_reject");
+  });
+});
+
 describe("recommend_reject lane", () => {
-  it("very low confidence → recommend_reject", () => {
+  it("very low real confidence → recommend_reject", () => {
     const decision = triageProposal(
       base({ classifierConfidence: 0.2 }),
       { now: NOW },
@@ -248,12 +285,52 @@ describe("recommend_reject lane", () => {
     expect(decision.lane).toBe("recommend_reject");
   });
 
-  it("E0 + missing source → recommend_reject", () => {
+  it("E1 grade with confidence < 0.6 → recommend_reject", () => {
     const decision = triageProposal(
-      base({ proposedGrade: "E0", sourceUrl: null, sourceIds: [] }),
+      base({ proposedGrade: "E1", classifierConfidence: 0.5 }),
       { now: NOW },
     );
     expect(decision.lane).toBe("recommend_reject");
+  });
+
+  it("hedged language with real confidence → recommend_reject", () => {
+    const decision = triageProposal(
+      base({
+        classifierConfidence: 0.65,
+        excerpt: "Microsoft Copilot may achieve roughly 90% accuracy on internal benchmarks.",
+      }),
+      { now: NOW },
+    );
+    expect(decision.lane).toBe("recommend_reject");
+  });
+
+  it("stale data (>365d) with real confidence → recommend_reject", () => {
+    const decision = triageProposal(
+      base({ capturedAt: new Date("2024-01-01T00:00:00Z") }),
+      { now: NOW },
+    );
+    expect(decision.lane).toBe("recommend_reject");
+  });
+});
+
+describe("ALL FOUR LANES MUST BE REACHABLE", () => {
+  it("auto_approve is reachable", () => {
+    expect(triageProposal(base(), { now: NOW }).lane).toBe("auto_approve");
+  });
+  it("recommend_approve is reachable", () => {
+    expect(
+      triageProposal(base({ classifierConfidence: 0.7 }), { now: NOW }).lane,
+    ).toBe("recommend_approve");
+  });
+  it("recommend_reject is reachable", () => {
+    expect(
+      triageProposal(base({ classifierConfidence: 0.2 }), { now: NOW }).lane,
+    ).toBe("recommend_reject");
+  });
+  it("human_review_required is reachable", () => {
+    expect(
+      triageProposal(base({ confidenceIsFallback: true }), { now: NOW }).lane,
+    ).toBe("human_review_required");
   });
 });
 
@@ -329,6 +406,25 @@ describe("batch helpers", () => {
     const counts = summariseLanes(decisions);
     expect(counts.auto_approve).toBe(1);
     expect(counts.human_review_required + counts.recommend_reject).toBeGreaterThanOrEqual(2);
+  });
+
+  it("summariseReasons collapses numeric variations and counts most-common first", () => {
+    const decisions = triageBatch(
+      [
+        base({ id: "a", classifierConfidence: 0.2 }),
+        base({ id: "b", classifierConfidence: 0.3 }),
+        base({ id: "c", classifierConfidence: 0.25 }),
+        base({ id: "d", proposedGrade: "E0" }),
+      ],
+      { now: NOW },
+    );
+    const reasons = summariseReasons(decisions);
+    expect(reasons.length).toBeGreaterThan(0);
+    expect(reasons[0].count).toBeGreaterThanOrEqual(reasons[reasons.length - 1].count);
+    // Numeric percentages collapse into a single bucket
+    const lowConf = reasons.find((r) => /low classifier confidence N%/.test(r.reason));
+    expect(lowConf).toBeDefined();
+    expect(lowConf!.count).toBeGreaterThanOrEqual(3);
   });
 });
 

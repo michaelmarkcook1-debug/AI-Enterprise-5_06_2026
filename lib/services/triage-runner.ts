@@ -23,6 +23,7 @@ import { hasDatabase, getPrisma } from "../prisma";
 import {
   triageBatch,
   summariseLanes,
+  summariseReasons,
   type TriageDecision,
   type TriageInput,
   type TriageOptions,
@@ -58,11 +59,39 @@ export interface TriageRunReport {
   dryRun: boolean;
   total: number;
   laneCounts: Record<TriageLane, number>;
+  reasonCounts: { reason: string; count: number }[];
+  /** Number of proposals where classifierConfidence is the runner's
+   * fallback default (the LLM classifier silently failed). */
+  classifierFallbackCount: number;
   appliedCount: number;
   auditWritten: number;
   decisions: TriageDecision[];
   /** Failures while applying live auto_approve actions, by proposalId. */
   applicationErrors: { proposalId: string; error: string }[];
+}
+
+/** Detect proposals where classifierConfidence is the runner's missing-value
+ * default rather than a real classifier output. The fallback signature is:
+ *   - confidence === 0.5 (exact — runner.ts:315 stamps this when classify fails)
+ *   - rationale is null OR matches the extractor's hand-written rationale
+ *     (i.e. NOT produced by the classifier prompt).
+ *
+ * Empirically (n=314 in the May 2026 audit log): 312 proposals at exactly
+ * 0.5 with extractor-style rationale, 2 at 0.91/0.92 — confirming 0.5 is
+ * uniquely the fallback signal. The stub classifier returns 0.6.
+ *
+ * Going forward (post lib/sourcing/runner.ts fix) the fallback also writes
+ * a null rationale, making detection unambiguous. The 0.5-exact heuristic
+ * remains as a back-compat detector for already-persisted rows. */
+export function isClassifierFallback(p: { classifierConfidence: number; classifierRationale: string | null }): boolean {
+  if (p.classifierRationale === null) return true;
+  if (p.classifierConfidence !== 0.5) return false;
+  // 0.5 exact + a rationale present → the runner overwrote rationale with
+  // the extractor's text. Treat as fallback when the rationale lacks any
+  // classifier-style "regrade" wording.
+  const r = p.classifierRationale.toLowerCase();
+  const looksClassifierWritten = /re-?grad|classifier|cap\b|conservative|stub classifier/.test(r);
+  return !looksClassifierWritten;
 }
 
 function proposalToTriageInput(p: EvidenceProposal): TriageInput {
@@ -84,6 +113,7 @@ function proposalToTriageInput(p: EvidenceProposal): TriageInput {
     sourceIds: p.sourceUrl ? [p.sourceUrl] : [],
     capturedAt: p.capturedAt,
     classifierConfidence: p.classifierConfidence,
+    confidenceIsFallback: isClassifierFallback(p),
     isInferredTransformation: false,
     hasSourceConflict: false,
   };
@@ -112,6 +142,8 @@ export async function runTriage(opts: TriageRunOptions = {}): Promise<TriageRunR
         recommend_reject: 0,
         human_review_required: 0,
       },
+      reasonCounts: [],
+      classifierFallbackCount: 0,
       appliedCount: 0,
       auditWritten: 0,
       decisions: [],
@@ -182,10 +214,14 @@ export async function runTriage(opts: TriageRunOptions = {}): Promise<TriageRunR
 
   await recordTriageAuditBatch(auditEntries);
 
+  const classifierFallbackCount = inputs.filter((i) => i.confidenceIsFallback).length;
+
   return {
     dryRun: effectiveDryRun,
     total: decisions.length,
     laneCounts: summariseLanes(decisions),
+    reasonCounts: summariseReasons(decisions),
+    classifierFallbackCount,
     appliedCount,
     auditWritten: auditEntries.length,
     decisions,

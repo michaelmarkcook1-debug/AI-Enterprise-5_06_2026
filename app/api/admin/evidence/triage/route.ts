@@ -35,6 +35,8 @@ export async function POST(request: Request) {
       dryRun: report.dryRun,
       total: report.total,
       laneCounts: report.laneCounts,
+      reasonCounts: report.reasonCounts,
+      classifierFallbackCount: report.classifierFallbackCount,
       appliedCount: report.appliedCount,
       auditWritten: report.auditWritten,
       applicationErrors: report.applicationErrors,
