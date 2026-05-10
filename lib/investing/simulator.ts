@@ -105,7 +105,7 @@ export function isPrivateExposureCompatible(
 
 export function getSeedPortfolio(input: Partial<SimulationInput> = {}): SimulationPortfolio {
   const normalised = normaliseInput(input);
-  if (normalised.allocationStyle === "manual") {
+  if (normalised.allocationStyle === "manual" || normalised.allocationStyle === "single_stock") {
     return getManualPortfolio(normalised);
   }
 
@@ -281,7 +281,7 @@ export function validateSimulationAllocation(input: Partial<SimulationInput>, pr
   const errors: string[] = [];
   const warnings: string[] = [];
 
-  if (normalised.allocationStyle !== "manual") {
+  if (normalised.allocationStyle !== "manual" && normalised.allocationStyle !== "single_stock") {
     return {
       isValid: true,
       totalAllocationPct: 100,
@@ -300,12 +300,18 @@ export function validateSimulationAllocation(input: Partial<SimulationInput>, pr
   const totalDelta = round(totalAllocationPct - 100, 2);
 
   if (selectedVendorIds.length === 0) {
-    errors.push(`Select at least one eligible ${labelInvestmentUniverse(normalised.investmentUniverse)} provider before running a manual allocation.`);
+    if (normalised.allocationStyle === "single_stock") {
+      errors.push("Pick a single ticker to model. Single-stock mode allocates 100% of capital to one public-direct holding.");
+    } else {
+      errors.push(`Select at least one eligible ${labelInvestmentUniverse(normalised.investmentUniverse)} provider before running a manual allocation.`);
+    }
+  } else if (normalised.allocationStyle === "single_stock" && selectedVendorIds.length > 1) {
+    errors.push("Single-stock mode allows exactly one ticker. Remove additional selections.");
   } else if (Math.abs(totalDelta) > 0.5) {
     const adjustment = formatPercent(Math.abs(totalDelta));
     errors.push(totalDelta < 0
-      ? `Manual allocations are ${adjustment}% short. Add vendor allocation or lower cash reserve so holdings plus cash equal 100%. Current total: ${formatPercent(totalAllocationPct)}%.`
-      : `Manual allocations are ${adjustment}% over. Reduce vendor allocation or cash reserve so holdings plus cash equal 100%. Current total: ${formatPercent(totalAllocationPct)}%.`);
+      ? `Manual allocations are ${adjustment}% short. Add vendor allocation so holdings total 100%. Current total: ${formatPercent(totalAllocationPct)}%.`
+      : `Manual allocations are ${adjustment}% over. Reduce vendor allocation so holdings total 100%. Current total: ${formatPercent(totalAllocationPct)}%.`);
   }
 
   selectedVendorIds.forEach((providerId) => {

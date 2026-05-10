@@ -66,7 +66,7 @@ const PRESETS: SimulatorPreset[] = [
       allocationStyle: "model_guided",
       investmentUniverse: "public_only",
       includePrivateExposure: "no",
-      cashReservePct: 15,
+      cashReservePct: 0,
       horizonYears: 5,
       globalRiskClimate: "calm",
       selectedVendorIds: [],
@@ -83,7 +83,7 @@ const PRESETS: SimulatorPreset[] = [
       allocationStyle: "model_guided",
       investmentUniverse: "public_and_indirect",
       includePrivateExposure: "indirect_only",
-      cashReservePct: 8,
+      cashReservePct: 0,
       horizonYears: 5,
       globalRiskClimate: "elevated",
       selectedVendorIds: [],
@@ -100,7 +100,7 @@ const PRESETS: SimulatorPreset[] = [
       allocationStyle: "model_guided",
       investmentUniverse: "ipo_watch",
       includePrivateExposure: "ipo_watchlist",
-      cashReservePct: 5,
+      cashReservePct: 0,
       horizonYears: 3,
       globalRiskClimate: "elevated",
       selectedVendorIds: [],
@@ -117,7 +117,7 @@ const PRESETS: SimulatorPreset[] = [
       allocationStyle: "model_guided",
       investmentUniverse: "speculative_all",
       includePrivateExposure: "ipo_watchlist",
-      cashReservePct: 3,
+      cashReservePct: 0,
       horizonYears: 5,
       globalRiskClimate: "tense",
       selectedVendorIds: [],
@@ -306,6 +306,8 @@ export default function InvestmentSimulatorClient({
         {shockEvent && <p className="mt-2 text-amber-800 dark:text-amber-300">{shockEvent.displayMessage}</p>}
       </div>
 
+      <ConfigBanner errors={state.errors} />
+
       <div className="grid gap-5 xl:grid-cols-[0.72fr_1.45fr_0.83fr]">
         <Panel title="Inputs and assumptions">
           <div className="space-y-3">
@@ -346,32 +348,42 @@ export default function InvestmentSimulatorClient({
 
             {/* ─────── STRATEGY — collapsible, default open ─────── */}
             <CollapsibleSection title="Strategy & allocation" defaultOpen>
-              <Field label="Allocation style" info="Model-guided builds a seed allocation. Manual lets you select vendors and weights; invalid totals block chart output.">
-                <Select value={input.allocationStyle} options={["manual", "model_guided", "thesis_based", "single_stock"]} onChange={(value) => setField("allocationStyle", value as SimulationInput["allocationStyle"])} />
+              <Field label="Allocation style" info="Model-guided builds the portfolio for you. Manual lets you pick vendors and weights. Single Stock isolates one ticker.">
+                <Select value={input.allocationStyle} options={["model_guided", "manual", "single_stock", "thesis_based"]} onChange={(value) => setField("allocationStyle", value as SimulationInput["allocationStyle"])} />
               </Field>
-              <Field label="Private exposure" info="Controls whether private providers are hidden, shown only through indirect links, or displayed as IPO-watch scenario items.">
-                <Select
-                  disabledOptions={blockedPrivateExposureOptions}
-                  value={input.includePrivateExposure}
-                  options={PRIVATE_EXPOSURE_OPTIONS}
-                  onChange={(value) => setField("includePrivateExposure", value as SimulationInput["includePrivateExposure"])}
+
+              {/* Decision-tree collapse: only show Private Exposure when the
+                  current universe actually offers a meaningful choice. */}
+              {input.investmentUniverse !== "public_only" && input.investmentUniverse !== "single_stock" && (
+                <Field label="Private exposure" info="Controls whether private providers are hidden, shown via indirect links, or displayed as IPO-watch items.">
+                  <Select
+                    disabledOptions={blockedPrivateExposureOptions}
+                    value={input.includePrivateExposure}
+                    options={PRIVATE_EXPOSURE_OPTIONS}
+                    onChange={(value) => setField("includePrivateExposure", value as SimulationInput["includePrivateExposure"])}
+                  />
+                  <GuidanceNote>{PRIVATE_EXPOSURE_GUIDANCE[input.investmentUniverse]}</GuidanceNote>
+                </Field>
+              )}
+
+              {input.allocationStyle === "single_stock" && (
+                <SingleStockPicker
+                  eligibleProviders={state.eligibleUniverse}
+                  selectedId={(input.selectedVendorIds ?? [])[0] ?? null}
+                  startingCapital={input.startingCapital}
+                  onSelect={(providerId) => {
+                    setInput((current) => ({
+                      ...current,
+                      // Force the universe to single_stock so the engine
+                      // restricts to public_direct tickers and validates one-only.
+                      investmentUniverse: "single_stock",
+                      selectedVendorIds: [providerId],
+                      manualAllocations: { [providerId]: 100 },
+                    }));
+                  }}
                 />
-                <GuidanceNote>{PRIVATE_EXPOSURE_GUIDANCE[input.investmentUniverse]}</GuidanceNote>
-              </Field>
-              <Field label="Cash reserve" info="Cash reserve lowers invested allocation and volatility. In manual mode, vendor allocations plus cash must total 100%.">
-                <input
-                  className="w-full accent-[#2f5d50]"
-                  min={0}
-                  max={50}
-                  type="range"
-                  value={input.cashReservePct}
-                  onChange={(event) => setField("cashReservePct", Number(event.target.value))}
-                />
-                <div className="mt-1 flex items-center justify-between text-xs text-[#697362] dark:text-zinc-500">
-                  <span>{input.cashReservePct}% cash</span>
-                  <span className="font-mono tabular-nums">{formatCurrency((input.startingCapital * input.cashReservePct) / 100)}</span>
-                </div>
-              </Field>
+              )}
+
               {input.allocationStyle === "manual" && (
                 <ManualAllocationEditor
                   eligibleProviders={state.eligibleUniverse}
@@ -387,14 +399,14 @@ export default function InvestmentSimulatorClient({
 
             {/* ─────── MARKET CONTEXT — collapsible, default open ─────── */}
             <CollapsibleSection title="Market context" defaultOpen>
-              <Field label="Global news / political climate" info="Captures the prevailing macro and geopolitical risk regime as expressed in news flow. Applies a return drag, shock amplifier, and regulatory-tilt to all holdings.">
+              <Field label="Global news / political climate" info="Prevailing macro / geopolitical regime. Applies a return drag, shock amplifier, and regulatory tilt to all holdings.">
                 <ClimateSegmented
                   value={input.globalRiskClimate ?? "elevated"}
                   onChange={(value) => setField("globalRiskClimate", value)}
                 />
                 <GuidanceNote>{GLOBAL_RISK_CLIMATE_GUIDANCE[input.globalRiskClimate ?? "elevated"]}</GuidanceNote>
               </Field>
-              <Field label="Market Signals overlay" info="When enabled, blends source-cited macro / regulatory / company / sector signals into each holding's expected return. Truthfulness gates prevent unsupported or low-confidence signals from moving centre.">
+              <Field label="Market Signals overlay" info="Blends source-cited macro / regulatory / company / sector signals into each holding's expected return. Truthfulness gates prevent unsupported signals from moving centre.">
                 <ToggleSwitch
                   checked={Boolean(input.applySignalOverlay)}
                   onChange={(checked) => setField("applySignalOverlay", checked)}
@@ -403,7 +415,7 @@ export default function InvestmentSimulatorClient({
                 />
                 <GuidanceNote>
                   {input.applySignalOverlay
-                    ? "Active. Per-vendor signal contributions appear in the Provider table and on the chart annotation."
+                    ? "Active. Per-vendor delta appears in the chart annotation and the provider table."
                     : "Off — base scenario engine only. Toggle on to layer in current macro / regulatory / sector signals."}
                 </GuidanceNote>
               </Field>
@@ -679,13 +691,96 @@ function BlockedOutputNote() {
   );
 }
 
-function IntegrityError({ errors }: { errors: string[] }) {
+/**
+ * Quiet placeholder for chart panels when the input combo is invalid.
+ * Replaces the previous per-panel IntegrityError spam — the actionable
+ * error list is rendered ONCE at the top of the page in <ConfigBanner>.
+ */
+function IntegrityError(_: { errors: string[] }) {
+  return (
+    <div className="flex h-32 items-center justify-center rounded-md border border-dashed border-[#dfe4da] text-xs text-[#697362] dark:border-zinc-700 dark:text-zinc-500">
+      Awaiting valid configuration — see the panel above the chart for what to fix.
+    </div>
+  );
+}
+
+/**
+ * Single, prominent error banner shown above the chart layout when the input
+ * combination is invalid. Lists every error once with a one-line "what to do".
+ */
+function ConfigBanner({ errors }: { errors: string[] }) {
+  if (errors.length === 0) return null;
   return (
     <div className="rounded-lg border border-rose-200 bg-rose-50 p-4 text-sm leading-6 text-rose-900 dark:border-rose-900/70 dark:bg-rose-950/40 dark:text-rose-200">
-      <div className="font-semibold">Simulation integrity error: output is not synced with current inputs. Please review highlighted fields or rerun the simulation.</div>
+      <div className="font-semibold">Simulation can&apos;t run yet — fix the {errors.length === 1 ? "issue" : `${errors.length} issues`} below:</div>
       <ul className="mt-2 list-disc pl-5 text-xs">
-        {errors.map((error) => <li key={error}>{error}</li>)}
+        {errors.map((error, i) => <li key={i}>{error}</li>)}
       </ul>
+    </div>
+  );
+}
+
+/**
+ * Single-stock picker. Used when allocationStyle === "single_stock" — exposes
+ * a clear list of public-direct tickers, click-to-select, with the selected
+ * ticker showing 100% allocation against the current starting capital.
+ */
+function SingleStockPicker({
+  eligibleProviders,
+  selectedId,
+  startingCapital,
+  onSelect,
+}: {
+  eligibleProviders: InvestmentProviderProfile[];
+  selectedId: string | null;
+  startingCapital: number;
+  onSelect: (providerId: string) => void;
+}) {
+  const tickers = eligibleProviders.filter((p) => p.investabilityStatus === "public_direct" && p.ticker);
+  const chosen = tickers.find((p) => p.id === selectedId);
+  return (
+    <div className="rounded-lg border border-[#dfe4da] p-3 dark:border-zinc-800">
+      <div className="text-[10px] font-semibold uppercase tracking-wide text-[#697362] dark:text-zinc-500">Single ticker</div>
+      <div className="mt-2 max-h-56 overflow-y-auto pr-1">
+        <div className="grid gap-1.5">
+          {tickers.map((p) => {
+            const isSelected = p.id === selectedId;
+            return (
+              <button
+                key={p.id}
+                type="button"
+                onClick={() => onSelect(p.id)}
+                className={`flex items-center justify-between rounded-md border px-3 py-2 text-left text-xs transition-colors ${
+                  isSelected
+                    ? "border-[#192319] bg-[#192319] text-white dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-950"
+                    : "border-[#dfe4da] bg-white hover:bg-[#eef2e8] dark:border-zinc-800 dark:bg-zinc-900 dark:hover:bg-zinc-800"
+                }`}
+              >
+                <span>
+                  <span className="font-semibold">{p.name}</span>
+                  <span className={`ml-2 font-mono text-[10px] ${isSelected ? "opacity-80" : "text-[#697362] dark:text-zinc-500"}`}>{p.ticker}</span>
+                </span>
+                <span className={`text-[10px] uppercase tracking-wide ${isSelected ? "opacity-90" : "text-[#697362] dark:text-zinc-500"}`}>
+                  {p.exposureClass.replace(/_/g, " ")}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+      {chosen ? (
+        <div className="mt-3 rounded-md bg-emerald-50 px-3 py-2 text-xs text-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-200">
+          <div className="flex items-center justify-between">
+            <span>100% to <strong>{chosen.name}</strong> ({chosen.ticker})</span>
+            <span className="font-mono tabular-nums">{formatCurrency(startingCapital)}</span>
+          </div>
+          <div className="mt-1 text-[11px] opacity-80">{chosen.mainRisk}</div>
+        </div>
+      ) : (
+        <div className="mt-3 text-xs leading-5 text-[#697362] dark:text-zinc-500">
+          Pick one ticker to model 100% allocation. Single-stock mode is a focused thesis on one name — no diversification.
+        </div>
+      )}
     </div>
   );
 }
@@ -1185,19 +1280,30 @@ function AllocationDonut({ portfolio, providers }: { portfolio: SimulationPortfo
         <text x="130" y="124" textAnchor="middle" fontSize="22" fontWeight="700" fill="currentColor">{portfolio.holdings.length}</text>
         <text x="130" y="145" textAnchor="middle" fontSize="11" fill="#697362">holdings</text>
       </svg>
-      <div className="space-y-2">
+      <div className="space-y-1.5">
+        <div className="mb-1 flex items-center justify-between text-[10px] font-semibold uppercase tracking-wide text-[#697362] dark:text-zinc-500">
+          <span>Holding</span>
+          <span className="flex gap-3"><span>Weight</span><span className="w-20 text-right">Amount</span></span>
+        </div>
         {portfolio.holdings.map((holding) => {
           const provider = providers.get(holding.providerId)!;
           return (
-            <div key={holding.providerId} className="flex items-center justify-between gap-3 text-sm">
-              <span className="flex items-center gap-2">
-                <span className="h-2.5 w-2.5 rounded-full" style={{ background: exposureColors[holding.exposureType] }} />
-                {provider.name}
+            <div key={holding.providerId} className="flex items-center justify-between gap-3 text-xs">
+              <span className="flex min-w-0 items-center gap-2">
+                <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: exposureColors[holding.exposureType] }} />
+                <span className="truncate">{provider.name}</span>
               </span>
-              <span className="font-mono">{holding.weightPct.toFixed(1)}%</span>
+              <span className="flex shrink-0 gap-3">
+                <span className="font-mono tabular-nums text-[#697362] dark:text-zinc-500">{holding.weightPct.toFixed(1)}%</span>
+                <span className="w-20 text-right font-mono tabular-nums text-[#18201b] dark:text-zinc-100">{formatCurrency(holding.amount)}</span>
+              </span>
             </div>
           );
         })}
+        <div className="mt-2 flex items-center justify-between border-t border-[#dfe4da] pt-2 text-xs font-semibold dark:border-zinc-800">
+          <span>Total</span>
+          <span className="font-mono tabular-nums">{formatCurrency(portfolio.holdings.reduce((sum, h) => sum + h.amount, 0))}</span>
+        </div>
       </div>
     </div>
   );

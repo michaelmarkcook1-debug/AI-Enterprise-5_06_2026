@@ -30,7 +30,7 @@ export const DEFAULT_SIMULATION_INPUT: SimulationInput = {
   region: "Global",
   includePrivateExposure: "indirect_only",
   rebalanceFrequency: "annually",
-  cashReservePct: 8,
+  cashReservePct: 0,
   selectedVendorIds: [],
   manualAllocations: {},
   globalRiskClimate: "elevated",
