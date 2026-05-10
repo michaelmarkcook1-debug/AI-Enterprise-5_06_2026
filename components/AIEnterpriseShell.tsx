@@ -70,14 +70,24 @@ export default function AIEnterpriseShell() {
           Enterprise AI vendor intelligence — source-cited, evidence-graded, ready for the investment committee.
         </p>
         <div className={styles.ctaRow}>
-          <Link href="/dashboard" className={styles.ctaPrimary}>
-            <span className={styles.ctaDot} aria-hidden />
-            Enter portal
-            <span className={styles.ctaArrow} aria-hidden>→</span>
-          </Link>
-          <Link href="/investor-tools" className={styles.ctaSecondary}>
-            View Investor Tools
-          </Link>
+          <span className={styles.ctaWrap}>
+            <span className={`${styles.pulseRing} ${styles.pulseRingDelay0}`} aria-hidden />
+            <span className={`${styles.pulseRing} ${styles.pulseRingDelay1}`} aria-hidden />
+            <Link href="/dashboard" className={styles.ctaPrimary}>
+              <span className={styles.ctaDot} aria-hidden />
+              Enter portal
+              <span className={styles.ctaArrow} aria-hidden>→</span>
+            </Link>
+          </span>
+          <span className={styles.ctaWrap}>
+            <span className={`${styles.pulseRing} ${styles.pulseRingDelay0}`} aria-hidden />
+            <span className={`${styles.pulseRing} ${styles.pulseRingDelay1}`} aria-hidden />
+            <Link href="/assessment" className={styles.ctaPrimary}>
+              <span className={styles.ctaDot} aria-hidden />
+              Take Assessment
+              <span className={styles.ctaArrow} aria-hidden>→</span>
+            </Link>
+          </span>
         </div>
         <p className={styles.foot}>
           Source-cited · Truthfulness gated · Evidence E0–E5 · IPO modelled · Light/dark parity
