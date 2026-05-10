@@ -354,6 +354,11 @@ model EvidenceProposal {
   classificationFailureCode String? @map("classification_failure_code")
   classificationFailureReason String? @map("classification_failure_reason") @db.Text
   confidenceIsFallback Boolean   @default(false) @map("confidence_is_fallback")
+  // Product-scope linkage. May be populated by the operator (single
+  // product, picked in /admin/evidence) or by the bulk vendor-wide
+  // gesture (every product the vendor sells). Empty array = unlinked.
+  productScopeIds String[]      @default([]) @map("product_scope_ids")
+  isVendorWide    Boolean       @default(false) @map("is_vendor_wide")
   status          ProposalStatus @default(pending)
   reviewerId      String?        @map("reviewer_id")
   reviewedAt      DateTime?      @map("reviewed_at")

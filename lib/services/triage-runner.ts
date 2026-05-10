@@ -122,6 +122,7 @@ function proposalToTriageInput(p: EvidenceProposal): TriageInput {
     vendorId: p.vendorId,
     productId: undefined,
     productMention: undefined,
+    productScopeIds: p.productScopeIds ?? [],
     domain: p.domain,
     subfactor: p.subfactor,
     excerpt: p.excerpt,

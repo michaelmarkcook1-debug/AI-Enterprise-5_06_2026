@@ -29,6 +29,10 @@ export interface TriageInput {
   /** Free-text product mention from the excerpt classifier (used when
    * productId is missing — must still match a known vendor product to count). */
   productMention?: string | null;
+  /** Operator-confirmed product-scope linkage. Single id, multiple ids
+   * (vendor-wide claims), or empty (unlinked). Non-empty satisfies the
+   * hasProductMatch gate. */
+  productScopeIds?: string[];
   domain: string;
   subfactor: string;
   excerpt: string;
@@ -204,6 +208,7 @@ export function triageProposal(
   const hasEntityMatch = !!input.vendorId && input.vendorId.trim().length > 0;
   const hasProductMatch = (() => {
     if (input.productId) return true;
+    if (input.productScopeIds && input.productScopeIds.length > 0) return true;
     if (!input.productMention) return false;
     const known = options.knownProductNames ?? [];
     if (known.length === 0) return false;

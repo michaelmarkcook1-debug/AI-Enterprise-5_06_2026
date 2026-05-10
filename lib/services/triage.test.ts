@@ -249,6 +249,36 @@ describe("recommend_approve lane", () => {
   });
 });
 
+describe("productScopeIds linkage path", () => {
+  it("populated productScopeIds satisfies the product-match gate", () => {
+    const decision = triageProposal(
+      base({ productId: null, productMention: null, productScopeIds: ["msft_microsoft_365_copilot"] }),
+      { now: NOW },
+    );
+    expect(decision.lane).toBe("auto_approve");
+  });
+
+  it("vendor-wide linkage (multiple ids) also satisfies the gate", () => {
+    const decision = triageProposal(
+      base({
+        productId: null,
+        productMention: null,
+        productScopeIds: ["msft_microsoft_365_copilot", "msft_github_copilot", "msft_azure_ai"],
+      }),
+      { now: NOW },
+    );
+    expect(decision.lane).toBe("auto_approve");
+  });
+
+  it("empty productScopeIds does NOT satisfy the gate", () => {
+    const decision = triageProposal(
+      base({ productId: null, productMention: null, productScopeIds: [] }),
+      { now: NOW },
+    );
+    expect(decision.lane).toBe("recommend_approve");
+  });
+});
+
 describe("classifier-fallback handling", () => {
   it("confidenceIsFallback always routes to human_review_required regardless of how high the stamped value is", () => {
     const decision = triageProposal(
