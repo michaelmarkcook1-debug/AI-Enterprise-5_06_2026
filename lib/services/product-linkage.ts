@@ -24,6 +24,10 @@ export interface LinkageProposalInput {
   domain: string;
   subfactor: string;
   excerpt: string;
+  /** Optional source URL of the proposal. When the URL contains a
+   * product-page path (e.g. `/security`, `/agents`), the suggester uses
+   * it as a category hint — see strategy 4b. */
+  sourceUrl?: string | null;
 }
 
 export interface LinkageProductScope {
@@ -88,6 +92,39 @@ function tokenOverlap(a: string, b: string): number {
   let inter = 0;
   for (const t of ta) if (tb.has(t)) inter += 1;
   return inter / ta.size; // recall over the product-name tokens
+}
+
+/** Map a URL path segment to a product category. Conservative: only
+ * fires when a known product-page path (e.g. `/security`, `/agents`,
+ * `/search`) appears in the URL AND aligns with the product's
+ * category. Returns the matched path segment or null. */
+function matchUrlPathToCategory(url: string, category: string): string | null {
+  let pathname: string;
+  try {
+    pathname = new URL(url).pathname.toLowerCase();
+  } catch {
+    return null;
+  }
+  const PATH_TO_CATEGORIES: Record<string, string[]> = {
+    security: ["security_ai", "governance_control", "agent_governance"],
+    permissions: ["governance_control", "agent_governance"],
+    agents: ["agent_platform", "agent_runtime"],
+    search: ["enterprise_search"],
+    assistant: ["enterprise_assistant"],
+    "work-ai": ["enterprise_assistant"],
+    governance: ["agent_governance", "governance_control"],
+    pricing: [], // pricing pages don't bind to a single category
+    api: ["model_api"],
+    bedrock: ["cloud_ai_platform"],
+    copilot: ["enterprise_assistant", "coding_agent"],
+  };
+  for (const [segment, allowedCategories] of Object.entries(PATH_TO_CATEGORIES)) {
+    if (allowedCategories.length === 0) continue;
+    if (pathname.includes(`/${segment}`) && allowedCategories.includes(category)) {
+      return segment;
+    }
+  }
+  return null;
 }
 
 /** Subfactor / category alignment. Both are loose strings; we look for
@@ -175,6 +212,26 @@ export function suggestLinkage(
         safeToApply: false,
       });
       continue;
+    }
+
+    // 4b. Source-URL path hint. When the proposal's source URL contains
+    // a product-page path that maps to this product's category, surface
+    // the product as a category-aligned suggestion. Helps with vendor
+    // pages whose excerpts describe the *function* without naming the
+    // product (e.g. glean.com/security mentions sensitive-content
+    // protection without saying "Glean Protect").
+    if (proposal.sourceUrl) {
+      const urlMatch = matchUrlPathToCategory(proposal.sourceUrl, scope.productCategory);
+      if (urlMatch) {
+        raw.push({
+          productScopeId: scope.id,
+          productName,
+          confidence: 0.65,
+          reason: `source URL path "/${urlMatch}" aligns with category "${scope.productCategory}"`,
+          safeToApply: false,
+        });
+        continue;
+      }
     }
   }
 

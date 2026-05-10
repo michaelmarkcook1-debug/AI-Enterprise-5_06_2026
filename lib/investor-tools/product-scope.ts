@@ -138,9 +138,18 @@ const PRODUCT_SEEDS: ProductSeed[] = [
   ], { modules: [...DEFAULT_MODULES, "AI Platform Fit Assessment", "Investment Simulator"], simulator: true, assessment: true }),
   scope("glean", "Glean", [
     ["Glean Assistant", "enterprise_assistant"],
+    // Glean's marketing rebrand of the Assistant. Both names appear on
+    // glean.com — kept as a separate scope entry so the linkage
+    // suggester catches either form in the excerpt.
+    ["Glean Work AI", "enterprise_assistant"],
     ["Glean Agents", "agent_platform"],
     ["Glean Search", "enterprise_search"],
     ["Glean Protect", "security_ai"],
+    // Named components on glean.com/security. Sensitive content
+    // protection, oversharing triage, and granular access controls all
+    // ship under these two names on the Glean security page.
+    ["Glean Permissions", "governance_control"],
+    ["Glean Sensitive Content Protection", "security_ai"],
   ], { modules: [...DEFAULT_MODULES, "AI Platform Fit Assessment", "Investment Simulator"], simulator: true, assessment: true }),
   scope("moveworks", "Moveworks", [
     ["Moveworks AI Assistant Platform", "enterprise_assistant"],

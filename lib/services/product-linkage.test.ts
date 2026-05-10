@@ -144,6 +144,93 @@ describe("suggestLinkage", () => {
     expect(canonicaliseVendorId("vendor_broadcom")).toBe("avgo");
   });
 
+  it("REGRESSION — Glean security-page rows resolve to a product via URL-path strategy", () => {
+    // Reproduces the actual production excerpts from
+    // runlogs/product-linkage-batch-40.txt where every Glean row
+    // landed in `no_match` because the excerpt described the
+    // function (sensitive content protection, single-tenant deployment)
+    // without naming a product.
+    const GLEAN_SCOPES: LinkageProductScope[] = [
+      { id: "glean_glean_assistant", vendorId: "glean", productName: "Glean Assistant", productCategory: "enterprise_assistant" },
+      { id: "glean_glean_work_ai", vendorId: "glean", productName: "Glean Work AI", productCategory: "enterprise_assistant" },
+      { id: "glean_glean_agents", vendorId: "glean", productName: "Glean Agents", productCategory: "agent_platform" },
+      { id: "glean_glean_search", vendorId: "glean", productName: "Glean Search", productCategory: "enterprise_search" },
+      { id: "glean_glean_protect", vendorId: "glean", productName: "Glean Protect", productCategory: "security_ai" },
+      { id: "glean_glean_permissions", vendorId: "glean", productName: "Glean Permissions", productCategory: "governance_control" },
+      { id: "glean_glean_sensitive_content_protection", vendorId: "glean", productName: "Glean Sensitive Content Protection", productCategory: "security_ai" },
+    ];
+    const r = suggestLinkage(
+      {
+        id: "p_glean_security",
+        vendorId: "glean",
+        domain: "data_security_privacy",
+        subfactor: "sensitive_data_detection_dlp",
+        excerpt: "Get sensitive content protection across all structured and unstructured data with customizable or one-click policies that detect credentials, payment data, medical information, and other sensitive data.",
+        sourceUrl: "https://www.glean.com/security",
+      },
+      GLEAN_SCOPES,
+    );
+    // Should NOT be no_match anymore — URL path /security maps to
+    // security_ai / governance_control categories.
+    expect(r.status).not.toBe("no_match");
+    expect(r.suggestions.length).toBeGreaterThan(0);
+    // Should suggest at least one of: Glean Protect, Glean Permissions,
+    // Glean Sensitive Content Protection.
+    const suggestedIds = r.suggestions.map((s) => s.productScopeId);
+    expect(
+      suggestedIds.some((id) =>
+        ["glean_glean_protect", "glean_glean_permissions", "glean_glean_sensitive_content_protection"].includes(id),
+      ),
+    ).toBe(true);
+    // The "Sensitive Content Protection" entry has token overlap with
+    // the excerpt — should rank highly.
+    expect(r.suggestions[0].productScopeId).toBe("glean_glean_sensitive_content_protection");
+  });
+
+  it("URL-path strategy fires for /agents → agent_platform category", () => {
+    const scopes: LinkageProductScope[] = [
+      { id: "v_agents", vendorId: "v", productName: "Their Agents Suite", productCategory: "agent_platform" },
+      { id: "v_unrelated", vendorId: "v", productName: "Their Search Tool", productCategory: "enterprise_search" },
+    ];
+    const r = suggestLinkage(
+      {
+        id: "p1",
+        vendorId: "v",
+        // Subfactor that does NOT share tokens with "agent_platform"
+        // (otherwise the subfactor strategy fires first and we never
+        // exercise the URL-path path).
+        domain: "data_security_privacy",
+        subfactor: "encryption",
+        excerpt: "Generic excerpt with no product name.",
+        sourceUrl: "https://example.com/agents/builder",
+      },
+      scopes,
+    );
+    expect(r.suggestions[0].productScopeId).toBe("v_agents");
+    expect(r.suggestions[0].reason).toMatch(/source URL path/);
+  });
+
+  it("URL-path strategy does NOT fire when the path doesn't align with the category", () => {
+    const scopes: LinkageProductScope[] = [
+      { id: "v_search", vendorId: "v", productName: "Their Search", productCategory: "enterprise_search" },
+      // ≥ 2 products so the single-product-vendor fallback doesn't fire.
+      { id: "v_other", vendorId: "v", productName: "Their CRM Tool", productCategory: "crm_ai" },
+    ];
+    const r = suggestLinkage(
+      {
+        id: "p1",
+        vendorId: "v",
+        domain: "data_security_privacy",
+        subfactor: "encryption_at_rest",
+        excerpt: "No product name here.",
+        sourceUrl: "https://example.com/security/encryption", // /security but products are search + CRM
+      },
+      scopes,
+    );
+    // Neither product aligns with /security; nothing else fires either.
+    expect(r.status).toBe("no_match");
+  });
+
   it("REGRESSION — non-prefixed ids pass through unchanged", () => {
     expect(canonicaliseVendorId("msft")).toBe("msft");
     expect(canonicaliseVendorId("anthropic")).toBe("anthropic");

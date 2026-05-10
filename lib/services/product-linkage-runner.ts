@@ -159,7 +159,14 @@ export async function buildLinkageReport(
     const canonVendor = canonicaliseVendorId(p.vendorId);
     const vendorScopes = scopesByVendor().get(canonVendor) ?? [];
     const linkage = suggestLinkage(
-      { id: p.id, vendorId: p.vendorId, domain: p.domain, subfactor: p.subfactor, excerpt: p.excerpt },
+      {
+        id: p.id,
+        vendorId: p.vendorId,
+        domain: p.domain,
+        subfactor: p.subfactor,
+        excerpt: p.excerpt,
+        sourceUrl: p.sourceUrl,
+      },
       vendorScopes,
     );
 
