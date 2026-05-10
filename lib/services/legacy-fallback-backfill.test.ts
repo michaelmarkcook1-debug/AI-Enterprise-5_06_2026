@@ -17,16 +17,14 @@ describe("isLegacyFallbackRow", () => {
     expect(isLegacyFallbackRow(row())).toBe(true);
   });
 
-  it("treats null classificationFailed/confidenceIsFallback the same as false", () => {
-    expect(
-      isLegacyFallbackRow({
-        status: "pending",
-        classifierConfidence: 0.5,
-        classificationFailed: null,
-        confidenceIsFallback: null,
-        classificationFailureCode: null,
-      }),
-    ).toBe(true);
+  it("requires classificationFailed === false (NOT NULL post-migration)", () => {
+    expect(isLegacyFallbackRow(row({ classificationFailed: false }))).toBe(true);
+    expect(isLegacyFallbackRow(row({ classificationFailed: true }))).toBe(false);
+  });
+
+  it("requires confidenceIsFallback === false (NOT NULL post-migration)", () => {
+    expect(isLegacyFallbackRow(row({ confidenceIsFallback: false }))).toBe(true);
+    expect(isLegacyFallbackRow(row({ confidenceIsFallback: true }))).toBe(false);
   });
 
   it("does NOT match real-classifier rows (0.91)", () => {

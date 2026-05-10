@@ -7,12 +7,17 @@
 // the May-2026 repair). Result: 312 of 314 legacy fallback rows missed
 // the backfill.
 //
-// The correct detector (per requirements):
-//   status = pending
+// The correct detector (per requirements, post-migration schema):
+//   status = "pending"
 //   classifierConfidence = 0.5
-//   classificationFailed is null/false  (not yet backfilled)
-//   confidenceIsFallback is null/false  (not yet backfilled)
-//   classificationFailureCode is null
+//   classificationFailed = false        (NOT NULL after migration)
+//   confidenceIsFallback = false        (NOT NULL after migration)
+//   classificationFailureCode IS NULL
+//
+// classificationFailed and confidenceIsFallback are NOT NULL Boolean
+// columns post-migration (default false). Treating them as nullable in
+// the Prisma `where` clause produced an invalid query at runtime —
+// hence the script failure. The detector now mirrors the schema.
 //
 // This MUST NOT match:
 //   - rows with real classifier output (e.g. 0.91, 0.92 — non-0.5)
@@ -24,8 +29,8 @@
 export interface LegacyFallbackCandidate {
   status: string;
   classifierConfidence: number;
-  classificationFailed?: boolean | null;
-  confidenceIsFallback?: boolean | null;
+  classificationFailed: boolean;
+  confidenceIsFallback: boolean;
   classificationFailureCode?: string | null;
 }
 
@@ -44,8 +49,8 @@ export const LEGACY_FALLBACK_REASON =
 export function isLegacyFallbackRow(p: LegacyFallbackCandidate): boolean {
   if (p.status !== "pending") return false;
   if (p.classifierConfidence !== 0.5) return false;
-  if (p.classificationFailed === true) return false;
-  if (p.confidenceIsFallback === true) return false;
+  if (p.classificationFailed !== false) return false;
+  if (p.confidenceIsFallback !== false) return false;
   if (p.classificationFailureCode != null) return false;
   return true;
 }

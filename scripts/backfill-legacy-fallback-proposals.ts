@@ -116,15 +116,15 @@ async function main() {
   const result = await prisma.evidenceProposal.updateMany({
     where: {
       id: { in: ids },
-      // Belt-and-braces: re-assert the heuristic in the WHERE clause so
-      // a concurrent write between SELECT and UPDATE can't sneak a
-      // not-actually-legacy row through.
+      // Belt-and-braces: re-assert the full heuristic in the WHERE
+      // clause so a concurrent write between SELECT and UPDATE can't
+      // sneak a not-actually-legacy row through. classificationFailed
+      // and confidenceIsFallback are NOT NULL columns post-migration,
+      // so the comparator is plain `false`, not OR-with-null.
       status: "pending",
       classifierConfidence: 0.5,
-      OR: [
-        { classificationFailed: false },
-        { classificationFailed: null as unknown as boolean }, // tolerate nulls in legacy rows
-      ],
+      classificationFailed: false,
+      confidenceIsFallback: false,
       classificationFailureCode: null,
     },
     data: {
