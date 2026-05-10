@@ -1,75 +1,93 @@
-# AI Enterprise — Truth Engine Audit Report
+# Truth Engine Audit
 
 Date: 2026-05-10
-Phase: Master fix prompt pack v1, Phase 5 + Phase 12
-Status: implemented + enforced
+Prepared for: Mike
+Pack: Stage 1 batch · Task 3 (`04_TASK_3_TRUTH_ENGINE_MINIMUM_CONTRACT.md`)
 
-## Architecture
+## Models added/changed
 
-```
-source -> evidence -> claim -> calculation -> output -> chart
-```
-
-Every layer carries data-status, evidence-grade, confidence, freshness,
-uncertainty. Anything that fails its truthfulness gate either renders as
-"Unknown / Source validation required" or is excluded entirely from active
-counts.
-
-## Models in place
-
-| Model | Where | Purpose |
+| Type | Path | Status |
 |---|---|---|
-| `EvidenceRecord` | `prisma/schema.prisma`, `lib/types.ts` | Persisted, source-cited, graded evidence |
-| `EvidenceProposal` | `prisma/schema.prisma` | Pending review queue from LLM extractor |
-| `EvidenceSource` | `prisma/schema.prisma` | Source registry (URL, type, date, freshness) |
-| `MarketSignal` | `lib/market-signals/types.ts` | Source-cited signals with full provenance |
-| `CommercialModel` | `lib/model-inventory/types.ts` | Per-model source metadata + ownership integrity |
-| `ProductScope` | `lib/investor-tools/product-scope.ts` | Vendor-product registry with source linkage |
-| `MarketRegime` | `lib/market-signals/types.ts` | Derived regime view, sources cited |
-| `ManifestPatch` | `prisma/schema.prisma` (this session) | URL-repair-agent proposed manifest fixes |
-| `NormalisedEvidenceSource` | `lib/evidence/normalise.ts` (this session) | Connector → evidence shape |
+| `TruthRecord` | `lib/truthfulness/truth-engine.ts` (new this pass) | ✅ minimum contract from spec |
+| `TruthDataStatus` | same file | ✅ 10-state union: verified · documented · tested · estimated · inferred · seed · stale · disputed · unknown · unsupported |
+| `TruthFreshnessStatus` | same file | ✅ fresh · aging · stale · unknown |
+| `TruthBadgeProps` | same file | ✅ `{label, tone, title}` shape consumable by any UI lib |
+| `EvidenceSource` (in DB) | `prisma/schema.prisma` | ✅ pre-existing — covers id / entity / source / date / publisher / official / primary / licensed / grade / confidence / freshness / notes |
+| `NormalisedEvidenceSource` (in-memory connector output) | `lib/evidence/normalise.ts` | ✅ pre-existing — produced by every connector via `normaliseFetchResult()` |
 
-## Truthfulness gates enforced
+## Rendering guards (helpers)
 
-| Gate | Implementation | Tests |
+All four spec helpers added in `lib/truthfulness/truth-engine.ts`:
+
+| Helper | Returns | Behaviour |
 |---|---|---|
-| E0 cannot render verified | `isVerified()` requires E3+ AND `sourceIds.length > 0` | `lib/model-inventory/repository.test.ts`, `lib/market-signals/engine.test.ts` |
-| Seed data labelled seed | `SeedDataBadge` renders bold red with `NOT LIVE:` prefix | `components/intelligence-ui.tsx` |
-| Stale data downweights confidence | `freshnessOf()` per-tier horizon → `confidenceFor()` deducts | `lib/evidence/freshness.ts`, `lib/evidence/confidence.ts` |
-| Conflicting sources show disputed | Schema includes `dataStatus: "disputed"` everywhere | `MarketSignal`, `CommercialModel`, `EvidenceRecord` |
-| Missing source → unknown | `dataStatus: "unknown"`; `refreshRequired()` flags it | `lib/model-inventory/repository.ts` |
-| Unsupported facts blocked | `canMoveCentre()` in market-signals engine zeros impact | 5 tests in `lib/market-signals/engine.test.ts` |
-| Hosted ≠ first-party | `isFirstParty()` vs `isHostedThirdParty()` strict separation | 4 tests in `lib/model-inventory/repository.test.ts` |
-| Market talk capped at ±2pt | `MARKET_TALK_CENTRE_CAP` enforced | 2 tests in `lib/market-signals/engine.test.ts` |
-| No $ price without verified offer | IPO forecast `dataStatus: "estimated"`; bands % only | `lib/investing/types.ts` `IPOForecast` |
-| Unknown vendor product → blocked or flagged | `ProductScope` linkage required | `lib/investor-tools/product-scope.test.ts` |
+| `canRenderAsVerified(record)` | `boolean` | Strict gate. False unless: E3+ AND sourceIds non-empty AND dataStatus ∈ {verified, documented, tested} AND confidence ≥ 60 AND freshness ≠ stale |
+| `truthDisplayStatus(record)` | `string` | Short UI label. `unsupported` always returns `"Unknown"`; missing-source on a "verified-claiming" status returns `"Source validation required"`; stale freshness on a non-stale record returns `"Stale"` |
+| `truthBadgeProps(record)` | `TruthBadgeProps` | `{label, tone, title}`. Tone scale `ok / info / warn / bad / neutral` — 1:1 mappable to any palette. Low confidence on documented → "Documented (low confidence)" tone warn |
+| `requiresValidation(record)` | `boolean` | True for disputed / unsupported / missing-sources / verified-claiming-but-failing-gate |
 
-## Render guards
+Plus the convenience helper `isHighConfidence(record)` — true only when verified + fresh + confidence ≥ 75.
 
-- **`SeedDataBadge`** (`components/intelligence-ui.tsx`) — bold red pulse + `NOT LIVE:` prefix when `provenance="seed"`
-- **`<NotLiveBanner>`** (`components/NotLiveBanner.tsx`) — global red strip on every page when `getDataProvenance()` returns `seed`
-- **`<EvidenceBadge>`** (`components/intelligence-ui.tsx`) — E0–E5 grade visible per evidence row
-- **`renderClaim()`** (`lib/truthfulness/render-claim.ts`) — pre-existing claim-rendering guard
+## Evidence grades
 
-## Persistence state (live Neon DB)
+Locked on the existing `EvidenceGrade` union (`lib/types.ts`) — `E0 | E1 | E2 | E3 | E4 | E5`. The truth-engine helpers respect the standard rank:
 
-- **298 evidence proposals** sitting `pending` (extracted by Anthropic from 51-URL manifest)
-- **0 approved** (none promoted to `EvidenceRecord` yet)
-- **2 manifest patches** persisted by URL-repair agent (both ServiceNow URLs, both auto-retry succeeded)
-- Until `EvidenceRecord.reviewStatus="analyst_verified"` count > 0 OR `EvidenceProposal.status="approved"` count > 0, `getDataProvenance().source` returns `seed` → red banner stays visible.
+| Grade | Rendering allowed |
+|---|---|
+| E0 | Never as verified. Always renders Unknown / requires validation. |
+| E1 | Vendor claim only. Never verified. Documented label gated additionally on dataStatus + sources. |
+| E2 | Public documentation. Documented at most. |
+| E3 | Public test / sandbox / API verification. Verified gate eligible. |
+| E4 | Production customer evidence. Verified eligible. |
+| E5 | Independent audit / verified benchmark / filing. Verified eligible. |
+
+## Data statuses
+
+Behavioural matrix locked by tests:
+
+| dataStatus | Verified gate | Display label | requiresValidation |
+|---|---|---|---|
+| verified | yes (if other gates pass) | `Verified` | no |
+| documented | yes (if other gates pass) | `Verified` or `Documented` | only when gate fails |
+| tested | yes | `Verified` or `Tested` | only when gate fails |
+| estimated | no | `Estimated` | no |
+| inferred | no | `Inferred` | no |
+| seed | no | `Seed` | no |
+| stale | no | `Stale` | no |
+| disputed | **never** | `Disputed` | **always** |
+| unknown | no | `Unknown` | no |
+| unsupported | **never** | **`Unknown`** (renamed for safety) | **always** |
+
+## Tests
+
+`lib/truthfulness/truth-engine.test.ts` — **24 tests** covering the seven required paths:
+
+- ✅ Verified path (E3 + E5; documented + verified status)
+- ✅ Seed path
+- ✅ Stale path (both `dataStatus: "stale"` and `freshnessStatus: "stale"`)
+- ✅ Unsupported path (always renders Unknown)
+- ✅ Missing source path (validation required)
+- ✅ Disputed path (always requires validation, tone bad)
+- ✅ Low-confidence path (`Documented (low confidence)`, tone warn)
+
+Plus boundary tests: every grade × every dataStatus, isHighConfidence threshold, and explicit tests for the rules locked in the module's docstring.
+
+## Blocked unsupported outputs
+
+Per the live test suite, the following can never produce a verified rendering, regardless of other fields:
+
+- `evidenceGrade: "E0"` — fails grade rank check
+- `dataStatus: "seed"` / `"unknown"` / `"unsupported"` / `"disputed"` / `"stale"` — fails status check
+- `sourceIds.length === 0` — fails source presence check
+- `confidenceScore < 60` — fails low-confidence check
+- `freshnessStatus: "stale"` — fails freshness check
 
 ## Remaining risks
 
-1. **No HUMAN review yet** — 298 proposals queued, none reviewed. Operator must approve at `/admin/evidence` for the seed → live transition.
-2. **Capabilities surface still seed-heavy** — Phase 5 of the prompt pack (audit-grade per-cell metadata on `/capabilities`) is **not yet shipped**. Tracked as next-up.
-3. **Connector ingestion not yet scheduled** — connectors built (Phase 6), but no cron / scheduled task wired to refresh them periodically.
-4. **No truthfulness regression tests at the page level** — engine-level coverage is good; visual rendering tests are not in place (would need playwright / RTL harness).
+1. **TruthRecord persistence not wired.** The type + helpers exist, but no code path currently writes a `TruthRecord` row when an `EvidenceRecord` is approved. Stage 2 work: emit one TruthRecord per approved EvidenceRecord and link it back to the entity it claims about.
+2. **Module not yet adopted by every render site.** `lib/intelligence/capabilities-truthfulness.ts` has its own `capabilityRenderState()` that overlaps with the new helpers. They agree on rules — both have tests — but the duplication should be reconciled in a Stage 2 refactor: the capabilities helper should compose the truth-engine helpers rather than encode rules itself.
+3. **Helper not exposed in legacy `intelligence-ui` badge.** `SeedDataBadge` uses its own seed/live binary flag rather than the full `truthBadgeProps()`. The badge works (and is bold-red on seed); the next iteration should accept a TruthRecord directly so it benefits from the four-state rule set.
 
-## Production readiness verdict
+## Final verdict
 
-The truth scaffolding is **production-grade**. The data flowing through it is mostly seed because:
-- Connectors exist but most need their (free) API keys set
-- Proposals exist but none approved yet
-- Live ingestion isn't on a cron yet
-
-When those three things land, the scaffolding flips the dashboard from `seed` → `live` automatically — no further code changes needed.
+Truth Engine **minimum contract is in place and tested**. Any consumer that wraps its data into a `TruthRecord` and asks the four helpers gets the correct render-state. The remaining work is adoption (rewiring existing UI sites to consume these helpers) + persistence (TruthRecord DB rows) — both Stage 2 deferrals. No unsupported claim can render as fact through this module today.

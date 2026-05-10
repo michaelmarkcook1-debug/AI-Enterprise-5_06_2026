@@ -7,6 +7,7 @@ describe("connectors: registry", () => {
     expect(ids).toEqual([
       "alphaVantage", "bea", "bls", "congress", "eia",
       "federalRegister", "fiscalData", "fred", "gdelt", "github", "sec",
+      "vendorDocs",
     ].sort());
   });
 
@@ -52,7 +53,7 @@ describe("connectors: registry", () => {
 
   it("dashboardSummary counts roll up correctly", () => {
     const s = dashboardSummary();
-    expect(s.total).toBe(11);
+    expect(s.total).toBe(12);
     expect(s.configured + s.notConfigured).toBeLessThanOrEqual(s.total);
   });
 
