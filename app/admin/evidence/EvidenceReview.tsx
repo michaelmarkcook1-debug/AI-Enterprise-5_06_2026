@@ -3,6 +3,14 @@
 import Link from "next/link";
 import { useState } from "react";
 
+interface LinkageSuggestion {
+  productScopeId: string;
+  productName: string;
+  confidence: number;
+  reason: string;
+  safeToApply: boolean;
+}
+
 interface Proposal {
   id: string;
   vendorId: string;
@@ -15,9 +23,14 @@ interface Proposal {
   capturedAt: string;
   classifierConfidence: number;
   classifierRationale?: string;
+  classificationFailed?: boolean;
+  classificationFailureCode?: string;
+  confidenceIsFallback?: boolean;
   triageLane?: "auto_approve" | "recommend_approve" | "recommend_reject" | "human_review_required";
   triageReasons?: string[];
   triageUnsafeCategory?: string;
+  linkageStatus?: string;
+  linkageSuggestions?: LinkageSuggestion[];
 }
 
 const LANE_LABEL: Record<NonNullable<Proposal["triageLane"]>, { label: string; classes: string }> = {
@@ -38,6 +51,32 @@ const LANE_LABEL: Record<NonNullable<Proposal["triageLane"]>, { label: string; c
     classes: "bg-amber-100 text-amber-900 border-amber-300 dark:bg-amber-950/40 dark:text-amber-200 dark:border-amber-800",
   },
 };
+
+/** Approve button is disabled when the row is fundamentally unsafe to
+ * promote — classifier-fallback rows (confidence is the runner default,
+ * not real output), unsafe-category triages (market share / valuation /
+ * IPO timing / disputed), and recommend-reject lane. Reject still works
+ * in every state. */
+function isUnsafeToApprove(p: Proposal): boolean {
+  if (p.confidenceIsFallback) return true;
+  if (p.classificationFailed) return true;
+  if (p.triageUnsafeCategory) return true;
+  if (p.triageLane === "recommend_reject") return true;
+  return false;
+}
+
+function approveBlockReason(p: Proposal): string {
+  if (p.confidenceIsFallback || p.classificationFailed) {
+    return "Reclassify required — confidence is the runner's fallback default, not real classifier output.";
+  }
+  if (p.triageUnsafeCategory) {
+    return `Unsafe category (${p.triageUnsafeCategory.replace(/_/g, " ")}) — must go through human review.`;
+  }
+  if (p.triageLane === "recommend_reject") {
+    return "Triage flagged this row for reject. Use Reject, or escalate to human review.";
+  }
+  return "Approve blocked.";
+}
 
 export default function EvidenceReview({ initialProposals, hasDatabase }: { initialProposals: Proposal[]; hasDatabase: boolean }) {
   const [proposals, setProposals] = useState<Proposal[]>(initialProposals);
@@ -137,6 +176,15 @@ export default function EvidenceReview({ initialProposals, hasDatabase }: { init
                   )}
                 </div>
               )}
+              {p.confidenceIsFallback && (
+                <div className="mt-3 rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-xs text-red-900 dark:border-red-900/60 dark:bg-red-950/30 dark:text-red-200">
+                  <strong>Classifier unavailable.</strong> The {(p.classifierConfidence * 100).toFixed(0)}% confidence is the runner&apos;s fallback default — not real classifier output.
+                  {p.classificationFailureCode && (
+                    <span className="ml-1 font-mono text-[11px]">code: {p.classificationFailureCode}</span>
+                  )}{" "}
+                  Reclassify before approving.
+                </div>
+              )}
               <blockquote className="mt-3 rounded-lg bg-zinc-50 dark:bg-[#071827] px-3 py-2 text-sm border-l-2 border-zinc-300 dark:border-zinc-700">
                 {p.excerpt}
               </blockquote>
@@ -148,11 +196,38 @@ export default function EvidenceReview({ initialProposals, hasDatabase }: { init
                   <strong>Source:</strong> {p.sourceUrl}
                 </div>
               )}
+              {p.linkageSuggestions && p.linkageSuggestions.length > 0 && (
+                <div className="mt-2 rounded-lg border border-sky-200 bg-sky-50 px-3 py-2 text-xs dark:border-sky-900/60 dark:bg-sky-950/30">
+                  <div className="font-semibold text-sky-900 dark:text-sky-200">
+                    Suggested product linkage{p.linkageStatus ? ` · ${p.linkageStatus}` : ""}
+                  </div>
+                  <ul className="mt-1 space-y-0.5 text-sky-900 dark:text-sky-200">
+                    {p.linkageSuggestions.map((s) => (
+                      <li key={s.productScopeId}>
+                        <span className="font-mono">{(s.confidence * 100).toFixed(0)}%</span>{" "}
+                        <strong>{s.productName}</strong>
+                        {s.safeToApply && (
+                          <span className="ml-1 rounded bg-emerald-200 px-1 text-[10px] text-emerald-900 dark:bg-emerald-900/40 dark:text-emerald-200">
+                            safe
+                          </span>
+                        )}
+                        <span className="ml-1 text-zinc-500">— {s.reason}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {p.linkageSuggestions && p.linkageSuggestions.length === 0 && p.linkageStatus && (
+                <div className="mt-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900 dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-200">
+                  <strong>Linkage:</strong> {p.linkageStatus.replace(/_/g, " ")} — operator must select product manually.
+                </div>
+              )}
               <div className="mt-3 flex gap-2">
                 <button
-                  disabled={busy === p.id}
+                  disabled={busy === p.id || isUnsafeToApprove(p)}
                   onClick={() => act(p.id, "approve")}
-                  className="rounded-full bg-emerald-600 px-4 py-1.5 text-xs font-medium text-white disabled:opacity-50"
+                  title={isUnsafeToApprove(p) ? approveBlockReason(p) : undefined}
+                  className="rounded-full bg-emerald-600 px-4 py-1.5 text-xs font-medium text-white disabled:opacity-40 disabled:cursor-not-allowed"
                 >Approve → promote</button>
                 <button
                   disabled={busy === p.id}
