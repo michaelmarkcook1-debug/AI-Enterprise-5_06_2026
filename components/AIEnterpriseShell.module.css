@@ -297,6 +297,55 @@
   transform: translateY(-1px);
 }
 
+/* Strong primary: same geometry as ctaPrimary but a filled gold body with
+   high-contrast inverse text + a richer halo. Reserved for the single most
+   important CTA on the page (Enter portal). */
+.ctaPrimaryStrong {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 28px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 180ms ease, border-color 180ms ease, transform 180ms ease, box-shadow 180ms ease;
+
+  /* Filled gold body. Border tightens the silhouette against the navy bg. */
+  background: linear-gradient(135deg,
+    color-mix(in srgb, var(--accent) 96%, white 6%),
+    color-mix(in srgb, var(--accent) 88%, black 6%));
+  border: 1px solid color-mix(in srgb, var(--accent) 90%, white 10%);
+  /* Inverse text — near-black so the bg can carry the visual weight. */
+  color: #14181f;
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--accent) 40%, transparent),
+    0 0 48px color-mix(in srgb, var(--accent) 55%, transparent),
+    0 8px 24px color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+.ctaPrimaryStrong:hover {
+  transform: translateY(-1px);
+  background: linear-gradient(135deg,
+    color-mix(in srgb, var(--accent) 100%, white 8%),
+    color-mix(in srgb, var(--accent) 92%, black 4%));
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--accent) 55%, transparent),
+    0 0 64px color-mix(in srgb, var(--accent) 70%, transparent),
+    0 10px 28px color-mix(in srgb, var(--accent) 38%, transparent);
+}
+
+.ctaDotStrong {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: #14181f;
+  box-shadow: 0 0 6px rgba(20, 24, 31, 0.35);
+}
+
 .ctaDot {
   width: 7px;
   height: 7px;

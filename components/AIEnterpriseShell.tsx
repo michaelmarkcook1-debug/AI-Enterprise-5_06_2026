@@ -70,15 +70,13 @@ export default function AIEnterpriseShell() {
           <span className={styles.ctaWrap}>
             <span className={`${styles.pulseRing} ${styles.pulseRingDelay0}`} aria-hidden />
             <span className={`${styles.pulseRing} ${styles.pulseRingDelay1}`} aria-hidden />
-            <Link href="/dashboard" className={styles.ctaPrimary}>
-              <span className={styles.ctaDot} aria-hidden />
+            <Link href="/dashboard" className={styles.ctaPrimaryStrong}>
+              <span className={styles.ctaDotStrong} aria-hidden />
               Enter portal
               <span className={styles.ctaArrow} aria-hidden>→</span>
             </Link>
           </span>
           <span className={styles.ctaWrap}>
-            <span className={`${styles.pulseRing} ${styles.pulseRingDelay0}`} aria-hidden />
-            <span className={`${styles.pulseRing} ${styles.pulseRingDelay1}`} aria-hidden />
             <Link href="/assessment" className={styles.ctaPrimary}>
               <span className={styles.ctaDot} aria-hidden />
               Take Assessment
