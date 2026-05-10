@@ -296,33 +296,40 @@ export default function InvestmentSimulatorClient({
       </div>
 
       <div className="rounded-lg border border-[#dfe4da] bg-white p-3 text-xs leading-5 text-[#596151] dark:border-zinc-800 dark:bg-[#071827] dark:text-zinc-400">
-        <div className="flex flex-wrap items-center gap-2">
-          <SeedDataBadge label="Simulation state" />
-          <span>State hash: <span className="font-mono">{state.stateHash}</span></span>
-          <span>Updates: on input change</span>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <SeedDataBadge label="Live scenario" />
+            <span>Recomputes on every input change</span>
+          </div>
+          <span className="font-mono text-[10px] text-[#9da696] dark:text-zinc-600" title="Internal state fingerprint — used for deterministic test harness">{state.stateHash.slice(0, 10)}</span>
         </div>
         {shockEvent && <p className="mt-2 text-amber-800 dark:text-amber-300">{shockEvent.displayMessage}</p>}
       </div>
 
       <div className="grid gap-5 xl:grid-cols-[0.72fr_1.45fr_0.83fr]">
         <Panel title="Inputs and assumptions">
-          <div className="space-y-4">
-            <Field label="Starting capital" info="Capital base used to calculate holding amounts and scenario paths. It affects chart values, not provider eligibility.">
-              <input
-                className="w-full rounded-md border border-[#d8ded0] bg-white px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
-                min={100}
-                step={500}
-                type="number"
-                value={input.startingCapital}
-                onChange={(event) => setField("startingCapital", Number(event.target.value))}
-              />
+          <div className="space-y-3">
+            {/* ─────── ESSENTIALS — always visible ─────── */}
+            <SectionHeader>Essentials</SectionHeader>
+            <Field label="Starting capital" info="Capital base used to calculate holding amounts and scenario paths.">
+              <div className="relative">
+                <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-[#697362] dark:text-zinc-500">$</span>
+                <input
+                  className="w-full rounded-md border border-[#d8ded0] bg-white px-3 py-2 pl-7 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+                  min={100}
+                  step={500}
+                  type="number"
+                  value={input.startingCapital}
+                  onChange={(event) => setField("startingCapital", Number(event.target.value))}
+                />
+              </div>
               {input.startingCapital < 100 && (
                 <div className="mt-1 text-xs text-amber-700 dark:text-amber-300">
                   Minimum $100 — simulation will run as if you entered $100.
                 </div>
               )}
             </Field>
-            <Field label="Horizon" info="Number of years to model. It changes scenario path length, shock timing, drawdown, and x-axis scale.">
+            <Field label="Horizon" info="Number of years to model. Changes scenario path length, shock timing, drawdown, and x-axis scale.">
               <Segmented
                 value={`${input.horizonYears}`}
                 options={["1", "3", "5", "10"]}
@@ -332,80 +339,93 @@ export default function InvestmentSimulatorClient({
             <Field label="Risk profile" info="Risk appetite adjusts scenario return multipliers, shock severity, model selection, and risk radar.">
               <Select value={input.riskProfile} options={["conservative", "balanced", "aggressive", "speculative"]} onChange={(value) => setField("riskProfile", value as SimulationInput["riskProfile"])} />
             </Field>
-            <Field label="Allocation style" info="Model-guided builds a seed allocation. Manual lets you select vendors and weights; invalid totals block chart output.">
-              <Select value={input.allocationStyle} options={["manual", "model_guided", "thesis_based", "single_stock"]} onChange={(value) => setField("allocationStyle", value as SimulationInput["allocationStyle"])} />
-            </Field>
             <Field label="Investment universe" info="Controls eligible vendors. Public Only excludes private names; IPO Watch excludes public direct holdings.">
               <Select value={input.investmentUniverse} options={INVESTMENT_UNIVERSE_OPTIONS} onChange={(value) => setField("investmentUniverse", value as SimulationInput["investmentUniverse"])} />
               <GuidanceNote>{UNIVERSE_GUIDANCE[input.investmentUniverse]}</GuidanceNote>
             </Field>
-            <Field label="Region" info="Region currently labels the scenario context. Future live feeds will use it for eligible instruments and regulatory risk.">
-              <Select value={input.region} options={["US", "Europe", "Global"]} onChange={(value) => setField("region", value as SimulationInput["region"])} />
-            </Field>
-            <Field label="Global news / political climate" info="Captures the prevailing macro and geopolitical risk regime as expressed in news flow. Each level applies a return drag plus a shock-penalty amplifier and a regulatory-tilt to all holdings.">
-              <Select
-                value={input.globalRiskClimate ?? "elevated"}
-                options={GLOBAL_RISK_CLIMATE_OPTIONS}
-                onChange={(value) => setField("globalRiskClimate", value as SimulationInput["globalRiskClimate"])}
-              />
-              <GuidanceNote>{GLOBAL_RISK_CLIMATE_GUIDANCE[input.globalRiskClimate ?? "elevated"]}</GuidanceNote>
-            </Field>
-            <Field label="Market Signals overlay" info="When enabled, blends source-cited macro / regulatory / company / sector signals into each holding's expected return. Truthfulness gates prevent unsupported or low-confidence signals from moving centre.">
-              <label className="flex items-center gap-2 text-xs text-[#4d574b] dark:text-zinc-300">
-                <input
-                  type="checkbox"
-                  className="h-4 w-4 accent-[#2f5d50]"
-                  checked={Boolean(input.applySignalOverlay)}
-                  onChange={(event) => setField("applySignalOverlay", event.target.checked)}
+
+            {/* ─────── STRATEGY — collapsible, default open ─────── */}
+            <CollapsibleSection title="Strategy & allocation" defaultOpen>
+              <Field label="Allocation style" info="Model-guided builds a seed allocation. Manual lets you select vendors and weights; invalid totals block chart output.">
+                <Select value={input.allocationStyle} options={["manual", "model_guided", "thesis_based", "single_stock"]} onChange={(value) => setField("allocationStyle", value as SimulationInput["allocationStyle"])} />
+              </Field>
+              <Field label="Private exposure" info="Controls whether private providers are hidden, shown only through indirect links, or displayed as IPO-watch scenario items.">
+                <Select
+                  disabledOptions={blockedPrivateExposureOptions}
+                  value={input.includePrivateExposure}
+                  options={PRIVATE_EXPOSURE_OPTIONS}
+                  onChange={(value) => setField("includePrivateExposure", value as SimulationInput["includePrivateExposure"])}
                 />
-                {input.applySignalOverlay ? "Signal overlay ON" : "Signal overlay OFF"}
-              </label>
-              <GuidanceNote>
-                {input.applySignalOverlay
-                  ? "Active. See /investor-tools/signals for the contributing signals and market regime."
-                  : "Off — base scenario engine only. Toggle on to layer in current macro / regulatory / sector signals."}
-              </GuidanceNote>
-            </Field>
-            <Field label="Private exposure" info="Controls whether private providers are hidden, shown only through indirect links, or displayed as IPO-watch scenario items.">
-              <Select
-                disabledOptions={blockedPrivateExposureOptions}
-                value={input.includePrivateExposure}
-                options={PRIVATE_EXPOSURE_OPTIONS}
-                onChange={(value) => setField("includePrivateExposure", value as SimulationInput["includePrivateExposure"])}
-              />
-              <GuidanceNote>{PRIVATE_EXPOSURE_GUIDANCE[input.investmentUniverse]}</GuidanceNote>
-            </Field>
-            <Field label="Rebalance" info="Rebalance frequency is captured for state integrity. Seed paths currently use static annual holdings.">
-              <Select value={input.rebalanceFrequency} options={["none", "quarterly", "annually"]} onChange={(value) => setField("rebalanceFrequency", value as SimulationInput["rebalanceFrequency"])} />
-            </Field>
-            <Field label="Cash reserve" info="Cash reserve lowers invested allocation and volatility. In manual mode, vendor allocations plus cash must total 100%.">
-              <input
-                className="w-full accent-[#2f5d50]"
-                min={0}
-                max={50}
-                type="range"
-                value={input.cashReservePct}
-                onChange={(event) => setField("cashReservePct", Number(event.target.value))}
-              />
-              <div className="mt-1 text-xs text-[#697362] dark:text-zinc-500">{input.cashReservePct}% cash reserve</div>
-            </Field>
-            {input.allocationStyle === "manual" && (
-              <ManualAllocationEditor
-                eligibleProviders={state.eligibleUniverse}
-                input={input}
-                providers={providerById}
-                validation={state.allocationValidation}
-                onAddVendor={addManualVendor}
-                onRemoveVendor={removeManualVendor}
-                onSetAllocation={setManualAllocation}
-              />
-            )}
-            <div className="grid grid-cols-2 gap-2">
+                <GuidanceNote>{PRIVATE_EXPOSURE_GUIDANCE[input.investmentUniverse]}</GuidanceNote>
+              </Field>
+              <Field label="Cash reserve" info="Cash reserve lowers invested allocation and volatility. In manual mode, vendor allocations plus cash must total 100%.">
+                <input
+                  className="w-full accent-[#2f5d50]"
+                  min={0}
+                  max={50}
+                  type="range"
+                  value={input.cashReservePct}
+                  onChange={(event) => setField("cashReservePct", Number(event.target.value))}
+                />
+                <div className="mt-1 flex items-center justify-between text-xs text-[#697362] dark:text-zinc-500">
+                  <span>{input.cashReservePct}% cash</span>
+                  <span className="font-mono tabular-nums">{formatCurrency((input.startingCapital * input.cashReservePct) / 100)}</span>
+                </div>
+              </Field>
+              {input.allocationStyle === "manual" && (
+                <ManualAllocationEditor
+                  eligibleProviders={state.eligibleUniverse}
+                  input={input}
+                  providers={providerById}
+                  validation={state.allocationValidation}
+                  onAddVendor={addManualVendor}
+                  onRemoveVendor={removeManualVendor}
+                  onSetAllocation={setManualAllocation}
+                />
+              )}
+            </CollapsibleSection>
+
+            {/* ─────── MARKET CONTEXT — collapsible, default open ─────── */}
+            <CollapsibleSection title="Market context" defaultOpen>
+              <Field label="Global news / political climate" info="Captures the prevailing macro and geopolitical risk regime as expressed in news flow. Applies a return drag, shock amplifier, and regulatory-tilt to all holdings.">
+                <ClimateSegmented
+                  value={input.globalRiskClimate ?? "elevated"}
+                  onChange={(value) => setField("globalRiskClimate", value)}
+                />
+                <GuidanceNote>{GLOBAL_RISK_CLIMATE_GUIDANCE[input.globalRiskClimate ?? "elevated"]}</GuidanceNote>
+              </Field>
+              <Field label="Market Signals overlay" info="When enabled, blends source-cited macro / regulatory / company / sector signals into each holding's expected return. Truthfulness gates prevent unsupported or low-confidence signals from moving centre.">
+                <ToggleSwitch
+                  checked={Boolean(input.applySignalOverlay)}
+                  onChange={(checked) => setField("applySignalOverlay", checked)}
+                  labelOn="Overlay ON"
+                  labelOff="Overlay OFF"
+                />
+                <GuidanceNote>
+                  {input.applySignalOverlay
+                    ? "Active. Per-vendor signal contributions appear in the Provider table and on the chart annotation."
+                    : "Off — base scenario engine only. Toggle on to layer in current macro / regulatory / sector signals."}
+                </GuidanceNote>
+              </Field>
+            </CollapsibleSection>
+
+            {/* ─────── ADVANCED — collapsible, default closed ─────── */}
+            <CollapsibleSection title="Advanced" defaultOpen={false}>
+              <Field label="Region" info="Region labels the scenario context. Future live feeds will use it for eligible instruments and regulatory risk.">
+                <Select value={input.region} options={["US", "Europe", "Global"]} onChange={(value) => setField("region", value as SimulationInput["region"])} />
+              </Field>
+              <Field label="Rebalance" info="Rebalance frequency is captured for state integrity. Seed paths currently use static annual holdings.">
+                <Select value={input.rebalanceFrequency} options={["none", "quarterly", "annually"]} onChange={(value) => setField("rebalanceFrequency", value as SimulationInput["rebalanceFrequency"])} />
+              </Field>
+            </CollapsibleSection>
+
+            {/* ─────── Actions ─────── */}
+            <div className="grid grid-cols-2 gap-2 pt-2">
               <button className="rounded-md border border-[#cfd7c8] px-3 py-2 text-xs font-semibold hover:bg-[#eef2e8] dark:border-zinc-700 dark:hover:bg-zinc-900" onClick={() => { setInput(coerceClientInput(initialInput)); setShockEvent(null); }} type="button">
-                Reset model
+                Reset to defaults
               </button>
-              <button className="rounded-md bg-[#192319] px-3 py-2 text-xs font-semibold text-white hover:bg-[#2a382c] dark:bg-zinc-100 dark:text-zinc-950" onClick={applyBoardShock} type="button">
-                Apply shock
+              <button className="rounded-md bg-[#192319] px-3 py-2 text-xs font-semibold text-white hover:bg-[#2a382c] dark:bg-zinc-100 dark:text-zinc-950 dark:hover:bg-white" onClick={applyBoardShock} type="button">
+                Apply random shock
               </button>
             </div>
           </div>
@@ -799,6 +819,116 @@ function Segmented({ value, options, onChange }: { value: string; options: strin
         </button>
       ))}
     </div>
+  );
+}
+
+/**
+ * Section header for the always-visible Essentials block. Subtle uppercase
+ * label so the eye reads "this is the start" without competing with field
+ * labels.
+ */
+function SectionHeader({ children }: { children: React.ReactNode }) {
+  return (
+    <h3 className="mt-1 mb-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-[#697362] dark:text-zinc-500">
+      {children}
+    </h3>
+  );
+}
+
+/**
+ * Native <details>/<summary> section with consistent styling. State persists
+ * per-section via the `open` attribute — no React state needed.
+ */
+function CollapsibleSection({
+  title,
+  defaultOpen,
+  children,
+}: {
+  title: string;
+  defaultOpen: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <details className="group rounded-md border border-[#dfe4da] bg-[#f7f8f5] px-3 py-2 dark:border-zinc-800 dark:bg-zinc-900/40" open={defaultOpen}>
+      <summary className="flex cursor-pointer list-none items-center justify-between text-[10px] font-semibold uppercase tracking-[0.18em] text-[#697362] hover:text-[#18201b] dark:text-zinc-400 dark:hover:text-zinc-100">
+        {title}
+        <span className="text-[10px] transition-transform group-open:rotate-180" aria-hidden>▾</span>
+      </summary>
+      <div className="mt-3 space-y-3">{children}</div>
+    </details>
+  );
+}
+
+/**
+ * Climate selector — 4 horizontal segments with tone (green→red as risk
+ * climbs). Faster + more visual than the underlying <select>.
+ */
+function ClimateSegmented({
+  value,
+  onChange,
+}: {
+  value: NonNullable<SimulationInput["globalRiskClimate"]>;
+  onChange: (value: SimulationInput["globalRiskClimate"]) => void;
+}) {
+  const options: { value: NonNullable<SimulationInput["globalRiskClimate"]>; label: string; tone: string }[] = [
+    { value: "calm", label: "Calm", tone: "border-emerald-300 bg-emerald-50 text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300" },
+    { value: "elevated", label: "Elevated", tone: "border-sky-300 bg-sky-50 text-sky-800 dark:border-sky-800 dark:bg-sky-950/40 dark:text-sky-300" },
+    { value: "tense", label: "Tense", tone: "border-amber-300 bg-amber-50 text-amber-800 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-300" },
+    { value: "crisis", label: "Crisis", tone: "border-rose-300 bg-rose-50 text-rose-800 dark:border-rose-800 dark:bg-rose-950/40 dark:text-rose-300" },
+  ];
+  return (
+    <div className="grid grid-cols-4 gap-1">
+      {options.map((opt) => {
+        const active = value === opt.value;
+        return (
+          <button
+            key={opt.value}
+            type="button"
+            onClick={() => onChange(opt.value)}
+            aria-pressed={active}
+            className={`rounded-md border px-2 py-1.5 text-[11px] font-semibold transition-colors ${
+              active ? opt.tone + " ring-2 ring-current ring-offset-0" : "border-[#dfe4da] bg-white text-[#697362] hover:border-[#cfd7c8] dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400"
+            }`}
+          >
+            {opt.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+/**
+ * On/off pill toggle — clearer than a checkbox for binary feature flags.
+ */
+function ToggleSwitch({
+  checked,
+  onChange,
+  labelOn,
+  labelOff,
+}: {
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+  labelOn: string;
+  labelOff: string;
+}) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      onClick={() => onChange(!checked)}
+      className={`flex w-full items-center justify-between rounded-md border px-3 py-2 text-xs font-semibold transition-colors ${
+        checked
+          ? "border-emerald-300 bg-emerald-50 text-emerald-900 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-200"
+          : "border-[#d8ded0] bg-white text-[#4d574b] hover:bg-[#f7f8f5] dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800"
+      }`}
+    >
+      <span>{checked ? labelOn : labelOff}</span>
+      <span className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors ${checked ? "bg-emerald-500" : "bg-zinc-300 dark:bg-zinc-700"}`}>
+        <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${checked ? "translate-x-5" : "translate-x-1"}`} />
+      </span>
+    </button>
   );
 }
 

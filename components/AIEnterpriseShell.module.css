@@ -72,6 +72,9 @@
   to   { transform: rotate(-360deg); }
 }
 
+/* Only the horizontal-plane ring set rotates. The tilted set stays static —
+   creates a sense of one constellation orbiting around a fixed reference frame
+   rather than two overlapping spinners (which read as visual noise). */
 .layerA {
   transform-origin: center;
   transform-box: fill-box;
@@ -79,13 +82,13 @@
 }
 
 .layerB {
+  /* static — provides depth + the cross-axis reference plane */
   transform-origin: center;
   transform-box: fill-box;
-  animation: orbitCCW 130s linear infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .layerA, .layerB { animation: none; }
+  .layerA { animation: none; }
 }
 
 /* ─────────── Top brand ─────────── */
@@ -106,6 +109,12 @@
   color: var(--accent);
 }
 
+.brandWordStack {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+}
+
 .brandWord {
   font-size: 16px;
   font-weight: 600;
@@ -118,6 +127,14 @@
 
 .brandWordAccent {
   color: var(--accent);
+}
+
+.brandSubline {
+  margin-top: 2px;
+  font-size: 10px;
+  letter-spacing: 0.02em;
+  color: var(--text-soft);
+  font-weight: 400;
 }
 
 /* ─────────── Theme toggle ─────────── */

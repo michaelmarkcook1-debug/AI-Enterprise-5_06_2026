@@ -15,6 +15,7 @@ const NAV: { href: string; label: string }[] = [
   { href: "/assessment", label: "Assessment" },
   { href: "/briefings", label: "Briefings" },
   { href: "/watchlists", label: "Watchlists" },
+  { href: "/admin", label: "Admin" },
 ];
 
 export default function TopNav() {
