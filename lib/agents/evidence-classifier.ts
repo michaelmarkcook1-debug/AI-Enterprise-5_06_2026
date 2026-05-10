@@ -6,33 +6,47 @@ import { z } from "zod";
 import { extractStructured } from "./llm-client";
 import type { ExtractedProposal } from "./evidence-extractor";
 
-// Rationale ceiling raised from 400 to 2000 + truncated defensively.
-// Investigation: 304 / 312 May-2026 classifier failures were Zod too_big
-// errors at path "rationale" — the LLM consistently produced 400+ char
-// rationales and the strict ceiling threw, which the runner caught as
-// "classifier failed" and stamped a 0.5 fallback. See
-// CLASSIFIER_FAILURE_REPORT.md.
-export const RATIONALE_MAX = 2000;
+// Defensive length-handling: truncate at the OUTER preprocess layer so a
+// runaway LLM output can never fail validation on a length issue. The
+// schema's `.max()` checks are kept as cheap safety nets — they can only
+// fire on absurd >50k-char outputs, which would themselves be a separate
+// signal of trouble.
+//
+// History:
+//   • Original ceiling: rationale max 400 → caused 304/312 silent classifier
+//     failures (CLASSIFIER_FAILURE_REPORT.md).
+//   • First fix: bumped to 2000, but LLM still occasionally exceeded it
+//     (27/43 of the May-2026 reclassify pass).
+//   • Current: preprocess truncates before validation; max checks are
+//     loose backstops that only fire on pathological output.
 export const RATIONALE_DISPLAY_MAX = 1500;
+export const RATIONALE_HARD_MAX = 50000;
+export const DESCRIPTION_DISPLAY_MAX = 240;
+export const DESCRIPTION_HARD_MAX = 5000;
+
+function truncate(s: string, max: number, marker = "…[truncated]"): string {
+  if (s.length <= max) return s;
+  return s.slice(0, max - marker.length) + marker;
+}
+
+const TruncatedRationale = z.preprocess(
+  (v) => (typeof v === "string" ? truncate(v, RATIONALE_DISPLAY_MAX) : v),
+  z.string().min(10).max(RATIONALE_HARD_MAX),
+);
+
+const TruncatedDescription = z.preprocess(
+  (v) => (typeof v === "string" ? truncate(v, DESCRIPTION_DISPLAY_MAX) : v),
+  z.string().max(DESCRIPTION_HARD_MAX).optional(),
+);
 
 export const ClassificationSchema = z.object({
   finalGrade: z.enum(["E0", "E1", "E2", "E3", "E4", "E5"]),
   finalRawScore: z.number().min(0).max(100),
   confidence: z.number().min(0).max(1),
-  rationale: z
-    .string()
-    .min(10)
-    .max(RATIONALE_MAX)
-    // Truncate to a display limit so a few extra-long rationales don't
-    // bloat downstream renders. Adding "…[truncated]" makes it auditable.
-    .transform((s) =>
-      s.length > RATIONALE_DISPLAY_MAX
-        ? s.slice(0, RATIONALE_DISPLAY_MAX - 14) + "…[truncated]"
-        : s,
-    ),
+  rationale: TruncatedRationale,
   suggestedRiskFlag: z.object({
     severity: z.enum(["low", "moderate", "severe", "fatal"]).optional(),
-    description: z.string().max(240).optional(),
+    description: TruncatedDescription,
   }).partial().optional(),
 });
 
@@ -65,7 +79,7 @@ const TOOL = {
       finalGrade: { type: "string", enum: ["E0", "E1", "E2", "E3", "E4", "E5"] },
       finalRawScore: { type: "number", minimum: 0, maximum: 100 },
       confidence: { type: "number", minimum: 0, maximum: 1 },
-      rationale: { type: "string", minLength: 10, maxLength: RATIONALE_MAX },
+      rationale: { type: "string", minLength: 10, maxLength: RATIONALE_HARD_MAX },
       suggestedRiskFlag: {
         type: "object",
         properties: {
