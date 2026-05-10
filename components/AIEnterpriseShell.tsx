@@ -29,15 +29,12 @@ export default function AIEnterpriseShell() {
       {/* Orbital rings — only the horizontal set rotates; tilted set stays static. */}
       <OrbitalRings />
 
-      {/* Top brand — AnalystGenius parent brand with AI Enterpise product line */}
-      <Link href="/dashboard" className={styles.brand} aria-label="AnalystGenius — AI Enterpise dashboard">
+      {/* Top brand — AnalystGenius parent brand */}
+      <Link href="/dashboard" className={styles.brand} aria-label="AnalystGenius dashboard">
         <BrandMark />
-        <span className={styles.brandWordStack}>
-          <span className={styles.brandWord}>
-            <span className={styles.brandWordMute}>Analyst</span>
-            <span className={styles.brandWordAccent}>Genius</span>
-          </span>
-          <span className={styles.brandSubline}>AI Enterpise is a product of AnalystGenius</span>
+        <span className={styles.brandWord}>
+          <span className={styles.brandWordMute}>Analyst</span>
+          <span className={styles.brandWordAccent}>Genius</span>
         </span>
       </Link>
 

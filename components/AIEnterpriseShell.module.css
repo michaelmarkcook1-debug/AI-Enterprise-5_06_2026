@@ -258,8 +258,15 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 14px;
+  /* Gap sized so the 1.45× pulse halos around each CTA do not collide. */
+  gap: 110px;
   margin-bottom: 40px;
+}
+
+@media (max-width: 720px) {
+  .ctaRow {
+    gap: 56px;
+  }
 }
 
 .ctaPrimary,
