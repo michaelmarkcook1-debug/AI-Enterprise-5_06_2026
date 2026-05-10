@@ -139,6 +139,26 @@ export interface VendorCapability {
   evidenceGrade: EvidenceGrade;
   lastVerified: string;
   notes: string;
+
+  // ─── Phase 5 audit-grade extensions ───
+  // All optional so legacy seed records remain valid. The render guard
+  // (`capabilityRenderState` in lib/intelligence/capabilities-truthfulness.ts)
+  // treats absence of these fields as seed/inferred and labels accordingly.
+  productScopeIds?: string[];
+  confidenceScore?: number;       // 0-100
+  dataStatus?: "verified" | "documented" | "estimated" | "inferred" | "seed" | "stale" | "disputed" | "unknown" | "unsupported";
+  freshnessStatus?: "fresh" | "stale" | "unknown";
+  sourceIds?: string[];
+  sourceUrls?: string[];
+  sourceNames?: string[];
+  sourceDate?: string;
+  uncertaintyNote?: string;
+  truthRecordIds?: string[];
+  formulaVersion?: string;
+  calculationTrace?: string;
+  isSeedScore?: boolean;
+  isCalculated?: boolean;
+  isVerified?: boolean;
 }
 
 export interface AssessmentRun {
