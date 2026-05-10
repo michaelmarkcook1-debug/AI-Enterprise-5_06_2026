@@ -95,27 +95,35 @@ async function main() {
   }
 
   // Live path. Reclassify one at a time so a single LLM blowup doesn't
-  // poison a batch.
+  // poison a batch. Each call is wrapped in a timeout so a hung
+  // Anthropic retry can't freeze the whole run.
   let okCount = 0;
   let failCount = 0;
   const failureCounts = new Map<string, number>();
+  const PER_CALL_TIMEOUT_MS = 60_000;
 
   for (const [i, p] of candidates.entries()) {
-    if (i % 25 === 0) console.log(`  …processed ${i}/${candidates.length}`);
+    const t0 = Date.now();
+    process.stdout.write(`  [${i + 1}/${candidates.length}] ${p.id} ${p.vendorId}/${p.subfactor} … `);
     try {
-      const result = await classifyEvidence({
-        vendorName: p.vendorId,
-        sourceCategory: "vendor_docs",
-        sourceUrl: p.sourceUrl ?? "",
-        proposal: {
-          domain: p.domain,
-          subfactor: p.subfactor,
-          excerpt: p.excerpt,
-          proposedGrade: p.proposedGrade,
-          proposedRawScore: p.proposedRawScore,
-          rationale: p.classifierRationale ?? "Reclassify pass — original rationale not available",
-        },
-      });
+      const result = await Promise.race([
+        classifyEvidence({
+          vendorName: p.vendorId,
+          sourceCategory: "vendor_docs",
+          sourceUrl: p.sourceUrl ?? "",
+          proposal: {
+            domain: p.domain,
+            subfactor: p.subfactor,
+            excerpt: p.excerpt,
+            proposedGrade: p.proposedGrade,
+            proposedRawScore: p.proposedRawScore,
+            rationale: p.classifierRationale ?? "Reclassify pass — original rationale not available",
+          },
+        }),
+        new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error(`timeout after ${PER_CALL_TIMEOUT_MS}ms`)), PER_CALL_TIMEOUT_MS),
+        ),
+      ]);
       await client.evidenceProposal.update({
         where: { id: p.id },
         data: {
@@ -130,6 +138,7 @@ async function main() {
         },
       });
       okCount += 1;
+      console.log(`ok (${Date.now() - t0}ms, ${(result.data.confidence * 100).toFixed(0)}%)`);
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       const failure = categoriseClassifyFailure(message);
@@ -144,6 +153,7 @@ async function main() {
       });
       failureCounts.set(failure.code, (failureCounts.get(failure.code) ?? 0) + 1);
       failCount += 1;
+      console.log(`FAIL (${Date.now() - t0}ms, ${failure.code})`);
     }
   }
 
