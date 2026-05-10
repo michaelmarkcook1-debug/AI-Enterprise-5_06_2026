@@ -178,7 +178,7 @@ export default function AssessForm({ industries, useCases, objectives, ecosystem
 
           {step === 3 && (
             <div className="space-y-4">
-              <p className="text-sm text-zinc-600 dark:text-zinc-400">
+              <p className="text-sm text-zinc-600">
                 Select vendors to compare, or leave empty to score the full universe.
               </p>
               <OwnershipLegend />
@@ -190,25 +190,25 @@ export default function AssessForm({ industries, useCases, objectives, ecosystem
             </div>
           )}
 
-          {error && <div className="mt-6 rounded-lg bg-red-50 dark:bg-red-950/40 px-4 py-3 text-sm text-red-700 dark:text-red-300">Error: {error}</div>}
+          {error && <div className="mt-6 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">Error: {error}</div>}
 
           <div className="mt-8 flex items-center justify-between">
             <button
               disabled={step === 0 || submitting}
               onClick={() => setStep((s) => Math.max(0, s - 1))}
-              className="rounded-full px-5 py-2 text-sm font-medium text-zinc-700 dark:text-zinc-300 disabled:opacity-40"
+              className="rounded-full px-5 py-2 text-sm font-medium text-zinc-700 disabled:opacity-40"
             >Back</button>
             {step < STEPS.length - 1 ? (
               <button
                 disabled={!canAdvance}
                 onClick={() => setStep((s) => s + 1)}
-                className="rounded-full bg-zinc-900 dark:bg-white px-6 py-2.5 text-sm font-medium text-white dark:text-zinc-900 disabled:opacity-40"
+                className="rounded-full bg-zinc-900 px-6 py-2.5 text-sm font-medium text-white disabled:opacity-40"
               >Continue</button>
             ) : (
               <button
                 disabled={submitting}
                 onClick={submit}
-                className="rounded-full bg-zinc-900 dark:bg-white px-6 py-2.5 text-sm font-medium text-white dark:text-zinc-900 disabled:opacity-40"
+                className="rounded-full bg-zinc-900 px-6 py-2.5 text-sm font-medium text-white disabled:opacity-40"
               >{submitting ? "Scoring…" : "Run assessment"}</button>
             )}
           </div>
@@ -228,9 +228,15 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 }
 
 function Select({ value, onChange, options }: { value: string; onChange: (v: string) => void; options: { value: string; label: string }[] }) {
+  // Form card is always bg-white (regardless of theme), so the select must
+  // stay light too — dark: variants here would clash with the white surround
+  // and inherit the parent's text-zinc-900, producing invisible dark-on-dark.
   return (
-    <select value={value} onChange={(e) => onChange(e.target.value)}
-      className="w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-[#071827] px-3 py-2 text-sm">
+    <select
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900"
+    >
       {options.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
     </select>
   );
@@ -247,8 +253,8 @@ function ChipGroup({ options, selected, onToggle }: { options: Option[]; selecte
             type="button"
             onClick={() => onToggle(o.id)}
             className={`rounded-full border px-3 py-1.5 text-xs ${on
-              ? "border-zinc-900 dark:border-white bg-zinc-900 dark:bg-white text-white dark:text-zinc-900"
-              : "border-zinc-300 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800"}`}
+              ? "border-zinc-900 bg-zinc-900 text-white"
+              : "border-zinc-300 text-zinc-700 hover:bg-zinc-100"}`}
           >{o.label ?? o.name}</button>
         );
       })}
