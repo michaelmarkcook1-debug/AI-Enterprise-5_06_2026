@@ -58,3 +58,6 @@ _check.ts
 _ids.ts
 _classes.ts
 .env*.local
+
+# Triage audit log (append-only forensic trail; not source-controlled)
+/data/triage-audit.jsonl

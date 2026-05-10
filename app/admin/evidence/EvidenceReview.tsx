@@ -15,7 +15,29 @@ interface Proposal {
   capturedAt: string;
   classifierConfidence: number;
   classifierRationale?: string;
+  triageLane?: "auto_approve" | "recommend_approve" | "recommend_reject" | "human_review_required";
+  triageReasons?: string[];
+  triageUnsafeCategory?: string;
 }
+
+const LANE_LABEL: Record<NonNullable<Proposal["triageLane"]>, { label: string; classes: string }> = {
+  auto_approve: {
+    label: "AUTO-APPROVE eligible",
+    classes: "bg-emerald-100 text-emerald-900 border-emerald-300 dark:bg-emerald-950/40 dark:text-emerald-200 dark:border-emerald-800",
+  },
+  recommend_approve: {
+    label: "Recommend approve",
+    classes: "bg-sky-100 text-sky-900 border-sky-300 dark:bg-sky-950/40 dark:text-sky-200 dark:border-sky-800",
+  },
+  recommend_reject: {
+    label: "Recommend REJECT",
+    classes: "bg-orange-100 text-orange-900 border-orange-300 dark:bg-orange-950/40 dark:text-orange-200 dark:border-orange-800",
+  },
+  human_review_required: {
+    label: "Human review required",
+    classes: "bg-amber-100 text-amber-900 border-amber-300 dark:bg-amber-950/40 dark:text-amber-200 dark:border-amber-800",
+  },
+};
 
 export default function EvidenceReview({ initialProposals, hasDatabase }: { initialProposals: Proposal[]; hasDatabase: boolean }) {
   const [proposals, setProposals] = useState<Proposal[]>(initialProposals);
@@ -96,6 +118,25 @@ export default function EvidenceReview({ initialProposals, hasDatabase }: { init
                   <div className="text-xs text-zinc-500">classifier conf {(p.classifierConfidence * 100).toFixed(0)}%</div>
                 </div>
               </div>
+              {p.triageLane && (
+                <div className={`mt-3 rounded-lg border px-3 py-2 text-xs ${LANE_LABEL[p.triageLane].classes}`}>
+                  <div className="font-semibold uppercase tracking-wide">
+                    {LANE_LABEL[p.triageLane].label}
+                    {p.triageUnsafeCategory && (
+                      <span className="ml-2 rounded bg-red-200 px-1.5 py-0.5 text-[10px] text-red-900 dark:bg-red-900/40 dark:text-red-200">
+                        unsafe: {p.triageUnsafeCategory.replace(/_/g, " ")}
+                      </span>
+                    )}
+                  </div>
+                  {p.triageReasons && p.triageReasons.length > 0 && (
+                    <ul className="mt-1 list-disc pl-5 space-y-0.5">
+                      {p.triageReasons.slice(0, 3).map((r, i) => (
+                        <li key={i}>{r}</li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              )}
               <blockquote className="mt-3 rounded-lg bg-zinc-50 dark:bg-[#071827] px-3 py-2 text-sm border-l-2 border-zinc-300 dark:border-zinc-700">
                 {p.excerpt}
               </blockquote>
