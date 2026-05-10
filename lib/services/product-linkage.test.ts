@@ -4,6 +4,7 @@ import {
   type LinkageProposalInput,
   type LinkageProductScope,
 } from "./product-linkage";
+import { canonicaliseVendorId } from "./product-linkage-runner";
 
 const MSFT_SCOPES: LinkageProductScope[] = [
   { id: "msft_microsoft_365_copilot", vendorId: "msft", productName: "Microsoft 365 Copilot", productCategory: "enterprise_assistant" },
@@ -112,6 +113,41 @@ describe("suggestLinkage", () => {
       MSFT_SCOPES,
     );
     for (const s of r.suggestions) expect(s.safeToApply).toBe(false);
+  });
+
+  it("REGRESSION — vendors using vendor_<id> prefix resolve via prefix-strip", () => {
+    // These were the vendors landing in `no_vendor_products` before the
+    // canonicaliser learned to strip the `vendor_` prefix as a fallback.
+    expect(canonicaliseVendorId("vendor_cohere")).toBe("cohere");
+    expect(canonicaliseVendorId("vendor_mistral")).toBe("mistral");
+    expect(canonicaliseVendorId("vendor_glean")).toBe("glean");
+    expect(canonicaliseVendorId("vendor_anthropic")).toBe("anthropic");
+    expect(canonicaliseVendorId("vendor_openai")).toBe("openai");
+    expect(canonicaliseVendorId("vendor_writer")).toBe("writer");
+    expect(canonicaliseVendorId("vendor_ibm")).toBe("ibm");
+    expect(canonicaliseVendorId("vendor_sap")).toBe("sap");
+    expect(canonicaliseVendorId("vendor_databricks")).toBe("databricks");
+  });
+
+  it("REGRESSION — vendor_<id> aliases resolve to ticker-style ids", () => {
+    // These vendors have registry ids that are stock tickers, not
+    // suffix-matches — they need explicit alias entries.
+    expect(canonicaliseVendorId("vendor_microsoft")).toBe("msft");
+    expect(canonicaliseVendorId("vendor_google")).toBe("googl");
+    expect(canonicaliseVendorId("vendor_alphabet")).toBe("googl");
+    expect(canonicaliseVendorId("vendor_aws")).toBe("amzn");
+    expect(canonicaliseVendorId("vendor_amazon")).toBe("amzn");
+    expect(canonicaliseVendorId("vendor_servicenow")).toBe("now");
+    expect(canonicaliseVendorId("vendor_salesforce")).toBe("crm");
+    expect(canonicaliseVendorId("vendor_oracle")).toBe("orcl");
+    expect(canonicaliseVendorId("vendor_snowflake")).toBe("snow");
+    expect(canonicaliseVendorId("vendor_broadcom")).toBe("avgo");
+  });
+
+  it("REGRESSION — non-prefixed ids pass through unchanged", () => {
+    expect(canonicaliseVendorId("msft")).toBe("msft");
+    expect(canonicaliseVendorId("anthropic")).toBe("anthropic");
+    expect(canonicaliseVendorId("unknown_vendor")).toBe("unknown_vendor");
   });
 
   it("INVARIANT — nothing below 0.95 confidence is ever safeToApply", () => {

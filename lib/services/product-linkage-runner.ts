@@ -46,29 +46,47 @@ export interface LinkageReport {
   rows: LinkageReportRow[];
 }
 
+// Explicit aliases — used when the proposal's vendor id (e.g. `vendor_microsoft`)
+// maps to a registry id that ISN'T just the suffix (`msft`, not `microsoft`).
+// For every other case the prefix-strip fallback below resolves it automatically.
 const VENDOR_ID_ALIASES: Record<string, string> = {
   vendor_microsoft: "msft",
+  microsoft: "msft",
   vendor_google: "googl",
+  google: "googl",
   vendor_alphabet: "googl",
+  alphabet: "googl",
   vendor_aws: "amzn",
+  aws: "amzn",
   vendor_amazon: "amzn",
-  vendor_openai: "openai",
-  vendor_anthropic: "anthropic",
+  amazon: "amzn",
   vendor_servicenow: "now",
+  servicenow: "now",
   vendor_salesforce: "crm",
+  salesforce: "crm",
   vendor_oracle: "orcl",
-  vendor_sap: "sap",
-  vendor_ibm: "ibm",
+  oracle: "orcl",
   vendor_snowflake: "snow",
-  vendor_databricks: "databricks",
-  vendor_writer: "writer",
-  vendor_harvey: "harvey",
-  vendor_hebbia: "hebbia",
-  vendor_rogo: "rogo",
+  snowflake: "snow",
+  vendor_broadcom: "avgo",
+  broadcom: "avgo",
 };
 
-function canonicaliseVendorId(id: string): string {
-  return VENDOR_ID_ALIASES[id] ?? id;
+/** Resolve a proposal's vendorId to the canonical registry id.
+ *  1. Exact alias hit (covers the cases where the registry id is a stock
+ *     ticker — msft / googl / amzn / crm / now / orcl / snow / avgo).
+ *  2. Strip the `vendor_` prefix and use the suffix verbatim (handles
+ *     anthropic, openai, cohere, mistral, glean, perplexity, xai, sap,
+ *     ibm, writer, harvey, hebbia, rogo, databricks, etc.).
+ *  3. Fallback: return the input unchanged. */
+export function canonicaliseVendorId(id: string): string {
+  if (VENDOR_ID_ALIASES[id]) return VENDOR_ID_ALIASES[id];
+  if (id.startsWith("vendor_")) {
+    const stripped = id.slice("vendor_".length);
+    if (VENDOR_ID_ALIASES[stripped]) return VENDOR_ID_ALIASES[stripped];
+    return stripped;
+  }
+  return id;
 }
 
 /** Group product scopes by canonical vendor id. Memoised across calls. */
