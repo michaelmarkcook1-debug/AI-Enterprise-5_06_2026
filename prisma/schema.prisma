@@ -358,6 +358,46 @@ model EvidenceProposal {
   @@map("evidence_proposals")
 }
 
+/// Proposed replacement for a stale (4xx) source URL in lib/sourcing/manifest.ts.
+/// Created automatically by the URL-finder agent when the runner hits a 404 etc.
+/// Operator approves at /admin/ingestion → manifest entry is rewritten on next ingest.
+model ManifestPatch {
+  id              String        @id @default(cuid()) @map("patch_id")
+  vendorId        String        @map("vendor_id")
+  vendorName      String        @map("vendor_name")
+  category        String
+  deadUrl         String        @map("dead_url")
+  httpStatus      Int           @map("http_status")
+  candidateUrl    String        @map("candidate_url")
+  candidateTitle  String        @map("candidate_title")
+  confidenceScore Int           @map("confidence_score")
+  rationale       String        @db.Text
+  citations       String[]      @default([])
+  llmSource       String        @map("llm_source")
+  searchesUsed    Int           @map("searches_used")
+  status          PatchStatus   @default(pending)
+  reviewerId      String?       @map("reviewer_id")
+  reviewedAt      DateTime?     @map("reviewed_at")
+  reviewNotes     String?       @map("review_notes") @db.Text
+  appliedAt       DateTime?     @map("applied_at")
+  retryAttempted  Boolean       @default(false) @map("retry_attempted")
+  retryOk         Boolean?      @map("retry_ok")
+  createdAt       DateTime      @default(now()) @map("created_at")
+
+  @@index([vendorId, status])
+  @@index([status, createdAt])
+  @@unique([vendorId, deadUrl, status])
+  @@map("manifest_patches")
+}
+
+enum PatchStatus {
+  pending
+  approved
+  rejected
+  applied
+  superseded
+}
+
 // ─── AI Enterpise intelligence portal domain ─────────────────────────────
 
 model IntelligenceVendor {

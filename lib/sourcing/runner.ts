@@ -16,6 +16,8 @@ import { fetchSource } from "../ingestion/fetcher";
 import { extractEvidence } from "../agents/evidence-extractor";
 import { classifyEvidence } from "../agents/evidence-classifier";
 import { hasLLM } from "../agents/llm-client";
+import { findReplacementUrl } from "../agents/url-finder";
+import { VENDORS as INTELLIGENCE_VENDORS } from "../intelligence/seed-vendors-intel";
 import { hasDatabase, getPrisma } from "../prisma";
 import { logEvent } from "./logger";
 import {
@@ -23,6 +25,26 @@ import {
   manifestForVendor,
   type SourceManifestEntry,
 } from "./manifest";
+
+// Vendor-id → display-name lookup for the URL-repair agent (matches the
+// intelligence seed which uses `vendor_*` IDs).
+const VENDOR_NAMES: Record<string, string> = Object.fromEntries(
+  INTELLIGENCE_VENDORS.map((v) => [v.id, v.name]),
+);
+
+// Confidence above which a freshly-found replacement URL is auto-retried in
+// the same run. Below this we still persist the patch for review but don't
+// burn another fetch + LLM call on it.
+const AUTO_RETRY_CONFIDENCE = 75;
+
+// HTTP error pattern → numeric status. The fetcher throws strings like
+// "HTTP 404 Not Found for ...". Anything 4xx is a candidate for repair.
+function extractHttpStatus(message: string): number | null {
+  const match = message.match(/HTTP (\d{3})/);
+  if (!match) return null;
+  const code = Number(match[1]);
+  return Number.isFinite(code) ? code : null;
+}
 
 export interface SourceRunOutcome {
   vendorId: string;
@@ -173,6 +195,21 @@ async function runOneSource(
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     await logEvent({ ts: new Date().toISOString(), ...base, event: "sourcing.fetch.fail", durationMs: Date.now() - sourceStart, error: message });
+
+    // ── 1a) URL repair attempt on 4xx ─────────────────────────────────────
+    // The dead URL might just be that the vendor moved their page. Ask the
+    // url-finder agent (Claude + web-search) for a current replacement, persist
+    // any candidate as a ManifestPatch for operator review, and — if the
+    // candidate is high-confidence and on-domain — retry the fetch once.
+    const httpStatus = extractHttpStatus(message);
+    if (httpStatus && httpStatus >= 400 && httpStatus < 500 && hasLLM()) {
+      const repairOutcome = await attemptUrlRepair(entry, httpStatus, { runId, base });
+      if (repairOutcome) {
+        // Successful retry — return the OK outcome from the recursion.
+        return repairOutcome;
+      }
+    }
+
     return {
       vendorId: entry.vendorId, category: entry.category, url: entry.url,
       status: "fetch_failed", proposalsExtracted: 0, proposalsPersisted: 0,
@@ -312,4 +349,126 @@ async function runOneSource(
     contentHash: fetched.contentHash,
     durationMs: Date.now() - sourceStart,
   };
+}
+
+/**
+ * Run the URL-repair agent on a dead manifest entry, persist the proposed
+ * replacement as a ManifestPatch, and (if confidence is high enough AND the
+ * candidate is on the vendor's apex domain) retry the fetch once with the new
+ * URL — recursing into runSourceEntry with a synthesised manifest entry.
+ *
+ * Returns:
+ *   - SourceRunOutcome (status="ok"): the retry succeeded; caller should
+ *     return this directly so the final summary counts it as ok.
+ *   - null: the repair attempt did not produce a usable URL or the retry
+ *     failed; caller should fall through to the normal fetch_failed outcome.
+ */
+async function attemptUrlRepair(
+  entry: SourceManifestEntry,
+  httpStatus: number,
+  ctx: { runId: string; base: { runId: string; vendorId: string; sourceUrl: string; category: string } },
+): Promise<SourceRunOutcome | null> {
+  const { runId, base } = ctx;
+  const repairTs = new Date().toISOString();
+  await logEvent({ ts: repairTs, ...base, event: "sourcing.repair.start" });
+
+  const vendorName = VENDOR_NAMES[entry.vendorId] ?? entry.vendorId.replace(/^vendor_/, "");
+  let repair;
+  try {
+    repair = await findReplacementUrl({
+      vendorId: entry.vendorId,
+      vendorName,
+      category: String(entry.category),
+      deadUrl: entry.url,
+      httpStatus,
+    });
+  } catch (err) {
+    await logEvent({ ts: new Date().toISOString(), ...base, event: "sourcing.repair.error", error: err instanceof Error ? err.message : String(err) });
+    return null;
+  }
+
+  if (!repair.candidate) {
+    await logEvent({
+      ts: new Date().toISOString(), ...base,
+      event: "sourcing.repair.no_candidate",
+      data: { rejectedReason: repair.rejectedReason ?? "no_candidate", searchesUsed: repair.searchesUsed },
+    });
+    return null;
+  }
+
+  // Persist the patch (best-effort — DB might be unavailable).
+  if (hasDatabase()) {
+    try {
+      await getPrisma().manifestPatch.upsert({
+        where: { vendorId_deadUrl_status: { vendorId: entry.vendorId, deadUrl: entry.url, status: "pending" } },
+        update: {
+          candidateUrl: repair.candidate.candidateUrl,
+          candidateTitle: repair.candidate.title,
+          confidenceScore: repair.candidate.confidenceScore,
+          rationale: repair.candidate.rationale,
+          citations: repair.candidate.citations,
+          httpStatus,
+          searchesUsed: repair.searchesUsed,
+        },
+        create: {
+          vendorId: entry.vendorId,
+          vendorName,
+          category: String(entry.category),
+          deadUrl: entry.url,
+          httpStatus,
+          candidateUrl: repair.candidate.candidateUrl,
+          candidateTitle: repair.candidate.title,
+          confidenceScore: repair.candidate.confidenceScore,
+          rationale: repair.candidate.rationale,
+          citations: repair.candidate.citations,
+          llmSource: repair.llmSource,
+          searchesUsed: repair.searchesUsed,
+          status: "pending",
+          retryAttempted: false,
+        },
+      });
+    } catch (err) {
+      await logEvent({ ts: new Date().toISOString(), ...base, event: "sourcing.repair.persist_failed", error: err instanceof Error ? err.message : String(err) });
+    }
+  }
+
+  await logEvent({
+    ts: new Date().toISOString(), ...base,
+    event: "sourcing.repair.candidate",
+    data: {
+      candidateUrl: repair.candidate.candidateUrl,
+      confidenceScore: repair.candidate.confidenceScore,
+      searchesUsed: repair.searchesUsed,
+    },
+  });
+
+  // High-confidence + on-domain → try the new URL once. Lower-confidence
+  // candidates are persisted but not auto-applied; operator approves at
+  // /admin/ingestion before they go live.
+  if (repair.candidate.confidenceScore < AUTO_RETRY_CONFIDENCE) {
+    return null;
+  }
+
+  const synthesizedEntry: SourceManifestEntry = { ...entry, url: repair.candidate.candidateUrl };
+  const retried = await runOneSource(runId, synthesizedEntry, hasDatabase());
+
+  // Mark the patch retry result on the persisted record.
+  if (hasDatabase()) {
+    try {
+      await getPrisma().manifestPatch.updateMany({
+        where: { vendorId: entry.vendorId, deadUrl: entry.url, status: "pending" },
+        data: { retryAttempted: true, retryOk: retried.status === "ok" },
+      });
+    } catch {
+      // non-fatal
+    }
+  }
+
+  if (retried.status === "ok") {
+    await logEvent({ ts: new Date().toISOString(), ...base, event: "sourcing.repair.retry_ok", data: { newUrl: repair.candidate.candidateUrl, proposalsPersisted: retried.proposalsPersisted } });
+    return retried;
+  }
+
+  await logEvent({ ts: new Date().toISOString(), ...base, event: "sourcing.repair.retry_failed", error: retried.error ?? "unknown" });
+  return null;
 }

@@ -35,7 +35,16 @@ export type SourcingEventName =
   | "sourcing.persist.ok"
   | "sourcing.persist.fail"
   | "sourcing.run.summary"
-  | "sourcing.gate.skipped";
+  | "sourcing.gate.skipped"
+  // URL-repair agent events (fired when a 4xx is detected and the
+  // url-finder agent runs to find a current canonical URL).
+  | "sourcing.repair.start"
+  | "sourcing.repair.candidate"
+  | "sourcing.repair.no_candidate"
+  | "sourcing.repair.error"
+  | "sourcing.repair.persist_failed"
+  | "sourcing.repair.retry_ok"
+  | "sourcing.repair.retry_failed";
 
 export interface SourcingEvent {
   ts: string;             // ISO timestamp

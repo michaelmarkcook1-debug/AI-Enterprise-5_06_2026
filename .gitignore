@@ -57,3 +57,4 @@ _test-*.ts
 _check.ts
 _ids.ts
 _classes.ts
+.env*.local
