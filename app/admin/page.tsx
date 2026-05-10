@@ -12,6 +12,8 @@ export default function AdminHome() {
         <div className="mt-8 grid gap-4 sm:grid-cols-2">
           <AdminCard href="/admin/ingestion" title="Ingestion" body="Trigger public-data fetches and inspect job status." />
           <AdminCard href="/admin/evidence" title="Evidence review" body="Review, approve, or reject extracted evidence proposals before they affect scoring." />
+          <AdminCard href="/admin/data-sources" title="Data sources" body="Per-connector health: configured / not_configured / error. Lists every official-source adapter (SEC, FRED, BLS, EIA, GDELT, etc.)." />
+          <AdminCard href="/admin/production-status" title="Production status" body="Env-var gates: DATABASE_URL, ANTHROPIC_API_KEY, ADMIN_API_TOKEN. Green = production-ready." />
         </div>
         <div className="mt-10 rounded-xl border border-amber-200 dark:border-amber-900/40 bg-amber-50 dark:bg-amber-950/30 px-4 py-3 text-sm text-amber-900 dark:text-amber-200">
           Set <code className="font-mono">ADMIN_API_OPEN=1</code> for local dev, or send the <code className="font-mono">x-admin-token</code> header.
