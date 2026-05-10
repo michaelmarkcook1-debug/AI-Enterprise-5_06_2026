@@ -1,0 +1,590 @@
+AI ENTERPRISE — CLAUDE CODE PROMPT PACK v2
+Commercial LLM Models Dashboard + Truth-Safe Model Inventory
+Date: 8 May 2026
+Timezone: Europe/London
+
+Prepared for: Mike
+
+================================================================================
+CLAUDE CODE MASTER TASK
+================================================================================
+
+You are working inside the AI Enterprise codebase.
+
+Task:
+Add a dashboard module at /dashboard that shows the specific commercially available LLMs, foundation models, model APIs, hosted models, and model-access routes tracked by AI Enterprise for every company currently in scope.
+
+This must be production-safe, source-backed, and truth-safe.
+
+The module must be called:
+
+Commercial LLM Models by Vendor
+
+Core outcome:
+Executives visiting AI Enterprise should be able to see, for each tracked company:
+- which commercial LLM/model products are owned by that company
+- which third-party models are hosted, brokered, or orchestrated by that company
+- which models are API-accessible, enterprise-only, preview, beta, deprecated, retired, unknown, or source-refresh required
+- which entries are verified/documented versus seed/inferred/unknown
+- which sources support each model entry
+- what uncertainty remains
+
+Critical:
+Never invent model names.
+Never invent model ownership.
+Never invent model availability.
+Never invent model IDs.
+Never invent source URLs.
+Never treat marketplace/hosted models as vendor-owned.
+Never display seed or inferred data as verified.
+
+If the app cannot verify a model from an official source, show:
+“Model inventory unavailable — source validation required.”
+
+================================================================================
+LANGUAGE AND NAMING
+================================================================================
+
+When addressing the product owner in docs or comments, use “Mike”.
+
+Do not refer to Mike as “the user”.
+
+For product UX, use neutral terms such as:
+- executive
+- portal operator
+- viewer
+- customer
+- account owner
+- assessment operator
+
+Avoid casual wording in UI.
+
+================================================================================
+TRUTH ENGINE REQUIREMENT
+================================================================================
+
+This feature must use the AI Enterprise truth/evidence model.
+
+Every displayed model record must include:
+
+CommercialModel:
+- id
+- vendorId
+- vendorName
+- ownerVendorId
+- ownerVendorName
+- hostingVendorId
+- hostingVendorName
+- modelName
+- modelId
+- modelFamily
+- modelCategory
+- modality
+- availabilityStage
+- commercialAvailability
+- ownershipType
+- accessChannel
+- contextWindow
+- inputModalities
+- outputModalities
+- toolSupport
+- pricingSummary
+- sourceIds
+- sourceUrls
+- sourceNames
+- sourceDate
+- capturedAt
+- evidenceGrade
+- confidenceScore
+- dataStatus
+- uncertaintyNote
+- lifecycleStatus
+- deprecationDate
+- lastVerifiedAt
+
+CommercialModelSource:
+- id
+- vendorId
+- sourceName
+- sourceUrl
+- sourceType
+- capturedAt
+- sourceDate
+- evidenceGrade
+- confidenceScore
+- freshnessStatus
+- notes
+
+ownershipType:
+- first_party
+- hosted_third_party
+- marketplace
+- byollm
+- open_weight
+- underlying_product_model
+- unknown
+
+availabilityStage:
+- ga
+- preview
+- beta
+- deprecated
+- retired
+- unknown
+
+commercialAvailability:
+- commercially_available
+- commercially_available_preview
+- enterprise_only
+- api_available
+- hosted_on_marketplace
+- underlying_product_model
+- not_commercially_available
+- unknown
+
+modelCategory:
+- llm_text
+- multimodal
+- reasoning
+- coding
+- embedding
+- reranking
+- guardrail_safety
+- speech_audio
+- image_generation
+- video_generation
+- ocr_document_ai
+- time_series
+- domain_specific
+- unknown
+
+dataStatus:
+- verified
+- documented
+- estimated
+- inferred
+- seed
+- stale
+- unknown
+- disputed
+
+Evidence grades:
+- E0: no evidence
+- E1: vendor claim only
+- E2: public documentation
+- E3: public API/model-list verification
+- E4: production customer evidence
+- E5: independent audit, verified benchmark, filing, or third-party validation
+
+Source types:
+- official_model_docs
+- official_api_models_endpoint
+- official_model_catalog
+- official_product_docs
+- official_marketplace_docs
+- official_pricing_page
+- reputable_news
+- seed_placeholder
+- unknown
+
+Rules:
+1. A model cannot render as verified unless evidenceGrade is E3 or higher and sourceIds exist.
+2. A model cannot count as first-party unless ownerVendorId equals vendorId.
+3. Hosted third-party models must show original owner and hosting platform separately.
+4. Deprecated/retired models must not count as active.
+5. Preview/beta models must show preview/beta badge.
+6. Unknown records must not be shown as active commercial models.
+7. If a source is stale, show stale badge and reduce confidence.
+8. If sources conflict, show disputed badge and uncertainty note.
+
+================================================================================
+DASHBOARD UI REQUIREMENT
+================================================================================
+
+On /dashboard add a card:
+
+Title:
+Commercial LLM Models by Vendor
+
+Subtitle:
+Source-backed model availability, separated by owned models, hosted third-party models, and uncertain entries.
+
+Card summary should show:
+- total tracked vendors
+- vendors with source-backed first-party models
+- vendors with hosted third-party models
+- vendors with unknown/unverified model inventory
+- stale inventory count
+- latest source refresh date
+
+Each vendor row should show:
+- vendor name
+- first-party active commercial model count
+- hosted third-party model count
+- preview/beta count
+- deprecated/retired count
+- primary model families
+- confidence score
+- data status
+- last verified date
+- uncertainty badge
+- expand button
+
+Expanded vendor row should show table:
+- Model
+- Model ID
+- Owner
+- Hosted by
+- Category
+- Modality
+- Stage
+- Commercial availability
+- Evidence grade
+- Confidence
+- Source
+- Uncertainty note
+
+Add filters:
+- vendor
+- ownershipType
+- availabilityStage
+- modelCategory
+- commercialAvailability
+- evidenceGrade
+- dataStatus
+
+UI style:
+- match AI Enterprise dashboard
+- executive-grade cards
+- confidence badges
+- evidence labels
+- no spreadsheet feel in default view
+- table only in expanded/advanced view
+- responsive layout
+
+If a model is hosted but not owned:
+Display badge:
+Hosted third-party — not vendor-owned.
+
+If no source-backed first-party model exists:
+Display:
+No source-backed first-party commercial LLM model currently recorded.
+
+If source is missing:
+Display:
+Model inventory unavailable — source validation required.
+
+================================================================================
+API REQUIREMENTS
+================================================================================
+
+Add API routes:
+
+GET /api/model-inventory
+Returns all CommercialModel records.
+
+GET /api/model-inventory/vendors
+Returns grouped vendor summaries.
+
+GET /api/model-inventory/vendors/[vendorId]
+Returns full model inventory for a vendor.
+
+GET /api/model-inventory/sources
+Returns source registry.
+
+POST /api/model-inventory/refresh
+Stub only unless actual ingestion exists.
+If not implemented, return:
+{ "status": "not_implemented", "message": "Model inventory refresh is not implemented. No data was changed." }
+
+Do not fake refresh behaviour.
+
+================================================================================
+SOURCE-BACKED INITIAL MODEL INVENTORY SEED RULES
+================================================================================
+
+Seed data is allowed only for development.
+
+All seed records must include:
+- dataStatus = seed or documented
+- evidenceGrade = E2 unless verified by live API/model endpoint
+- confidenceScore = 50-80 depending on source strength
+- uncertaintyNote
+- sourceUrl
+- capturedAt
+- lastVerifiedAt = null unless actually verified
+
+Do not display seed records as verified.
+
+During implementation, if official source pages can be fetched, update seed records to documented.
+If API/model endpoints are reachable and verified, update evidenceGrade to E3.
+
+================================================================================
+SOURCE LIST BY VENDOR
+================================================================================
+
+Use these as starting source URLs. Do not assume completeness. Verify during implementation.
+
+OpenAI:
+- https://developers.openai.com/api/docs/models
+- https://platform.openai.com/docs/models
+
+Anthropic:
+- https://docs.anthropic.com/en/docs/about-claude/models/overview
+- https://docs.anthropic.com/en/api/models-list
+
+Google / Alphabet:
+- https://cloud.google.com/vertex-ai/generative-ai/docs/models
+- https://docs.cloud.google.com/vertex-ai/generative-ai/docs/models
+- https://ai.google.dev/gemini-api/docs/models
+
+Mistral AI:
+- https://docs.mistral.ai/models
+- https://docs.mistral.ai/models/overview
+
+Cohere:
+- https://docs.cohere.com/docs/models
+- https://docs.cohere.com/v2/docs/models
+
+xAI:
+- https://x.ai/api
+- https://docs.x.ai/overview
+- https://docs.x.ai/docs/models
+
+AWS / Amazon Bedrock:
+- https://docs.aws.amazon.com/bedrock/latest/userguide/models.html
+- https://docs.aws.amazon.com/bedrock/latest/userguide/models-supported.html
+
+Microsoft / Azure AI Foundry:
+- https://azure.microsoft.com/products/ai-model-catalog/
+- https://learn.microsoft.com/en-us/azure/ai-foundry/foundry-models/overview
+- https://learn.microsoft.com/en-us/azure/ai-foundry/foundry-models/concepts/models-from-partners
+
+IBM:
+- https://www.ibm.com/products/watsonx-ai/foundation-models
+- https://www.ibm.com/docs/en/watsonx/saas?topic=models-foundation
+
+Oracle / OCI Generative AI:
+- https://docs.oracle.com/en-us/iaas/Content/generative-ai/pretrained-models.htm
+- https://docs.public.content.oci.oraclecloud.com/en-us/iaas/Content/generative-ai/xai-models.htm
+
+Salesforce / Agentforce:
+- https://developer.salesforce.com/docs/ai/agentforce/guide/supported-models.html
+- https://developer.salesforce.com/docs/ai/agentforce/guide/trust.html
+- https://developer.salesforce.com/docs/einstein/genai/guide/supported-models.html
+
+ServiceNow:
+- https://www.servicenow.com/docs/r/intelligent-experiences/servicenow-large-language-model-now-llm/exploring-large-language-models.html
+- https://newsroom.servicenow.com/press-releases/details/2023/ServiceNow-launches-Now-Assist-for-ITSM-CSM-HRSD-and-Creator-to-embed-generative-AI-across-all-workflows-on-the-Now-Platform-09-20-2023-traffic/default.aspx
+
+Writer:
+- https://dev.writer.com/home/models
+- https://dev.writer.com/home/models-overview
+
+Moveworks:
+- https://www.moveworks.com/us/en/resources/blog/introducing-moveworks-llm-movelm
+
+Glean:
+- https://docs.glean.com/administration/llms
+- https://www.glean.com/product/ai-search
+
+Harvey:
+- https://help.harvey.ai/articles/what-ai-models-does-harvey-use
+
+Perplexity:
+- official Perplexity Enterprise Pro docs
+- official Sonar API docs
+
+NVIDIA:
+- official NVIDIA AI Enterprise docs
+- official NVIDIA NIM docs
+- official NVIDIA NeMo docs
+- official Nemotron model docs
+- AWS Bedrock model catalogue where NVIDIA-hosted models appear
+
+AMD / Broadcom / ASML / Arm:
+- treat as infrastructure/investment exposure unless official commercial LLM/model API source exists.
+
+================================================================================
+INITIAL VENDOR HANDLING RULES
+================================================================================
+
+OpenAI:
+- Treat OpenAI as first-party model provider.
+- Pull active models from official model docs/API if possible.
+- Do not hard-code model list as verified without source.
+- If docs and API disagree, mark disputed and prefer live API if available.
+
+Anthropic:
+- Treat Claude models as Anthropic-owned.
+- If available through AWS Bedrock or Vertex AI, owner remains Anthropic and host is AWS/Google.
+- Prefer Anthropic model list endpoint where possible.
+
+Google:
+- Treat Gemini as Google-owned.
+- Treat Gemma as Google open-weight model family where source confirms.
+- Separate GA vs Preview.
+- Separate language, image, video, medical/domain models.
+
+Mistral:
+- Treat Mistral model families as Mistral-owned.
+- Separate premier/open/labs/deprecated if source provides that lifecycle.
+- Keep model versions.
+
+Cohere:
+- Treat Command, Embed, Rerank, Aya families as Cohere-owned.
+- If available on Bedrock/Azure/Oracle, owner remains Cohere.
+- Separate generative, embedding, rerank, multilingual/domain models.
+
+xAI:
+- Treat Grok model families as xAI-owned.
+- Use official xAI docs only for active model availability.
+- Mark retired models as retired.
+
+AWS:
+- Treat Amazon Nova and Titan as Amazon-owned.
+- Treat Bedrock-hosted models by Anthropic, Cohere, Mistral, Meta, DeepSeek, Qwen, NVIDIA, OpenAI, Google, xAI etc. as hosted third-party.
+- Do not count hosted third-party models as Amazon first-party.
+
+Microsoft:
+- Treat Phi/MAI models as Microsoft-owned where official source confirms commercial availability.
+- Treat OpenAI/Anthropic/Cohere/Mistral/Meta/DeepSeek/xAI/NVIDIA models in Azure AI Foundry as hosted/partner models.
+- Do not count OpenAI/Anthropic/xAI models as Microsoft-owned.
+
+IBM:
+- Treat Granite families as IBM-owned.
+- Separate Granite LLMs, code models, guardian/safety models, vision, and time-series.
+- Treat non-IBM models in watsonx as hosted third-party.
+
+Oracle:
+- Do not assume Oracle-owned general commercial LLM unless official source lists one.
+- Treat Cohere/Google/Meta/Mistral/xAI models in OCI as hosted third-party.
+- Oracle is host/orchestrator for those models.
+
+Salesforce:
+- Treat Salesforce as application/orchestration/trust layer unless official current docs confirm Salesforce-owned commercial model.
+- Salesforce Default model and supported provider options must be source-backed.
+- If XGen/xLAM appear only in research/engineering content, mark research/uncertain, not active commercial customer model.
+
+ServiceNow:
+- Treat Now LLM as ServiceNow first-party/domain-specific LLM only where official docs confirm.
+- Treat third-party provider/model access through Now LLM Service as hosted/orchestrated, not ServiceNow-owned.
+
+Writer:
+- Treat Palmyra models as Writer-owned where official docs confirm.
+- Mark deprecated models as deprecated if docs say so.
+
+Moveworks:
+- Treat MoveLM as Moveworks-owned only if source confirms.
+- If MoveLM is underlying product model and not customer-selectable API, mark commercialAvailability = underlying_product_model.
+
+Glean:
+- Treat Glean as model hub/orchestration/search provider unless official source confirms Glean-owned model.
+- Supported OpenAI/Google/Anthropic/Amazon/Meta models remain owned by their original providers.
+
+Harvey:
+- Treat Harvey as orchestration/application vendor.
+- Models used by Harvey remain owned by Anthropic/OpenAI/Google/etc.
+- Display “models used by Harvey,” not “Harvey-owned models.”
+
+Perplexity:
+- Include Sonar models only if official Sonar API docs confirm model names and commercial API access.
+- If official source unavailable, show source refresh required.
+
+NVIDIA:
+- Treat NVIDIA Nemotron models/NIM model endpoints as NVIDIA-owned where official source confirms.
+- Treat NVIDIA as infrastructure/model-platform provider, not general SaaS assistant vendor.
+
+AMD / Broadcom / ASML / Arm:
+- Do not show first-party commercial LLM models unless official source confirms.
+- Show infrastructure/investment exposure note.
+
+================================================================================
+TEST REQUIREMENTS
+================================================================================
+
+Add tests:
+
+Truth and counting:
+- no model renders as verified without sourceIds
+- seed records show seed label
+- deprecated/retired models not counted as active
+- hosted third-party not counted as first-party
+- unknown records not counted as commercial models
+- stale records show stale label
+
+Ownership:
+- AWS-hosted Anthropic/Cohere/Mistral models keep original owner
+- Azure-hosted OpenAI/Anthropic/etc keep original owner
+- Oracle-hosted Cohere/Google/Mistral/xAI models keep original owner
+- Glean/Harvey/Salesforce orchestration does not reassign ownership
+
+UI:
+- /dashboard renders Commercial LLM Models by Vendor card
+- expansion table renders source metadata
+- unknown vendor state works
+- filters work
+- data-status badges visible
+
+API:
+- /api/model-inventory returns model records
+- /api/model-inventory/vendors returns grouped summaries
+- /api/model-inventory/sources returns source registry
+
+No-hallucination:
+- fake source URL in seed data should fail test
+- model without evidenceGrade should fail validation
+- first-party count must exclude hosted third-party models
+
+================================================================================
+IMPLEMENTATION ORDER
+================================================================================
+
+1. Inspect current AI Enterprise codebase.
+2. Locate /dashboard route and shared dashboard card components.
+3. Add CommercialModel and CommercialModelSource types.
+4. Add model inventory seed data with source URLs and seed/documented status.
+5. Add repository/helper functions:
+   - getCommercialModels()
+   - getVendorModelSummary()
+   - getModelsByVendor()
+   - groupModelsByOwnership()
+   - activeModelCount()
+   - hostedThirdPartyCount()
+   - verifiedModelCount()
+   - staleInventoryCount()
+6. Add API routes.
+7. Add dashboard card.
+8. Add expandable vendor model table.
+9. Add filters.
+10. Add tests.
+11. Run:
+   - npm test
+   - npm run build
+   - npx tsc --noEmit if available
+12. Fix all errors.
+13. Do not remove Investor Tools, Assessment, Truth Engine, Product Scope Registry, or existing dashboard features.
+
+================================================================================
+FINAL ACCEPTANCE CRITERIA
+================================================================================
+
+Feature is complete when:
+
+- /dashboard shows Commercial LLM Models by Vendor card.
+- Each tracked company has either:
+  - source-backed first-party model records
+  - hosted third-party model records
+  - unknown/source-refresh-required state
+  - infrastructure-only note
+- Hosted third-party models are not counted as vendor-owned.
+- Every model has source/evidence/data-status metadata.
+- No seed data is displayed as verified.
+- Deprecated models are visibly marked and excluded from active counts.
+- Tests pass.
+- Build passes.
+- No fake sources are present.
+- No unsupported model claims are visible.
+
+Final instruction:
+If unsure, mark unknown. Do not invent.

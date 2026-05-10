@@ -1,0 +1,840 @@
+AI ENTERPRISE — FULL DATA CONNECTION AUDIT + FREE SOURCE IMPLEMENTATION PROMPT
+================================================================================
+Date: 9 May 2026
+Timezone: Europe/London
+Prepared for: Mike
+
+Purpose
+-------
+This prompt is for Claude Code / Codex / development agents working inside AI Enterprise.
+
+It audits the current data posture and instructs agents to replace seed/static capability data with source-backed integrations wherever free or official data sources exist.
+
+Critical premise:
+AI Enterprise must not present static seed data as live intelligence. Every dashboard, capability, assessment, investor, simulator, news, model inventory, and briefing output must be backed by a source, evidence grade, confidence score, freshness status, and data-status label.
+
+The deployed /capabilities page must be audited and converted from a static capability table into a live/source-backed capability intelligence surface.
+
+================================================================================
+SECTION 1 — LIVE URL AUDIT LIMITATION
+================================================================================
+
+The product owner asked to audit:
+https://ranking-engine-greix3nc5-michaelmarkcook1-debugs-projects.vercel.app/capabilities
+
+If a development agent can access the URL locally or in Vercel, run the live audit below.
+
+If the URL is not reachable from the agent environment:
+- do not invent observations
+- inspect the codebase instead
+- run local app
+- run API tests
+- compare rendered /capabilities output against data repositories
+- mark live-browser audit as blocked
+
+Required audit modes:
+1. Live deployed audit
+2. Local app audit
+3. API/data route audit
+4. Repository/data-source audit
+5. Calculation audit
+6. Truth/evidence audit
+
+================================================================================
+SECTION 2 — WHAT TO TEST ON /capabilities
+================================================================================
+
+Audit /capabilities for:
+
+1. Data source type
+- Is it using static seed JSON?
+- Is it using a database?
+- Is it using live source connectors?
+- Is it using official vendor docs?
+- Is it using model APIs?
+- Is it using old scraped data?
+- Is it mixing seed and live data without labels?
+
+2. Capability correctness
+Every displayed capability must have:
+- vendorId
+- vendorName
+- productScopeId
+- capabilityName
+- capabilityCategory
+- capabilityStatus
+- maturityScore
+- evidenceGrade
+- confidenceScore
+- sourceIds
+- sourceUrls
+- lastVerifiedAt
+- freshnessStatus
+- uncertaintyNote
+
+3. Product scope alignment
+Every capability must map to a product in ProductScopeRegistry.
+
+If a capability appears without a ProductScopeRegistry entry:
+Show error:
+“Capability cannot be displayed: missing product-scope record.”
+
+4. Evidence status
+Capabilities must display one of:
+- verified
+- documented
+- tested
+- estimated
+- inferred
+- seed
+- stale
+- unknown
+- disputed
+
+5. Ownership distinction
+For model/platform capabilities:
+- first-party model
+- hosted third-party model
+- marketplace model
+- orchestration layer
+- infrastructure exposure
+must be separated.
+
+Example:
+AWS hosting Claude on Bedrock is not AWS owning Claude.
+Azure hosting OpenAI/Anthropic/xAI models is not Microsoft owning those models.
+Oracle hosting Cohere/Mistral/xAI models is not Oracle owning those models.
+
+6. Score calculation
+Check whether maturity scores and confidence scores are:
+- calculated
+- manually seeded
+- inferred
+- tested
+- verified
+
+If a score is not calculated, mark:
+“Seed score — not verified.”
+
+7. Data freshness
+Any capability older than freshness window must show stale.
+
+Recommended freshness windows:
+- model availability: 14-30 days
+- vendor capability/product docs: 30-90 days
+- market share/adoption: 30-90 days
+- public financials: after each quarterly release
+- IPO rumours: 7 days
+- pricing pages: 14-30 days
+- trust/security docs: 90 days unless changed
+
+8. UI honesty
+No card, graph, or table may imply “current live market truth” if data is static.
+
+================================================================================
+SECTION 3 — DATA REQUIREMENT MAP
+================================================================================
+
+AI Enterprise data needs fall into these groups:
+
+A. Vendor/Product/Capability Data
+B. Commercial model inventory
+C. Security/trust/privacy/governance data
+D. Market-share/adoption data
+E. News/functionality intelligence
+F. Financial fundamentals
+G. Public stock prices and market data
+H. Macro/economic regime data
+I. Political/regulatory signals
+J. Energy/infrastructure signals
+K. Developer/community signals
+L. IPO/private-company data
+M. Investment simulator assumptions
+N. Evidence/claim registry
+
+Each group needs source-backed connectors.
+
+================================================================================
+SECTION 4 — FREE / OFFICIAL DATA CONNECTIONS
+================================================================================
+
+Implement connectors in priority order.
+
+4.1 SEC EDGAR / data.sec.gov
+----------------------------
+Use for:
+- public-company filings
+- 10-K / 10-Q / 8-K / S-1 / 20-F / 6-K
+- XBRL financial facts
+- RPO/backlog where tagged
+- revenue, margins, cash flow, capex
+- IPO filings
+- company metadata and ticker/CIK mapping
+
+Connection:
+- data.sec.gov/submissions/CIK##########.json
+- data.sec.gov/api/xbrl/companyfacts/CIK##########.json
+- data.sec.gov/api/xbrl/companyconcept/CIK##########/{taxonomy}/{tag}.json
+
+Requirements:
+- set compliant User-Agent header
+- respect SEC fair access
+- cache responses
+- store source URLs
+- evidenceGrade E5 for filings and XBRL facts
+- freshness high for recent filings
+
+4.2 FRED API
+------------
+Use for:
+- interest rates
+- Fed funds
+- treasury yields
+- unemployment
+- CPI/PCE series where available
+- financial conditions
+- VIX if available via FRED series
+- macro regime
+
+Connection:
+- https://api.stlouisfed.org/fred/series/observations
+- requires FRED API key
+- supports json via file_type=json
+- use series IDs such as DFF, SOFR, DGS10, UNRATE, CPIAUCSL, PCEPI, GDP, NFCI where relevant
+
+Store:
+- series_id
+- observations
+- date
+- value
+- source
+- confidence
+
+4.3 BLS Public Data API
+-----------------------
+Use for:
+- CPI
+- PPI
+- unemployment
+- payrolls
+- labour costs
+- wages
+- employment sectors
+
+Connection:
+- https://api.bls.gov/publicAPI/v2/timeseries/data/
+- v1 can be used without registration for simpler/recent series
+- v2 registration improves limits and features
+
+Store:
+- seriesID
+- year
+- period
+- value
+- footnotes
+
+4.4 BEA API
+-----------
+Use for:
+- GDP
+- personal consumption
+- business investment
+- industry GDP
+- fixed investment
+- national accounts
+- regional economic data
+
+Connection:
+- BEA API requires key/registration
+- use BEA datasets/methods for NIPA, GDP, Regional, Industry, Fixed Assets
+
+Store:
+- dataset
+- table
+- line item
+- period
+- value
+
+4.5 EIA API
+-----------
+Use for:
+- electricity prices
+- power generation
+- natural gas
+- energy prices
+- grid/power signals
+- data-centre energy constraint proxy
+
+Connection:
+- EIA API v2
+- API key required
+- examples under api.eia.gov/v2
+
+Store:
+- dataset route
+- frequency
+- period
+- value
+- geography
+
+4.6 Treasury Fiscal Data API
+----------------------------
+Use for:
+- Treasury yields/interest costs where applicable
+- federal debt
+- fiscal conditions
+- public finance signals
+- exchange rates where Treasury rates are useful
+
+Connection:
+- https://api.fiscaldata.treasury.gov/services/api/fiscal_service/
+- no API key required
+- supports JSON/CSV/XML
+
+4.7 Alpha Vantage
+-----------------
+Use for:
+- public stock prices
+- daily time series
+- company overview
+- income statement / balance sheet / cash flow
+- market news and sentiment
+- top gainers/losers
+- market status
+- fundamentals
+- some options data depending tier
+
+Connection:
+- requires free API key
+- https://www.alphavantage.co/query
+- functions:
+  - TIME_SERIES_DAILY
+  - GLOBAL_QUOTE
+  - OVERVIEW
+  - INCOME_STATEMENT
+  - BALANCE_SHEET
+  - CASH_FLOW
+  - NEWS_SENTIMENT
+  - TOP_GAINERS_LOSERS
+  - MARKET_STATUS
+  - LISTING_STATUS
+
+Caution:
+- free tier may be rate limited
+- realtime/advanced options may require paid plan
+- label data freshness and entitlement
+
+4.8 GDELT DOC / Context APIs
+----------------------------
+Use for:
+- broad public news signal monitoring
+- market talk proxy
+- geopolitical/regulatory media signal
+- vendor news velocity
+- event detection
+- entity news timeline
+
+Connection:
+- GDELT DOC 2.0 API supports JSON output
+- GDELT Context 2.0 API supports sentence-level snippets
+
+Caution:
+- use as signal source, not factual proof
+- confidence medium/low unless corroborated
+- do not let GDELT alone establish factual claims
+
+4.9 GitHub REST API
+-------------------
+Use for:
+- open-source repo activity
+- developer adoption signals
+- commit velocity
+- releases
+- forks/stars/issues where relevant
+- public SDK activity
+- open-source model/tool maturity
+
+Connection:
+- GitHub REST API
+- stats endpoints may return 202 while computing
+- unauthenticated access possible for public resources but rate limited
+- authenticated token improves rate limit
+
+Use for:
+- Mistral open model repos if relevant
+- OpenAI/Anthropic/Google/AWS SDKs
+- MLflow/Databricks public projects
+- model/tool ecosystem proxies
+
+4.10 Congress.gov API
+---------------------
+Use for:
+- US legislative signals affecting AI, chips, privacy, export controls, public procurement
+- congressional bills/resolutions
+
+Connection:
+- https://api.data.gov/congress/v3
+- requires data.gov API key
+- JSON/XML
+
+4.11 Federal Register / Regulations.gov
+---------------------------------------
+Use for:
+- regulatory proposals
+- executive orders
+- federal AI rules
+- agency notices
+- export-control notices
+- public comments
+
+Connections:
+- Federal Register API
+- Regulations.gov API may require API key
+
+4.12 Official Vendor Docs / Model Catalogues
+--------------------------------------------
+Use for:
+- commercial model inventory
+- model availability
+- product capability
+- enterprise controls
+- pricing pages
+- trust centres
+- subprocessor lists
+- API docs
+- changelogs/release notes
+
+Connection type:
+- official docs scraper
+- RSS where available
+- sitemap crawl where permitted
+- API endpoints where available
+
+Priority official model sources:
+- OpenAI model docs and /v1/models
+- Anthropic /v1/models
+- Google Gemini API model docs
+- Google Vertex AI model docs
+- Mistral model docs / list models API
+- Cohere model docs
+- xAI model docs
+- AWS Bedrock model catalogue
+- Azure AI Foundry model catalogue
+- IBM watsonx foundation model docs
+- Oracle OCI Generative AI model docs
+- Salesforce Agentforce supported model docs
+- ServiceNow LLM docs
+- Writer model docs
+- Glean LLM admin docs
+- Harvey model-use docs
+- NVIDIA NIM/AI Enterprise docs
+
+4.13 Company IR / Press / Trust Sources
+---------------------------------------
+Use for:
+- official product announcements
+- earnings releases
+- revenue/RPO/backlog
+- pricing changes
+- trust/security claims
+- compliance claims
+- subprocessor lists
+- data handling claims
+
+Connection:
+- official company RSS if present
+- investor relations pages
+- press release feeds
+- trust centre scraping
+
+Evidence:
+- official company sources are documented but not necessarily independently verified
+- evidenceGrade usually E2/E3, filings E5
+
+================================================================================
+SECTION 5 — DATA CONNECTION ARCHITECTURE
+================================================================================
+
+Create these layers:
+
+1. Connector Layer
+Each connector fetches raw source data:
+- secConnector
+- fredConnector
+- blsConnector
+- beaConnector
+- eiaConnector
+- fiscalDataConnector
+- alphaVantageConnector
+- gdeltConnector
+- githubConnector
+- regulatoryConnector
+- vendorDocsConnector
+
+2. Normalisation Layer
+Transforms raw data into:
+- EvidenceSource
+- TruthRecord
+- MarketSignal
+- FinancialMetric
+- ProductScopeItem
+- CommercialModel
+- CapabilityRecord
+- NewsSignal
+- InvestmentSignal
+
+3. Evidence Layer
+Assigns:
+- evidenceGrade
+- confidenceScore
+- dataStatus
+- freshnessStatus
+- uncertaintyNote
+
+4. Calculation Layer
+Computes:
+- capability maturity
+- vendor momentum
+- market regime
+- investment score
+- IPO forecast
+- post-IPO bands
+- simulator scenarios
+- risk-return scatter data
+- confidence heatmaps
+
+5. Cross-Feed Validation Layer
+Checks:
+- input -> calculation -> output consistency
+- stale chart data
+- missing source records
+- outdated seed data
+- invalid portfolio universe
+- unsupported claim rendering
+
+6. UI Rendering Layer
+All UI components must use truth-safe rendering:
+- badge status
+- confidence
+- source tooltip
+- uncertainty note
+- freshness warning
+
+================================================================================
+SECTION 6 — CAPABILITIES PAGE TARGET STATE
+================================================================================
+
+The /capabilities page should not just show a static list.
+
+It should show:
+
+1. Capability Overview
+- total vendors tracked
+- products in scope
+- capabilities tracked
+- verified capabilities
+- documented capabilities
+- seed/inferred capabilities
+- stale capabilities
+- unknown capabilities
+
+2. Capability Matrix
+Rows:
+- vendors/products
+
+Columns:
+- models
+- assistant
+- RAG/knowledge
+- agents
+- governance
+- security
+- integrations
+- cost controls
+- deployment
+- portability
+- investor data
+- IPO signals
+
+Each cell:
+- score
+- evidence grade
+- confidence
+- status
+- last verified
+- source link
+
+3. Capability Drilldown
+On click:
+- capability description
+- product scope mapping
+- evidence records
+- calculation method
+- current source
+- stale/uncertainty warnings
+- vendor-owned vs hosted/orchestrated distinction
+
+4. Connection Status Panel
+Show:
+- source connector status
+- last successful fetch
+- next refresh
+- failures
+- stale source count
+- missing source count
+
+5. Data Integrity Panel
+Show:
+- seed data still in use
+- unsupported claims blocked
+- stale data blocked
+- cross-feed errors
+- failed connectors
+- confidence distribution
+
+================================================================================
+SECTION 7 — CALCULATION AUDIT REQUIREMENTS
+================================================================================
+
+Audit and test all calculations:
+
+Capability maturity:
+- input: product scope + evidence + feature status + source freshness
+- output: maturityScore 0-100
+- must show formula
+
+Evidence confidence:
+- input: evidenceGrade + sourceType + freshness + corroboration
+- output: confidenceScore 0-100
+
+Market momentum:
+- input: news velocity + product release velocity + adoption proxies + customer signals + financial signals
+- output: momentumScore
+
+Investment scoring:
+- input: AI provider quality + financials + valuation + catalysts + risk + confidence
+- output: investmentAttractivenessScore
+
+IPO forecast:
+- input: evidence quality + funding + financial readiness + rumour quality + market regime
+- output: estimated window, not factual date
+
+Simulator:
+- input: selected vendors + universe + allocation + shocks + assumptions
+- output: scenario paths, risk score, drawdown, scatter chart
+
+Every calculation should store:
+- input snapshot
+- formula version
+- output value
+- confidence
+- stateHash
+- calculation timestamp
+
+================================================================================
+SECTION 8 — CLAUDE CODE IMPLEMENTATION PROMPT
+================================================================================
+
+Use this task inside Claude Code:
+
+You are inside the AI Enterprise codebase. Run a full audit of /capabilities and the platform data integrations.
+
+Do not invent findings. If the deployed URL is unreachable, say so and audit the codebase/local app instead.
+
+Tasks:
+1. Inspect /capabilities route and components.
+2. Identify all data sources used by /capabilities.
+3. Identify all seed/static JSON used.
+4. Identify any API routes used by /capabilities.
+5. Identify any calculations used for capability scores.
+6. Check whether every displayed capability maps to a ProductScope record.
+7. Check whether every displayed capability has EvidenceSource/TruthRecord metadata.
+8. Check whether every score has a formula and calculation provenance.
+9. Check whether stale/seed/estimated data is labelled in UI.
+10. Check whether hosted third-party models are separated from first-party models.
+11. Check whether capability counts exclude unknown/deprecated/hosted-third-party where appropriate.
+12. Run npm test.
+13. Run npm run build.
+14. Run npx tsc --noEmit if configured.
+15. Produce AUDIT_REPORT_CAPABILITIES.md with:
+    - passed checks
+    - failed checks
+    - unsupported claims
+    - seed data still used
+    - missing connectors
+    - broken calculations
+    - stale data risks
+    - recommended fixes
+16. Implement fixes where safe:
+    - add data-status badges
+    - add source/evidence display
+    - add product-scope validation
+    - add connection status panel
+    - add tests
+17. Do not remove existing features.
+18. Do not fabricate live data.
+
+Acceptance criteria:
+- /capabilities renders.
+- every displayed capability has dataStatus.
+- every displayed capability has evidenceGrade.
+- every displayed capability has source metadata or Unknown/Requires validation.
+- build passes.
+- tests pass.
+- audit report is written.
+
+================================================================================
+SECTION 9 — FREE DATA SOURCE CONNECTION PROMPT
+================================================================================
+
+Use this task after the audit:
+
+Implement the first version of AI Enterprise free data connectors.
+
+Create connector interfaces for:
+- SEC EDGAR / data.sec.gov
+- FRED
+- BLS
+- BEA
+- EIA
+- Treasury Fiscal Data
+- Alpha Vantage
+- GDELT
+- GitHub
+- Congress.gov
+- Federal Register / Regulations.gov
+- Vendor official docs/model catalogue scrapers
+
+Do not require every connector to be fully working on first pass.
+Implement:
+- connector interface
+- environment variable config
+- health check
+- fetch stub or working minimal fetch
+- response normalisation
+- EvidenceSource creation
+- TruthRecord creation
+- error handling
+- rate-limit awareness
+- freshness status
+- tests for at least connector health and normalisation
+
+Required files:
+- lib/connectors/types.ts
+- lib/connectors/sec.ts
+- lib/connectors/fred.ts
+- lib/connectors/bls.ts
+- lib/connectors/eia.ts
+- lib/connectors/alphaVantage.ts
+- lib/connectors/gdelt.ts
+- lib/connectors/github.ts
+- lib/connectors/vendorDocs.ts
+- lib/evidence/normalise.ts
+- lib/evidence/freshness.ts
+- lib/evidence/confidence.ts
+- app/api/data-sources/status/route.ts
+- app/api/data-sources/refresh/route.ts
+
+Add /data-sources or advanced /admin/data-sources page if quick.
+
+Show:
+- connector name
+- status
+- requires API key?
+- last fetch
+- last error
+- records fetched
+- confidence impact
+- freshness status
+
+Do not fake successful connections.
+If missing API key, show:
+“Configured: false — API key required.”
+
+================================================================================
+SECTION 10 — ENVIRONMENT VARIABLES
+================================================================================
+
+Recommended env vars:
+
+FRED_API_KEY=
+BLS_API_KEY=
+BEA_API_KEY=
+EIA_API_KEY=
+ALPHA_VANTAGE_API_KEY=
+CONGRESS_API_KEY=
+GITHUB_TOKEN=
+OPENAI_API_KEY=
+ANTHROPIC_API_KEY=
+GOOGLE_API_KEY=
+MISTRAL_API_KEY=
+COHERE_API_KEY=
+XAI_API_KEY=
+SEC_USER_AGENT="AI Enterprise contact@example.com"
+
+Rules:
+- do not commit real keys
+- docs should explain which are optional
+- official docs scraping should work without API keys where pages are public
+- model API endpoints require vendor keys
+- no key means connector status = not_configured
+
+================================================================================
+SECTION 11 — PRODUCTION DATA PRIORITY
+================================================================================
+
+Priority 1 — Truth engine and source metadata
+- EvidenceSource
+- TruthRecord
+- dataStatus badges
+- seed/stale labels
+- unsupported claim blocking
+
+Priority 2 — Model/product/capability data
+- official vendor docs
+- model catalogues
+- ProductScope registry
+- CommercialModel inventory
+
+Priority 3 — Financial and investment data
+- SEC
+- Alpha Vantage
+- company IR pages
+- earnings releases
+
+Priority 4 — Macro and market regime
+- FRED
+- BLS
+- BEA
+- Treasury
+- EIA
+
+Priority 5 — News and signals
+- GDELT
+- company news
+- regulatory feeds
+
+Priority 6 — Community/developer adoption
+- GitHub
+- review/marketplace proxies
+- job postings if later implemented
+
+================================================================================
+SECTION 12 — HARD TRUTH
+================================================================================
+
+If /capabilities currently renders seed data without source metadata, it is not ready.
+
+If scores are manually assigned without calculation provenance, they are not audit-grade.
+
+If model ownership is not separated from hosting, the product will mislead executives.
+
+If investment simulator outputs are not linked to evidence and market signals, they are scenario toys, not intelligence.
+
+The immediate objective is not to add more charts.
+The immediate objective is to wire truthful data flow:
+source -> evidence -> claim -> calculation -> output -> chart.
+
+================================================================================
+END
+================================================================================

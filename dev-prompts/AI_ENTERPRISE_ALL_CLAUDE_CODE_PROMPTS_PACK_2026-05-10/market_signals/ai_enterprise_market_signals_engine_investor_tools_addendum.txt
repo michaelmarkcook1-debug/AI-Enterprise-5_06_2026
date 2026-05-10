@@ -1,0 +1,888 @@
+AI ENTERPRISE — MARKET SIGNALS ENGINE ADDENDUM FOR INVESTOR TOOLS
+==================================================================
+Date: 9 May 2026
+Timezone: Europe/London
+
+Purpose
+-------
+This prompt pack adds a Market Signals Engine to AI Enterprise Investor Tools.
+
+The current Investment Intelligence and Investment Simulator are too dependent on provider fundamentals, IPO mechanics, and seed assumptions. To better model share-price fluctuation, IPO volatility, market movement, and investor sentiment, the investment tab must ingest and score broader signals:
+
+- current events
+- macroeconomic indicators
+- political and regulatory movements
+- market talk
+- analyst/market sentiment
+- options/volatility signals
+- sector momentum
+- company-specific news
+- AI infrastructure signals
+- legal/litigation signals
+- geopolitical/export-control signals
+- cloud/capex/data-centre signals
+- AI adoption and enterprise demand signals
+
+Critical instruction:
+Never hallucinate, invent, or imply unsupported causal relationships.
+All signals must be source-backed, confidence-scored, time-stamped, and labelled as verified, documented, inferred, estimated, seed, stale, disputed, or unknown.
+
+This module must improve Investment Intelligence and the Investment Simulator while also feeding the wider AI Enterprise platform:
+- Market Dashboard
+- Vendor Profiles
+- News Intelligence
+- Market Tracker
+- Capability Tracker
+- Investor Tools
+- Executive Briefings
+- Watchlists
+
+============================================================
+SECTION 1 — PRODUCT OBJECTIVE
+============================================================
+
+Add a new backend layer called:
+
+Market Signals Engine
+
+Purpose:
+Convert public and reliably sourced external signals into structured, confidence-weighted inputs for:
+
+1. Short-term catalyst scores
+2. Long-term hold scores
+3. speculative upside scores
+4. IPO month forecasts
+5. post-IPO 1-10 month fluctuation bands
+6. investment simulator scenarios
+7. randomised shock generation
+8. who-is-winning / who-is-losing dashboard
+9. vendor momentum
+10. risk radar
+11. executive investment briefings
+
+The Market Signals Engine must not directly say:
+“Buy”, “sell”, “guaranteed”, “certain”, “will rise”, or “will fall”.
+
+It may say:
+- “This signal increases short-term volatility risk.”
+- “This signal widens the modelled fluctuation band.”
+- “This signal shifts the base-case centre upward/downward.”
+- “Confidence is low because source quality is weak.”
+- “This signal is market talk and should not override verified filings or official data.”
+
+============================================================
+SECTION 2 — SIGNAL CATEGORIES
+============================================================
+
+Create signal categories.
+
+1. Macro Signals
+----------------
+Examples:
+- interest rates
+- expected rate cuts/hikes
+- CPI / PCE inflation
+- unemployment / payrolls
+- GDP growth
+- yield curve
+- credit spreads
+- VIX / volatility regime
+- USD strength
+- liquidity / financial conditions
+- PMIs / business surveys
+- consumer sentiment
+
+Effect:
+Macro signals affect valuation multiples, risk appetite, IPO windows, technology multiples, and high-beta AI names.
+
+2. Political / Regulatory Signals
+---------------------------------
+Examples:
+- AI regulation
+- export controls
+- chip restrictions
+- antitrust investigations
+- privacy/data regulation
+- public-sector procurement
+- defence/critical-infrastructure policy
+- tariffs
+- tax policy
+- election-cycle risk
+- government AI investment
+
+Effect:
+Political/regulatory signals affect provider risk, infrastructure access, semiconductor supply chains, AI platform adoption, valuation multiples, and IPO timing.
+
+3. Market Sentiment / Market Talk
+---------------------------------
+Examples:
+- high-quality financial news
+- analyst commentary
+- credible market reports
+- earnings-call commentary
+- IPO market chatter
+- social/media discussion
+- search trends
+- review/forum sentiment
+- developer/community chatter
+- institutional positioning if available
+
+Effect:
+Market talk can affect short-term volatility and sentiment but must have lower confidence than filings, earnings releases, official statements, or audited data.
+
+Rule:
+Market talk must never override verified fundamentals.
+
+4. Company-Specific Signals
+---------------------------
+Examples:
+- earnings releases
+- revenue guidance
+- AI ARR disclosure
+- RPO/backlog
+- product launches
+- customer wins/losses
+- executive changes
+- outages
+- security incidents
+- litigation
+- strategic partnerships
+- cloud/GPU/data-centre commitments
+- model releases
+- pricing changes
+- product deprecations
+
+Effect:
+Company-specific signals affect provider momentum, investment attractiveness, short-term catalysts, valuation risk, and simulator shocks.
+
+5. AI Sector Signals
+--------------------
+Examples:
+- frontier-model releases
+- model benchmark shifts
+- coding-agent adoption
+- enterprise AI adoption
+- cloud AI growth
+- data-centre capex
+- GPU supply
+- energy/power constraints
+- AI chip export controls
+- AI safety incidents
+- AI litigation
+- enterprise agent adoption
+- agent protocol developments
+
+Effect:
+Sector signals affect the whole AI investment universe and may trigger class-level adjustments.
+
+6. Financial Market Signals
+---------------------------
+Examples:
+- share-price momentum
+- beta
+- volatility
+- options implied volatility
+- put/call ratio
+- short interest, if available
+- institutional holdings
+- insider transactions
+- ETF flows, if available
+- IPO index performance
+- SaaS/software multiples
+- semiconductor index performance
+- cloud/infrastructure index performance
+
+Effect:
+These feed risk/return scatterplots, fluctuation bands, and simulator volatility.
+
+7. Energy / Infrastructure Signals
+----------------------------------
+Examples:
+- power prices
+- data-centre capacity
+- grid constraints
+- cloud capex
+- GPU delivery timelines
+- energy regulatory constraints
+- natural gas/electricity prices
+- data-centre permitting
+
+Effect:
+These matter especially for OpenAI, Anthropic, Oracle, Amazon, Alphabet, Microsoft, Nvidia, CoreWeave/Cerebras-style names, and any AI infrastructure provider.
+
+============================================================
+SECTION 3 — DATA SOURCES AND RELIABILITY
+============================================================
+
+Use source-backed data only.
+
+Recommended source classes:
+
+Official / high confidence:
+- SEC EDGAR / data.sec.gov
+- company earnings releases
+- investor presentations
+- official company blogs/docs
+- official government economic APIs
+- central bank data
+- BLS
+- FRED
+- BEA
+- EIA
+- official regulatory filings
+- official court/regulatory releases
+
+Medium confidence:
+- reputable financial news
+- recognised business press
+- analyst reports where licensed
+- exchange data
+- Nasdaq Data Link / market data providers
+- Alpha Vantage or other market data APIs
+- GDELT for broad news-event monitoring
+
+Lower confidence:
+- social media
+- Reddit
+- X
+- forums
+- unsourced market chatter
+- anonymous reports
+- search trend proxies
+- app/review trends
+
+Rule:
+Each source type must receive a default trust level.
+Do not use low-confidence sources to create factual claims.
+Use low-confidence sources only to:
+- widen volatility bands
+- trigger watchlist alerts
+- lower confidence
+- suggest validation
+- flag market chatter
+
+============================================================
+SECTION 4 — SIGNAL DATA MODEL
+============================================================
+
+Create MarketSignal model:
+
+MarketSignal:
+- id
+- signalType
+- signalCategory
+- title
+- summary
+- entityIds
+- entityTypes
+- vendorIds
+- tickers
+- affectedExposureClasses
+- affectedModules
+- sourceId
+- sourceName
+- sourceUrl
+- sourceType
+- sourceDate
+- capturedAt
+- evidenceGrade
+- confidenceScore
+- dataStatus
+- sentiment
+- direction
+- magnitude
+- timeHorizon
+- volatilityImpact
+- valuationImpact
+- revenueImpact
+- marginImpact
+- ipoWindowImpact
+- liquidityImpact
+- regulatoryImpact
+- infrastructureImpact
+- politicalRiskImpact
+- notes
+- uncertaintyNote
+- requiresHumanReview
+
+signalType options:
+- macro
+- political_regulatory
+- market_sentiment
+- company_specific
+- ai_sector
+- financial_market
+- energy_infrastructure
+- legal_litigation
+- ipo_specific
+- social_market_talk
+
+direction:
+- positive
+- negative
+- mixed
+- neutral
+- unknown
+
+timeHorizon:
+- intraday
+- short_term
+- medium_term
+- long_term
+- structural
+
+dataStatus:
+- verified
+- documented
+- tested
+- estimated
+- inferred
+- seed
+- stale
+- disputed
+- unknown
+
+============================================================
+SECTION 5 — SIGNAL IMPACT SCORING
+============================================================
+
+Create SignalImpactScore.
+
+Inputs:
+- signal magnitude
+- source confidence
+- recency
+- relevance to vendor/exposure class
+- entity match quality
+- market regime
+- historical sensitivity
+- source reliability
+- corroboration count
+- contradiction count
+
+SignalImpactScore =
+magnitude
+× relevance
+× confidence
+× recencyWeight
+× corroborationWeight
+× marketRegimeWeight
+- contradictionPenalty
+- stalePenalty
+
+Output:
+- impactScore 0-100
+- confidenceScore 0-100
+- affectedScoreFields
+- explanation
+- uncertaintyNote
+
+Affected score fields:
+- shortTermCatalystScore
+- longTermHoldScore
+- speculativeUpsideScore
+- ipoReadinessScore
+- ipoPricingRiskScore
+- postIpoBandWidth
+- postIpoBandCenter
+- valuationRiskScore
+- infrastructureDependencyScore
+- aiCapitalEfficiencyScore
+- marketMomentumScore
+- sentimentScore
+- volatilityScore
+- riskRadarScore
+
+============================================================
+SECTION 6 — MARKET REGIME ENGINE
+============================================================
+
+Create MarketRegime model.
+
+MarketRegime:
+- id
+- periodStart
+- periodEnd
+- riskAppetite
+- rateRegime
+- inflationRegime
+- growthRegime
+- creditRegime
+- volatilityRegime
+- techMultipleRegime
+- ipoWindowQuality
+- aiSentimentRegime
+- infrastructureConstraintRegime
+- confidenceScore
+- sourceIds
+
+riskAppetite:
+- risk_on
+- neutral
+- risk_off
+
+rateRegime:
+- easing
+- stable
+- tightening
+- uncertain
+
+inflationRegime:
+- disinflation
+- stable
+- reacceleration
+- shock
+
+growthRegime:
+- expansion
+- softening
+- recession_risk
+- contraction
+
+volatilityRegime:
+- low
+- normal
+- elevated
+- stressed
+
+ipoWindowQuality:
+- open
+- selective
+- difficult
+- closed
+
+Effect:
+MarketRegime feeds:
+- valuation multipliers
+- IPO timing forecasts
+- post-IPO band widths
+- simulator expected returns
+- risk shock likelihood
+- market dashboard “who’s winning/losing”
+
+============================================================
+SECTION 7 — PRICE FLUCTUATION BAND ADJUSTMENT MODEL
+============================================================
+
+Current post-IPO bands are too static.
+Add Market Signal adjustments.
+
+BaseBand:
+- lowPct
+- highPct
+- centerPct
+- widthPct
+
+AdjustedBand =
+BaseBand
++ centreShift
++ widthExpansion
++ eventShockAdjustments
++ regimeAdjustment
++ confidenceAdjustment
+
+centreShift =
+sum(signalImpact.directionalScore × vendorSensitivity × evidenceConfidence)
+
+widthExpansion =
+baseWidth
+× (1 + volatilityRegimeFactor + eventDensityFactor + confidencePenalty + marketTalkPenalty)
+
+Rules:
+- High-quality positive revenue/catalyst signal may shift band centre upward.
+- High-quality negative regulatory/legal signal may shift centre downward.
+- Low-confidence market talk should mainly widen band, not move centre aggressively.
+- Macro risk-off regime widens bands and shifts high-beta names downward.
+- Risk-on AI sentiment narrows downside and raises upside for high-beta names.
+- Stale or unsupported signals cannot move centre; they can only reduce confidence.
+
+Do not forecast exact share prices unless verified offer price or current price exists.
+
+============================================================
+SECTION 8 — PUBLIC STOCK PRICE SIMULATION ADJUSTMENT
+============================================================
+
+For public AI providers, add signal-adjusted simulation.
+
+Inputs:
+- currentPrice, if available from sourced market data
+- historical returns
+- volatility
+- beta
+- market regime
+- AI exposure score
+- valuation risk
+- catalyst score
+- macro signals
+- company-specific signals
+- sector signals
+- sentiment signals
+- shock events
+
+SignalAdjustedReturn =
+baseReturn
++ aiCatalystImpact
++ macroImpact
++ companySignalImpact
++ sectorMomentumImpact
++ sentimentImpact
+- valuationRiskPenalty
+- regulatoryRiskPenalty
+- capexRiskPenalty
+- confidencePenalty
+
+SignalAdjustedVolatility =
+baseVolatility
++ eventDensityImpact
++ marketTalkImpact
++ ipoRiskImpact
++ macroVolatilityImpact
++ confidencePenalty
+
+Charts affected:
+- scenario fan chart
+- drawdown chart
+- risk-return scatterplot
+- contribution waterfall
+- risk radar
+- confidence heatmap
+- shock timeline
+
+============================================================
+SECTION 9 — MARKET TALK HANDLING
+============================================================
+
+Market talk must be included but treated cautiously.
+
+MarketTalkSignal:
+- id
+- platform
+- query
+- entity
+- volumeScore
+- sentimentScore
+- noveltyScore
+- repetitionScore
+- botRiskScore
+- sourceConfidence
+- dataStatus
+- derivedFrom
+- uncertaintyNote
+
+Use cases:
+- early warning
+- sentiment shift
+- volatility widening
+- watchlist alert
+- human review trigger
+
+Do not use market talk alone to:
+- claim market share
+- claim revenue
+- claim IPO timing
+- claim product availability
+- move investment ranking materially
+- declare winner/loser status
+
+Market talk can:
+- widen post-IPO bands
+- increase volatility
+- flag a watch item
+- reduce confidence
+- trigger a “market chatter detected” label
+
+============================================================
+SECTION 10 — POLITICAL / REGULATORY EVENT HANDLING
+============================================================
+
+Political/regulatory signals must be categorised by direct relevance.
+
+RegulatoryEvent:
+- ai_regulation
+- chip_export_control
+- antitrust
+- privacy_data
+- public_procurement
+- defence_policy
+- tax_policy
+- tariff_trade
+- election_risk
+- energy_permitting
+- data_centre_policy
+
+Each event should map to affected vendors/exposure classes:
+- AI labs
+- cloud providers
+- chip suppliers
+- semiconductor equipment
+- software platforms
+- public-sector AI
+- healthcare/financial AI
+- sovereign AI providers
+
+Impact:
+- revenue opportunity
+- margin risk
+- market access risk
+- valuation risk
+- IPO window risk
+- customer adoption risk
+- supply chain risk
+
+If political event source is partisan/commentary:
+- mark sourceType = commentary
+- lower confidence
+- require corroboration
+
+============================================================
+SECTION 11 — DATA PIPELINE
+============================================================
+
+Build the Market Signals Engine pipeline:
+
+1. Source Ingestion
+- APIs
+- RSS/news feeds
+- official filings
+- official economic releases
+- market data
+- regulatory feeds
+- manual analyst entries
+
+2. Source Normalisation
+- convert all sources to EvidenceSource
+- assign evidenceGrade
+- assign sourceType
+- assign freshness status
+
+3. Entity Resolution
+- map signal to vendors, tickers, private firms, products, sectors, exposure classes
+
+4. Signal Classification
+- macro / political / market talk / company / AI sector / financial / energy
+
+5. Impact Scoring
+- calculate magnitude, direction, horizon, confidence, affected outputs
+
+6. Cross-Feed Update
+- update Investor Tools
+- update Simulator
+- update Market Dashboard
+- update Vendor Profiles
+- update Watchlists
+- update Briefings
+
+7. Audit Log
+- record what changed
+- record why score changed
+- store before/after values
+- preserve source trail
+
+============================================================
+SECTION 12 — SOURCE CONNECTOR PRIORITIES
+============================================================
+
+Implement connectors in stages.
+
+Stage 1 — low-risk public official sources:
+- SEC data.sec.gov for submissions/XBRL
+- FRED for macro data
+- BLS for CPI/jobs/labour data
+- EIA for energy/power/oil/gas data
+- official company press releases / RSS
+- official investor relations pages
+
+Stage 2 — financial and market APIs:
+- Alpha Vantage or equivalent for prices, news sentiment, fundamentals, options data
+- Nasdaq Data Link for market datasets where licensed
+- Cboe or vendor-provided VIX/options data where licensed
+- exchange feeds where licensed
+
+Stage 3 — event/news intelligence:
+- GDELT DOC/Context APIs
+- reputable news APIs
+- licensed analyst/news sources
+
+Stage 4 — low-confidence market talk:
+- Reddit API
+- X API or approved social feeds
+- Google Trends or search-interest proxies where terms allow
+- developer/community forums
+- review sites
+
+Do not block product launch waiting for all connectors.
+Start with source-backed official data and seed model placeholders clearly labelled.
+
+============================================================
+SECTION 13 — OUTPUT CHANGES IN INVESTOR TOOLS
+============================================================
+
+Add these outputs.
+
+Investment Dashboard:
+- Current Market Regime
+- AI Sentiment Regime
+- Signal-adjusted winners and losers
+- Top current catalysts
+- Top regulatory risks
+- Top macro risks
+- Biggest signal-driven score moves
+- Market talk watchlist, low confidence
+
+Provider Investment Page:
+- Signal timeline
+- Signal-adjusted scores
+- Current-event risk summary
+- Macro sensitivity
+- Political/regulatory sensitivity
+- Market-talk sentiment
+- Source confidence by signal type
+- What changed since last update
+
+Investment Simulator:
+- Signal-adjusted fan chart toggle
+- Shock timeline
+- Macro overlay
+- Political/regulatory overlay
+- Market-talk volatility overlay
+- Current-event waterfall
+- Signal confidence heatmap
+- Scenario assumptions drawer
+
+IPO Watch:
+- Signal-adjusted IPO timing
+- IPO window quality
+- post-IPO band adjustments
+- lock-up risk if known
+- market regime impact
+- IPO market sentiment
+- missing data checklist
+
+============================================================
+SECTION 14 — GRAPH REQUIREMENTS
+============================================================
+
+Add attractive AI Enterprise-style graphs:
+
+1. Market Regime Ribbon
+Shows risk-on/risk-off, rates, inflation, volatility, IPO window quality over time.
+
+2. Signal Timeline
+Shows macro, political, company, and market-talk events by date.
+
+3. Signal Impact Waterfall
+Shows which signals moved expected return/volatility.
+
+4. Event Heatmap
+Rows: vendors.
+Columns: macro, political, market talk, company news, AI sector, infrastructure.
+Values: impact score/confidence.
+
+5. Sentiment vs Evidence Scatter
+X-axis: sentiment strength.
+Y-axis: evidence confidence.
+Purpose: prevent weak market chatter from looking like fact.
+
+6. IPO Band Adjustment Chart
+Shows base post-IPO bands vs signal-adjusted bands.
+
+7. Volatility Expansion Chart
+Shows which events widened uncertainty.
+
+8. Cross-Platform Signal Feed
+Shows which signals affected:
+- Investment Intelligence
+- Simulator
+- Market Dashboard
+- Vendor Profile
+- Watchlist
+
+============================================================
+SECTION 15 — TESTING REQUIREMENTS
+============================================================
+
+Add tests:
+
+Truthfulness:
+- unsupported market talk cannot render as fact
+- low-confidence signal cannot shift centre beyond defined cap
+- stale macro data cannot update high-confidence regime
+- missing source lowers confidence
+- conflicting sources show disputed status
+
+Signal engine:
+- macro signal updates market regime
+- regulatory signal maps to affected vendors
+- company-specific signal updates provider page and simulator
+- market talk only widens volatility unless corroborated
+- event density expands band width
+- positive high-confidence catalyst shifts centre upward
+- negative high-confidence risk shifts centre downward
+
+Simulator:
+- applying market regime changes scenario fan chart
+- applying regulatory shock changes risk radar
+- signal-adjusted toggle changes scenario output
+- chart data uses latest stateHash
+- old chart data is marked stale
+
+IPO:
+- market regime affects IPO window quality
+- IPO bands adjust with signals
+- no offer price means no dollar price forecast
+- missing S-1 data keeps confidence limited
+
+Dashboard:
+- “who’s winning” only updates when signal confidence threshold is met
+- “market talk detected” appears separately from verified news
+- source confidence visible in every signal card
+
+============================================================
+SECTION 16 — DEVELOPMENT ORDER
+============================================================
+
+1. Add MarketSignal model.
+2. Add MarketRegime model.
+3. Add source connector interface.
+4. Add official-source placeholder connectors.
+5. Add SignalImpactScore function.
+6. Add market regime calculation.
+7. Add signal-adjusted post-IPO band model.
+8. Add signal-adjusted public stock simulator.
+9. Add market talk handling with strict low-confidence rules.
+10. Add political/regulatory event mapping.
+11. Add Market Signals UI components.
+12. Add graphs.
+13. Add tests.
+14. Wire signals into:
+   - Investor Tools
+   - Simulator
+   - IPO Watch
+   - Vendor Profiles
+   - Market Dashboard
+   - Briefings
+
+============================================================
+SECTION 17 — FINAL DEVELOPMENT AGENT INSTRUCTION
+============================================================
+
+Do not overfit, overclaim, or invent causal certainty.
+
+Market signals improve modelling; they do not create truth.
+
+Every signal must have:
+- source
+- date
+- confidence
+- evidence grade
+- affected outputs
+- uncertainty note
+
+If a signal cannot be sourced, it cannot affect factual output.
+
+Low-confidence market talk may increase volatility or trigger watchlist review, but it must not become a factual claim or dominate the model.
+
+The product must be willing to say:
+“Not enough evidence to adjust forecast.”
+
+That is better than a false forecast.

@@ -1,0 +1,1435 @@
+AI ENTERPRISE — ZERO-HALLUCINATION INVESTOR TOOLS + PRODUCT SCOPE DEVELOPMENT PROMPT PACK
+=========================================================================================
+Date: 7 May 2026
+Timezone: Europe/London
+
+Purpose
+-------
+This is a single consolidated prompt pack for development agents working on AI Enterprise.
+
+It combines:
+1. Strict no-hallucination / no-false-output rules for the entire AI Enterprise platform.
+2. A vendor/product inventory covering the AI products, services, platforms, models, agents, and infrastructure exposures currently in scope.
+3. The Investor Tools module, combining Investment Intelligence and Investment Simulator under one parent tab.
+4. Updates and fixes to simulator functionality.
+5. Data integrity, cross-feed validation, graphing requirements, and UI/UX alignment with the parent AI Enterprise portal.
+
+Use this as the controlling prompt for development agents.
+
+Critical Product Name
+---------------------
+Use the parent portal name: AI Enterprise.
+
+If existing code has the misspelling “AI Enterpise”, preserve legacy IDs only where needed to avoid breaking routes/data.
+User-facing labels should use “AI Enterprise” unless product owner explicitly says otherwise.
+
+=========================================================================================
+SECTION 1 — ABSOLUTE TRUTHFULNESS / NO-HALLUCINATION POLICY
+=========================================================================================
+
+Primary instruction:
+AI Enterprise must never present hallucinated, false, unverified, outdated, or unsupported claims as fact.
+
+Every claim shown in the UI must be backed by a structured evidence record or clearly labelled as:
+- seed data
+- estimated
+- inferred
+- unverified
+- needs validation
+- unknown
+
+No unlabelled factual claim may appear in:
+- dashboards
+- provider profiles
+- investment outputs
+- simulator outputs
+- charts
+- hover tooltips
+- news cards
+- executive briefings
+- exports
+- PDFs
+- board packs
+- API responses intended for display
+
+Hard rule:
+If a value or claim has no supporting source, display “Unknown”, “Not enough evidence”, or “Seed estimate — not verified”.
+Do not invent missing numbers.
+
+Required data-status labels:
+- seed
+- estimated
+- inferred
+- documented
+- tested
+- verified
+- stale
+- disputed
+- unknown
+
+Required evidence grades:
+- E0: no evidence
+- E1: vendor claim only
+- E2: public documentation
+- E3: public test, agent test, sandbox/API verification
+- E4: production customer evidence
+- E5: independent audit, verified benchmark, or third-party validation
+
+All rendered claims must include:
+- claimId
+- entityId
+- entityType
+- claimText
+- value
+- unit
+- dataStatus
+- evidenceGrade
+- confidenceScore
+- sourceIds
+- sourceUrls
+- sourceNames
+- sourceDates
+- capturedAt
+- lastVerifiedAt
+- staleAfter
+- uncertaintyNote
+- isEstimated
+- isSeedData
+- isUserGenerated
+- isModelGenerated
+
+If a claim is model-generated, it must have:
+- source claims used
+- confidence score
+- reasoning summary
+- uncertainty note
+- no unsupported extrapolation
+
+Do not allow LLM outputs into production views unless the output is traceable to evidence records.
+
+=========================================================================================
+SECTION 2 — ZERO-HALLUCINATION ENGINEERING REQUIREMENTS
+=========================================================================================
+
+Build or enforce the following truthfulness architecture:
+
+1. Evidence Registry
+--------------------
+Create a central evidence registry.
+
+Every source must be stored as:
+EvidenceSource:
+- id
+- entityType
+- entityId
+- sourceType
+- sourceName
+- sourceUrl
+- sourceDate
+- capturedAt
+- publisher
+- isOfficialSource
+- isPrimarySource
+- isLicensedSource
+- evidenceGrade
+- confidenceScore
+- freshnessStatus
+- notes
+
+2. Claim Registry
+-----------------
+Create a claim registry that maps every platform-visible claim to evidence.
+
+Claim:
+- id
+- entityType
+- entityId
+- claimType
+- claimText
+- numericValue
+- unit
+- period
+- geography
+- sourceIds
+- evidenceGrade
+- confidenceScore
+- dataStatus
+- uncertaintyNote
+- createdAt
+- updatedAt
+- lastVerifiedAt
+- expiryDate
+
+3. Claim Rendering Guard
+------------------------
+Create a UI helper:
+renderClaim(claim)
+
+Rules:
+- If evidenceGrade = E0, render as “Unknown” unless explicitly seed.
+- If isSeedData = true, show “Seed estimate — not verified”.
+- If staleAfter < today, show “Stale data — refresh required”.
+- If confidenceScore < 40, show “Low confidence”.
+- If sources conflict, show “Conflicting sources”.
+- Do not suppress uncertainty notes.
+
+4. No Unsupported Outputs
+-------------------------
+No component may display:
+- market share
+- adoption percentage
+- valuation
+- revenue
+- ARR
+- product availability
+- IPO probability
+- investment ranking
+- product capability
+- customer count
+- benchmark score
+- provider claim
+without evidence metadata.
+
+5. CI / Test Requirements
+-------------------------
+Add tests that fail when:
+- a UI component renders a numeric data point without source metadata
+- a vendor product appears without a productScope record
+- simulator output changes without state/hash update
+- chart data is stale or mismatched
+- private company is treated as directly investable
+- IPO watch includes public companies as direct holdings
+- shock output does not show shock timing and shock details
+- scatter chart axes fail to recompute after data changes
+- a briefing includes unsourced statements
+- seed data is displayed without a seed/estimated label
+
+=========================================================================================
+SECTION 3 — PLATFORM-WIDE VENDOR / PRODUCT SCOPE INVENTORY
+=========================================================================================
+
+Create a structured ProductScope registry covering all AI products, services, platforms, models, agents, infrastructure products, and investment exposures measured within AI Enterprise.
+
+Important:
+This initial scope is not guaranteed exhaustive. Each product entry must include source status and uncertainty.
+
+ProductScope:
+- id
+- vendorId
+- vendorName
+- productName
+- productCategory
+- productType
+- moduleCoverage
+- measuredInModules
+- evidenceStatus
+- confidenceScore
+- sourceIds
+- uncertaintyNote
+- includeInAssessment
+- includeInMarketIntelligence
+- includeInInvestorTools
+- includeInSimulator
+
+Product categories:
+- enterprise_assistant
+- model_api
+- coding_agent
+- agent_platform
+- agent_governance
+- enterprise_search
+- rag_knowledge
+- data_ai_platform
+- cloud_ai_platform
+- workflow_ai
+- crm_ai
+- hr_ai
+- legal_ai
+- finance_ai
+- developer_ai
+- security_ai
+- ai_infrastructure
+- ai_compute
+- ai_networking
+- semiconductor_equipment
+- sovereign_ai
+- investment_exposure
+
+Initial vendor/product inventory
+--------------------------------
+
+1. OpenAI
+Products / capabilities in scope:
+- ChatGPT Enterprise
+- ChatGPT Business
+- ChatGPT Edu
+- ChatGPT agent
+- Deep Research
+- Codex
+- OpenAI API / Responses API
+- enterprise connectors
+- file uploads / data analysis / canvas / search / advanced voice / image generation
+- Sora / video generation where relevant
+- models exposed in ChatGPT/API where officially available
+Measured in:
+- Market Intelligence
+- Vendor Profiles
+- AI Platform Fit Assessment
+- News Intelligence
+- Capability Tracker
+- Investor Tools
+- Investment Simulator
+Uncertainties:
+- Exact current model availability changes frequently.
+- Sora and image/video features may vary by plan, geography, and date.
+- Enterprise product availability and limits must be source-refreshed before rendering.
+
+2. Microsoft
+Products / capabilities in scope:
+- Microsoft 365 Copilot
+- Microsoft Agent 365
+- Microsoft 365 E7 / Frontier Suite
+- Work IQ
+- Microsoft Entra
+- Microsoft Defender
+- Microsoft Intune
+- Microsoft Purview
+- Azure AI / Azure AI Foundry if present in codebase
+- Azure Copilot
+- Copilot Studio
+- GitHub Copilot if included in vendor/product map
+- Dynamics 365 AI / Power Platform AI if included later
+Measured in:
+- Market Intelligence
+- Vendor Profiles
+- AI Platform Fit Assessment
+- Capability Tracker
+- Investor Tools
+- Investment Simulator
+Uncertainties:
+- Product naming and packaging may evolve.
+- Some Microsoft AI capabilities overlap across M365, Azure, GitHub, Dynamics, and Power Platform.
+- Use product-specific source records to avoid double counting.
+
+3. Google / Alphabet
+Products / capabilities in scope:
+- Gemini Enterprise
+- Gemini models
+- Vertex AI
+- Vertex AI Studio
+- Vertex AI Agent Builder
+- Agent Development Kit
+- Agent Engine
+- Agent Garden
+- Model Garden
+- Gemini for Google Workspace if included
+- Google Gen AI SDK migration-related developer tooling
+- TPU / Google Cloud AI infrastructure exposure for Investor Tools
+Measured in:
+- Market Intelligence
+- Vendor Profiles
+- AI Platform Fit Assessment
+- Capability Tracker
+- Investor Tools
+- Investment Simulator
+Uncertainties:
+- Gemini Enterprise, Vertex AI, and Workspace Gemini must be treated as related but distinct products.
+- Some agent capabilities may be preview/beta and must be labelled accordingly.
+
+4. AWS / Amazon
+Products / capabilities in scope:
+- Amazon Bedrock
+- Amazon Bedrock Marketplace
+- Amazon SageMaker AI
+- Amazon SageMaker Unified Studio
+- Amazon Q Business
+- Amazon Q Developer
+- Amazon Nova
+- Amazon Titan
+- Trainium
+- Inferentia
+- AWS AI infrastructure
+- Bedrock model providers including Anthropic, Cohere, Mistral, Meta, OpenAI open-weight models, etc. where source-supported
+Measured in:
+- Market Intelligence
+- Vendor Profiles
+- AI Platform Fit Assessment
+- Capability Tracker
+- Investor Tools
+- Investment Simulator
+Uncertainties:
+- Model provider availability in Bedrock changes frequently.
+- Distinguish AWS-native products from third-party models hosted through AWS.
+- Do not count third-party models as AWS-owned products.
+
+5. Anthropic
+Products / capabilities in scope:
+- Claude
+- Claude Enterprise / Team where source-supported
+- Claude API
+- Claude Code
+- Claude model family
+- Claude connectors / enterprise usage where source-supported
+- Claude Managed Agents / Claude Cowork only if source-confirmed
+Measured in:
+- Market Intelligence
+- Vendor Profiles
+- AI Platform Fit Assessment
+- News Intelligence
+- Investor Tools
+- Investment Simulator
+Uncertainties:
+- Managed Agents / Cowork naming and availability must be verified.
+- Some reported products may be beta, research preview, or media-reported only.
+- Do not treat media-reported product names as verified without official source.
+
+6. Salesforce
+Products / capabilities in scope:
+- Agentforce
+- Agentforce 360
+- Agentforce Builder
+- Agentforce Voice
+- Agent Script
+- Atlas Reasoning Engine
+- Einstein
+- Data Cloud / Data 360
+- Slack AI / Slack integrations where source-supported
+- Salesforce AI CRM
+Measured in:
+- Market Intelligence
+- Vendor Profiles
+- AI Platform Fit Assessment
+- Capability Tracker
+- Investor Tools
+- Investment Simulator
+Uncertainties:
+- Salesforce product naming shifted around Agentforce, Agentforce 360, Einstein, and Data 360.
+- Verify exact current packaging and revenue disclosure before using investment outputs.
+
+7. ServiceNow
+Products / capabilities in scope:
+- ServiceNow AI Platform
+- Now Assist
+- AI Control Tower
+- Action Fabric
+- MCP Server
+- AI Gateway
+- AI Agent Advisor
+- AI-powered setup
+- AI-powered center
+- Evaluation Suite
+- Autonomous Workforce
+- Otto
+- Project Arc
+- ServiceNow AI specialists
+Measured in:
+- Market Intelligence
+- Vendor Profiles
+- AI Platform Fit Assessment
+- Capability Tracker
+- Investor Tools
+- Investment Simulator
+Uncertainties:
+- Some features announced at Knowledge 2026 are rolling availability, Innovation Lab, or future GA.
+- Label availability stage.
+
+8. Oracle
+Products / capabilities in scope:
+- Oracle Fusion Agentic Applications
+- Fusion Agentic Applications for CX
+- Fusion Agentic Applications for HR
+- Oracle AI Agent Studio for Fusion Applications
+- Agentic Applications Builder
+- OCI Generative AI
+- Oracle Fusion Cloud Applications AI features
+- Oracle Cloud Infrastructure AI/data-centre exposure for Investor Tools
+Measured in:
+- Market Intelligence
+- Vendor Profiles
+- AI Platform Fit Assessment
+- Capability Tracker
+- Investor Tools
+- Investment Simulator
+Uncertainties:
+- Distinguish Oracle application agents from OCI model/platform services.
+- Availability varies by product family and region.
+
+9. SAP
+Products / capabilities in scope:
+- SAP Business AI
+- Joule
+- Joule Agents
+- Joule Studio
+- Joule Studio code editor
+- Joule Studio CLI
+- Joule Skills
+- SAP Signavio + Joule
+- SAP CX / Engagement Cloud agent integrations
+- SAP BTP AI-related capabilities where source-supported
+Measured in:
+- Market Intelligence
+- Vendor Profiles
+- AI Platform Fit Assessment
+- Capability Tracker
+- Investor Tools
+- Investment Simulator
+Uncertainties:
+- Exact number of Joule agents/skills changes.
+- Verify current availability and scope by SAP application.
+
+10. IBM
+Products / capabilities in scope:
+- IBM watsonx
+- IBM watsonx Orchestrate
+- IBM Bob
+- IBM Concert
+- watsonx.data context layer
+- IBM Confluent integration / real-time AI-ready data foundation
+- IBM Sovereign Core
+- hybrid cloud AI management
+Measured in:
+- Market Intelligence
+- Vendor Profiles
+- AI Platform Fit Assessment
+- Capability Tracker
+- Investor Tools
+- Investment Simulator
+Uncertainties:
+- Some Think 2026 capabilities may be private preview or announced but not GA.
+- Label availability.
+
+11. Snowflake
+Products / capabilities in scope:
+- Snowflake Cortex AI
+- Snowflake Intelligence
+- Cortex Agents
+- Cortex Analyst
+- Cortex Search
+- Cortex AI Functions
+- Cortex Code
+- Snowflake AI Data Cloud
+- Project SnowWork only if source-confirmed
+Measured in:
+- Market Intelligence
+- Vendor Profiles
+- AI Platform Fit Assessment
+- Capability Tracker
+- Investor Tools
+- Investment Simulator
+Uncertainties:
+- Some products may be preview/research preview.
+- Distinguish Cortex AI suite from Snowflake Intelligence and Cortex Code.
+
+12. Databricks
+Products / capabilities in scope:
+- Databricks Data Intelligence Platform
+- Mosaic AI
+- Agent Bricks
+- Genie
+- Lakebase
+- MLflow evaluation
+- Unity Catalog governance
+- AI Gateway
+- MCP catalog/support where source-supported
+Measured in:
+- Market Intelligence
+- Vendor Profiles
+- AI Platform Fit Assessment
+- Capability Tracker
+- Investor Tools
+- Investment Simulator
+Uncertainties:
+- Some Agent Bricks capabilities may be beta/preview.
+- Verify availability by cloud and workspace.
+
+13. Cohere
+Products / capabilities in scope:
+- North
+- Compass
+- Command
+- Embed
+- Rerank
+- Model Vault / deployment options where source-supported
+Measured in:
+- Market Intelligence
+- Vendor Profiles
+- AI Platform Fit Assessment
+- Capability Tracker
+- Investor Tools
+- Investment Simulator
+Uncertainties:
+- Exact product packaging and plan availability must be verified.
+
+14. Mistral AI
+Products / capabilities in scope:
+- Le Chat
+- Le Chat Enterprise
+- Studio
+- Mistral API / La Plateforme
+- Mistral Vibe
+- Admin
+- Mistral models
+- custom agents
+- code interpreter / web search / document analysis / Canvas where source-supported
+Measured in:
+- Market Intelligence
+- Vendor Profiles
+- AI Platform Fit Assessment
+- Capability Tracker
+- Investor Tools
+- Investment Simulator
+Uncertainties:
+- Product names and capabilities change quickly.
+- Enterprise features, remote agents, and work mode must be source-confirmed before display.
+
+15. Glean
+Products / capabilities in scope:
+- Glean Assistant
+- Glean Agents
+- Glean Search
+- Glean Protect
+- enterprise work AI platform
+- enterprise connectors/search across SaaS tools
+Measured in:
+- Market Intelligence
+- Vendor Profiles
+- AI Platform Fit Assessment
+- Capability Tracker
+- Investor Tools
+- Investment Simulator
+Uncertainties:
+- Exact product packaging and AI agent functionality should be verified from official source.
+
+16. Moveworks
+Products / capabilities in scope:
+- Moveworks AI Assistant Platform
+- Reasoning Engine
+- AI Agent Marketplace
+- business initiative agent bundles
+- integrations across HR, IT, Finance, Procurement, Engineering, Sales, Marketing, etc.
+Measured in:
+- Market Intelligence
+- Vendor Profiles
+- AI Platform Fit Assessment
+- Capability Tracker
+- Investor Tools if applicable
+Uncertainties:
+- Customer/adoption figures must be source dated.
+- Marketplace agent counts may change.
+
+17. Writer
+Products / capabilities in scope:
+- Writer AI Studio
+- Palmyra-powered agents
+- Writer Knowledge Graph if source-supported
+- governance and agent lifecycle features
+- enterprise agent platform
+Measured in:
+- Market Intelligence
+- Vendor Profiles
+- AI Platform Fit Assessment
+- Capability Tracker
+- Investor Tools / Simulator if included as private watch
+Uncertainties:
+- Product naming and model-family availability must be verified.
+
+18. Harvey
+Products / capabilities in scope:
+- Harvey Assistant
+- Harvey Vault
+- Harvey Workflow Agents
+- Harvey Agents
+- Agent Builder
+- History
+- Library
+- Microsoft 365 Copilot integration
+- legal/professional services AI workflows
+Measured in:
+- Market Intelligence
+- Vendor Profiles
+- AI Platform Fit Assessment
+- Capability Tracker
+- Investor Tools
+- Investment Simulator
+Uncertainties:
+- Daily task counts, customer counts, and valuation must be source-dated.
+- Product availability may be restricted to legal/professional-services customers.
+
+19. Hebbia
+Products / capabilities in scope:
+- Hebbia Matrix
+- multi-step workflow AI
+- multimodal reasoning
+- citations / transparent agent actions
+- enterprise integrations
+Measured in:
+- Market Intelligence
+- Vendor Profiles
+- AI Platform Fit Assessment
+- Capability Tracker
+- Investor Tools / Simulator if included as private watch
+Uncertainties:
+- Product scope and customer usage figures must be verified.
+
+20. Rogo
+Products / capabilities in scope:
+- Rogo financial AI platform
+- autonomous financial agents
+- financial data/platform integrations
+- institutional outputs such as Excel models, investment memos, diligence materials, slide decks
+Measured in:
+- Market Intelligence
+- Vendor Profiles
+- AI Platform Fit Assessment for finance use cases
+- Investor Tools / Simulator if included as private watch
+Uncertainties:
+- Product documentation depth is limited.
+- Verify product modules, customers, and funding before investment outputs.
+
+21. Perplexity
+Products / capabilities in scope:
+- Perplexity Enterprise Pro where source-supported
+- Sonar API
+- Sonar Pro API
+- real-time web answer/research API with citations
+Measured in:
+- Market Intelligence
+- Capability Tracker
+- Investor Tools / Simulator if included
+Uncertainties:
+- Enterprise product naming and plan details must be source-confirmed.
+- API features and pricing change.
+
+22. xAI
+Products / capabilities in scope:
+- Grok
+- Grok API if officially source-confirmed
+- Grok on X
+- Grok coding/API features only if official source-confirmed
+Measured in:
+- Market Intelligence
+- News/Risk Intelligence
+- Investor Tools / Simulator if included
+Uncertainties:
+- Treat non-official reports as unverified.
+- Grok product capabilities and enterprise suitability require official confirmation.
+- Content-safety/regulatory risk must be tracked.
+
+23. NVIDIA
+Products / capabilities in scope:
+- NVIDIA GPUs / Blackwell / Blackwell Ultra where source-supported
+- NVIDIA DGX
+- DGX SuperPOD
+- NVIDIA NIM
+- NVIDIA NeMo
+- NVIDIA AI Enterprise if included
+- NVIDIA Enterprise AI Factory / validated designs where source-supported
+- NVIDIA networking / AI infrastructure exposure
+Measured in:
+- Market Intelligence
+- Infrastructure Intelligence
+- Investor Tools
+- Investment Simulator
+Uncertainties:
+- Distinguish NVIDIA as infrastructure enabler, not general enterprise AI platform provider.
+
+24. AMD
+Products / capabilities in scope:
+- AMD Instinct accelerators where source-supported
+- Ryzen AI
+- Ryzen AI PRO
+- Ryzen AI Max+
+- Ryzen AI Halo
+- ROCm
+- EPYC AI infrastructure exposure where source-supported
+Measured in:
+- Infrastructure Intelligence
+- Investor Tools
+- Investment Simulator
+Uncertainties:
+- Distinguish client AI chips from data-centre AI accelerators.
+- Verify AI accelerator product names separately.
+
+25. Broadcom
+Products / capabilities in scope:
+- Tomahawk 6
+- Jericho4
+- AI networking/switching/routing for scale-up and scale-out clusters
+- co-packaged optics / AI networking where source-supported
+Measured in:
+- Infrastructure Intelligence
+- Investor Tools
+- Investment Simulator
+Uncertainties:
+- Broadcom is an AI infrastructure enabler, not an enterprise AI software provider.
+- Avoid comparing software capabilities against software vendors.
+
+26. ASML
+Products / capabilities in scope:
+- EUV lithography systems
+- High-NA EUV / EXE systems
+- DUV lithography where relevant
+- semiconductor manufacturing exposure for AI chips
+Measured in:
+- Infrastructure Intelligence
+- Investor Tools
+- Investment Simulator
+Uncertainties:
+- ASML is a semiconductor equipment supplier, not an AI software provider.
+- Use only as indirect AI infrastructure exposure.
+
+27. Arm
+Products / capabilities in scope:
+- Arm compute/IP exposure for AI workloads where source-supported
+- AI edge/mobile/server architecture exposure where source-supported
+Measured in:
+- Infrastructure Intelligence
+- Investor Tools
+- Investment Simulator
+Uncertainties:
+- Product-level AI scope must be source-confirmed before detailed provider scoring.
+
+=========================================================================================
+SECTION 4 — SOURCE / UNCERTAINTY RULES FOR PRODUCT INVENTORY
+=========================================================================================
+
+For every ProductScope item:
+- If official source confirms it, mark evidenceStatus = documented.
+- If media source reports it but no official source confirms it, mark evidenceStatus = inferred or unverified.
+- If only seed data exists, mark evidenceStatus = seed.
+- If product name has changed or availability is unclear, mark uncertaintyNote.
+- If availability is preview/beta/Innovation Lab/research preview, display this clearly.
+- If product is third-party-hosted on a cloud marketplace, distinguish owner vs host.
+
+Do not double count:
+- OpenAI models hosted in AWS Bedrock as AWS-owned models.
+- Anthropic Claude available on AWS/Google as AWS/Google-owned models.
+- Salesforce/Google joint integrations as standalone products unless separately productized.
+- Infrastructure exposure as software-platform capability.
+
+=========================================================================================
+SECTION 5 — INVESTOR TOOLS NAVIGATION UPDATE
+=========================================================================================
+
+Combine Investment Intelligence and Investment Simulator under one top-level tab titled:
+
+Investor Tools
+
+Navigation:
+- Investor Tools
+  - Investment Intelligence
+  - Public AI Stocks
+  - IPO Watch
+  - Exposure Map
+  - Investment Simulator
+  - Investor Briefing
+  - Investor Watchlist
+
+Routes:
+- /investor-tools
+- /investor-tools/intelligence
+- /investor-tools/public
+- /investor-tools/ipo-watch
+- /investor-tools/exposure-map
+- /investor-tools/simulator
+- /investor-tools/briefing
+- /investor-tools/watchlist
+
+If existing code uses /investing routes, keep redirects or aliases:
+- /investing -> /investor-tools
+- /investing/simulator -> /investor-tools/simulator
+
+UI:
+- Investor Tools should be one tab in the AI Enterprise top navigation.
+- Dropdown should appear on hover and click.
+- Use parent portal styling.
+- Do not create a separate visual identity.
+
+=========================================================================================
+SECTION 6 — INVESTMENT INTELLIGENCE FUNCTIONALITY
+=========================================================================================
+
+Investment Intelligence must include:
+- AI Provider Quality Score
+- Investment Attractiveness Score
+- Short-Term Catalyst Score
+- Long-Term Hold Score
+- Speculative Upside Score
+- IPO Readiness Score
+- IPO Pricing Risk
+- Post-IPO Behaviour Forecast
+- Retail Access / Investability Score
+- Indirect Exposure Score
+- AI Capital Efficiency Score
+- Hype Penalty
+- Valuation Discipline Score
+- Financial Data Confidence Score
+
+Core rule:
+A strong AI provider is not automatically a strong investment.
+
+Separate:
+1. AI Provider Quality
+2. Investment Attractiveness
+3. Investability / Access
+4. Time Horizon Fit
+5. Confidence / Evidence Quality
+
+Do not output direct buy/sell advice.
+
+Allowed language:
+- “ranks highest under this model”
+- “watchlist candidate”
+- “valuation-sensitive”
+- “requires evidence validation”
+- “not directly investable”
+- “speculative”
+- “higher conviction under available evidence”
+
+Disallowed language:
+- “buy”
+- “sell”
+- “guaranteed return”
+- “sure thing”
+- “risk-free”
+- “will outperform”
+
+=========================================================================================
+SECTION 7 — SIMULATOR UPDATES ONLY
+=========================================================================================
+
+The following updates apply specifically to the Investment Simulator.
+
+7.1 Manual allocation style vendor dropdown
+-------------------------------------------
+When allocationStyle = manual:
+- Show a follow-on dropdown/multi-select to select vendors.
+- User must be able to add holdings one by one.
+- Each selected vendor shows:
+  - ticker or private status
+  - exposure type
+  - investability status
+  - allocation %
+  - amount
+  - confidence
+  - warning if not directly investable
+- Validate total allocation + cash reserve = 100%.
+- If not 100%, show error and disable simulation run.
+
+Manual allocation flow:
+1. User selects manual allocation.
+2. Vendor selection dropdown appears.
+3. User selects eligible vendors based on investmentUniverse.
+4. User enters allocation weights.
+5. System validates eligibility and totals.
+6. Charts update immediately.
+
+7.2 Investment Universe separation fix
+--------------------------------------
+Investment Universe must accurately separate vendors.
+
+InvestmentUniverse options and rules:
+
+public_only:
+- Include only public_direct investabilityStatus.
+- Examples: MSFT, GOOGL, AMZN, NVDA, ORCL, NOW, CRM, SNOW, SAP, IBM, ASML, AMD, AVGO, ARM if seeded.
+- Exclude OpenAI, Anthropic, Databricks, Cerebras, Harvey, Cohere, Mistral, Glean, Perplexity, xAI, Writer, Hebbia, Rogo.
+- Do not include IPO watch private companies.
+- Do not include private_inaccessible.
+
+public_and_indirect:
+- Include public_direct companies.
+- Show indirect exposure links to private providers.
+- User can allocate to public tickers only.
+- Private companies may appear in exposure map but not as direct holdings.
+
+ipo_watch:
+- Include IPO watch/private candidates only.
+- Examples: OpenAI, Anthropic, Databricks, Cerebras, Harvey, Cohere, Mistral, Glean, Perplexity, xAI, Writer, Hebbia, Rogo.
+- Do not include Amazon, Microsoft, Alphabet, Nvidia, Oracle, or other public companies as direct portfolio holdings.
+- If user wants indirect exposure to IPO watch names, direct them to public_and_indirect.
+- IPO watch holdings must show “not directly investable unless IPO/access event occurs”.
+
+speculative_all:
+- Include high-beta public names + IPO watch names + indirect exposure options.
+- Direct private allocations disabled unless investabilityStatus permits.
+- Private names can appear as scenario/watchlist items, not ordinary tradable holdings.
+
+Error condition:
+If investmentUniverse = ipo_watch and a public company appears as direct portfolio holding, show:
+“Universe error: IPO Watch cannot include public direct holdings. Select Public + Indirect for public exposure to private AI providers.”
+
+7.3 Apply Shock function
+------------------------
+Apply Shock must indicate:
+- shock type
+- shock severity
+- time period when shock occurs
+- affected holdings
+- affected exposure classes
+- affected outputs
+- confidence
+
+Shock timing:
+- Randomise shock timing within selected horizon.
+- Allow deterministic random seed for reproducibility.
+- Example: Year 2, Quarter 3.
+- Display visually on scenario fan chart and drawdown chart.
+
+Shock types:
+- valuation compression
+- capex spike
+- cloud growth slowdown
+- regulatory shock
+- IPO lock-up selloff
+- infrastructure shortage
+- model commoditisation
+- enterprise adoption slowdown
+- security incident
+- AI litigation event
+- interest-rate shock
+- data-centre energy constraint
+
+Shock generator:
+generateRandomShock(horizonYears, selectedUniverse, riskProfile, seed)
+
+Must return:
+- shockId
+- shockType
+- shockLabel
+- shockDescription
+- shockYear
+- shockQuarter
+- severity
+- affectedProviderIds
+- affectedExposureClasses
+- parameterImpacts
+- displayMessage
+
+Example display:
+“Shock applied: Valuation compression event in Year 2 Q3. Affected: AI infrastructure and IPO watch holdings. Stress-case valuation multiple reduced by 22%.”
+
+7.4 Info buttons
+----------------
+Insert info (i) buttons next to every variable input.
+
+Every info button should explain:
+- what the variable means
+- how it affects the simulation
+- whether it affects eligibility, scoring, or charts
+- any limitation or uncertainty
+
+Inputs requiring info buttons:
+- startingCapital
+- horizonYears
+- riskProfile
+- allocationStyle
+- investmentUniverse
+- region
+- includePrivateExposure
+- rebalanceFrequency
+- cashReservePct
+- vendor selection
+- allocation %
+- risk shocks
+- scenario type
+- confidence score
+- evidence grade
+- IPO readiness
+- valuation risk
+- long-term hold score
+- speculative upside score
+- indirect exposure score
+
+7.5 Cross-feed integrity
+------------------------
+Comprehensively ensure all variable input and functionality/output cross-feeds accurately and truthfully into relevant functions and outputs immediately.
+
+Create a central simulation state model:
+SimulationState:
+- input
+- eligibleUniverse
+- selectedHoldings
+- allocationValidation
+- scenarioAssumptions
+- shocks
+- computedPaths
+- computedScores
+- chartData
+- evidenceStatus
+- errors
+- lastUpdatedAt
+- stateHash
+
+Every output must derive from current SimulationState.
+
+No stale output allowed.
+
+When any input changes:
+- recompute eligibleUniverse
+- recompute holdings validation
+- recompute allocation totals
+- recompute scenario assumptions
+- recompute portfolio scores
+- recompute scenario paths
+- recompute drawdown
+- recompute chart data
+- recompute confidence
+- update stateHash
+- update UI immediately
+
+If any output cannot be recomputed:
+Show error:
+“Simulation integrity error: output is not synced with current inputs.”
+
+Do not silently use stale values.
+
+Cross-feed tests:
+- changing riskProfile updates scenario returns and risk radar
+- changing investmentUniverse updates eligible vendor dropdown
+- changing allocation updates donut, scatter, fan chart, drawdown, scores
+- applying shock updates fan chart, drawdown, waterfall, risk radar
+- selecting ipo_watch removes public stocks from direct holdings
+- selecting public_only removes private/IPO watch names
+- changing horizon updates scenario path length and x-axis
+- changing cashReserve updates allocation donut and portfolio values
+- changing evidence confidence updates confidence heatmap and confidence-adjusted returns
+
+7.6 Scatter plot auto-scaling
+-----------------------------
+Automatically adjust x and y axes of the risk/return scatter plot to increase vendor spread and readability.
+
+Implement:
+calculateScatterDomain(points, axis, options)
+
+Rules:
+- Use min/max of visible points.
+- Add 12% padding.
+- Enforce minimum axis spread of 20 points.
+- If values are tightly clustered, expand domain around median.
+- Clamp final domain to 0-100 unless out-of-range mode is enabled.
+- Avoid all bubbles overlapping.
+- Add deterministic small jitter only where labels overlap, but do not distort tooltip values.
+- Recompute axes after:
+  - investmentUniverse change
+  - riskProfile change
+  - shock applied
+  - manual allocation change
+  - selected vendor change
+
+Tooltip must always show true values, not jittered visual positions.
+
+Error condition:
+If scatter points are all identical or invalid, show:
+“Scatter plot has insufficient spread. Displaying expanded axis for readability.”
+
+=========================================================================================
+SECTION 8 — SIMULATOR GRAPHING REQUIREMENTS
+=========================================================================================
+
+Graphs must align with AI Enterprise UI/UX ethos:
+- clean executive dashboard style
+- high contrast but restrained colours
+- rounded cards
+- clear legends
+- confidence badges
+- hover tooltips
+- source/evidence status
+- responsive layouts
+- no clutter
+- no misleading axes
+- no unsupported data
+
+Graph components:
+1. Portfolio Allocation Donut
+2. Scenario Fan Chart
+3. Risk-Return Scatterplot
+4. Exposure Network Graph
+5. IPO Lifecycle Timeline
+6. Drawdown Chart
+7. Stacked Exposure Bar
+8. Confidence Heatmap
+9. Contribution Waterfall
+10. Risk Radar
+
+Every graph must show:
+- dataStatus
+- confidence
+- scenario assumptions link or drawer
+- “estimated/seed” label where relevant
+
+Do not show graphs from missing data.
+If data is missing, show an empty state with what data is required.
+
+=========================================================================================
+SECTION 9 — SIMULATOR DATA VALIDATION
+=========================================================================================
+
+Validation rules:
+- Manual allocations must total 100% including cash reserve.
+- Cannot allocate directly to private_inaccessible providers.
+- Cannot allocate directly to IPO watch providers unless in ipo_watch scenario mode and clearly marked not currently tradable.
+- IPO Watch universe cannot include public direct holdings.
+- Public Only universe cannot include private providers.
+- Public + Indirect can show private exposure map but allocations must be to public instruments only.
+- Speculative All must warn when including non-public names.
+- All provider scores must have evidence metadata.
+- All generated scenario assumptions must be marked seed/estimated unless validated.
+- Shock timing must be shown and saved.
+- Chart data must match current simulation state hash.
+- If any mismatch is detected, block output and show error.
+
+=========================================================================================
+SECTION 10 — INVESTOR TOOLS DATA MODELS
+=========================================================================================
+
+Update/add these TypeScript/database models.
+
+InvestorToolNav:
+- id
+- label
+- route
+- children
+
+InvestmentProviderProfile:
+- id
+- providerId
+- name
+- slug
+- ticker
+- exposureClass
+- exposureType
+- publicStatus
+- investabilityStatus
+- aiProviderQualityScore
+- investmentAttractivenessScore
+- shortTermCatalystScore
+- longTermHoldScore
+- speculativeUpsideScore
+- ipoReadinessScore
+- ipoPricingRisk
+- retailAccessScore
+- valuationRiskScore
+- liquidityRiskScore
+- capexRiskScore
+- regulatoryRiskScore
+- infrastructureDependencyScore
+- aiCapitalEfficiencyScore
+- hypePenalty
+- evidenceConfidence
+- evidenceGrade
+- keyThesis
+- mainRisk
+- dataStatus
+- lastUpdated
+- productScopeIds
+
+ProductScope:
+- id
+- vendorId
+- vendorName
+- productName
+- productCategory
+- productType
+- moduleCoverage
+- measuredInModules
+- evidenceStatus
+- confidenceScore
+- sourceIds
+- uncertaintyNote
+- includeInAssessment
+- includeInMarketIntelligence
+- includeInInvestorTools
+- includeInSimulator
+
+SimulationState:
+- input
+- eligibleUniverse
+- selectedHoldings
+- allocationValidation
+- scenarioAssumptions
+- shocks
+- computedPaths
+- computedScores
+- chartData
+- evidenceStatus
+- errors
+- lastUpdatedAt
+- stateHash
+
+SimulationInput:
+- startingCapital
+- horizonYears
+- riskProfile
+- allocationStyle
+- investmentUniverse
+- region
+- includePrivateExposure
+- rebalanceFrequency
+- cashReservePct
+- selectedVendorIds
+- manualAllocations
+
+SimulationHolding:
+- providerId
+- ticker
+- name
+- weightPct
+- amount
+- exposureType
+- investabilityStatus
+- isDirectlyInvestable
+- confidence
+- evidenceGrade
+- warning
+
+ShockEvent:
+- shockId
+- shockType
+- shockLabel
+- shockDescription
+- shockYear
+- shockQuarter
+- severity
+- affectedProviderIds
+- affectedExposureClasses
+- parameterImpacts
+- displayMessage
+- randomSeed
+
+ChartData:
+- chartId
+- chartType
+- simulationStateHash
+- data
+- generatedAt
+- sourceIds
+- confidenceScore
+- dataStatus
+
+=========================================================================================
+SECTION 11 — API ROUTES
+=========================================================================================
+
+Investor Tools:
+- GET /api/investor-tools/products
+- GET /api/investor-tools/providers
+- GET /api/investor-tools/providers/[slug]
+- GET /api/investor-tools/public
+- GET /api/investor-tools/ipo-watch
+- GET /api/investor-tools/exposure-map
+- GET /api/investor-tools/briefing
+- GET /api/investor-tools/scores
+
+Simulator:
+- GET /api/investor-tools/simulator/eligible-universe
+- POST /api/investor-tools/simulator/simulate
+- POST /api/investor-tools/simulator/apply-random-shock
+- POST /api/investor-tools/simulator/validate
+- POST /api/investor-tools/simulator/save
+- GET /api/investor-tools/simulator/[id]
+
+Evidence:
+- GET /api/evidence/sources
+- GET /api/evidence/claims
+- POST /api/evidence/validate-claim
+
+=========================================================================================
+SECTION 12 — TEST REQUIREMENTS
+=========================================================================================
+
+Add tests for:
+
+Truthfulness:
+- claim without source cannot render as verified
+- seed data always shows seed/estimated label
+- stale source shows stale warning
+- unknown product does not appear in product scope without uncertainty
+- LLM-generated brief cannot include unsupported factual claim
+
+Product inventory:
+- every vendor has at least one ProductScope record
+- every product has evidenceStatus and uncertaintyNote
+- every product has module coverage
+- third-party hosted models are not counted as cloud-owned models
+
+Investor Tools:
+- Investment Intelligence and Simulator appear under Investor Tools dropdown
+- legacy /investing routes redirect or alias correctly
+- provider pages show product scope and evidence
+
+Simulator:
+- manual allocation shows vendor dropdown
+- manual allocations validate total allocation
+- public_only excludes private/IPO watch
+- ipo_watch excludes public stocks
+- public_and_indirect allows public holdings and private exposure graph
+- random shock includes time period and shock details
+- shock changes scenario output
+- info buttons exist for all variables
+- state hash changes when inputs change
+- charts block stale data
+- scatter axes auto-scale to improve spread
+- chart tooltips show true values
+
+=========================================================================================
+SECTION 13 — REQUIRED UI COPY
+=========================================================================================
+
+Global investor disclaimer:
+“Investor Tools are for market intelligence and hypothetical scenario modelling only. They are not financial advice. Outputs are based on documented, estimated, inferred, or seed data as labelled. Future returns are not guaranteed.”
+
+Private company warning:
+“Private companies and IPO watchlist providers may not be directly investable by retail users.”
+
+Indirect exposure warning:
+“Indirect exposure is not the same as direct ownership of the private AI provider.”
+
+Seed data warning:
+“This view includes seed or estimated data. Replace with verified evidence before using for final decisions.”
+
+Simulation integrity error:
+“Simulation integrity error: output is not synced with current inputs. Please review highlighted fields or rerun the simulation.”
+
+Universe error:
+“Universe error: IPO Watch cannot include public direct holdings. Select Public + Indirect for public exposure to private AI providers.”
+
+=========================================================================================
+SECTION 14 — DEVELOPMENT PRIORITY ORDER
+=========================================================================================
+
+1. Add no-hallucination evidence and claim schema.
+2. Add ProductScope registry.
+3. Add product inventory seed data with uncertainty labels.
+4. Add Investor Tools dropdown navigation.
+5. Merge Investment Intelligence and Investment Simulator under Investor Tools.
+6. Fix investment universe filtering.
+7. Add manual allocation vendor dropdown flow.
+8. Add simulator state model and cross-feed validation.
+9. Add random shock generator with time period display.
+10. Add info buttons to all simulator inputs.
+11. Add chart data state hashes and stale-output prevention.
+12. Add scatter auto-scaling.
+13. Add product inventory page/table in advanced/backend view.
+14. Add tests.
+15. Only then expand live ingestion.
+
+=========================================================================================
+FINAL DEVELOPMENT AGENT INSTRUCTION
+=========================================================================================
+
+Do not prioritise new visual features over truthfulness.
+
+The order of importance is:
+1. Truthfulness and source traceability.
+2. Correct product/vendor scope.
+3. Accurate universe filtering and simulator state integrity.
+4. Clear confidence and uncertainty labelling.
+5. Beautiful AI Enterprise-consistent visuals.
+6. Advanced graphing and market intelligence polish.
+
+Never invent.
+Never silently fill missing data.
+Never present seed values as verified.
+Never allow stale simulator outputs.
+Never treat private companies as directly investable unless legitimate access is explicitly modelled.
