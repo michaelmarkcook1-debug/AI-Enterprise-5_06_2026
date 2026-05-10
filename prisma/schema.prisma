@@ -345,6 +345,15 @@ model EvidenceProposal {
   capturedAt      DateTime       @map("captured_at")
   classifierConfidence Float     @default(0) @map("classifier_confidence")
   classifierRationale String?    @map("classifier_rationale") @db.Text
+  // Explicit classification-failure metadata. Set by the sourcing runner
+  // when the LLM classifier throws or its output fails schema validation.
+  // confidenceIsFallback flags rows where classifierConfidence is the
+  // runner's missing-value default (legacy: 0.5; current: 0) rather than
+  // a real classifier output.
+  classificationFailed Boolean   @default(false) @map("classification_failed")
+  classificationFailureCode String? @map("classification_failure_code")
+  classificationFailureReason String? @map("classification_failure_reason") @db.Text
+  confidenceIsFallback Boolean   @default(false) @map("confidence_is_fallback")
   status          ProposalStatus @default(pending)
   reviewerId      String?        @map("reviewer_id")
   reviewedAt      DateTime?      @map("reviewed_at")

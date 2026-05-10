@@ -71,27 +71,45 @@ export interface TriageRunReport {
 }
 
 /** Detect proposals where classifierConfidence is the runner's missing-value
- * default rather than a real classifier output. The fallback signature is:
- *   - confidence === 0.5 (exact — runner.ts:315 stamps this when classify fails)
- *   - rationale is null OR matches the extractor's hand-written rationale
- *     (i.e. NOT produced by the classifier prompt).
+ * default rather than a real classifier output.
  *
- * Empirically (n=314 in the May 2026 audit log): 312 proposals at exactly
- * 0.5 with extractor-style rationale, 2 at 0.91/0.92 — confirming 0.5 is
- * uniquely the fallback signal. The stub classifier returns 0.6.
+ * Post-migration `confidence_is_fallback` is the canonical signal — set
+ * by the sourcing runner whenever a classify call throws or its output
+ * fails schema validation.
  *
- * Going forward (post lib/sourcing/runner.ts fix) the fallback also writes
- * a null rationale, making detection unambiguous. The 0.5-exact heuristic
- * remains as a back-compat detector for already-persisted rows. */
-export function isClassifierFallback(p: { classifierConfidence: number; classifierRationale: string | null }): boolean {
+ * The 0.5-exact + null-rationale heuristic remains as a defence-in-depth
+ * fallback for any rows that pre-date the migration backfill (which
+ * should be zero in production after `prisma migrate deploy`). */
+export function isClassifierFallback(p: {
+  classifierConfidence: number;
+  classifierRationale: string | null;
+  confidenceIsFallback?: boolean | null;
+  classificationFailed?: boolean | null;
+}): boolean {
+  if (p.confidenceIsFallback === true) return true;
+  if (p.classificationFailed === true) return true;
   if (p.classifierRationale === null) return true;
-  if (p.classifierConfidence !== 0.5) return false;
-  // 0.5 exact + a rationale present → the runner overwrote rationale with
-  // the extractor's text. Treat as fallback when the rationale lacks any
-  // classifier-style "regrade" wording.
-  const r = p.classifierRationale.toLowerCase();
-  const looksClassifierWritten = /re-?grad|classifier|cap\b|conservative|stub classifier/.test(r);
-  return !looksClassifierWritten;
+  if (p.classifierConfidence === 0.5) {
+    const r = p.classifierRationale.toLowerCase();
+    const looksClassifierWritten = /re-?grad|classifier|cap\b|conservative|stub classifier/.test(r);
+    return !looksClassifierWritten;
+  }
+  return false;
+}
+
+/** Failure-cause counts across pending proposals. Used by the admin
+ * /api/admin/evidence/failures endpoint and the CLI report. */
+export async function getClassifierFailureCounts(): Promise<{ code: string; count: number }[]> {
+  if (!hasDatabase()) return [];
+  const prisma = getPrisma();
+  const rows = await prisma.evidenceProposal.groupBy({
+    by: ["classificationFailureCode"],
+    where: { status: "pending", classificationFailed: true },
+    _count: { _all: true },
+  });
+  return rows
+    .map((r) => ({ code: r.classificationFailureCode ?? "unknown", count: r._count._all }))
+    .sort((a, b) => b.count - a.count);
 }
 
 function proposalToTriageInput(p: EvidenceProposal): TriageInput {
@@ -113,7 +131,12 @@ function proposalToTriageInput(p: EvidenceProposal): TriageInput {
     sourceIds: p.sourceUrl ? [p.sourceUrl] : [],
     capturedAt: p.capturedAt,
     classifierConfidence: p.classifierConfidence,
-    confidenceIsFallback: isClassifierFallback(p),
+    confidenceIsFallback: isClassifierFallback({
+      classifierConfidence: p.classifierConfidence,
+      classifierRationale: p.classifierRationale,
+      confidenceIsFallback: p.confidenceIsFallback,
+      classificationFailed: p.classificationFailed,
+    }),
     isInferredTransformation: false,
     hasSourceConflict: false,
   };

@@ -32,6 +32,61 @@ const VENDOR_NAMES: Record<string, string> = Object.fromEntries(
   INTELLIGENCE_VENDORS.map((v) => [v.id, v.name]),
 );
 
+// ─── Classifier failure categorisation ─────────────────────────────────
+// The classifier can fail for several distinct reasons. Each category maps
+// to a different remediation: a schema mismatch needs a code fix, a credit
+// outage needs operator action, a rate limit needs throttling, etc.
+// The sourcing runner persists these codes onto EvidenceProposal so the
+// reclassification script and admin reports can summarise by cause.
+
+export type ClassifyFailureCode =
+  | "schema_validation"          // zod parse failed (e.g. rationale too long)
+  | "credit_balance"             // Anthropic billing exhausted
+  | "rate_limit"                 // 429 from Anthropic
+  | "auth"                       // 401 / missing key
+  | "model_not_found"            // bad ANTHROPIC_MODEL
+  | "timeout"                    // request timed out
+  | "no_tool_use"                // LLM didn't return a tool_use block
+  | "network"                    // connect/DNS/TLS failure
+  | "unknown";
+
+export interface ClassifyFailure {
+  code: ClassifyFailureCode;
+  reason: string;
+}
+
+export function categoriseClassifyFailure(message: string): ClassifyFailure {
+  const m = message ?? "";
+  const low = m.toLowerCase();
+  // Zod errors are emitted as a JSON-array string. The cheapest detector is
+  // the literal "code" key + a known zod issue code.
+  if (m.startsWith("[") && /"code"\s*:\s*"(too_big|too_small|invalid_type|invalid_enum|invalid_format)"/.test(m)) {
+    return { code: "schema_validation", reason: m.slice(0, 1500) };
+  }
+  if (/credit balance|insufficient_credit|insufficient credit/i.test(m)) {
+    return { code: "credit_balance", reason: m.slice(0, 1500) };
+  }
+  if (/\b429\b|rate ?limit|too many requests/i.test(m)) {
+    return { code: "rate_limit", reason: m.slice(0, 1500) };
+  }
+  if (/\b401\b|unauthor|invalid api key|missing.*key/i.test(low)) {
+    return { code: "auth", reason: m.slice(0, 1500) };
+  }
+  if (/model.*not.*found|invalid model|unknown model/i.test(low)) {
+    return { code: "model_not_found", reason: m.slice(0, 1500) };
+  }
+  if (/timeout|timed out|etimedout|esockettimedout/i.test(low)) {
+    return { code: "timeout", reason: m.slice(0, 1500) };
+  }
+  if (/tool_use/.test(m)) {
+    return { code: "no_tool_use", reason: m.slice(0, 1500) };
+  }
+  if (/econnreset|enotfound|eai_again|getaddrinfo|certificate|tls/i.test(low)) {
+    return { code: "network", reason: m.slice(0, 1500) };
+  }
+  return { code: "unknown", reason: m.slice(0, 1500) };
+}
+
 // Confidence above which a freshly-found replacement URL is auto-retried in
 // the same run. Below this we still persist the patch for review but don't
 // burn another fetch + LLM call on it.
@@ -284,11 +339,17 @@ async function runOneSource(
           suggestedRiskFlag: result.data.suggestedRiskFlag,
         },
       });
-      return { proposal, classification: result.data };
+      return { proposal, classification: result.data, failure: null as ClassifyFailure | null };
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
-      await logEvent({ ts: new Date().toISOString(), ...base, event: "sourcing.classify.fail", error: message, data: { idx, domain: proposal.domain } });
-      return { proposal, classification: null };
+      const failure = categoriseClassifyFailure(message);
+      await logEvent({
+        ts: new Date().toISOString(), ...base,
+        event: "sourcing.classify.fail",
+        error: message,
+        data: { idx, domain: proposal.domain, failureCode: failure.code },
+      });
+      return { proposal, classification: null, failure };
     }
   }));
 
@@ -302,7 +363,7 @@ async function runOneSource(
         data: { vendorId: entry.vendorId, status: "ready_for_review" },
       });
       const now = new Date();
-      const data = classifications.map(({ proposal, classification }) => ({
+      const data = classifications.map(({ proposal, classification, failure }) => ({
         jobId: job.id,
         vendorId: entry.vendorId,
         domain: proposal.domain,
@@ -312,12 +373,15 @@ async function runOneSource(
         proposedRawScore: classification?.finalRawScore ?? proposal.proposedRawScore,
         sourceUrl: entry.url,
         capturedAt: now,
-        // 0.5 + null rationale is the documented "classifier unavailable"
-        // sentinel detected by lib/services/triage-runner.ts.
-        // Do NOT fall through to extractor rationale on classifier failure
-        // — that would mask the failure from the triage policy.
-        classifierConfidence: classification?.confidence ?? 0.5,
+        // Confidence is 0 (not 0.5) on failure — paired with
+        // confidence_is_fallback=true so the triage policy never confuses
+        // a real low-confidence call with a missing classification.
+        classifierConfidence: classification?.confidence ?? 0,
         classifierRationale: classification?.rationale ?? null,
+        classificationFailed: classification === null,
+        classificationFailureCode: failure?.code ?? null,
+        classificationFailureReason: failure?.reason ?? null,
+        confidenceIsFallback: classification === null,
         status: "pending" as const,
       }));
       const created = await client.evidenceProposal.createMany({ data });

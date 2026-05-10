@@ -6,11 +6,30 @@ import { z } from "zod";
 import { extractStructured } from "./llm-client";
 import type { ExtractedProposal } from "./evidence-extractor";
 
+// Rationale ceiling raised from 400 to 2000 + truncated defensively.
+// Investigation: 304 / 312 May-2026 classifier failures were Zod too_big
+// errors at path "rationale" — the LLM consistently produced 400+ char
+// rationales and the strict ceiling threw, which the runner caught as
+// "classifier failed" and stamped a 0.5 fallback. See
+// CLASSIFIER_FAILURE_REPORT.md.
+export const RATIONALE_MAX = 2000;
+export const RATIONALE_DISPLAY_MAX = 1500;
+
 export const ClassificationSchema = z.object({
   finalGrade: z.enum(["E0", "E1", "E2", "E3", "E4", "E5"]),
   finalRawScore: z.number().min(0).max(100),
   confidence: z.number().min(0).max(1),
-  rationale: z.string().min(10).max(400),
+  rationale: z
+    .string()
+    .min(10)
+    .max(RATIONALE_MAX)
+    // Truncate to a display limit so a few extra-long rationales don't
+    // bloat downstream renders. Adding "…[truncated]" makes it auditable.
+    .transform((s) =>
+      s.length > RATIONALE_DISPLAY_MAX
+        ? s.slice(0, RATIONALE_DISPLAY_MAX - 14) + "…[truncated]"
+        : s,
+    ),
   suggestedRiskFlag: z.object({
     severity: z.enum(["low", "moderate", "severe", "fatal"]).optional(),
     description: z.string().max(240).optional(),
@@ -46,7 +65,7 @@ const TOOL = {
       finalGrade: { type: "string", enum: ["E0", "E1", "E2", "E3", "E4", "E5"] },
       finalRawScore: { type: "number", minimum: 0, maximum: 100 },
       confidence: { type: "number", minimum: 0, maximum: 1 },
-      rationale: { type: "string", minLength: 10, maxLength: 400 },
+      rationale: { type: "string", minLength: 10, maxLength: RATIONALE_MAX },
       suggestedRiskFlag: {
         type: "object",
         properties: {
