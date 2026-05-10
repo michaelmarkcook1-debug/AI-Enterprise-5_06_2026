@@ -1,0 +1,219 @@
+// Enterprise AI Platform Ranking Engine — Core Type Model
+// Source: Product Spec v1.0, Sections 8–13, 16, 18.
+// Six user-facing pillars; 12-domain backend; E0–E5 evidence grading.
+
+export type PillarId =
+  | "business_fit"
+  | "enterprise_control"
+  | "reliability_safety"
+  | "integration_ops"
+  | "vendor_resilience"
+  | "market_strength";
+
+export const PILLARS: { id: PillarId; label: string; defaultWeight: number }[] = [
+  { id: "business_fit", label: "Business Fit", defaultWeight: 0.15 },
+  { id: "enterprise_control", label: "Enterprise Control", defaultWeight: 0.25 },
+  { id: "reliability_safety", label: "Reliability & Safety", defaultWeight: 0.15 },
+  { id: "integration_ops", label: "Integration & Operations", defaultWeight: 0.15 },
+  { id: "vendor_resilience", label: "Vendor Resilience", defaultWeight: 0.15 },
+  { id: "market_strength", label: "Market Strength", defaultWeight: 0.15 },
+];
+
+// 12 backend domains (spec §9). Each maps to one primary pillar.
+export type DomainId =
+  | "strategic_value"
+  | "data_security_privacy"
+  | "identity_access"
+  | "model_reliability"
+  | "governance_compliance"
+  | "security_threat"
+  | "integration_architecture"
+  | "agentic_autonomy"
+  | "cost_finops"
+  | "workforce_adoption"
+  | "vendor_maturity_lockin"
+  | "capital_resilience"
+  | "market_position";
+
+export const DOMAIN_TO_PILLAR: Record<DomainId, PillarId> = {
+  strategic_value: "business_fit",
+  data_security_privacy: "enterprise_control",
+  identity_access: "enterprise_control",
+  model_reliability: "reliability_safety",
+  governance_compliance: "enterprise_control",
+  security_threat: "reliability_safety",
+  integration_architecture: "integration_ops",
+  agentic_autonomy: "integration_ops",
+  cost_finops: "integration_ops",
+  workforce_adoption: "business_fit",
+  vendor_maturity_lockin: "vendor_resilience",
+  capital_resilience: "vendor_resilience",
+  market_position: "market_strength",
+};
+
+// Evidence grading (spec §12.3)
+export type EvidenceGrade = "E0" | "E1" | "E2" | "E3" | "E4" | "E5";
+export const EVIDENCE_MODIFIER: Record<EvidenceGrade, number> = {
+  E0: 0.0,
+  E1: 0.4,
+  E2: 0.6,
+  E3: 0.75,
+  E4: 0.9,
+  E5: 1.0,
+};
+
+export type RiskSeverity = "fatal" | "severe" | "moderate" | "low";
+export const RISK_PENALTY: Record<RiskSeverity, number> = {
+  fatal: 100, // exclusion handled separately
+  severe: 18,
+  moderate: 8,
+  low: 3,
+};
+
+export type RecommendationBand =
+  | "not_recommended"
+  | "pilot_only"
+  | "controlled_deployment"
+  | "enterprise_scale";
+
+export type IndustryArchetype =
+  | "regulated_financial"
+  | "health_life_sciences"
+  | "legal_professional"
+  | "public_sector_education"
+  | "critical_infrastructure_defence"
+  | "enterprise_software"
+  | "industrial_physical_ops"
+  | "commercial_enterprise";
+
+export type DeploymentPreference = "saas" | "vpc" | "on_prem" | "sovereign" | "hybrid";
+
+export type AutonomyAppetite = "advisory_only" | "human_in_loop" | "supervised_agent" | "autonomous";
+
+export type AdoptionMaturityBand = "nascent" | "emerging" | "developing" | "mainstream" | "advanced";
+
+// User input — context that drives scoring (spec §7)
+export interface AssessmentInput {
+  industry: IndustryArchetype;
+  region?: string;
+  orgSize: "smb" | "mid_market" | "enterprise" | "global_enterprise";
+  aiMaturity?: "exploring" | "piloting" | "scaling" | "operating";
+  primaryObjectives: string[]; // e.g. ["productivity","customer_service"]
+  useCases: string[]; // taxonomy ids
+  dataSensitivity: 1 | 2 | 3 | 4 | 5;
+  riskTolerance: 1 | 2 | 3 | 4 | 5;
+  autonomyAppetite: AutonomyAppetite;
+  ecosystem: string[]; // e.g. ["microsoft","salesforce","aws"]
+  deploymentPreference: DeploymentPreference;
+  budgetSensitivity: 1 | 2 | 3 | 4 | 5;
+  vendorIds: string[]; // explicit set; if empty -> recommend
+}
+
+export interface EvidenceItem {
+  id: string;
+  vendorId: string;
+  domain: DomainId;
+  subfactor: string;
+  excerpt: string;
+  sourceUrl?: string;
+  capturedAt: string; // ISO date
+  grade: EvidenceGrade;
+  // 0-100 raw capability assertion this evidence supports
+  rawScore: number;
+  // For freshness modifier — days threshold per source category handled in engine
+  freshnessDays?: number;
+}
+
+export interface RiskFlag {
+  id: string;
+  vendorId: string;
+  severity: RiskSeverity;
+  description: string;
+  domain: DomainId;
+  // If true, exclude this vendor in contexts that fail this blocker
+  isFatalIfTriggered?: boolean;
+  // Industries where this flag is fatal vs severe
+  fatalInIndustries?: IndustryArchetype[];
+}
+
+export interface VendorIndustryAdoption {
+  industry: IndustryArchetype;
+  productionReferenceCount: number;
+  deploymentDepthScore: number; // 0-100
+  confidence: number; // 0-100
+}
+
+export interface Vendor {
+  id: string;
+  name: string;
+  category: string;
+  website?: string;
+  hq?: string;
+  ownership: "public" | "private" | "subsidiary";
+  summary: string;
+  supportedDeployments: DeploymentPreference[];
+  ecosystemFit: string[]; // ecosystem tokens this vendor integrates well with
+  useCaseFit: string[];
+  evidence: EvidenceItem[];
+  risks: RiskFlag[];
+  industryAdoption: VendorIndustryAdoption[];
+}
+
+export interface IndustryProfile {
+  id: IndustryArchetype;
+  name: string;
+  // Pillar weights — must sum to 1.0
+  weights: Record<PillarId, number>;
+  fatalBlockerDomains: DomainId[]; // weak coverage in these → fatal in this industry
+  evidenceStrictness: number; // 1.0 baseline; >1 demands higher grades
+  adoption: {
+    experimentationPct: number;
+    regularUsePct: number;
+    productionPct: number;
+    scaledPct: number;
+    agenticExperimentationPct: number;
+    agenticScaledPct: number;
+  };
+}
+
+// Engine outputs — spec §18
+
+export interface PillarBreakdown {
+  pillar: PillarId;
+  score: number; // 0-100
+  weight: number;
+  weightedContribution: number;
+  contributingDomains: { domain: DomainId; score: number; evidenceCount: number }[];
+}
+
+export interface VendorResult {
+  vendorId: string;
+  vendorName: string;
+  ownership: Vendor["ownership"];
+  rank: number;
+  finalScore: number; // 0-100
+  confidenceScore: number; // 0-100
+  recommendationBand: RecommendationBand;
+  pillarScores: Record<PillarId, number>;
+  pillarBreakdown: PillarBreakdown[];
+  topStrengths: string[];
+  topRisks: string[];
+  missingEvidence: string[];
+  validationSteps: string[];
+  industryRationale: string;
+  evidenceIds: string[];
+  riskFlagsTriggered: RiskFlag[];
+  excluded: boolean;
+  excludedReason?: string;
+  bonuses: { strategicFit: number; sectorAdoptionFit: number };
+  penalties: { risk: number; missingEvidence: number; adoptionFriction: number };
+}
+
+export interface AssessmentResult {
+  runId: string;
+  generatedAt: string;
+  scoringRuleVersion: string;
+  inputSummary: AssessmentInput & { industryName: string };
+  ranking: VendorResult[];
+  comparisonSummary: string;
+}

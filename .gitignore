@@ -15,6 +15,7 @@
 
 # next.js
 /.next/
+/.next.stale-*/
 /out/
 
 # production
@@ -39,3 +40,20 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# prisma
+/generated/prisma/
+
+# operator log output (large NDJSON, regenerated on each ingest)
+/logs/
+
+# linter-duplicate files (e.g. "page 2.tsx") that some IDEs create
+* 2.*
+* 2/
+* 2
+
+# audit / scratch scripts kept out of CI
+_test-*.ts
+_check.ts
+_ids.ts
+_classes.ts
