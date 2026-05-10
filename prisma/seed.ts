@@ -26,6 +26,7 @@ async function main() {
 
   await prisma.$transaction(async (tx) => {
     await tx.evidenceSource.deleteMany();
+    // (transaction body — see options below for timeout bump for serverless DBs)
     await tx.watchlist.deleteMany();
     await tx.vendorCapability.deleteMany();
     await tx.capability.deleteMany();
@@ -199,6 +200,12 @@ async function main() {
         })),
       });
     }
+  }, {
+    // Serverless databases (Neon, etc.) cold-start can exceed the 5s default.
+    // 60s gives plenty of headroom for the multi-table truncate + bulk insert
+    // even on first connection of a paused branch.
+    timeout: 60_000,
+    maxWait: 30_000,
   });
 
   console.log(`Seeded ${INTELLIGENCE_VENDORS.length} AI Enterpise intelligence vendors and ${vendors.length} assessment profiles.`);
