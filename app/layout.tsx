@@ -4,6 +4,7 @@ import "./globals.css";
 import TopNav from "@/components/TopNav";
 import GlobalFooter from "@/components/GlobalFooter";
 import AmbientHeroBackdrop from "@/components/AmbientHeroBackdrop";
+import NotLiveBanner from "@/components/NotLiveBanner";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
@@ -49,6 +50,7 @@ export default function RootLayout({
         <AmbientHeroBackdrop />
         <div className="relative z-10 flex flex-1 flex-col">
           <TopNav />
+          <NotLiveBanner />
           <div className="flex-1">{children}</div>
           <GlobalFooter />
         </div>

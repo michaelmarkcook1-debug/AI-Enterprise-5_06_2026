@@ -22,6 +22,17 @@ export function Panel({ title, children, action }: { title: string; children: Re
   );
 }
 
+/**
+ * Data-provenance badge.
+ *
+ * SEED rendering is intentionally LOUD (bold red, dot indicator, "NOT LIVE"
+ * prefix) so any panel reading from seed data is visually unmissable. The
+ * label is preserved as the human-readable source ("Seed news", "Estimated
+ * market signals", etc.) and the optional `reason` populates the tooltip.
+ *
+ * LIVE rendering is calm green — the absence of red anywhere on screen is
+ * the at-a-glance signal that the page is fully source-backed.
+ */
 export function SeedDataBadge({
   label,
   provenance = "seed",
@@ -31,16 +42,25 @@ export function SeedDataBadge({
   provenance?: "seed" | "live";
   reason?: string;
 }) {
-  const text = label ?? (provenance === "live" ? "Live" : "Seed estimate");
-  const tone = provenance === "live"
+  const isLive = provenance === "live";
+  const text = label ?? (isLive ? "Live source" : "Seed estimate");
+  const tone = isLive
     ? "border-emerald-300 bg-emerald-50 text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300"
-    : "border-[#d8ded0] bg-[#f7f8f5] text-[#697362] dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400";
+    : "border-rose-400 bg-rose-50 text-rose-900 dark:border-rose-700 dark:bg-rose-950/50 dark:text-rose-200";
+  const tooltip = reason ?? (isLive
+    ? "Source-backed live data."
+    : `NOT LIVE — ${text}. Source: typed seed module. Run /admin/ingestion + approve in /admin/evidence to flip this surface to live.`);
   return (
     <span
-      className={`rounded border px-1.5 py-0.5 text-[11px] font-medium uppercase tracking-wide ${tone}`}
-      title={reason}
+      className={`inline-flex items-center gap-1 rounded border px-1.5 py-0.5 text-[11px] font-bold uppercase tracking-wide ${tone}`}
+      title={tooltip}
     >
-      {text}
+      <span
+        aria-hidden
+        className={`inline-block h-1.5 w-1.5 rounded-full ${isLive ? "bg-emerald-500" : "bg-rose-500 animate-pulse"}`}
+      />
+      {!isLive && <span className="font-extrabold">NOT LIVE:</span>}
+      <span>{text}</span>
     </span>
   );
 }
