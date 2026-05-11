@@ -1,0 +1,63 @@
+─── Product Linkage Assist — aggregate report ───
+recommend_approve total : 182
+blocked on linkage      : 182
+
+By linkage status:
+    94  no_match
+    30  ok
+    21  multiple_competing
+    21  no_vendor_products
+    16  ok_uncertain
+
+By vendor (top 15):
+    25  vendor_writer
+    19  vendor_microsoft
+    18  vendor_google
+    15  vendor_anthropic
+    14  vendor_aws
+    12  vendor_openai
+    11  vendor_ibm
+    10  vendor_snowflake
+    10  vendor_cohere
+    10  vendor_sap
+     9  vendor_databricks
+     6  vendor_glean
+     5  vendor_mistral
+     4  vendor_servicenow
+     4  vendor_harvey
+
+By domain/subfactor (top 15):
+     2  identity_access/SSO, MFA, RBAC, least-privilege access
+     2  security_threat/penetration_testing_and_vulnerability_management
+     1  agentic_autonomy/autonomous_ai_agents_with_scoped_permissions
+     1  governance_compliance/regulated_market_compliance_offerings
+     1  governance_compliance/third_party_audit_compliance
+     1  security_threat/responsible_disclosure_program
+     1  integration_architecture/connector_breadth_llm_interoperability
+     1  vendor_maturity_lockin/deployment_options_single_tenant
+     1  agentic_autonomy/workflow_orchestration_approvals_guardrails
+     1  cost_finops/pricing_transparency_seat_model
+     1  identity_access/sso_scim_rbac_provisioning
+     1  governance_compliance/agent_observability_audit_logs
+     1  data_security_privacy/compliance_certifications_encryption
+     1  agentic_autonomy/governed agent execution layer with identity validation and approval flows
+     1  model_reliability/third-party LLM benchmarking (Stanford HELM)
+
+By sourceUrl (top 15):
+    13  https://writer.com/plans/
+    12  https://writer.com/security/
+    10  https://trust.openai.com/
+     8  https://aws.amazon.com/bedrock/pricing/
+     7  https://www.snowflake.com/en/product/features/cortex/
+     7  https://www.ibm.com/trust
+     7  https://www.anthropic.com/pricing
+     7  https://status.cloud.google.com/
+     7  https://learn.microsoft.com/en-us/copilot/microsoft-365/microsoft-365-copilot-overview
+     6  https://www.glean.com/security
+     6  https://cohere.com/pricing
+     6  https://docs.aws.amazon.com/bedrock/latest/userguide/what-is-bedrock.html
+     6  https://cloud.google.com/vertex-ai/generative-ai/docs/overview
+     5  https://mistral.ai/pricing
+     5  https://www.sap.com/products/artificial-intelligence/ai-assistant.html
+
+(For batch review: --batch=20 [--offset=20])

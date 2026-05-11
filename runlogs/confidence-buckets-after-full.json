@@ -1,0 +1,80 @@
+[
+  {
+    "_count": {
+      "_all": 43
+    },
+    "classifierConfidence": 0.5
+  },
+  {
+    "_count": {
+      "_all": 2
+    },
+    "classifierConfidence": 0.55
+  },
+  {
+    "_count": {
+      "_all": 1
+    },
+    "classifierConfidence": 0.6
+  },
+  {
+    "_count": {
+      "_all": 40
+    },
+    "classifierConfidence": 0.62
+  },
+  {
+    "_count": {
+      "_all": 113
+    },
+    "classifierConfidence": 0.72
+  },
+  {
+    "_count": {
+      "_all": 20
+    },
+    "classifierConfidence": 0.78
+  },
+  {
+    "_count": {
+      "_all": 44
+    },
+    "classifierConfidence": 0.82
+  },
+  {
+    "_count": {
+      "_all": 3
+    },
+    "classifierConfidence": 0.85
+  },
+  {
+    "_count": {
+      "_all": 17
+    },
+    "classifierConfidence": 0.88
+  },
+  {
+    "_count": {
+      "_all": 10
+    },
+    "classifierConfidence": 0.91
+  },
+  {
+    "_count": {
+      "_all": 17
+    },
+    "classifierConfidence": 0.92
+  },
+  {
+    "_count": {
+      "_all": 3
+    },
+    "classifierConfidence": 0.93
+  },
+  {
+    "_count": {
+      "_all": 1
+    },
+    "classifierConfidence": 0.95
+  }
+]

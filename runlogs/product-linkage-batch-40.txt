@@ -1,0 +1,229 @@
+─── Batch review 41–60 of 182 (recommend_approve only) ───
+
+[41] cmozd2ijg00084kwvwurx28k0
+    vendor       : vendor_databricks
+    domain       : vendor_maturity_lockin
+    subfactor    : self_service_due_diligence_package
+    grade        : E2
+    classifier   : 62%
+    source       : https://www.databricks.com/trust
+    excerpt      : Perform your own self-service security review of Databricks using our due diligence package, which includes documentation and compliance materials.
+    linkage      : no_match
+      (no suggestions — operator must select manually)
+
+[42] cmozd2ijg00034kwv6j3fhl76
+    vendor       : vendor_databricks
+    domain       : identity_access
+    subfactor    : identity_integration_and_access_controls
+    grade        : E2
+    classifier   : 72%
+    source       : https://www.databricks.com/trust
+    excerpt      : We provide comprehensive security capabilities to protect your data and workloads, such as encryption, network controls, auditing, identity integration, access controls and data governance.
+    linkage      : no_match
+      (no suggestions — operator must select manually)
+
+[43] cmozckakp006h3owvbis7kxl9
+    vendor       : vendor_writer
+    domain       : cost_finops
+    subfactor    : pricing_transparency_and_seat_model
+    grade        : E2
+    classifier   : 72%
+    source       : https://writer.com/plans/
+    excerpt      : Starter offers monthly or annual per-seat plans with fixed credit limits. Enterprise includes regular seats, and unlimited free users, plus optional solution packs and services as you grow. How do I c…
+    linkage      : ok_uncertain
+      • 55%  writer_palmyra_powered_agents
+        reason: subfactor "pricing_transparency_and_seat_model" aligns with category "model_api"
+
+[44] cmozckakp006i3owvhsql7zpq
+    vendor       : vendor_writer
+    domain       : workforce_adoption
+    subfactor    : training_onboarding_and_program_management
+    grade        : E2
+    classifier   : 62%
+    source       : https://writer.com/plans/
+    excerpt      : WRITER Academy. Technical onboarding support. Quarterly onsite reviews. Ongoing platform support & scaling. Visibility into product roadmap. AI program management. Priority enterprise support.
+    linkage      : no_match
+      (no suggestions — operator must select manually)
+
+[45] cmozckakp006g3owvb1pyay81
+    vendor       : vendor_writer
+    domain       : integration_architecture
+    subfactor    : connectors_LLM_interoperability_and_API_access
+    grade        : E2
+    classifier   : 62%
+    source       : https://writer.com/plans/
+    excerpt      : Full interoperability with your systems and LLMs. Advanced connectors. Industry-specific connectors. Enterprise data sources. API access. Expanded rate limits. Works with preferred LLMs. Model flexibi…
+    linkage      : no_match
+      (no suggestions — operator must select manually)
+
+[46] cmozckakp006f3owvo2l76r7r
+    vendor       : vendor_writer
+    domain       : agentic_autonomy
+    subfactor    : approval_gates_orchestration_and_governance
+    grade        : E2
+    classifier   : 62%
+    source       : https://writer.com/plans/
+    excerpt      : Advanced orchestration, approvals, and admin controls. WRITER Agent can orchestrate and execute work across teams and systems, while operating within org-level rules and compliance requirements. Playb…
+    linkage      : ok_uncertain
+      • 55%  writer_governance_and_agent_lifecycle_features
+        reason: subfactor "approval_gates_orchestration_and_governance" aligns with category "agent_governance"
+
+[47] cmozckakp006d3owvfi0xldh2
+    vendor       : vendor_writer
+    domain       : identity_access
+    subfactor    : SSO_SCIM_RBAC_provisioning
+    grade        : E2
+    classifier   : 72%
+    source       : https://writer.com/plans/
+    excerpt      : Role-based access. Customisable roles and permissions. Multi-factor-authentication. SAML SSO. SCIM provisioning. Team & org-level policies.
+    linkage      : no_match
+      (no suggestions — operator must select manually)
+
+[48] cmozckakp006e3owvq0437crz
+    vendor       : vendor_writer
+    domain       : governance_compliance
+    subfactor    : audit_logs_and_agent_observability
+    grade        : E2
+    classifier   : 62%
+    source       : https://writer.com/plans/
+    excerpt      : Granular agent governance, observability, and auditability. Agent observability. Audit logs. Knowledge and connector access controls. Integration with third party guardrails. Team & org-level policies…
+    linkage      : multiple_competing
+      • 55%  writer_writer_ai_studio
+        reason: subfactor "audit_logs_and_agent_observability" aligns with category "agent_platform"
+      • 55%  writer_governance_and_agent_lifecycle_features
+        reason: subfactor "audit_logs_and_agent_observability" aligns with category "agent_governance"
+
+[49] cmozcjor400643owvalaa0dv0
+    vendor       : vendor_writer
+    domain       : identity_access
+    subfactor    : SSO, MFA, RBAC, least-privilege access
+    grade        : E2
+    classifier   : 72%
+    source       : https://writer.com/security/
+    excerpt      : We support all major SSO providers and multi-factor authentication so you can leverage your existing security and identity solutions when deploying WRITER. Role-based permissions and least-privilege a…
+    linkage      : no_match
+      (no suggestions — operator must select manually)
+
+[50] cmozcjor400683owvfnahwzmv
+    vendor       : vendor_writer
+    domain       : model_reliability
+    subfactor    : Third-party LLM benchmarking (Stanford HELM)
+    grade        : E2
+    classifier   : 72%
+    source       : https://writer.com/security/
+    excerpt      : Our models offer accuracy and quality through third-party testing and benchmarking. Read how Palmyra, the WRITER family of LLMs, ranks on Stanford HELM benchmarking.
+    linkage      : no_match
+      (no suggestions — operator must select manually)
+
+[51] cmozcjor400623owvxxd8wb5w
+    vendor       : vendor_writer
+    domain       : data_security_privacy
+    subfactor    : training data policy / zero data retention
+    grade        : E2
+    classifier   : 72%
+    source       : https://writer.com/security/
+    excerpt      : WRITER does not train its models on your data, nor does it train on user inputs or any outputs. You control how your data is used... WRITER takes a zero data retention approach, storing data for only …
+    linkage      : no_match
+      (no suggestions — operator must select manually)
+
+[52] cmozcjor400633owvum8p85ye
+    vendor       : vendor_writer
+    domain       : governance_compliance
+    subfactor    : SOC 2 Type II, ISO 27001/27701/42001 certifications
+    grade        : E2
+    classifier   : 85%
+    source       : https://writer.com/security/
+    excerpt      : We undergo annual SOC 2 Type II evaluations and hold ISO/IEC 27001, 27701, and 42001 certifications, confirming our implemented controls for security, privacy, and responsible AI management.
+    linkage      : no_match
+      (no suggestions — operator must select manually)
+
+[53] cmozcjor400693owvfzh46r3c
+    vendor       : vendor_writer
+    domain       : data_security_privacy
+    subfactor    : Encryption at rest and in transit, isolated provisioning
+    grade        : E2
+    classifier   : 72%
+    source       : https://writer.com/security/
+    excerpt      : We encrypt data shared within our platform at rest and in transit, and provision data in an isolated production project. Managed, multi-cloud options, including dedicated private cloud deployment.
+    linkage      : no_match
+      (no suggestions — operator must select manually)
+
+[54] cmozcjor400673owvmlupow4d
+    vendor       : vendor_writer
+    domain       : agentic_autonomy
+    subfactor    : Agent governed execution layer, approval flows, identity validation
+    grade        : E2
+    classifier   : 72%
+    source       : https://writer.com/security/
+    excerpt      : Guardrails, identity validation, granular permissions and approval flows shape how agents interact with connected systems... Agent requests to connected systems pass through a governed execution layer…
+    linkage      : multiple_competing
+      • 55%  writer_writer_ai_studio
+        reason: subfactor "Agent governed execution layer, approval flows, identity validation" aligns with category "agent_platform"
+      • 55%  writer_governance_and_agent_lifecycle_features
+        reason: subfactor "Agent governed execution layer, approval flows, identity validation" aligns with category "agent_governance"
+
+[55] cmozcjor400653owvutu10bj3
+    vendor       : vendor_writer
+    domain       : governance_compliance
+    subfactor    : Audit logs and activity traces
+    grade        : E2
+    classifier   : 72%
+    source       : https://writer.com/security/
+    excerpt      : Activity traces, source citation, and decision logs provide clarity into how AI reached an answer... audit logs surface how Writer is used across your organization... all access to our internal admini…
+    linkage      : no_match
+      (no suggestions — operator must select manually)
+
+[56] cmozciue5005w3owvudybk7v7
+    vendor       : vendor_glean
+    domain       : data_security_privacy
+    subfactor    : sensitive_data_detection_dlp
+    grade        : E2
+    classifier   : 72%
+    source       : https://www.glean.com/security
+    excerpt      : Get sensitive content protection across all structured and unstructured data with customizable or one-click policies that detect credentials, payment data, medical information, and other sensitive dat…
+    linkage      : no_vendor_products
+      (no suggestions — operator must select manually)
+
+[57] cmozciue500603owvcda6zy4z
+    vendor       : vendor_glean
+    domain       : data_security_privacy
+    subfactor    : overshared_content_triage_remediation
+    grade        : E2
+    classifier   : 62%
+    source       : https://www.glean.com/security
+    excerpt      : Close the loop on sensitive findings by simply hiding content or running through a triage workflow (beta). Investigate sensitive findings, assign owners, and remediate overshared documents directly in…
+    linkage      : no_vendor_products
+      (no suggestions — operator must select manually)
+
+[58] cmozciue4005t3owvj3wk24ul
+    vendor       : vendor_glean
+    domain       : data_security_privacy
+    subfactor    : single_tenant_isolated_deployment
+    grade        : E2
+    classifier   : 72%
+    source       : https://www.glean.com/security
+    excerpt      : Run Glean in a fully isolated, single-tenant environment that keeps your data and platform secure, either Glean-hosted or in your own AWS, Azure, or GCP cloud.
+    linkage      : no_vendor_products
+      (no suggestions — operator must select manually)
+
+[59] cmozciue4005v3owvfwh4aw9v
+    vendor       : vendor_glean
+    domain       : data_security_privacy
+    subfactor    : zero_retention_model_provider_agreements
+    grade        : E2
+    classifier   : 62%
+    source       : https://www.glean.com/security
+    excerpt      : Zero-retention agreements with model providers ensure your data is never stored or used for model training.
+    linkage      : no_vendor_products
+      (no suggestions — operator must select manually)
+
+[60] cmozciue5005z3owvotuv1viq
+    vendor       : vendor_glean
+    domain       : identity_access
+    subfactor    : granular_agent_access_controls
+    grade        : E2
+    classifier   : 62%
+    source       : https://www.glean.com/security
+    excerpt      : Keeping agents in scope starts with the right access controls for your organization. Control who can create and deploy agents and the actions that they can take.
+    linkage      : no_vendor_products
+      (no suggestions — operator must select manually)

@@ -1,0 +1,25 @@
+─── Evidence dedup report ───
+mode                    : REPORT (read-only)
+proposals scanned       : 314
+exact duplicate clusters: 4
+exact duplicate rows    : 4
+near duplicate clusters : 0
+near duplicate rows     : 0
+SAFE for auto-merge     : 4
+needs human review      : 0
+merge actions planned   : 4
+merge actions applied   : 0
+
+── Top 5 exact clusters ──
+  2× | vendor_openai · governance_compliance · independent_audit_certifications
+         url: https://trust.openai.com
+         ids: cmozbxq8s00011ywvbwl8xo1o, cmozc0m8600013owvdjacityf
+  2× | vendor_openai · governance_compliance · audit_logging
+         url: https://trust.openai.com
+         ids: cmozbxq8t00061ywvtgz73lpm, cmozc0m8600063owvthfc52n2
+  2× | vendor_openai · governance_compliance · AI_governance_standard_ISO42001
+         url: https://trust.openai.com
+         ids: cmozbxq8t00021ywvnzuojhlk, cmozc0m8600023owvfhe88egy
+  2× | vendor_writer · governance_compliance · SOC 2 Type II, ISO 27001/27701/42001 certifications
+         url: https://writer.com/security
+         ids: cmozcjor400633owvum8p85ye, cmozd9u0w0002huwvhbj6s6nu

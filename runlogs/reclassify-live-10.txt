@@ -1,0 +1,11 @@
+─── Reclassify failed proposals ───
+mode      : LIVE
+candidates: 10
+  …processed 0/10
+
+─── Result ───
+reclassified ok : 9
+still failing   : 1
+
+residual failures by code:
+     1  schema_validation

@@ -1,0 +1,229 @@
+─── Batch review 1–20 of 182 (recommend_approve only) ───
+
+[1] cmoze3sb200060jwvpo0dx46j
+    vendor       : vendor_servicenow
+    domain       : agentic_autonomy
+    subfactor    : autonomous_ai_agents_with_scoped_permissions
+    grade        : E2
+    classifier   : 72%
+    source       : https://www.servicenow.com/company/trust.html
+    excerpt      : The Autonomous Workforce is more than just isolated tasks. These AI specialists are assigned to roles, with business context and permissions to handle complex workflows end-to-end.
+    linkage      : ok
+      • 95%  now_autonomous_workforce ✓ safe
+        reason: exact name match: "Autonomous Workforce"
+
+[2] cmoze3sb200050jwvltcj5js6
+    vendor       : vendor_servicenow
+    domain       : governance_compliance
+    subfactor    : regulated_market_compliance_offerings
+    grade        : E2
+    classifier   : 82%
+    source       : https://www.servicenow.com/company/trust.html
+    excerpt      : ServiceNow Government Community Cloud (GCC) and FedRAMP ... ServiceNow HIPAA Security Controls ... ServiceNow Protected Platform (SPP) Australia ... ServiceNow Protected Platform for the European Unio…
+    linkage      : no_match
+      (no suggestions — operator must select manually)
+
+[3] cmoze3sb200020jwvwq5wd3qx
+    vendor       : vendor_servicenow
+    domain       : governance_compliance
+    subfactor    : third_party_audit_compliance
+    grade        : E2
+    classifier   : 62%
+    source       : https://www.servicenow.com/company/trust.html
+    excerpt      : Annual third‑party audits help ServiceNow comply with global privacy regulations. We use AI, automation, and tools that promote proactive security, allowing customers to meet their compliance requirem…
+    linkage      : no_match
+      (no suggestions — operator must select manually)
+
+[4] cmoze3sb300080jwvybizwpfa
+    vendor       : vendor_servicenow
+    domain       : security_threat
+    subfactor    : responsible_disclosure_program
+    grade        : E2
+    classifier   : 62%
+    source       : https://www.servicenow.com/company/trust.html
+    excerpt      : Responsible Disclosure ... Visit Security Portal ... Customer Security Portal
+    linkage      : no_match
+      (no suggestions — operator must select manually)
+
+[5] cmozdalo4000fhuwvlgen54wa
+    vendor       : vendor_writer
+    domain       : integration_architecture
+    subfactor    : connector_breadth_llm_interoperability
+    grade        : E2
+    classifier   : 62%
+    source       : https://writer.com/plans/
+    excerpt      : Full Knowledge Graph capabilities with unrestricted connectors. Industry-specific connectors. Enterprise data sources. Full interoperability with your systems and LLMs. Works with preferred LLMs. API …
+    linkage      : no_match
+      (no suggestions — operator must select manually)
+
+[6] cmozdalo4000hhuwv4u68vym0
+    vendor       : vendor_writer
+    domain       : vendor_maturity_lockin
+    subfactor    : deployment_options_single_tenant
+    grade        : E2
+    classifier   : 72%
+    source       : https://writer.com/plans/
+    excerpt      : Deployment options: Standard. Single-tenant available as add-on. Fully managed platform deployment and scaling.
+    linkage      : no_match
+      (no suggestions — operator must select manually)
+
+[7] cmozdalo4000ehuwvgdlzdsz2
+    vendor       : vendor_writer
+    domain       : agentic_autonomy
+    subfactor    : workflow_orchestration_approvals_guardrails
+    grade        : E2
+    classifier   : 72%
+    source       : https://writer.com/plans/
+    excerpt      : Advanced orchestration, approvals, and admin controls. Unrestricted number of playbooks, routines, and cross-team workflows. WRITER Agent can orchestrate and execute work across teams and systems, whi…
+    linkage      : no_match
+      (no suggestions — operator must select manually)
+
+[8] cmozdalo4000ghuwv8g67kq7q
+    vendor       : vendor_writer
+    domain       : cost_finops
+    subfactor    : pricing_transparency_seat_model
+    grade        : E2
+    classifier   : 72%
+    source       : https://writer.com/plans/
+    excerpt      : Starter offers monthly or annual per-seat plans with fixed credit limits. Enterprise includes regular seats, and unlimited free users, plus optional solution packs and services as you grow. 14-day fre…
+    linkage      : ok_uncertain
+      • 55%  writer_palmyra_powered_agents
+        reason: subfactor "pricing_transparency_seat_model" aligns with category "model_api"
+
+[9] cmozdalo4000chuwvtr905qoz
+    vendor       : vendor_writer
+    domain       : identity_access
+    subfactor    : sso_scim_rbac_provisioning
+    grade        : E2
+    classifier   : 72%
+    source       : https://writer.com/plans/
+    excerpt      : Role-based access. Customisable roles and permissions. Multi-factor-authentication. SAML SSO. SCIM provisioning. Team & org-level policies.
+    linkage      : no_match
+      (no suggestions — operator must select manually)
+
+[10] cmozdalo4000dhuwvdx221k0h
+    vendor       : vendor_writer
+    domain       : governance_compliance
+    subfactor    : agent_observability_audit_logs
+    grade        : E2
+    classifier   : 72%
+    source       : https://writer.com/plans/
+    excerpt      : Granular agent governance, observability, and auditability. Agent observability. Audit logs. Knowledge and connector access controls. Integration with third party guardrails. Team & org-level policies…
+    linkage      : multiple_competing
+      • 55%  writer_writer_ai_studio
+        reason: subfactor "agent_observability_audit_logs" aligns with category "agent_platform"
+      • 55%  writer_governance_and_agent_lifecycle_features
+        reason: subfactor "agent_observability_audit_logs" aligns with category "agent_governance"
+
+[11] cmozdalo4000bhuwvnvquphgq
+    vendor       : vendor_writer
+    domain       : data_security_privacy
+    subfactor    : compliance_certifications_encryption
+    grade        : E2
+    classifier   : 82%
+    source       : https://writer.com/plans/
+    excerpt      : We adhere to global privacy laws and industry-recognized security standards with measures to help you meet your compliance obligations, including GDPR, HIPAA, SOC 2 Type II, and PCI. HIPAA and SOC 2 T…
+    linkage      : no_match
+      (no suggestions — operator must select manually)
+
+[12] cmozd9u0w0003huwvr9v4cdgs
+    vendor       : vendor_writer
+    domain       : identity_access
+    subfactor    : SSO, MFA, RBAC, least-privilege access
+    grade        : E2
+    classifier   : 82%
+    source       : https://writer.com/security/
+    excerpt      : We support all major SSO providers and multi-factor authentication... Role-based permissions and least-privilege access helps ensure every action is appropriately authorized, while audit logs surface …
+    linkage      : no_match
+      (no suggestions — operator must select manually)
+
+[13] cmozd9u0w0006huwvyo7tmulr
+    vendor       : vendor_writer
+    domain       : agentic_autonomy
+    subfactor    : governed agent execution layer with identity validation and approval flows
+    grade        : E2
+    classifier   : 72%
+    source       : https://writer.com/security/
+    excerpt      : Guardrails, identity validation, granular permissions and approval flows shape how agents interact with connected systems... Agent requests to connected systems pass through a governed execution layer…
+    linkage      : multiple_competing
+      • 55%  writer_writer_ai_studio
+        reason: subfactor "governed agent execution layer with identity validation and approval flows" aligns with category "agent_platform"
+      • 55%  writer_governance_and_agent_lifecycle_features
+        reason: subfactor "governed agent execution layer with identity validation and approval flows" aligns with category "agent_governance"
+
+[14] cmozd9u0w0004huwv12yj844a
+    vendor       : vendor_writer
+    domain       : model_reliability
+    subfactor    : third-party LLM benchmarking (Stanford HELM)
+    grade        : E2
+    classifier   : 72%
+    source       : https://writer.com/security/
+    excerpt      : Top-scoring LLMs: Our models offer accuracy and quality through third-party testing and benchmarking. Read how Palmyra, the WRITER family of LLMs, ranks on Stanford HELM benchmarking.
+    linkage      : no_match
+      (no suggestions — operator must select manually)
+
+[15] cmozd9u0w0007huwvd8pq3i6x
+    vendor       : vendor_writer
+    domain       : data_security_privacy
+    subfactor    : data ownership and team isolation
+    grade        : E2
+    classifier   : 82%
+    source       : https://writer.com/security/
+    excerpt      : All data, files, and other materials that customers make available to WRITER for using our platform, along with any inputs or generated outputs, are owned by that customer. For a WRITER account with m…
+    linkage      : no_match
+      (no suggestions — operator must select manually)
+
+[16] cmozd9u0w0001huwvpdf7qusq
+    vendor       : vendor_writer
+    domain       : data_security_privacy
+    subfactor    : training data policy / zero retention
+    grade        : E2
+    classifier   : 72%
+    source       : https://writer.com/security/
+    excerpt      : WRITER does not train its models on your data, nor does it train on user inputs or any outputs. You control how your data is used... WRITER takes a zero data retention approach, storing data for only …
+    linkage      : no_match
+      (no suggestions — operator must select manually)
+
+[17] cmozd8wiz000hctwvcrev31fa
+    vendor       : vendor_snowflake
+    domain       : governance_compliance
+    subfactor    : incident_transparency_and_communication_cadence
+    grade        : E3
+    classifier   : 72%
+    source       : https://status.snowflake.com/
+    excerpt      : We'll provide our next update within 24 hours... We'll provide another update within 6 hours... We'll provide another update within 60 minutes... Incident start time: 12:25 UTC March 01, 2026 [updates…
+    linkage      : no_match
+      (no suggestions — operator must select manually)
+
+[18] cmozd8wiz000ectwv5cbxiadn
+    vendor       : vendor_snowflake
+    domain       : strategic_value
+    subfactor    : govcloud_and_dod_sector_fit
+    grade        : E3
+    classifier   : 72%
+    source       : https://status.snowflake.com/
+    excerpt      : AWS - GovCloud (US-West) Operational... AWS - GovCloud (US-East) Operational... AWS GovCloud - DoD Operational... AWS - US West (Commercial Gov - Oregon) Operational... AWS - US East (Commercial Gov-V…
+    linkage      : no_match
+      (no suggestions — operator must select manually)
+
+[19] cmozd8wiz000cctwvxng6ylex
+    vendor       : vendor_snowflake
+    domain       : integration_architecture
+    subfactor    : multi_cloud_multi_region_deployment_breadth
+    grade        : E3
+    classifier   : 78%
+    source       : https://status.snowflake.com/
+    excerpt      : AWS - US West (Oregon) Operational... AWS - GovCloud (US-West) Operational... AWS - GovCloud (US-East) Operational... AWS GovCloud - DoD Operational... AWS - Europe (Ireland) Operational... AWS - Euro…
+    linkage      : no_match
+      (no suggestions — operator must select manually)
+
+[20] cmozd7zay0003ctwvjy1mhwv5
+    vendor       : vendor_snowflake
+    domain       : data_security_privacy
+    subfactor    : security_perimeter_and_governance
+    grade        : E2
+    classifier   : 72%
+    source       : https://www.snowflake.com/en/product/features/cortex/
+    excerpt      : Every interaction is processed within Snowflake's secure perimeter and governance model, enabling compliance with your data policies through role-based access and providing explainability for audit pu…
+    linkage      : no_match
+      (no suggestions — operator must select manually)
