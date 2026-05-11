@@ -58,28 +58,31 @@ export default function AIEnterpriseShell() {
           <span className={styles.wordmarkMute}>AI </span>
           <span className={styles.wordmarkAccent}>Enterpise</span>
         </h1>
-        <p className={styles.subtitle}>Vendor · Investor · Capability Intelligence</p>
+        <p className={styles.subtitle}>Assessment · Vendor · Capability · Briefing Intelligence</p>
         <div className={styles.divider} aria-hidden />
         <p className={styles.tagline}>
           <em>Track</em> · <em>Score</em> · <em>Forecast</em> · <em>Decide</em>
         </p>
         <p className={styles.lede}>
-          Enterprise AI vendor intelligence — source-cited, evidence-graded, ready for the investment committee.
+          Source-cited, evidence-graded AI vendor intelligence — start with an assessment of your AI platform fit.
         </p>
         <div className={styles.ctaRow}>
+          {/* Take Assessment is now the strong primary CTA per the Stage-2
+              Rev2 hero hierarchy: Assessment is a Level-1 core function,
+              Investor Tools is a Level-3 specialist module. */}
           <span className={styles.ctaWrap}>
             <span className={`${styles.pulseRing} ${styles.pulseRingDelay0}`} aria-hidden />
             <span className={`${styles.pulseRing} ${styles.pulseRingDelay1}`} aria-hidden />
-            <Link href="/dashboard" className={styles.ctaPrimaryStrong}>
+            <Link href="/assessment" className={styles.ctaPrimaryStrong}>
               <span className={styles.ctaDotStrong} aria-hidden />
-              Enter portal
+              Take Assessment
               <span className={styles.ctaArrow} aria-hidden>→</span>
             </Link>
           </span>
           <span className={styles.ctaWrap}>
-            <Link href="/assessment" className={styles.ctaPrimary}>
+            <Link href="/dashboard" className={styles.ctaPrimary}>
               <span className={styles.ctaDot} aria-hidden />
-              Take Assessment
+              Enter portal
               <span className={styles.ctaArrow} aria-hidden>→</span>
             </Link>
           </span>

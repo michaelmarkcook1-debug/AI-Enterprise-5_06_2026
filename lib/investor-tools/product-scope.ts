@@ -11,6 +11,11 @@ type ProductSeed = {
   modules?: string[];
   simulator?: boolean;
   assessment?: boolean;
+  /** Set false to exclude this vendor from every Investor Tools surface
+   * (Investment Intelligence, Investment Simulator, IPO Watch, Public AI
+   * Stocks, Indirect Exposure Map, Investor Briefings, Investor
+   * Watchlist). Defaults to true. */
+  investorTools?: boolean;
   uncertainty?: string;
 };
 
@@ -215,12 +220,29 @@ const PRODUCT_SEEDS: ProductSeed[] = [
     ["Financial data/platform integrations", "finance_ai"],
     ["Institutional investment memo outputs", "finance_ai"],
   ], { modules: [...DEFAULT_MODULES, "AI Platform Fit Assessment", "Investment Simulator"], simulator: true, assessment: true }),
+  // Perplexity is a PLATFORM vendor only — included in ProductScope,
+  // Capabilities, Commercial Models, Vendor Intelligence, and News
+  // Intelligence; EXCLUDED from every Investor Tools surface
+  // (Investment Intelligence, Investment Simulator, IPO Watch, Public
+  // AI Stocks, Indirect Exposure Map, Investor Briefings, Investor
+  // Watchlist). Source: prompt 09 of the Stage-2 Rev2 batch.
   scope("perplexity", "Perplexity", [
     ["Perplexity Enterprise Pro", "enterprise_search"],
+    ["Perplexity Enterprise Max", "enterprise_search"],
+    ["Search API", "model_api"],
     ["Sonar API", "model_api"],
-    ["Sonar Pro API", "model_api"],
+    ["Agent API", "agent_runtime", "Hosts third-party models alongside Perplexity's own; tag first-party vs hosted_third_party per CommercialModel rules."],
+    ["Sonar", "model_api"],
+    ["Sonar Pro", "model_api"],
+    ["Sonar Reasoning Pro", "model_api"],
+    ["Sonar Deep Research", "enterprise_search"],
     ["Real-time web answer/research API", "enterprise_search"],
-  ], { modules: [...DEFAULT_MODULES, "Investment Simulator"], simulator: true }),
+  ], {
+    modules: [...DEFAULT_MODULES, "News Intelligence"],
+    simulator: false,
+    assessment: true,
+    investorTools: false,
+  }),
   scope("xai", "xAI", [
     ["Grok", "model_api"],
     ["Grok API", "model_api"],
@@ -288,7 +310,7 @@ export const PRODUCT_SCOPES: ProductScope[] = PRODUCT_SEEDS.flatMap((seed) =>
       lastVerified: "1970-01-01T00:00:00.000Z",
       includeInAssessment: seed.assessment ?? true,
       includeInMarketIntelligence: true,
-      includeInInvestorTools: true,
+      includeInInvestorTools: seed.investorTools ?? true,
       includeInSimulator: seed.simulator ?? false,
     };
   }),

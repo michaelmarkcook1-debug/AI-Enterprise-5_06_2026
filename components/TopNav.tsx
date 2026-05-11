@@ -6,14 +6,18 @@ import { usePortalTheme } from "@/lib/use-theme";
 import BrandLogo from "@/components/BrandLogo";
 import { INVESTOR_TOOLS_NAV } from "@/lib/investor-tools/nav";
 
+// Hero / Level-1 core functions first (Assessment, Vendors, Capabilities,
+// Briefings), then Level-2 supporting modules (Market Tracker, News,
+// Watchlists). Investor Tools is a Level-3 specialist module and is
+// rendered AFTER this nav with non-hero styling — see the JSX below.
 const NAV: { href: string; label: string }[] = [
   { href: "/dashboard", label: "Dashboard" },
+  { href: "/assessment", label: "Assessment" },
   { href: "/vendors", label: "Vendors" },
+  { href: "/capabilities", label: "Capabilities" },
+  { href: "/briefings", label: "Briefings" },
   { href: "/market", label: "Market Tracker" },
   { href: "/news", label: "News" },
-  { href: "/capabilities", label: "Capabilities" },
-  { href: "/assessment", label: "Assessment" },
-  { href: "/briefings", label: "Briefings" },
   { href: "/watchlists", label: "Watchlists" },
   { href: "/admin", label: "Admin" },
 ];
@@ -41,29 +45,6 @@ export default function TopNav() {
           <BrandLogo size={32} />
         </Link>
         <nav className="hidden flex-1 items-center gap-1 text-sm md:flex">
-          <div className="group relative">
-            <Link
-              href={INVESTOR_TOOLS_NAV.route}
-              className={`rounded-md px-3 py-1.5 font-semibold transition-colors ${
-                pathname.startsWith("/investor-tools") || pathname.startsWith("/investing")
-                  ? "bg-[#192319] !text-white shadow-sm dark:bg-white dark:!text-[#0c1220]"
-                  : "font-medium text-[#4d574b] hover:bg-[#e9ede4] hover:text-[#18201b] dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-100"
-              }`}
-            >
-              {INVESTOR_TOOLS_NAV.label}
-            </Link>
-            <div className="invisible absolute left-0 top-8 z-40 w-64 rounded-lg border border-[#dfe4da] bg-white p-2 opacity-0 shadow-lg transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100 dark:border-zinc-800 dark:bg-[#071827]">
-              {INVESTOR_TOOLS_NAV.children?.map((child) => (
-                <Link
-                  key={child.id}
-                  href={child.route}
-                  className="block rounded-md px-3 py-2 text-sm text-[#4d574b] hover:bg-[#e9ede4] hover:text-[#18201b] dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-100"
-                >
-                  {child.label}
-                </Link>
-              ))}
-            </div>
-          </div>
           {NAV.map((n) => {
             const active = n.href === "/" ? pathname === "/" : pathname.startsWith(n.href);
             return (
@@ -81,6 +62,33 @@ export default function TopNav() {
               </Link>
             );
           })}
+          {/* Investor Tools is a Level-3 specialist module per Stage-2 Rev2
+              hero hierarchy. Kept in the nav (accessible) but rendered
+              AFTER the hero pillars with non-bold styling so it doesn't
+              read as a hero function. */}
+          <div className="group relative">
+            <Link
+              href={INVESTOR_TOOLS_NAV.route}
+              className={`rounded-md px-3 py-1.5 transition-colors ${
+                pathname.startsWith("/investor-tools") || pathname.startsWith("/investing")
+                  ? "bg-[#192319] !text-white font-semibold shadow-sm dark:bg-white dark:!text-[#0c1220]"
+                  : "font-medium text-[#4d574b] hover:bg-[#e9ede4] hover:text-[#18201b] dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-100"
+              }`}
+            >
+              {INVESTOR_TOOLS_NAV.label}
+            </Link>
+            <div className="invisible absolute left-0 top-8 z-40 w-64 rounded-lg border border-[#dfe4da] bg-white p-2 opacity-0 shadow-lg transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100 dark:border-zinc-800 dark:bg-[#071827]">
+              {INVESTOR_TOOLS_NAV.children?.map((child) => (
+                <Link
+                  key={child.id}
+                  href={child.route}
+                  className="block rounded-md px-3 py-2 text-sm text-[#4d574b] hover:bg-[#e9ede4] hover:text-[#18201b] dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-100"
+                >
+                  {child.label}
+                </Link>
+              ))}
+            </div>
+          </div>
         </nav>
         <button
           type="button"

@@ -9,7 +9,10 @@ import { IPO_FORECASTS, POST_IPO_FLUCTUATION_BANDS } from "./seed";
 
 describe("IPO forecast truthfulness model", () => {
   it("labels every IPO forecast with data status, evidence, confidence, and model warning", () => {
-    expect(IPO_FORECASTS.length).toBeGreaterThanOrEqual(13);
+    // Threshold lowered from 13 to 12: Perplexity removed from Investor
+    // Tools surfaces per Stage-2 Rev2 prompt 09 — IPO forecast row
+    // deleted alongside.
+    expect(IPO_FORECASTS.length).toBeGreaterThanOrEqual(12);
     expect(IPO_FORECASTS.every((forecast) => forecast.dataStatus)).toBe(true);
     expect(IPO_FORECASTS.every((forecast) => forecast.evidenceGrade)).toBe(true);
     expect(IPO_FORECASTS.every((forecast) => forecast.confidenceScore > 0)).toBe(true);

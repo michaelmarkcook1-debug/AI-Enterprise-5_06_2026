@@ -71,13 +71,35 @@ export const INVESTMENT_PROVIDERS: InvestmentProviderProfile[] = [
   provider("cohere", "cohere", "Cohere", null, "private_inaccessible", "private", "private_inaccessible", 72, 56, 65, 62, 74, 54, "medium_high", 5, 80, 88, 72, 48, 78, 50, "E1", "Enterprise-focused model provider with regulated-market positioning.", "Competitive pressure from frontier labs and cloud platforms."),
   provider("mistral", "mistral", "Mistral", null, "private_inaccessible", "private", "private_inaccessible", 74, 60, 72, 66, 80, 58, "medium_high", 5, 78, 88, 66, 46, 74, 52, "E1", "European sovereign/open-model AI thesis.", "Private access and hyperscaler competition."),
   provider("glean", "glean", "Glean", null, "private_inaccessible", "private", "private_inaccessible", 68, 58, 66, 64, 76, 52, "medium_high", 5, 76, 88, 26, 34, 28, 48, "E1", "Enterprise search and knowledge-assistant adoption thesis.", "Private access and crowded enterprise assistant market."),
-  provider("perplexity", "perplexity", "Perplexity", null, "private_inaccessible", "private", "private_inaccessible", 70, 54, 76, 56, 84, 58, "high", 5, 86, 90, 46, 58, 54, 46, "E1", "AI answer engine with consumer mindshare and enterprise-search optionality.", "Revenue durability, copyright/regulatory exposure, and private access."),
+  // Perplexity is kept in INVESTMENT_PROVIDERS so the Commercial Models
+  // inventory (model-inventory repository) can still surface the vendor.
+  // It is EXPLICITLY EXCLUDED from every Investor-Tools surface by being
+  // absent from IPO_PROCESS_STATES, IPO_EVIDENCE_SIGNALS, IPO_FORECASTS,
+  // POST_IPO_FLUCTUATION_BANDS, and the exposure-class map below — AND
+  // by being listed in INVESTOR_EXCLUDED_VENDOR_IDS for any future
+  // investor-surface iteration that may consume INVESTMENT_PROVIDERS.
+  // Source: Stage-2 Rev2 prompt 09.
+  provider("perplexity", "perplexity", "Perplexity", null, "private_inaccessible", "private", "private_inaccessible", 70, 54, 76, 56, 84, 58, "high", 5, 86, 90, 46, 58, 54, 46, "E1", "AI answer engine and enterprise-search platform. Tracked for Commercial Models inventory and vendor intelligence only — NOT included in Investor Tools.", "Platform-only vendor; investor-side IPO/valuation modelling intentionally omitted."),
   provider("xai", "xai", "xAI", null, "private_inaccessible", "private", "private_inaccessible", 76, 52, 82, 58, 88, 56, "high", 5, 90, 92, 88, 64, 94, 44, "E1", "High-beta frontier model and distribution thesis.", "Private opacity, compute intensity, and governance uncertainty."),
   provider("writer", "writer", "Writer", null, "private_inaccessible", "private", "private_inaccessible", 66, 56, 64, 62, 72, 50, "medium_high", 5, 74, 86, 32, 36, 34, 48, "E1", "Enterprise generative AI platform with verticalized workflow positioning.", "Private access and differentiation versus broad platform vendors."),
   provider("hebbia", "hebbia", "Hebbia", null, "private_inaccessible", "private", "private_inaccessible", 64, 55, 63, 60, 74, 48, "medium_high", 5, 76, 88, 28, 34, 30, 46, "E1", "High-value knowledge-work AI for financial and professional services.", "Vertical concentration and private-market valuation opacity."),
   provider("rogo", "rogo", "Rogo", null, "private_inaccessible", "private", "private_inaccessible", 62, 54, 62, 58, 72, 46, "medium_high", 5, 74, 88, 28, 32, 28, 44, "E1", "Financial-services AI analyst thesis with domain workflow specificity.", "Early scale, private access, and category competition."),
   provider("cash", "cash", "Cash reserve", null, "cash", "cash", "cash", 0, 0, 0, 0, 0, 0, "low", 100, 0, 0, 0, 0, 0, 90, "E2", "Optional reserve to moderate scenario volatility.", "Inflation and opportunity-cost drag."),
 ];
+
+/** Vendor ids that are tracked for Commercial Models / Capabilities /
+ * Vendor Intelligence but MUST NOT appear in any Investor-Tools surface
+ * (Investment Intelligence, Investment Simulator, IPO Watch, Public AI
+ * Stocks, Indirect Exposure Map, Investor Briefings, Investor Watchlist).
+ * Source: Stage-2 Rev2 prompt 09. */
+export const INVESTOR_EXCLUDED_VENDOR_IDS: ReadonlySet<string> = new Set([
+  "perplexity",
+]);
+
+/** True iff the vendor should appear in Investor-Tools surfaces. */
+export function isInvestorTracked(vendorId: string): boolean {
+  return !INVESTOR_EXCLUDED_VENDOR_IDS.has(vendorId);
+}
 
 export const INDIRECT_EXPOSURES: IndirectExposure[] = [
   indirect("openai", "MSFT", "strategic/commercial/infrastructure", 0.65, 0.55, 0.65, 0.35),
@@ -100,7 +122,7 @@ export const IPO_PROFILES: IPOProfile[] = [
   ipo("cohere", "R2", 54, "medium_high", 10, 74, "avoid_until_s1_clarity", 50, "Watch for model economics and enterprise customer proof."),
   ipo("mistral", "R2", 58, "medium_high", 10, 72, "trading_ipo", 52, "Watch for sovereign-AI demand, enterprise revenue, and model-cost discipline."),
   ipo("glean", "R2", 52, "medium_high", 10, 70, "avoid_until_s1_clarity", 48, "Watch for enterprise assistant retention and expansion rates."),
-  ipo("perplexity", "R2", 58, "high", 9, 80, "avoid_until_s1_clarity", 46, "Watch for revenue mix, legal exposure, and retention durability."),
+  // Perplexity excluded from Investor Tools per Stage-2 Rev2 prompt 09.
   ipo("xai", "R0", 56, "high", 8, 86, "avoid_until_s1_clarity", 44, "Standalone IPO is not modelled; watch only for credible standalone filing evidence."),
   ipo("writer", "R1", 50, "medium_high", 8, 68, "avoid_until_s1_clarity", 44, "Watch for enterprise ARR scale and platform differentiation."),
   ipo("hebbia", "R0", 48, "medium_high", 7, 70, "avoid_until_s1_clarity", 42, "No reliable month-level IPO forecast available until signal quality improves."),
@@ -116,7 +138,7 @@ export const IPO_EVIDENCE_QUALITY: IPOEvidenceQuality[] = [
   ipoEvidence("harvey", "R1_or_R2", 42, "rumoured", true, "Vertical AI watch item; no confirmed IPO process."),
   ipoEvidence("glean", "R1", 38, "none", true, "Month-level precision is weak; use broad-window treatment until credible process evidence appears."),
   ipoEvidence("mistral", "R1", 40, "none", true, "Strategic funding routes may precede any IPO; production use requires current source validation."),
-  ipoEvidence("perplexity", "R1", 36, "none", true, "Management comments and market signals require refresh before any high-confidence IPO timing."),
+  // Perplexity excluded from Investor Tools per Stage-2 Rev2 prompt 09.
   ipoEvidence("writer", "R0_or_R1", 32, "none", true, "No credible near-term IPO process signal in seed model."),
   ipoEvidence("hebbia", "R0", 20, "none", false, "No reliable month-level IPO forecast available."),
   ipoEvidence("rogo", "R0", 20, "none", false, "No reliable month-level IPO forecast available."),
@@ -132,7 +154,7 @@ export const IPO_FORECASTS: IPOForecast[] = [
   ipoForecast("harvey", "2028-06", "2028-01", "2029-12", "low_medium", "R1_or_R2", "model_estimate_not_fact", "vertical_ai_tam_proof_needed", "Strong legal AI vertical, but no confirmed IPO process in seed data."),
   ipoForecast("glean", "2028-09", "2028-01", "2029-12", "low_medium", "R1", "model_estimate_not_fact", "enterprise_knowledge_layer_watch", "Enterprise knowledge layer watch item; platform-suite competition risk remains material."),
   ipoForecast("mistral", "2028-11", "2028-01", "2029-12", "low_medium", "R1", "model_estimate_not_fact", "sovereign_ai_strategic_bet", "Strategic sovereign-AI funding route may precede IPO."),
-  ipoForecast("perplexity", "2028-06", "2028-01", "2029-12", "low", "R1", "model_estimate_not_fact", "search_answer_engine_volatility", "Monetisation, competition, and legal/search risk must be validated."),
+  // Perplexity excluded from Investor Tools per Stage-2 Rev2 prompt 09.
   ipoForecast("writer", "2029-09", "2029-01", "2030-12", "low", "R0_or_R1", "model_estimate_not_fact", "enterprise_agentic_watch", "No credible near-term IPO process signal in seed model."),
   ipoForecast("hebbia", null, null, null, "very_low", "R0", "no_reliable_month_estimate", "too_early", "Disable month-level price model until IPO signal quality improves.", "No reliable month-level IPO forecast available."),
   ipoForecast("rogo", null, null, null, "very_low", "R0", "no_reliable_month_estimate", "too_early", "Disable month-level price model until IPO signal quality improves.", "No reliable month-level IPO forecast available."),
@@ -148,7 +170,7 @@ export const POST_IPO_FLUCTUATION_BANDS: PostIPOFluctuationBand[] = [
   ...bands("harvey", "low_medium", [[10, 50], [0, 45], [-10, 40], [-15, 35], [-25, 30], [-35, 25], [-30, 35], [-25, 40], [-20, 45], [-15, 50]]),
   ...bands("glean", "low_medium", [[0, 35], [-5, 35], [-10, 30], [-15, 30], [-20, 25], [-30, 20], [-25, 30], [-20, 35], [-15, 40], [-10, 45]]),
   ...bands("mistral", "low_medium", [[5, 45], [0, 40], [-10, 35], [-15, 35], [-20, 30], [-30, 25], [-25, 35], [-20, 40], [-15, 45], [-10, 50]]),
-  ...bands("perplexity", "low", [[15, 80], [0, 70], [-15, 55], [-25, 45], [-35, 35], [-50, 25], [-45, 35], [-40, 45], [-35, 55], [-30, 65]]),
+  // Perplexity excluded from Investor Tools per Stage-2 Rev2 prompt 09.
   ...bands("writer", "low", [[0, 30], [-5, 30], [-10, 30], [-15, 25], [-20, 25], [-30, 20], [-25, 30], [-20, 35], [-15, 40], [-10, 45]]),
 ];
 
@@ -347,7 +369,7 @@ function exposureClassFor(id: string, exposureType: InvestmentProviderProfile["e
     cohere: "frontier_private_ai_lab",
     mistral: "sovereign_ai",
     glean: "enterprise_search_work_ai",
-    perplexity: "vertical_ai_specialist",
+    // perplexity intentionally absent — platform-only vendor per Stage-2 Rev2 prompt 09.
     xai: "frontier_private_ai_lab",
     writer: "vertical_ai_specialist",
     hebbia: "vertical_ai_specialist",
