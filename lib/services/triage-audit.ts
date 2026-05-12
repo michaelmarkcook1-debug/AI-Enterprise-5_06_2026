@@ -48,24 +48,54 @@ export interface TriageAuditEntry {
   thresholdUsed: number;
 }
 
-const DATA_DIR = path.resolve(process.cwd(), "data");
+// Audit-log location is environment-aware:
+//   - Vercel Functions filesystem is read-only outside /tmp. When
+//     we detect that runtime we route audit writes to /tmp (still
+//     readable from the cron logs, just ephemeral). The structured
+//     audit entry is ALSO console.log'd so it lands in Vercel logs.
+//   - Local dev keeps the original <repo>/data path so the file
+//     survives across runs and shows up in scripts/triage-evidence.
+const IS_VERCEL = Boolean(process.env.VERCEL || process.env.VERCEL_ENV);
+const DATA_DIR = IS_VERCEL
+  ? "/tmp/ai-enterpise"
+  : path.resolve(process.cwd(), "data");
 const AUDIT_FILE = path.join(DATA_DIR, "triage-audit.jsonl");
 
 async function ensureDataDir(): Promise<void> {
-  await fs.mkdir(DATA_DIR, { recursive: true });
+  try {
+    await fs.mkdir(DATA_DIR, { recursive: true });
+  } catch {
+    // If even /tmp fails the audit log degrades to console-only.
+  }
+}
+
+/** Best-effort append. Falls back to console.log when the filesystem
+ * refuses (EROFS / EACCES / ENOSPC) so cron runs never fail because
+ * audit writes failed. The console line is JSON so Vercel logs are
+ * structured. */
+async function safeAppend(content: string, entries: TriageAuditEntry[]): Promise<void> {
+  try {
+    await ensureDataDir();
+    await fs.appendFile(AUDIT_FILE, content, "utf8");
+  } catch (err) {
+    // Don't throw — emit each entry as a structured console line so
+    // the audit trail still exists in the platform's log store.
+    for (const e of entries) {
+      console.log(`[triage-audit] ${JSON.stringify(e)}`);
+    }
+    console.warn(`[triage-audit] file write failed, fell back to console: ${(err as Error).message}`);
+  }
 }
 
 export async function recordTriageAudit(entry: TriageAuditEntry): Promise<void> {
-  await ensureDataDir();
   const line = JSON.stringify(entry) + "\n";
-  await fs.appendFile(AUDIT_FILE, line, "utf8");
+  await safeAppend(line, [entry]);
 }
 
 export async function recordTriageAuditBatch(entries: TriageAuditEntry[]): Promise<void> {
   if (entries.length === 0) return;
-  await ensureDataDir();
   const blob = entries.map((e) => JSON.stringify(e)).join("\n") + "\n";
-  await fs.appendFile(AUDIT_FILE, blob, "utf8");
+  await safeAppend(blob, entries);
 }
 
 /** Build an audit entry from a TriageDecision. Pure helper. */

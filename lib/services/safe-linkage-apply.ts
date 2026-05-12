@@ -88,20 +88,40 @@ export function planSafeLinkages(
 
 // ─── Audit log ────────────────────────────────────────────────────────────
 
-const DATA_DIR = path.resolve(process.cwd(), "data");
+// Audit path is environment-aware: Vercel Functions filesystem is read-only
+// outside /tmp, so on that runtime we route writes to /tmp and ALSO emit each
+// entry as a structured console line (so the audit trail survives in Vercel
+// logs even though /tmp is ephemeral). Local dev keeps <repo>/data so the
+// file persists across runs.
+const IS_VERCEL = Boolean(process.env.VERCEL || process.env.VERCEL_ENV);
+const DATA_DIR = IS_VERCEL
+  ? "/tmp/ai-enterpise"
+  : path.resolve(process.cwd(), "data");
 const AUDIT_FILE = path.join(DATA_DIR, "linkage-apply-audit.jsonl");
 
 export const LINKAGE_AUDIT_FILE = AUDIT_FILE;
 
 async function ensureDataDir(): Promise<void> {
-  await fs.mkdir(DATA_DIR, { recursive: true });
+  try {
+    await fs.mkdir(DATA_DIR, { recursive: true });
+  } catch {
+    // If even /tmp fails, the audit log degrades to console-only.
+  }
 }
 
 export async function recordLinkageAuditBatch(entries: SafeLinkageAuditEntry[]): Promise<void> {
   if (entries.length === 0) return;
-  await ensureDataDir();
   const blob = entries.map((e) => JSON.stringify(e)).join("\n") + "\n";
-  await fs.appendFile(AUDIT_FILE, blob, "utf8");
+  try {
+    await ensureDataDir();
+    await fs.appendFile(AUDIT_FILE, blob, "utf8");
+  } catch (err) {
+    // Don't throw — preserve the audit trail in the platform log store.
+    for (const e of entries) {
+      console.log(`[linkage-audit] ${JSON.stringify(e)}`);
+    }
+    console.warn(`[linkage-audit] file write failed, fell back to console: ${(err as Error).message}`);
+  }
 }
 
 export function entryToAudit(args: {
