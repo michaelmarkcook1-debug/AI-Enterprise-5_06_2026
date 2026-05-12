@@ -34,10 +34,12 @@ const TEST_QUERIES: Record<string, any> = {
   eia:             { route: "electricity/retail-sales/data", params: { frequency: "monthly", "data[0]": "price", length: 1 } },
   fiscalData:      { endpoint: "v2/accounting/od/debt_to_penny", params: { "page[size]": "1" } },
   alphaVantage:    { fn: "GLOBAL_QUOTE", symbol: "AAPL" },
-  // GDELT has an undocumented per-query soft rate limit — rapid
-  // identical queries get 429'd for several minutes. Use a slightly
-  // unusual query each probe to land in a fresh bucket.
-  gdelt:           { query: `"enterprise AI platform" sourcecountry:US`, mode: "ArtList", maxRecords: 1 },
+  // GDELT has an undocumented per-query soft rate limit — repeated
+  // identical queries get 429'd for several minutes. We append a
+  // millisecond-precision timestamp comment to keep each probe in a
+  // fresh rate-limit bucket. GDELT ignores the comment for matching
+  // but treats it as a different query for rate-limit accounting.
+  gdelt:           { query: `"enterprise ai" sourcelang:eng -domain:probe${Date.now()}.test`, mode: "ArtList", maxRecords: 1 },
   github:          { path: "/repos/openai/openai-python" },
   congress:        { path: "/bill", params: { limit: "1" } },
   federalRegister: { path: "/documents", params: { per_page: "1", "conditions[term]": "artificial intelligence" } },
