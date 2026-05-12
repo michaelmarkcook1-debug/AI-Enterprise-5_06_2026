@@ -258,14 +258,17 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  /* Gap sized so the 1.45× pulse halos around each CTA do not collide. */
-  gap: 110px;
+  /* Gap sized so the 1.45× pulse halo around the primary CTA stops
+   * short of the secondary CTA — visually adjacent but never touching
+   * at peak pulse. Only the primary pulses, so half the clearance
+   * needed vs. when both pulsed. */
+  gap: 84px;
   margin-bottom: 40px;
 }
 
 @media (max-width: 720px) {
   .ctaRow {
-    gap: 56px;
+    gap: 48px;
   }
 }
 

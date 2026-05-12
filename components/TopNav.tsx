@@ -76,6 +76,12 @@ export default function TopNav() {
               }`}
             >
               {INVESTOR_TOOLS_NAV.label}
+              <span
+                className="ml-1.5 rounded-full bg-amber-100 px-1.5 py-0.5 align-middle text-[10px] font-semibold uppercase tracking-wider text-amber-900 dark:bg-amber-950/50 dark:text-amber-200"
+                aria-label="beta"
+              >
+                beta
+              </span>
             </Link>
             <div className="invisible absolute left-0 top-8 z-40 w-64 rounded-lg border border-[#dfe4da] bg-white p-2 opacity-0 shadow-lg transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100 dark:border-zinc-800 dark:bg-[#071827]">
               {INVESTOR_TOOLS_NAV.children?.map((child) => (

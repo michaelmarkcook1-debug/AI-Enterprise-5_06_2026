@@ -67,22 +67,23 @@ export default function AIEnterpriseShell() {
           Source-cited, evidence-graded AI vendor intelligence — start with an assessment of your AI platform fit.
         </p>
         <div className={styles.ctaRow}>
-          {/* Take Assessment is now the strong primary CTA per the Stage-2
-              Rev2 hero hierarchy: Assessment is a Level-1 core function,
-              Investor Tools is a Level-3 specialist module. */}
+          {/* Enter portal is the pulsing strong primary; Take Assessment
+              sits beside it as a secondary CTA. Assessment remains a
+              first-class function — it has a dedicated nav slot and is
+              named in the subtitle/lede above. */}
           <span className={styles.ctaWrap}>
             <span className={`${styles.pulseRing} ${styles.pulseRingDelay0}`} aria-hidden />
             <span className={`${styles.pulseRing} ${styles.pulseRingDelay1}`} aria-hidden />
-            <Link href="/assessment" className={styles.ctaPrimaryStrong}>
+            <Link href="/dashboard" className={styles.ctaPrimaryStrong}>
               <span className={styles.ctaDotStrong} aria-hidden />
-              Take Assessment
+              Enter portal
               <span className={styles.ctaArrow} aria-hidden>→</span>
             </Link>
           </span>
           <span className={styles.ctaWrap}>
-            <Link href="/dashboard" className={styles.ctaPrimary}>
+            <Link href="/assessment" className={styles.ctaPrimary}>
               <span className={styles.ctaDot} aria-hidden />
-              Enter portal
+              Take Assessment
               <span className={styles.ctaArrow} aria-hidden>→</span>
             </Link>
           </span>
