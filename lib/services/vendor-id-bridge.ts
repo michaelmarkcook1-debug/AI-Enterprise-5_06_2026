@@ -30,6 +30,9 @@ export const TICKER_TO_PLAIN: Record<string, string> = {
   orcl: "oracle",
   snow: "snowflake",
   avgo: "broadcom",
+  nvda: "nvidia",
+  // amd, asml, arm — already in plain form in PRODUCT_SCOPES, resolved
+  // by the prefix-strip fallback in vendorIdCandidates().
 };
 
 /** Pure helper — generate every candidate VendorProfile id we might
