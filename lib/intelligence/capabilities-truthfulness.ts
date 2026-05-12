@@ -118,6 +118,50 @@ export function capabilityRenderState(
   const sourcesPresent = (vc.sourceIds?.length ?? 0) > 0 || (vc.sourceUrls?.length ?? 0) > 0;
   const productScopeLinked = (vc.productScopeIds?.length ?? 0) > 0;
 
+  // Metadata-free fast path: the strict gate below demands source arrays +
+  // productScopeIds, but those columns are not stored on `VendorCapability`
+  // in the DB schema (the row only carries status + grade + notes). Rows
+  // written by the intelligence projector (from analyst_verified
+  // EvidenceRecord) and rows from the curated seed both lack those arrays,
+  // so without this branch every cell would render as "validation_required".
+  // We trust the row's explicit `status` field for cells that lack any of
+  // the metadata-array signals.
+  const hasArrayMetadata = sourcesPresent || productScopeLinked || vc.dataStatus !== undefined;
+  if (!hasArrayMetadata) {
+    if ((vc.status === "verified" || vc.status === "tested") && gradeRank >= 3) {
+      return {
+        mode: "verified",
+        reason: vc.notes || "Trusted row — status=verified with E3+ evidence grade.",
+        showScore: true,
+        confidence: Math.min(100, 70 + gradeRank * 5),
+        uncertaintyNote: "",
+      };
+    }
+    if (vc.status === "documented" && gradeRank >= 2) {
+      return {
+        mode: "documented",
+        reason: vc.notes || "Trusted row — status=documented.",
+        showScore: true,
+        confidence: 75,
+        uncertaintyNote: "",
+      };
+    }
+    // Anything else with a non-empty grade gets rendered as "documented"
+    // when the grade reaches E2, so we don't blanket the matrix in
+    // "validation required" for cells the seed/projector marked with
+    // lesser status. Cells with grade < E2 fall through.
+    if (gradeRank >= 2) {
+      return {
+        mode: "documented",
+        reason: vc.notes || "Trusted row — graded but unverified.",
+        showScore: true,
+        confidence: 65,
+        uncertaintyNote: "",
+      };
+    }
+    // Fall through to the strict-gate branches below.
+  }
+
   // Verified: E3+ AND at least one source AND ProductScope linkage AND not seed
   if (gradeRank >= 3 && sourcesPresent && productScopeLinked && vc.dataStatus !== "seed" && !vc.isSeedScore) {
     return {
