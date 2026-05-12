@@ -23,6 +23,7 @@ export default function BatchReview({ result, filters, paging, hasDatabase }: Pr
   const [reviewerId, setReviewerId] = useState("admin@local");
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [bulkRunning, setBulkRunning] = useState<null | { action: "approve" | "reject" | "defer"; done: number; total: number; failed: number }>(null);
 
   function updateFilter(name: string, value: string | undefined) {
     const u = new URLSearchParams(window.location.search);
@@ -40,22 +41,28 @@ export default function BatchReview({ result, filters, paging, hasDatabase }: Pr
     startTransition(() => router.replace(`/admin/evidence/batch?${u.toString()}`));
   }
 
+  async function singleAction(id: string, action: "approve" | "reject" | "defer"): Promise<{ ok: boolean; error?: string }> {
+    const res = await fetch(`/api/admin/evidence/batch-action/${encodeURIComponent(id)}`, {
+      method: "PATCH",
+      headers: {
+        "content-type": "application/json",
+        ...(token ? { "x-admin-token": token } : {}),
+      },
+      body: JSON.stringify({ action, reviewerId }),
+    });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      return { ok: false, error: body.error ?? `HTTP ${res.status}` };
+    }
+    return { ok: true };
+  }
+
   async function act(id: string, action: "approve" | "reject" | "defer") {
     setBusy(id);
     setError(null);
     try {
-      const res = await fetch(`/api/admin/evidence/batch-action/${encodeURIComponent(id)}`, {
-        method: "PATCH",
-        headers: {
-          "content-type": "application/json",
-          ...(token ? { "x-admin-token": token } : {}),
-        },
-        body: JSON.stringify({ action, reviewerId }),
-      });
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        throw new Error(body.error ?? `HTTP ${res.status}`);
-      }
+      const result = await singleAction(id, action);
+      if (!result.ok) throw new Error(result.error);
       // Refresh the page to drop the row from the working set.
       router.refresh();
     } catch (e) {
@@ -63,6 +70,40 @@ export default function BatchReview({ result, filters, paging, hasDatabase }: Pr
     } finally {
       setBusy(null);
     }
+  }
+
+  /** Run a bulk action across N proposal ids with limited concurrency.
+   * Progress + failure count surfaced live; page refreshes once at the end
+   * so the working set updates in one paint. */
+  async function bulkAct(ids: string[], action: "approve" | "reject" | "defer") {
+    if (ids.length === 0) return;
+    setError(null);
+    setBulkRunning({ action, done: 0, total: ids.length, failed: 0 });
+    const concurrency = 5;
+    let cursor = 0;
+    let done = 0;
+    let failed = 0;
+    const workers = Array.from({ length: Math.min(concurrency, ids.length) }, async () => {
+      while (cursor < ids.length) {
+        const idx = cursor++;
+        const id = ids[idx];
+        const result = await singleAction(id, action);
+        done += 1;
+        if (!result.ok) failed += 1;
+        setBulkRunning({ action, done, total: ids.length, failed });
+      }
+    });
+    await Promise.all(workers);
+    setBulkRunning(null);
+    if (failed > 0) setError(`Bulk ${action}: ${failed}/${ids.length} failed — see server logs.`);
+    router.refresh();
+  }
+
+  function confirmAndBulk(action: "approve" | "reject" | "defer", ids: string[], scope: string) {
+    if (ids.length === 0) return;
+    const verb = action === "approve" ? "Approve" : action === "reject" ? "Reject" : "Defer";
+    if (!window.confirm(`${verb} ${ids.length} proposal${ids.length === 1 ? "" : "s"} (${scope})?\n\nThis is irreversible for approve/reject. Continue?`)) return;
+    void bulkAct(ids, action);
   }
 
   const { page, total, totalAfterFilter, facets } = result;
@@ -155,6 +196,52 @@ export default function BatchReview({ result, filters, paging, hasDatabase }: Pr
         </div>
 
         {error && <div className="mt-4 rounded-lg bg-red-50 dark:bg-red-950/40 px-4 py-2 text-sm text-red-700 dark:text-red-300">Error: {error}</div>}
+
+        {/* Bulk actions toolbar */}
+        {page.length > 0 && !bulkRunning && (
+          <div className="mt-4 flex flex-wrap items-center gap-2 rounded-xl border border-emerald-300 bg-emerald-50 px-4 py-3 dark:border-emerald-900/60 dark:bg-emerald-950/30">
+            <span className="text-xs font-semibold uppercase tracking-wider text-emerald-900 dark:text-emerald-200">
+              Bulk actions
+            </span>
+            <button
+              type="button"
+              onClick={() => confirmAndBulk("approve", page.map((p) => p.proposalId), `this page · ${page.length} rows`)}
+              className="rounded-full bg-emerald-600 px-4 py-1.5 text-xs font-medium text-white hover:bg-emerald-700"
+            >Approve all on this page ({page.length})</button>
+            {totalAfterFilter > page.length && (
+              <span className="text-xs text-emerald-900/70 dark:text-emerald-300/70">
+                or
+              </span>
+            )}
+            {totalAfterFilter > page.length && (
+              <BulkAllMatchingButton
+                totalAfterFilter={totalAfterFilter}
+                filters={filters}
+                onIdsResolved={(ids) => confirmAndBulk("approve", ids, `all matching filters · ${ids.length} rows`)}
+              />
+            )}
+            <span className="ml-auto text-xs text-emerald-900/70 dark:text-emerald-300/70">
+              Defer and Reject are per-row to keep audit at proposal granularity.
+            </span>
+          </div>
+        )}
+
+        {bulkRunning && (
+          <div className="mt-4 rounded-xl border border-sky-300 bg-sky-50 px-4 py-3 text-sm text-sky-900 dark:border-sky-900/60 dark:bg-sky-950/30 dark:text-sky-200">
+            <div className="font-semibold uppercase tracking-wider text-xs">
+              Bulk {bulkRunning.action} in progress
+            </div>
+            <div className="mt-1 font-mono">
+              {bulkRunning.done} / {bulkRunning.total} processed{bulkRunning.failed > 0 ? ` · ${bulkRunning.failed} failed` : ""}
+            </div>
+            <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-sky-200 dark:bg-sky-900">
+              <div
+                className="h-full bg-sky-600 transition-all"
+                style={{ width: `${(bulkRunning.done / Math.max(1, bulkRunning.total)) * 100}%` }}
+              />
+            </div>
+          </div>
+        )}
 
         {/* Row cards */}
         <div className="mt-6 space-y-3">
@@ -274,5 +361,53 @@ function FilterSelect({ label, value, onChange, options }: {
         ))}
       </select>
     </label>
+  );
+}
+
+/** Resolve every proposal id matching the current filter set (across all
+ * pages) by asking the server for the full list, then call onIdsResolved.
+ * The batch page already pulls up to 5000 rows server-side; we just hit
+ * it with limit=0 to get the full set in one round-trip.
+ *
+ * Falls back to a single-page action if the server lookup fails. */
+function BulkAllMatchingButton({
+  totalAfterFilter,
+  filters,
+  onIdsResolved,
+}: {
+  totalAfterFilter: number;
+  filters: BatchReviewFilters;
+  onIdsResolved: (ids: string[]) => void;
+}) {
+  const [loading, setLoading] = useState(false);
+  return (
+    <button
+      type="button"
+      disabled={loading}
+      onClick={async () => {
+        setLoading(true);
+        try {
+          const u = new URLSearchParams();
+          if (filters.vendorId) u.set("vendor", filters.vendorId);
+          if (filters.confidenceBand) u.set("confidence", filters.confidenceBand);
+          if (filters.grade) u.set("grade", filters.grade);
+          if (filters.linkageStatus) u.set("linkage", filters.linkageStatus);
+          if (filters.sourceUrlContains) u.set("source", filters.sourceUrlContains);
+          if (filters.includeDeferred) u.set("includeDeferred", "1");
+          u.set("ids", "1"); // tell the server to return just ids
+          const res = await fetch(`/api/admin/evidence/batch-action/ids?${u.toString()}`);
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const body = (await res.json()) as { ids: string[] };
+          onIdsResolved(body.ids);
+        } catch (e) {
+          alert(`Failed to resolve ids: ${(e as Error).message}`);
+        } finally {
+          setLoading(false);
+        }
+      }}
+      className="rounded-full border border-emerald-600 px-4 py-1.5 text-xs font-medium text-emerald-900 hover:bg-emerald-100 disabled:opacity-50 dark:border-emerald-400 dark:text-emerald-200 dark:hover:bg-emerald-950"
+    >
+      {loading ? "Resolving…" : `Approve all matching filters (${totalAfterFilter})`}
+    </button>
   );
 }
