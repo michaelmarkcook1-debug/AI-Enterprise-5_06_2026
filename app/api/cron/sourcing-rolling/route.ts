@@ -2,21 +2,21 @@
 // ───────────────────────
 // Runs the public-data ingestion pipeline against ONE vendor per
 // invocation, rotating through the manifest. Designed for Vercel
-// Cron — hourly schedule cycles through every vendor in ~one day
-// without exceeding the 300s function timeout on any single call.
+// Cron daily schedule (Hobby plan ceiling) — full manifest cycles
+// through every vendor in ~vendorCount days (~3-4 weeks for 28 vendors).
 //
 // Trigger:
-//   - Vercel Cron (Authorization: Bearer $CRON_SECRET)
-//   - Manual: curl -H "x-admin-token: $TOKEN" -X POST /api/cron/sourcing-rolling
+//   - Vercel Cron daily at 03:05 UTC (Authorization: Bearer $CRON_SECRET)
+//   - Manual: curl -H "x-admin-token: $TOKEN" /api/cron/sourcing-rolling
 //
 // Selection:
-//   - Default: vendor index = (hours-since-epoch) mod manifestVendorCount
+//   - Default: vendor index = (days-since-epoch) mod manifestVendorCount
 //   - Override: ?vendor=vendor_writer to scope manually
 //
 // Each run persists proposals to the DB. Downstream pipeline:
 //   1. This route fetches + LLM-extracts + persists pending proposals
 //   2. /api/cron/safe-actions promotes the safe ones to evidence
-//      records (separate cron, runs more frequently)
+//      records (separate cron, runs 15 min after this one).
 
 import { isCronOrAdminRequest, cronUnauthorized } from "@/lib/cron/auth";
 import { runSourcing } from "@/lib/sourcing/runner";
@@ -33,10 +33,10 @@ function pickTodaysVendor(override?: string): string | undefined {
   if (override) return override;
   const vendors = [...new Set(SOURCE_MANIFEST.map((e) => e.vendorId))].sort();
   if (vendors.length === 0) return undefined;
-  // Hour-of-epoch modulo vendor count → deterministic rotation that
-  // cycles through every vendor over (vendors.length) hours.
-  const hourOfEpoch = Math.floor(Date.now() / (60 * 60 * 1000));
-  return vendors[hourOfEpoch % vendors.length];
+  // Day-of-epoch modulo vendor count → deterministic rotation that
+  // cycles through every vendor over (vendors.length) days.
+  const dayOfEpoch = Math.floor(Date.now() / (24 * 60 * 60 * 1000));
+  return vendors[dayOfEpoch % vendors.length];
 }
 
 async function handle(request: Request) {

@@ -3,11 +3,11 @@
   "crons": [
     {
       "path": "/api/cron/sourcing-rolling",
-      "schedule": "5 * * * *"
+      "schedule": "5 3 * * *"
     },
     {
       "path": "/api/cron/safe-actions",
-      "schedule": "20 * * * *"
+      "schedule": "20 3 * * *"
     }
   ]
 }
