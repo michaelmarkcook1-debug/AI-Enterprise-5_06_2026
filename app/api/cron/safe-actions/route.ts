@@ -28,6 +28,7 @@ import { PRODUCT_SCOPES } from "@/lib/investor-tools/product-scope";
 import { canonicaliseVendorId } from "@/lib/services/product-linkage-runner";
 import { suggestLinkage } from "@/lib/services/product-linkage";
 import { isVendorWideUrl } from "@/lib/services/vendor-wide-detector";
+import { projectEvidenceToIntelligence } from "@/lib/services/intelligence-projector";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -133,6 +134,22 @@ async function handle(request: Request) {
     errors.push(`triage: ${(err as Error).message}`);
   }
 
+  // Step 4: project verified EvidenceRecord rows into the
+  // IntelligenceVendor read-tables (VendorCapability, IntelligenceNewsItem)
+  // so /capabilities and /news reflect live data instead of seed.
+  let projection = { scanned: 0, capabilitiesUpserted: 0, newsUpserted: 0, vendorsSkipped: 0 };
+  try {
+    const r = await projectEvidenceToIntelligence(getPrisma());
+    projection = {
+      scanned: r.scannedEvidenceRows,
+      capabilitiesUpserted: r.capabilitiesUpserted,
+      newsUpserted: r.newsUpserted,
+      vendorsSkipped: r.vendorsSkipped.length,
+    };
+  } catch (err) {
+    errors.push(`projection: ${(err as Error).message}`);
+  }
+
   return Response.json({
     ok: errors.length === 0,
     startedAt,
@@ -140,6 +157,7 @@ async function handle(request: Request) {
     vendorWide,
     safeLinkage,
     triage,
+    projection,
     errors,
   });
 }
