@@ -95,18 +95,18 @@ describe("Perplexity — investor exclusion", () => {
   });
 
   it("is absent from IPO_PROFILES (process states)", () => {
-    expect(IPO_PROFILES.find((r) => r.id === "perplexity")).toBeUndefined();
+    expect(IPO_PROFILES.find((r) => r.providerId === "perplexity")).toBeUndefined();
   });
 
   it("is absent from IPO_EVIDENCE_QUALITY (evidence signals)", () => {
-    expect(IPO_EVIDENCE_QUALITY.find((r) => r.id === "perplexity")).toBeUndefined();
+    expect(IPO_EVIDENCE_QUALITY.find((r) => r.providerId === "perplexity")).toBeUndefined();
   });
 
   it("is absent from IPO_FORECASTS", () => {
-    expect(IPO_FORECASTS.find((r) => r.id === "perplexity")).toBeUndefined();
+    expect(IPO_FORECASTS.find((r) => r.providerId === "perplexity")).toBeUndefined();
   });
 
   it("is absent from POST_IPO_FLUCTUATION_BANDS", () => {
-    expect(POST_IPO_FLUCTUATION_BANDS.find((r) => r.id === "perplexity")).toBeUndefined();
+    expect(POST_IPO_FLUCTUATION_BANDS.find((r) => r.providerId === "perplexity")).toBeUndefined();
   });
 });

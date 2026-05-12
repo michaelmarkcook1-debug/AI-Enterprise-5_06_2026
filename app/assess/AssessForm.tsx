@@ -1,8 +1,9 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { OwnershipLegend, VendorNameWithOwnership, ownershipChipClassName } from "@/components/ownership-indicator";
+import { ASSESSMENT_FORM_STATE_KEY, type AssessmentTier } from "@/lib/assessment/tiers";
 
 interface Option { id: string; label?: string; name?: string }
 
@@ -12,29 +13,90 @@ interface Props {
   objectives: { id: string; label: string }[];
   ecosystems: string[];
   vendors: { id: string; name: string; category: string; ownershipType: string }[];
+  tier?: AssessmentTier;
 }
 
 const STEPS = ["Context", "Use case", "Risk & ecosystem", "Vendors"] as const;
 
-export default function AssessForm({ industries, useCases, objectives, ecosystems, vendors }: Props) {
+interface PersistedFormState {
+  industry: string;
+  orgSize: string;
+  aiMaturity: string;
+  region: string;
+  primaryObjectives: string[];
+  selectedUseCases: string[];
+  dataSensitivity: number;
+  riskTolerance: number;
+  autonomyAppetite: string;
+  ecosystem: string[];
+  deploymentPreference: string;
+  budgetSensitivity: number;
+  vendorIds: string[];
+}
+
+function loadPersisted(): Partial<PersistedFormState> | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.sessionStorage.getItem(ASSESSMENT_FORM_STATE_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw) as Partial<PersistedFormState>;
+  } catch {
+    return null;
+  }
+}
+
+function savePersisted(state: PersistedFormState): void {
+  if (typeof window === "undefined") return;
+  try {
+    window.sessionStorage.setItem(ASSESSMENT_FORM_STATE_KEY, JSON.stringify(state));
+  } catch {
+    // sessionStorage may be unavailable (privacy mode) — proceed without persistence.
+  }
+}
+
+export default function AssessForm({ industries, useCases, objectives, ecosystems, vendors, tier = "quick" }: Props) {
   const router = useRouter();
   const [step, setStep] = useState(0);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [industry, setIndustry] = useState(industries[0]?.id ?? "");
-  const [orgSize, setOrgSize] = useState("enterprise");
-  const [aiMaturity, setAiMaturity] = useState("piloting");
-  const [region, setRegion] = useState("uk");
-  const [primaryObjectives, setPrimaryObjectives] = useState<string[]>(["productivity"]);
-  const [selectedUseCases, setSelectedUseCases] = useState<string[]>([]);
-  const [dataSensitivity, setDataSensitivity] = useState(3);
-  const [riskTolerance, setRiskTolerance] = useState(3);
-  const [autonomyAppetite, setAutonomyAppetite] = useState("human_in_loop");
-  const [ecosystem, setEcosystem] = useState<string[]>([]);
-  const [deploymentPreference, setDeploymentPreference] = useState("saas");
-  const [budgetSensitivity, setBudgetSensitivity] = useState(3);
-  const [vendorIds, setVendorIds] = useState<string[]>([]);
+  // Hydrate from sessionStorage on mount so a user switching tiers keeps answers.
+  const initial = useRef<Partial<PersistedFormState> | null>(null);
+  if (initial.current === null && typeof window !== "undefined") {
+    initial.current = loadPersisted() ?? {};
+  }
+  const seed = initial.current ?? {};
+
+  const [industry, setIndustry] = useState(seed.industry ?? industries[0]?.id ?? "");
+  const [orgSize, setOrgSize] = useState(seed.orgSize ?? "enterprise");
+  const [aiMaturity, setAiMaturity] = useState(seed.aiMaturity ?? "piloting");
+  const [region, setRegion] = useState(seed.region ?? "uk");
+  const [primaryObjectives, setPrimaryObjectives] = useState<string[]>(seed.primaryObjectives ?? ["productivity"]);
+  const [selectedUseCases, setSelectedUseCases] = useState<string[]>(seed.selectedUseCases ?? []);
+  const [dataSensitivity, setDataSensitivity] = useState(seed.dataSensitivity ?? 3);
+  const [riskTolerance, setRiskTolerance] = useState(seed.riskTolerance ?? 3);
+  const [autonomyAppetite, setAutonomyAppetite] = useState(seed.autonomyAppetite ?? "human_in_loop");
+  const [ecosystem, setEcosystem] = useState<string[]>(seed.ecosystem ?? []);
+  const [deploymentPreference, setDeploymentPreference] = useState(seed.deploymentPreference ?? "saas");
+  const [budgetSensitivity, setBudgetSensitivity] = useState(seed.budgetSensitivity ?? 3);
+  const [vendorIds, setVendorIds] = useState<string[]>(seed.vendorIds ?? []);
+
+  // Persist whenever any input changes so a tier switch never loses state.
+  useEffect(() => {
+    savePersisted({
+      industry, orgSize, aiMaturity, region,
+      primaryObjectives, selectedUseCases,
+      dataSensitivity, riskTolerance, autonomyAppetite,
+      ecosystem, deploymentPreference, budgetSensitivity,
+      vendorIds,
+    });
+  }, [
+    industry, orgSize, aiMaturity, region,
+    primaryObjectives, selectedUseCases,
+    dataSensitivity, riskTolerance, autonomyAppetite,
+    ecosystem, deploymentPreference, budgetSensitivity,
+    vendorIds,
+  ]);
 
   function toggle(arr: string[], setter: (v: string[]) => void, id: string) {
     setter(arr.includes(id) ? arr.filter((x) => x !== id) : [...arr, id]);
@@ -187,6 +249,29 @@ export default function AssessForm({ industries, useCases, objectives, ecosystem
                 selected={vendorIds}
                 onToggle={(id) => toggle(vendorIds, setVendorIds, id)}
               />
+            </div>
+          )}
+
+          {tier === "guided" && step === STEPS.length - 1 && (
+            <div className="mt-8 rounded-lg border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-900 dark:border-sky-900/60 dark:bg-sky-950/30 dark:text-sky-200">
+              <div className="font-semibold">Guided depth (Phase 1B)</div>
+              <p className="mt-1 text-xs">
+                Guided adds adaptive follow-ups, governance strictness, integration depth, and human-review model.
+                These inputs ship in Phase 1B per ASSESSMENT_GRANULARITY_UPGRADE_PLAN.md — your current answers are
+                preserved and will be re-used when Phase 1B lands.
+              </p>
+            </div>
+          )}
+
+          {tier === "advanced" && step === STEPS.length - 1 && (
+            <div className="mt-8 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-200">
+              <div className="font-semibold">Advanced depth (Phase 1B)</div>
+              <p className="mt-1 text-xs">
+                Advanced adds procurement-grade inputs (switching cost, sovereignty, RFP cycle), the four output
+                modes (Executive · Buyer · Technical · Procurement), and stack-based recommendations per
+                ASSESSMENT_MULTI_VENDOR_STACK_OUTPUT_PLAN.md. Your current answers are preserved and will be
+                re-used when Phase 1B lands.
+              </p>
             </div>
           )}
 
