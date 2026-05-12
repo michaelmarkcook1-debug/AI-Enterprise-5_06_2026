@@ -173,9 +173,14 @@ function OrbitalRings() {
 
 function Ring({ rx, ry, planets }: { rx: number; ry: number; planets: number }) {
   // Distribute planet dots around the ellipse using parametric form.
+  // Coordinates rounded to 4 decimal places so server and client V8
+  // produce identical attribute strings during hydration. Without this
+  // rounding, Math.sin / Math.cos can differ in the last bit between
+  // Node and the browser → "hydration mismatch" warnings.
+  const round = (n: number) => Math.round(n * 10000) / 10000;
   const dots = Array.from({ length: planets }, (_, i) => {
     const angle = (i / planets) * Math.PI * 2 + (rx % 2 === 0 ? 0 : 0.4);
-    return { x: rx * Math.cos(angle), y: ry * Math.sin(angle), r: 1.6 + (i % 3) * 0.5 };
+    return { x: round(rx * Math.cos(angle)), y: round(ry * Math.sin(angle)), r: 1.6 + (i % 3) * 0.5 };
   });
   return (
     <g>
