@@ -25,6 +25,10 @@ export interface ConnectorHealth {
   envVars: string[];
   configured: boolean;
   status: ConnectorStatus;
+  /** Optional human-readable status detail — e.g. "EIA_API_KEY is required"
+   * when status is `not_configured`. Surfaced in /api/data-sources/status
+   * and the /admin/data-sources page. */
+  message?: string;
   rateLimitNotes?: string;
   homepageUrl: string;
   apiDocsUrl: string;
