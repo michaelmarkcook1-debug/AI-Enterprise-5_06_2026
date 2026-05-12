@@ -26,6 +26,13 @@ import { SOURCE_MANIFEST, manifestForVendor } from "../sourcing/manifest";
 const HOME = "https://www.aienterpise.app/admin/ingestion";
 const DOCS = "https://github.com/anthropics/claude-code"; // internal pipeline docs link
 
+export const VENDOR_DOCS_NOT_CONFIGURED_MESSAGE =
+  "ANTHROPIC_API_KEY is required (must start with sk-ant-) — the LLM extractor cannot run without it";
+
+export function isAnthropicKeyValid(key: string | undefined): boolean {
+  return Boolean(key && key.startsWith("sk-ant-") && key.length > 20);
+}
+
 export interface VendorDocsQuery {
   vendorId?: string;
 }
@@ -38,7 +45,7 @@ interface VendorDocsRecord {
 
 export const vendorDocsConnector: Connector<VendorDocsQuery, VendorDocsRecord> = {
   health(): ConnectorHealth {
-    const llmConfigured = Boolean(process.env.ANTHROPIC_API_KEY && process.env.ANTHROPIC_API_KEY.startsWith("sk-ant-"));
+    const llmConfigured = isAnthropicKeyValid(process.env.ANTHROPIC_API_KEY);
     const last = getLastFetch("vendorDocs");
     return {
       id: "vendorDocs",
@@ -49,6 +56,7 @@ export const vendorDocsConnector: Connector<VendorDocsQuery, VendorDocsRecord> =
       envVars: ["ANTHROPIC_API_KEY"],
       configured: llmConfigured,
       status: llmConfigured ? "ok" : "not_configured",
+      message: llmConfigured ? undefined : VENDOR_DOCS_NOT_CONFIGURED_MESSAGE,
       homepageUrl: HOME,
       apiDocsUrl: DOCS,
       rateLimitNotes: "Per-source rate limit determined by each vendor's robots / WAF policy. Polite back-off + URL-repair agent on 4xx.",
@@ -73,6 +81,20 @@ export const vendorDocsConnector: Connector<VendorDocsQuery, VendorDocsRecord> =
    */
   async fetch(query?: VendorDocsQuery): Promise<FetchResult<VendorDocsRecord>> {
     const fetchedAt = new Date().toISOString();
+    // Honest gate: if the LLM extractor can't run, we don't pretend the
+    // pipeline is ready. The fetch step itself doesn't need the key, but
+    // returning ok=true here would falsely imply vendorDocs is producing
+    // evidence proposals.
+    if (!isAnthropicKeyValid(process.env.ANTHROPIC_API_KEY)) {
+      return {
+        ok: false,
+        status: "not_configured",
+        records: [],
+        recordCount: 0,
+        fetchedAt,
+        error: VENDOR_DOCS_NOT_CONFIGURED_MESSAGE,
+      };
+    }
     const entries = query?.vendorId ? manifestForVendor(query.vendorId) : SOURCE_MANIFEST;
 
     if (entries.length === 0) {

@@ -1,11 +1,16 @@
 /**
  * SEC EDGAR connector.
  *
- * No API key required, but SEC requires a compliant User-Agent identifying
- * who you are. Set SEC_USER_AGENT="AI Enterprise contact@example.com".
+ * No API key required, but SEC requires a compliant User-Agent that
+ * identifies who you are AND contains a contact email. Set
+ * SEC_USER_AGENT="AI Enterprise contact@example.com".
  *
  * Use cases: 10-K, 10-Q, 8-K, S-1 filings; XBRL company facts; CIK lookup.
  * Rate limit: 10 req/sec. Polite back-off recommended.
+ *
+ * Output shape note: SEC returns JSON natively (no string-encoded
+ * numbers like EIA). `companyFacts` returns the XBRL tree with
+ * `units.USD[].val` as actual numbers.
  */
 
 import type { Connector, ConnectorHealth, FetchResult } from "./types";
@@ -15,6 +20,16 @@ const HOME = "https://www.sec.gov/edgar";
 const DOCS = "https://www.sec.gov/edgar/sec-api-documentation";
 const SUBMISSIONS = (cik: string) => `https://data.sec.gov/submissions/CIK${cik.padStart(10, "0")}.json`;
 const COMPANY_FACTS = (cik: string) => `https://data.sec.gov/api/xbrl/companyfacts/CIK${cik.padStart(10, "0")}.json`;
+
+export const SEC_NOT_CONFIGURED_MESSAGE =
+  "SEC_USER_AGENT is required and must contain a contact email (e.g. \"AI Enterprise contact@example.com\")";
+
+export function isSecUserAgentValid(ua: string | undefined): ua is string {
+  if (!ua) return false;
+  // Must contain an email (at-sign with text either side) AND be at least
+  // 8 chars to discourage placeholder values like "x@y".
+  return /\S+@\S+\.\S+/.test(ua) && ua.length >= 8;
+}
 
 export interface SecQuery {
   cik: string;
@@ -31,6 +46,7 @@ interface SecRecord {
 export const secConnector: Connector<SecQuery, SecRecord> = {
   health(): ConnectorHealth {
     const ua = process.env.SEC_USER_AGENT;
+    const ok = isSecUserAgentValid(ua);
     const last = getLastFetch("sec");
     return {
       id: "sec",
@@ -39,8 +55,9 @@ export const secConnector: Connector<SecQuery, SecRecord> = {
       tier: "official_government",
       requiresKey: false,
       envVars: ["SEC_USER_AGENT"],
-      configured: Boolean(ua && /@/.test(ua)),
-      status: ua && /@/.test(ua) ? "ok" : "not_configured",
+      configured: ok,
+      status: ok ? "ok" : "not_configured",
+      message: ok ? undefined : SEC_NOT_CONFIGURED_MESSAGE,
       homepageUrl: HOME,
       apiDocsUrl: DOCS,
       rateLimitNotes: "10 req/sec. Polite back-off recommended. SEC may block requests without a contact-bearing User-Agent.",
@@ -57,8 +74,8 @@ export const secConnector: Connector<SecQuery, SecRecord> = {
   async fetch(query?: SecQuery): Promise<FetchResult<SecRecord>> {
     const fetchedAt = new Date().toISOString();
     const ua = process.env.SEC_USER_AGENT;
-    if (!ua || !/@/.test(ua)) {
-      return { ok: false, status: "not_configured", records: [], recordCount: 0, fetchedAt, error: "SEC_USER_AGENT must be set and contain a contact email." };
+    if (!isSecUserAgentValid(ua)) {
+      return { ok: false, status: "not_configured", records: [], recordCount: 0, fetchedAt, error: SEC_NOT_CONFIGURED_MESSAGE };
     }
     if (!query?.cik) {
       return { ok: false, status: "error", records: [], recordCount: 0, fetchedAt, error: "cik required" };
