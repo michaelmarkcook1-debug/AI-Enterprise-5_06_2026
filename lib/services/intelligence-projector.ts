@@ -28,6 +28,7 @@
 // while live data slowly takes over.
 
 import type { PrismaClient } from "../../generated/prisma/client";
+import { VENDOR_CAPABILITIES } from "../intelligence/seed-capabilities";
 
 /** Map ingestion-domain enum → capability tracker id. Domains that don't
  * map to a capability family (capital_resilience, market_position,
@@ -64,6 +65,10 @@ export interface ProjectorResult {
   vendorsResolved: number;
   vendorsSkipped: { vendorId: string; reason: string }[];
   capabilitiesUpserted: number;
+  /** Pairs the projector would have written but the seed or an earlier
+   * projector run already had stronger evidence. Reported so operators
+   * can see when low-grade ingestion is being suppressed by curated data. */
+  capabilitiesSkippedNoDowngrade: number;
   newsUpserted: number;
   /** Seed news items deleted once we have ≥5 live items, so the
    * "Recent news" panels stop showing [MOCK]-prefixed scaffolding. */
@@ -193,9 +198,47 @@ export async function projectEvidenceToIntelligence(
   const knownCapabilityIds = new Set(knownCapabilities.map((c) => c.id));
 
   // 5. Upsert each bucket as a VendorCapability row.
+  //
+  // No-downgrade guard: if the (vendor, capability) pair already has a row
+  // (from a previous projector run or DB seeder) at a HIGHER evidence
+  // grade than what we'd write now, leave it alone. Otherwise low-grade
+  // evidence from a single source could downgrade a cell the curated
+  // seed (or earlier projector run with better evidence) classified
+  // higher.
+  const existingPairs = await prisma.vendorCapability.findMany({
+    where: {
+      OR: [...buckets.values()].map((b) => ({
+        vendorId: b.intelligenceVendorId,
+        capabilityId: b.capabilityId,
+      })),
+    },
+    select: { vendorId: true, capabilityId: true, evidenceGrade: true },
+  });
+  const existingGrade = new Map<string, string>();
+  for (const row of existingPairs) {
+    existingGrade.set(`${row.vendorId}::${row.capabilityId}`, row.evidenceGrade);
+  }
+  // Seed cells aren't in the DB, but they ARE rendered (via the merge in
+  // listVendorCapabilities). Treat their grades as baselines too so we
+  // never downgrade a curated seed cell.
+  for (const seed of VENDOR_CAPABILITIES) {
+    const key = `${seed.vendorId}::${seed.capabilityId}`;
+    const current = existingGrade.get(key);
+    if (!current || (GRADE_RANK[seed.evidenceGrade] ?? 0) > (GRADE_RANK[current] ?? 0)) {
+      existingGrade.set(key, seed.evidenceGrade);
+    }
+  }
+
   let capabilitiesUpserted = 0;
+  let capabilitiesSkippedNoDowngrade = 0;
   for (const bucket of buckets.values()) {
     if (!knownCapabilityIds.has(bucket.capabilityId)) continue;
+    const key = `${bucket.intelligenceVendorId}::${bucket.capabilityId}`;
+    const prev = existingGrade.get(key);
+    if (prev && (GRADE_RANK[prev] ?? 0) > (GRADE_RANK[bucket.bestGrade] ?? 0)) {
+      capabilitiesSkippedNoDowngrade += 1;
+      continue;
+    }
     const avgScore = bucket.scores.reduce((s, n) => s + n, 0) / bucket.scores.length;
     const maturityScore = Math.max(0, Math.min(100, avgScore));
     await prisma.vendorCapability.upsert({
@@ -306,6 +349,7 @@ impactScore: Math.max(75, Math.min(100, row.rawScore || 75)),
     vendorsResolved: plainToIntelligence.size,
     vendorsSkipped,
     capabilitiesUpserted,
+    capabilitiesSkippedNoDowngrade,
     newsUpserted,
     seedNewsEvicted,
     startedAt: startedAt.toISOString(),

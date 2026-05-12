@@ -146,10 +146,8 @@ export function capabilityRenderState(
         uncertaintyNote: "",
       };
     }
-    // Anything else with a non-empty grade gets rendered as "documented"
-    // when the grade reaches E2, so we don't blanket the matrix in
-    // "validation required" for cells the seed/projector marked with
-    // lesser status. Cells with grade < E2 fall through.
+    // Anything else with grade ≥ E2 → documented (covers "tested" rows
+    // at E2 and any other status the seed produces).
     if (gradeRank >= 2) {
       return {
         mode: "documented",
@@ -159,7 +157,20 @@ export function capabilityRenderState(
         uncertaintyNote: "",
       };
     }
-    // Fall through to the strict-gate branches below.
+    // Low-grade cells (E0 / E1) — a row exists but the supporting
+    // evidence isn't strong enough for a confident mode. Render as
+    // "seed" so users see a clear "needs better source" signal instead
+    // of the meaningless "SOURCE VALIDATION REQUIRED" that the strict
+    // gate would otherwise produce. Never fall through from this
+    // branch — if a VendorCapability row exists at all, we owe the
+    // user a definite mode, not a placeholder.
+    return {
+      mode: "seed",
+      reason: vc.notes || "Low-grade evidence — refresh from /admin/ingestion or approve stronger evidence to upgrade.",
+      showScore: true,
+      confidence: 40,
+      uncertaintyNote: "",
+    };
   }
 
   // Verified: E3+ AND at least one source AND ProductScope linkage AND not seed
