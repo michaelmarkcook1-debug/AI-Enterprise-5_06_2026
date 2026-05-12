@@ -7,44 +7,9 @@ import type { EvidenceProposal, PrismaClient, ProposalStatus } from "../../gener
 
 type Client = PrismaClient;
 
-/** Map ticker-style ids (used by PRODUCT_SCOPES) to the plain-name ids
- * used by VendorProfile. Falls back to identity for non-ticker ids. */
-const TICKER_TO_PLAIN: Record<string, string> = {
-  msft: "microsoft",
-  googl: "google",
-  amzn: "aws",
-  crm: "salesforce",
-  now: "servicenow",
-  orcl: "oracle",
-  snow: "snowflake",
-  avgo: "broadcom",
-};
-
-/** Resolve the EvidenceProposal.vendorId (e.g. `vendor_writer`,
- * `vendor_microsoft`) to a VendorProfile.id (e.g. `writer`, `microsoft`).
- * Returns null when no profile matches — caller surfaces a useful error
- * instead of letting the FK violation propagate. */
-async function resolveVendorProfileId(c: Client, vendorId: string): Promise<string | null> {
-  // Candidate forms, in order of preference:
-  //   1. exact match (already plain)
-  //   2. strip `vendor_` prefix
-  //   3. strip `vendor_` then map ticker → plain
-  //   4. map ticker → plain on the raw id
-  const candidates = new Set<string>();
-  candidates.add(vendorId);
-  if (vendorId.startsWith("vendor_")) {
-    const stripped = vendorId.slice("vendor_".length);
-    candidates.add(stripped);
-    if (TICKER_TO_PLAIN[stripped]) candidates.add(TICKER_TO_PLAIN[stripped]);
-  }
-  if (TICKER_TO_PLAIN[vendorId]) candidates.add(TICKER_TO_PLAIN[vendorId]);
-
-  const hit = await c.vendorProfile.findFirst({
-    where: { id: { in: [...candidates] } },
-    select: { id: true },
-  });
-  return hit?.id ?? null;
-}
+// resolveVendorProfileId lives in vendor-id-bridge.ts so the seed
+// script + approval path use the same logic.
+import { resolveVendorProfileId } from "./vendor-id-bridge";
 
 export async function listProposals(
   filter: { status?: ProposalStatus; vendorId?: string } = {},
