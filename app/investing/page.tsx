@@ -120,7 +120,7 @@ export default async function InvestingDashboardPage() {
                         {category}
                       </span>
                     ))}
-                    <SeedDataBadge label={item.sourceKind === "real" ? "Documented" : "Seed source"} />
+                    <SeedDataBadge label={item.sourceKind === "real" ? "Documented" : "Seed source"} provenance={item.sourceKind === "real" ? "live" : "seed"} />
                   </div>
                 </div>
                 <div className="font-mono text-sm">Impact {item.impactScore}</div>

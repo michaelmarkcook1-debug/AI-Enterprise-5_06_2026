@@ -234,7 +234,18 @@ function mapNews(row: PrismaNewsItem): NewsItem {
     summary: row.summary,
     sourceName: row.sourceName,
     sourceUrl: optionalString(row.sourceUrl),
-    sourceKind: row.sourceName.toLowerCase().includes("seed") ? "seed" : "real",
+    // Seed detection: any of (a) explicit "seed" in the source name,
+    // (b) the [MOCK] prefix used by `lib/intelligence/seed-news.ts`,
+    // (c) the "stub" / "placeholder" markers used by other seed fixtures,
+    // or (d) a missing source URL. The previous implementation matched
+    // only "seed" as a substring, which let every [MOCK]-prefixed seed
+    // item through as "real" and rendered a dishonest green badge on
+    // the dashboard's recent-news cards.
+    sourceKind:
+      /\[mock\]|\bseed\b|\bstub\b|\bplaceholder\b/i.test(row.sourceName) ||
+      !optionalString(row.sourceUrl)
+        ? "seed"
+        : "real",
     publishedAt: toIso(row.publishedAt),
     vendors: row.vendors,
     categories: row.categories as NewsCategory[],

@@ -37,7 +37,7 @@ export default async function IpoForecastProviderPage({ params }: { params: Prom
       <div className="mt-5 grid gap-5 lg:grid-cols-[1.1fr_0.9fr]">
         <Panel
           title="Post-IPO fluctuation band"
-          action={<SeedDataBadge label={bands.length === 10 ? "Percentage bands" : "Disabled"} reason="Bands are relative to IPO offer price, not dollar prices." />}
+          action={<span className="inline-flex items-center gap-1 rounded border border-amber-300 bg-amber-100/60 px-1.5 py-0.5 text-[11px] font-bold uppercase tracking-wide text-amber-900 dark:border-amber-700 dark:bg-amber-950/60 dark:text-amber-200" title="Bands are relative to IPO offer price, not dollar prices.">{bands.length === 10 ? "Percentage bands" : "Disabled"}</span>}
         >
           {disabledReason || bands.length !== 10 ? (
             <DisabledForecast reason={disabledReason ?? "Post-IPO fluctuation model disabled until IPO signal quality improves."} />
@@ -51,7 +51,7 @@ export default async function IpoForecastProviderPage({ params }: { params: Prom
             <div className="flex flex-wrap gap-2">
               <Confidence value={forecast.confidenceScore} />
               <SeedDataBadge label="Modelled estimate" />
-              <SeedDataBadge label={forecast.sourceRequired ? "Source refresh required" : "Source backed"} />
+              <SeedDataBadge label={forecast.sourceRequired ? "Source refresh required" : "Source backed"} provenance={forecast.sourceRequired ? "seed" : "live"} />
             </div>
             <p className="text-[#596151] dark:text-zinc-400">{forecast.notes}</p>
             <dl className="grid grid-cols-2 gap-3 text-xs">

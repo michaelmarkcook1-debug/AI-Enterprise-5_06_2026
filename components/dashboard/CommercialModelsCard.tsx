@@ -23,7 +23,16 @@ export default function CommercialModelsCard() {
   return (
     <Panel
       title="Commercial LLM Models by Vendor"
-      action={<SeedDataBadge label="Source-backed seed inventory" reason="Records cite official vendor docs; live API verification flips dataStatus to 'verified'." />}
+      action={
+        // Flip green once the inventory contains verified first-party rows
+        // AND there are no stale entries. Mixed states stay seed-labelled so
+        // operators see they need to refresh.
+        <SeedDataBadge
+          label={summary.vendorsWithFirstPartyModels > 0 && summary.staleInventoryCount === 0 ? "Source-backed verified" : "Source-backed seed inventory"}
+          provenance={summary.vendorsWithFirstPartyModels > 0 && summary.staleInventoryCount === 0 ? "live" : "seed"}
+          reason="Records cite official vendor docs; live API verification flips dataStatus to 'verified'."
+        />
+      }
     >
       <p className="mb-4 text-xs leading-5 text-[#596151] dark:text-zinc-400">
         Source-backed model availability, separated by owned models, hosted third-party models, and uncertain entries.

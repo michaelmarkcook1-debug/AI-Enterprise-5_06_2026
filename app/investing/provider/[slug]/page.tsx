@@ -177,7 +177,7 @@ export default async function ProviderInvestmentPage({ params }: { params: Promi
                   <div className="font-semibold">{scope.productName}</div>
                   <div className="mt-1 text-[#66705f] dark:text-zinc-500">{label(scope.productCategory)} | {scope.productType}</div>
                 </div>
-                <SeedDataBadge label={label(scope.evidenceStatus)} />
+                <SeedDataBadge label={label(scope.evidenceStatus)} provenance={scope.evidenceStatus === "verified" || scope.evidenceStatus === "documented" ? "live" : "seed"} />
               </div>
               <p className="mt-2 leading-5 text-[#596151] dark:text-zinc-400">{scope.uncertaintyNote}</p>
               <div className="mt-2 flex flex-wrap gap-2">

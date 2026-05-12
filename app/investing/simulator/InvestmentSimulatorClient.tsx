@@ -258,7 +258,7 @@ export default function InvestmentSimulatorClient({
   return (
     <div className="space-y-5">
       <div className="flex flex-wrap items-center gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-900/70 dark:bg-amber-950/50 dark:text-amber-200">
-        <SeedDataBadge label="Scenario tool" reason="Hypothetical simulator, not financial advice." />
+        <span className="inline-flex items-center gap-1 rounded border border-amber-300 bg-amber-100/60 px-1.5 py-0.5 text-[11px] font-bold uppercase tracking-wide text-amber-900 dark:border-amber-700 dark:bg-amber-950/60 dark:text-amber-200" title="Hypothetical simulator, not financial advice.">Scenario tool</span>
         <span>{DISCLAIMER}</span>
       </div>
 
