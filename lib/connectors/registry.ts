@@ -16,6 +16,7 @@ import { githubConnector } from "./github";
 import { congressConnector } from "./congress";
 import { federalRegisterConnector } from "./federalRegister";
 import { vendorDocsConnector } from "./vendorDocs";
+import { yahooFinanceConnector } from "./yahooFinance";
 
 // Loose typing here is deliberate — connectors take different query shapes.
 // The registry only needs the common health()/fetch() surface for listing.
@@ -32,6 +33,7 @@ export const CONNECTORS: Record<string, Connector<unknown, unknown>> = {
   congress: congressConnector as unknown as Connector<unknown, unknown>,
   federalRegister: federalRegisterConnector as unknown as Connector<unknown, unknown>,
   vendorDocs: vendorDocsConnector as unknown as Connector<unknown, unknown>,
+  yahooFinance: yahooFinanceConnector as unknown as Connector<unknown, unknown>,
 };
 
 export function listConnectorHealth() {
