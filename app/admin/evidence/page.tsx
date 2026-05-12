@@ -88,6 +88,17 @@ export default async function EvidenceReviewPage() {
         reason: s.reason,
         safeToApply: s.safeToApply,
       })),
+      // Full vendor catalogue so the row's manual product picker has
+      // options to render. Vendor canonicalised so `vendor_microsoft`
+      // and `microsoft` both resolve to the same product list.
+      availableProducts: vendorScopes.map((s) => ({
+        id: s.id,
+        name: s.productName,
+        category: s.productCategory,
+      })),
+      // Current linkage state (what's already saved on the row).
+      currentProductScopeIds: p.productScopeIds ?? [],
+      currentIsVendorWide: p.isVendorWide ?? false,
     };
   });
   return (

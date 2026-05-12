@@ -22,6 +22,14 @@ export interface BatchReviewRow {
   triageReasons: string[];
   linkageStatus: ProposalLinkageResult["status"] | "linked";
   linkedProductIds: string[];
+  /** Vendor's full product catalogue — used by the inline picker so
+   * operators can attach products without leaving the batch screen. */
+  availableProducts?: { id: string; name: string; category: string }[];
+  /** Top-3 ranked suggestions from the linkage suggester. Shown
+   * pinned at the top of the picker with a "safe" tag where eligible. */
+  linkageSuggestions?: { productScopeId: string; productName: string; confidence: number; reason: string; safeToApply: boolean }[];
+  /** Whether the row's existing linkage was operator-marked vendor-wide. */
+  isVendorWide?: boolean;
   /** Set when the proposal carries the DEFERRED sentinel in reviewNotes. */
   isDeferred: boolean;
 }

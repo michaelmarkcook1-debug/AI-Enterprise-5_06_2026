@@ -125,6 +125,7 @@ export default async function BatchReviewPage({ searchParams }: PageProps) {
     );
     const hasLinkage = (p.productScopeIds?.length ?? 0) > 0;
 
+    const vendorScopes = scopesByVendor.get(canonicaliseVendorId(p.vendorId)) ?? [];
     rows.push({
       proposalId: p.id,
       vendorId: p.vendorId,
@@ -139,6 +140,21 @@ export default async function BatchReviewPage({ searchParams }: PageProps) {
       triageReasons: decision.reasons,
       linkageStatus: hasLinkage ? "linked" : linkage.status,
       linkedProductIds: p.productScopeIds ?? [],
+      // Picker payload — vendor catalogue + suggestions + current
+      // vendor-wide flag. Lets the operator attach products inline.
+      availableProducts: vendorScopes.map((s) => ({
+        id: s.id,
+        name: s.productName,
+        category: s.productCategory,
+      })),
+      linkageSuggestions: linkage.suggestions.slice(0, 3).map((s) => ({
+        productScopeId: s.productScopeId,
+        productName: s.productName,
+        confidence: s.confidence,
+        reason: s.reason,
+        safeToApply: s.safeToApply,
+      })),
+      isVendorWide: p.isVendorWide ?? false,
       isDeferred: isDeferred(p.reviewNotes),
     });
   }

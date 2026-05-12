@@ -11,6 +11,12 @@ interface LinkageSuggestion {
   safeToApply: boolean;
 }
 
+interface AvailableProduct {
+  id: string;
+  name: string;
+  category: string;
+}
+
 interface Proposal {
   id: string;
   vendorId: string;
@@ -31,6 +37,9 @@ interface Proposal {
   triageUnsafeCategory?: string;
   linkageStatus?: string;
   linkageSuggestions?: LinkageSuggestion[];
+  availableProducts?: AvailableProduct[];
+  currentProductScopeIds?: string[];
+  currentIsVendorWide?: boolean;
 }
 
 const LANE_LABEL: Record<NonNullable<Proposal["triageLane"]>, { label: string; classes: string }> = {
@@ -253,32 +262,20 @@ export default function EvidenceReview({
                   <strong>Source:</strong> {p.sourceUrl}
                 </div>
               )}
-              {p.linkageSuggestions && p.linkageSuggestions.length > 0 && (
-                <div className="mt-2 rounded-lg border border-sky-200 bg-sky-50 px-3 py-2 text-xs dark:border-sky-900/60 dark:bg-sky-950/30">
-                  <div className="font-semibold text-sky-900 dark:text-sky-200">
-                    Suggested product linkage{p.linkageStatus ? ` · ${p.linkageStatus}` : ""}
-                  </div>
-                  <ul className="mt-1 space-y-0.5 text-sky-900 dark:text-sky-200">
-                    {p.linkageSuggestions.map((s) => (
-                      <li key={s.productScopeId}>
-                        <span className="font-mono">{(s.confidence * 100).toFixed(0)}%</span>{" "}
-                        <strong>{s.productName}</strong>
-                        {s.safeToApply && (
-                          <span className="ml-1 rounded bg-emerald-200 px-1 text-[10px] text-emerald-900 dark:bg-emerald-900/40 dark:text-emerald-200">
-                            safe
-                          </span>
-                        )}
-                        <span className="ml-1 text-zinc-500">— {s.reason}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              {p.linkageSuggestions && p.linkageSuggestions.length === 0 && p.linkageStatus && (
-                <div className="mt-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900 dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-200">
-                  <strong>Linkage:</strong> {p.linkageStatus.replace(/_/g, " ")} — operator must select product manually.
-                </div>
-              )}
+              {/* Product linkage — picker + suggestions all in one block.
+                  Replaces the previous dead-end "operator must select
+                  manually" message with a working multi-select. */}
+              <ProductLinkagePicker
+                proposalId={p.id}
+                vendorId={p.vendorId}
+                availableProducts={p.availableProducts ?? []}
+                suggestions={p.linkageSuggestions ?? []}
+                initialScopeIds={p.currentProductScopeIds ?? []}
+                initialIsVendorWide={p.currentIsVendorWide ?? false}
+                linkageStatus={p.linkageStatus}
+                token={token}
+                onError={setError}
+              />
               <div className="mt-3 flex gap-2">
                 {(() => {
                   const unsafe = isUnsafeToApprove(p);
@@ -360,4 +357,213 @@ function QueueStat({
     </div>
   );
   return href ? <Link href={href} className="block no-underline">{body}</Link> : body;
+}
+
+/** Inline product-linkage picker.
+ *
+ * Replaces the prior "operator must select product manually" dead-end.
+ * Shows the vendor's full product catalogue as checkboxes (top suggestions
+ * pinned at top with a "safe" tag when applicable), plus a "vendor-wide
+ * claim" preset that selects every product at once. Save calls
+ * PATCH /api/admin/proposals/:id/linkage which validates that every
+ * selected id belongs to the vendor's catalogue and persists.
+ */
+function ProductLinkagePicker({
+  proposalId,
+  vendorId,
+  availableProducts,
+  suggestions,
+  initialScopeIds,
+  initialIsVendorWide,
+  linkageStatus,
+  token,
+  onError,
+}: {
+  proposalId: string;
+  vendorId: string;
+  availableProducts: AvailableProduct[];
+  suggestions: LinkageSuggestion[];
+  initialScopeIds: string[];
+  initialIsVendorWide: boolean;
+  linkageStatus?: string;
+  token: string;
+  onError: (msg: string | null) => void;
+}) {
+  const [selected, setSelected] = useState<Set<string>>(new Set(initialScopeIds));
+  const [isVendorWide, setIsVendorWide] = useState(initialIsVendorWide);
+  const [saving, setSaving] = useState(false);
+  const [savedAt, setSavedAt] = useState<string | null>(null);
+  const [expanded, setExpanded] = useState(initialScopeIds.length === 0);
+
+  // No catalogue → vendor not in registry. Surface a clear note.
+  if (availableProducts.length === 0) {
+    return (
+      <div className="mt-2 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-900 dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-200">
+        <strong>Linkage:</strong> vendor <code className="font-mono">{vendorId}</code> has no product
+        scopes registered. Add the vendor to <code className="font-mono">PRODUCT_SCOPES</code> in code
+        first, then re-run the linkage suggester.
+      </div>
+    );
+  }
+
+  function toggleAll(on: boolean) {
+    if (on) setSelected(new Set(availableProducts.map((p) => p.id)));
+    else setSelected(new Set());
+    setIsVendorWide(on);
+  }
+
+  function toggle(id: string) {
+    setSelected((cur) => {
+      const next = new Set(cur);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      // Vendor-wide flag becomes false the moment the operator
+      // unchecks any product.
+      if (next.size !== availableProducts.length) setIsVendorWide(false);
+      else setIsVendorWide(true);
+      return next;
+    });
+  }
+
+  async function save() {
+    setSaving(true);
+    onError(null);
+    try {
+      const res = await fetch(`/api/admin/proposals/${encodeURIComponent(proposalId)}/linkage`, {
+        method: "PATCH",
+        headers: {
+          "content-type": "application/json",
+          ...(token ? { "x-admin-token": token } : {}),
+        },
+        body: JSON.stringify({
+          productScopeIds: [...selected],
+          isVendorWide,
+        }),
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.message ?? body.error ?? `HTTP ${res.status}`);
+      }
+      setSavedAt(new Date().toLocaleTimeString());
+    } catch (e) {
+      onError((e as Error).message);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  const suggestionIds = new Set(suggestions.map((s) => s.productScopeId));
+  // Render order: suggestions first (highest confidence at top), then the
+  // rest of the catalogue alphabetically.
+  const ordered = [
+    ...suggestions
+      .slice()
+      .sort((a, b) => b.confidence - a.confidence)
+      .map((s) => availableProducts.find((p) => p.id === s.productScopeId))
+      .filter((p): p is AvailableProduct => Boolean(p)),
+    ...availableProducts
+      .filter((p) => !suggestionIds.has(p.id))
+      .sort((a, b) => a.name.localeCompare(b.name)),
+  ];
+  const dirty =
+    selected.size !== initialScopeIds.length ||
+    [...selected].some((id) => !initialScopeIds.includes(id));
+
+  return (
+    <div className="mt-2 rounded-lg border border-sky-200 bg-sky-50 px-3 py-2 text-xs dark:border-sky-900/60 dark:bg-sky-950/30">
+      <div className="flex items-center justify-between gap-2">
+        <div className="font-semibold text-sky-900 dark:text-sky-200">
+          Product linkage
+          {linkageStatus && (
+            <span className="ml-2 rounded bg-sky-200 px-1.5 py-0.5 text-[10px] uppercase tracking-wider text-sky-900 dark:bg-sky-900/40 dark:text-sky-200">
+              {linkageStatus.replace(/_/g, " ")}
+            </span>
+          )}
+          {selected.size > 0 && (
+            <span className="ml-2 text-sky-700 dark:text-sky-300">
+              · {selected.size} of {availableProducts.length} linked
+              {isVendorWide && " (vendor-wide)"}
+            </span>
+          )}
+        </div>
+        <button
+          type="button"
+          onClick={() => setExpanded((v) => !v)}
+          className="text-[11px] text-sky-700 hover:underline dark:text-sky-300"
+        >
+          {expanded ? "Hide picker" : "Edit linkage"}
+        </button>
+      </div>
+
+      {expanded && (
+        <>
+          <div className="mt-2 flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => toggleAll(true)}
+              className="rounded-full border border-sky-400 px-2 py-0.5 text-[11px] font-medium text-sky-900 hover:bg-sky-100 dark:border-sky-700 dark:text-sky-200 dark:hover:bg-sky-950"
+            >Select all (vendor-wide)</button>
+            <button
+              type="button"
+              onClick={() => toggleAll(false)}
+              className="rounded-full border border-zinc-300 px-2 py-0.5 text-[11px] text-zinc-700 hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-900"
+            >Clear</button>
+            {suggestions.length > 0 && (
+              <button
+                type="button"
+                onClick={() => {
+                  setSelected(new Set(suggestions.map((s) => s.productScopeId)));
+                  setIsVendorWide(false);
+                }}
+                className="rounded-full border border-emerald-500 px-2 py-0.5 text-[11px] text-emerald-900 hover:bg-emerald-50 dark:border-emerald-700 dark:text-emerald-200 dark:hover:bg-emerald-950"
+              >Apply top suggestions ({suggestions.length})</button>
+            )}
+          </div>
+
+          <ul className="mt-2 max-h-48 space-y-0.5 overflow-y-auto rounded border border-sky-200 bg-white p-2 dark:border-sky-900/60 dark:bg-zinc-900">
+            {ordered.map((p) => {
+              const suggestion = suggestions.find((s) => s.productScopeId === p.id);
+              return (
+                <li key={p.id}>
+                  <label className="flex cursor-pointer items-center gap-2 rounded px-1 py-0.5 hover:bg-sky-50 dark:hover:bg-sky-950/40">
+                    <input
+                      type="checkbox"
+                      checked={selected.has(p.id)}
+                      onChange={() => toggle(p.id)}
+                      className="accent-sky-600"
+                    />
+                    <span className="font-medium text-zinc-900 dark:text-zinc-100">{p.name}</span>
+                    <span className="text-[10px] text-zinc-500">· {p.category}</span>
+                    {suggestion && (
+                      <span className="ml-auto flex items-center gap-1 text-[10px] text-emerald-700 dark:text-emerald-400">
+                        <span className="font-mono">{(suggestion.confidence * 100).toFixed(0)}%</span>
+                        {suggestion.safeToApply && (
+                          <span className="rounded bg-emerald-200 px-1 text-emerald-900 dark:bg-emerald-900/50 dark:text-emerald-200">safe</span>
+                        )}
+                      </span>
+                    )}
+                  </label>
+                </li>
+              );
+            })}
+          </ul>
+
+          <div className="mt-2 flex items-center gap-2">
+            <button
+              type="button"
+              onClick={save}
+              disabled={saving || !dirty}
+              className="rounded-full bg-sky-600 px-3 py-1 text-[11px] font-semibold text-white shadow-sm hover:bg-sky-700 disabled:opacity-50"
+            >
+              {saving ? "Saving…" : dirty ? `Save linkage (${selected.size})` : "No changes"}
+            </button>
+            {savedAt && <span className="text-[11px] text-emerald-700 dark:text-emerald-400">✓ saved {savedAt}</span>}
+            {!dirty && initialScopeIds.length > 0 && (
+              <span className="text-[11px] text-zinc-500">{initialScopeIds.length} product{initialScopeIds.length === 1 ? "" : "s"} currently linked</span>
+            )}
+          </div>
+        </>
+      )}
+    </div>
+  );
 }
