@@ -33,7 +33,7 @@ const TEST_QUERIES: Record<string, any> = {
   bea:             { dataset: "NIPA", params: { TableName: "T10101", Frequency: "Q", Year: "2024" } },
   eia:             { route: "electricity/retail-sales/data", params: { frequency: "monthly", "data[0]": "price", length: 1 } },
   fiscalData:      { endpoint: "v2/accounting/od/debt_to_penny", params: { "page[size]": "1" } },
-  alphaVantage:    { params: { function: "GLOBAL_QUOTE", symbol: "AAPL" } },
+  alphaVantage:    { fn: "GLOBAL_QUOTE", symbol: "AAPL" },
   // GDELT has an undocumented per-query soft rate limit — rapid
   // identical queries get 429'd for several minutes. Use a slightly
   // unusual query each probe to land in a fresh bucket.
