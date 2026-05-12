@@ -3,6 +3,7 @@
  * Requires BEA_API_KEY (free at apps.bea.gov/API/signup/).
  */
 import type { Connector, ConnectorHealth, FetchResult } from "./types";
+import { scrubSecretsFromUrl } from "./url-scrub";
 import { getLastFetch, recordLastFetch } from "./types";
 const HOME = "https://www.bea.gov/";
 const DOCS = "https://apps.bea.gov/api/_pdf/bea_web_service_api_user_guide.pdf";
@@ -39,13 +40,13 @@ export const beaConnector: Connector<BeaQuery, BeaRecord> = {
       if (!res.ok) {
         const error = `HTTP ${res.status} ${res.statusText}`;
         recordLastFetch("bea", { ok: false, error });
-        return { ok: false, status: "error", records: [], recordCount: 0, fetchedAt, error, sourceUrl: url };
+        return { ok: false, status: "error", records: [], recordCount: 0, fetchedAt, error, sourceUrl: scrubSecretsFromUrl(url) };
       }
       const json = await res.json() as { BEAAPI?: { Results?: { Data?: unknown[] } } };
       const rows = json.BEAAPI?.Results?.Data ?? [];
       const records: BeaRecord[] = [{ datasetName: query.datasetName, rows }];
       recordLastFetch("bea", { ok: true, recordCount: rows.length });
-      return { ok: true, status: "ok", records, recordCount: rows.length, fetchedAt, sourceUrl: url };
+      return { ok: true, status: "ok", records, recordCount: rows.length, fetchedAt, sourceUrl: scrubSecretsFromUrl(url) };
     } catch (e) {
       const error = e instanceof Error ? e.message : String(e);
       recordLastFetch("bea", { ok: false, error });

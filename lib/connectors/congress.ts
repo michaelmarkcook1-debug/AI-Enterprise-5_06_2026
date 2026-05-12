@@ -3,6 +3,7 @@
  * Requires CONGRESS_API_KEY (free at api.congress.gov/sign-up/).
  */
 import type { Connector, ConnectorHealth, FetchResult } from "./types";
+import { scrubSecretsFromUrl } from "./url-scrub";
 import { getLastFetch, recordLastFetch } from "./types";
 const HOME = "https://www.congress.gov/";
 const DOCS = "https://api.congress.gov/";
@@ -36,12 +37,12 @@ export const congressConnector: Connector<CongressQuery, CongressRecord> = {
       if (!res.ok) {
         const error = `HTTP ${res.status} ${res.statusText}`;
         recordLastFetch("congress", { ok: false, error });
-        return { ok: false, status: "error", records: [], recordCount: 0, fetchedAt, error, sourceUrl: url };
+        return { ok: false, status: "error", records: [], recordCount: 0, fetchedAt, error, sourceUrl: scrubSecretsFromUrl(url) };
       }
       const raw = await res.json();
       const records: CongressRecord[] = [{ path: query.path, raw }];
       recordLastFetch("congress", { ok: true, recordCount: 1 });
-      return { ok: true, status: "ok", records, recordCount: 1, fetchedAt, sourceUrl: url };
+      return { ok: true, status: "ok", records, recordCount: 1, fetchedAt, sourceUrl: scrubSecretsFromUrl(url) };
     } catch (e) {
       const error = e instanceof Error ? e.message : String(e);
       recordLastFetch("congress", { ok: false, error });

@@ -17,6 +17,7 @@
 
 import type { Connector, ConnectorHealth, FetchResult } from "./types";
 import { getLastFetch, recordLastFetch } from "./types";
+import { scrubSecretsFromUrl } from "./url-scrub";
 
 const HOME = "https://www.eia.gov/";
 const DOCS = "https://www.eia.gov/opendata/documentation.php";
@@ -159,7 +160,7 @@ export const eiaConnector: Connector<EiaQuery, EiaRecord> = {
         records,
         recordCount: rows.length,
         fetchedAt,
-        sourceUrl: url,
+        sourceUrl: scrubSecretsFromUrl(url),
       };
     } catch (e) {
       const error = e instanceof Error ? e.message : String(e);

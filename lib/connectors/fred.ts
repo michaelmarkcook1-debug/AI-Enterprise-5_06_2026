@@ -10,6 +10,7 @@
  */
 
 import type { Connector, ConnectorHealth, FetchResult } from "./types";
+import { scrubSecretsFromUrl } from "./url-scrub";
 import { getLastFetch, recordLastFetch } from "./types";
 
 const HOME = "https://fred.stlouisfed.org/";
@@ -68,12 +69,12 @@ export const fredConnector: Connector<FredQuery, FredRecord> = {
       if (!res.ok) {
         const error = `HTTP ${res.status} ${res.statusText}`;
         recordLastFetch("fred", { ok: false, error });
-        return { ok: false, status: res.status === 429 ? "rate_limited" : "error", records: [], recordCount: 0, fetchedAt, error, sourceUrl: url };
+        return { ok: false, status: res.status === 429 ? "rate_limited" : "error", records: [], recordCount: 0, fetchedAt, error, sourceUrl: scrubSecretsFromUrl(url) };
       }
       const json = await res.json() as { observations?: FredObservation[] };
       const records: FredRecord[] = [{ seriesId: query.seriesId, observations: json.observations ?? [] }];
       recordLastFetch("fred", { ok: true, recordCount: json.observations?.length ?? 0 });
-      return { ok: true, status: "ok", records, recordCount: json.observations?.length ?? 0, fetchedAt, sourceUrl: url };
+      return { ok: true, status: "ok", records, recordCount: json.observations?.length ?? 0, fetchedAt, sourceUrl: scrubSecretsFromUrl(url) };
     } catch (e) {
       const error = e instanceof Error ? e.message : String(e);
       recordLastFetch("fred", { ok: false, error });

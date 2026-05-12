@@ -3,6 +3,7 @@
  * Requires ALPHA_VANTAGE_API_KEY (free tier: 25 req/day).
  */
 import type { Connector, ConnectorHealth, FetchResult } from "./types";
+import { scrubSecretsFromUrl } from "./url-scrub";
 import { getLastFetch, recordLastFetch } from "./types";
 const HOME = "https://www.alphavantage.co/";
 const DOCS = "https://www.alphavantage.co/documentation/";
@@ -38,18 +39,18 @@ export const alphaVantageConnector: Connector<AlphaVantageQuery, AlphaVantageRec
       if (!res.ok) {
         const error = `HTTP ${res.status} ${res.statusText}`;
         recordLastFetch("alphaVantage", { ok: false, error });
-        return { ok: false, status: "error", records: [], recordCount: 0, fetchedAt, error, sourceUrl: url };
+        return { ok: false, status: "error", records: [], recordCount: 0, fetchedAt, error, sourceUrl: scrubSecretsFromUrl(url) };
       }
       const raw = await res.json() as Record<string, unknown>;
       // Alpha Vantage returns 200 with a "Note" or "Information" field on rate-limit hits.
       if (typeof raw["Note"] === "string" || typeof raw["Information"] === "string") {
         const error = String(raw["Note"] ?? raw["Information"]);
         recordLastFetch("alphaVantage", { ok: false, error });
-        return { ok: false, status: "rate_limited", records: [], recordCount: 0, fetchedAt, error, sourceUrl: url };
+        return { ok: false, status: "rate_limited", records: [], recordCount: 0, fetchedAt, error, sourceUrl: scrubSecretsFromUrl(url) };
       }
       const records: AlphaVantageRecord[] = [{ fn: query.fn, raw }];
       recordLastFetch("alphaVantage", { ok: true, recordCount: 1 });
-      return { ok: true, status: "ok", records, recordCount: 1, fetchedAt, sourceUrl: url };
+      return { ok: true, status: "ok", records, recordCount: 1, fetchedAt, sourceUrl: scrubSecretsFromUrl(url) };
     } catch (e) {
       const error = e instanceof Error ? e.message : String(e);
       recordLastFetch("alphaVantage", { ok: false, error });
