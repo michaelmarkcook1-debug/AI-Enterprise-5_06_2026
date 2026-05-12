@@ -1,0 +1,21 @@
+─── Triage report ───
+mode             : DRY-RUN
+proposals scanned: 310
+auto_approve     : 1
+recommend_approve: 210
+recommend_reject : 20
+human_review     : 79
+applied (live)   : 0
+classifier fallback rows : 0
+audit lines      : 310 → /Users/michaelcook/Documents/Dev Projects/AI Enterpise dev fev1.0/app/ranking-engine/data/triage-audit.jsonl
+
+─── Reason breakdown ───
+   208  medium confidence N% (below N% auto-approve threshold)
+   109  product linkage missing — operator confirm
+    73  grade E? below E? floor
+    22  classifier confidence N% below N% threshold
+    20  inferred / hedged language detected
+     3  unsafe category: adoption estimate
+     2  unsafe category: market share
+     1  E? evidence cannot be approved
+     1  auto_approve: E? · conf N% · vendor + product match · fresh · official source

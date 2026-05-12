@@ -1,0 +1,21 @@
+─── Vendor-wide evidence sweep ───
+mode                    : LIVE
+pending unlinked rows   : 257
+vendor-wide candidates  : 88
+skipped (named product) : 60
+
+By canonical vendor:
+   15  openai  →  16 products
+   12  cohere  →  5 products
+    8  writer  →  11 products
+    8  harvey  →  5 products
+    7  snow  →  6 products
+    7  sap  →  6 products
+    6  databricks  →  6 products
+    6  mistral  →  6 products
+    6  anthropic  →  13 products
+    6  msft  →  11 products
+    4  ibm  →  5 products
+    3  googl  →  14 products
+
+Applied vendor-wide linkage to 88 proposals.

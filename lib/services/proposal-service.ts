@@ -70,6 +70,36 @@ export async function approveProposal(input: {
   });
 }
 
+export async function deferProposal(input: {
+  proposalId: string;
+  reviewerId: string;
+  reason?: string;
+  client?: Client;
+}): Promise<{ proposalId: string; reviewNotes: string }> {
+  if (!input.client && !hasDatabase()) throw new Error("DATABASE_URL required to defer proposals");
+  const c = input.client ?? getPrisma();
+  const proposal = await c.evidenceProposal.findUnique({ where: { id: input.proposalId } });
+  if (!proposal) throw new Error(`unknown proposal ${input.proposalId}`);
+  if (proposal.status !== "pending") throw new Error(`proposal ${input.proposalId} already ${proposal.status}`);
+
+  // Defer writes the DEFERRED sentinel to reviewNotes and leaves
+  // status=pending. The batch-review UI filters deferred rows out by
+  // default so the operator's working set shrinks visibly without
+  // losing the row.
+  const { buildDeferredNotes } = await import("./batch-review");
+  const notes = buildDeferredNotes({ reviewerId: input.reviewerId, reason: input.reason });
+  await c.evidenceProposal.update({
+    where: { id: proposal.id },
+    data: {
+      reviewerId: input.reviewerId,
+      reviewedAt: new Date(),
+      reviewNotes: notes,
+      // status stays "pending" — this is the deferred-but-not-decided state
+    },
+  });
+  return { proposalId: proposal.id, reviewNotes: notes };
+}
+
 export async function rejectProposal(input: {
   proposalId: string;
   reviewerId: string;
