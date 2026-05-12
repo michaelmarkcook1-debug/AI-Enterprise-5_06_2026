@@ -53,6 +53,9 @@ export interface BatchReviewFilters {
   sourceUrlContains?: string;
   /** Whether to include rows that have been deferred. Default false. */
   includeDeferred?: boolean;
+  /** Triage lane to show. Defaults to "recommend_approve" at the page
+   * layer; pass "all" to show every pending row regardless of lane. */
+  lane?: TriageDecision["lane"] | "all";
 }
 
 export interface BatchReviewPaging {
@@ -90,6 +93,7 @@ export function buildDeferredNotes(args: {
 /** Apply the filter predicate to a single row. Returns true iff the
  * row should be included in the batch. */
 export function matchesFilters(row: BatchReviewRow, filters: BatchReviewFilters): boolean {
+  if (filters.lane && filters.lane !== "all" && row.triageLane !== filters.lane) return false;
   if (filters.vendorId && row.vendorId !== filters.vendorId) return false;
   if (filters.confidenceBand && confidenceBand(row.classifierConfidence) !== filters.confidenceBand) return false;
   if (filters.grade && row.proposedGrade !== filters.grade) return false;
@@ -113,6 +117,7 @@ export interface BatchReviewResult {
     byConfidenceBand: { band: "high" | "medium" | "low"; count: number }[];
     byGrade: { grade: string; count: number }[];
     byLinkageStatus: { status: string; count: number }[];
+    byLane: { lane: TriageDecision["lane"]; count: number }[];
     deferredCount: number;
   };
 }
@@ -138,12 +143,14 @@ function computeFacets(rows: BatchReviewRow[]): BatchReviewResult["facets"] {
   const byBand: Record<"high" | "medium" | "low", number> = { high: 0, medium: 0, low: 0 };
   const byGrade = new Map<string, number>();
   const byLinkage = new Map<string, number>();
+  const byLane = new Map<TriageDecision["lane"], number>();
   let deferredCount = 0;
   for (const r of rows) {
     byVendor.set(r.vendorId, (byVendor.get(r.vendorId) ?? 0) + 1);
     byBand[confidenceBand(r.classifierConfidence)] += 1;
     byGrade.set(r.proposedGrade, (byGrade.get(r.proposedGrade) ?? 0) + 1);
     byLinkage.set(r.linkageStatus, (byLinkage.get(r.linkageStatus) ?? 0) + 1);
+    byLane.set(r.triageLane, (byLane.get(r.triageLane) ?? 0) + 1);
     if (r.isDeferred) deferredCount += 1;
   }
   const sortByCount = <T>(m: Map<T, number>): { key: T; count: number }[] =>
@@ -153,6 +160,7 @@ function computeFacets(rows: BatchReviewRow[]): BatchReviewResult["facets"] {
     byConfidenceBand: (["high", "medium", "low"] as const).map((band) => ({ band, count: byBand[band] })),
     byGrade: sortByCount(byGrade).map((e) => ({ grade: e.key, count: e.count })),
     byLinkageStatus: sortByCount(byLinkage).map((e) => ({ status: e.key, count: e.count })),
+    byLane: sortByCount(byLane).map((e) => ({ lane: e.key, count: e.count })),
     deferredCount,
   };
 }

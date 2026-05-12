@@ -24,6 +24,7 @@ interface PageProps {
     source?: string;
     offset?: string;
     includeDeferred?: string;
+    lane?: string;
   }>;
 }
 
@@ -49,6 +50,12 @@ export default async function BatchReviewPage({ searchParams }: PageProps) {
         : undefined,
     sourceUrlContains: params.source || undefined,
     includeDeferred: params.includeDeferred === "1",
+    lane:
+      params.lane === "all" || params.lane === "auto_approve" ||
+      params.lane === "recommend_approve" || params.lane === "recommend_reject" ||
+      params.lane === "human_review_required"
+        ? params.lane
+        : "recommend_approve",
   };
   const offset = Math.max(0, Number(params.offset ?? "0") || 0);
 
@@ -59,7 +66,7 @@ export default async function BatchReviewPage({ searchParams }: PageProps) {
           total: 0,
           totalAfterFilter: 0,
           page: [],
-          facets: { byVendor: [], byConfidenceBand: [], byGrade: [], byLinkageStatus: [], deferredCount: 0 },
+          facets: { byVendor: [], byConfidenceBand: [], byGrade: [], byLinkageStatus: [], byLane: [], deferredCount: 0 },
         }}
         filters={filters}
         paging={{ offset, limit: DEFAULT_BATCH_LIMIT }}
@@ -83,8 +90,9 @@ export default async function BatchReviewPage({ searchParams }: PageProps) {
     scopesByVendor.set(s.vendorId, arr);
   }
 
-  // Enrich each proposal → BatchReviewRow, scoped to recommend_approve only
-  // (the batch-review workflow is for that cohort).
+  // Enrich every pending proposal → BatchReviewRow. The lane filter
+  // narrows the visible set inside buildBatchReviewResult so the facet
+  // counts (byLane) still reflect the full pending population.
   const rows: BatchReviewRow[] = [];
   for (const p of proposals) {
     const fallback = isClassifierFallback({
@@ -110,7 +118,11 @@ export default async function BatchReviewPage({ searchParams }: PageProps) {
       classifierConfidence: p.classifierConfidence,
       confidenceIsFallback: fallback,
     });
-    if (decision.lane !== "recommend_approve") continue;
+    // Skip auto_approve here — those are handled by the safe-actions cron,
+    // not by manual review. Everything else (recommend_approve,
+    // recommend_reject, human_review_required) is selectable via the
+    // lane filter.
+    if (decision.lane === "auto_approve") continue;
 
     const linkage = suggestLinkage(
       {

@@ -114,11 +114,42 @@ export default function BatchReview({ result, filters, paging, hasDatabase }: Pr
     <div className="min-h-screen bg-zinc-50 dark:bg-[#071827] text-zinc-900 dark:text-zinc-100">
       <main className="mx-auto max-w-7xl px-6 py-10">
         <Link href="/admin/evidence" className="text-sm text-zinc-500 hover:underline">← Single review</Link>
-        <h1 className="mt-4 text-3xl font-semibold tracking-tight">Batch review — recommend_approve</h1>
+        <h1 className="mt-4 text-3xl font-semibold tracking-tight">
+          Batch review — {filters.lane ?? "recommend_approve"}
+        </h1>
         <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
-          {totalAfterFilter} of {total} pending recommend_approve proposals after filters. Showing rows {totalAfterFilter === 0 ? 0 : paging.offset + 1}–
+          {totalAfterFilter} of {total} pending proposals after filters. Showing rows {totalAfterFilter === 0 ? 0 : paging.offset + 1}–
           {Math.min(paging.offset + paging.limit, totalAfterFilter)}.
         </p>
+
+        {/* Lane selector — primary navigation. The 34 fresh proposals
+            could be in any of these lanes; default lands on
+            recommend_approve, but if it's empty the operator needs to
+            see human_review_required (where unsafe-category rows sit). */}
+        <div className="mt-4 flex flex-wrap items-center gap-2">
+          <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500">Lane:</span>
+          {(["recommend_approve", "human_review_required", "recommend_reject", "all"] as const).map((laneKey) => {
+            const active = (filters.lane ?? "recommend_approve") === laneKey;
+            const count =
+              laneKey === "all"
+                ? facets.byLane.reduce((s, f) => s + f.count, 0)
+                : facets.byLane.find((f) => f.lane === laneKey)?.count ?? 0;
+            return (
+              <button
+                key={laneKey}
+                type="button"
+                onClick={() => updateFilter("lane", laneKey === "recommend_approve" ? undefined : laneKey)}
+                className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+                  active
+                    ? "border-emerald-500 bg-emerald-600 text-white"
+                    : "border-zinc-300 bg-white text-zinc-700 hover:border-emerald-400 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200"
+                }`}
+              >
+                {laneKey} ({count})
+              </button>
+            );
+          })}
+        </div>
 
         {!hasDatabase && (
           <div className="mt-6 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-900/40 dark:bg-amber-950/30 dark:text-amber-200">
@@ -269,7 +300,7 @@ export default function BatchReview({ result, filters, paging, hasDatabase }: Pr
               {/* Triage reasons */}
               {p.triageReasons.length > 0 && (
                 <div className="mt-3 rounded-lg border border-sky-200 bg-sky-50 px-3 py-2 text-xs text-sky-900 dark:border-sky-900/60 dark:bg-sky-950/30 dark:text-sky-200">
-                  <div className="font-semibold uppercase tracking-wide">recommend_approve</div>
+                  <div className="font-semibold uppercase tracking-wide">{p.triageLane}</div>
                   <ul className="mt-1 list-disc pl-5 space-y-0.5">
                     {p.triageReasons.slice(0, 3).map((r, i) => <li key={i}>{r}</li>)}
                   </ul>
