@@ -30,7 +30,7 @@ const TEST_QUERIES: Record<string, any> = {
   sec:             { cik: "789019" }, // Microsoft
   fred:            { seriesId: "GDP" },
   bls:             { seriesIds: ["LNS14000000"] }, // U-3 unemployment
-  bea:             { dataset: "NIPA", params: { TableName: "T10101", Frequency: "Q", Year: "2024" } },
+  bea:             { datasetName: "NIPA", tableName: "T10101", frequency: "Q", year: "2024" },
   eia:             { route: "electricity/retail-sales/data", params: { frequency: "monthly", "data[0]": "price", length: 1 } },
   fiscalData:      { endpoint: "v2/accounting/od/debt_to_penny", params: { "page[size]": "1" } },
   alphaVantage:    { fn: "GLOBAL_QUOTE", symbol: "AAPL" },
@@ -39,7 +39,7 @@ const TEST_QUERIES: Record<string, any> = {
   // unusual query each probe to land in a fresh bucket.
   gdelt:           { query: `"enterprise AI platform" sourcecountry:US`, mode: "ArtList", maxRecords: 1 },
   github:          { path: "/repos/openai/openai-python" },
-  congress:        { endpoint: "bill", params: { limit: 1 } },
+  congress:        { path: "/bill", params: { limit: "1" } },
   federalRegister: { path: "/documents", params: { per_page: "1", "conditions[term]": "artificial intelligence" } },
   vendorDocs:      { vendorId: "vendor_openai" },
   yahooFinance:    { resource: "quote", symbols: ["MSFT"] },
