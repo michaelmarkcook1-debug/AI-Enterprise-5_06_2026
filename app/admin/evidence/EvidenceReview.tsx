@@ -78,7 +78,24 @@ function approveBlockReason(p: Proposal): string {
   return "Approve blocked.";
 }
 
-export default function EvidenceReview({ initialProposals, hasDatabase }: { initialProposals: Proposal[]; hasDatabase: boolean }) {
+interface QueueHealth {
+  totalPending: number;
+  deferredCount: number;
+  staleCount: number;
+  freshActionableCount: number;
+}
+
+export default function EvidenceReview({
+  initialProposals,
+  hasDatabase,
+  queueHealth,
+  staleThresholdDays = 30,
+}: {
+  initialProposals: Proposal[];
+  hasDatabase: boolean;
+  queueHealth?: QueueHealth;
+  staleThresholdDays?: number;
+}) {
   const [proposals, setProposals] = useState<Proposal[]>(initialProposals);
   const [token, setToken] = useState("");
   const [reviewerId, setReviewerId] = useState("admin@local");
@@ -125,6 +142,36 @@ export default function EvidenceReview({ initialProposals, hasDatabase }: { init
             Batch review — recommend_approve cohort (20 at a time) →
           </Link>
         </div>
+
+        {/* Queue health summary — total / fresh / deferred / stale */}
+        {queueHealth && queueHealth.totalPending > 0 && (
+          <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <QueueStat
+              label="Pending total"
+              value={queueHealth.totalPending}
+              tone="neutral"
+            />
+            <QueueStat
+              label="Fresh & actionable"
+              value={queueHealth.freshActionableCount}
+              tone="green"
+              hint={`Captured within ${staleThresholdDays} days, not deferred`}
+            />
+            <QueueStat
+              label="Deferred"
+              value={queueHealth.deferredCount}
+              tone="amber"
+              hint="Set aside by an operator — view with ?includeDeferred=1 on the batch screen"
+              href={queueHealth.deferredCount > 0 ? "/admin/evidence/batch?includeDeferred=1" : undefined}
+            />
+            <QueueStat
+              label="Stale pending"
+              value={queueHealth.staleCount}
+              tone={queueHealth.staleCount > 0 ? "red" : "neutral"}
+              hint={`Captured > ${staleThresholdDays} days ago and not deferred`}
+            />
+          </div>
+        )}
 
         {!hasDatabase && (
           <div className="mt-6 rounded-xl border border-amber-200 dark:border-amber-900/40 bg-amber-50 dark:bg-amber-950/30 px-4 py-3 text-sm text-amber-900 dark:text-amber-200">
@@ -270,4 +317,45 @@ export default function EvidenceReview({ initialProposals, hasDatabase }: { init
       </main>
     </div>
   );
+}
+
+const STAT_TONE: Record<"neutral" | "green" | "amber" | "red", string> = {
+  neutral:
+    "border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900",
+  green:
+    "border-emerald-200 bg-emerald-50 dark:border-emerald-900/60 dark:bg-emerald-950/30",
+  amber:
+    "border-amber-200 bg-amber-50 dark:border-amber-900/60 dark:bg-amber-950/30",
+  red:
+    "border-red-300 bg-red-50 dark:border-red-900/60 dark:bg-red-950/30",
+};
+
+const STAT_TEXT_TONE: Record<"neutral" | "green" | "amber" | "red", string> = {
+  neutral: "text-zinc-900 dark:text-zinc-100",
+  green: "text-emerald-900 dark:text-emerald-200",
+  amber: "text-amber-900 dark:text-amber-200",
+  red: "text-red-900 dark:text-red-200",
+};
+
+function QueueStat({
+  label,
+  value,
+  tone,
+  hint,
+  href,
+}: {
+  label: string;
+  value: number;
+  tone: "neutral" | "green" | "amber" | "red";
+  hint?: string;
+  href?: string;
+}) {
+  const body = (
+    <div className={`rounded-xl border px-4 py-3 ${STAT_TONE[tone]} ${href ? "transition-colors hover:brightness-95" : ""}`} title={hint}>
+      <div className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">{label}</div>
+      <div className={`mt-1 text-2xl font-semibold tabular-nums ${STAT_TEXT_TONE[tone]}`}>{value.toLocaleString()}</div>
+      {hint && <div className="mt-1 text-[10px] leading-snug text-zinc-500 dark:text-zinc-400">{hint}</div>}
+    </div>
+  );
+  return href ? <Link href={href} className="block no-underline">{body}</Link> : body;
 }

@@ -1,16 +1,20 @@
 import EvidenceReview from "./EvidenceReview";
 import { listProposals } from "@/lib/services/proposal-service";
-import { hasDatabase } from "@/lib/prisma";
+import { hasDatabase, getPrisma } from "@/lib/prisma";
 import { triageProposal } from "@/lib/services/triage";
 import { isClassifierFallback } from "@/lib/services/triage-runner";
 import { suggestLinkage } from "@/lib/services/product-linkage";
 import { canonicaliseVendorId } from "@/lib/services/product-linkage-runner";
 import { PRODUCT_SCOPES } from "@/lib/investor-tools/product-scope";
+import { getQueueHealthSummary, EMPTY_QUEUE_HEALTH, STALE_PENDING_THRESHOLD_DAYS } from "@/lib/services/queue-health";
 
 export const dynamic = "force-dynamic";
 
 export default async function EvidenceReviewPage() {
   const proposals = hasDatabase() ? await listProposals({ status: "pending" }) : [];
+  const queueHealth = hasDatabase()
+    ? await getQueueHealthSummary(getPrisma())
+    : EMPTY_QUEUE_HEALTH;
 
   // Build vendorId → product-scopes index once per request.
   const scopesByVendor = new Map<string, { id: string; vendorId: string; productName: string; productCategory: string }[]>();
@@ -86,5 +90,12 @@ export default async function EvidenceReviewPage() {
       })),
     };
   });
-  return <EvidenceReview initialProposals={enriched} hasDatabase={hasDatabase()} />;
+  return (
+    <EvidenceReview
+      initialProposals={enriched}
+      hasDatabase={hasDatabase()}
+      queueHealth={queueHealth}
+      staleThresholdDays={STALE_PENDING_THRESHOLD_DAYS}
+    />
+  );
 }
