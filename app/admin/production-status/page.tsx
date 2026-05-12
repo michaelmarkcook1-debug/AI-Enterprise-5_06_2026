@@ -127,8 +127,14 @@ export default async function ProductionStatusPage() {
                 <div className="mt-1 text-[11px] text-zinc-500 dark:text-zinc-500">→ {g.remediation}</div>
               )}
             </div>
-            <span className={`text-[10px] uppercase tracking-wider ${g.severity === "required" ? "text-rose-700 dark:text-rose-400" : "text-amber-700 dark:text-amber-400"}`}>
-              {g.severity}
+            <span className={`text-[10px] uppercase tracking-wider ${
+              g.ok
+                ? "text-emerald-700 dark:text-emerald-400"
+                : g.severity === "required"
+                  ? "text-rose-700 dark:text-rose-400"
+                  : "text-amber-700 dark:text-amber-400"
+            }`}>
+              {g.ok ? `${g.severity} ✓` : g.severity}
             </span>
           </li>
         ))}
