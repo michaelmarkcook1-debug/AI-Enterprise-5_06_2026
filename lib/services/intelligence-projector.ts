@@ -65,6 +65,9 @@ export interface ProjectorResult {
   vendorsSkipped: { vendorId: string; reason: string }[];
   capabilitiesUpserted: number;
   newsUpserted: number;
+  /** Seed news items deleted once we have ≥5 live items, so the
+   * "Recent news" panels stop showing [MOCK]-prefixed scaffolding. */
+  seedNewsEvicted: number;
   startedAt: string;
   finishedAt: string;
   durationMs: number;
@@ -241,7 +244,9 @@ export async function projectEvidenceToIntelligence(
         publishedAt: row.capturedAt,
         vendors: [vendorId],
         categories: ["evidence"],
-        impactScore: Math.max(50, Math.min(100, row.rawScore || 70)),
+        // Floor live items at 75 so any seed survivors don't out-rank them
+// on the "Recent news" sort that the dashboard / investing pages use.
+impactScore: Math.max(75, Math.min(100, row.rawScore || 75)),
         confidenceScore: Math.max(40, Math.min(100, ((GRADE_RANK[row.evidenceGrade] ?? 2) / 5) * 100)),
         affectedPillars: [row.domain],
         whyItMatters: row.excerpt.slice(0, 400),
@@ -255,7 +260,9 @@ export async function projectEvidenceToIntelligence(
         sourceUrl: row.sourceUrl ?? undefined,
         publishedAt: row.capturedAt,
         vendors: [vendorId],
-        impactScore: Math.max(50, Math.min(100, row.rawScore || 70)),
+        // Floor live items at 75 so any seed survivors don't out-rank them
+// on the "Recent news" sort that the dashboard / investing pages use.
+impactScore: Math.max(75, Math.min(100, row.rawScore || 75)),
         confidenceScore: Math.max(40, Math.min(100, ((GRADE_RANK[row.evidenceGrade] ?? 2) / 5) * 100)),
         affectedPillars: [row.domain],
         whyItMatters: row.excerpt.slice(0, 400),
@@ -266,6 +273,33 @@ export async function projectEvidenceToIntelligence(
     newsUpserted += 1;
   }
 
+  // Once we have ≥5 live news items, evict the seed scaffolding. Seed
+  // items use `sourceName` prefixed with `[MOCK]` or contain literal
+  // "seed" / "stub" / "placeholder" — we delete those specifically
+  // rather than a blanket DELETE so any other manually inserted rows
+  // are preserved. The threshold of 5 prevents an empty live-news state
+  // when the projector has only produced one or two items.
+  let seedNewsEvicted = 0;
+  if (newsUpserted >= 5) {
+    const seedItems = await prisma.intelligenceNewsItem.findMany({
+      where: {
+        OR: [
+          { sourceName: { startsWith: "[MOCK]" } },
+          { sourceName: { contains: "seed", mode: "insensitive" } },
+          { sourceName: { contains: "stub", mode: "insensitive" } },
+          { sourceName: { contains: "placeholder", mode: "insensitive" } },
+        ],
+      },
+      select: { id: true },
+    });
+    if (seedItems.length > 0) {
+      const r = await prisma.intelligenceNewsItem.deleteMany({
+        where: { id: { in: seedItems.map((s) => s.id) } },
+      });
+      seedNewsEvicted = r.count;
+    }
+  }
+
   const finishedAt = new Date();
   return {
     scannedEvidenceRows: rows.length,
@@ -273,6 +307,7 @@ export async function projectEvidenceToIntelligence(
     vendorsSkipped,
     capabilitiesUpserted,
     newsUpserted,
+    seedNewsEvicted,
     startedAt: startedAt.toISOString(),
     finishedAt: finishedAt.toISOString(),
     durationMs: finishedAt.getTime() - startedAt.getTime(),
