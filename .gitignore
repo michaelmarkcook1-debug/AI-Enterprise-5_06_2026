@@ -61,3 +61,5 @@ _classes.ts
 
 # Triage audit log (append-only forensic trail; not source-controlled)
 /data/triage-audit.jsonl
+/data/linkage-apply-audit.jsonl
+/data/*.jsonl
