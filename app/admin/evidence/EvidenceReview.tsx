@@ -134,12 +134,14 @@ export default function EvidenceReview({
         <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
           Review extractor + classifier output before it can affect production scoring.
         </p>
-        <div className="mt-3 text-sm">
+        <div className="mt-4 text-sm">
           <Link
             href="/admin/evidence/batch"
-            className="inline-flex items-center gap-2 rounded-full bg-zinc-900 px-4 py-1.5 text-xs font-medium text-white hover:bg-zinc-800 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200"
+            className="inline-flex items-center gap-2 rounded-full border-2 border-emerald-700 bg-emerald-600 px-5 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-emerald-700 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2 dark:border-emerald-400 dark:bg-emerald-500 dark:text-white dark:hover:bg-emerald-400"
           >
-            Batch review — recommend_approve cohort (20 at a time) →
+            <span aria-hidden>📋</span>
+            Batch review — recommend_approve cohort (20 at a time)
+            <span aria-hidden>→</span>
           </Link>
         </div>
 
