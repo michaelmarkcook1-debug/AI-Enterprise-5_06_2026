@@ -1,18 +1,31 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { Confidence, EvidenceBadge, Panel, ScoreBar, SeedDataBadge } from "@/components/intelligence-ui";
+import { Confidence, EvidenceBadge, Panel, ScoreBar } from "@/components/intelligence-ui";
 import { VendorNameWithOwnership } from "@/components/ownership-indicator";
 import type { InvestmentProviderProfile } from "@/lib/investing/types";
 
 export function WarningStrip() {
+  // The two chips here are NOT data-provenance markers — "Investor Tools" is a
+  // section label, "Not financial advice" is a legal disclaimer. They render
+  // as neutral amber chips so the loud "NOT LIVE" rose styling is reserved
+  // for actual data-source claims (provider tables, simulator cells, etc.)
+  // which carry their own SeedDataBadge per row.
   return (
     <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-900 dark:border-amber-900/70 dark:bg-amber-950/50 dark:text-amber-200">
       <div className="mb-1 flex flex-wrap gap-2">
-        <SeedDataBadge label="Investor Tools" />
-        <SeedDataBadge label="Not financial advice" />
+        <DisclaimerChip>Investor Tools</DisclaimerChip>
+        <DisclaimerChip>Not financial advice</DisclaimerChip>
       </div>
       Investor Tools are for market intelligence and hypothetical scenario modelling only. They are not financial advice. Outputs are based on documented, estimated, inferred, or seed data as labelled. Future returns are not guaranteed.
     </div>
+  );
+}
+
+function DisclaimerChip({ children }: { children: ReactNode }) {
+  return (
+    <span className="inline-flex items-center gap-1 rounded border border-amber-300 bg-amber-100/60 px-1.5 py-0.5 text-[11px] font-bold uppercase tracking-wide text-amber-900 dark:border-amber-700 dark:bg-amber-950/60 dark:text-amber-200">
+      {children}
+    </span>
   );
 }
 
