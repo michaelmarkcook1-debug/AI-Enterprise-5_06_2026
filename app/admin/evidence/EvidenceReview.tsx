@@ -231,12 +231,33 @@ export default function EvidenceReview({ initialProposals, hasDatabase }: { init
                 </div>
               )}
               <div className="mt-3 flex gap-2">
-                <button
-                  disabled={busy === p.id || isUnsafeToApprove(p)}
-                  onClick={() => act(p.id, "approve")}
-                  title={isUnsafeToApprove(p) ? approveBlockReason(p) : undefined}
-                  className="rounded-full bg-emerald-600 px-4 py-1.5 text-xs font-medium text-white disabled:opacity-40 disabled:cursor-not-allowed"
-                >Approve → promote</button>
+                {(() => {
+                  const unsafe = isUnsafeToApprove(p);
+                  const onClick = () => {
+                    if (unsafe) {
+                      const ok = window.confirm(
+                        `This row was flagged as risky:\n\n${approveBlockReason(p)}\n\nApprove anyway?`,
+                      );
+                      if (!ok) return;
+                    }
+                    act(p.id, "approve");
+                  };
+                  return (
+                    <button
+                      disabled={busy === p.id}
+                      onClick={onClick}
+                      title={unsafe ? `Risky: ${approveBlockReason(p)} — click to override` : undefined}
+                      className={
+                        unsafe
+                          // Amber "approve anyway" — still clickable, but visually warns.
+                          ? "rounded-full border-2 border-amber-500 bg-amber-50 px-4 py-1 text-xs font-semibold text-amber-900 hover:bg-amber-100 disabled:opacity-50 dark:border-amber-400 dark:bg-amber-950/40 dark:text-amber-200 dark:hover:bg-amber-950/60"
+                          : "rounded-full bg-emerald-600 px-4 py-1.5 text-xs font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
+                      }
+                    >
+                      {unsafe ? "⚠ Approve anyway →" : "Approve → promote"}
+                    </button>
+                  );
+                })()}
                 <button
                   disabled={busy === p.id}
                   onClick={() => act(p.id, "reject")}
