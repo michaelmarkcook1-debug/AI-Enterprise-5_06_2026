@@ -145,20 +145,38 @@ export default async function ProductionStatusPage() {
         Single source of truth at <code className="font-mono">lib/env.ts</code>. Every gate reads from this contract.
       </p>
       <div className="mt-3 grid gap-2">
-        {ENV_SPEC.filter((s) => s.severity !== "optional").map((s) => (
-          <div key={s.key} className="rounded-lg border border-zinc-200 dark:border-zinc-800 p-3 text-xs">
-            <div className="flex items-baseline gap-2">
-              <code className="font-mono font-semibold">{s.key}</code>
-              <span className={`rounded px-1.5 py-0.5 text-[10px] uppercase ${s.severity === "required" ? "bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300" : "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300"}`}>
-                {s.severity}
-              </span>
+        {ENV_SPEC.filter((s) => s.severity !== "optional").map((s) => {
+          // Each env contract row reflects the LIVE state of the env
+          // var. Set + required → emerald with ✓. Missing + required
+          // → red. Set + recommended → emerald. Missing + recommended
+          // → amber.
+          const isSet = Boolean(process.env[s.key]);
+          const tagClass = isSet
+            ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
+            : s.severity === "required"
+              ? "bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300"
+              : "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300";
+          const borderClass = isSet
+            ? "border-emerald-200 dark:border-emerald-900/50"
+            : "border-zinc-200 dark:border-zinc-800";
+          return (
+            <div key={s.key} className={`rounded-lg border ${borderClass} p-3 text-xs`}>
+              <div className="flex items-baseline gap-2">
+                <code className="font-mono font-semibold">{s.key}</code>
+                <span className={`rounded px-1.5 py-0.5 text-[10px] uppercase ${tagClass}`}>
+                  {isSet ? `${s.severity} ✓` : s.severity}
+                </span>
+                {!isSet && (
+                  <span className="text-[10px] text-rose-700 dark:text-rose-400">not set in this environment</span>
+                )}
+              </div>
+              <p className="mt-1 text-zinc-600 dark:text-zinc-400">{s.description}</p>
+              <ul className="mt-1 list-disc pl-4 text-[11px] text-zinc-500">
+                {s.enables.map((e) => <li key={e}>{e}</li>)}
+              </ul>
             </div>
-            <p className="mt-1 text-zinc-600 dark:text-zinc-400">{s.description}</p>
-            <ul className="mt-1 list-disc pl-4 text-[11px] text-zinc-500">
-              {s.enables.map((e) => <li key={e}>{e}</li>)}
-            </ul>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       <div className="mt-8 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-[#071827] p-4 text-xs">
