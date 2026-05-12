@@ -298,7 +298,7 @@ export default function InvestmentSimulatorClient({
       <div className="rounded-lg border border-[#dfe4da] bg-white p-3 text-xs leading-5 text-[#596151] dark:border-zinc-800 dark:bg-[#071827] dark:text-zinc-400">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex flex-wrap items-center gap-2">
-            <SeedDataBadge label="Live scenario" />
+            <SeedDataBadge label="Live scenario" provenance="live" reason="Scenario engine recomputes deterministically from your inputs." />
             <span>Recomputes on every input change</span>
           </div>
           <span className="font-mono text-[10px] text-[#9da696] dark:text-zinc-600" title="Internal state fingerprint — used for deterministic test harness">{state.stateHash.slice(0, 10)}</span>

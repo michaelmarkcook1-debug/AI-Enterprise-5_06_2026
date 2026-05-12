@@ -64,7 +64,7 @@ export default async function DashboardPage() {
           </Panel>
 
           <div className="grid gap-5">
-            <Panel title="Who's winning" action={<SeedDataBadge label="Estimated" />}>
+            <Panel title="Who's winning" action={<SeedDataBadge label={provenance.source === "live" ? "Live model" : "Estimated"} provenance={provenance.source} reason={provenance.reason} />}>
               <div className="space-y-3">
                 {dashboard.winningVendors.slice(0, 5).map((item) => (
                   <div key={item.vendor.id} className="border-l-2 border-emerald-600 pl-3">
@@ -80,7 +80,7 @@ export default async function DashboardPage() {
               </div>
             </Panel>
 
-            <Panel title="Who's losing" action={<SeedDataBadge label="Estimated" />}>
+            <Panel title="Who's losing" action={<SeedDataBadge label={provenance.source === "live" ? "Live model" : "Estimated"} provenance={provenance.source} reason={provenance.reason} />}>
               <div className="space-y-3">
                 {dashboard.losingVendors.slice(0, 5).map((item) => (
                   <div key={item.vendor.id} className="border-l-2 border-rose-500 pl-3">
@@ -99,7 +99,7 @@ export default async function DashboardPage() {
         </div>
 
         <div className="mt-5 grid gap-5 lg:grid-cols-[0.95fr_1.05fr]">
-          <Panel title="Biggest market movers" action={<SeedDataBadge label="Estimated change" />}>
+          <Panel title="Biggest market movers" action={<SeedDataBadge label={provenance.source === "live" ? "Live model" : "Estimated change"} provenance={provenance.source} reason={provenance.reason} />}>
             <div className="space-y-3">
               {dashboard.weeklyMovers.slice(0, 6).map((item) => {
                 const status = marketMoverStatus(item.changePct);
@@ -121,7 +121,7 @@ export default async function DashboardPage() {
             </div>
           </Panel>
 
-          <Panel title="Market share by category" action={<SeedDataBadge label="Seed estimate" />}>
+          <Panel title="Market share by category" action={<SeedDataBadge label={provenance.source === "live" ? "Live model" : "Seed estimate"} provenance={provenance.source} reason={provenance.reason} />}>
             <div className="grid gap-x-8 gap-y-5 md:grid-cols-2">
               {dashboard.categoryShare.slice(0, 10).map((category) => (
                 <div key={category.category.id}>
@@ -149,7 +149,7 @@ export default async function DashboardPage() {
         </div>
 
         <div className="mt-5 grid gap-5 lg:grid-cols-3">
-          <Panel title="Agentic AI momentum" action={<SeedDataBadge label="Estimated" />}>
+          <Panel title="Agentic AI momentum" action={<SeedDataBadge label={provenance.source === "live" ? "Live model" : "Estimated"} provenance={provenance.source} reason={provenance.reason} />}>
             <div className="space-y-4">
               {dashboard.agenticMomentum.slice(0, 5).map((item) => (
                 <div key={item.vendor.id}>
@@ -165,7 +165,7 @@ export default async function DashboardPage() {
             </div>
           </Panel>
 
-          <Panel title="Enterprise risk radar" action={<SeedDataBadge label="Estimated" />}>
+          <Panel title="Enterprise risk radar" action={<SeedDataBadge label={provenance.source === "live" ? "Live model" : "Estimated"} provenance={provenance.source} reason={provenance.reason} />}>
             <div className="space-y-3">
               {dashboard.riskAlerts.slice(0, 5).map((item) => (
                 <div key={item.vendor.id} className="rounded-md bg-[#faf8f1] px-3 py-2 dark:bg-amber-950/20">
@@ -182,7 +182,7 @@ export default async function DashboardPage() {
             </div>
           </Panel>
 
-          <Panel title="Sector-specific leaders" action={<SeedDataBadge label="Estimated" />}>
+          <Panel title="Sector-specific leaders" action={<SeedDataBadge label={provenance.source === "live" ? "Live model" : "Estimated"} provenance={provenance.source} reason={provenance.reason} />}>
             <div className="space-y-4">
               {dashboard.sectorLeaders.slice(0, 5).map((sector) => (
                 <div key={sector.industry}>
@@ -206,7 +206,7 @@ export default async function DashboardPage() {
         </div>
 
         <div className="mt-5">
-          <Panel title="Recent major news" action={<SeedDataBadge label="Seed news" />}>
+          <Panel title="Recent major news" action={<SeedDataBadge label={provenance.source === "live" ? "Live news" : "Seed news"} provenance={provenance.source} reason={provenance.reason} />}>
             <div className="divide-y divide-[#edf0ea] dark:divide-zinc-800">
               {dashboard.majorNews.map((item) => (
                 <Link key={item.id} href="/news" className="block py-3">
@@ -216,7 +216,7 @@ export default async function DashboardPage() {
                   </div>
                   <div className="mt-1 text-xs leading-5 text-[#66705f] dark:text-zinc-400">{item.whyItMatters}</div>
                   <div className="mt-2 flex flex-wrap items-center gap-2">
-                    <SeedDataBadge label={item.sourceKind === "real" ? "Source linked" : "Seed item"} />
+                    <SeedDataBadge label={item.sourceKind === "real" ? "Source linked" : "Seed item"} provenance={item.sourceKind === "real" ? "live" : "seed"} />
                     <Confidence value={item.confidenceScore} />
                     {item.categories.slice(0, 2).map((category) => (
                       <span key={category} className="text-xs text-[#697362] dark:text-zinc-500">{category}</span>
