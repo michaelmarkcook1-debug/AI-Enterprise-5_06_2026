@@ -383,20 +383,37 @@ export async function listCapabilities(): Promise<Capability[]> {
 }
 
 export async function listVendorCapabilities(): Promise<VendorCapability[]> {
+  // Merge strategy (not all-or-nothing): the intelligence projector only
+  // writes cells it has verified evidence for. If we returned just the DB
+  // rows, every (vendor, capability) pair not yet touched by the projector
+  // would render as "validation_required" — even though we have curated
+  // seed estimates for them. So we layer DB rows over seed rows: any
+  // (vendor, capability) pair present in the DB wins; everything else
+  // falls back to the seed baseline.
   return databaseOrSeed(
     async (client) => {
-      const rows = await client.vendorCapability.findMany({ orderBy: [{ vendorId: "asc" }, { capabilityId: "asc" }] });
-      return rows.length ? rows.map(mapVendorCapability) : capabilitiesMockRepository.listVendorCapabilities();
+      const dbRows = (await client.vendorCapability.findMany({
+        orderBy: [{ vendorId: "asc" }, { capabilityId: "asc" }],
+      })).map(mapVendorCapability);
+      const seed = await capabilitiesMockRepository.listVendorCapabilities();
+      const dbKeys = new Set(dbRows.map((r) => `${r.vendorId}_${r.capabilityId}`));
+      const seedFallback = seed.filter((s) => !dbKeys.has(`${s.vendorId}_${s.capabilityId}`));
+      return [...dbRows, ...seedFallback];
     },
     () => capabilitiesMockRepository.listVendorCapabilities(),
   );
 }
 
 export async function listVendorPillarScores(): Promise<VendorPillarScore[]> {
+  // Same merge strategy as listVendorCapabilities above.
   return databaseOrSeed(
     async (client) => {
-      const rows = await client.intelligencePillarScore.findMany({ orderBy: [{ vendorId: "asc" }, { pillar: "asc" }] });
-      return rows.length ? rows.map(mapPillarScore) : VENDOR_PILLAR_SCORES;
+      const dbRows = (await client.intelligencePillarScore.findMany({
+        orderBy: [{ vendorId: "asc" }, { pillar: "asc" }],
+      })).map(mapPillarScore);
+      const dbKeys = new Set(dbRows.map((r) => `${r.vendorId}_${r.pillar}`));
+      const seedFallback = VENDOR_PILLAR_SCORES.filter((s) => !dbKeys.has(`${s.vendorId}_${s.pillar}`));
+      return [...dbRows, ...seedFallback];
     },
     () => VENDOR_PILLAR_SCORES,
   );

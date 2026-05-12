@@ -609,7 +609,7 @@ export const SEED_MODELS: CommercialModel[] = [
     sourceNames: ["AWS — Bedrock supported foundation models"],
   }),
 
-  // ───────────── Microsoft (first-party Phi/MAI + hosted third-party) ─────────────
+  // ───────────── Microsoft (first-party Phi/MAI/Copilot + hosted third-party) ─────────────
   model({
     id: "model_msft_phi",
     vendorId: "msft", vendorName: "Microsoft",
@@ -620,6 +620,79 @@ export const SEED_MODELS: CommercialModel[] = [
     sourceIds: ["src_azure_ai_foundry_models"],
     sourceUrls: ["https://learn.microsoft.com/en-us/azure/ai-foundry/foundry-models/overview"],
     sourceNames: ["Azure AI Foundry — Models"],
+  }),
+  // Microsoft AI Internal models (MAI series) — Microsoft's first-party
+  // frontier models developed internally, sitting alongside the OpenAI
+  // partnership in Foundry.
+  model({
+    id: "model_msft_mai",
+    vendorId: "msft", vendorName: "Microsoft",
+    ownerVendorId: "msft", ownerVendorName: "Microsoft",
+    modelName: "MAI (Microsoft AI)", modelFamily: "MAI", modelCategory: "multimodal",
+    ownershipType: "first_party", availabilityStage: "ga",
+    commercialAvailability: "api_available",
+    sourceIds: ["src_azure_ai_foundry_models"],
+    sourceUrls: ["https://learn.microsoft.com/en-us/azure/ai-foundry/foundry-models/overview"],
+    sourceNames: ["Azure AI Foundry — Models"],
+  }),
+  // Copilot product family — Microsoft's first-party assistant brand,
+  // packaged across M365, GitHub, Dynamics, Security, and Sales/Service.
+  // Each variant is a first-party Microsoft product even though the
+  // underlying LLM is OpenAI GPT served via Azure AI Foundry.
+  model({
+    id: "model_msft_copilot_m365",
+    vendorId: "msft", vendorName: "Microsoft",
+    ownerVendorId: "msft", ownerVendorName: "Microsoft",
+    modelName: "Microsoft 365 Copilot", modelFamily: "Copilot", modelCategory: "llm_text",
+    ownershipType: "first_party", availabilityStage: "ga",
+    commercialAvailability: "api_available",
+    sourceIds: ["src_azure_ai_foundry_models"],
+    sourceUrls: ["https://www.microsoft.com/en-us/microsoft-365/copilot"],
+    sourceNames: ["Microsoft 365 Copilot — official product page"],
+  }),
+  model({
+    id: "model_msft_copilot_github",
+    vendorId: "msft", vendorName: "Microsoft",
+    ownerVendorId: "msft", ownerVendorName: "Microsoft",
+    modelName: "GitHub Copilot", modelFamily: "Copilot", modelCategory: "coding",
+    ownershipType: "first_party", availabilityStage: "ga",
+    commercialAvailability: "api_available",
+    sourceIds: ["src_azure_ai_foundry_models"],
+    sourceUrls: ["https://github.com/features/copilot"],
+    sourceNames: ["GitHub Copilot — official product page"],
+  }),
+  model({
+    id: "model_msft_copilot_studio",
+    vendorId: "msft", vendorName: "Microsoft",
+    ownerVendorId: "msft", ownerVendorName: "Microsoft",
+    modelName: "Copilot Studio", modelFamily: "Copilot", modelCategory: "llm_text",
+    ownershipType: "first_party", availabilityStage: "ga",
+    commercialAvailability: "api_available",
+    sourceIds: ["src_azure_ai_foundry_models"],
+    sourceUrls: ["https://www.microsoft.com/en-us/microsoft-copilot/microsoft-copilot-studio"],
+    sourceNames: ["Microsoft Copilot Studio — official product page"],
+  }),
+  model({
+    id: "model_msft_copilot_dynamics",
+    vendorId: "msft", vendorName: "Microsoft",
+    ownerVendorId: "msft", ownerVendorName: "Microsoft",
+    modelName: "Dynamics 365 Copilot", modelFamily: "Copilot", modelCategory: "llm_text",
+    ownershipType: "first_party", availabilityStage: "ga",
+    commercialAvailability: "api_available",
+    sourceIds: ["src_azure_ai_foundry_models"],
+    sourceUrls: ["https://www.microsoft.com/en-us/dynamics-365/solutions/ai"],
+    sourceNames: ["Dynamics 365 Copilot — official product page"],
+  }),
+  model({
+    id: "model_msft_copilot_security",
+    vendorId: "msft", vendorName: "Microsoft",
+    ownerVendorId: "msft", ownerVendorName: "Microsoft",
+    modelName: "Microsoft Security Copilot", modelFamily: "Copilot", modelCategory: "llm_text",
+    ownershipType: "first_party", availabilityStage: "ga",
+    commercialAvailability: "api_available",
+    sourceIds: ["src_azure_ai_foundry_models"],
+    sourceUrls: ["https://www.microsoft.com/en-us/security/business/ai-machine-learning/microsoft-security-copilot"],
+    sourceNames: ["Microsoft Security Copilot — official product page"],
   }),
   // Hosted on Azure AI Foundry — owner stays original
   model({
