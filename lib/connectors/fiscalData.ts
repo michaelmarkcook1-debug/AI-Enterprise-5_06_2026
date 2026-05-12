@@ -26,7 +26,10 @@ export const fiscalDataConnector: Connector<FiscalQuery, FiscalRecord> = {
     const fetchedAt = new Date().toISOString();
     if (!query?.endpoint) return { ok: false, status: "error", records: [], recordCount: 0, fetchedAt, error: "endpoint required (e.g. '/v1/accounting/od/debt_to_penny')" };
     const params = new URLSearchParams(query.params ?? {});
-    const url = `${API}${query.endpoint}${params.toString() ? `?${params.toString()}` : ""}`;
+    // Tolerate endpoints with or without a leading slash — common
+    // user error and we don't want every caller to remember.
+    const ep = query.endpoint.startsWith("/") ? query.endpoint : `/${query.endpoint}`;
+    const url = `${API}${ep}${params.toString() ? `?${params.toString()}` : ""}`;
     try {
       const res = await fetch(url);
       if (!res.ok) {
