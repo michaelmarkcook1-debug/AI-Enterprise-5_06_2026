@@ -201,7 +201,9 @@ describe("model-inventory: vendor summaries", () => {
 
   it("Infrastructure-only vendors (AMD, ASML, Arm) show as infrastructure-only", () => {
     const all = getAllVendorSummaries();
-    for (const id of ["amd", "asml", "arm", "snow", "sap"]) {
+    // Snowflake removed from the infra-only set — it now has first-party
+    // Arctic per the May 2026 inventory refresh.
+    for (const id of ["amd", "asml", "arm", "sap"]) {
       const s = all.find((x) => x.vendorId === id);
       expect(s?.isInfrastructureOnly).toBe(true);
       expect(s?.firstPartyActiveCount).toBe(0);

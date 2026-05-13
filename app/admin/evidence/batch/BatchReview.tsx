@@ -101,8 +101,15 @@ export default function BatchReview({ result, filters, paging, hasDatabase }: Pr
 
   function confirmAndBulk(action: "approve" | "reject" | "defer", ids: string[], scope: string) {
     if (ids.length === 0) return;
-    const verb = action === "approve" ? "Approve" : action === "reject" ? "Reject" : "Defer";
-    if (!window.confirm(`${verb} ${ids.length} proposal${ids.length === 1 ? "" : "s"} (${scope})?\n\nThis is irreversible for approve/reject. Continue?`)) return;
+    // Auto-process approve actions without a confirm dialog — operators
+    // asked for one-click batch ingest. Reject/Defer still confirm
+    // because they're irreversible per-row decisions that can hide
+    // signal. The `scope` arg is kept so the bulk progress strip can
+    // still show what's being processed.
+    if (action !== "approve") {
+      const verb = action === "reject" ? "Reject" : "Defer";
+      if (!window.confirm(`${verb} ${ids.length} proposal${ids.length === 1 ? "" : "s"} (${scope})?\n\nThis is irreversible. Continue?`)) return;
+    }
     void bulkAct(ids, action);
   }
 
@@ -234,11 +241,22 @@ export default function BatchReview({ result, filters, paging, hasDatabase }: Pr
             <span className="text-xs font-semibold uppercase tracking-wider text-emerald-900 dark:text-emerald-200">
               Bulk actions
             </span>
+            {/* One-click auto-process for the whole cohort. Skips confirm
+                dialog and approves every row matching current filters. */}
+            {totalAfterFilter > 0 && (
+              <BulkAllMatchingButton
+                totalAfterFilter={totalAfterFilter}
+                filters={filters}
+                onIdsResolved={(ids) => confirmAndBulk("approve", ids, `auto-process · ${ids.length} rows`)}
+                label={`⚡ Auto-process all ${totalAfterFilter} pending`}
+                tone="primary"
+              />
+            )}
             <button
               type="button"
               onClick={() => confirmAndBulk("approve", page.map((p) => p.proposalId), `this page · ${page.length} rows`)}
               className="rounded-full bg-emerald-600 px-4 py-1.5 text-xs font-medium text-white hover:bg-emerald-700"
-            >Approve all on this page ({page.length})</button>
+            >Approve page ({page.length})</button>
             {totalAfterFilter > page.length && (
               <span className="text-xs text-emerald-900/70 dark:text-emerald-300/70">
                 or
@@ -408,12 +426,20 @@ function BulkAllMatchingButton({
   totalAfterFilter,
   filters,
   onIdsResolved,
+  label,
+  tone = "secondary",
 }: {
   totalAfterFilter: number;
   filters: BatchReviewFilters;
   onIdsResolved: (ids: string[]) => void;
+  /** Custom label override. Defaults to "Approve all matching filters (N)". */
+  label?: string;
+  /** Visual emphasis. "primary" = filled emerald, "secondary" = outline. */
+  tone?: "primary" | "secondary";
 }) {
   const [loading, setLoading] = useState(false);
+  const primaryCls = "rounded-full bg-emerald-600 px-5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 disabled:opacity-50";
+  const secondaryCls = "rounded-full border border-emerald-600 px-4 py-1.5 text-xs font-medium text-emerald-900 hover:bg-emerald-100 disabled:opacity-50 dark:border-emerald-400 dark:text-emerald-200 dark:hover:bg-emerald-950";
   return (
     <button
       type="button"
@@ -439,9 +465,9 @@ function BulkAllMatchingButton({
           setLoading(false);
         }
       }}
-      className="rounded-full border border-emerald-600 px-4 py-1.5 text-xs font-medium text-emerald-900 hover:bg-emerald-100 disabled:opacity-50 dark:border-emerald-400 dark:text-emerald-200 dark:hover:bg-emerald-950"
+      className={tone === "primary" ? primaryCls : secondaryCls}
     >
-      {loading ? "Resolving…" : `Approve all matching filters (${totalAfterFilter})`}
+      {loading ? "Resolving…" : (label ?? `Approve all matching filters (${totalAfterFilter})`)}
     </button>
   );
 }
