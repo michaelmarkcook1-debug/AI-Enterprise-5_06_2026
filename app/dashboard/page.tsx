@@ -6,8 +6,7 @@ import { marketMoverStatus, momentumStatus } from "@/lib/intelligence/metrics";
 import { getMarketDashboard } from "@/lib/intelligence/repository";
 import { getDataProvenance } from "@/lib/intelligence/provenance";
 import CommercialModelsCard from "@/components/dashboard/CommercialModelsCard";
-import ExposureMapHero, { type ExposureEdge } from "@/components/dashboard/ExposureMapHero";
-import { listIndirectExposureScores, getInvestmentProvider } from "@/lib/investing/intelligence";
+import ExposureMapHero from "@/components/dashboard/ExposureMapHero";
 
 export const dynamic = "force-dynamic";
 
@@ -17,19 +16,6 @@ export default async function DashboardPage() {
     getDataProvenance(),
   ]);
 
-  // Resolve exposure edges with provider names for the hero map.
-  const exposureEdges: ExposureEdge[] = listIndirectExposureScores().map((e) => ({
-    privateProviderId: e.privateProviderId,
-    privateProviderName: getInvestmentProvider(e.privateProviderId)?.name ?? e.privateProviderId,
-    publicTicker: e.publicTicker,
-    exposureType: e.exposureType,
-    exposureStrength: e.exposureStrength,
-    revenueLinkage: e.revenueLinkage,
-    confidence: e.confidence,
-    dilutionPenalty: e.dilutionPenalty,
-    indirectExposureScore: e.indirectExposureScore ?? 0,
-  }));
-
   return (
     <AppShell>
       <main className="mx-auto max-w-7xl px-5 py-8">
@@ -38,7 +24,7 @@ export default async function DashboardPage() {
             investor user: which public ticker exposes you to which AI
             provider, with hover-to-highlight + click-to-pin. */}
         <div className="mb-8">
-          <ExposureMapHero edges={exposureEdges} />
+          <ExposureMapHero />
         </div>
 
         <div className="grid gap-6 lg:grid-cols-[1.35fr_0.65fr]">
