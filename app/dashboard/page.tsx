@@ -6,6 +6,8 @@ import { marketMoverStatus, momentumStatus } from "@/lib/intelligence/metrics";
 import { getMarketDashboard } from "@/lib/intelligence/repository";
 import { getDataProvenance } from "@/lib/intelligence/provenance";
 import CommercialModelsCard from "@/components/dashboard/CommercialModelsCard";
+import ExposureMapHero, { type ExposureEdge } from "@/components/dashboard/ExposureMapHero";
+import { listIndirectExposureScores, getInvestmentProvider } from "@/lib/investing/intelligence";
 
 export const dynamic = "force-dynamic";
 
@@ -15,9 +17,30 @@ export default async function DashboardPage() {
     getDataProvenance(),
   ]);
 
+  // Resolve exposure edges with provider names for the hero map.
+  const exposureEdges: ExposureEdge[] = listIndirectExposureScores().map((e) => ({
+    privateProviderId: e.privateProviderId,
+    privateProviderName: getInvestmentProvider(e.privateProviderId)?.name ?? e.privateProviderId,
+    publicTicker: e.publicTicker,
+    exposureType: e.exposureType,
+    exposureStrength: e.exposureStrength,
+    revenueLinkage: e.revenueLinkage,
+    confidence: e.confidence,
+    dilutionPenalty: e.dilutionPenalty,
+    indirectExposureScore: e.indirectExposureScore ?? 0,
+  }));
+
   return (
     <AppShell>
       <main className="mx-auto max-w-7xl px-5 py-8">
+        {/* Indirect-exposure hero — moved to the top per the May 2026
+            dashboard redesign. Single most-decision-shaping panel for an
+            investor user: which public ticker exposes you to which AI
+            provider, with hover-to-highlight + click-to-pin. */}
+        <div className="mb-8">
+          <ExposureMapHero edges={exposureEdges} />
+        </div>
+
         <div className="grid gap-6 lg:grid-cols-[1.35fr_0.65fr]">
           <section className="border-b border-[#dfe4da] pb-6 dark:border-zinc-800">
             <div className="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#6a725f] dark:text-zinc-500">

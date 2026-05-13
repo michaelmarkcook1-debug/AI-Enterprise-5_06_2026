@@ -102,14 +102,23 @@ export function isInvestorTracked(vendorId: string): boolean {
 }
 
 export const INDIRECT_EXPOSURES: IndirectExposure[] = [
-  indirect("openai", "MSFT", "strategic/commercial/infrastructure", 0.65, 0.55, 0.65, 0.35),
-  indirect("anthropic", "AMZN", "investment/cloud infrastructure", 0.65, 0.6, 0.65, 0.35),
-  indirect("openai", "AMZN", "cloud/model hosting/Bedrock exposure", 0.45, 0.45, 0.55, 0.45),
-  indirect("anthropic", "GOOGL", "investment/cloud/TPU exposure", 0.7, 0.65, 0.65, 0.3),
-  indirect("openai", "NVDA", "compute infrastructure", 0.75, 0.75, 0.75, 0.25),
-  indirect("anthropic", "NVDA", "compute infrastructure", 0.72, 0.72, 0.72, 0.25),
-  indirect("frontier_labs", "NVDA", "compute infrastructure", 0.75, 0.75, 0.75, 0.25),
-  indirect("ai_infrastructure", "ORCL", "cloud/data-centre infrastructure", 0.65, 0.7, 0.6, 0.3),
+  // MSFT → OpenAI is the marquee relationship: Microsoft 365 Copilot,
+  // GitHub Copilot, and Azure OpenAI all consume GPT under the hood.
+  indirect("openai", "MSFT", "M365 Copilot / GitHub Copilot / Azure OpenAI dependency", 0.85, 0.7, 0.75, 0.2),
+  indirect("anthropic", "AMZN", "investment / Bedrock cloud infrastructure", 0.7, 0.65, 0.7, 0.3),
+  indirect("openai", "AMZN", "Bedrock hosted model marketplace", 0.4, 0.4, 0.55, 0.45),
+  indirect("anthropic", "GOOGL", "investment / Vertex / TPU exposure", 0.7, 0.65, 0.65, 0.3),
+  // Llama on Bedrock — Meta is the original owner, Amazon distributes.
+  indirect("meta", "AMZN", "Bedrock hosted Llama distribution", 0.55, 0.55, 0.7, 0.35),
+  // Mistral on Bedrock — Mistral owner, Amazon distributes.
+  indirect("mistral", "AMZN", "Bedrock hosted Mistral distribution", 0.45, 0.5, 0.65, 0.35),
+  // Compute infrastructure pillar — every frontier lab depends on NVIDIA.
+  indirect("openai", "NVDA", "compute infrastructure / H100/B200 dependency", 0.8, 0.78, 0.8, 0.2),
+  indirect("anthropic", "NVDA", "compute infrastructure / H100/B200 dependency", 0.78, 0.75, 0.78, 0.22),
+  indirect("frontier_labs", "NVDA", "compute infrastructure (cohort)", 0.75, 0.75, 0.75, 0.25),
+  indirect("meta", "NVDA", "compute infrastructure / training stack", 0.7, 0.7, 0.7, 0.25),
+  // Other infrastructure relationships.
+  indirect("ai_infrastructure", "ORCL", "cloud / OCI data-centre infrastructure", 0.65, 0.7, 0.6, 0.3),
   indirect("mistral", "ASML", "strategic investment / European AI sovereignty", 0.35, 0.2, 0.45, 0.55),
 ];
 
