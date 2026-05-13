@@ -9,6 +9,8 @@ export async function generateWeeklyBriefing() {
     executiveSummary: [
       `${dashboard.topVendors[0]?.name ?? "The leading group"} remains the highest-scoring platform in the current AI Enterpise model.`,
       `Agentic AI momentum is concentrated around ${dashboard.agenticMomentum.slice(0, 3).map((item) => item.vendor.name).join(", ")}.`,
+      "The frontier-model ecosystem is now genuinely global: Meta (Llama), DeepSeek, Alibaba (Qwen), Moonshot (Kimi), Z.ai (GLM), and MiniMax sit alongside the US-frontier set, and open-weights options shape buying decisions where access compliance allows.",
+      "Microsoft's distribution strength via Copilot, GitHub, and Azure is product-layer reach, not first-party model origination — separate the two when reading category share.",
       "Enterprise control, evidence quality, and cost governance are the main swing factors for high-risk buyers.",
     ],
     whoIsWinning: dashboard.winningVendors.slice(0, 4).map((item) => `${item.vendor.name}: ${item.reason}`),

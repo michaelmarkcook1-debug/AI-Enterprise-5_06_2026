@@ -37,6 +37,18 @@ export const INTELLIGENCE_VENDORS: Vendor[] = [
   vendor("harvey", "Harvey", "Regulated-industry AI", 76, 71, "San Francisco, US", "private", ["Legal AI", "Regulated-industry AI"], "Legal AI specialist with strong mindshare in law firms and legal departments.", "Own legal knowledge work and expand into adjacent professional-services workflows.", "Agentic capability is valuable but should be bounded by human review and privilege controls.", ["Legal research", "Contract review", "Professional services"], ["matter controls", "audit"], ["Vertical concentration", "pricing opacity"], "High-signal vertical leader; market share should be assessed in legal, not generic AI."),
   vendor("databricks", "Databricks", "Cloud AI platform", 79, 76, "San Francisco, US", "private", ["Cloud AI platform", "Data AI", "Developer/coding agent"], "Data and AI platform with strong lakehouse footprint and model-building orientation.", "Use data estate, open model tooling, and governance to become enterprise AI build platform.", "Agentic capability is strongest for data/analytics and custom enterprise build patterns.", ["Data AI", "Model operations", "Governance"], ["data governance", "lineage"], ["Business-user assistant reach", "implementation skill needs"], "Strong for build-oriented enterprises that treat data governance as the AI foundation."),
   vendor("snowflake", "Snowflake", "Cloud AI platform", 77, 75, "Bozeman, US", "public", ["Cloud AI platform", "Data AI", "RAG/enterprise search"], "Data cloud incumbent embedding AI into analytics, apps, and governed enterprise data workflows.", "Turn governed data estate into AI applications, search, and application-development layer.", "Agentic capability is emerging around governed data and app workflows.", ["Data AI", "Enterprise search", "Governance"], ["data access controls", "governance"], ["AI platform breadth", "ecosystem competition"], "Strong data-layer contender; category share differs greatly between data AI and assistant markets."),
+
+  // ───────────── Global frontier set (Phase 3 cross-tab propagation) ─────────────
+  // Added so the new vendors surface in /vendors, /assessment Step-4
+  // selector, /watchlists chips, and /vendors/[slug] detail pages.
+  vendor("meta", "Meta", "Frontier model/API", 84, 75, "Menlo Park, US", "public", ["Frontier model/API", "Open-weight models", "Consumer AI"], "Llama owner with deep open-weights distribution and Meta-AI consumer product surface.", "Lead open-weights ecosystem while running Meta AI as a consumer assistant; deepen developer reach via Llama API.", "Llama 4 brings stronger multimodal and tool-use; enterprise productisation lags hyperscalers.", ["Models", "Open-weights", "Consumer AI"], ["model card transparency", "responsible use license"], ["Enterprise control narrative thin", "consumer-AI brand concentration"], "Decisive for open-weights strategies; less of a packaged enterprise platform play."),
+  vendor("deepseek", "DeepSeek", "Frontier model/API", 78, 65, "Hangzhou, China", "private", ["Frontier model/API", "Reasoning models"], "Cost-efficient frontier reasoning lab — V4 series materially undercuts US pricing.", "Win on price-per-token + reasoning quality through aggressive open release cadence.", "Strong reasoning benchmarks; geopolitical and data-residency caveats apply for many buyers.", ["Models", "Reasoning"], ["limited enterprise tooling"], ["Geopolitical access risk", "data residency concerns"], "Compelling on cost-per-quality; access compliance is the deciding factor for regulated buyers."),
+  vendor("alibaba", "Alibaba", "Frontier model/API", 80, 68, "Hangzhou, China", "public", ["Frontier model/API", "Cloud AI platform"], "Qwen series + Alibaba Cloud Model Studio — broad multilingual + reasoning coverage.", "Distribute Qwen via Alibaba Cloud and open-weight release; lead non-English benchmarks.", "Qwen3.5 family covers Plus / Flash variants + QwQ reasoning; agentic stack via Model Studio.", ["Models", "Cloud AI", "Multilingual"], ["regional cloud controls"], ["Geopolitical access", "Western enterprise sales reach"], "Top-3 global frontier vendor; enterprise procurement gated by jurisdiction."),
+  vendor("moonshot", "Moonshot AI", "Frontier model/API", 72, 62, "Beijing, China", "private", ["Frontier model/API", "Long-context models"], "Kimi K2 series — known for long-context handling and reasoning depth.", "Build a reasoning-and-long-context niche through K2 Thinking and platform.moonshot.ai.", "K2 Thinking adds reasoning; commercial enterprise track record is short.", ["Models", "Long-context", "Reasoning"], ["limited enterprise controls disclosure"], ["Geopolitical access", "enterprise-readiness gap"], "Strong technical contender; enterprise validation still early."),
+  vendor("zai", "Z.ai", "Frontier model/API", 68, 58, "Beijing, China", "private", ["Frontier model/API"], "Zhipu / Z.ai — GLM-5.1 frontier model; significant in Chinese enterprise + research market.", "Anchor GLM as Chinese frontier alternative with English/multilingual coverage expanding.", "GLM-5.1 multimodal capable; broader agent stack underdeveloped vs frontier US labs.", ["Models"], ["limited enterprise tooling"], ["Geopolitical access", "Western enterprise reach"], "Relevant for jurisdictional diversity; Western enterprise readiness limited."),
+  vendor("minimax", "MiniMax", "Frontier model/API", 66, 57, "Shanghai, China", "private", ["Frontier model/API", "Speech / multimodal"], "MiniMax M2 series + her-variant for speech; consumer + B2B AI surface.", "Differentiate on speech-multimodal and consumer-AI integration patterns.", "M2 family covers speech and multimodal; enterprise control story underdeveloped.", ["Models", "Speech"], ["limited enterprise disclosures"], ["Geopolitical access", "enterprise depth"], "Interesting multimodal contender; not yet a packaged enterprise platform."),
+  vendor("ai21", "AI21 Labs", "Frontier model/API", 70, 65, "Tel Aviv, Israel", "private", ["Frontier model/API", "Long-context / hybrid architectures"], "Jamba hybrid Mamba+Transformer family; long-context efficiency thesis.", "Sell architectural efficiency (long-context cost) into enterprise + regulated buyers.", "Jamba Large/Mini optimised for long-context; agentic story is implementation-led.", ["Models", "Long-context"], ["enterprise integration patterns"], ["Smaller market share", "ecosystem breadth"], "Solid technical specialist for long-context workloads."),
+  vendor("aleph", "Aleph Alpha", "Frontier model/API", 60, 50, "Heidelberg, Germany", "private", ["Frontier model/API", "European AI sovereignty"], "Pharia model family with European sovereignty positioning; weight-available release.", "Anchor European sovereign-AI narrative + on-prem deployment.", "Limited public agentic stack; sovereign-deployment story is the main draw.", ["Models", "Sovereign AI"], ["on-prem deployment controls"], ["Commercial API availability unclear", "scale evidence thin"], "Relevant where European data residency and on-prem deployment dominate the decision."),
 ];
 
 function vendor(
@@ -328,7 +340,10 @@ export const WATCHLISTS: Watchlist[] = [
   {
     id: "watchlist_frontier_risk",
     name: "Frontier model control watch",
-    vendors: ["openai", "anthropic", "google", "mistral", "cohere"],
+    // Expanded May 2026 — include Meta (Llama owner), DeepSeek, and
+    // Alibaba (Qwen) so the frontier set reflects the open-weights +
+    // global frontier reality, not just the US labs.
+    vendors: ["openai", "anthropic", "google", "mistral", "cohere", "meta", "deepseek", "alibaba"],
     categories: ["Enterprise control", "Risk event", "Regulation"],
     industries: ["Financial services", "Public sector"],
     alertRules: { riskThreshold: 70, momentumChangePct: 10, categories: ["Enterprise control", "Risk event", "Regulation"] },
@@ -341,6 +356,17 @@ export const WATCHLISTS: Watchlist[] = [
     categories: ["Agentic AI", "Product launch", "Partnership"],
     industries: ["Commercial enterprise", "Technology"],
     alertRules: { momentumChangePct: 12, categories: ["Agentic AI", "Product launch"] },
+    createdAt: lastUpdated,
+  },
+  // Global frontier ecosystem watchlist — for buyers tracking the
+  // non-US frontier set and open-weights momentum.
+  {
+    id: "watchlist_global_frontier",
+    name: "Global frontier ecosystem",
+    vendors: ["meta", "deepseek", "alibaba", "moonshot", "zai", "minimax", "mistral", "ai21", "aleph"],
+    categories: ["Product launch", "Strategy signal", "Market movement"],
+    industries: ["Commercial enterprise", "Public sector"],
+    alertRules: { momentumChangePct: 8, categories: ["Product launch", "Strategy signal"] },
     createdAt: lastUpdated,
   },
 ];
