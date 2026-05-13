@@ -192,11 +192,15 @@ describe("model-inventory: vendor summaries", () => {
     expect(summary!.hostedThirdPartyCount).toBeGreaterThan(0);
   });
 
-  it("Perplexity summary marks refresh required (no source-backed inventory yet)", () => {
+  it("Perplexity summary reflects the Sonar family (source-backed first-party)", () => {
+    // Refreshed May 2026: Perplexity now has source-backed Sonar entries
+    // (Sonar, Sonar Pro, Sonar Reasoning Pro, Sonar Deep Research). Sonar
+    // is narrowly classified as search-answering / domain-specific in the
+    // notes, but ownership is first-party.
     const summary = getAllVendorSummaries().find((s) => s.vendorId === "perplexity");
-    expect(summary?.refreshRequired).toBe(true);
-    expect(summary?.uncertaintyBadge).toBeTruthy();
-    expect(summary?.firstPartyActiveCount).toBe(0);
+    expect(summary?.refreshRequired).toBe(false);
+    expect(summary?.firstPartyActiveCount).toBeGreaterThan(0);
+    expect(summary?.primaryModelFamilies).toContain("Sonar");
   });
 
   it("Infrastructure-only vendors (AMD, ASML, Arm) show as infrastructure-only", () => {
