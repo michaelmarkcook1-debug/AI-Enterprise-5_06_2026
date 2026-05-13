@@ -82,8 +82,10 @@ export const EXPOSURE_NODES: ExposureMapNode[] = [
     category: "AI compute", logoDomain: "nvidia.com", monogram: "NV", brandColor: "#76B900" },
   { id: "ORCL", label: "Oracle", ticker: "ORCL", side: "left", ownership: "public",
     category: "Cloud / OCI", logoDomain: "oracle.com", monogram: "OR", brandColor: "#C74634" },
-  { id: "META", label: "Meta", ticker: "META", side: "left", ownership: "public",
-    category: "Model owner (Llama)", logoDomain: "meta.com", monogram: "ME", brandColor: "#0866FF" },
+  // Meta is a publicly-traded company AND a model owner. Per the
+  // redesign brief it belongs on the right side as the originator of
+  // Llama — see the `meta` right-side node below. We don't double-list
+  // it on the left, which would suggest it's a buyer of itself.
   { id: "CRM", label: "Salesforce", ticker: "CRM", side: "left", ownership: "public",
     category: "CRM AI / BYOLLM", logoDomain: "salesforce.com", monogram: "SF", brandColor: "#00A1E0" },
   { id: "SNOW", label: "Snowflake", ticker: "SNOW", side: "left", ownership: "public",
@@ -106,6 +108,10 @@ export const EXPOSURE_NODES: ExposureMapNode[] = [
     category: "Frontier lab", logoDomain: "x.ai", monogram: "xA", brandColor: "#0F0F0F" },
   { id: "perplexity", label: "Perplexity", side: "right", ownership: "private",
     category: "Search-answer API", logoDomain: "perplexity.ai", monogram: "PX", brandColor: "#20808D" },
+  // Meta is publicly traded but listed here as a model owner — Llama
+  // is hosted across Bedrock, Azure AI Foundry, and OCI Generative AI.
+  { id: "meta", label: "Meta", ticker: "META", side: "right", ownership: "public",
+    category: "Model owner (Llama)", logoDomain: "meta.com", monogram: "ME", brandColor: "#0866FF" },
   // Extended ecosystem (toggleable)
   { id: "nemotron", label: "NVIDIA Nemotron", side: "right", ownership: "subsidiary",
     category: "First-party (NVDA)", logoDomain: "nvidia.com", monogram: "Ne", brandColor: "#76B900" },
