@@ -2,9 +2,11 @@ export type Theme = "light" | "dark";
 
 export const THEME_STORAGE_KEY = "ai-enterprise-theme";
 
+export const DEFAULT_THEME: Theme = "dark";
+
 export function getStoredOrPreferredTheme(): Theme {
   if (typeof window === "undefined") {
-    return "light";
+    return DEFAULT_THEME;
   }
 
   const storedTheme = window.localStorage.getItem(THEME_STORAGE_KEY);
@@ -13,7 +15,10 @@ export function getStoredOrPreferredTheme(): Theme {
     return storedTheme;
   }
 
-  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  // Brand surfaces are designed dark-first; ignore OS preference and
+  // default to dark unless the user explicitly opts to light via the
+  // TopNav toggle. Mirrors the pre-hydration script in app/layout.tsx.
+  return DEFAULT_THEME;
 }
 
 export function applyTheme(theme: Theme) {

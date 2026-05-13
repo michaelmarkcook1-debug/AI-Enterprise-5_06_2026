@@ -27,9 +27,10 @@ const NO_FLASH_THEME_SCRIPT = `
   try {
     var key = 'ai-enterprise-theme';
     var stored = window.localStorage.getItem(key);
-    var theme = (stored === 'light' || stored === 'dark')
-      ? stored
-      : (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    // Dark is the default — only honour an explicit user opt-in to
+    // 'light' via the TopNav toggle. We intentionally ignore the OS
+    // preference because the brand surfaces are designed dark-first.
+    var theme = stored === 'light' ? 'light' : 'dark';
     var root = document.documentElement;
     root.classList.toggle('dark', theme === 'dark');
     root.dataset.aiEnterpriseTheme = theme;

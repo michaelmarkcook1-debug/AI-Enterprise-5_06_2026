@@ -65,9 +65,15 @@ export function SeedDataBadge({
   );
 }
 
-export function Confidence({ value }: { value: number }) {
-  const tone = value >= 75 ? "bg-emerald-50 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300" : value >= 60 ? "bg-amber-50 text-amber-800 dark:bg-amber-950 dark:text-amber-300" : "bg-rose-50 text-rose-800 dark:bg-rose-950 dark:text-rose-300";
-  return <span className={`rounded px-1.5 py-0.5 text-xs font-medium ${tone}`}>Confidence {value}/100</span>;
+// Confidence badge removed per product decision — scores were noisy and
+// drew attention from the headline rank. The component is kept as a
+// no-op so every existing `<Confidence value={...} />` call site
+// continues to compile, but renders nothing. To bring the badge back,
+// restore the previous implementation in this file's git history.
+//
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function Confidence(_: { value: number }) {
+  return null;
 }
 
 export function EvidenceBadge({ grade }: { grade: EvidenceGrade }) {

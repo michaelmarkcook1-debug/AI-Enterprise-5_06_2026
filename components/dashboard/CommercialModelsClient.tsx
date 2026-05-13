@@ -112,7 +112,6 @@ export default function CommercialModelsClient({ vendors, models, sources }: Pro
                     {v.primaryModelFamilies.length > 0 && (
                       <span>Families: {v.primaryModelFamilies.join(", ")}</span>
                     )}
-                    <span>Confidence {v.confidenceScore}/100</span>
                     <span>Last verified {v.lastVerifiedAt ?? "—"}</span>
                   </div>
                 </div>

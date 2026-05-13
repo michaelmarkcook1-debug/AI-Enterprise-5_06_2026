@@ -83,7 +83,6 @@ function VendorCard({ vr, open, onToggle }: { vr: VendorResult; open: boolean; o
           </div>
           <div className="text-right shrink-0">
             <div className="text-3xl font-semibold tabular-nums">{vr.excluded ? "—" : vr.finalScore.toFixed(0)}</div>
-            <div className="text-xs text-zinc-500">Confidence {vr.confidenceScore.toFixed(0)}/100</div>
             <div className="mt-2"><OwnershipBadge ownershipType={vr.ownership} /></div>
             <span className={`mt-2 inline-block rounded-full px-2 py-0.5 text-xs font-medium ${band.tone}`}>{band.label}</span>
           </div>

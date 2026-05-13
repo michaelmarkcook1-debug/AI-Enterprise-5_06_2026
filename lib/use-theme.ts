@@ -20,7 +20,10 @@ function getSnapshot(): Theme {
 }
 
 function getServerSnapshot(): Theme {
-  return "light";
+  // Server-side rendering returns the brand default (dark). The
+  // pre-hydration script in app/layout.tsx flips to 'light' before
+  // paint if the user opted in via localStorage.
+  return "dark";
 }
 
 export function usePortalTheme() {

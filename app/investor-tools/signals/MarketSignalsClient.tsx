@@ -93,7 +93,7 @@ export default function MarketSignalsClient({
         <div className="mb-3 flex items-center justify-between">
           <h2 className="text-sm font-semibold text-[#18201b]">Current market regime</h2>
           <span className="text-xs text-[#697362]">
-            Confidence {regime.confidenceScore}/100 · {regime.contributingSignalIds.length} contributing signals
+            {regime.contributingSignalIds.length} contributing signals
           </span>
         </div>
         <div className="grid grid-cols-2 gap-2 text-xs md:grid-cols-5">
