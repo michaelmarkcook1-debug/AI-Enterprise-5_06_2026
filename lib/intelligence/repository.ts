@@ -487,13 +487,71 @@ export async function getMarketDashboard(): Promise<MarketDashboard> {
       confidence: momentumByVendor.get(vendor.id)?.confidence ?? vendor.confidenceScore,
     }));
 
+  // ─────────────────────────────────────────────────────────────
+  // "Who's losing" — sharpened per the May-2026 dashboard review.
+  // The previous implementation rendered the same generic hedge
+  // ("Confidence, evidence depth, or category concentration is
+  // limiting the current view.") for every entry. That's not a
+  // thesis. Replaced with a composite "losing score" + a per-vendor
+  // reason that names the actual issue.
+  //
+  // Composite losing score = (low momentum) + (negative share trend)
+  //   + (depth of risk profile). Higher = bigger problem.
+  //
+  // Per-vendor reason names whichever signal is most damning, falling
+  // back to the vendor's own riskProfile entries so the copy is
+  // grounded in seed-curated content, not invented.
+  // ─────────────────────────────────────────────────────────────
+  const shareTrendByVendor = new Map<string, number>();
+  for (const s of shares) {
+    const prev = shareTrendByVendor.get(s.vendorId) ?? 0;
+    shareTrendByVendor.set(s.vendorId, prev + Math.min(0, s.changePct));
+  }
+
+  function losingScore(v: Vendor): number {
+    const mom = momentumByVendor.get(v.id)?.momentumScore ?? 50;
+    const momentumDrag = Math.max(0, 60 - mom);
+    const shareDrag = Math.abs(Math.min(0, shareTrendByVendor.get(v.id) ?? 0));
+    const riskDepth = (v.riskProfile?.length ?? 0) * 8;
+    const confidenceGap = Math.max(0, 70 - (v.confidenceScore ?? 50));
+    return momentumDrag * 1.4 + shareDrag * 1.1 + riskDepth + confidenceGap * 0.6;
+  }
+
+  function losingReason(v: Vendor): string {
+    const mom = momentumByVendor.get(v.id)?.momentumScore ?? 50;
+    const shareDelta = shareTrendByVendor.get(v.id) ?? 0;
+    const primaryRisk = v.riskProfile?.[0];
+    // Most damning signal first.
+    if (shareDelta <= -6) {
+      return `Category share down ${Math.abs(shareDelta).toFixed(1)}pp${primaryRisk ? ` — ${primaryRisk.toLowerCase()}` : ""}.`;
+    }
+    if (mom < 50) {
+      return `Momentum ${Math.round(mom)}/100 — ${primaryRisk ? primaryRisk.toLowerCase() : "lagging product cadence"}.`;
+    }
+    if ((v.riskProfile?.length ?? 0) >= 2) {
+      return `Two open risks: ${v.riskProfile!.slice(0, 2).join("; ").toLowerCase()}.`;
+    }
+    if (v.confidenceScore < 65) {
+      return `Evidence depth ${v.confidenceScore}/100 — ${primaryRisk ? primaryRisk.toLowerCase() : "limited verified-source coverage"}.`;
+    }
+    return primaryRisk ?? "Position narrowing on combined momentum + evidence signals.";
+  }
+
   const losingVendors = [...vendors]
-    .filter((vendor) => vendor.confidenceScore < 70 || vendor.riskProfile.length > 1)
-    .sort((a, b) => a.confidenceScore - b.confidenceScore)
+    .filter((vendor) => {
+      const mom = momentumByVendor.get(vendor.id)?.momentumScore ?? 50;
+      const shareDelta = shareTrendByVendor.get(vendor.id) ?? 0;
+      // Real signals only: momentum below 60, OR meaningful share
+      // erosion, OR ≥2 open risks. Skip vendors that don't actually
+      // signal "losing" — even if confidenceScore is low, that alone
+      // isn't a losing signal, it's an evidence-depth signal.
+      return mom < 60 || shareDelta <= -3 || (vendor.riskProfile?.length ?? 0) >= 2;
+    })
+    .sort((a, b) => losingScore(b) - losingScore(a))
     .slice(0, 5)
     .map((vendor) => ({
       vendor,
-      reason: "Confidence, evidence depth, or category concentration is limiting the current view.",
+      reason: losingReason(vendor),
       confidence: vendor.confidenceScore,
     }));
 
