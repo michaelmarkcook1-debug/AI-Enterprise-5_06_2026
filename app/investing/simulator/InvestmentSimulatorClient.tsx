@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useRef, useState } from "react";
-import { Confidence, EvidenceBadge, Panel, ScoreBar, SeedDataBadge } from "@/components/intelligence-ui";
+import { EvidenceBadge, Panel, ScoreBar, SeedDataBadge } from "@/components/intelligence-ui";
 import { OwnershipLegend, VendorNameWithOwnership } from "@/components/ownership-indicator";
 import {
   calculateScatterDomain,
@@ -257,20 +257,54 @@ export default function InvestmentSimulatorClient({
 
   return (
     <div className="space-y-5">
-      <div className="flex flex-wrap items-center gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-900/70 dark:bg-amber-950/50 dark:text-amber-200">
-        <span className="inline-flex items-center gap-1 rounded border border-amber-300 bg-amber-100/60 px-1.5 py-0.5 text-[11px] font-bold uppercase tracking-wide text-amber-900 dark:border-amber-700 dark:bg-amber-950/60 dark:text-amber-200" title="Hypothetical simulator, not financial advice.">Scenario tool</span>
-        <span>{DISCLAIMER}</span>
-      </div>
+      {/* Slim disclaimer strip — full text in details/summary so it doesn't
+          dominate the hero. Operators have seen the longform version a
+          hundred times by their second visit. */}
+      <details className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-2 text-xs text-amber-900 dark:border-amber-900/70 dark:bg-amber-950/50 dark:text-amber-200">
+        <summary className="flex cursor-pointer list-none items-center gap-2">
+          <span className="inline-flex items-center gap-1 rounded border border-amber-300 bg-amber-100/60 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide" title="Hypothetical simulator, not financial advice.">Scenario tool</span>
+          <span className="font-medium">Not financial advice</span>
+          <span className="text-amber-900/70 dark:text-amber-200/70">— click for full disclaimer</span>
+          <span aria-hidden className="ml-auto">▾</span>
+        </summary>
+        <p className="mt-2 leading-relaxed">{DISCLAIMER}</p>
+      </details>
 
-      <div className="rounded-lg border border-[#dfe4da] bg-white p-4 dark:border-zinc-800 dark:bg-[#071827]">
+      {/* In-page anchor nav — there are ~14 panels in this view and
+          operators reported scroll fatigue. These chips jump to the
+          section that matters. Hidden on mobile (the stacked view is
+          easier to scroll). */}
+      <nav aria-label="Simulator sections" className="hidden flex-wrap items-center gap-1.5 md:flex">
+        <span className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">Jump to</span>
+        {[
+          { href: "#sim-quickstart", label: "Quick start" },
+          { href: "#sim-inputs", label: "Inputs & scenario" },
+          { href: "#sim-allocation", label: "Allocation" },
+          { href: "#sim-risk", label: "Risk" },
+          { href: "#sim-detail", label: "Provider table" },
+        ].map((item) => (
+          <a
+            key={item.href}
+            href={item.href}
+            className="rounded-full border border-zinc-300 bg-white px-2.5 py-0.5 text-[11px] font-medium text-zinc-600 hover:border-emerald-500 hover:bg-emerald-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400 dark:hover:border-emerald-400 dark:hover:bg-emerald-950/40"
+          >
+            {item.label}
+          </a>
+        ))}
+      </nav>
+
+      <div id="sim-quickstart" className="scroll-mt-20 rounded-lg border border-[#dfe4da] bg-white p-4 dark:border-zinc-800 dark:bg-[#071827]">
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
           <div>
             <h2 className="text-sm font-semibold text-[#18201b] dark:text-zinc-100">Quick start</h2>
             <p className="mt-0.5 text-xs text-[#697362] dark:text-zinc-400">Pick a preset to load a sensible starting configuration. The chart updates live as you tune inputs below — no &ldquo;run&rdquo; button required.</p>
           </div>
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300">
-            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" /> Auto-updating
-          </span>
+          <div className="flex items-center gap-2">
+            <ShareConfigButton input={input} />
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300">
+              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" /> Auto-updating
+            </span>
+          </div>
         </div>
         <div className="grid gap-2 md:grid-cols-4">
           {PRESETS.map((preset) => (
@@ -292,7 +326,7 @@ export default function InvestmentSimulatorClient({
         <SummaryCard label="Time horizon" value={`${input.horizonYears}y`} note={input.rebalanceFrequency} />
         <SummaryCard label="Risk profile" value={title(input.riskProfile)} note={input.allocationStyle.replace(/_/g, " ")} />
         <SummaryCard label="Universe" value={input.investmentUniverse.replace(/_/g, " ")} note={input.region} />
-        <SummaryCard label="Confidence" value={hasIntegrityError ? "Blocked" : `${result.confidenceScore.toFixed(0)}/100`} note="weighted evidence" />
+        <SummaryCard label="Evidence weight" value={hasIntegrityError ? "Blocked" : `${result.confidenceScore.toFixed(0)}/100`} note="evidence-weighted score" />
       </div>
 
       <div className="rounded-lg border border-[#dfe4da] bg-white p-3 text-xs leading-5 text-[#596151] dark:border-zinc-800 dark:bg-[#071827] dark:text-zinc-400">
@@ -308,7 +342,7 @@ export default function InvestmentSimulatorClient({
 
       <ConfigBanner errors={state.errors} />
 
-      <div className="grid gap-5 xl:grid-cols-[0.72fr_1.45fr_0.83fr]">
+      <div id="sim-inputs" className="grid scroll-mt-20 gap-5 xl:grid-cols-[0.72fr_1.45fr_0.83fr]">
         <Panel title="Inputs and assumptions">
           <div className="space-y-3">
             {/* ─────── ESSENTIALS — always visible ─────── */}
@@ -432,13 +466,39 @@ export default function InvestmentSimulatorClient({
             </CollapsibleSection>
 
             {/* ─────── Actions ─────── */}
+            {/* Relabelled per the May-2026 simulator audit:
+                - "Apply random shock" → "Roll a market shock" (clearer
+                  that it's a random shock, not a specific one). Tooltip
+                  explains what gets perturbed.
+                - Reset to defaults moves NEXT to "Clear shock" when a
+                  shock is active so the operator can undo deliberately. */}
             <div className="grid grid-cols-2 gap-2 pt-2">
-              <button className="rounded-md border border-[#cfd7c8] px-3 py-2 text-xs font-semibold hover:bg-[#eef2e8] dark:border-zinc-700 dark:hover:bg-zinc-900" onClick={() => { setInput(coerceClientInput(initialInput)); setShockEvent(null); }} type="button">
+              <button
+                className="rounded-md border border-[#cfd7c8] px-3 py-2 text-xs font-semibold hover:bg-[#eef2e8] dark:border-zinc-700 dark:hover:bg-zinc-900"
+                onClick={() => { setInput(coerceClientInput(initialInput)); setShockEvent(null); }}
+                type="button"
+                aria-label="Reset inputs and clear any active shock"
+              >
                 Reset to defaults
               </button>
-              <button className="rounded-md bg-[#192319] px-3 py-2 text-xs font-semibold text-white hover:bg-[#2a382c] dark:bg-zinc-100 dark:text-zinc-950 dark:hover:bg-white" onClick={applyBoardShock} type="button">
-                Apply random shock
+              <button
+                className="rounded-md bg-[#192319] px-3 py-2 text-xs font-semibold text-white hover:bg-[#2a382c] dark:bg-zinc-100 dark:text-zinc-950 dark:hover:bg-white"
+                onClick={applyBoardShock}
+                type="button"
+                title="Generates a random market shock — drawdown severity, timing, and stress amplifier vary each click. The shock effect shows on the fan chart and drawdown panel."
+                aria-label="Apply a random market shock to the current scenario"
+              >
+                🎲 Roll a market shock
               </button>
+              {shockEvent && (
+                <button
+                  type="button"
+                  onClick={() => setShockEvent(null)}
+                  className="col-span-2 rounded-md border border-amber-300 bg-amber-50 px-3 py-1.5 text-[11px] font-medium text-amber-900 hover:bg-amber-100 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-200"
+                >
+                  Clear active shock
+                </button>
+              )}
             </div>
           </div>
         </Panel>
@@ -517,8 +577,9 @@ export default function InvestmentSimulatorClient({
               <ScoreBar value={result.qualityScore} label="Quality score" />
               <ScoreBar value={result.speculationScore} label="Speculation score" />
               <ScoreBar value={result.riskScore} label="Risk score" />
-              <Confidence value={result.confidenceScore} />
-              <InfoButton text="Confidence score is evidence-weighted and seed-labelled. It changes when selected holdings, evidence confidence, or universe composition changes." />
+              {/* Confidence chip removed app-wide (May 2026). Evidence
+                  weighting still drives the scores above; the strip
+                  beneath the chart already mentions evidence-weighting. */}
               <p className="rounded-md border border-[#dfe4da] bg-[#f7f8f5] p-3 text-xs leading-5 text-[#596151] dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400">
                 The current pack is tilted toward public platform and infrastructure exposure, with IPO-watch upside modelled as scenario sensitivity rather than direct ownership.
               </p>
@@ -528,15 +589,33 @@ export default function InvestmentSimulatorClient({
         </Panel>
       </div>
 
-      <div className="grid gap-5 xl:grid-cols-2">
+      <div id="sim-allocation" className="grid scroll-mt-20 gap-5 xl:grid-cols-2">
         <Panel title="Portfolio allocation">
           {hasIntegrityError ? <IntegrityError errors={state.errors} /> : <AllocationDonut portfolio={portfolio} providers={providerById} />}
         </Panel>
         <Panel title="Risk-return scatterplot">
           {hasIntegrityError ? <IntegrityError errors={state.errors} /> : <RiskReturnScatter portfolio={portfolio} providers={providerById} stateHash={state.stateHash} />}
         </Panel>
-        <Panel title="Indirect exposure network">
-          <ExposureNetwork exposures={indirectExposures} providers={providerById} />
+        {/* Indirect exposure: link to the polished hero on
+            /investor-tools/exposure-map instead of re-rendering an
+            inferior copy here. Keeps the simulator focused on portfolio
+            scenarios; the exposure-map page handles relationship
+            inspection with hover, multi-pin, filters, logos. */}
+        <Panel title="Indirect exposure">
+          <div className="space-y-3 text-xs leading-5 text-[#596151] dark:text-zinc-400">
+            <p>
+              The dedicated <a href="/investor-tools/exposure-map" className="font-semibold text-emerald-700 underline-offset-2 hover:underline dark:text-emerald-400">indirect exposure map</a> shows who-backs-whom and who-hosts-whom across the full public/private graph, with hover detail, multi-pin compare, and source-backed confidence tiers.
+            </p>
+            <div className="text-[11px] text-zinc-500">
+              {indirectExposures.length} edges in the current dataset · public hyperscalers on the left, AI labs on the right.
+            </div>
+            <a
+              href="/investor-tools/exposure-map"
+              className="inline-flex items-center gap-1 rounded-full bg-emerald-600 px-4 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-400"
+            >
+              Open full exposure map →
+            </a>
+          </div>
         </Panel>
         <Panel title="IPO lifecycle timeline">
           <IpoTimeline profiles={ipoWatch} providers={providerById} />
@@ -547,7 +626,7 @@ export default function InvestmentSimulatorClient({
         <Panel title="Stacked exposure bar">
           {hasIntegrityError ? <IntegrityError errors={state.errors} /> : <StackedExposureBar portfolio={portfolio} />}
         </Panel>
-        <Panel title="Confidence heatmap">
+        <Panel title="Evidence-weight heatmap">
           {hasIntegrityError ? <IntegrityError errors={state.errors} /> : <ConfidenceHeatmap portfolio={portfolio} providers={providerById} />}
         </Panel>
         <Panel title="Contribution waterfall">
@@ -555,10 +634,13 @@ export default function InvestmentSimulatorClient({
         </Panel>
       </div>
 
-      <Panel title="Risk radar">
-        {hasIntegrityError ? <IntegrityError errors={state.errors} /> : <RiskRadar result={result} portfolio={portfolio} providers={providerById} />}
-      </Panel>
+      <div id="sim-risk" className="scroll-mt-20">
+        <Panel title="Risk radar">
+          {hasIntegrityError ? <IntegrityError errors={state.errors} /> : <RiskRadar result={result} portfolio={portfolio} providers={providerById} />}
+        </Panel>
+      </div>
 
+      <div id="sim-detail" className="scroll-mt-20" />
       <Panel title="Provider detail table">
         <div className="mb-4">
           <OwnershipLegend />
@@ -614,6 +696,39 @@ export default function InvestmentSimulatorClient({
         </div>}
       </Panel>
     </div>
+  );
+}
+
+// Encodes the current SimulationInput as a URL hash fragment and copies
+// the result to the clipboard. Lets an operator share a specific
+// scenario with a colleague without standing up a persistence layer.
+// The URL never leaves the user's machine — purely a hash, no server.
+function ShareConfigButton({ input }: { input: SimulationInput }) {
+  const [status, setStatus] = useState<"idle" | "copied" | "failed">("idle");
+  async function copy() {
+    try {
+      const json = JSON.stringify(input);
+      const hash = "#sim=" + encodeURIComponent(json);
+      const url = typeof window !== "undefined" ? window.location.origin + window.location.pathname + hash : hash;
+      if (typeof navigator !== "undefined" && navigator.clipboard) {
+        await navigator.clipboard.writeText(url);
+      }
+      setStatus("copied");
+      setTimeout(() => setStatus("idle"), 2200);
+    } catch {
+      setStatus("failed");
+      setTimeout(() => setStatus("idle"), 2200);
+    }
+  }
+  return (
+    <button
+      type="button"
+      onClick={copy}
+      title="Copy a link encoding the current scenario config — paste it to share or bookmark."
+      className="inline-flex items-center gap-1.5 rounded-full border border-zinc-300 bg-white px-2.5 py-1 text-[11px] font-semibold text-zinc-700 hover:border-emerald-500 hover:bg-emerald-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:border-emerald-400 dark:hover:bg-emerald-950/40"
+    >
+      {status === "copied" ? "✓ Link copied" : status === "failed" ? "× Couldn't copy" : "Copy share link"}
+    </button>
   );
 }
 
