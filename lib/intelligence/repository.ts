@@ -363,10 +363,21 @@ export async function listVendorMomentum(): Promise<VendorMomentum[]> {
 }
 
 export async function listNewsItems(): Promise<NewsItem[]> {
+  // Merge strategy: DB rows (from the projector / approved evidence)
+  // take precedence, but curated seed items fill in vendor coverage
+  // the projector hasn't produced. Without this merge, seeded news for
+  // newly-added vendors (Meta, DeepSeek, Alibaba, etc.) is invisible
+  // any time the projector has written even one IntelligenceNewsItem.
+  // Sorted newest-first overall after the merge.
   return databaseOrSeed(
     async (client) => {
-      const rows = await client.intelligenceNewsItem.findMany({ orderBy: { publishedAt: "desc" } });
-      return rows.length ? rows.map(mapNews) : newsMockRepository.list();
+      const dbRows = (await client.intelligenceNewsItem.findMany({ orderBy: { publishedAt: "desc" } })).map(mapNews);
+      const seed = await newsMockRepository.list();
+      const dbIds = new Set(dbRows.map((r) => r.id));
+      const seedFallback = seed.filter((s) => !dbIds.has(s.id));
+      const merged = [...dbRows, ...seedFallback];
+      merged.sort((a, b) => (a.publishedAt < b.publishedAt ? 1 : -1));
+      return merged;
     },
     () => newsMockRepository.list(),
   );
