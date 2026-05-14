@@ -310,8 +310,9 @@ export default function ExposureMapHero(_: { edges?: unknown } = {}) {
         )}
       </div>
 
-      {/* Map */}
-      <div className="relative overflow-x-auto">
+      {/* Map — desktop / tablet (≥ md). Below md we fall through to the
+          stacked relationship explorer at the bottom of this component. */}
+      <div className="relative hidden overflow-x-auto md:block">
         <svg
           viewBox={`0 0 ${W} ${height}`}
           width="100%"
@@ -416,6 +417,19 @@ export default function ExposureMapHero(_: { edges?: unknown } = {}) {
 
         {/* Floating tooltip */}
         {tooltip && <MapTooltip {...tooltip} />}
+      </div>
+
+      {/* Mobile / narrow-viewport stacked card explorer.
+          A SVG node-link layout is unreadable below ~700px wide, so
+          below md we drop the SVG and render edges as a flat list of
+          relationship cards grouped by left-side node. Same filter
+          state as the SVG above, so the chips at the top of the
+          component work consistently across both views. */}
+      <div className="md:hidden">
+        <MobileStackedView
+          edges={visibleEdges}
+          getNode={(id) => EXPOSURE_NODES.find((n) => n.id === id)!}
+        />
       </div>
 
       {/* Legend */}
@@ -610,6 +624,95 @@ function MapTooltip({
           )}
         </ul>
       )}
+    </div>
+  );
+}
+
+// ──────────────── Mobile stacked-card view ────────────────
+// Used below md breakpoint. Groups visible edges by source (left-side
+// public companies) so the user can scan "Microsoft exposes you to:
+// OpenAI [investment], Mistral [investment], Meta [model hosting]"
+// without horizontal scrolling. Each card respects the same
+// relationship-type colour palette and confidence dashing the SVG uses.
+
+function MobileStackedView({
+  edges, getNode,
+}: {
+  edges: ExposureMapEdge[];
+  getNode: (id: string) => ExposureMapNode;
+}) {
+  // Group edges by source node, preserving original order.
+  const grouped = new Map<string, ExposureMapEdge[]>();
+  for (const e of edges) {
+    const list = grouped.get(e.sourceId) ?? [];
+    list.push(e);
+    grouped.set(e.sourceId, list);
+  }
+  if (grouped.size === 0) {
+    return (
+      <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-4 text-center text-xs text-zinc-500 dark:border-zinc-800 dark:bg-zinc-900/40">
+        No relationships match the current filters.
+      </div>
+    );
+  }
+  return (
+    <div className="space-y-4">
+      {[...grouped.entries()].map(([sourceId, sourceEdges]) => {
+        const src = getNode(sourceId);
+        return (
+          <details key={sourceId} open className="rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
+            <summary className="flex cursor-pointer list-none items-center gap-3 p-3">
+              <span
+                className="inline-flex h-9 w-9 items-center justify-center rounded-full text-[12px] font-bold text-white"
+                style={{ backgroundColor: src.brandColor }}
+                aria-hidden
+              >
+                {src.monogram}
+              </span>
+              <div className="flex-1">
+                <div className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">{src.label}</div>
+                <div className="text-[10px] uppercase tracking-wider text-zinc-500">
+                  {src.ticker ?? src.category} · {sourceEdges.length} relationship{sourceEdges.length === 1 ? "" : "s"}
+                </div>
+              </div>
+              <span aria-hidden className="text-zinc-400">▾</span>
+            </summary>
+            <ul className="divide-y divide-zinc-200 border-t border-zinc-200 dark:divide-zinc-800 dark:border-zinc-800">
+              {sourceEdges.map((e) => {
+                const tgt = getNode(e.targetId);
+                return (
+                  <li key={e.id} className="space-y-1.5 p-3 text-xs">
+                    <div className="flex items-center gap-2">
+                      <span className="inline-block h-2 w-2 rounded-full" style={{ backgroundColor: REL_COLOR[e.relationshipType] }} />
+                      <span className="font-semibold text-zinc-900 dark:text-zinc-100">{tgt.label}</span>
+                      <span className="ml-auto rounded-full bg-zinc-100 px-2 py-0.5 text-[9px] uppercase tracking-wider text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">
+                        {CONF_LABEL[e.confidence]}
+                      </span>
+                    </div>
+                    <div className="text-[10px] uppercase tracking-wider text-zinc-500">
+                      {REL_LABEL[e.relationshipType]}
+                      {e.estimatedValue && ` · ${e.estimatedValue}`}
+                      {` · updated ${e.dateUpdated}`}
+                    </div>
+                    <p className="leading-relaxed text-zinc-700 dark:text-zinc-300">{e.summary}</p>
+                    {e.sourceUrls.length > 0 && (
+                      <div className="text-[10px] text-emerald-700 dark:text-emerald-400">
+                        {e.sourceUrls.slice(0, 2).map((u) => {
+                          try {
+                            return <span key={u} className="mr-2">{new URL(u).hostname}</span>;
+                          } catch {
+                            return null;
+                          }
+                        })}
+                      </div>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          </details>
+        );
+      })}
     </div>
   );
 }

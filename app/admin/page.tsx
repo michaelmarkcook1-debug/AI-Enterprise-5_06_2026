@@ -94,6 +94,11 @@ export default async function AdminHome() {
             title="Production status"
             body="Env-var gates and the production readiness contract."
           />
+          <AdminCard
+            href="/admin/exposure-edits"
+            title="Exposure-map edits"
+            body="Propose adds / updates / removals to the indirect-exposure graph. Append-only JSONL audit; nothing live until a reviewer folds it in."
+          />
         </div>
 
         {/* Bottom strip: dev-mode note. */}
