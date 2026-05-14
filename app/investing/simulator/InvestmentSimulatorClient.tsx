@@ -124,6 +124,27 @@ const PRESETS: SimulatorPreset[] = [
       manualAllocations: {},
     }),
   },
+  // Single stock — the operator's escape hatch from model-guided
+  // portfolios. Pre-selects MSFT (the most-clicked public-direct
+  // ticker) so the simulation runs immediately and the picker is
+  // already loaded with a valid choice the user can change.
+  {
+    id: "single_stock_msft",
+    label: "Single stock — pick one",
+    description: "Allocate 100% to a single public-direct ticker. Defaults to Microsoft; swap inside the picker below.",
+    apply: (current) => ({
+      ...current,
+      riskProfile: "balanced",
+      allocationStyle: "single_stock",
+      investmentUniverse: "single_stock",
+      includePrivateExposure: "no",
+      cashReservePct: 0,
+      horizonYears: 5,
+      globalRiskClimate: "elevated",
+      selectedVendorIds: ["msft"],
+      manualAllocations: { msft: 100 },
+    }),
+  },
 ];
 
 const exposureColors: Record<string, string> = {
@@ -396,6 +417,44 @@ export default function InvestmentSimulatorClient({
               <GuidanceNote>{UNIVERSE_GUIDANCE[input.investmentUniverse]}</GuidanceNote>
             </Field>
 
+            {/* Single-stock picker lifted OUT of the Strategy collapsible.
+                When the operator is in single_stock mode the picker
+                must be the most prominent thing in the inputs panel —
+                burying it inside a collapsible meant it was discoverable
+                only via two-level navigation and people reported they
+                "couldn't pick a single stock". Now it's first-tier,
+                framed in emerald, and impossible to miss. */}
+            {input.allocationStyle === "single_stock" && (
+              <div className="rounded-lg border-2 border-emerald-500 bg-emerald-50/40 p-3 dark:border-emerald-500 dark:bg-emerald-950/20">
+                <div className="mb-2 flex items-center justify-between gap-2">
+                  <div className="text-[10px] font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
+                    Single-stock mode · pick one ticker
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setField("allocationStyle", "model_guided")}
+                    className="rounded-full border border-emerald-300 px-2 py-0.5 text-[10px] font-medium text-emerald-800 hover:bg-emerald-100 dark:border-emerald-700 dark:text-emerald-300 dark:hover:bg-emerald-950/60"
+                  >
+                    Exit single-stock
+                  </button>
+                </div>
+                <SingleStockPicker
+                  eligibleProviders={providers}
+                  selectedId={(input.selectedVendorIds ?? [])[0] ?? null}
+                  startingCapital={input.startingCapital}
+                  onSelect={(providerId) => {
+                    setInput((current) => ({
+                      ...current,
+                      investmentUniverse: "single_stock",
+                      includePrivateExposure: defaultPrivateExposureForUniverse("single_stock"),
+                      selectedVendorIds: [providerId],
+                      manualAllocations: { [providerId]: 100 },
+                    }));
+                  }}
+                />
+              </div>
+            )}
+
             {/* ─────── STRATEGY — collapsible, default open ─────── */}
             <CollapsibleSection title="Strategy & allocation" defaultOpen>
               <Field label="Allocation style" info="Model-guided builds the portfolio for you. Manual lets you pick vendors and weights. Single Stock isolates one ticker.">
@@ -416,27 +475,9 @@ export default function InvestmentSimulatorClient({
                 </Field>
               )}
 
-              {input.allocationStyle === "single_stock" && (
-                <SingleStockPicker
-                  // Use the full providers list — the picker filters
-                  // for public_direct + ticker internally. Avoids the
-                  // case where the universe was previously narrow and
-                  // state.eligibleUniverse hadn't yet recomputed,
-                  // leaving the picker empty.
-                  eligibleProviders={providers}
-                  selectedId={(input.selectedVendorIds ?? [])[0] ?? null}
-                  startingCapital={input.startingCapital}
-                  onSelect={(providerId) => {
-                    setInput((current) => ({
-                      ...current,
-                      investmentUniverse: "single_stock",
-                      includePrivateExposure: defaultPrivateExposureForUniverse("single_stock"),
-                      selectedVendorIds: [providerId],
-                      manualAllocations: { [providerId]: 100 },
-                    }));
-                  }}
-                />
-              )}
+              {/* Single-stock picker lifted above the collapsible so
+                  it can't be missed. See the prominent emerald panel
+                  earlier in this inputs column. */}
 
               {input.allocationStyle === "manual" && (
                 <ManualAllocationEditor
