@@ -213,7 +213,23 @@ export default function InvestmentSimulatorClient({
           };
         }
       }
-      if (key === "allocationStyle" && value !== "manual") return { ...next, selectedVendorIds: [], manualAllocations: {} };
+      if (key === "allocationStyle" && value !== "manual") {
+        // Auto-flip universe when the operator picks single-stock —
+        // otherwise the picker reads from `state.eligibleUniverse`
+        // which is gated by `investmentUniverse`, and the picker
+        // renders empty until the operator also changes the universe.
+        // Picking single-stock allocation style should be sufficient.
+        if (value === "single_stock") {
+          return {
+            ...next,
+            investmentUniverse: "single_stock",
+            includePrivateExposure: defaultPrivateExposureForUniverse("single_stock"),
+            selectedVendorIds: [],
+            manualAllocations: {},
+          };
+        }
+        return { ...next, selectedVendorIds: [], manualAllocations: {} };
+      }
       return next;
     });
   }
@@ -402,15 +418,19 @@ export default function InvestmentSimulatorClient({
 
               {input.allocationStyle === "single_stock" && (
                 <SingleStockPicker
-                  eligibleProviders={state.eligibleUniverse}
+                  // Use the full providers list — the picker filters
+                  // for public_direct + ticker internally. Avoids the
+                  // case where the universe was previously narrow and
+                  // state.eligibleUniverse hadn't yet recomputed,
+                  // leaving the picker empty.
+                  eligibleProviders={providers}
                   selectedId={(input.selectedVendorIds ?? [])[0] ?? null}
                   startingCapital={input.startingCapital}
                   onSelect={(providerId) => {
                     setInput((current) => ({
                       ...current,
-                      // Force the universe to single_stock so the engine
-                      // restricts to public_direct tickers and validates one-only.
                       investmentUniverse: "single_stock",
+                      includePrivateExposure: defaultPrivateExposureForUniverse("single_stock"),
                       selectedVendorIds: [providerId],
                       manualAllocations: { [providerId]: 100 },
                     }));
@@ -853,12 +873,43 @@ function SingleStockPicker({
 }) {
   const tickers = eligibleProviders.filter((p) => p.investabilityStatus === "public_direct" && p.ticker);
   const chosen = tickers.find((p) => p.id === selectedId);
+  const [search, setSearch] = useState("");
+  const q = search.trim().toLowerCase();
+  const filtered = q
+    ? tickers.filter((p) =>
+        p.name.toLowerCase().includes(q) ||
+        (p.ticker ?? "").toLowerCase().includes(q) ||
+        p.exposureClass.toLowerCase().includes(q),
+      )
+    : tickers;
   return (
     <div className="rounded-lg border border-[#dfe4da] p-3 dark:border-zinc-800">
-      <div className="text-[10px] font-semibold uppercase tracking-wide text-[#697362] dark:text-zinc-500">Single ticker</div>
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <div className="text-[10px] font-semibold uppercase tracking-wide text-[#697362] dark:text-zinc-500">Single ticker</div>
+        <div className="text-[10px] text-zinc-500">{filtered.length} of {tickers.length}</div>
+      </div>
+      {tickers.length === 0 ? (
+        <div className="mt-3 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900 dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-200">
+          No public-direct tickers available. Reset to defaults from the panel actions and try again.
+        </div>
+      ) : (
+        <>
+          <input
+            type="search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Filter by name, ticker, or category…"
+            className="mt-2 w-full rounded-md border border-[#d8ded0] bg-white px-3 py-1.5 text-xs dark:border-zinc-700 dark:bg-zinc-900"
+            aria-label="Filter tickers"
+          />
+        </>
+      )}
       <div className="mt-2 max-h-56 overflow-y-auto pr-1">
+        {filtered.length === 0 && q && (
+          <div className="text-xs italic text-zinc-500">No tickers match &ldquo;{search}&rdquo;.</div>
+        )}
         <div className="grid gap-1.5">
-          {tickers.map((p) => {
+          {filtered.map((p) => {
             const isSelected = p.id === selectedId;
             return (
               <button
