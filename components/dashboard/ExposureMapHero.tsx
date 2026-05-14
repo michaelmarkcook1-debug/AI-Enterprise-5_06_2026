@@ -615,9 +615,31 @@ function NodeBubble({
           style={!reducedMotion ? { animation: "spin-slow 12s linear infinite", transformOrigin: "0 0" } : undefined}
         />
       )}
-      {/* Filled bubble */}
-      <circle r={NODE_R} fill="white" stroke={node.brandColor} strokeWidth={2.5} className="dark:[fill:#1a2333]" />
-      {/* Logo or monogram */}
+      {/* Filled bubble — brand colour as base so the bubble carries
+          identity even before the logo image loads (or if Clearbit is
+          rate-limited / blocked). */}
+      <circle r={NODE_R} fill={node.brandColor} stroke={node.brandColor} strokeWidth={2.5} />
+      <circle r={NODE_R - 3} fill="white" className="dark:[fill:#1a2333]" />
+
+      {/* Monogram — ALWAYS rendered, behind the logo. If the logo image
+          loads successfully it covers the monogram. If the image fails,
+          returns transparent, is blocked, or is slow, the monogram keeps
+          the node identifiable. This replaces the previous race-condition
+          path where SSR showed the image only, and the monogram fallback
+          relied on a client-side onError event firing. */}
+      <text
+        textAnchor="middle"
+        dy={5}
+        fill={node.brandColor}
+        className="text-[13px] font-bold"
+        style={{ fontFamily: "ui-sans-serif, system-ui, sans-serif" }}
+      >
+        {node.monogram}
+      </text>
+
+      {/* Logo image — clipped to circle, painted ON TOP of the monogram.
+          If it loads → covers monogram, brand identity from the real
+          logo. If it fails / 404s / is empty → monogram shows through. */}
       {showLogo && (
         <>
           <defs>
@@ -635,19 +657,6 @@ function NodeBubble({
             preserveAspectRatio="xMidYMid slice"
             onError={() => setLogoFailed(true)}
           />
-        </>
-      )}
-      {!showLogo && (
-        <>
-          <circle r={NODE_R - 3} fill={node.brandColor} />
-          <text
-            textAnchor="middle"
-            dy={5}
-            className="fill-white text-[14px] font-bold"
-            style={{ fontFamily: "ui-sans-serif, system-ui, sans-serif" }}
-          >
-            {node.monogram}
-          </text>
         </>
       )}
       {/* Label */}
