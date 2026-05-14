@@ -11,6 +11,7 @@ export async function generateWeeklyBriefing() {
       `Agentic AI momentum is concentrated around ${dashboard.agenticMomentum.slice(0, 3).map((item) => item.vendor.name).join(", ")}.`,
       "The frontier-model ecosystem is now genuinely global: Meta (Llama), DeepSeek, Alibaba (Qwen), Moonshot (Kimi), Z.ai (GLM), and MiniMax sit alongside the US-frontier set, and open-weights options shape buying decisions where access compliance allows.",
       "Microsoft's distribution strength via Copilot, GitHub, and Azure is product-layer reach, not first-party model origination — separate the two when reading category share.",
+      "Anthropic is the structural winner of developer-coding workloads in 2026: Claude Sonnet is the default in Cursor, Aider, and GitHub Copilot Workspace, and Claude Code ships as first-party CLI. Microsoft retains the distribution layer; Anthropic owns the model.",
       "Enterprise control, evidence quality, and cost governance are the main swing factors for high-risk buyers.",
     ],
     whoIsWinning: dashboard.winningVendors.slice(0, 4).map((item) => `${item.vendor.name}: ${item.reason}`),
