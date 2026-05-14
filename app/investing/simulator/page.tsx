@@ -11,7 +11,7 @@ export default function InvestmentSimulatorPage() {
   return (
     <PageFrame
       title="Investment Simulator"
-      kicker="AI Enterpise investment scenario modelling"
+      kicker="AI Enterprise investment scenario modelling"
       description="Hypothetical AI-provider portfolio modelling for public, indirect, and IPO-watch exposure. Outputs are seed-based, confidence-weighted, and not financial advice."
     >
       <InvestmentSimulatorClient

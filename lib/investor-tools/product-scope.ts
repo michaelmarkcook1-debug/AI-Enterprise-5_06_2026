@@ -299,7 +299,7 @@ export const PRODUCT_SCOPES: ProductScope[] = PRODUCT_SEEDS.flatMap((seed) =>
       moduleCoverage: modules,
       measuredInModules: modules,
       sourceStatus: "requires_validation",
-      sourceName: "AI Enterpise product scope seed registry",
+      sourceName: "AI Enterprise product scope seed registry",
       sourceUrl: undefined,
       evidenceGrade: "E1",
       evidenceStatus: "seed",

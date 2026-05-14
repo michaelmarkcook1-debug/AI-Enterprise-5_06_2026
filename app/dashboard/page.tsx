@@ -34,7 +34,7 @@ export default async function DashboardPage() {
               <SeedDataBadge provenance={provenance.source} reason={provenance.reason} />
             </div>
             <h1 className="mt-3 max-w-4xl text-4xl font-semibold tracking-tight text-[#121812] dark:text-zinc-50 md:text-5xl">
-              AI Enterpise tracks market position, momentum, and enterprise risk across AI platforms.
+              AI Enterprise tracks market position, momentum, and enterprise risk across AI platforms.
             </h1>
             <p className="mt-4 max-w-3xl text-sm leading-6 text-[#596151] dark:text-zinc-400">
               Seeded market intelligence across category share, agentic momentum, capability change, risk posture, and evidence confidence.

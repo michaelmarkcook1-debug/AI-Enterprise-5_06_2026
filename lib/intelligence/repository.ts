@@ -70,7 +70,7 @@ async function databaseOrSeed<T>(
     if (!dbFallbackWarningShown && process.env.NODE_ENV !== "test") {
       dbFallbackWarningShown = true;
       const message = error instanceof Error ? error.message : String(error);
-      console.warn(`AI Enterpise intelligence DB unavailable; using seed data. ${message}`);
+      console.warn(`AI Enterprise intelligence DB unavailable; using seed data. ${message}`);
     }
     return seed();
   }

@@ -7,7 +7,7 @@ export async function generateWeeklyBriefing() {
     generatedAt: dashboard.generatedAt,
     confidenceNote: "MVP briefing generated from seeded market intelligence. Treat market share and momentum as directional estimates, not audited fact.",
     executiveSummary: [
-      `${dashboard.topVendors[0]?.name ?? "The leading group"} remains the highest-scoring platform in the current AI Enterpise model.`,
+      `${dashboard.topVendors[0]?.name ?? "The leading group"} remains the highest-scoring platform in the current AI Enterprise model.`,
       `Agentic AI momentum is concentrated around ${dashboard.agenticMomentum.slice(0, 3).map((item) => item.vendor.name).join(", ")}.`,
       "The frontier-model ecosystem is now genuinely global: Meta (Llama), DeepSeek, Alibaba (Qwen), Moonshot (Kimi), Z.ai (GLM), and MiniMax sit alongside the US-frontier set, and open-weights options shape buying decisions where access compliance allows.",
       "Microsoft's distribution strength via Copilot, GitHub, and Azure is product-layer reach, not first-party model origination — separate the two when reading category share.",

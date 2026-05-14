@@ -15,7 +15,7 @@ const cormorant = Cormorant_Garamond({
 });
 
 export const metadata: Metadata = {
-  title: "AI Enterpise — Enterprise AI Market Intelligence",
+  title: "AI Enterprise — Enterprise AI Market Intelligence",
   description: "Executive market intelligence portal for enterprise AI: vendor rankings, market share, agentic momentum, news, capabilities, and platform-fit assessment.",
 };
 

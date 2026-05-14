@@ -37,6 +37,44 @@ import {
 
 // ──────────────── Visual constants ────────────────
 
+// Maps exposure-map node ids → /vendors/[slug] slugs. Only entries with
+// a curated profile in lib/intelligence/seed.ts are listed here; the
+// node-detail panel hides the "View vendor profile" link when there's
+// no mapping rather than rendering a broken CTA.
+//
+// Tickers (uppercase) map to plain VendorProfile ids; lowercase ids
+// (most right-side nodes) are usually identical to the slug.
+const NODE_TO_VENDOR_SLUG: Record<string, string> = {
+  // Left-side public tickers
+  MSFT: "microsoft",
+  AMZN: "aws",
+  GOOGL: "google",
+  NVDA: "nvidia",
+  ORCL: "oracle",
+  CRM: "salesforce",
+  SNOW: "snowflake",
+  // ASML has no /vendors/asml profile — omitted intentionally.
+  // Right-side labs / model owners
+  openai: "openai",
+  anthropic: "anthropic",
+  // deepmind has no separate profile — Alphabet's slug is "google"
+  deepmind: "google",
+  mistral: "mistral",
+  cohere: "cohere",
+  xai: "xai",
+  perplexity: "perplexity",
+  meta: "meta",
+  deepseek: "deepseek",
+  alibaba: "alibaba",
+  moonshot: "moonshot",
+  zai: "zai",
+  minimax: "minimax",
+  ai21: "ai21",
+  aleph: "aleph",
+  // nemotron has no standalone vendor profile — falls under NVIDIA
+  nemotron: "nvidia",
+};
+
 const REL_COLOR: Record<RelationshipType, string> = {
   investment: "#eab308",            // gold
   cloud: "#06b6d4",                 // cyan
@@ -310,6 +348,44 @@ export default function ExposureMapHero(_: { edges?: unknown } = {}) {
         )}
       </div>
 
+      {/* Directionality note — always visible above the SVG so users
+          don't have to guess what an edge means. Investment / subsidiary
+          imply ownership-or-control exposure; cloud / hosting / supply
+          chain / partnership imply dependency or distribution exposure. */}
+      <div className="mb-3 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-[11px] leading-relaxed text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900/50 dark:text-zinc-400">
+        <span className="font-semibold text-zinc-700 dark:text-zinc-300">Direction:</span>{" "}
+        edges run <span className="font-semibold">left → right</span>, from exposure owner to model/API provider.{" "}
+        <span className="font-semibold text-amber-700 dark:text-amber-400">Investment</span> and{" "}
+        <span className="font-semibold text-violet-700 dark:text-violet-400">subsidiary</span>{" "}
+        indicate ownership / control exposure; <span className="font-semibold text-cyan-700 dark:text-cyan-400">cloud</span>,{" "}
+        <span className="font-semibold text-teal-700 dark:text-teal-400">hosting</span>,{" "}
+        <span className="font-semibold text-zinc-500 dark:text-zinc-400">supply chain</span>, and{" "}
+        <span className="font-semibold text-lime-700 dark:text-lime-400">partnership</span>{" "}
+        indicate dependency or distribution exposure.
+      </div>
+
+      {/* Inline legend strip — always visible. Same content as the
+          legend at the bottom of the panel, but anchored near the
+          map so colour decoding doesn't require scrolling. */}
+      <div className="mb-3 hidden flex-wrap items-center gap-3 rounded-lg border border-zinc-200 bg-white px-3 py-2 text-[10px] text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400 md:flex">
+        <span className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">Legend</span>
+        {ALL_REL_TYPES.map((rt) => (
+          <span key={rt} className="inline-flex items-center gap-1.5">
+            <svg width={22} height={6} aria-hidden>
+              <line x1={0} y1={3} x2={18} y2={3} stroke={REL_COLOR[rt]} strokeWidth={2.5} />
+              <polygon points="18,0 22,3 18,6" fill={REL_COLOR[rt]} />
+            </svg>
+            {REL_LABEL[rt]}
+          </span>
+        ))}
+        <span className="inline-flex items-center gap-1.5">
+          <svg width={22} height={6} aria-hidden>
+            <line x1={0} y1={3} x2={22} y2={3} stroke="#94a3b8" strokeWidth={2} strokeDasharray="4 3" />
+          </svg>
+          Seed / unverified
+        </span>
+      </div>
+
       {/* Map — desktop / tablet (≥ md). Below md we fall through to the
           stacked relationship explorer at the bottom of this component. */}
       <div className="relative hidden overflow-x-auto md:block">
@@ -321,6 +397,26 @@ export default function ExposureMapHero(_: { edges?: unknown } = {}) {
           role="img"
           aria-label="Indirect AI market exposure map"
         >
+          {/* Per-relationship-colour arrow markers so every edge carries
+              a direction cue at its target node. orient="auto" rotates
+              the marker along the bezier path tangent. */}
+          <defs>
+            {ALL_REL_TYPES.map((rt) => (
+              <marker
+                key={`arrow-${rt}`}
+                id={`arrow-${rt}`}
+                viewBox="0 0 10 10"
+                refX="9"
+                refY="5"
+                markerWidth="5"
+                markerHeight="5"
+                orient="auto-start-reverse"
+                markerUnits="userSpaceOnUse"
+              >
+                <path d="M 0 0 L 10 5 L 0 10 z" fill={REL_COLOR[rt]} />
+              </marker>
+            ))}
+          </defs>
           {/* Column headers */}
           <text x={COL_LEFT_X} y={42} textAnchor="middle" className="fill-current text-[11px] font-semibold uppercase tracking-[0.16em] opacity-60">
             Public exposure owners
@@ -347,12 +443,13 @@ export default function ExposureMapHero(_: { edges?: unknown } = {}) {
             return (
               <path
                 key={e.id}
-                d={`M ${COL_LEFT_X + NODE_R} ${ay} C ${cx} ${ay}, ${cx} ${by}, ${COL_RIGHT_X - NODE_R} ${by}`}
+                d={`M ${COL_LEFT_X + NODE_R} ${ay} C ${cx} ${ay}, ${cx} ${by}, ${COL_RIGHT_X - NODE_R - 6} ${by}`}
                 fill="none"
                 stroke={color}
                 strokeWidth={strokeWidth}
                 strokeOpacity={opacity}
                 strokeDasharray={dashArray}
+                markerEnd={`url(#arrow-${e.relationshipType})`}
                 style={{ transition: "stroke-opacity 180ms, stroke-width 180ms", vectorEffect: "non-scaling-stroke" }}
                 onMouseEnter={() => {
                   setHoveredEdge(e.id);
@@ -431,6 +528,20 @@ export default function ExposureMapHero(_: { edges?: unknown } = {}) {
           getNode={(id) => EXPOSURE_NODES.find((n) => n.id === id)!}
         />
       </div>
+
+      {/* Active-node readout — persistent panel below the SVG showing
+          the incident edges for every pinned / hovered node, with
+          clickable evidence URLs and (when available) a vendor-profile
+          drill-through. Hover gives a quick read; click-to-pin makes
+          the link surface persistent and reachable. */}
+      {activeIds.size > 0 && (
+        <ActiveReadout
+          activeIds={activeIds}
+          edges={visibleEdges}
+          getNode={(id) => EXPOSURE_NODES.find((n) => n.id === id)!}
+          pinnedCount={pinned.size}
+        />
+      )}
 
       {/* Legend */}
       <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-zinc-200 pt-3 text-[11px] text-zinc-600 dark:border-zinc-800 dark:text-zinc-400">
@@ -713,6 +824,124 @@ function MobileStackedView({
           </details>
         );
       })}
+    </div>
+  );
+}
+
+// ──────────────── Active-node readout (clickable detail panel) ────────────────
+// Renders one card per pinned/hovered node, listing each incident edge
+// with relationship type, confidence, summary, clickable evidence URLs,
+// and (when a curated profile exists) a "View vendor profile" link.
+// This is the surface where the operator actually CLICKS — the floating
+// MapTooltip is hover-only.
+
+function safeHost(u: string): string | null {
+  try { return new URL(u).hostname.replace(/^www\./, ""); } catch { return null; }
+}
+
+function ActiveReadout({
+  activeIds, edges, getNode, pinnedCount,
+}: {
+  activeIds: Set<string>;
+  edges: ExposureMapEdge[];
+  getNode: (id: string) => ExposureMapNode;
+  pinnedCount: number;
+}) {
+  const ids = [...activeIds];
+  return (
+    <div className="mt-4 space-y-3">
+      <div className="text-[10px] font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
+        {pinnedCount > 0 ? `${pinnedCount} pinned · ${ids.length} active` : "Hovered detail"}
+      </div>
+      <div className="grid gap-3 md:grid-cols-2">
+        {ids.map((id) => {
+          const node = getNode(id);
+          const incident = edges
+            .filter((e) => e.sourceId === id || e.targetId === id)
+            .sort((a, b) => b.strengthScore - a.strengthScore);
+          const profileSlug = NODE_TO_VENDOR_SLUG[id];
+          return (
+            <div key={id} className="rounded-xl border border-emerald-300 bg-emerald-50/40 p-3 text-sm dark:border-emerald-900/60 dark:bg-emerald-950/20">
+              <div className="flex items-baseline justify-between gap-2">
+                <div>
+                  <div className="font-semibold text-zinc-900 dark:text-zinc-100">{node.label}</div>
+                  <div className="text-[10px] uppercase tracking-wider text-zinc-500">
+                    {node.ticker ? `${node.ticker} · ` : ""}{node.category}
+                  </div>
+                </div>
+                {profileSlug && (
+                  <a
+                    href={`/vendors/${profileSlug}`}
+                    className="rounded-full border border-emerald-500 bg-white px-2.5 py-0.5 text-[11px] font-medium text-emerald-800 hover:bg-emerald-100 dark:border-emerald-700 dark:bg-zinc-900 dark:text-emerald-300 dark:hover:bg-emerald-950/60"
+                  >
+                    View vendor profile →
+                  </a>
+                )}
+              </div>
+              <ul className="mt-3 space-y-2">
+                {incident.length === 0 && (
+                  <li className="text-xs italic text-zinc-500">No relationships match the current filters.</li>
+                )}
+                {incident.map((e) => {
+                  const isOutgoing = e.sourceId === id;
+                  const counterparty = getNode(isOutgoing ? e.targetId : e.sourceId);
+                  return (
+                    <li key={e.id} className="rounded-md border border-zinc-200 bg-white/70 p-2 text-xs dark:border-zinc-800 dark:bg-zinc-900/70">
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <span className="inline-block h-2 w-2 rounded-full" style={{ backgroundColor: REL_COLOR[e.relationshipType] }} />
+                        <span className="font-semibold text-zinc-800 dark:text-zinc-200">
+                          {isOutgoing ? "→" : "←"} {counterparty.label}
+                        </span>
+                        <span className="text-zinc-500">· {REL_LABEL[e.relationshipType]}</span>
+                        <span className="ml-auto rounded bg-zinc-100 px-1.5 py-0.5 text-[9px] uppercase tracking-wider text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">
+                          {CONF_LABEL[e.confidence]}
+                        </span>
+                      </div>
+                      {e.summary && (
+                        <p className="mt-1 leading-relaxed text-zinc-700 dark:text-zinc-300">{e.summary}</p>
+                      )}
+                      <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] text-zinc-500">
+                        {e.estimatedValue && <span>{e.estimatedValue}</span>}
+                        <span>Updated {e.dateUpdated}</span>
+                      </div>
+                      {/* Evidence links — clickable, open in new tab,
+                          safe-attribute rel. Falls back to a "Evidence
+                          pending" line when sourceUrls is empty so the
+                          operator never sees a silent gap. */}
+                      <div className="mt-2 border-t border-zinc-200 pt-1.5 dark:border-zinc-800">
+                        <div className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">View evidence</div>
+                        {e.sourceUrls.length === 0 ? (
+                          <div className="mt-0.5 text-[11px] italic text-zinc-500">Evidence pending — relationship classified from public reporting; primary source not yet attached.</div>
+                        ) : (
+                          <ul className="mt-0.5 space-y-0.5">
+                            {e.sourceUrls.slice(0, 3).map((url) => {
+                              const host = safeHost(url);
+                              if (!host) return null;
+                              return (
+                                <li key={url}>
+                                  <a
+                                    href={url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-1 text-[11px] text-emerald-700 underline-offset-2 hover:underline dark:text-emerald-400"
+                                  >
+                                    {host}
+                                    <span aria-hidden className="text-[9px]">↗</span>
+                                  </a>
+                                </li>
+                              );
+                            })}
+                          </ul>
+                        )}
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }

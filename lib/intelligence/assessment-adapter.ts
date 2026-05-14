@@ -66,7 +66,7 @@ function toAssessmentVendor(vendor: IntelligenceVendor): AssessmentVendor {
         vendorId: vendor.id,
         domain,
         subfactor: `${domain.replace(/_/g, " ")} intelligence signal`,
-        excerpt: `${vendor.name} ${domain.replace(/_/g, " ")} score is based on seeded AI Enterpise intelligence with ${grade} evidence status.`,
+        excerpt: `${vendor.name} ${domain.replace(/_/g, " ")} score is based on seeded AI Enterprise intelligence with ${grade} evidence status.`,
         capturedAt: vendor.lastUpdated,
         grade: grade as EvidenceGrade,
         rawScore,

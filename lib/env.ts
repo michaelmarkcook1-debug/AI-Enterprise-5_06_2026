@@ -1,4 +1,4 @@
-// Environment-variable contract for AI Enterpise.
+// Environment-variable contract for AI Enterprise.
 //
 // Single source of truth for which env vars exist, what they mean, and what
 // "production-ready" requires. Every other module should call into this rather
@@ -184,7 +184,7 @@ export function getReadiness(): ReadinessSummary {
 export function assertProductionReady(): void {
   const summary = getReadiness();
   if (summary.ready) return;
-  const lines: string[] = ["AI Enterpise is not production-ready:"];
+  const lines: string[] = ["AI Enterprise is not production-ready:"];
   for (const r of summary.requiredMissing) {
     lines.push(`  ✗ ${r.spec.key} missing — ${r.spec.remediation}`);
   }

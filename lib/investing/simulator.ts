@@ -151,7 +151,7 @@ export function getSeedPortfolio(input: Partial<SimulationInput> = {}): Simulati
 
   return {
     id: "seed_ai_enterpise_investment_simulator",
-    name: "AI Enterpise seed model portfolio",
+    name: "AI Enterprise seed model portfolio",
     ...normalised,
     holdings: normaliseWeights(holdings, normalised.startingCapital),
     createdAt: new Date("2026-05-07T00:00:00.000Z").toISOString(),
@@ -545,7 +545,7 @@ function getManualPortfolio(input: SimulationInput, providers: InvestmentProvide
 
   return {
     id: "seed_ai_enterprise_manual_simulation",
-    name: "AI Enterpise manual allocation simulation",
+    name: "AI Enterprise manual allocation simulation",
     ...input,
     holdings,
     createdAt: new Date("2026-05-07T00:00:00.000Z").toISOString(),

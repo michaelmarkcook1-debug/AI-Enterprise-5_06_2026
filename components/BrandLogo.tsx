@@ -1,4 +1,4 @@
-// BrandLogo — orbital atom mark + "AI Enterpise" wordmark.
+// BrandLogo — orbital atom mark + "AI Enterprise" wordmark.
 // Light mode renders the teal-gold mark; dark mode swaps to the cream-on-navy
 // mark. Both rely on the existing class="dark" toggling on <html> (set by
 // TopNav's theme switcher) — so they switch in lockstep with everything else.
@@ -7,7 +7,7 @@
 
 interface BrandLogoProps {
   size?: number;            // px height of the mark
-  showWordmark?: boolean;   // render "AI Enterpise" beside the mark
+  showWordmark?: boolean;   // render "AI Enterprise" beside the mark
   className?: string;
 }
 
@@ -32,7 +32,7 @@ export default function BrandLogo({ size = 28, showWordmark = true, className }:
       />
       {showWordmark && (
         <span className="font-semibold tracking-tight text-[#18201b] dark:text-zinc-100">
-          AI Enterpise
+          AI Enterprise
         </span>
       )}
     </span>

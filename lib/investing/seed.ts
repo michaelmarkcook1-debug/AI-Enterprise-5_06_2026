@@ -188,9 +188,9 @@ export const MISSING_IPO_DATA_CHECKLISTS: MissingIPODataChecklist[] = IPO_FORECA
 export const FINANCIAL_METRICS: FinancialMetric[] = INVESTMENT_PROVIDERS
   .filter((provider) => provider.publicStatus === "public")
   .flatMap((provider) => [
-    financial(provider.id, "AI revenue conversion", provider.aiRevenueExposureScore, "FY2026 seed", "seed_estimate", "AI Enterpise seed model", provider.evidenceConfidence),
-    financial(provider.id, "Capital efficiency", provider.aiCapitalEfficiencyScore, "FY2026 seed", "seed_estimate", "AI Enterpise seed model", provider.evidenceConfidence),
-    financial(provider.id, "Retail access", provider.retailAccessScore, "Current seed", "seed_estimate", "AI Enterpise seed model", provider.evidenceConfidence),
+    financial(provider.id, "AI revenue conversion", provider.aiRevenueExposureScore, "FY2026 seed", "seed_estimate", "AI Enterprise seed model", provider.evidenceConfidence),
+    financial(provider.id, "Capital efficiency", provider.aiCapitalEfficiencyScore, "FY2026 seed", "seed_estimate", "AI Enterprise seed model", provider.evidenceConfidence),
+    financial(provider.id, "Retail access", provider.retailAccessScore, "Current seed", "seed_estimate", "AI Enterprise seed model", provider.evidenceConfidence),
   ]);
 
 export const VALUATION_METRICS: ValuationMetric[] = INVESTMENT_PROVIDERS
@@ -421,7 +421,7 @@ function ipoEvidence(
     providerId,
     rumourQuality,
     sourceIds: [IPO_FORECAST_SOURCE_ID],
-    sourceNames: ["AI Enterpise IPO forecast seed model"],
+    sourceNames: ["AI Enterprise IPO forecast seed model"],
     sourceUrls: [],
     sourceDates: ["2026-05-08"],
     evidenceGrade: "E1",
@@ -465,7 +465,7 @@ function ipoForecast(
     sourceRequired: true,
     sourceIds: [IPO_FORECAST_SOURCE_ID],
     evidenceGrade: "E1",
-    sourceNames: ["AI Enterpise IPO forecast seed model"],
+    sourceNames: ["AI Enterprise IPO forecast seed model"],
     sourceUrls: [],
     sourceDates: ["2026-05-08"],
     relativeTo: "ipo_offer_price",

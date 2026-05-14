@@ -41,7 +41,7 @@ export default function TopNav() {
         Seed intelligence preview | estimated market signals remain confidence-labelled until live ingestion is connected.
       </div>
       <div className="mx-auto flex h-14 max-w-7xl items-center gap-6 px-5">
-        <Link href="/" className="flex items-center" aria-label="AI Enterpise home">
+        <Link href="/" className="flex items-center" aria-label="AI Enterprise home">
           <BrandLogo size={32} />
         </Link>
         <nav className="hidden flex-1 items-center gap-1 text-sm md:flex">

@@ -20,7 +20,7 @@ export default async function AssessmentPage({ searchParams }: PageProps) {
   return (
     <PageFrame
       title="AI platform fit assessment"
-      kicker="One module inside AI Enterpise"
+      kicker="One module inside AI Enterprise"
       description="Source-cited, evidence-graded AI vendor fit. Pick a depth tier — Quick for fast triage, Guided for decision-shaping detail, Advanced for procurement-grade output."
     >
       <TierBar current={tier} />
