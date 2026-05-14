@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Cormorant_Garamond } from "next/font/google";
+import { Geist, Geist_Mono, Cormorant_Garamond, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import TopNav from "@/components/TopNav";
 import GlobalFooter from "@/components/GlobalFooter";
@@ -12,6 +12,15 @@ const cormorant = Cormorant_Garamond({
   variable: "--font-cormorant",
   weight: ["400", "500", "600"],
   subsets: ["latin"],
+});
+// Display wordmark face for the homepage hero — heavy humanist sans
+// matching the brief's reference image. Loaded at 700/800/900 for
+// the wordmark + supporting weights.
+const plusJakarta = Plus_Jakarta_Sans({
+  variable: "--font-display",
+  weight: ["700", "800"],
+  subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -43,7 +52,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} ${cormorant.variable} h-full antialiased`} suppressHydrationWarning>
+    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} ${cormorant.variable} ${plusJakarta.variable} h-full antialiased`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: NO_FLASH_THEME_SCRIPT }} />
       </head>

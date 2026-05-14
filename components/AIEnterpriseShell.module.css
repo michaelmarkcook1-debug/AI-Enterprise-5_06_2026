@@ -199,22 +199,26 @@
 
 .wordmark {
   margin: 0;
-  font-family: var(--font-cormorant), "Cormorant Garamond", Georgia, "Times New Roman", serif;
-  font-weight: 500;
+  /* Display wordmark — heavy humanist sans, matches the May-2026
+     reference image. Falls back to system humanist sans stack so the
+     mark still reads strong if the network font is slow. */
+  font-family: var(--font-display), "Plus Jakarta Sans", "Inter",
+    -apple-system, "Segoe UI", system-ui, sans-serif;
+  font-weight: 800;
   font-size: clamp(56px, 9vw, 128px);
   line-height: 1;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
   text-shadow: 0 4px 40px color-mix(in srgb, var(--accent) 35%, transparent);
 }
 
 .wordmarkMute {
   color: var(--text-strong);
-  font-style: italic;
+  font-style: normal;
 }
 
 .wordmarkAccent {
   color: var(--accent);
-  font-style: italic;
+  font-style: normal;
 }
 
 .subtitle {

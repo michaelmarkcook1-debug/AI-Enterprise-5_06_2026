@@ -56,7 +56,7 @@ export default function AIEnterpriseShell() {
         <p className={styles.eyebrow}>Executive AI Market Intelligence</p>
         <h1 className={styles.wordmark}>
           <span className={styles.wordmarkMute}>AI </span>
-          <span className={styles.wordmarkAccent}>Enterpise</span>
+          <span className={styles.wordmarkAccent}>Enterprise</span>
         </h1>
         <p className={styles.subtitle}>Assessment · Vendor · Capability · Briefing Intelligence</p>
         <div className={styles.divider} aria-hidden />
