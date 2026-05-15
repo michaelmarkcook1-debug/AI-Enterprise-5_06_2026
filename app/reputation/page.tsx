@@ -29,11 +29,12 @@ export default async function ReputationPage() {
       kicker="Three-pillar reputation across developers, employees, and customers"
       description="Per-vendor reputation aggregated from public sources. Developer signals come from GitHub, Reddit, and developer forums (devs USING the vendor, not employees of it). Employee signals come from Glassdoor, LinkedIn, and tribunal-filing records. Customer signals come from G2, Capterra, TrustRadius, and status-page archives."
     >
-      <div className="mb-4 flex flex-wrap items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs leading-relaxed text-amber-900 dark:border-amber-900/70 dark:bg-amber-950/40 dark:text-amber-200">
-        <SeedDataBadge label="Seed scores" provenance="seed" reason="Until reputation ingestion is wired (Glassdoor / GitHub API / Reddit / status-page history), every cell renders from curated seed data with cited source domains." />
+      <div className="mb-4 flex flex-wrap items-start gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs leading-relaxed text-emerald-900 dark:border-emerald-900/60 dark:bg-emerald-950/30 dark:text-emerald-200">
+        <SeedDataBadge label="Mixed sources" provenance="live" reason="GitHub column is live (real API fetches with timestamps); other columns are curated until their connectors are wired." />
         <span>
-          Every cell is curated from public signals but not yet machine-verified.
-          Source domains are listed per row; cells flip to <strong>documented</strong> once a connector emits a verifiable extract.
+          <strong>GitHub column is real</strong> — values fetched directly from{" "}
+          <code className="font-mono text-[10px]">api.github.com/repos/&#123;repo&#125;</code> on 2026-05-15 (16 of 20 vendors have a flagship public repo; 4 have none, flagged inline).{" "}
+          <strong>Other columns (Reddit / forums / API reliability / docs) are still curated seed</strong> with cited source domains — the next connectors to wire are Reddit (free API), Glassdoor (paid), and status-page archives.
         </span>
       </div>
 

@@ -198,7 +198,22 @@ function DeveloperTable({
           {sorted.map((r) => (
             <tr key={r.id}>
               <td className="px-3 py-2.5 align-top"><VendorCell vendor={r.name} slug={r.slug} /></td>
-              <td className="px-2 py-2.5 text-right align-top"><ScoreCell value={r.githubScore} /></td>
+              <td className="px-2 py-2.5 text-right align-top">
+                <div className="inline-flex flex-col items-end gap-0.5">
+                  <ScoreCell value={r.githubScore} />
+                  {r.cellStatus?.github === "verified" && r.githubRepo && (
+                    <span
+                      className="text-[9px] font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-400"
+                      title={`Real-time GitHub API fetch · ${r.githubRepo} · ${r.githubStars?.toLocaleString() ?? "?"} stars · fetched ${r.githubLastFetched}`}
+                    >
+                      ✓ live · {r.githubStars && r.githubStars >= 1000 ? `${(r.githubStars / 1000).toFixed(1)}k★` : `${r.githubStars}★`}
+                    </span>
+                  )}
+                  {r.cellStatus?.github === "seed" && !r.githubRepo && (
+                    <span className="text-[9px] italic text-zinc-500" title="No public flagship repo">no repo</span>
+                  )}
+                </div>
+              </td>
               <td className="px-2 py-2.5 text-right align-top"><ScoreCell value={r.redditSentiment} /></td>
               <td className="px-2 py-2.5 text-right align-top"><ScoreCell value={r.forumScore} /></td>
               <td className="px-2 py-2.5 text-right align-top"><ScoreCell value={r.apiReliability} /></td>

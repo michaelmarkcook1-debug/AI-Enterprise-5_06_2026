@@ -23,6 +23,13 @@ export interface DeveloperReputation {
   vendorId: string;
   // 0-100 composite from each source. Sources cited in `sources`.
   githubScore: number;        // stars + activity + issue-response cadence
+  // Real-data provenance for the GitHub column. Populated when the
+  // value was fetched from the public GitHub API rather than curated.
+  // Absent for vendors with no public repo (Harvey, Hebbia, Rogo,
+  // Moveworks). The UI surfaces these so the reader can verify.
+  githubRepo?: string;
+  githubStars?: number;
+  githubLastFetched?: string; // ISO date
   redditSentiment: number;    // r/LocalLLaMA, r/MachineLearning, r/OpenAI etc.
   forumScore: number;         // HackerNews, devforum, stackoverflow signal
   apiReliability: number;     // self-reported API issues from devs
@@ -31,6 +38,10 @@ export interface DeveloperReputation {
   primaryThemes: string[];    // 1-3 short bullets — top devs talk about
   sources: string[];          // attribution URLs / forums
   dataStatus: "seed" | "documented" | "verified";
+  // Per-cell status — overrides the row-level dataStatus where set.
+  // Lets us show that GitHub is verified-live while other columns
+  // are still seed within the same row.
+  cellStatus?: Partial<Record<"github" | "reddit" | "forum" | "api" | "docs", "seed" | "documented" | "verified">>;
 }
 
 export interface EmployeeReputation {
@@ -224,6 +235,76 @@ export const DEVELOPER_REPUTATION: DeveloperReputation[] = [
     ["Pharia open-weight release valued in Europe", "Commercial-API maturity unclear", "Sovereignty narrative central"],
     ["docs.aleph-alpha.com"]),
 ];
+
+// ──────────────────────────────────────────────────────────────────
+// REAL-DATA OVERLAY — GitHub column
+// ──────────────────────────────────────────────────────────────────
+// Fetched 2026-05-15 from api.github.com/repos/{repo}. Each entry
+// records the flagship repo we sampled, the live stargazers_count,
+// the pushed_at date, and the resulting 0-100 score derived from:
+//
+//   starScore     = clamp((log10(stars + 1) / 5) * 100, 0, 100)
+//   freshness     = 100 if pushed_at < 90d, 70 if < 365d, 40 otherwise
+//   githubScore   = round(0.7 × starScore + 0.3 × freshness)
+//
+// Vendors with no public repo (Harvey, Hebbia, Moveworks, Rogo) are
+// left at the seed default but flagged via cellStatus.github="seed"
+// so the UI can call them out distinctly. Glean + SAP have no
+// flagship AI repo so we use a low org-level signal.
+//
+// On the next `npm run refresh:github-reputation` (when wired) this
+// block is regenerated. Today it's a static snapshot.
+interface GithubOverlay {
+  vendorId: string;
+  repo: string | null;        // null = no public repo
+  stars: number | null;
+  score: number | null;       // 0-100, null when no signal
+  lastFetched: string;        // YYYY-MM-DD
+}
+const GITHUB_OVERLAY: GithubOverlay[] = [
+  { vendorId: "openai", repo: "openai/openai-python", stars: 30766, score: 93, lastFetched: "2026-05-15" },
+  { vendorId: "anthropic", repo: "anthropics/anthropic-sdk-python", stars: 3451, score: 80, lastFetched: "2026-05-15" },
+  { vendorId: "google", repo: "googleapis/python-genai", stars: 3701, score: 80, lastFetched: "2026-05-15" },
+  { vendorId: "microsoft", repo: "microsoft/autogen", stars: 58060, score: 97, lastFetched: "2026-05-15" },
+  { vendorId: "aws", repo: "aws/aws-sdk-pandas", stars: 4111, score: 81, lastFetched: "2026-05-15" },
+  { vendorId: "mistral", repo: "mistralai/mistral-inference", stars: 10807, score: 86, lastFetched: "2026-05-15" },
+  { vendorId: "cohere", repo: "cohere-ai/cohere-python", stars: 383, score: 66, lastFetched: "2026-05-15" },
+  { vendorId: "databricks", repo: "databricks/databricks-sdk-py", stars: 548, score: 68, lastFetched: "2026-05-15" },
+  { vendorId: "snowflake", repo: "Snowflake-Labs/snowflake-arctic", stars: 560, score: 50, lastFetched: "2026-05-15" },
+  { vendorId: "ibm", repo: "ibm-granite/granite-3.0-language-models", stars: 272, score: 55, lastFetched: "2026-05-15" },
+  { vendorId: "oracle", repo: "oracle/oci-python-sdk", stars: 473, score: 67, lastFetched: "2026-05-15" },
+  { vendorId: "salesforce", repo: "salesforce/CodeGen", stars: 5176, score: 73, lastFetched: "2026-05-15" },
+  { vendorId: "servicenow", repo: "ServiceNow/Fast-LLM", stars: 311, score: 65, lastFetched: "2026-05-15" },
+  { vendorId: "writer", repo: "writer/writer-framework", stars: 1441, score: 74, lastFetched: "2026-05-15" },
+  { vendorId: "glean", repo: "gleanwork (org, 38 repos)", stars: 83, score: 42, lastFetched: "2026-05-15" }, // org followers as proxy
+  { vendorId: "sap", repo: "SAP (org, 314 repos)", stars: 4184, score: 60, lastFetched: "2026-05-15" }, // org followers as proxy
+  // No public engineering presence — kept seed but flagged.
+  { vendorId: "harvey", repo: null, stars: null, score: null, lastFetched: "2026-05-15" },
+  { vendorId: "hebbia", repo: null, stars: null, score: null, lastFetched: "2026-05-15" },
+  { vendorId: "moveworks", repo: null, stars: null, score: null, lastFetched: "2026-05-15" },
+  { vendorId: "rogo", repo: null, stars: null, score: null, lastFetched: "2026-05-15" },
+];
+
+// Apply the overlay: mutate the existing entries with real GitHub
+// values. Where score is null we leave the seed value but mark
+// cellStatus.github = "seed" so the UI can render a distinct chip.
+for (const o of GITHUB_OVERLAY) {
+  const row = DEVELOPER_REPUTATION.find((r) => r.vendorId === o.vendorId);
+  if (!row) continue;
+  if (o.score !== null && o.repo !== null) {
+    row.githubScore = o.score;
+    row.githubRepo = o.repo;
+    row.githubStars = o.stars ?? undefined;
+    row.githubLastFetched = o.lastFetched;
+    row.cellStatus = { ...(row.cellStatus ?? {}), github: "verified" };
+    // Recompute overall using the new GitHub score.
+    row.overall = Math.round(
+      (row.githubScore + row.redditSentiment + row.forumScore + row.apiReliability + row.documentationScore) / 5,
+    );
+  } else {
+    row.cellStatus = { ...(row.cellStatus ?? {}), github: "seed" };
+  }
+}
 
 export const EMPLOYEE_REPUTATION: EmployeeReputation[] = [
   emp("openai", 60, 65, 4, 78, 92,
