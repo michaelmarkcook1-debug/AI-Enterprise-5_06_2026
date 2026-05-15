@@ -441,10 +441,18 @@ export async function listEvidenceSources(): Promise<EvidenceSource[]> {
 }
 
 export async function listWatchlists(): Promise<Watchlist[]> {
+  // Same merge strategy used for capabilities + pillar scores + news:
+  // DB rows win per id; seed entries with ids not present in DB are
+  // appended. Without this merge, any new curated watchlist (e.g.
+  // "Vertical AI specialists", "Regulated enterprise stack") is
+  // shadowed by the DB-seeded initial two rows.
   return databaseOrSeed(
     async (client) => {
-      const rows = await client.watchlist.findMany({ orderBy: { createdAt: "desc" } });
-      return rows.length ? rows.map(mapWatchlist) : watchlistsMockRepository.list();
+      const dbRows = (await client.watchlist.findMany({ orderBy: { createdAt: "desc" } })).map(mapWatchlist);
+      const seed = await watchlistsMockRepository.list();
+      const dbIds = new Set(dbRows.map((r) => r.id));
+      const seedFallback = seed.filter((s) => !dbIds.has(s.id));
+      return [...dbRows, ...seedFallback];
     },
     () => watchlistsMockRepository.list(),
   );
