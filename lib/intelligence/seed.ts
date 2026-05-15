@@ -61,6 +61,9 @@ export const INTELLIGENCE_VENDORS: Vendor[] = [
   vendor("minimax", "MiniMax", "Frontier model/API", 66, 57, "Shanghai, China", "private", ["Frontier model/API", "Speech / multimodal"], "MiniMax M2 series + her-variant for speech; consumer + B2B AI surface.", "Differentiate on speech-multimodal and consumer-AI integration patterns.", "M2 family covers speech and multimodal; enterprise control story underdeveloped.", ["Models", "Speech"], ["limited enterprise disclosures"], ["Geopolitical access", "enterprise depth"], "Interesting multimodal contender; not yet a packaged enterprise platform."),
   vendor("ai21", "AI21 Labs", "Frontier model/API", 70, 65, "Tel Aviv, Israel", "private", ["Frontier model/API", "Long-context / hybrid architectures"], "Jamba hybrid Mamba+Transformer family; long-context efficiency thesis.", "Sell architectural efficiency (long-context cost) into enterprise + regulated buyers.", "Jamba Large/Mini optimised for long-context; agentic story is implementation-led.", ["Models", "Long-context"], ["enterprise integration patterns"], ["Smaller market share", "ecosystem breadth"], "Solid technical specialist for long-context workloads."),
   vendor("aleph", "Aleph Alpha", "Frontier model/API", 60, 50, "Heidelberg, Germany", "private", ["Frontier model/API", "European AI sovereignty"], "Pharia model family with European sovereignty positioning; weight-available release.", "Anchor European sovereign-AI narrative + on-prem deployment.", "Limited public agentic stack; sovereign-deployment story is the main draw.", ["Models", "Sovereign AI"], ["on-prem deployment controls"], ["Commercial API availability unclear", "scale evidence thin"], "Relevant where European data residency and on-prem deployment dominate the decision."),
+  // xAI — referenced in market-share + news but missing a spine row.
+  // Adding so /reputation, /vendors, /assessment can surface it.
+  vendor("xai", "xAI", "Frontier model/API", 72, 60, "Palo Alto, US", "private", ["Frontier model/API", "Agent platform"], "Frontier lab with Grok model line and Memphis Colossus compute build-out; investor + governance opacity remain a constraint.", "Win on compute scale, real-time signal (X integration), and aggressive model cadence.", "Grok and tool-use shipping; enterprise track record and audit story thin.", ["Models", "Real-time signal", "Voice + image APIs"], ["limited published controls"], ["Governance opacity", "geopolitical / regulatory visibility"], "High-beta frontier contender; enterprise readiness lags the leading set."),
 ];
 
 function vendor(
@@ -426,6 +429,31 @@ export const WATCHLISTS: Watchlist[] = [
     categories: ["Product launch", "Strategy signal", "Market movement"],
     industries: ["Commercial enterprise", "Public sector"],
     alertRules: { momentumChangePct: 8, categories: ["Product launch", "Strategy signal"] },
+    createdAt: lastUpdated,
+  },
+  // Vertical / specialist set — Glean, Harvey, Hebbia, Rogo, Writer,
+  // Moveworks. Covers the tail vendors that aren't headline platforms
+  // but are decisive in their domains (legal, finance research, employee
+  // service, content). Seeded so /watchlists has cohort coverage that
+  // matches the full spine.
+  {
+    id: "watchlist_vertical_specialists",
+    name: "Vertical AI specialists",
+    vendors: ["glean", "harvey", "hebbia", "rogo", "writer", "moveworks"],
+    categories: ["Product launch", "Partnership", "Market movement"],
+    industries: ["Financial services", "Healthcare", "Public sector"],
+    alertRules: { momentumChangePct: 10, categories: ["Product launch", "Partnership"] },
+    createdAt: lastUpdated,
+  },
+  // Regulated / enterprise governance — for buyers whose decision is
+  // dominated by control + audit posture rather than model quality.
+  {
+    id: "watchlist_regulated_enterprise",
+    name: "Regulated enterprise stack",
+    vendors: ["ibm", "sap", "oracle", "servicenow", "salesforce"],
+    categories: ["Regulation", "Enterprise control", "Risk event"],
+    industries: ["Financial services", "Healthcare", "Public sector"],
+    alertRules: { riskThreshold: 70, momentumChangePct: 8 },
     createdAt: lastUpdated,
   },
 ];

@@ -25,7 +25,13 @@ export default async function CapabilitiesPage() {
     getDataProvenance(),
   ]);
 
-  const vendorsToShow = vendors.sort((a, b) => b.overallScore - a.overallScore).slice(0, 10);
+  // May-2026 update: show ALL spine vendors, not just the top 10. The
+  // matrix is wider but operators asked for full coverage so tail
+  // vendors (Harvey, Hebbia, Rogo, MoveWorks, AI21, Aleph Alpha, etc.)
+  // are visible alongside the headline platforms. Order remains
+  // highest-score-first so the most important vendors are above the
+  // fold.
+  const vendorsToShow = vendors.sort((a, b) => b.overallScore - a.overallScore);
   const byKey = new Map(vendorCapabilities.map((item) => [`${item.vendorId}_${item.capabilityId}`, item]));
 
   // Compute the render state for every visible cell — used both for the cell
