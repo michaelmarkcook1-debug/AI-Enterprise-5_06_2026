@@ -18,6 +18,7 @@ const NAV: { href: string; label: string }[] = [
   { href: "/briefings", label: "Briefings" },
   { href: "/market", label: "Market Tracker" },
   { href: "/news", label: "News" },
+  { href: "/reputation", label: "Reputation" },
   { href: "/watchlists", label: "Watchlists" },
   { href: "/admin", label: "Admin" },
 ];
