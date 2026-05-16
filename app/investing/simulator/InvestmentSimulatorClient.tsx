@@ -11,6 +11,14 @@ import {
   generateRandomShock,
 } from "@/lib/investing/simulator";
 import { deriveSignalAdjustedDelta } from "@/lib/market-signals/engine";
+import {
+  chooseMacroModel,
+  runModelI,
+  runModelIIEnsemble,
+  MODEL_I_BASELINE,
+  DEFAULT_REGIMES,
+  DEFAULT_Q,
+} from "@/lib/growth-models/macro-models";
 import type {
   IndirectExposure,
   InvestmentProviderProfile,
@@ -650,6 +658,16 @@ export default function InvestmentSimulatorClient({
         </Panel>
       </div>
 
+      {/* Macro forward-growth models — gated to private + IPO universes
+          only. Model I (MC-SSDF) for short horizons (1-3y), Model II
+          (SRS-MJN) for longer. Public-direct universes never see this
+          panel — they keep the scenario engine above. */}
+      <MacroModelPanel
+        universe={input.investmentUniverse}
+        horizonYears={input.horizonYears}
+        startingCapital={input.startingCapital}
+      />
+
       <div id="sim-allocation" className="grid scroll-mt-20 gap-5 xl:grid-cols-2">
         <Panel title="Portfolio allocation">
           {hasIntegrityError ? <IntegrityError errors={state.errors} /> : <AllocationDonut portfolio={portfolio} providers={providerById} />}
@@ -892,6 +910,131 @@ function ConfigBanner({ errors }: { errors: string[] }) {
       <ul className="mt-2 list-disc pl-5 text-xs">
         {errors.map((error, i) => <li key={i}>{error}</li>)}
       </ul>
+    </div>
+  );
+}
+
+/**
+ * Macro forward-growth model panel — gated to private + IPO universes.
+ * Model I (MC-SSDF) drives the short-term (1-3y) view; Model II
+ * (SRS-MJN ensemble) drives the longer-term view. Public-direct
+ * universes get `model: "none"` and the panel renders nothing.
+ */
+function MacroModelPanel({
+  universe,
+  horizonYears,
+  startingCapital,
+}: {
+  universe: SimulationInput["investmentUniverse"];
+  horizonYears: number;
+  startingCapital: number;
+}) {
+  const choice = chooseMacroModel(universe, horizonYears);
+  if (choice.model === "none") return null;
+
+  if (choice.model === "I") {
+    const r = runModelI(MODEL_I_BASELINE, [1.2, 0.9, 1.0, 0.15], horizonYears, 200);
+    const yearMarks = [0, 0.33, 0.66, 1].map((f) => Math.floor(f * (r.t.length - 1)));
+    return (
+      <div className="mt-5 rounded-lg border-2 border-[#2f5d50] bg-[#f3f7f3] p-4 dark:border-emerald-600 dark:bg-emerald-950/20">
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <div>
+            <div className="text-[10px] font-semibold uppercase tracking-wider text-[#2f5d50] dark:text-emerald-400">
+              Forward growth · Model I — MC-SSDF
+            </div>
+            <h3 className="mt-0.5 text-base font-semibold text-[#18201b] dark:text-zinc-100">
+              Macro-coupled state-space projection · {horizonYears}-year horizon
+            </h3>
+          </div>
+          <span className="rounded-full bg-[#2f5d50]/10 px-2 py-0.5 text-[10px] font-medium text-[#2f5d50] dark:bg-emerald-900/40 dark:text-emerald-300">
+            Private + IPO only
+          </span>
+        </div>
+        <p className="mt-1 text-xs leading-5 text-[#596151] dark:text-zinc-400">{choice.reason}</p>
+        <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {yearMarks.map((idx, i) => (
+            <div key={i} className="rounded-md border border-[#dfe4da] bg-white p-2 dark:border-zinc-800 dark:bg-zinc-900">
+              <div className="text-[10px] uppercase tracking-wide text-[#697362] dark:text-zinc-500">
+                {i === 0 ? "Now" : `Year ${(r.t[idx]).toFixed(1)}`}
+              </div>
+              <div className="mt-0.5 font-mono text-lg font-semibold text-[#18201b] dark:text-zinc-100">
+                {(r.growth[idx] * 100).toFixed(0)}%
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-1 text-[11px] text-[#596151] dark:text-zinc-400 sm:grid-cols-4">
+          <span>Compute/liquidity C: {r.C[r.C.length - 1].toFixed(2)}</span>
+          <span>Geo-openness P: {r.P[r.P.length - 1].toFixed(2)}</span>
+          <span>Supply-chain W: {r.W[r.W.length - 1].toFixed(2)}</span>
+          <span>Social adoption S: {r.S[r.S.length - 1].toFixed(2)}</span>
+        </div>
+        <p className="mt-2 text-[10px] leading-4 text-[#6a725f] dark:text-zinc-500">
+          4-state ODE (RK4, 200 steps). Cyclical rate environment, regulatory friction,
+          supply-chain decay, and logistic social adoption couple into a decaying growth
+          core. Discrete world-event shocks applied separately. Deterministic — same
+          inputs reproduce the trajectory exactly.
+        </p>
+      </div>
+    );
+  }
+
+  // Model II — ensemble.
+  const ens = runModelIIEnsemble(DEFAULT_REGIMES, DEFAULT_Q, startingCapital, horizonYears, 1500, 60);
+  return (
+    <div className="mt-5 rounded-lg border-2 border-[#2f5d50] bg-[#f3f7f3] p-4 dark:border-emerald-600 dark:bg-emerald-950/20">
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <div>
+          <div className="text-[10px] font-semibold uppercase tracking-wider text-[#2f5d50] dark:text-emerald-400">
+            Forward growth · Model II — SRS-MJN
+          </div>
+          <h3 className="mt-0.5 text-base font-semibold text-[#18201b] dark:text-zinc-100">
+            Regime-switching jump-diffusion · {horizonYears}-year horizon
+          </h3>
+        </div>
+        <span className="rounded-full bg-[#2f5d50]/10 px-2 py-0.5 text-[10px] font-medium text-[#2f5d50] dark:bg-emerald-900/40 dark:text-emerald-300">
+          Private + IPO only
+        </span>
+      </div>
+      <p className="mt-1 text-xs leading-5 text-[#596151] dark:text-zinc-400">{choice.reason}</p>
+      <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <MacroStat label="P5 (downside)" value={formatCurrency(ens.p5)} tone="text-rose-700 dark:text-rose-300" />
+        <MacroStat label="P50 (median)" value={formatCurrency(ens.p50)} tone="text-[#2f5d50] dark:text-emerald-300" />
+        <MacroStat label="P95 (upside)" value={formatCurrency(ens.p95)} tone="text-emerald-700 dark:text-emerald-300" />
+        <MacroStat label="Median CAGR" value={`${(ens.medianCagr * 100).toFixed(0)}%`} tone="text-[#18201b] dark:text-zinc-100" />
+      </div>
+      <div className="mt-3">
+        <div className="text-[10px] font-semibold uppercase tracking-wide text-[#697362] dark:text-zinc-500">
+          Regime occupancy across {ens.paths.toLocaleString()} paths
+        </div>
+        <div className="mt-1.5 space-y-1">
+          {ens.regimeOccupancy.map((reg) => (
+            <div key={reg.name} className="flex items-center gap-2 text-[11px]">
+              <span className="w-52 shrink-0 text-[#596151] dark:text-zinc-400">{reg.name}</span>
+              <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-[#e8ede2] dark:bg-zinc-800">
+                <div className="h-full rounded-full bg-[#2f5d50] dark:bg-emerald-400" style={{ width: `${reg.fraction * 100}%` }} />
+              </div>
+              <span className="w-10 text-right font-mono text-[#18201b] dark:text-zinc-200">{(reg.fraction * 100).toFixed(0)}%</span>
+            </div>
+          ))}
+        </div>
+      </div>
+      <p className="mt-2 text-[10px] leading-4 text-[#6a725f] dark:text-zinc-500">
+        Continuous-time Markov regime chain (generator matrix Q) + jump-diffusion per
+        regime. {ens.paths.toLocaleString()} seeded paths — a single path is high-variance
+        and not decision-grade, so the panel reports the ensemble distribution.
+        Hyper-growth, regulatory-containment, geopolitical-mercantilism, and
+        capital-starvation regimes each carry distinct drift / volatility / jump profiles.
+      </p>
+    </div>
+  );
+}
+
+function MacroStat({ label, value, tone }: { label: string; value: string; tone: string }) {
+  return (
+    <div className="rounded-md border border-[#dfe4da] bg-white p-2 dark:border-zinc-800 dark:bg-zinc-900">
+      <div className="text-[10px] uppercase tracking-wide text-[#697362] dark:text-zinc-500">{label}</div>
+      <div className={`mt-0.5 font-mono text-lg font-semibold ${tone}`}>{value}</div>
     </div>
   );
 }
