@@ -122,6 +122,34 @@ function VendorCell({ vendor, slug }: { vendor: string; slug?: string }) {
   );
 }
 
+// Stable rank badge — ranks each vendor by overall score within the
+// pillar. Stays fixed even when the table is sorted by another column.
+function RankBadge({ rank }: { rank: number }) {
+  const tone =
+    rank === 1
+      ? "bg-amber-100 text-amber-900 dark:bg-amber-900/50 dark:text-amber-200"
+      : rank === 2
+        ? "bg-zinc-200 text-zinc-800 dark:bg-zinc-700 dark:text-zinc-100"
+        : rank === 3
+          ? "bg-orange-100 text-orange-900 dark:bg-orange-900/50 dark:text-orange-200"
+          : "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400";
+  return (
+    <span
+      className={`inline-flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-bold tabular-nums ${tone}`}
+      title={`Rank ${rank} by overall score in this pillar`}
+    >
+      {rank}
+    </span>
+  );
+}
+
+/** Build a vendorId → rank map, ranked by overall score descending. */
+function rankMap<T extends { vendorId: string; overall: number }>(rows: T[]): Map<string, number> {
+  const m = new Map<string, number>();
+  [...rows].sort((a, b) => b.overall - a.overall).forEach((r, i) => m.set(r.vendorId, i + 1));
+  return m;
+}
+
 function ThemesCell({ themes }: { themes: string[] }) {
   return (
     <ul className="space-y-0.5 text-[11px] leading-snug text-zinc-600 dark:text-zinc-400">
@@ -170,6 +198,7 @@ function DeveloperTable({
       return r ? { ...v, ...r } : null;
     })
     .filter((x): x is Joined => x !== null);
+  const ranks = rankMap(joined);
   const sorted = [...joined].sort((a, b) => {
     const av = (a as unknown as Record<string, number | string>)[sortBy] ?? a.overall;
     const bv = (b as unknown as Record<string, number | string>)[sortBy] ?? b.overall;
@@ -183,6 +212,7 @@ function DeveloperTable({
       <table className="w-full min-w-[920px] text-left text-xs">
         <thead className="border-b border-zinc-200 bg-zinc-50/60 text-zinc-500 dark:border-zinc-800 dark:bg-zinc-900/60">
           <tr>
+            <th className="whitespace-nowrap px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider">#</th>
             <th className="whitespace-nowrap px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider">Vendor</th>
             <SortHeader label="GitHub" active={sortBy === "githubScore"} desc={sortDesc} onClick={() => onSort("githubScore")} />
             <SortHeader label="Reddit" active={sortBy === "redditSentiment"} desc={sortDesc} onClick={() => onSort("redditSentiment")} />
@@ -197,6 +227,7 @@ function DeveloperTable({
         <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
           {sorted.map((r) => (
             <tr key={r.id}>
+              <td className="px-3 py-2.5 align-top"><RankBadge rank={ranks.get(r.vendorId) ?? 0} /></td>
               <td className="px-3 py-2.5 align-top"><VendorCell vendor={r.name} slug={r.slug} /></td>
               <td className="px-2 py-2.5 text-right align-top">
                 <div className="inline-flex flex-col items-end gap-0.5">
@@ -282,6 +313,7 @@ function EmployeeTable({
       return r ? { ...v, ...r } : null;
     })
     .filter((x): x is Joined => x !== null);
+  const ranks = rankMap(joined);
   const sorted = [...joined].sort((a, b) => {
     const av = (a as unknown as Record<string, number | string>)[sortBy] ?? a.overall;
     const bv = (b as unknown as Record<string, number | string>)[sortBy] ?? b.overall;
@@ -295,6 +327,7 @@ function EmployeeTable({
       <table className="w-full min-w-[1000px] text-left text-xs">
         <thead className="border-b border-zinc-200 bg-zinc-50/60 text-zinc-500 dark:border-zinc-800 dark:bg-zinc-900/60">
           <tr>
+            <th className="whitespace-nowrap px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider">#</th>
             <th className="whitespace-nowrap px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider">Vendor</th>
             <SortHeader label="Work / life" active={sortBy === "workLifeBalance"} desc={sortDesc} onClick={() => onSort("workLifeBalance")} />
             <SortHeader label="Culture" active={sortBy === "culture"} desc={sortDesc} onClick={() => onSort("culture")} />
@@ -310,6 +343,7 @@ function EmployeeTable({
         <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
           {sorted.map((r) => (
             <tr key={r.id}>
+              <td className="px-3 py-2.5 align-top"><RankBadge rank={ranks.get(r.vendorId) ?? 0} /></td>
               <td className="px-3 py-2.5 align-top"><VendorCell vendor={r.name} slug={r.slug} /></td>
               <td className="px-2 py-2.5 text-right align-top"><ScoreCell value={r.workLifeBalance} /></td>
               <td className="px-2 py-2.5 text-right align-top"><ScoreCell value={r.culture} /></td>
@@ -383,6 +417,7 @@ function CustomerTable({
       return r ? { ...v, ...r } : null;
     })
     .filter((x): x is Joined => x !== null);
+  const ranks = rankMap(joined);
   const sorted = [...joined].sort((a, b) => {
     const av = (a as unknown as Record<string, number | string>)[sortBy] ?? a.overall;
     const bv = (b as unknown as Record<string, number | string>)[sortBy] ?? b.overall;
@@ -396,6 +431,7 @@ function CustomerTable({
       <table className="w-full min-w-[1000px] text-left text-xs">
         <thead className="border-b border-zinc-200 bg-zinc-50/60 text-zinc-500 dark:border-zinc-800 dark:bg-zinc-900/60">
           <tr>
+            <th className="whitespace-nowrap px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider">#</th>
             <th className="whitespace-nowrap px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider">Vendor</th>
             <SortHeader label="Uptime" active={sortBy === "averageUptimePct"} desc={sortDesc} onClick={() => onSort("averageUptimePct")} />
             <SortHeader label="Value / $" active={sortBy === "valueForMoney"} desc={sortDesc} onClick={() => onSort("valueForMoney")} />
@@ -410,6 +446,7 @@ function CustomerTable({
         <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
           {sorted.map((r) => (
             <tr key={r.id}>
+              <td className="px-3 py-2.5 align-top"><RankBadge rank={ranks.get(r.vendorId) ?? 0} /></td>
               <td className="px-3 py-2.5 align-top"><VendorCell vendor={r.name} slug={r.slug} /></td>
               <td className="px-2 py-2.5 text-right align-top"><ScoreCell value={r.averageUptimePct} suffix="%" /></td>
               <td className="px-2 py-2.5 text-right align-top"><ScoreCell value={r.valueForMoney} /></td>
