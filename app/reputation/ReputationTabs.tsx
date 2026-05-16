@@ -215,7 +215,19 @@ function DeveloperTable({
                 </div>
               </td>
               <td className="px-2 py-2.5 text-right align-top"><ScoreCell value={r.redditSentiment} /></td>
-              <td className="px-2 py-2.5 text-right align-top"><ScoreCell value={r.forumScore} /></td>
+              <td className="px-2 py-2.5 text-right align-top">
+                <div className="inline-flex flex-col items-end gap-0.5">
+                  <ScoreCell value={r.forumScore} />
+                  {r.cellStatus?.forum === "verified" && (
+                    <span
+                      className="text-[9px] font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-400"
+                      title={`Live HackerNews API fetch · ${r.forumHnHits?.toLocaleString() ?? "?"} stories in the last 12 months · fetched ${r.forumLastFetched}`}
+                    >
+                      ✓ live · {r.forumHnHits?.toLocaleString() ?? "?"} HN
+                    </span>
+                  )}
+                </div>
+              </td>
               <td className="px-2 py-2.5 text-right align-top"><ScoreCell value={r.apiReliability} /></td>
               <td className="px-2 py-2.5 text-right align-top"><ScoreCell value={r.documentationScore} /></td>
               <td className="px-2 py-2.5 text-right align-top"><ScoreCell value={r.overall} /></td>

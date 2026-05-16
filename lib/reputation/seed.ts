@@ -32,6 +32,11 @@ export interface DeveloperReputation {
   githubLastFetched?: string; // ISO date
   redditSentiment: number;    // r/LocalLLaMA, r/MachineLearning, r/OpenAI etc.
   forumScore: number;         // HackerNews, devforum, stackoverflow signal
+  // Real-data provenance for the forum column — populated when the
+  // value was computed from the public HackerNews (Algolia) API.
+  forumSource?: string;
+  forumHnHits?: number;       // 12-month story count on HN
+  forumLastFetched?: string;  // ISO date
   apiReliability: number;     // self-reported API issues from devs
   documentationScore: number; // dev-facing docs quality
   overall: number;
@@ -304,6 +309,55 @@ for (const o of GITHUB_OVERLAY) {
   } else {
     row.cellStatus = { ...(row.cellStatus ?? {}), github: "seed" };
   }
+}
+
+// ──────────────────────────────────────────────────────────────────
+// REAL-DATA OVERLAY — Forum column (HackerNews)
+// ──────────────────────────────────────────────────────────────────
+// Fetched 2026-05-15 from the public HackerNews Algolia API
+// (hn.algolia.com/api/v1/search) — 12-month story window. Score:
+//
+//   volumeScore     = clamp((log10(nbHits + 1) / 4) × 100, 0, 100)
+//   engagementScore = clamp((log10(avgPoints + 1) / 2.7) × 100, 0, 100)
+//   forumScore      = round(0.55 × volume + 0.45 × engagement)
+//
+// Enterprise-SaaS vendors (SAP, ServiceNow, Oracle) genuinely have
+// low HN developer chatter — HN skews toward frontier-lab dev tools.
+// That low score is a true signal, not a gap.
+interface ForumOverlay { vendorId: string; hits: number; score: number }
+const HN_OVERLAY: ForumOverlay[] = [
+  { vendorId: "openai", hits: 10849, score: 100 },
+  { vendorId: "anthropic", hits: 1453, score: 67 },
+  { vendorId: "google", hits: 1445, score: 70 },
+  { vendorId: "microsoft", hits: 498, score: 71 },
+  { vendorId: "mistral", hits: 376, score: 63 },
+  { vendorId: "databricks", hits: 211, score: 56 },
+  { vendorId: "aws", hits: 150, score: 51 },
+  { vendorId: "cohere", hits: 850, score: 68 },
+  { vendorId: "rogo", hits: 42, score: 43 },
+  { vendorId: "glean", hits: 38, score: 44 },
+  { vendorId: "hebbia", hits: 37, score: 33 },
+  { vendorId: "snowflake", hits: 23, score: 41 },
+  { vendorId: "ibm", hits: 23, score: 28 },
+  { vendorId: "salesforce", hits: 22, score: 32 },
+  { vendorId: "harvey", hits: 9, score: 23 },
+  { vendorId: "moveworks", hits: 6, score: 19 },
+  { vendorId: "writer", hits: 5, score: 26 },
+  { vendorId: "oracle", hits: 2, score: 17 },
+  { vendorId: "sap", hits: 1, score: 9 },
+  { vendorId: "servicenow", hits: 1, score: 9 },
+];
+for (const o of HN_OVERLAY) {
+  const row = DEVELOPER_REPUTATION.find((r) => r.vendorId === o.vendorId);
+  if (!row) continue;
+  row.forumScore = o.score;
+  row.forumSource = "hn.algolia.com";
+  row.forumHnHits = o.hits;
+  row.forumLastFetched = "2026-05-15";
+  row.cellStatus = { ...(row.cellStatus ?? {}), forum: "verified" };
+  row.overall = Math.round(
+    (row.githubScore + row.redditSentiment + row.forumScore + row.apiReliability + row.documentationScore) / 5,
+  );
 }
 
 export const EMPLOYEE_REPUTATION: EmployeeReputation[] = [
