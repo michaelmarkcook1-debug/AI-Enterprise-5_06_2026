@@ -70,18 +70,28 @@ export interface EmployeeReputation {
   litigationScore: number;    // 0-100 derived from count + severity
   careerGrowth: number;
   compensation: number;
+  // Alignment between stated mission and lived employee experience —
+  // do employees believe in / feel aligned with the company mission?
+  // Curated seed: no free API exists for this; it is informed by
+  // public review themes but not machine-extracted.
+  missionAlignment: number;   // 0-100
   overall: number;
   primaryThemes: string[];
   sources: string[];
   dataStatus: "seed" | "documented" | "verified";
   // Real-data provenance for the litigation column — raw count of
   // employment-related court records from the CourtListener API.
-  // Size-dominated: large incumbents carry large footprints, so read
-  // relative to company scale.
+  // Size-dominated, so we also normalise per-employee below.
   litigationFootprint?: number;
   litigationSource?: string;
   litigationLastFetched?: string;
-  cellStatus?: Partial<Record<"litigation", "seed" | "documented" | "verified">>;
+  // Litigation normalised to a rate. approxHeadcount is a public
+  // estimate (seed-grade); litigationPerThousand = footprint /
+  // headcount × 1000. The numerator is real (CourtListener); the
+  // denominator is an estimate — so the RATE is "documented".
+  approxHeadcount?: number;
+  litigationPerThousand?: number;
+  cellStatus?: Partial<Record<"litigation" | "litigationRate" | "mission", "seed" | "documented" | "verified">>;
 }
 
 export interface CustomerReputation {
@@ -123,12 +133,18 @@ function emp(
   vendorId: string,
   wlb: number, culture: number, litCount: number, careerGrowth: number, comp: number,
   themes: string[], sources: string[],
+  // Mission alignment — optional 9th arg. Defaults to a culture-anchored
+  // estimate when not supplied (mission alignment tracks culture
+  // closely in public review data); the MISSION_OVERLAY refines named
+  // vendors. Curated seed throughout — no free API exists for it.
+  missionAlignment?: number,
 ): EmployeeReputation {
   // Litigation score: 100 if zero filings, drops 8 points per filing,
   // floored at 30. Tribunal cases are public-record so this is the
   // cell most likely to flip to "verified" first.
   const litigationScore = Math.max(30, 100 - litCount * 8);
-  const overall = Math.round((wlb + culture + litigationScore + careerGrowth + comp) / 5);
+  const mission = missionAlignment ?? Math.round(culture * 0.95);
+  const overall = Math.round((wlb + culture + litigationScore + careerGrowth + comp + mission) / 6);
   return {
     vendorId,
     workLifeBalance: wlb,
@@ -137,6 +153,7 @@ function emp(
     litigationScore,
     careerGrowth,
     compensation: comp,
+    missionAlignment: mission,
     overall,
     primaryThemes: themes,
     sources,
@@ -580,36 +597,97 @@ export const EMPLOYEE_REPUTATION: EmployeeReputation[] = [
 // litigiousness estimate and is left untouched; the footprint is
 // surfaced alongside it as the verified real datum, with the size
 // caveat shown in the UI tooltip.
-interface LitigationOverlay { vendorId: string; footprint: number }
+// footprint = real CourtListener count (verified).
+// headcount = approximate current employee count — a public estimate
+//   (company filings / press, ~May 2026). For AWS we use the AWS
+//   division headcount, not Amazon-wide, to match the "Amazon Web
+//   Services" search scope.
+// litigationPerThousand = footprint / headcount × 1000. The numerator
+//   is real, the denominator is an estimate, and the footprint is
+//   CUMULATIVE while headcount is a CURRENT snapshot — so the rate is
+//   directional ("documented"), not exact. It is still far fairer
+//   than raw footprint, which a 50-year-old incumbent inflates by
+//   age + size alone.
+interface LitigationOverlay { vendorId: string; footprint: number; headcount: number }
 const COURTLISTENER_OVERLAY: LitigationOverlay[] = [
-  { vendorId: "anthropic", footprint: 268 },
-  { vendorId: "aws", footprint: 1999 },
-  { vendorId: "cohere", footprint: 424 },
-  { vendorId: "databricks", footprint: 126 },
-  { vendorId: "glean", footprint: 0 },
-  { vendorId: "google", footprint: 6912 },
-  { vendorId: "harvey", footprint: 16 },
-  { vendorId: "hebbia", footprint: 2 },
-  { vendorId: "ibm", footprint: 20077 },
-  { vendorId: "microsoft", footprint: 55901 },
-  { vendorId: "mistral", footprint: 8 },
-  { vendorId: "moveworks", footprint: 7 },
-  { vendorId: "openai", footprint: 631 },
-  { vendorId: "oracle", footprint: 1106 },
-  { vendorId: "rogo", footprint: 0 },
-  { vendorId: "salesforce", footprint: 5380 },
-  { vendorId: "sap", footprint: 838 },
-  { vendorId: "servicenow", footprint: 482 },
-  { vendorId: "snowflake", footprint: 264 },
-  { vendorId: "writer", footprint: 15 },
+  { vendorId: "anthropic", footprint: 268, headcount: 2500 },
+  { vendorId: "aws", footprint: 1999, headcount: 150000 },
+  { vendorId: "cohere", footprint: 424, headcount: 600 },
+  { vendorId: "databricks", footprint: 126, headcount: 7500 },
+  { vendorId: "glean", footprint: 0, headcount: 1000 },
+  { vendorId: "google", footprint: 6912, headcount: 183000 },
+  { vendorId: "harvey", footprint: 16, headcount: 500 },
+  { vendorId: "hebbia", footprint: 2, headcount: 200 },
+  { vendorId: "ibm", footprint: 20077, headcount: 280000 },
+  { vendorId: "microsoft", footprint: 55901, headcount: 228000 },
+  { vendorId: "mistral", footprint: 8, headcount: 350 },
+  { vendorId: "moveworks", footprint: 7, headcount: 600 },
+  { vendorId: "openai", footprint: 631, headcount: 3000 },
+  { vendorId: "oracle", footprint: 1106, headcount: 159000 },
+  { vendorId: "rogo", footprint: 0, headcount: 120 },
+  { vendorId: "salesforce", footprint: 5380, headcount: 76000 },
+  { vendorId: "sap", footprint: 838, headcount: 108000 },
+  { vendorId: "servicenow", footprint: 482, headcount: 26000 },
+  { vendorId: "snowflake", footprint: 264, headcount: 7800 },
+  { vendorId: "writer", footprint: 15, headcount: 400 },
 ];
 for (const o of COURTLISTENER_OVERLAY) {
   const row = EMPLOYEE_REPUTATION.find((r) => r.vendorId === o.vendorId);
   if (!row) continue;
   row.litigationFootprint = o.footprint;
+  row.approxHeadcount = o.headcount;
+  row.litigationPerThousand = Math.round((o.footprint / o.headcount) * 1000 * 10) / 10;
   row.litigationSource = "courtlistener.com";
   row.litigationLastFetched = "2026-05-15";
-  row.cellStatus = { ...(row.cellStatus ?? {}), litigation: "verified" };
+  row.cellStatus = {
+    ...(row.cellStatus ?? {}),
+    litigation: "verified",     // raw footprint — real CourtListener count
+    litigationRate: "documented", // per-1000 rate — real numerator, estimated denominator
+  };
+}
+
+// ──────────────────────────────────────────────────────────────────
+// SEED OVERLAY — Mission alignment (Employee pillar)
+// ──────────────────────────────────────────────────────────────────
+// Alignment between the company's stated mission and the lived
+// employee experience. Curated seed — no free API exists. The values
+// are informed by recurring themes in public employee discussion
+// (mission-driven framing is consistently cited at frontier labs;
+// large incumbents score lower as employees report the mission feels
+// distant from day-to-day work). Marked "seed" so the UI is honest.
+interface MissionOverlay { vendorId: string; score: number }
+const MISSION_OVERLAY: MissionOverlay[] = [
+  { vendorId: "anthropic", score: 90 },  // safety-mission alignment consistently cited
+  { vendorId: "openai", score: 74 },     // mission cited but post-2024 governance strain
+  { vendorId: "mistral", score: 86 },    // European-sovereignty mission resonates internally
+  { vendorId: "cohere", score: 78 },
+  { vendorId: "harvey", score: 88 },     // tight legal-AI mission, small team
+  { vendorId: "hebbia", score: 82 },
+  { vendorId: "glean", score: 84 },
+  { vendorId: "writer", score: 80 },
+  { vendorId: "rogo", score: 82 },
+  { vendorId: "moveworks", score: 78 },
+  { vendorId: "databricks", score: 76 },
+  { vendorId: "snowflake", score: 72 },
+  { vendorId: "google", score: 64 },     // mission feels distant at scale
+  { vendorId: "microsoft", score: 66 },
+  { vendorId: "aws", score: 60 },
+  { vendorId: "salesforce", score: 68 },
+  { vendorId: "servicenow", score: 70 },
+  { vendorId: "oracle", score: 56 },
+  { vendorId: "sap", score: 62 },
+  { vendorId: "ibm", score: 58 },
+];
+for (const o of MISSION_OVERLAY) {
+  const row = EMPLOYEE_REPUTATION.find((r) => r.vendorId === o.vendorId);
+  if (!row) continue;
+  row.missionAlignment = o.score;
+  row.cellStatus = { ...(row.cellStatus ?? {}), mission: "seed" };
+  // Recompute overall — now a 6-metric mean.
+  row.overall = Math.round(
+    (row.workLifeBalance + row.culture + row.litigationScore +
+     row.careerGrowth + row.compensation + row.missionAlignment) / 6,
+  );
 }
 
 export const CUSTOMER_REPUTATION: CustomerReputation[] = [

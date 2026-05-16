@@ -301,6 +301,7 @@ function EmployeeTable({
             <SortHeader label="Work / life" active={sortBy === "workLifeBalance"} desc={sortDesc} onClick={() => onSort("workLifeBalance")} />
             <SortHeader label="Culture" active={sortBy === "culture"} desc={sortDesc} onClick={() => onSort("culture")} />
             <SortHeader label="Litigation #" active={sortBy === "litigationCount"} desc={sortDesc} onClick={() => onSort("litigationCount")} />
+            <SortHeader label="Mission fit" active={sortBy === "missionAlignment"} desc={sortDesc} onClick={() => onSort("missionAlignment")} />
             <SortHeader label="Career growth" active={sortBy === "careerGrowth"} desc={sortDesc} onClick={() => onSort("careerGrowth")} />
             <SortHeader label="Comp" active={sortBy === "compensation"} desc={sortDesc} onClick={() => onSort("compensation")} />
             <SortHeader label="Overall" active={sortBy === "overall"} desc={sortDesc} onClick={() => onSort("overall")} />
@@ -333,11 +334,30 @@ function EmployeeTable({
                   {r.cellStatus?.litigation === "verified" && r.litigationFootprint !== undefined && (
                     <span
                       className="text-[9px] font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-400"
-                      title={`CourtListener — ${r.litigationFootprint.toLocaleString()} employment-related court records. Raw footprint, size-dominated: large/old incumbents carry large footprints. Fetched ${r.litigationLastFetched}.`}
+                      title={`CourtListener — ${r.litigationFootprint.toLocaleString()} employment-related court records (raw footprint). Fetched ${r.litigationLastFetched}.`}
                     >
                       ✓ {r.litigationFootprint >= 1000 ? `${(r.litigationFootprint / 1000).toFixed(1)}k` : r.litigationFootprint} CL
                     </span>
                   )}
+                  {r.litigationPerThousand !== undefined && r.approxHeadcount !== undefined && (
+                    <span
+                      className="text-[9px] font-semibold tabular-nums text-zinc-600 dark:text-zinc-400"
+                      title={`Normalised: ${r.litigationFootprint?.toLocaleString()} records ÷ ~${r.approxHeadcount.toLocaleString()} employees × 1000 = ${r.litigationPerThousand} per 1,000. Footprint is cumulative, headcount is a current estimate — directional, not exact.`}
+                    >
+                      {r.litigationPerThousand}/1k emp
+                    </span>
+                  )}
+                </div>
+              </td>
+              <td className="px-2 py-2.5 text-right align-top">
+                <div className="inline-flex flex-col items-end gap-0.5">
+                  <ScoreCell value={r.missionAlignment} />
+                  <span
+                    className="text-[9px] font-medium uppercase tracking-wider text-zinc-400 dark:text-zinc-600"
+                    title="Alignment between stated mission and lived employee experience. Curated seed — no free API exists for this metric."
+                  >
+                    seed
+                  </span>
                 </div>
               </td>
               <td className="px-2 py-2.5 text-right align-top"><ScoreCell value={r.careerGrowth} /></td>
