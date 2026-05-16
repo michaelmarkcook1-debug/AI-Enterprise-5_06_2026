@@ -286,8 +286,6 @@ function EmployeeTable({
     const av = (a as unknown as Record<string, number | string>)[sortBy] ?? a.overall;
     const bv = (b as unknown as Record<string, number | string>)[sortBy] ?? b.overall;
     if (typeof av === "number" && typeof bv === "number") {
-      // Litigation count: lower is better, so flip the sort direction.
-      if (sortBy === "litigationCount") return sortDesc ? av - bv : bv - av;
       return sortDesc ? bv - av : av - bv;
     }
     return 0;
@@ -300,7 +298,7 @@ function EmployeeTable({
             <th className="whitespace-nowrap px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider">Vendor</th>
             <SortHeader label="Work / life" active={sortBy === "workLifeBalance"} desc={sortDesc} onClick={() => onSort("workLifeBalance")} />
             <SortHeader label="Culture" active={sortBy === "culture"} desc={sortDesc} onClick={() => onSort("culture")} />
-            <SortHeader label="Litigation #" active={sortBy === "litigationCount"} desc={sortDesc} onClick={() => onSort("litigationCount")} />
+            <SortHeader label="Litigation" active={sortBy === "litigationScore"} desc={sortDesc} onClick={() => onSort("litigationScore")} />
             <SortHeader label="Mission fit" active={sortBy === "missionAlignment"} desc={sortDesc} onClick={() => onSort("missionAlignment")} />
             <SortHeader label="Career growth" active={sortBy === "careerGrowth"} desc={sortDesc} onClick={() => onSort("careerGrowth")} />
             <SortHeader label="Comp" active={sortBy === "compensation"} desc={sortDesc} onClick={() => onSort("compensation")} />
@@ -315,26 +313,21 @@ function EmployeeTable({
               <td className="px-3 py-2.5 align-top"><VendorCell vendor={r.name} slug={r.slug} /></td>
               <td className="px-2 py-2.5 text-right align-top"><ScoreCell value={r.workLifeBalance} /></td>
               <td className="px-2 py-2.5 text-right align-top"><ScoreCell value={r.culture} /></td>
-              {/* Litigation count rendered separately — colour-tone follows
-                  the derived litigationScore (lower count = greener). */}
+              {/* Litigation cell — the primary number is the 0-100
+                  litigation SCORE (consistent with every other column).
+                  Higher = less litigation exposure. The score now
+                  derives from the per-1,000-employee rate, so colour,
+                  score, footprint and rate all agree. Footprint + rate
+                  shown below as the real-data evidence. */}
               <td className="px-2 py-2.5 text-right align-top">
                 <div className="inline-flex flex-col items-end gap-0.5">
-                  <span
-                    className={`inline-block min-w-[36px] rounded px-1.5 py-0.5 text-center font-mono text-[11px] font-semibold tabular-nums ${
-                      r.litigationCount === 0
-                        ? "bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300"
-                        : r.litigationCount <= 5
-                          ? "bg-amber-50 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300"
-                          : "bg-rose-50 text-rose-800 dark:bg-rose-950/40 dark:text-rose-300"
-                    }`}
-                    title={`Litigation score ${r.litigationScore}/100 (lower count = higher score)`}
-                  >
-                    {r.litigationCount}
+                  <span title={`Litigation score ${r.litigationScore}/100 — higher = lower litigation exposure per employee.`}>
+                    <ScoreCell value={r.litigationScore} />
                   </span>
                   {r.cellStatus?.litigation === "verified" && r.litigationFootprint !== undefined && (
                     <span
                       className="text-[9px] font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-400"
-                      title={`CourtListener — ${r.litigationFootprint.toLocaleString()} employment-related court records (raw footprint). Fetched ${r.litigationLastFetched}.`}
+                      title={`CourtListener — ${r.litigationFootprint.toLocaleString()} employment-related court records (raw cumulative footprint). Fetched ${r.litigationLastFetched}.`}
                     >
                       ✓ {r.litigationFootprint >= 1000 ? `${(r.litigationFootprint / 1000).toFixed(1)}k` : r.litigationFootprint} CL
                     </span>
@@ -342,7 +335,7 @@ function EmployeeTable({
                   {r.litigationPerThousand !== undefined && r.approxHeadcount !== undefined && (
                     <span
                       className="text-[9px] font-semibold tabular-nums text-zinc-600 dark:text-zinc-400"
-                      title={`Normalised: ${r.litigationFootprint?.toLocaleString()} records ÷ ~${r.approxHeadcount.toLocaleString()} employees × 1000 = ${r.litigationPerThousand} per 1,000. Footprint is cumulative, headcount is a current estimate — directional, not exact.`}
+                      title={`Score basis: ${r.litigationFootprint?.toLocaleString()} records ÷ ~${r.approxHeadcount.toLocaleString()} employees × 1000 = ${r.litigationPerThousand} per 1,000. Footprint is cumulative, headcount a current estimate — directional, not exact.`}
                     >
                       {r.litigationPerThousand}/1k emp
                     </span>

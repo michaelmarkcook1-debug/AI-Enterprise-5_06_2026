@@ -631,19 +631,41 @@ const COURTLISTENER_OVERLAY: LitigationOverlay[] = [
   { vendorId: "snowflake", footprint: 264, headcount: 7800 },
   { vendorId: "writer", footprint: 15, headcount: 400 },
 ];
+// Map a per-1,000-employee litigation rate to a 0-100 score where a
+// LOWER rate is BETTER. Log scale: the rates span ~0 to ~700, so a
+// linear map would floor every large vendor. log10 keeps the curve
+// readable — rate 10 → ~75, rate 100 → ~52, rate 250 → ~42,
+// rate 700 → ~31.
+function litigationRateToScore(perK: number): number {
+  const raw = 100 - (Math.log10(perK + 1) / Math.log10(800)) * 70;
+  return Math.round(Math.max(30, Math.min(100, raw)));
+}
+
 for (const o of COURTLISTENER_OVERLAY) {
   const row = EMPLOYEE_REPUTATION.find((r) => r.vendorId === o.vendorId);
   if (!row) continue;
+  const perK = Math.round((o.footprint / o.headcount) * 1000 * 10) / 10;
   row.litigationFootprint = o.footprint;
   row.approxHeadcount = o.headcount;
-  row.litigationPerThousand = Math.round((o.footprint / o.headcount) * 1000 * 10) / 10;
+  row.litigationPerThousand = perK;
   row.litigationSource = "courtlistener.com";
   row.litigationLastFetched = "2026-05-15";
+  // Reconcile: the litigation SCORE (which feeds Overall) now derives
+  // from the real per-1,000-employee rate, NOT the old curated
+  // litigationCount. This makes the colour, the score, and the rate
+  // all agree — previously the colour followed the seed count while
+  // the rate fed nothing, so a vendor could show red with a low rate.
+  row.litigationScore = litigationRateToScore(perK);
   row.cellStatus = {
     ...(row.cellStatus ?? {}),
     litigation: "verified",     // raw footprint — real CourtListener count
     litigationRate: "documented", // per-1000 rate — real numerator, estimated denominator
   };
+  // Overall is a 6-metric mean — recompute now that litigationScore moved.
+  row.overall = Math.round(
+    (row.workLifeBalance + row.culture + row.litigationScore +
+     row.careerGrowth + row.compensation + row.missionAlignment) / 6,
+  );
 }
 
 // ──────────────────────────────────────────────────────────────────
