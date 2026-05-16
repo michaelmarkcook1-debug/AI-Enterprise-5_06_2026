@@ -31,6 +31,19 @@ export interface DeveloperReputation {
   githubStars?: number;
   githubLastFetched?: string; // ISO date
   redditSentiment: number;    // r/LocalLLaMA, r/MachineLearning, r/OpenAI etc.
+  // Real-data provenance for the Reddit column — populated when the
+  // value was computed from the public Reddit search API. Marked
+  // "documented" not "verified" because unauthenticated search volume
+  // is name-ambiguity contaminated; the score uses upvote-ratio only.
+  redditSource?: string;
+  redditUpvoteRatio?: number;
+  redditLastFetched?: string;
+  // Real-data provenance for the API-reliability column — populated
+  // from the vendor's Atlassian Statuspage incident history.
+  apiSource?: string;
+  apiIncidents90d?: number;
+  apiMajorIncidents90d?: number;
+  apiLastFetched?: string;
   forumScore: number;         // HackerNews, devforum, stackoverflow signal
   // Real-data provenance for the forum column — populated when the
   // value was computed from the public HackerNews (Algolia) API.
@@ -61,6 +74,14 @@ export interface EmployeeReputation {
   primaryThemes: string[];
   sources: string[];
   dataStatus: "seed" | "documented" | "verified";
+  // Real-data provenance for the litigation column — raw count of
+  // employment-related court records from the CourtListener API.
+  // Size-dominated: large incumbents carry large footprints, so read
+  // relative to company scale.
+  litigationFootprint?: number;
+  litigationSource?: string;
+  litigationLastFetched?: string;
+  cellStatus?: Partial<Record<"litigation", "seed" | "documented" | "verified">>;
 }
 
 export interface CustomerReputation {
@@ -360,6 +381,98 @@ for (const o of HN_OVERLAY) {
   );
 }
 
+// ──────────────────────────────────────────────────────────────────
+// REAL-DATA OVERLAY — Reddit reception (documented, not verified)
+// ──────────────────────────────────────────────────────────────────
+// Fetched 2026-05-15 from the public Reddit search API
+// (reddit.com/search.json, 12-month window). The score uses ONLY the
+// average upvote-ratio across results:
+//
+//   redditSentiment = clamp(round((avgUpvoteRatio − 0.5) / 0.45 × 100), 0, 100)
+//
+// Volume IS deliberately discarded: unauthenticated Reddit search is
+// name-ambiguity contaminated (the raw fetch put tiny-startup "Rogo"
+// above "Google" on volume — clear noise). Upvote-ratio is bounded
+// [0,1] and far more robust to that contamination, but it still mixes
+// in off-topic posts, so this column is marked "documented" not
+// "verified". True sentiment needs the authenticated API + subreddit
+// scoping + an NLP classifier.
+interface RedditOverlay { vendorId: string; ratio: number; score: number }
+const REDDIT_OVERLAY: RedditOverlay[] = [
+  { vendorId: "openai", ratio: 0.953, score: 100 },
+  { vendorId: "anthropic", ratio: 0.936, score: 97 },
+  { vendorId: "google", ratio: 0.935, score: 97 },
+  { vendorId: "microsoft", ratio: 0.953, score: 100 },
+  { vendorId: "mistral", ratio: 0.941, score: 98 },
+  { vendorId: "databricks", ratio: 0.886, score: 86 },
+  { vendorId: "aws", ratio: 0.838, score: 75 },
+  { vendorId: "cohere", ratio: 0.805, score: 68 },
+  { vendorId: "glean", ratio: 0.904, score: 90 },
+  { vendorId: "ibm", ratio: 0.805, score: 68 },
+  { vendorId: "oracle", ratio: 0.963, score: 100 },
+  { vendorId: "salesforce", ratio: 0.901, score: 89 },
+  { vendorId: "snowflake", ratio: 0.843, score: 76 },
+  { vendorId: "harvey", ratio: 0.878, score: 84 },
+  { vendorId: "hebbia", ratio: 0.942, score: 98 },
+  { vendorId: "moveworks", ratio: 0.865, score: 81 },
+  { vendorId: "sap", ratio: 0.874, score: 83 },
+  { vendorId: "servicenow", ratio: 0.911, score: 91 },
+  { vendorId: "rogo", ratio: 0.929, score: 95 },
+  { vendorId: "writer", ratio: 0.918, score: 93 },
+];
+for (const o of REDDIT_OVERLAY) {
+  const row = DEVELOPER_REPUTATION.find((r) => r.vendorId === o.vendorId);
+  if (!row) continue;
+  row.redditSentiment = o.score;
+  row.redditSource = "reddit.com/search";
+  row.redditUpvoteRatio = o.ratio;
+  row.redditLastFetched = "2026-05-15";
+  row.cellStatus = { ...(row.cellStatus ?? {}), reddit: "documented" };
+  row.overall = Math.round(
+    (row.githubScore + row.redditSentiment + row.forumScore + row.apiReliability + row.documentationScore) / 5,
+  );
+}
+
+// ──────────────────────────────────────────────────────────────────
+// REAL-DATA OVERLAY — API reliability (Atlassian Statuspage incidents)
+// ──────────────────────────────────────────────────────────────────
+// Fetched 2026-05-15 from each vendor's Atlassian Statuspage
+// incidents.json. Only 8 of 20 vendors expose an accessible Atlassian
+// page; the rest keep the seed apiReliability value.
+//
+//   minor = recent-90d incidents that are not major/critical
+//   apiReliability = clamp(100 − min(minor, 25)×1.2 − major×4, 30, 100)
+//
+// Caveat: Atlassian's incidents.json caps at ~50 records. A vendor
+// that hit the cap (Anthropic) may post very granular component-level
+// incidents — a high count can reflect transparent reporting as much
+// as genuine downtime. The raw counts are surfaced so the reader can
+// judge.
+interface ApiOverlay { vendorId: string; incidents90d: number; major90d: number; score: number }
+const STATUS_OVERLAY: ApiOverlay[] = [
+  { vendorId: "openai", incidents90d: 25, major90d: 3, score: 62 },
+  { vendorId: "anthropic", incidents90d: 50, major90d: 17, score: 30 },
+  { vendorId: "cohere", incidents90d: 3, major90d: 1, score: 94 },
+  { vendorId: "snowflake", incidents90d: 13, major90d: 8, score: 62 },
+  { vendorId: "harvey", incidents90d: 6, major90d: 1, score: 90 },
+  { vendorId: "hebbia", incidents90d: 1, major90d: 0, score: 99 },
+  { vendorId: "moveworks", incidents90d: 6, major90d: 6, score: 76 },
+  { vendorId: "rogo", incidents90d: 2, major90d: 2, score: 92 },
+];
+for (const o of STATUS_OVERLAY) {
+  const row = DEVELOPER_REPUTATION.find((r) => r.vendorId === o.vendorId);
+  if (!row) continue;
+  row.apiReliability = o.score;
+  row.apiSource = "Atlassian Statuspage incidents.json";
+  row.apiIncidents90d = o.incidents90d;
+  row.apiMajorIncidents90d = o.major90d;
+  row.apiLastFetched = "2026-05-15";
+  row.cellStatus = { ...(row.cellStatus ?? {}), api: "verified" };
+  row.overall = Math.round(
+    (row.githubScore + row.redditSentiment + row.forumScore + row.apiReliability + row.documentationScore) / 5,
+  );
+}
+
 export const EMPLOYEE_REPUTATION: EmployeeReputation[] = [
   emp("openai", 60, 65, 4, 78, 92,
     ["Mission alignment strong", "High turnover post-2024 governance events", "Top-of-market comp"],
@@ -450,6 +563,54 @@ export const EMPLOYEE_REPUTATION: EmployeeReputation[] = [
     ["High-velocity, high-intensity culture", "Founder-driven environment cited", "Top-of-market comp + equity upside"],
     ["news.ycombinator.com", "linkedin.com/company/xai"]),
 ];
+
+// ──────────────────────────────────────────────────────────────────
+// REAL-DATA OVERLAY — Litigation footprint (CourtListener)
+// ──────────────────────────────────────────────────────────────────
+// Fetched 2026-05-15 from the CourtListener v4 search API. Each value
+// is the count of court records matching the vendor name AND
+// employment-litigation terms (employment / discrimination / wrongful
+// / labor / harassment).
+//
+// IMPORTANT — this is a raw legal-FOOTPRINT count, heavily dominated
+// by company size + age. Microsoft (55,901) and IBM (20,077) carry
+// enormous footprints simply because they are large, old companies —
+// it does NOT mean they are 200× worse employers than OpenAI (631).
+// The litigationScore in the seed row is the curated employer-
+// litigiousness estimate and is left untouched; the footprint is
+// surfaced alongside it as the verified real datum, with the size
+// caveat shown in the UI tooltip.
+interface LitigationOverlay { vendorId: string; footprint: number }
+const COURTLISTENER_OVERLAY: LitigationOverlay[] = [
+  { vendorId: "anthropic", footprint: 268 },
+  { vendorId: "aws", footprint: 1999 },
+  { vendorId: "cohere", footprint: 424 },
+  { vendorId: "databricks", footprint: 126 },
+  { vendorId: "glean", footprint: 0 },
+  { vendorId: "google", footprint: 6912 },
+  { vendorId: "harvey", footprint: 16 },
+  { vendorId: "hebbia", footprint: 2 },
+  { vendorId: "ibm", footprint: 20077 },
+  { vendorId: "microsoft", footprint: 55901 },
+  { vendorId: "mistral", footprint: 8 },
+  { vendorId: "moveworks", footprint: 7 },
+  { vendorId: "openai", footprint: 631 },
+  { vendorId: "oracle", footprint: 1106 },
+  { vendorId: "rogo", footprint: 0 },
+  { vendorId: "salesforce", footprint: 5380 },
+  { vendorId: "sap", footprint: 838 },
+  { vendorId: "servicenow", footprint: 482 },
+  { vendorId: "snowflake", footprint: 264 },
+  { vendorId: "writer", footprint: 15 },
+];
+for (const o of COURTLISTENER_OVERLAY) {
+  const row = EMPLOYEE_REPUTATION.find((r) => r.vendorId === o.vendorId);
+  if (!row) continue;
+  row.litigationFootprint = o.footprint;
+  row.litigationSource = "courtlistener.com";
+  row.litigationLastFetched = "2026-05-15";
+  row.cellStatus = { ...(row.cellStatus ?? {}), litigation: "verified" };
+}
 
 export const CUSTOMER_REPUTATION: CustomerReputation[] = [
   cust("openai", 99.3, 74, 72, 78, 90,

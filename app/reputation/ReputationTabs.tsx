@@ -214,7 +214,19 @@ function DeveloperTable({
                   )}
                 </div>
               </td>
-              <td className="px-2 py-2.5 text-right align-top"><ScoreCell value={r.redditSentiment} /></td>
+              <td className="px-2 py-2.5 text-right align-top">
+                <div className="inline-flex flex-col items-end gap-0.5">
+                  <ScoreCell value={r.redditSentiment} />
+                  {r.cellStatus?.reddit === "documented" && (
+                    <span
+                      className="text-[9px] font-semibold uppercase tracking-wider text-amber-700 dark:text-amber-400"
+                      title={`Reddit search API · score derived from average upvote-ratio ${r.redditUpvoteRatio ?? "?"} · volume discarded (name-ambiguity contamination) · fetched ${r.redditLastFetched}`}
+                    >
+                      ~ documented
+                    </span>
+                  )}
+                </div>
+              </td>
               <td className="px-2 py-2.5 text-right align-top">
                 <div className="inline-flex flex-col items-end gap-0.5">
                   <ScoreCell value={r.forumScore} />
@@ -228,7 +240,19 @@ function DeveloperTable({
                   )}
                 </div>
               </td>
-              <td className="px-2 py-2.5 text-right align-top"><ScoreCell value={r.apiReliability} /></td>
+              <td className="px-2 py-2.5 text-right align-top">
+                <div className="inline-flex flex-col items-end gap-0.5">
+                  <ScoreCell value={r.apiReliability} />
+                  {r.cellStatus?.api === "verified" && (
+                    <span
+                      className="text-[9px] font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-400"
+                      title={`Atlassian Statuspage incidents.json · ${r.apiIncidents90d ?? "?"} incidents in 90d (${r.apiMajorIncidents90d ?? "?"} major) · fetched ${r.apiLastFetched}`}
+                    >
+                      ✓ live · {r.apiIncidents90d ?? "?"}/90d
+                    </span>
+                  )}
+                </div>
+              </td>
               <td className="px-2 py-2.5 text-right align-top"><ScoreCell value={r.documentationScore} /></td>
               <td className="px-2 py-2.5 text-right align-top"><ScoreCell value={r.overall} /></td>
               <td className="max-w-xs px-2 py-2.5 align-top"><ThemesCell themes={r.primaryThemes} /></td>
@@ -293,18 +317,28 @@ function EmployeeTable({
               {/* Litigation count rendered separately — colour-tone follows
                   the derived litigationScore (lower count = greener). */}
               <td className="px-2 py-2.5 text-right align-top">
-                <span
-                  className={`inline-block min-w-[36px] rounded px-1.5 py-0.5 text-center font-mono text-[11px] font-semibold tabular-nums ${
-                    r.litigationCount === 0
-                      ? "bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300"
-                      : r.litigationCount <= 5
-                        ? "bg-amber-50 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300"
-                        : "bg-rose-50 text-rose-800 dark:bg-rose-950/40 dark:text-rose-300"
-                  }`}
-                  title={`Litigation score ${r.litigationScore}/100 (lower count = higher score)`}
-                >
-                  {r.litigationCount}
-                </span>
+                <div className="inline-flex flex-col items-end gap-0.5">
+                  <span
+                    className={`inline-block min-w-[36px] rounded px-1.5 py-0.5 text-center font-mono text-[11px] font-semibold tabular-nums ${
+                      r.litigationCount === 0
+                        ? "bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300"
+                        : r.litigationCount <= 5
+                          ? "bg-amber-50 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300"
+                          : "bg-rose-50 text-rose-800 dark:bg-rose-950/40 dark:text-rose-300"
+                    }`}
+                    title={`Litigation score ${r.litigationScore}/100 (lower count = higher score)`}
+                  >
+                    {r.litigationCount}
+                  </span>
+                  {r.cellStatus?.litigation === "verified" && r.litigationFootprint !== undefined && (
+                    <span
+                      className="text-[9px] font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-400"
+                      title={`CourtListener — ${r.litigationFootprint.toLocaleString()} employment-related court records. Raw footprint, size-dominated: large/old incumbents carry large footprints. Fetched ${r.litigationLastFetched}.`}
+                    >
+                      ✓ {r.litigationFootprint >= 1000 ? `${(r.litigationFootprint / 1000).toFixed(1)}k` : r.litigationFootprint} CL
+                    </span>
+                  )}
+                </div>
               </td>
               <td className="px-2 py-2.5 text-right align-top"><ScoreCell value={r.careerGrowth} /></td>
               <td className="px-2 py-2.5 text-right align-top"><ScoreCell value={r.compensation} /></td>

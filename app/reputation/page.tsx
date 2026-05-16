@@ -32,14 +32,17 @@ export default async function ReputationPage() {
       <div className="mb-4 flex flex-wrap items-start gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs leading-relaxed text-emerald-900 dark:border-emerald-900/60 dark:bg-emerald-950/30 dark:text-emerald-200">
         <SeedDataBadge label="Mixed sources" provenance="live" reason="GitHub column is live (real API fetches with timestamps); other columns are curated until their connectors are wired." />
         <span>
-          <strong>GitHub and Forum columns are real.</strong> GitHub values fetched from{" "}
-          <code className="font-mono text-[10px]">api.github.com/repos/&#123;repo&#125;</code>; Forum values
-          from the HackerNews Algolia API (12-month story window) — both fetched 2026-05-15, marked
-          &ldquo;✓ live&rdquo; inline.{" "}
-          <strong>Remaining columns (Reddit sentiment, API reliability, docs; all Employee + Customer
-          metrics) are still curated seed</strong> with cited source domains — next to wire are
-          Reddit (free API, sentiment needs NLP), Glassdoor (paid), CourtListener (free, litigation),
-          and status-page archives.
+          <strong>Five columns now carry real data</strong> (fetched 2026-05-15, marked inline):
+          GitHub (<code className="font-mono text-[10px]">api.github.com</code>),
+          Forum (HackerNews Algolia API),
+          API reliability (Atlassian Statuspage incidents, 8 vendors with accessible pages),
+          and Litigation footprint (CourtListener API) are <strong>✓ verified</strong>.
+          Reddit reception is <strong>~ documented</strong> — derived from average upvote-ratio only;
+          search volume was discarded because unauthenticated Reddit search is name-ambiguity
+          contaminated.{" "}
+          <strong>Still curated seed:</strong> documentation score, Employee work-life / culture /
+          career / comp, and all Customer metrics — these need Glassdoor (paid), G2/Capterra (paid),
+          or NLP work.
         </span>
       </div>
 
