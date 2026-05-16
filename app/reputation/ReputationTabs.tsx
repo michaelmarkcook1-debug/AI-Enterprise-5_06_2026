@@ -361,7 +361,7 @@ function EmployeeTable({
                   {r.cellStatus?.litigation === "verified" && r.litigationFootprint !== undefined && (
                     <span
                       className="text-[9px] font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-400"
-                      title={`CourtListener — ${r.litigationFootprint.toLocaleString()} employment-related court records (raw cumulative footprint). Fetched ${r.litigationLastFetched}.`}
+                      title={`CourtListener — ${r.litigationFootprint.toLocaleString()} employment-related court records filed in the last 24 months. Fetched ${r.litigationLastFetched}.`}
                     >
                       ✓ {r.litigationFootprint >= 1000 ? `${(r.litigationFootprint / 1000).toFixed(1)}k` : r.litigationFootprint} CL
                     </span>
@@ -369,7 +369,7 @@ function EmployeeTable({
                   {r.litigationPerThousand !== undefined && r.approxHeadcount !== undefined && (
                     <span
                       className="text-[9px] font-semibold tabular-nums text-zinc-600 dark:text-zinc-400"
-                      title={`Score basis: ${r.litigationFootprint?.toLocaleString()} records ÷ ~${r.approxHeadcount.toLocaleString()} employees × 1000 = ${r.litigationPerThousand} per 1,000. Footprint is cumulative, headcount a current estimate — directional, not exact.`}
+                      title={`Score basis: ${r.litigationFootprint?.toLocaleString()} records (last 24 months) ÷ ~${r.approxHeadcount.toLocaleString()} employees × 1000 = ${r.litigationPerThousand} per 1,000. Headcount is a current estimate — directional, not exact.`}
                     >
                       {r.litigationPerThousand}/1k emp
                     </span>

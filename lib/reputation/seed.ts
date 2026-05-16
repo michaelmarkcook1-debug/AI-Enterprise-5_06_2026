@@ -589,47 +589,57 @@ export const EMPLOYEE_REPUTATION: EmployeeReputation[] = [
 // employment-litigation terms (employment / discrimination / wrongful
 // / labor / harassment).
 //
-// IMPORTANT — this is a raw legal-FOOTPRINT count, heavily dominated
-// by company size + age. Microsoft (55,901) and IBM (20,077) carry
-// enormous footprints simply because they are large, old companies —
-// it does NOT mean they are 200× worse employers than OpenAI (631).
-// The litigationScore in the seed row is the curated employer-
-// litigiousness estimate and is left untouched; the footprint is
-// surfaced alongside it as the verified real datum, with the size
-// caveat shown in the UI tooltip.
-// footprint = real CourtListener count (verified).
-// headcount = approximate current employee count — a public estimate
-//   (company filings / press, ~May 2026). For AWS we use the AWS
-//   division headcount, not Amazon-wide, to match the "Amazon Web
-//   Services" search scope.
-// litigationPerThousand = footprint / headcount × 1000. The numerator
-//   is real, the denominator is an estimate, and the footprint is
-//   CUMULATIVE while headcount is a CURRENT snapshot — so the rate is
-//   directional ("documented"), not exact. It is still far fairer
-//   than raw footprint, which a 50-year-old incumbent inflates by
-//   age + size alone.
+// 24-MONTH WINDOW (re-pulled 2026-05-16): each footprint is the count
+// of court records filed since 2024-05-16 matching the vendor name +
+// employment-litigation terms. The 24-month constraint replaces the
+// earlier all-time pull, which unfairly inflated old incumbents
+// (Microsoft's all-time 55,901 → 24-month 8,963; IBM 20,077 → 1,115).
+//
+// footprint = real CourtListener count, 24-month window (verified).
+// headcount = approximate current employee count — public estimate
+//   (~May 2026). AWS uses the AWS division headcount to match the
+//   "Amazon Web Services" search scope.
+// litigationPerThousand = footprint / headcount × 1000. Numerator real,
+//   denominator estimated → the RATE is "documented", not exact. With
+//   the 24-month window it is now a recent-rate (not cumulative), so
+//   it pairs much more fairly with current headcount.
+//
+// Covers ALL reputation-tab vendors (the 20-vendor spine + the 9
+// extended global vendors) so every Employee-tab row gets the same
+// per-1k-derived score — no row falls back to a stale seed score.
 interface LitigationOverlay { vendorId: string; footprint: number; headcount: number }
 const COURTLISTENER_OVERLAY: LitigationOverlay[] = [
-  { vendorId: "anthropic", footprint: 268, headcount: 2500 },
-  { vendorId: "aws", footprint: 1999, headcount: 150000 },
-  { vendorId: "cohere", footprint: 424, headcount: 600 },
-  { vendorId: "databricks", footprint: 126, headcount: 7500 },
+  // 20-vendor spine
+  { vendorId: "anthropic", footprint: 177, headcount: 2500 },
+  { vendorId: "aws", footprint: 490, headcount: 150000 },
+  { vendorId: "cohere", footprint: 74, headcount: 600 },
+  { vendorId: "databricks", footprint: 68, headcount: 7500 },
   { vendorId: "glean", footprint: 0, headcount: 1000 },
-  { vendorId: "google", footprint: 6912, headcount: 183000 },
-  { vendorId: "harvey", footprint: 16, headcount: 500 },
-  { vendorId: "hebbia", footprint: 2, headcount: 200 },
-  { vendorId: "ibm", footprint: 20077, headcount: 280000 },
-  { vendorId: "microsoft", footprint: 55901, headcount: 228000 },
-  { vendorId: "mistral", footprint: 8, headcount: 350 },
-  { vendorId: "moveworks", footprint: 7, headcount: 600 },
-  { vendorId: "openai", footprint: 631, headcount: 3000 },
-  { vendorId: "oracle", footprint: 1106, headcount: 159000 },
+  { vendorId: "google", footprint: 2223, headcount: 183000 },
+  { vendorId: "harvey", footprint: 10, headcount: 500 },
+  { vendorId: "hebbia", footprint: 1, headcount: 200 },
+  { vendorId: "ibm", footprint: 1115, headcount: 280000 },
+  { vendorId: "microsoft", footprint: 8963, headcount: 228000 },
+  { vendorId: "mistral", footprint: 4, headcount: 350 },
+  { vendorId: "moveworks", footprint: 2, headcount: 600 },
+  { vendorId: "openai", footprint: 404, headcount: 3000 },
+  { vendorId: "oracle", footprint: 120, headcount: 159000 },
   { vendorId: "rogo", footprint: 0, headcount: 120 },
-  { vendorId: "salesforce", footprint: 5380, headcount: 76000 },
-  { vendorId: "sap", footprint: 838, headcount: 108000 },
-  { vendorId: "servicenow", footprint: 482, headcount: 26000 },
-  { vendorId: "snowflake", footprint: 264, headcount: 7800 },
-  { vendorId: "writer", footprint: 15, headcount: 400 },
+  { vendorId: "salesforce", footprint: 967, headcount: 76000 },
+  { vendorId: "sap", footprint: 196, headcount: 108000 },
+  { vendorId: "servicenow", footprint: 129, headcount: 26000 },
+  { vendorId: "snowflake", footprint: 185, headcount: 7800 },
+  { vendorId: "writer", footprint: 2, headcount: 400 },
+  // 9 extended global vendors
+  { vendorId: "meta", footprint: 1777, headcount: 75000 },
+  { vendorId: "deepseek", footprint: 49, headcount: 200 },
+  { vendorId: "alibaba", footprint: 115, headcount: 200000 },
+  { vendorId: "moonshot", footprint: 2, headcount: 200 },
+  { vendorId: "zai", footprint: 0, headcount: 800 },
+  { vendorId: "minimax", footprint: 12, headcount: 500 },
+  { vendorId: "ai21", footprint: 0, headcount: 350 },
+  { vendorId: "aleph", footprint: 0, headcount: 200 },
+  { vendorId: "xai", footprint: 13, headcount: 1200 },
 ];
 // Map a per-1,000-employee litigation rate to a 0-100 score where a
 // LOWER rate is BETTER. Log scale: the rates span ~0 to ~700, so a
@@ -649,7 +659,7 @@ for (const o of COURTLISTENER_OVERLAY) {
   row.approxHeadcount = o.headcount;
   row.litigationPerThousand = perK;
   row.litigationSource = "courtlistener.com";
-  row.litigationLastFetched = "2026-05-15";
+  row.litigationLastFetched = "2026-05-16";
   // Reconcile: the litigation SCORE (which feeds Overall) now derives
   // from the real per-1,000-employee rate, NOT the old curated
   // litigationCount. This makes the colour, the score, and the rate
