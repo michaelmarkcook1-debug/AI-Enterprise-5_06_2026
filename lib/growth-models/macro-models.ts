@@ -371,12 +371,14 @@ export function chooseMacroModel(
   universe: string,
   horizonYears: number,
 ): MacroModelChoice {
+  // Private + IPO universes only. public_and_indirect is a PUBLIC-
+  // instrument universe — it routes to the Unified Hybrid Engine
+  // (public AI equities), not here.
   const isPrivateOrIpo =
     universe === "ipo_watch" ||
-    universe === "speculative_all" ||
-    universe === "public_and_indirect"; // indirect exposure routes to private labs
+    universe === "speculative_all";
   if (!isPrivateOrIpo) {
-    return { model: "none", reason: "Macro models apply to private + IPO universes only — public-direct holdings use the scenario engine." };
+    return { model: "none", reason: "Macro models apply to private + IPO universes only — public equity universes use the Unified Hybrid Engine." };
   }
   if (horizonYears <= 3) {
     return { model: "I", reason: `Short-term horizon (${horizonYears}y) → Model I (MC-SSDF).` };

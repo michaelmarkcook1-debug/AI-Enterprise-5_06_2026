@@ -19,6 +19,7 @@ import {
   DEFAULT_REGIMES,
   DEFAULT_Q,
 } from "@/lib/growth-models/macro-models";
+import { runUnifiedHybrid } from "@/lib/growth-models/unified-hybrid";
 import type {
   IndirectExposure,
   InvestmentProviderProfile,
@@ -658,15 +659,16 @@ export default function InvestmentSimulatorClient({
         </Panel>
       </div>
 
-      {/* Macro forward-growth models — gated to private + IPO universes
-          only. Model I (MC-SSDF) for short horizons (1-3y), Model II
-          (SRS-MJN) for longer. Public-direct universes never see this
-          panel — they keep the scenario engine above. */}
+      {/* Forward-growth models. Private + IPO universes → Model I/II
+          macro panel. Public equity universes → Unified Hybrid Engine
+          (Model II governs 1-3y, blends 3-5y, Model I governs 5-10y),
+          with an operator-controlled timeline shock. */}
       <MacroModelPanel
         universe={input.investmentUniverse}
         horizonYears={input.horizonYears}
         startingCapital={input.startingCapital}
       />
+      <UnifiedHybridPanel universe={input.investmentUniverse} />
 
       <div id="sim-allocation" className="grid scroll-mt-20 gap-5 xl:grid-cols-2">
         <Panel title="Portfolio allocation">
@@ -1035,6 +1037,112 @@ function MacroStat({ label, value, tone }: { label: string; value: string; tone:
     <div className="rounded-md border border-[#dfe4da] bg-white p-2 dark:border-zinc-800 dark:bg-zinc-900">
       <div className="text-[10px] uppercase tracking-wide text-[#697362] dark:text-zinc-500">{label}</div>
       <div className={`mt-0.5 font-mono text-lg font-semibold ${tone}`}>{value}</div>
+    </div>
+  );
+}
+
+/**
+ * Unified Hybrid Engine panel — public AI equities only. Model II
+ * governs the volatile 1-3y horizon, blends 3-5y, Model I governs the
+ * structurally-bounded 5-10y horizon. The operator sets a timeline
+ * shock: onset year + severity ξ ∈ [-1, 1].
+ */
+function UnifiedHybridPanel({ universe }: { universe: SimulationInput["investmentUniverse"] }) {
+  // Public equity universes only — private + IPO use the Model I/II panel.
+  const isPublic =
+    universe === "public_only" ||
+    universe === "public_and_indirect" ||
+    universe === "single_stock";
+  const [tShock, setTShock] = useState(2.0);
+  const [xi, setXi] = useState(-0.65);
+
+  if (!isPublic) return null;
+
+  const r = runUnifiedHybrid(tShock, xi);
+  const engineLabel: Record<"II" | "blend" | "I", string> = {
+    II: "Model II — stochastic",
+    blend: "Blended",
+    I: "Model I — state-space",
+  };
+
+  return (
+    <div className="mt-5 rounded-lg border-2 border-[#2f5d50] bg-[#f3f7f3] p-4 dark:border-emerald-600 dark:bg-emerald-950/20">
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <div>
+          <div className="text-[10px] font-semibold uppercase tracking-wider text-[#2f5d50] dark:text-emerald-400">
+            Forward growth · Unified Hybrid Engine
+          </div>
+          <h3 className="mt-0.5 text-base font-semibold text-[#18201b] dark:text-zinc-100">
+            Multi-horizon forecast for public AI equities · 1 / 3 / 5 / 10-year
+          </h3>
+        </div>
+        <span className="rounded-full bg-[#2f5d50]/10 px-2 py-0.5 text-[10px] font-medium text-[#2f5d50] dark:bg-emerald-900/40 dark:text-emerald-300">
+          Public equities only
+        </span>
+      </div>
+      <p className="mt-1 text-xs leading-5 text-[#596151] dark:text-zinc-400">
+        Model II (stochastic regime-switching) governs years 1-3, blends through 3-5,
+        and Model I (macro-coupled state-space) governs the structurally-bounded 5-10y
+        horizon. Adjust the timeline shock to stress-test a disruption.
+      </p>
+
+      {/* Timeline shock controls */}
+      <div className="mt-3 grid gap-3 sm:grid-cols-2">
+        <label className="block">
+          <div className="mb-1 flex items-center justify-between text-[11px] font-medium text-[#596151] dark:text-zinc-400">
+            <span>Shock onset year</span>
+            <span className="font-mono text-[#18201b] dark:text-zinc-100">Y{tShock.toFixed(1)}</span>
+          </div>
+          <input
+            type="range" min={0} max={10} step={0.5}
+            value={tShock}
+            onChange={(e) => setTShock(Number(e.target.value))}
+            className="w-full accent-[#2f5d50]"
+            aria-label="Shock onset year"
+          />
+        </label>
+        <label className="block">
+          <div className="mb-1 flex items-center justify-between text-[11px] font-medium text-[#596151] dark:text-zinc-400">
+            <span>Shock severity ξ</span>
+            <span className={`font-mono ${xi < 0 ? "text-rose-700 dark:text-rose-300" : xi > 0 ? "text-emerald-700 dark:text-emerald-300" : "text-[#18201b] dark:text-zinc-100"}`}>
+              {xi >= 0 ? "+" : ""}{xi.toFixed(2)}
+            </span>
+          </div>
+          <input
+            type="range" min={-1} max={1} step={0.05}
+            value={xi}
+            onChange={(e) => setXi(Number(e.target.value))}
+            className="w-full accent-[#2f5d50]"
+            aria-label="Shock severity"
+          />
+          <div className="mt-0.5 flex justify-between text-[9px] text-[#697362] dark:text-zinc-500">
+            <span>−1 destructive</span><span>0 none</span><span>+1 accelerative</span>
+          </div>
+        </label>
+      </div>
+
+      {/* Milestone forecasts */}
+      <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        {r.milestones.map((m) => (
+          <div key={m.year} className="rounded-md border border-[#dfe4da] bg-white p-2 dark:border-zinc-800 dark:bg-zinc-900">
+            <div className="text-[10px] uppercase tracking-wide text-[#697362] dark:text-zinc-500">
+              Year {m.year}
+            </div>
+            <div className={`mt-0.5 font-mono text-lg font-semibold ${m.growth < 0 ? "text-rose-700 dark:text-rose-300" : "text-[#18201b] dark:text-zinc-100"}`}>
+              {(m.growth * 100).toFixed(1)}%
+            </div>
+            <div className="text-[9px] text-[#697362] dark:text-zinc-500">{engineLabel[m.engine]}</div>
+          </div>
+        ))}
+      </div>
+
+      <p className="mt-2 text-[10px] leading-4 text-[#6a725f] dark:text-zinc-500">
+        Shock operator S(t) = ξ / (1 + e^−12(t−t_shock)) — a steep sigmoid that fully
+        manifests within ~30 days of onset and carries lingering structural damage.
+        Deterministic given (t_shock, ξ). Long-horizon values are bounded by the
+        state-space resource ceiling; very large ξ can still produce wide 10-year
+        tails — treat the 10y figure as a structural scenario, not a point estimate.
+      </p>
     </div>
   );
 }
