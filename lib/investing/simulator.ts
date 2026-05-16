@@ -517,7 +517,14 @@ function selectUniverseProviders(input: SimulationInput, providers: InvestmentPr
     if (input.investmentUniverse === "public_only") return provider.investabilityStatus === "public_direct";
     if (input.investmentUniverse === "public_and_indirect") return provider.investabilityStatus === "public_direct";
     if (input.investmentUniverse === "ipo_watch") return provider.publicStatus === "private" || provider.investabilityStatus === "ipo_watch";
-    if (input.investmentUniverse === "single_stock") return provider.investabilityStatus === "public_direct";
+    // single_stock allows ONE holding — either a public-direct ticker
+    // OR an IPO-watch candidate (pre-IPO private lab modelled as a
+    // single-name thesis). Operators asked for IPO-stage names to be
+    // individually selectable, not just public equities.
+    if (input.investmentUniverse === "single_stock") {
+      return provider.investabilityStatus === "public_direct"
+        || provider.investabilityStatus === "ipo_watch";
+    }
     return provider.investabilityStatus === "public_direct"
       || provider.investabilityStatus === "ipo_watch"
       || provider.exposureClass === "ai_infrastructure_enabler"

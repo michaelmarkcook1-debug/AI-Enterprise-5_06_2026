@@ -1148,9 +1148,11 @@ function UnifiedHybridPanel({ universe }: { universe: SimulationInput["investmen
 }
 
 /**
- * Single-stock picker. Used when allocationStyle === "single_stock" — exposes
- * a clear list of public-direct tickers, click-to-select, with the selected
- * ticker showing 100% allocation against the current starting capital.
+ * Single-stock picker. Used when allocationStyle === "single_stock" —
+ * exposes a click-to-select list of single-name candidates. Includes
+ * BOTH public-direct tickers AND IPO-watch candidates (pre-IPO private
+ * labs modelled as a single-name thesis). The selected name shows 100%
+ * allocation against the current starting capital.
  */
 function SingleStockPicker({
   eligibleProviders,
@@ -1163,7 +1165,13 @@ function SingleStockPicker({
   startingCapital: number;
   onSelect: (providerId: string) => void;
 }) {
-  const tickers = eligibleProviders.filter((p) => p.investabilityStatus === "public_direct" && p.ticker);
+  // Public-direct names need a ticker; IPO-watch names are pre-IPO so
+  // they have no ticker — both are valid single-stock theses.
+  const tickers = eligibleProviders.filter(
+    (p) =>
+      (p.investabilityStatus === "public_direct" && p.ticker) ||
+      p.investabilityStatus === "ipo_watch",
+  );
   const chosen = tickers.find((p) => p.id === selectedId);
   const [search, setSearch] = useState("");
   const q = search.trim().toLowerCase();
@@ -1182,7 +1190,7 @@ function SingleStockPicker({
       </div>
       {tickers.length === 0 ? (
         <div className="mt-3 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900 dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-200">
-          No public-direct tickers available. Reset to defaults from the panel actions and try again.
+          No single-name candidates available. Reset to defaults from the panel actions and try again.
         </div>
       ) : (
         <>
@@ -1216,10 +1224,23 @@ function SingleStockPicker({
               >
                 <span>
                   <span className="font-semibold">{p.name}</span>
-                  <span className={`ml-2 font-mono text-[10px] ${isSelected ? "opacity-80" : "text-[#697362] dark:text-zinc-500"}`}>{p.ticker}</span>
+                  <span className={`ml-2 font-mono text-[10px] ${isSelected ? "opacity-80" : "text-[#697362] dark:text-zinc-500"}`}>
+                    {p.ticker ?? "pre-IPO"}
+                  </span>
                 </span>
-                <span className={`text-[10px] uppercase tracking-wide ${isSelected ? "opacity-90" : "text-[#697362] dark:text-zinc-500"}`}>
-                  {p.exposureClass.replace(/_/g, " ")}
+                <span className="flex items-center gap-1.5">
+                  {p.investabilityStatus === "ipo_watch" && (
+                    <span className={`rounded-full px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide ${
+                      isSelected
+                        ? "bg-white/20"
+                        : "bg-pink-100 text-pink-800 dark:bg-pink-950/60 dark:text-pink-300"
+                    }`}>
+                      IPO watch
+                    </span>
+                  )}
+                  <span className={`text-[10px] uppercase tracking-wide ${isSelected ? "opacity-90" : "text-[#697362] dark:text-zinc-500"}`}>
+                    {p.exposureClass.replace(/_/g, " ")}
+                  </span>
                 </span>
               </button>
             );
@@ -1229,7 +1250,7 @@ function SingleStockPicker({
       {chosen ? (
         <div className="mt-3 rounded-md bg-emerald-50 px-3 py-2 text-xs text-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-200">
           <div className="flex items-center justify-between">
-            <span>100% to <strong>{chosen.name}</strong> ({chosen.ticker})</span>
+            <span>100% to <strong>{chosen.name}</strong> ({chosen.ticker ?? (chosen.investabilityStatus === "ipo_watch" ? "pre-IPO" : "—")})</span>
             <span className="font-mono tabular-nums">{formatCurrency(startingCapital)}</span>
           </div>
           <div className="mt-1 text-[11px] opacity-80">{chosen.mainRisk}</div>
