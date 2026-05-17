@@ -19,6 +19,8 @@ const nextConfig: NextConfig = {
       { source: "/investing/briefing", destination: "/investor-tools/briefing", permanent: true },
       { source: "/investing/watchlist", destination: "/investor-tools/watchlist", permanent: true },
       { source: "/investing/provider/:slug", destination: "/investor-tools/provider/:slug", permanent: true },
+      // May-2026 4-tab restructure: Watchlists moved into Settings.
+      { source: "/watchlists", destination: "/settings", permanent: true },
     ];
   },
 };
