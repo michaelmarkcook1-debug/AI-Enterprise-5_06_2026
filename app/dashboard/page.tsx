@@ -3,18 +3,26 @@ import { AppShell } from "@/components/app-shell";
 import { Confidence, EstimatedNote, Metric, Panel, ScoreBar, SeedDataBadge } from "@/components/intelligence-ui";
 import { OwnershipLegend, VendorNameWithOwnership } from "@/components/ownership-indicator";
 import { marketMoverStatus, momentumStatus } from "@/lib/intelligence/metrics";
-import { getMarketDashboard } from "@/lib/intelligence/repository";
+import { getMarketDashboard, listIntelligenceVendors, listVendorMomentum } from "@/lib/intelligence/repository";
 import { getDataProvenance } from "@/lib/intelligence/provenance";
+import { buildRankingHistories } from "@/lib/intelligence/ranking-history";
 import CommercialModelsCard from "@/components/dashboard/CommercialModelsCard";
 import ExposureMapHero from "@/components/dashboard/ExposureMapHero";
+import VendorTrendHover from "@/components/dashboard/VendorTrendHover";
 
 export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {
-  const [dashboard, provenance] = await Promise.all([
+  const [dashboard, provenance, vendors, momentum] = await Promise.all([
     getMarketDashboard(),
     getDataProvenance(),
+    listIntelligenceVendors(),
+    listVendorMomentum(),
   ]);
+
+  // Deterministic day-by-day ranking history powering the hover-over
+  // trend graphs on the Who's winning / Who's losing lists.
+  const rankingHistories = buildRankingHistories(vendors, momentum);
 
   return (
     <AppShell>
@@ -76,15 +84,22 @@ export default async function DashboardPage() {
             <Panel title="Who's winning" action={<SeedDataBadge label={provenance.source === "live" ? "Live model" : "Estimated"} provenance={provenance.source} reason={provenance.reason} />}>
               <div className="space-y-3">
                 {dashboard.winningVendors.slice(0, 5).map((item) => (
-                  <div key={item.vendor.id} className="border-l-2 border-emerald-600 pl-3">
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="text-sm font-medium">
-                        <VendorNameWithOwnership name={item.vendor.name} ownershipType={item.vendor.ownershipType} />
+                  <VendorTrendHover
+                    key={item.vendor.id}
+                    vendorName={item.vendor.name}
+                    history={rankingHistories.get(item.vendor.id)}
+                    tone="win"
+                  >
+                    <div className="border-l-2 border-emerald-600 pl-3">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="text-sm font-medium">
+                          <VendorNameWithOwnership name={item.vendor.name} ownershipType={item.vendor.ownershipType} />
+                        </div>
+                        <Confidence value={item.confidence} />
                       </div>
-                      <Confidence value={item.confidence} />
+                      <div className="mt-1 text-xs leading-5 text-[#596151] dark:text-zinc-400">{item.reason}</div>
                     </div>
-                    <div className="mt-1 text-xs leading-5 text-[#596151] dark:text-zinc-400">{item.reason}</div>
-                  </div>
+                  </VendorTrendHover>
                 ))}
               </div>
             </Panel>
@@ -92,15 +107,22 @@ export default async function DashboardPage() {
             <Panel title="Who's losing" action={<SeedDataBadge label={provenance.source === "live" ? "Live model" : "Estimated"} provenance={provenance.source} reason={provenance.reason} />}>
               <div className="space-y-3">
                 {dashboard.losingVendors.slice(0, 5).map((item) => (
-                  <div key={item.vendor.id} className="border-l-2 border-rose-500 pl-3">
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="text-sm font-medium">
-                        <VendorNameWithOwnership name={item.vendor.name} ownershipType={item.vendor.ownershipType} />
+                  <VendorTrendHover
+                    key={item.vendor.id}
+                    vendorName={item.vendor.name}
+                    history={rankingHistories.get(item.vendor.id)}
+                    tone="lose"
+                  >
+                    <div className="border-l-2 border-rose-500 pl-3">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="text-sm font-medium">
+                          <VendorNameWithOwnership name={item.vendor.name} ownershipType={item.vendor.ownershipType} />
+                        </div>
+                        <Confidence value={item.confidence} />
                       </div>
-                      <Confidence value={item.confidence} />
+                      <div className="mt-1 text-xs leading-5 text-[#596151] dark:text-zinc-400">{item.reason}</div>
                     </div>
-                    <div className="mt-1 text-xs leading-5 text-[#596151] dark:text-zinc-400">{item.reason}</div>
-                  </div>
+                  </VendorTrendHover>
                 ))}
               </div>
             </Panel>
