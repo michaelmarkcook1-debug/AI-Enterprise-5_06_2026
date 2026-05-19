@@ -5,7 +5,7 @@ import { OwnershipLegend, VendorNameWithOwnership } from "@/components/ownership
 import { marketMoverStatus, momentumStatus } from "@/lib/intelligence/metrics";
 import { getMarketDashboard, listIntelligenceVendors, listVendorMomentum } from "@/lib/intelligence/repository";
 import { getDataProvenance } from "@/lib/intelligence/provenance";
-import { buildRankingHistories } from "@/lib/intelligence/ranking-history";
+import { getRankingHistories } from "@/lib/intelligence/ranking-snapshots";
 import CommercialModelsCard from "@/components/dashboard/CommercialModelsCard";
 import ExposureMapHero from "@/components/dashboard/ExposureMapHero";
 import VendorTrendHover from "@/components/dashboard/VendorTrendHover";
@@ -20,9 +20,11 @@ export default async function DashboardPage() {
     listVendorMomentum(),
   ]);
 
-  // Deterministic day-by-day ranking history powering the hover-over
-  // trend graphs on the Who's winning / Who's losing lists.
-  const rankingHistories = buildRankingHistories(vendors, momentum);
+  // Day-by-day ranking history powering the hover-over trend graphs on the
+  // Who's winning / Who's losing lists. Reads stored daily snapshots where
+  // they exist (vendor_ranking_snapshots, written by the ranking-snapshot
+  // cron) and falls back to deterministic reconstruction otherwise.
+  const rankingHistories = await getRankingHistories(vendors, momentum);
 
   return (
     <AppShell>

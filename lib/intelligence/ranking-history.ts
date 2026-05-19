@@ -38,6 +38,15 @@ export interface VendorRankingHistory {
   scoreDelta: number;
   /** Net change in rank across the window (positive = climbed). */
   rankDelta: number;
+  /**
+   * Provenance of the series:
+   *   - "snapshot"      — every point is a real captured daily snapshot.
+   *   - "mixed"         — captured snapshots layered over reconstructed
+   *                       backfill for earlier dates.
+   *   - "reconstructed" — fully deterministic reconstruction (no stored
+   *                       history yet for this vendor).
+   */
+  source: "snapshot" | "mixed" | "reconstructed";
 }
 
 // ─── deterministic PRNG ────────────────────────────────────────────────────
@@ -205,6 +214,7 @@ export function buildRankingHistories(
       scoreDelta: Math.round((points[points.length - 1].score - points[0].score) * 10) / 10,
       // Rank delta: positive means the vendor climbed (rank number fell).
       rankDelta: points[0].rank - points[points.length - 1].rank,
+      source: "reconstructed",
     });
   }
 

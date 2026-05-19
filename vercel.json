@@ -8,6 +8,10 @@
     {
       "path": "/api/cron/safe-actions",
       "schedule": "20 3 * * *"
+    },
+    {
+      "path": "/api/cron/ranking-snapshot",
+      "schedule": "40 3 * * *"
     }
   ]
 }

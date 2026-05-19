@@ -154,7 +154,11 @@ export default function VendorTrendHover({ vendorName, history, tone, children }
           </div>
         </div>
         <div className="mt-1.5 text-[9px] leading-3 text-[#9aa691] dark:text-zinc-600">
-          Reconstructed daily series — directional estimate pending live snapshot ingestion.
+          {history.source === "snapshot"
+            ? "Tracked daily snapshots — captured point-in-time history."
+            : history.source === "mixed"
+              ? "Recent points are tracked daily snapshots; earlier history is reconstructed backfill."
+              : "Reconstructed daily series — directional estimate pending snapshot capture."}
         </div>
       </div>
     </div>

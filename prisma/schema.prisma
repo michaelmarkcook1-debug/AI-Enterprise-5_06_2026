@@ -442,6 +442,7 @@ model IntelligenceVendor {
   marketShares        MarketShareEstimate[]
   momentum            VendorMomentum[]
   capabilities        VendorCapability[]
+  rankingSnapshots    VendorRankingSnapshot[]
   createdAt           DateTime                @default(now()) @map("created_at")
   updatedAt           DateTime                @updatedAt @map("updated_at")
 
@@ -517,6 +518,37 @@ model VendorMomentum {
   @@unique([vendorId, period])
   @@index([period, momentumScore])
   @@map("vendor_momentum")
+}
+
+// Daily point-in-time snapshot of a vendor's ranking metrics.
+//
+// One row per (vendor, snapshotDate). Written by the daily
+// /api/cron/ranking-snapshot job and consumed by the dashboard
+// "Who's winning / losing" hover-over trend graphs.
+//
+// `source` distinguishes how the row was produced:
+//   - "snapshot"  — captured live from the intelligence layer that day.
+//   - "backfill"  — deterministically reconstructed for dates that
+//                   predate snapshot capture, so the trend graphs have
+//                   history from day one. Replace freely with real
+//                   snapshots once they accumulate.
+model VendorRankingSnapshot {
+  id              String             @id @default(cuid())
+  vendorId        String             @map("vendor_id")
+  snapshotDate    DateTime           @map("snapshot_date") @db.Date
+  overallScore    Float              @map("overall_score")
+  momentumScore   Float              @map("momentum_score")
+  confidenceScore Float              @map("confidence_score")
+  rank            Int
+  trackedVendors  Int                @map("tracked_vendors")
+  source          String             @default("snapshot")
+  capturedAt      DateTime           @default(now()) @map("captured_at")
+  vendor          IntelligenceVendor @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+
+  @@unique([vendorId, snapshotDate])
+  @@index([snapshotDate])
+  @@index([vendorId, snapshotDate])
+  @@map("vendor_ranking_snapshots")
 }
 
 model IntelligenceNewsItem {
