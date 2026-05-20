@@ -31,6 +31,8 @@ import {
   backfillRankingSnapshots,
 } from "../intelligence/ranking-snapshots";
 import { runCompetitiveIntelMonitor } from "../intelligence/competitive-monitor";
+import { deriveVendorScores } from "./derive-scores";
+import { persistRefreshReport, getLastRefreshRun } from "./daily-refresh-store";
 import { getPrisma, hasDatabase } from "../prisma";
 
 interface StepReport {
@@ -116,7 +118,17 @@ export async function runDailyRefresh(now: Date = new Date()): Promise<DailyRefr
     };
   }));
 
-  // ── 5. Ranking snapshot (incl. one-time backfill) ──────────
+  // ── 5. Derive headline scores from fresh evidence ──────────
+  //     Recomputes IntelligenceVendor.overallScore + confidenceScore
+  //     and VendorMomentum.{news,product}Velocity + momentumScore so
+  //     the ranking algorithms and dashboard lists track the latest
+  //     projected data. Must run AFTER projection.
+  steps.push(await timed("derive_scores", async () => {
+    const r = await deriveVendorScores(now);
+    return r as unknown as Record<string, unknown>;
+  }));
+
+  // ── 6. Ranking snapshot (incl. one-time backfill) ──────────
   steps.push(await timed("ranking_snapshot", async () => {
     if (!dbConfigured) return { skipped: "no_database" };
     // Backfill only if the snapshot table is empty.
@@ -130,7 +142,7 @@ export async function runDailyRefresh(now: Date = new Date()): Promise<DailyRefr
     return { backfill, captured: capture.captured, snapshotDate: capture.snapshotDate };
   }));
 
-  // ── 6. Competitive-intel monitor ───────────────────────────
+  // ── 7. Competitive-intel monitor ───────────────────────────
   steps.push(await timed("competitive_intel", async () => {
     const r = await runCompetitiveIntelMonitor(now);
     return {
@@ -144,7 +156,7 @@ export async function runDailyRefresh(now: Date = new Date()): Promise<DailyRefr
   }));
 
   const errors = steps.flatMap((s) => (s.error ? [`${s.step}: ${s.error}`] : []));
-  return {
+  const report: DailyRefreshReport = {
     startedAt,
     finishedAt: new Date().toISOString(),
     ok: errors.length === 0,
@@ -152,16 +164,28 @@ export async function runDailyRefresh(now: Date = new Date()): Promise<DailyRefr
     steps,
     errors,
   };
+
+  // Persist the run summary so the operator can audit history and the
+  // TopNav badge can read a real "last refreshed" timestamp from a
+  // dedicated table (rather than inferring it from VendorRankingSnapshot).
+  await persistRefreshReport(report);
+
+  return report;
 }
 
 /**
- * Returns the timestamp of the most-recent ranking-snapshot capture,
- * used by the TopNav "Data refreshed" badge as a proxy for "when did
- * the daily pipeline last successfully run". Returns null when the
- * database isn't configured or no snapshot has been taken yet.
+ * Returns the timestamp of the most-recent daily-refresh run, used by
+ * the TopNav "Data refreshed" badge. Reads directly from the persistent
+ * daily_refresh_runs log; falls back to the most-recent ranking-snapshot
+ * capture for the period before the first persisted run lands. Returns
+ * null when the database isn't configured.
  */
 export async function getLastRefreshedAt(): Promise<Date | null> {
   if (!hasDatabase()) return null;
+  try {
+    const run = await getLastRefreshRun();
+    if (run) return new Date(run.finishedAt);
+  } catch {}
   try {
     const row = await getPrisma().vendorRankingSnapshot.findFirst({
       orderBy: { capturedAt: "desc" },
