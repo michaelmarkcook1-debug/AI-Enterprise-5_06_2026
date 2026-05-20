@@ -83,7 +83,9 @@ export async function deriveVendorScores(now: Date = new Date()): Promise<Derive
     prisma.evidenceRecord.findMany({
       where: {
         capturedAt: { gte: evCutoff },
-        reviewStatus: { in: ["approved", "auto_approved"] },
+        // Only verified evidence feeds confidence — curated seed +
+        // agent-extracted proposals are intentionally excluded.
+        reviewStatus: "analyst_verified",
       },
       select: { vendorId: true, evidenceGrade: true },
     }).catch(() => []),
