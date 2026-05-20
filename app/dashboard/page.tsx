@@ -7,7 +7,6 @@ import { getMarketDashboard, listIntelligenceVendors, listVendorMomentum } from 
 import { getDataProvenance } from "@/lib/intelligence/provenance";
 import { getRankingHistories } from "@/lib/intelligence/ranking-snapshots";
 import CommercialModelsCard from "@/components/dashboard/CommercialModelsCard";
-import ExposureMapHero from "@/components/dashboard/ExposureMapHero";
 import VendorTrendHover from "@/components/dashboard/VendorTrendHover";
 
 export const dynamic = "force-dynamic";
@@ -29,13 +28,10 @@ export default async function DashboardPage() {
   return (
     <AppShell>
       <main className="mx-auto max-w-7xl px-5 py-8">
-        {/* Indirect-exposure hero — moved to the top per the May 2026
-            dashboard redesign. Single most-decision-shaping panel for an
-            investor user: which public ticker exposes you to which AI
-            provider, with hover-to-highlight + click-to-pin. */}
-        <div className="mb-8">
-          <ExposureMapHero />
-        </div>
+        {/* Indirect-exposure map moved out of the dashboard into its own
+            top-level tab (/exposure-map) per the May 2026 navigation
+            refresh — the map is dense enough to deserve a dedicated
+            surface and was crowding the executive overview here. */}
 
         <div className="grid gap-6 lg:grid-cols-[1.35fr_0.65fr]">
           <section className="border-b border-[#dfe4da] pb-6 dark:border-zinc-800">

@@ -1,10 +1,47 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { usePortalTheme } from "@/lib/use-theme";
 import BrandLogo from "@/components/BrandLogo";
 import { INVESTOR_TOOLS_NAV } from "@/lib/investor-tools/nav";
+
+/**
+ * Relative-time formatter used by the "Data refreshed" badge.
+ * Returns "just now" / "12 min ago" / "5 hr ago" / "2 days ago".
+ */
+function formatRelative(iso: string): string {
+  const then = new Date(iso).getTime();
+  if (Number.isNaN(then)) return "—";
+  const secs = Math.max(0, Math.round((Date.now() - then) / 1000));
+  if (secs < 60) return "just now";
+  const mins = Math.round(secs / 60);
+  if (mins < 60) return `${mins} min ago`;
+  const hrs = Math.round(mins / 60);
+  if (hrs < 36) return `${hrs} hr ago`;
+  const days = Math.round(hrs / 24);
+  return `${days} day${days === 1 ? "" : "s"} ago`;
+}
+
+/**
+ * Lazily fetch the most-recent daily-refresh timestamp once on mount.
+ * Treats fetch errors as silent — the badge simply doesn't render.
+ */
+function useLastRefreshedAt(): string | null {
+  const [iso, setIso] = useState<string | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/system/last-refreshed", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((data: { lastRefreshedAt: string | null }) => {
+        if (!cancelled) setIso(data.lastRefreshedAt);
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, []);
+  return iso;
+}
 
 // Hero / Level-1 core functions first (Assessment, Vendors, Capabilities,
 // Briefings), then Level-2 supporting modules (Market Tracker, News,
@@ -17,6 +54,7 @@ const NAV: { href: string; label: string }[] = [
   { href: "/capabilities", label: "Capabilities" },
   { href: "/briefings", label: "Briefings" },
   { href: "/market", label: "Market Tracker" },
+  { href: "/exposure-map", label: "Exposure" },
   { href: "/news", label: "News" },
   { href: "/reputation", label: "Reputation" },
   { href: "/watchlists", label: "Watchlists" },
@@ -26,6 +64,7 @@ const NAV: { href: string; label: string }[] = [
 export default function TopNav() {
   const pathname = usePathname();
   const [theme, setTheme] = usePortalTheme();
+  const lastRefreshedAt = useLastRefreshedAt();
 
   // The home page renders the AIEnterpriseShell which has its own chrome —
   // suppress the global TopNav so we don't double-stack headers.
@@ -97,10 +136,22 @@ export default function TopNav() {
             </div>
           </div>
         </nav>
+        {/* Data-freshness badge — proxies "when did the daily refresh last
+            succeed" via the most-recent VendorRankingSnapshot.capturedAt
+            (every successful run writes one snapshot per vendor). */}
+        {lastRefreshedAt && (
+          <span
+            className="ml-auto hidden items-center gap-1.5 rounded-full border border-emerald-300 bg-emerald-50 px-2.5 py-1 text-[11px] font-medium text-emerald-900 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-200 md:inline-flex"
+            title={`Last daily refresh completed at ${new Date(lastRefreshedAt).toLocaleString()}`}
+          >
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 dark:bg-emerald-300" aria-hidden />
+            Data refreshed {formatRelative(lastRefreshedAt)}
+          </span>
+        )}
         <button
           type="button"
           onClick={toggleTheme}
-          className="ml-auto rounded-full border border-[#cfd7c8] bg-white/70 px-3 py-1.5 text-xs font-semibold text-[#273227] transition-colors hover:bg-[#eef2e8] dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
+          className={`${lastRefreshedAt ? "ml-2" : "ml-auto"} rounded-full border border-[#cfd7c8] bg-white/70 px-3 py-1.5 text-xs font-semibold text-[#273227] transition-colors hover:bg-[#eef2e8] dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800`}
           aria-label="Toggle light and dark mode"
           aria-pressed={theme === "dark"}
         >

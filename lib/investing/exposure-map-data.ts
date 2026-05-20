@@ -176,15 +176,14 @@ export const EXPOSURE_NODES: ExposureMapNode[] = [
 ];
 
 /** Subset of right-side nodes shown only when "Extended ecosystem" is toggled on. */
-export const EXTENDED_ECOSYSTEM_NODE_IDS: ReadonlySet<string> = new Set([
-  // Right-side ecosystem labs (China + sovereign + distributed)
-  "nemotron", "deepseek", "alibaba", "moonshot", "zai", "minimax", "ai21", "aleph",
-  "lighton", "falcon", "ernie", "hunyuan",
-  // Left-side private inference middleware + national-champion infra.
-  // Public exposure plays (AMD, TSM, CRWV, HPE, DELL, SMCI, OVH, TCEHY, BIDU)
-  // stay in the default view since they're directly investable.
-  "cerebras", "groq", "togetherai", "fireworks", "nscale", "g42", "huawei",
-]);
+/**
+ * Previously a curated subset shown only when the operator clicked the
+ * "Extended ecosystem →" toggle. Now empty — the full ecosystem renders
+ * by default on the dedicated /investor-tools/exposure-map page. The
+ * export is preserved as a stable contract; renderer code falls through
+ * to "all nodes always" when this set is empty.
+ */
+export const EXTENDED_ECOSYSTEM_NODE_IDS: ReadonlySet<string> = new Set([]);
 
 // ──────────────── Edge registry (verified) ────────────────
 // Every edge here was checked against publicly-known relationships in

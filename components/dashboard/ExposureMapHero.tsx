@@ -323,18 +323,11 @@ export default function ExposureMapHero(_: { edges?: unknown } = {}) {
           })}
         </div>
 
-        {/* Extended toggle */}
-        <button
-          type="button"
-          onClick={() => setShowExtended((v) => !v)}
-          className={`ml-1 rounded-full border px-3 py-0.5 text-[11px] font-medium transition-colors ${
-            showExtended
-              ? "border-violet-500 bg-violet-100 text-violet-900 dark:bg-violet-950 dark:text-violet-200"
-              : "border-zinc-300 bg-white text-zinc-600 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400"
-          }`}
-        >
-          {showExtended ? "Core market ←" : "Extended ecosystem →"}
-        </button>
+        {/* Extended/Core toggle removed — the full ecosystem (sovereign +
+            infra middleware + frontier labs) now renders by default on
+            the dedicated /exposure-map page. The `showExtended` state +
+            EXTENDED_ECOSYSTEM_NODE_IDS plumbing is intentionally kept so
+            the toggle can be reintroduced if curation diverges again. */}
 
         {/* Clear pins */}
         {pinned.size > 0 && (
