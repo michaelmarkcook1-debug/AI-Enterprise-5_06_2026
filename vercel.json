@@ -2,7 +2,6 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "crons": [
     {
-      "comment": "Single daily refresh — runs sourcing → safe linkage → triage → projection → ranking snapshot → competitive intel in order. The individual /api/cron/* routes remain available for manual ad-hoc runs.",
       "path": "/api/cron/daily-refresh",
       "schedule": "0 3 * * *"
     }
