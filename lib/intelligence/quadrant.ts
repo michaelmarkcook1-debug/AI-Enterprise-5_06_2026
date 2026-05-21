@@ -1,55 +1,23 @@
-// Quadrant-view data layer.
-// ────────────────────────
-// For each vendor returns its CURRENT (score, momentum) position plus
-// its position N days ago (when a stored snapshot exists). The /quadrant
-// page renders this as a 2x2 with arrows showing trajectory.
-//
-// Both axes come from tables the daily-refresh orchestrator updates:
-//   - score    ← IntelligenceVendor.overallScore (recomputed by derive_scores)
-//   - momentum ← VendorMomentum.momentumScore   (recomputed by derive_scores)
-//   - prior    ← VendorRankingSnapshot rows from N days ago
-//
-// Quadrant labels (with default cuts at score=60, momentum=50):
-//   top-right:    Leaders     (score ≥60, momentum ≥50)
-//   top-left:     Established (score ≥60, momentum  <50)
-//   bottom-right: Challengers (score  <60, momentum ≥50)
-//   bottom-left:  Watch list  (score  <60, momentum  <50)
+// Quadrant-view server data layer.
+// ───────────────────────────────
+// SERVER-ONLY module — imports Prisma transitively via the repository
+// and lib/prisma. Pure types + helpers live in ./quadrant-shared so
+// the client `QuadrantChart` component can import them without
+// pulling Node modules (dns, fs, net, tls) into the browser bundle.
 
 import { listIntelligenceVendors, listVendorMomentum } from "./repository";
 import { getPrisma, hasDatabase } from "../prisma";
-import type { Vendor } from "./types";
+import { quadrantOf, type QuadrantData, type QuadrantPoint } from "./quadrant-shared";
 
-export interface QuadrantPoint {
-  vendor: Vendor;
-  now: { score: number; momentum: number };
-  prev: { score: number; momentum: number } | null;
-  delta: { score: number; momentum: number } | null;
-  crossedQuadrant: boolean;
-}
-
-export type QuadrantId = "leaders" | "established" | "challengers" | "watchlist";
-
-export function quadrantOf(score: number, momentum: number, scoreCut: number, momentumCut: number): QuadrantId {
-  if (score >= scoreCut && momentum >= momentumCut) return "leaders";
-  if (score >= scoreCut && momentum < momentumCut) return "established";
-  if (score < scoreCut && momentum >= momentumCut) return "challengers";
-  return "watchlist";
-}
-
-export const QUADRANT_LABELS: Record<QuadrantId, string> = {
-  leaders: "Leaders",
-  established: "Established",
-  challengers: "Challengers",
-  watchlist: "Watch list",
-};
-
-export interface QuadrantData {
-  generatedAt: string;
-  windowDays: number;
-  scoreCut: number;
-  momentumCut: number;
-  points: QuadrantPoint[];
-}
+// Re-export the shared surface so existing imports of ./quadrant
+// continue to work for server consumers.
+export {
+  quadrantOf,
+  QUADRANT_LABELS,
+  type QuadrantId,
+  type QuadrantPoint,
+  type QuadrantData,
+} from "./quadrant-shared";
 
 export interface BuildQuadrantOptions {
   windowDays?: number;
@@ -83,7 +51,6 @@ async function fetchPriorSnapshots(
       select: { vendorId: true, snapshotDate: true, overallScore: true, momentumScore: true },
     });
 
-    // Per vendor, pick the row whose date is nearest to the target.
     const best = new Map<string, { dist: number; score: number; momentum: number }>();
     for (const r of rows) {
       const dist = Math.abs(r.snapshotDate.getTime() - target.getTime());
@@ -93,7 +60,6 @@ async function fetchPriorSnapshots(
       }
     }
 
-    // Fall back to the oldest snapshot for vendors with no row in window.
     const missingIds = vendorIds.filter((id) => !best.has(id));
     if (missingIds.length > 0) {
       const fallbackRows = await getPrisma().vendorRankingSnapshot.findMany({

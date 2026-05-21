@@ -10,7 +10,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { quadrantOf, QUADRANT_LABELS, type QuadrantData, type QuadrantPoint, type QuadrantId } from "@/lib/intelligence/quadrant";
+import { quadrantOf, QUADRANT_LABELS, type QuadrantData, type QuadrantId } from "@/lib/intelligence/quadrant-shared";
 
 const WIDTH = 760;
 const HEIGHT = 560;
