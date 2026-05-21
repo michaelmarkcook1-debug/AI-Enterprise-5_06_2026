@@ -18,6 +18,20 @@ const PAD = { top: 28, right: 28, bottom: 44, left: 56 };
 const INNER_W = WIDTH - PAD.left - PAD.right;
 const INNER_H = HEIGHT - PAD.top - PAD.bottom;
 
+// Visible axis ranges. The plot area is zoomed to the meaningful slice of
+// each axis rather than the full 0-100, so vendor positions spread out
+// rather than clustering in the middle. Values outside the range are
+// clamped to the nearest edge for plotting; the quadrant classification
+// itself still uses the raw values.
+const AXIS_X_MIN = 25;
+const AXIS_X_MAX = 80;
+const AXIS_Y_MIN = 25;
+const AXIS_Y_MAX = 90;
+const X_TICKS = [25, 40, 50, 60, 70, 80];
+const Y_TICKS = [25, 40, 50, 60, 70, 90];
+
+function clamp01(v: number) { return Math.max(0, Math.min(1, v)); }
+
 const QUADRANT_COLOURS: Record<QuadrantId, { bg: string; bgDark: string; label: string; labelDark: string }> = {
   leaders:     { bg: "#ecfdf5", bgDark: "rgba(16,185,129,0.08)",  label: "#047857", labelDark: "#6ee7b7" },
   established: { bg: "#eff6ff", bgDark: "rgba(59,130,246,0.08)",  label: "#1d4ed8", labelDark: "#93c5fd" },
@@ -26,9 +40,11 @@ const QUADRANT_COLOURS: Record<QuadrantId, { bg: string; bgDark: string; label: 
 };
 
 function pos(momentum: number, score: number) {
+  const fx = clamp01((momentum - AXIS_X_MIN) / (AXIS_X_MAX - AXIS_X_MIN));
+  const fy = clamp01((score - AXIS_Y_MIN) / (AXIS_Y_MAX - AXIS_Y_MIN));
   return {
-    x: PAD.left + (momentum / 100) * INNER_W,
-    y: PAD.top + (1 - score / 100) * INNER_H,
+    x: PAD.left + fx * INNER_W,
+    y: PAD.top + (1 - fy) * INNER_H,
   };
 }
 
@@ -63,12 +79,15 @@ export default function QuadrantChart({ data }: { data: QuadrantData }) {
     router.push(`/quadrant?${params.toString()}`);
   }
 
-  const cutX = PAD.left + (data.momentumCut / 100) * INNER_W;
-  const cutY = PAD.top + (1 - data.scoreCut / 100) * INNER_H;
+  // Cut lines use the same projection as the dots so they stay aligned
+  // with the visible range. If the operator sets a cut outside the
+  // visible window, clamp the line to the nearest edge.
+  const cutPos = pos(data.momentumCut, data.scoreCut);
+  const cutX = cutPos.x;
+  const cutY = cutPos.y;
 
-  // y-axis tick values
-  const yTicks = [0, 25, 50, 75, 100];
-  const xTicks = [0, 25, 50, 75, 100];
+  const yTicks = Y_TICKS;
+  const xTicks = X_TICKS;
 
   const hoveredPoint = hovered ? data.points.find((p) => p.vendor.id === hovered) ?? null : null;
 
@@ -184,7 +203,7 @@ export default function QuadrantChart({ data }: { data: QuadrantData }) {
 
           {/* Y-axis ticks */}
           {yTicks.map((t) => {
-            const y = PAD.top + (1 - t / 100) * INNER_H;
+            const y = pos(AXIS_X_MIN, t).y;
             return (
               <g key={`y${t}`}>
                 <line x1={PAD.left - 4} y1={y} x2={PAD.left} y2={y} stroke="currentColor" className="text-[#9aa691] dark:text-zinc-600" />
@@ -194,7 +213,7 @@ export default function QuadrantChart({ data }: { data: QuadrantData }) {
           })}
           {/* X-axis ticks */}
           {xTicks.map((t) => {
-            const x = PAD.left + (t / 100) * INNER_W;
+            const x = pos(t, AXIS_Y_MIN).x;
             return (
               <g key={`x${t}`}>
                 <line x1={x} y1={PAD.top + INNER_H} x2={x} y2={PAD.top + INNER_H + 4} stroke="currentColor" className="text-[#9aa691] dark:text-zinc-600" />
