@@ -1,12 +1,12 @@
 "use client";
 
-// Interactive 2x2 quadrant chart.
-// ───────────────────────────────
-// Renders vendor dots positioned by (momentumScore, overallScore) with
-// arrows showing the delta since the prior snapshot. Controls let the
-// operator change timeframe and the X/Y cuts — those changes navigate
-// to /quadrant?days=...&scoreCut=...&momentumCut=... so the data
-// reloads server-side (page is force-dynamic).
+// Magic Quadrant chart — Gartner-style 2x2.
+// ─────────────────────────────────────────
+// Y = ability to execute, X = completeness of vision (see
+// lib/intelligence/vendor-health.ts computeQuadrantAxes for the math).
+// Arrows show movement since the prior snapshot. Controls navigate to
+// /quadrant?days=...&executeCut=...&visionCut=... so the data reloads
+// server-side (page is force-dynamic).
 
 import { useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -14,43 +14,40 @@ import { quadrantOf, QUADRANT_LABELS, type QuadrantData, type QuadrantId } from 
 
 const WIDTH = 760;
 const HEIGHT = 560;
-const PAD = { top: 28, right: 28, bottom: 44, left: 56 };
+const PAD = { top: 28, right: 28, bottom: 44, left: 64 };
 const INNER_W = WIDTH - PAD.left - PAD.right;
 const INNER_H = HEIGHT - PAD.top - PAD.bottom;
 
-// Visible axis ranges. The plot area is zoomed to the meaningful slice of
-// each axis rather than the full 0-100, so vendor positions spread out
-// rather than clustering in the middle. Values outside the range are
-// clamped to the nearest edge for plotting; the quadrant classification
-// itself still uses the raw values.
+// Both axes range 25-90 since execute + vision are 0-100 composites
+// that in practice stay inside that window.
 const AXIS_X_MIN = 25;
-const AXIS_X_MAX = 80;
+const AXIS_X_MAX = 90;
 const AXIS_Y_MIN = 25;
 const AXIS_Y_MAX = 90;
-const X_TICKS = [25, 40, 50, 60, 70, 80];
-const Y_TICKS = [25, 40, 50, 60, 70, 90];
+const X_TICKS = [25, 40, 50, 60, 70, 80, 90];
+const Y_TICKS = [25, 40, 50, 60, 70, 80, 90];
 
 function clamp01(v: number) { return Math.max(0, Math.min(1, v)); }
 
-const QUADRANT_COLOURS: Record<QuadrantId, { bg: string; bgDark: string; label: string; labelDark: string }> = {
-  leaders:     { bg: "#ecfdf5", bgDark: "rgba(16,185,129,0.08)",  label: "#047857", labelDark: "#6ee7b7" },
-  established: { bg: "#eff6ff", bgDark: "rgba(59,130,246,0.08)",  label: "#1d4ed8", labelDark: "#93c5fd" },
-  challengers: { bg: "#fefce8", bgDark: "rgba(250,204,21,0.08)",  label: "#a16207", labelDark: "#fde68a" },
-  watchlist:   { bg: "#fef2f2", bgDark: "rgba(239,68,68,0.08)",   label: "#b91c1c", labelDark: "#fca5a5" },
-};
-
-/** Project an (X, Y) pair into the SVG plot area. X = health, Y = score. */
-function pos(health: number, score: number) {
-  const fx = clamp01((health - AXIS_X_MIN) / (AXIS_X_MAX - AXIS_X_MIN));
-  const fy = clamp01((score - AXIS_Y_MIN) / (AXIS_Y_MAX - AXIS_Y_MIN));
+/** Project (vision, execute) into the SVG plot area. */
+function pos(vision: number, execute: number) {
+  const fx = clamp01((vision - AXIS_X_MIN) / (AXIS_X_MAX - AXIS_X_MIN));
+  const fy = clamp01((execute - AXIS_Y_MIN) / (AXIS_Y_MAX - AXIS_Y_MIN));
   return {
     x: PAD.left + fx * INNER_W,
     y: PAD.top + (1 - fy) * INNER_H,
   };
 }
 
+const QUADRANT_COLOURS: Record<QuadrantId, { bg: string; bgDark: string; label: string; labelDark: string }> = {
+  leaders:     { bg: "#ecfdf5", bgDark: "rgba(16,185,129,0.10)", label: "#047857", labelDark: "#6ee7b7" },
+  challengers: { bg: "#eff6ff", bgDark: "rgba(59,130,246,0.10)", label: "#1d4ed8", labelDark: "#93c5fd" },
+  visionaries: { bg: "#fefce8", bgDark: "rgba(250,204,21,0.10)", label: "#a16207", labelDark: "#fde68a" },
+  niche:       { bg: "#fef2f2", bgDark: "rgba(239,68,68,0.10)",  label: "#b91c1c", labelDark: "#fca5a5" },
+};
+
 const TIMEFRAMES = [
-  { days: 7, label: "7d" },
+  { days: 7,  label: "7d" },
   { days: 14, label: "14d" },
   { days: 30, label: "30d" },
   { days: 90, label: "90d" },
@@ -67,9 +64,9 @@ export default function QuadrantChart({ data }: { data: QuadrantData }) {
   }, [data.points, onlyCrossings]);
 
   const counts = useMemo(() => {
-    const c: Record<QuadrantId, number> = { leaders: 0, established: 0, challengers: 0, watchlist: 0 };
+    const c: Record<QuadrantId, number> = { leaders: 0, challengers: 0, visionaries: 0, niche: 0 };
     for (const p of data.points) {
-      c[quadrantOf(p.now.score, p.now.health, data.scoreCut, data.momentumCut)] += 1;
+      c[quadrantOf(p.now.execute, p.now.vision, data.executeCut, data.visionCut)] += 1;
     }
     return c;
   }, [data]);
@@ -80,15 +77,9 @@ export default function QuadrantChart({ data }: { data: QuadrantData }) {
     router.push(`/quadrant?${params.toString()}`);
   }
 
-  // Cut lines use the same projection as the dots so they stay aligned
-  // with the visible range. X-axis cut applies to health, not raw
-  // momentum, so losing-list vendors always sit left of the cut.
-  const cutPos = pos(data.momentumCut, data.scoreCut);
+  const cutPos = pos(data.visionCut, data.executeCut);
   const cutX = cutPos.x;
   const cutY = cutPos.y;
-
-  const yTicks = Y_TICKS;
-  const xTicks = X_TICKS;
 
   const hoveredPoint = hovered ? data.points.find((p) => p.vendor.id === hovered) ?? null : null;
 
@@ -115,25 +106,25 @@ export default function QuadrantChart({ data }: { data: QuadrantData }) {
         </div>
 
         <label className="flex items-center gap-1.5">
-          <span className="font-semibold uppercase tracking-wide text-[#6a725f] dark:text-zinc-500">Score cut</span>
+          <span className="font-semibold uppercase tracking-wide text-[#6a725f] dark:text-zinc-500">Execute cut</span>
           <input
             type="number"
             min={1}
             max={99}
-            defaultValue={data.scoreCut}
-            onBlur={(e) => updateParam("scoreCut", e.target.value)}
+            defaultValue={data.executeCut}
+            onBlur={(e) => updateParam("executeCut", e.target.value)}
             className="w-14 rounded border border-[#cfd7c8] bg-white px-1.5 py-0.5 font-mono dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
           />
         </label>
 
         <label className="flex items-center gap-1.5">
-          <span className="font-semibold uppercase tracking-wide text-[#6a725f] dark:text-zinc-500">Health cut</span>
+          <span className="font-semibold uppercase tracking-wide text-[#6a725f] dark:text-zinc-500">Vision cut</span>
           <input
             type="number"
             min={1}
             max={99}
-            defaultValue={data.momentumCut}
-            onBlur={(e) => updateParam("momentumCut", e.target.value)}
+            defaultValue={data.visionCut}
+            onBlur={(e) => updateParam("visionCut", e.target.value)}
             className="w-14 rounded border border-[#cfd7c8] bg-white px-1.5 py-0.5 font-mono dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
           />
         </label>
@@ -149,22 +140,22 @@ export default function QuadrantChart({ data }: { data: QuadrantData }) {
         </label>
 
         <div className="ml-auto flex items-center gap-3 text-[10px] uppercase tracking-wide text-[#6a725f] dark:text-zinc-500">
-          <span>L {counts.leaders}</span>
-          <span>E {counts.established}</span>
-          <span>C {counts.challengers}</span>
-          <span>W {counts.watchlist}</span>
+          <span>Leaders {counts.leaders}</span>
+          <span>Challengers {counts.challengers}</span>
+          <span>Visionaries {counts.visionaries}</span>
+          <span>Niche {counts.niche}</span>
         </div>
       </div>
 
       {/* Chart */}
       <div className="rounded-lg border border-[#dfe4da] bg-white p-4 dark:border-zinc-800 dark:bg-[#071827]">
-        <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} className="w-full" role="img" aria-label="Vendor quadrant: overall score vs momentum">
+        <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} className="w-full" role="img" aria-label="Magic quadrant: ability to execute vs completeness of vision">
           {/* Quadrant background fills */}
-          {(["leaders", "established", "challengers", "watchlist"] as const).map((q) => {
-            const x = q === "leaders" || q === "challengers" ? cutX : PAD.left;
-            const y = q === "leaders" || q === "established" ? PAD.top : cutY;
-            const w = q === "leaders" || q === "challengers" ? PAD.left + INNER_W - cutX : cutX - PAD.left;
-            const h = q === "leaders" || q === "established" ? cutY - PAD.top : PAD.top + INNER_H - cutY;
+          {(["leaders", "challengers", "visionaries", "niche"] as const).map((q) => {
+            const x = q === "leaders" || q === "visionaries" ? cutX : PAD.left;
+            const y = q === "leaders" || q === "challengers" ? PAD.top : cutY;
+            const w = q === "leaders" || q === "visionaries" ? PAD.left + INNER_W - cutX : cutX - PAD.left;
+            const h = q === "leaders" || q === "challengers" ? cutY - PAD.top : PAD.top + INNER_H - cutY;
             const c = QUADRANT_COLOURS[q];
             return (
               <g key={q}>
@@ -177,19 +168,19 @@ export default function QuadrantChart({ data }: { data: QuadrantData }) {
           {/* Quadrant labels */}
           {(
             [
-              { q: "leaders" as QuadrantId,     x: PAD.left + INNER_W - 12, y: PAD.top + 18,         anchor: "end" as const },
-              { q: "established" as QuadrantId, x: PAD.left + 12,           y: PAD.top + 18,         anchor: "start" as const },
-              { q: "challengers" as QuadrantId, x: PAD.left + INNER_W - 12, y: PAD.top + INNER_H - 8, anchor: "end" as const },
-              { q: "watchlist" as QuadrantId,   x: PAD.left + 12,           y: PAD.top + INNER_H - 8, anchor: "start" as const },
+              { q: "leaders" as QuadrantId,     x: PAD.left + INNER_W - 12, y: PAD.top + 18,         anchor: "end"   as const },
+              { q: "challengers" as QuadrantId, x: PAD.left + 12,           y: PAD.top + 18,         anchor: "start" as const },
+              { q: "visionaries" as QuadrantId, x: PAD.left + INNER_W - 12, y: PAD.top + INNER_H - 8, anchor: "end"   as const },
+              { q: "niche" as QuadrantId,       x: PAD.left + 12,           y: PAD.top + INNER_H - 8, anchor: "start" as const },
             ]
           ).map(({ q, x, y, anchor }) => {
             const c = QUADRANT_COLOURS[q];
             return (
               <g key={q}>
-                <text x={x} y={y} textAnchor={anchor} className="dark:hidden" fill={c.label} fontSize={12} fontWeight={600} letterSpacing={1}>
+                <text x={x} y={y} textAnchor={anchor} className="dark:hidden" fill={c.label} fontSize={12} fontWeight={700} letterSpacing={1}>
                   {QUADRANT_LABELS[q].toUpperCase()}
                 </text>
-                <text x={x} y={y} textAnchor={anchor} className="hidden dark:block" fill={c.labelDark} fontSize={12} fontWeight={600} letterSpacing={1}>
+                <text x={x} y={y} textAnchor={anchor} className="hidden dark:block" fill={c.labelDark} fontSize={12} fontWeight={700} letterSpacing={1}>
                   {QUADRANT_LABELS[q].toUpperCase()}
                 </text>
               </g>
@@ -203,7 +194,7 @@ export default function QuadrantChart({ data }: { data: QuadrantData }) {
           <line x1={PAD.left} y1={cutY} x2={PAD.left + INNER_W} y2={cutY} stroke="currentColor" strokeWidth={1.5} strokeDasharray="4 3" className="text-[#697362] dark:text-zinc-500" />
 
           {/* Y-axis ticks */}
-          {yTicks.map((t) => {
+          {Y_TICKS.map((t) => {
             const y = pos(AXIS_X_MIN, t).y;
             return (
               <g key={`y${t}`}>
@@ -213,7 +204,7 @@ export default function QuadrantChart({ data }: { data: QuadrantData }) {
             );
           })}
           {/* X-axis ticks */}
-          {xTicks.map((t) => {
+          {X_TICKS.map((t) => {
             const x = pos(t, AXIS_Y_MIN).x;
             return (
               <g key={`x${t}`}>
@@ -224,10 +215,10 @@ export default function QuadrantChart({ data }: { data: QuadrantData }) {
           })}
           {/* Axis labels */}
           <text x={PAD.left + INNER_W / 2} y={HEIGHT - 8} textAnchor="middle" fontSize={11} fontWeight={600} className="fill-[#4d574b] dark:fill-zinc-300">
-            Health score (momentum − risk drag − share drift) →
+            Completeness of vision →
           </text>
-          <text x={14} y={PAD.top + INNER_H / 2} textAnchor="middle" fontSize={11} fontWeight={600} transform={`rotate(-90, 14, ${PAD.top + INNER_H / 2})`} className="fill-[#4d574b] dark:fill-zinc-300">
-            Overall score →
+          <text x={16} y={PAD.top + INNER_H / 2} textAnchor="middle" fontSize={11} fontWeight={600} transform={`rotate(-90, 16, ${PAD.top + INNER_H / 2})`} className="fill-[#4d574b] dark:fill-zinc-300">
+            Ability to execute →
           </text>
 
           {/* Arrow marker definition */}
@@ -239,13 +230,12 @@ export default function QuadrantChart({ data }: { data: QuadrantData }) {
 
           {/* Trajectory arrows + dots */}
           {points.map((p) => {
-            const nowPos = pos(p.now.health, p.now.score);
-            const prevPos = p.prev ? pos(p.prev.health, p.prev.score) : null;
+            const nowPos = pos(p.now.vision, p.now.execute);
+            const prevPos = p.prev ? pos(p.prev.vision, p.prev.execute) : null;
             const isHovered = hovered === p.vendor.id;
-            const qNow = quadrantOf(p.now.score, p.now.health, data.scoreCut, data.momentumCut);
+            const qNow = quadrantOf(p.now.execute, p.now.vision, data.executeCut, data.visionCut);
             const colour = QUADRANT_COLOURS[qNow];
 
-            // Only render the arrow if movement is visually meaningful.
             const movedEnough = prevPos && (Math.abs(prevPos.x - nowPos.x) + Math.abs(prevPos.y - nowPos.y) > 4);
 
             return (
@@ -261,13 +251,8 @@ export default function QuadrantChart({ data }: { data: QuadrantData }) {
               >
                 {movedEnough && prevPos && (
                   <line
-                    x1={prevPos.x}
-                    y1={prevPos.y}
-                    x2={nowPos.x}
-                    y2={nowPos.y}
-                    stroke={colour.label}
-                    strokeWidth={1.5}
-                    strokeOpacity={0.55}
+                    x1={prevPos.x} y1={prevPos.y} x2={nowPos.x} y2={nowPos.y}
+                    stroke={colour.label} strokeWidth={1.5} strokeOpacity={0.55}
                     markerEnd="url(#qarrow)"
                   />
                 )}
@@ -275,22 +260,18 @@ export default function QuadrantChart({ data }: { data: QuadrantData }) {
                   <circle cx={prevPos.x} cy={prevPos.y} r={2.5} fill={colour.label} fillOpacity={0.35} />
                 )}
                 <circle
-                  cx={nowPos.x}
-                  cy={nowPos.y}
+                  cx={nowPos.x} cy={nowPos.y}
                   r={isHovered ? 7 : 5}
                   fill={colour.label}
-                  stroke="white"
-                  strokeWidth={1.5}
+                  stroke="white" strokeWidth={1.5}
                   className="dark:stroke-zinc-900"
                 />
                 {p.crossedQuadrant && (
                   <circle cx={nowPos.x} cy={nowPos.y} r={9} fill="none" stroke={colour.label} strokeWidth={1.2} strokeDasharray="2 1.5" />
                 )}
                 <text
-                  x={nowPos.x + 8}
-                  y={nowPos.y + 3}
-                  fontSize={10}
-                  fontWeight={isHovered ? 700 : 500}
+                  x={nowPos.x + 8} y={nowPos.y + 3}
+                  fontSize={10} fontWeight={isHovered ? 700 : 500}
                   className="fill-[#18201b] dark:fill-zinc-100"
                   style={{ pointerEvents: "none" }}
                 >
@@ -303,7 +284,7 @@ export default function QuadrantChart({ data }: { data: QuadrantData }) {
 
         {/* Hover detail card */}
         {hoveredPoint && (
-          <div className="mt-3 grid gap-2 rounded-md border border-[#dfe4da] bg-[#f7f8f5] p-3 text-xs dark:border-zinc-700 dark:bg-[#0b1f30] md:grid-cols-[1.2fr_auto_auto_auto_auto_auto]">
+          <div className="mt-3 grid gap-3 rounded-md border border-[#dfe4da] bg-[#f7f8f5] p-3 text-xs dark:border-zinc-700 dark:bg-[#0b1f30] md:grid-cols-[1.3fr_auto_auto_auto_auto]">
             <div>
               <div className="text-[10px] uppercase tracking-wide text-[#6a725f] dark:text-zinc-500">Vendor</div>
               <div className="font-semibold text-[#18201b] dark:text-zinc-100">{hoveredPoint.vendor.name}</div>
@@ -315,33 +296,43 @@ export default function QuadrantChart({ data }: { data: QuadrantData }) {
               )}
             </div>
             <div>
-              <div className="text-[10px] uppercase tracking-wide text-[#6a725f] dark:text-zinc-500">Score</div>
-              <div className="font-mono font-semibold dark:text-zinc-100">{hoveredPoint.now.score.toFixed(1)}</div>
+              <div className="text-[10px] uppercase tracking-wide text-[#6a725f] dark:text-zinc-500">Execute</div>
+              <div className="font-mono font-semibold dark:text-zinc-100">{hoveredPoint.now.execute.toFixed(1)}</div>
               {hoveredPoint.delta && (
-                <div className={`text-[10px] font-medium ${hoveredPoint.delta.score >= 0 ? "text-emerald-700 dark:text-emerald-400" : "text-rose-700 dark:text-rose-400"}`}>
-                  {hoveredPoint.delta.score >= 0 ? "▲ +" : "▼ "}{hoveredPoint.delta.score}
+                <div className={`text-[10px] font-medium ${hoveredPoint.delta.execute >= 0 ? "text-emerald-700 dark:text-emerald-400" : "text-rose-700 dark:text-rose-400"}`}>
+                  {hoveredPoint.delta.execute >= 0 ? "▲ +" : "▼ "}{hoveredPoint.delta.execute}
                 </div>
               )}
+              <div className="mt-1 text-[10px] leading-tight text-[#697362] dark:text-zinc-500">
+                conf {hoveredPoint.components.execute.confidence}<br />
+                rel  {hoveredPoint.components.execute.reliability}<br />
+                ind  {hoveredPoint.components.execute.breadth}<br />
+                risk {hoveredPoint.components.execute.riskDrag}
+              </div>
             </div>
             <div>
-              <div className="text-[10px] uppercase tracking-wide text-[#6a725f] dark:text-zinc-500">Health</div>
-              <div className="font-mono font-semibold dark:text-zinc-100">{hoveredPoint.now.health.toFixed(1)}</div>
+              <div className="text-[10px] uppercase tracking-wide text-[#6a725f] dark:text-zinc-500">Vision</div>
+              <div className="font-mono font-semibold dark:text-zinc-100">{hoveredPoint.now.vision.toFixed(1)}</div>
               {hoveredPoint.delta && (
-                <div className={`text-[10px] font-medium ${hoveredPoint.delta.health >= 0 ? "text-emerald-700 dark:text-emerald-400" : "text-rose-700 dark:text-rose-400"}`}>
-                  {hoveredPoint.delta.health >= 0 ? "▲ +" : "▼ "}{hoveredPoint.delta.health}
+                <div className={`text-[10px] font-medium ${hoveredPoint.delta.vision >= 0 ? "text-emerald-700 dark:text-emerald-400" : "text-rose-700 dark:text-rose-400"}`}>
+                  {hoveredPoint.delta.vision >= 0 ? "▲ +" : "▼ "}{hoveredPoint.delta.vision}
                 </div>
               )}
-            </div>
-            <div>
-              <div className="text-[10px] uppercase tracking-wide text-[#6a725f] dark:text-zinc-500">Momentum</div>
-              <div className="font-mono font-semibold dark:text-zinc-100">{hoveredPoint.now.momentum.toFixed(0)}</div>
-              <div className="text-[10px] text-[#697362] dark:text-zinc-500">raw input</div>
+              <div className="mt-1 text-[10px] leading-tight text-[#697362] dark:text-zinc-500">
+                mom  {hoveredPoint.components.vision.momentum}<br />
+                prod {hoveredPoint.components.vision.product}<br />
+                use  {hoveredPoint.components.vision.useCases}<br />
+                shr  {hoveredPoint.components.vision.shareDrag}
+              </div>
             </div>
             <div>
               <div className="text-[10px] uppercase tracking-wide text-[#6a725f] dark:text-zinc-500">Quadrant</div>
               <div className="font-semibold dark:text-zinc-100">
-                {QUADRANT_LABELS[quadrantOf(hoveredPoint.now.score, hoveredPoint.now.health, data.scoreCut, data.momentumCut)]}
+                {QUADRANT_LABELS[quadrantOf(hoveredPoint.now.execute, hoveredPoint.now.vision, data.executeCut, data.visionCut)]}
                 {hoveredPoint.crossedQuadrant && <span className="ml-1 text-amber-700 dark:text-amber-400">(crossed)</span>}
+              </div>
+              <div className="mt-1 text-[10px] text-[#697362] dark:text-zinc-500">
+                score {hoveredPoint.now.score.toFixed(0)} · mom {hoveredPoint.now.momentum.toFixed(0)}
               </div>
             </div>
             <a
@@ -355,7 +346,7 @@ export default function QuadrantChart({ data }: { data: QuadrantData }) {
       </div>
 
       <div className="text-[11px] leading-5 text-[#6a725f] dark:text-zinc-500">
-        Cuts at score = {data.scoreCut}, health = {data.momentumCut}. Health = momentum − 8 × risk count − 1.5 × negative share drift − 0.3 × (70 − confidence). Any vendor on the dashboard&apos;s &quot;Who&apos;s losing&quot; list will have health &lt; 60 by construction, so cannot appear in the Leaders quadrant. Arrows show movement since {new Date(Date.now() - data.windowDays * 86400 * 1000).toLocaleDateString()}. Dashed ring = vendor crossed a quadrant boundary in this window.
+        Cuts at execute = {data.executeCut}, vision = {data.visionCut}. Execute = 0.40·confidence + 0.30·(enterprise-control + reliability-safety + vendor-resilience) + 0.20·industry breadth − 7·risk count. Vision = 0.40·momentum + 0.30·(business-fit + market-strength + integration-ops) + 0.20·use-case breadth − 1.5·negative share drift. Vendors on the &quot;Who&apos;s losing&quot; list are guaranteed to fall outside the Leaders quadrant. Arrows show movement since {new Date(Date.now() - data.windowDays * 86400 * 1000).toLocaleDateString()}.
       </div>
     </div>
   );

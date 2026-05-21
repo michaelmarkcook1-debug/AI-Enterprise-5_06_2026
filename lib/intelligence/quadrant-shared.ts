@@ -7,42 +7,48 @@
 
 import type { Vendor } from "./types";
 
-export type QuadrantId = "leaders" | "established" | "challengers" | "watchlist";
+export type QuadrantId = "leaders" | "challengers" | "visionaries" | "niche";
 
 export interface QuadrantPoint {
   vendor: Vendor;
   /**
-   * Current position. `health` is the composite from vendor-health.ts
-   * (momentum minus risk/share/confidence drag). The quadrant uses
-   * health rather than raw momentum so it stays consistent with the
-   * dashboard "Who's losing" list.
+   * Position on the Magic-Quadrant axes. `vision` and `execute` are
+   * the Gartner-style scalars computed by vendor-health.ts. `score`
+   * and `momentum` are kept around as raw inputs for tooltips.
    */
-  now: { score: number; momentum: number; health: number };
-  prev: { score: number; momentum: number; health: number } | null;
-  delta: { score: number; momentum: number; health: number } | null;
+  now: { execute: number; vision: number; score: number; momentum: number };
+  prev: { execute: number; vision: number; score: number; momentum: number } | null;
+  delta: { execute: number; vision: number; score: number; momentum: number } | null;
   /** True iff the vendor appears in the dashboard "Who's losing" list. */
   isLosing: boolean;
   crossedQuadrant: boolean;
+  /** Component breakdown surfaced in the hover detail. */
+  components: {
+    execute: { confidence: number; reliability: number; breadth: number; riskDrag: number };
+    vision: { momentum: number; product: number; useCases: number; shareDrag: number };
+  };
 }
 
 export interface QuadrantData {
   generatedAt: string;
   windowDays: number;
-  scoreCut: number;
-  momentumCut: number;
+  /** Vertical cut — execute threshold above which a vendor is in the top row. */
+  executeCut: number;
+  /** Horizontal cut — vision threshold right of which a vendor is in the right column. */
+  visionCut: number;
   points: QuadrantPoint[];
 }
 
-export function quadrantOf(score: number, momentum: number, scoreCut: number, momentumCut: number): QuadrantId {
-  if (score >= scoreCut && momentum >= momentumCut) return "leaders";
-  if (score >= scoreCut && momentum < momentumCut) return "established";
-  if (score < scoreCut && momentum >= momentumCut) return "challengers";
-  return "watchlist";
+export function quadrantOf(execute: number, vision: number, executeCut: number, visionCut: number): QuadrantId {
+  if (execute >= executeCut && vision >= visionCut) return "leaders";
+  if (execute >= executeCut && vision < visionCut)  return "challengers";
+  if (execute <  executeCut && vision >= visionCut) return "visionaries";
+  return "niche";
 }
 
 export const QUADRANT_LABELS: Record<QuadrantId, string> = {
   leaders: "Leaders",
-  established: "Established",
   challengers: "Challengers",
-  watchlist: "Watch list",
+  visionaries: "Visionaries",
+  niche: "Niche players",
 };

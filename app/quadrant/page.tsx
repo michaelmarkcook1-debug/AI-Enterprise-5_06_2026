@@ -13,7 +13,7 @@ import QuadrantChart from "@/components/quadrant/QuadrantChart";
 export const dynamic = "force-dynamic";
 
 interface PageProps {
-  searchParams: Promise<{ days?: string; scoreCut?: string; momentumCut?: string }>;
+  searchParams: Promise<{ days?: string; executeCut?: string; visionCut?: string }>;
 }
 
 function parseNumber(value: string | undefined, fallback: number, min: number, max: number): number {
@@ -25,18 +25,16 @@ function parseNumber(value: string | undefined, fallback: number, min: number, m
 export default async function QuadrantPage({ searchParams }: PageProps) {
   const params = await searchParams;
   const windowDays = parseNumber(params.days, 14, 1, 365);
-  const scoreCut = parseNumber(params.scoreCut, 60, 1, 99);
-  // Default 60: matches the dashboard's "Who's losing" momentum
-  // threshold so losing-list vendors mechanically land left of the cut.
-  const momentumCut = parseNumber(params.momentumCut, 60, 1, 99);
+  const executeCut = parseNumber(params.executeCut, 60, 1, 99);
+  const visionCut = parseNumber(params.visionCut, 60, 1, 99);
 
-  const data = await buildQuadrantData({ windowDays, scoreCut, momentumCut });
+  const data = await buildQuadrantData({ windowDays, executeCut, visionCut });
 
   return (
     <PageFrame
-      title="Vendor quadrant"
-      kicker="Score × momentum, with trajectory"
-      description="Position of every tracked vendor across overall ranking score (Y) and momentum (X). Arrows show movement since the prior snapshot. Cuts and timeframe are configurable via the controls below — they encode 'who's now a Leader / Challenger / Established / on the Watch list'."
+      title="Magic quadrant"
+      kicker="Ability to execute × completeness of vision"
+      description="Position of every tracked vendor on the analyst-standard two axes. Execute folds in evidence depth, reliability + enterprise-control pillars, industry breadth, and risk drag. Vision folds in momentum, business-fit + market-strength pillars, use-case breadth, and share drift. Vendors on the dashboard's 'Who's losing' list are mechanically pushed out of the Leaders quadrant. Arrows show movement since the prior snapshot."
     >
       <QuadrantChart data={data} />
     </PageFrame>

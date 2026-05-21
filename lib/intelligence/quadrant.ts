@@ -5,13 +5,18 @@
 // the client `QuadrantChart` component can import them without
 // pulling Node modules (dns, fs, net, tls) into the browser bundle.
 
-import { listIntelligenceVendors, listVendorMomentum, listMarketShareEstimates } from "./repository";
+import {
+  listIntelligenceVendors,
+  listVendorMomentum,
+  listMarketShareEstimates,
+  listVendorPillarScores,
+} from "./repository";
 import { getPrisma, hasDatabase } from "../prisma";
 import { quadrantOf, type QuadrantData, type QuadrantPoint } from "./quadrant-shared";
-import { computeVendorHealth } from "./vendor-health";
+import { computeVendorHealth, computeQuadrantAxes } from "./vendor-health";
+import type { PillarId } from "../types";
+import type { VendorPillarScore } from "./types";
 
-// Re-export the shared surface so existing imports of ./quadrant
-// continue to work for server consumers.
 export {
   quadrantOf,
   QUADRANT_LABELS,
@@ -22,16 +27,14 @@ export {
 
 export interface BuildQuadrantOptions {
   windowDays?: number;
-  scoreCut?: number;
-  momentumCut?: number;
+  /** Threshold for "in the top row" (Leaders / Challengers). Default 60. */
+  executeCut?: number;
+  /** Threshold for "in the right column" (Leaders / Visionaries). Default 60. */
+  visionCut?: number;
   now?: Date;
 }
 
-/**
- * Find the snapshot for each vendor that's closest to `windowDays` ago.
- * Falls back to the oldest available snapshot if the vendor hasn't been
- * tracked that long.
- */
+/** Find the snapshot for each vendor closest to `windowDays` ago. */
 async function fetchPriorSnapshots(
   vendorIds: string[],
   windowDays: number,
@@ -85,22 +88,25 @@ async function fetchPriorSnapshots(
 export async function buildQuadrantData(opts: BuildQuadrantOptions = {}): Promise<QuadrantData> {
   const now = opts.now ?? new Date();
   const windowDays = opts.windowDays ?? 14;
-  const scoreCut = opts.scoreCut ?? 60;
-  // X-axis cut: 60 by design so any vendor flagged as "losing" by the
-  // dashboard filter (which is mechanically guaranteed to have
-  // healthScore < 60) cannot land in the Leaders quadrant.
-  const momentumCut = opts.momentumCut ?? 60;
+  const executeCut = opts.executeCut ?? 60;
+  const visionCut = opts.visionCut ?? 60;
 
-  const [vendors, momenta, shares] = await Promise.all([
+  const [vendors, momenta, shares, pillarScores] = await Promise.all([
     listIntelligenceVendors(),
     listVendorMomentum(),
     listMarketShareEstimates(),
+    listVendorPillarScores(),
   ]);
+
   const momentumByVendor = new Map(momenta.map((m) => [m.vendorId, m.momentumScore]));
 
-  // Negative-share aggregation matches lib/intelligence/repository.ts
-  // shareTrendByVendor — sum of negative changePct per vendor across
-  // categories, expressed as a positive "drop in points" number.
+  const pillarsByVendor = new Map<string, Map<PillarId, VendorPillarScore>>();
+  for (const p of pillarScores) {
+    const bucket = pillarsByVendor.get(p.vendorId) ?? new Map<PillarId, VendorPillarScore>();
+    bucket.set(p.pillar, p);
+    pillarsByVendor.set(p.vendorId, bucket);
+  }
+
   const negShareByVendor = new Map<string, number>();
   for (const s of shares) {
     const drag = Math.abs(Math.min(0, s.changePct));
@@ -115,25 +121,40 @@ export async function buildQuadrantData(opts: BuildQuadrantOptions = {}): Promis
     const score = vendor.overallScore;
     const momentum = momentumByVendor.get(vendor.id) ?? 50;
     const negShare = negShareByVendor.get(vendor.id) ?? 0;
-    const { healthScore, isLosing } = computeVendorHealth({
+    const pillarByPillar = pillarsByVendor.get(vendor.id) ?? new Map<PillarId, VendorPillarScore>();
+
+    const { isLosing } = computeVendorHealth({
       vendor,
       momentumScore: momentum,
       negativeShareDelta: negShare,
     });
 
+    const axes = computeQuadrantAxes({
+      vendor,
+      momentumScore: momentum,
+      negativeShareDelta: negShare,
+      pillarByPillar,
+    });
+
+    // For the prior snapshot we re-run the axis math with TODAY's
+    // pillar + risk + share inputs (those move slowly) and the
+    // SNAPSHOTTED momentum + score. Gives a directionally honest
+    // arrow without needing per-day pillar history.
     const priorRaw = priors.get(vendor.id) ?? null;
-    // Prior snapshots store only score + momentum. Reconstruct prior
-    // health using TODAY's risk/share drag (those move slowly) so the
-    // arrow direction reflects the momentum component of the change.
-    const prev = priorRaw
+    const prevAxes = priorRaw
+      ? computeQuadrantAxes({
+          vendor: { ...vendor, overallScore: priorRaw.score },
+          momentumScore: priorRaw.momentum,
+          negativeShareDelta: negShare,
+          pillarByPillar,
+        })
+      : null;
+    const prev = priorRaw && prevAxes
       ? {
           score: priorRaw.score,
           momentum: priorRaw.momentum,
-          health: computeVendorHealth({
-            vendor,
-            momentumScore: priorRaw.momentum,
-            negativeShareDelta: negShare,
-          }).healthScore,
+          execute: prevAxes.execute,
+          vision: prevAxes.vision,
         }
       : null;
 
@@ -141,30 +162,32 @@ export async function buildQuadrantData(opts: BuildQuadrantOptions = {}): Promis
       ? {
           score: Math.round((score - prev.score) * 10) / 10,
           momentum: Math.round((momentum - prev.momentum) * 10) / 10,
-          health: Math.round((healthScore - prev.health) * 10) / 10,
+          execute: Math.round((axes.execute - prev.execute) * 10) / 10,
+          vision: Math.round((axes.vision - prev.vision) * 10) / 10,
         }
       : null;
 
     const crossedQuadrant = prev
-      ? quadrantOf(score, healthScore, scoreCut, momentumCut)
-        !== quadrantOf(prev.score, prev.health, scoreCut, momentumCut)
+      ? quadrantOf(axes.execute, axes.vision, executeCut, visionCut)
+        !== quadrantOf(prev.execute, prev.vision, executeCut, visionCut)
       : false;
 
     return {
       vendor,
-      now: { score, momentum, health: healthScore },
+      now: { execute: axes.execute, vision: axes.vision, score, momentum },
       prev,
       delta,
       isLosing,
       crossedQuadrant,
+      components: axes.components,
     };
   });
 
   return {
     generatedAt: now.toISOString(),
     windowDays,
-    scoreCut,
-    momentumCut,
+    executeCut,
+    visionCut,
     points,
   };
 }
