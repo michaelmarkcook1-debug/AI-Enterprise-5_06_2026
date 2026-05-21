@@ -39,8 +39,9 @@ const QUADRANT_COLOURS: Record<QuadrantId, { bg: string; bgDark: string; label: 
   watchlist:   { bg: "#fef2f2", bgDark: "rgba(239,68,68,0.08)",   label: "#b91c1c", labelDark: "#fca5a5" },
 };
 
-function pos(momentum: number, score: number) {
-  const fx = clamp01((momentum - AXIS_X_MIN) / (AXIS_X_MAX - AXIS_X_MIN));
+/** Project an (X, Y) pair into the SVG plot area. X = health, Y = score. */
+function pos(health: number, score: number) {
+  const fx = clamp01((health - AXIS_X_MIN) / (AXIS_X_MAX - AXIS_X_MIN));
   const fy = clamp01((score - AXIS_Y_MIN) / (AXIS_Y_MAX - AXIS_Y_MIN));
   return {
     x: PAD.left + fx * INNER_W,
@@ -68,7 +69,7 @@ export default function QuadrantChart({ data }: { data: QuadrantData }) {
   const counts = useMemo(() => {
     const c: Record<QuadrantId, number> = { leaders: 0, established: 0, challengers: 0, watchlist: 0 };
     for (const p of data.points) {
-      c[quadrantOf(p.now.score, p.now.momentum, data.scoreCut, data.momentumCut)] += 1;
+      c[quadrantOf(p.now.score, p.now.health, data.scoreCut, data.momentumCut)] += 1;
     }
     return c;
   }, [data]);
@@ -80,8 +81,8 @@ export default function QuadrantChart({ data }: { data: QuadrantData }) {
   }
 
   // Cut lines use the same projection as the dots so they stay aligned
-  // with the visible range. If the operator sets a cut outside the
-  // visible window, clamp the line to the nearest edge.
+  // with the visible range. X-axis cut applies to health, not raw
+  // momentum, so losing-list vendors always sit left of the cut.
   const cutPos = pos(data.momentumCut, data.scoreCut);
   const cutX = cutPos.x;
   const cutY = cutPos.y;
@@ -126,7 +127,7 @@ export default function QuadrantChart({ data }: { data: QuadrantData }) {
         </label>
 
         <label className="flex items-center gap-1.5">
-          <span className="font-semibold uppercase tracking-wide text-[#6a725f] dark:text-zinc-500">Momentum cut</span>
+          <span className="font-semibold uppercase tracking-wide text-[#6a725f] dark:text-zinc-500">Health cut</span>
           <input
             type="number"
             min={1}
@@ -223,7 +224,7 @@ export default function QuadrantChart({ data }: { data: QuadrantData }) {
           })}
           {/* Axis labels */}
           <text x={PAD.left + INNER_W / 2} y={HEIGHT - 8} textAnchor="middle" fontSize={11} fontWeight={600} className="fill-[#4d574b] dark:fill-zinc-300">
-            Momentum score →
+            Health score (momentum − risk drag − share drift) →
           </text>
           <text x={14} y={PAD.top + INNER_H / 2} textAnchor="middle" fontSize={11} fontWeight={600} transform={`rotate(-90, 14, ${PAD.top + INNER_H / 2})`} className="fill-[#4d574b] dark:fill-zinc-300">
             Overall score →
@@ -238,10 +239,10 @@ export default function QuadrantChart({ data }: { data: QuadrantData }) {
 
           {/* Trajectory arrows + dots */}
           {points.map((p) => {
-            const nowPos = pos(p.now.momentum, p.now.score);
-            const prevPos = p.prev ? pos(p.prev.momentum, p.prev.score) : null;
+            const nowPos = pos(p.now.health, p.now.score);
+            const prevPos = p.prev ? pos(p.prev.health, p.prev.score) : null;
             const isHovered = hovered === p.vendor.id;
-            const qNow = quadrantOf(p.now.score, p.now.momentum, data.scoreCut, data.momentumCut);
+            const qNow = quadrantOf(p.now.score, p.now.health, data.scoreCut, data.momentumCut);
             const colour = QUADRANT_COLOURS[qNow];
 
             // Only render the arrow if movement is visually meaningful.
@@ -302,11 +303,16 @@ export default function QuadrantChart({ data }: { data: QuadrantData }) {
 
         {/* Hover detail card */}
         {hoveredPoint && (
-          <div className="mt-3 grid gap-2 rounded-md border border-[#dfe4da] bg-[#f7f8f5] p-3 text-xs dark:border-zinc-700 dark:bg-[#0b1f30] md:grid-cols-[1fr_auto_auto_auto_auto]">
+          <div className="mt-3 grid gap-2 rounded-md border border-[#dfe4da] bg-[#f7f8f5] p-3 text-xs dark:border-zinc-700 dark:bg-[#0b1f30] md:grid-cols-[1.2fr_auto_auto_auto_auto_auto]">
             <div>
               <div className="text-[10px] uppercase tracking-wide text-[#6a725f] dark:text-zinc-500">Vendor</div>
               <div className="font-semibold text-[#18201b] dark:text-zinc-100">{hoveredPoint.vendor.name}</div>
               <div className="text-[#697362] dark:text-zinc-400">{hoveredPoint.vendor.category}</div>
+              {hoveredPoint.isLosing && (
+                <div className="mt-1 inline-block rounded bg-rose-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-rose-800 dark:bg-rose-950/50 dark:text-rose-300">
+                  On losing list
+                </div>
+              )}
             </div>
             <div>
               <div className="text-[10px] uppercase tracking-wide text-[#6a725f] dark:text-zinc-500">Score</div>
@@ -318,18 +324,23 @@ export default function QuadrantChart({ data }: { data: QuadrantData }) {
               )}
             </div>
             <div>
-              <div className="text-[10px] uppercase tracking-wide text-[#6a725f] dark:text-zinc-500">Momentum</div>
-              <div className="font-mono font-semibold dark:text-zinc-100">{hoveredPoint.now.momentum.toFixed(0)}</div>
+              <div className="text-[10px] uppercase tracking-wide text-[#6a725f] dark:text-zinc-500">Health</div>
+              <div className="font-mono font-semibold dark:text-zinc-100">{hoveredPoint.now.health.toFixed(1)}</div>
               {hoveredPoint.delta && (
-                <div className={`text-[10px] font-medium ${hoveredPoint.delta.momentum >= 0 ? "text-emerald-700 dark:text-emerald-400" : "text-rose-700 dark:text-rose-400"}`}>
-                  {hoveredPoint.delta.momentum >= 0 ? "▲ +" : "▼ "}{hoveredPoint.delta.momentum}
+                <div className={`text-[10px] font-medium ${hoveredPoint.delta.health >= 0 ? "text-emerald-700 dark:text-emerald-400" : "text-rose-700 dark:text-rose-400"}`}>
+                  {hoveredPoint.delta.health >= 0 ? "▲ +" : "▼ "}{hoveredPoint.delta.health}
                 </div>
               )}
             </div>
             <div>
+              <div className="text-[10px] uppercase tracking-wide text-[#6a725f] dark:text-zinc-500">Momentum</div>
+              <div className="font-mono font-semibold dark:text-zinc-100">{hoveredPoint.now.momentum.toFixed(0)}</div>
+              <div className="text-[10px] text-[#697362] dark:text-zinc-500">raw input</div>
+            </div>
+            <div>
               <div className="text-[10px] uppercase tracking-wide text-[#6a725f] dark:text-zinc-500">Quadrant</div>
               <div className="font-semibold dark:text-zinc-100">
-                {QUADRANT_LABELS[quadrantOf(hoveredPoint.now.score, hoveredPoint.now.momentum, data.scoreCut, data.momentumCut)]}
+                {QUADRANT_LABELS[quadrantOf(hoveredPoint.now.score, hoveredPoint.now.health, data.scoreCut, data.momentumCut)]}
                 {hoveredPoint.crossedQuadrant && <span className="ml-1 text-amber-700 dark:text-amber-400">(crossed)</span>}
               </div>
             </div>
@@ -344,7 +355,7 @@ export default function QuadrantChart({ data }: { data: QuadrantData }) {
       </div>
 
       <div className="text-[11px] leading-5 text-[#6a725f] dark:text-zinc-500">
-        Cuts at score = {data.scoreCut}, momentum = {data.momentumCut}. Arrows show movement since {new Date(Date.now() - data.windowDays * 86400 * 1000).toLocaleDateString()}. Dashed ring = vendor crossed a quadrant boundary in this window.
+        Cuts at score = {data.scoreCut}, health = {data.momentumCut}. Health = momentum − 8 × risk count − 1.5 × negative share drift − 0.3 × (70 − confidence). Any vendor on the dashboard&apos;s &quot;Who&apos;s losing&quot; list will have health &lt; 60 by construction, so cannot appear in the Leaders quadrant. Arrows show movement since {new Date(Date.now() - data.windowDays * 86400 * 1000).toLocaleDateString()}. Dashed ring = vendor crossed a quadrant boundary in this window.
       </div>
     </div>
   );

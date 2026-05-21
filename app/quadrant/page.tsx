@@ -26,7 +26,9 @@ export default async function QuadrantPage({ searchParams }: PageProps) {
   const params = await searchParams;
   const windowDays = parseNumber(params.days, 14, 1, 365);
   const scoreCut = parseNumber(params.scoreCut, 60, 1, 99);
-  const momentumCut = parseNumber(params.momentumCut, 50, 1, 99);
+  // Default 60: matches the dashboard's "Who's losing" momentum
+  // threshold so losing-list vendors mechanically land left of the cut.
+  const momentumCut = parseNumber(params.momentumCut, 60, 1, 99);
 
   const data = await buildQuadrantData({ windowDays, scoreCut, momentumCut });
 

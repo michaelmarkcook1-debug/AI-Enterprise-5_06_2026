@@ -5,9 +5,10 @@
 // the client `QuadrantChart` component can import them without
 // pulling Node modules (dns, fs, net, tls) into the browser bundle.
 
-import { listIntelligenceVendors, listVendorMomentum } from "./repository";
+import { listIntelligenceVendors, listVendorMomentum, listMarketShareEstimates } from "./repository";
 import { getPrisma, hasDatabase } from "../prisma";
 import { quadrantOf, type QuadrantData, type QuadrantPoint } from "./quadrant-shared";
+import { computeVendorHealth } from "./vendor-health";
 
 // Re-export the shared surface so existing imports of ./quadrant
 // continue to work for server consumers.
@@ -85,31 +86,78 @@ export async function buildQuadrantData(opts: BuildQuadrantOptions = {}): Promis
   const now = opts.now ?? new Date();
   const windowDays = opts.windowDays ?? 14;
   const scoreCut = opts.scoreCut ?? 60;
-  const momentumCut = opts.momentumCut ?? 50;
+  // X-axis cut: 60 by design so any vendor flagged as "losing" by the
+  // dashboard filter (which is mechanically guaranteed to have
+  // healthScore < 60) cannot land in the Leaders quadrant.
+  const momentumCut = opts.momentumCut ?? 60;
 
-  const [vendors, momenta] = await Promise.all([
+  const [vendors, momenta, shares] = await Promise.all([
     listIntelligenceVendors(),
     listVendorMomentum(),
+    listMarketShareEstimates(),
   ]);
   const momentumByVendor = new Map(momenta.map((m) => [m.vendorId, m.momentumScore]));
+
+  // Negative-share aggregation matches lib/intelligence/repository.ts
+  // shareTrendByVendor — sum of negative changePct per vendor across
+  // categories, expressed as a positive "drop in points" number.
+  const negShareByVendor = new Map<string, number>();
+  for (const s of shares) {
+    const drag = Math.abs(Math.min(0, s.changePct));
+    if (drag > 0) {
+      negShareByVendor.set(s.vendorId, (negShareByVendor.get(s.vendorId) ?? 0) + drag);
+    }
+  }
+
   const priors = await fetchPriorSnapshots(vendors.map((v) => v.id), windowDays, now);
 
   const points: QuadrantPoint[] = vendors.map((vendor) => {
     const score = vendor.overallScore;
     const momentum = momentumByVendor.get(vendor.id) ?? 50;
-    const prev = priors.get(vendor.id) ?? null;
+    const negShare = negShareByVendor.get(vendor.id) ?? 0;
+    const { healthScore, isLosing } = computeVendorHealth({
+      vendor,
+      momentumScore: momentum,
+      negativeShareDelta: negShare,
+    });
+
+    const priorRaw = priors.get(vendor.id) ?? null;
+    // Prior snapshots store only score + momentum. Reconstruct prior
+    // health using TODAY's risk/share drag (those move slowly) so the
+    // arrow direction reflects the momentum component of the change.
+    const prev = priorRaw
+      ? {
+          score: priorRaw.score,
+          momentum: priorRaw.momentum,
+          health: computeVendorHealth({
+            vendor,
+            momentumScore: priorRaw.momentum,
+            negativeShareDelta: negShare,
+          }).healthScore,
+        }
+      : null;
+
     const delta = prev
       ? {
           score: Math.round((score - prev.score) * 10) / 10,
           momentum: Math.round((momentum - prev.momentum) * 10) / 10,
+          health: Math.round((healthScore - prev.health) * 10) / 10,
         }
       : null;
+
     const crossedQuadrant = prev
-      ? quadrantOf(score, momentum, scoreCut, momentumCut)
-        !== quadrantOf(prev.score, prev.momentum, scoreCut, momentumCut)
+      ? quadrantOf(score, healthScore, scoreCut, momentumCut)
+        !== quadrantOf(prev.score, prev.health, scoreCut, momentumCut)
       : false;
 
-    return { vendor, now: { score, momentum }, prev, delta, crossedQuadrant };
+    return {
+      vendor,
+      now: { score, momentum, health: healthScore },
+      prev,
+      delta,
+      isLosing,
+      crossedQuadrant,
+    };
   });
 
   return {

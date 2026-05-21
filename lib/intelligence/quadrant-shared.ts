@@ -11,9 +11,17 @@ export type QuadrantId = "leaders" | "established" | "challengers" | "watchlist"
 
 export interface QuadrantPoint {
   vendor: Vendor;
-  now: { score: number; momentum: number };
-  prev: { score: number; momentum: number } | null;
-  delta: { score: number; momentum: number } | null;
+  /**
+   * Current position. `health` is the composite from vendor-health.ts
+   * (momentum minus risk/share/confidence drag). The quadrant uses
+   * health rather than raw momentum so it stays consistent with the
+   * dashboard "Who's losing" list.
+   */
+  now: { score: number; momentum: number; health: number };
+  prev: { score: number; momentum: number; health: number } | null;
+  delta: { score: number; momentum: number; health: number } | null;
+  /** True iff the vendor appears in the dashboard "Who's losing" list. */
+  isLosing: boolean;
   crossedQuadrant: boolean;
 }
 
