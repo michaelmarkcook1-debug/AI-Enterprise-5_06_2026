@@ -55,6 +55,7 @@ const NAV: { href: string; label: string }[] = [
   { href: "/briefings", label: "Briefings" },
   { href: "/market", label: "Market Tracker" },
   { href: "/exposure-map", label: "Exposure" },
+  { href: "/quadrant", label: "Quadrant" },
   { href: "/news", label: "News" },
   { href: "/reputation", label: "Reputation" },
   { href: "/watchlists", label: "Watchlists" },
