@@ -31,6 +31,17 @@ import {
   backfillRankingSnapshots,
 } from "../intelligence/ranking-snapshots";
 import { runCompetitiveIntelMonitor } from "../intelligence/competitive-monitor";
+import { fetchFinancialsForProviders } from "../investing/financials-live";
+import { fetchValuationForProviders } from "../investing/valuation-live";
+import { estimateAllIpoForecasts } from "../investing/ipo-estimator";
+import { fetchAnalystCoverageForAllProviders } from "../investing/analyst-coverage";
+import {
+  saveAnalystCoverage,
+  saveFinancials,
+  saveIpoForecasts,
+  saveValuations,
+} from "../investing/live-cache";
+import { INVESTMENT_PROVIDERS } from "../investing/seed";
 import { deriveVendorScores } from "./derive-scores";
 import { persistRefreshReport, getLastRefreshRun } from "./daily-refresh-store";
 import { getPrisma, hasDatabase } from "../prisma";
@@ -152,6 +163,56 @@ export async function runDailyRefresh(now: Date = new Date()): Promise<DailyRefr
       totalSearches: r.totalSearches,
       errorCount: r.errors.length,
       source: r.source,
+    };
+  }));
+
+  // ── 8. Investor-tools live refresh ─────────────────────────
+  //     SEC XBRL financials → Stooq+SEC valuations → IPO estimator
+  //     (LLM + news, deterministic fallback) → analyst coverage scrape.
+  //     Each sub-step records its own success/error count so the
+  //     /admin/pipeline-health panel can surface which source failed.
+  steps.push(await timed("investor_tools_refresh", async () => {
+    if (!dbConfigured) return { skipped: "no_database" };
+    const targets = INVESTMENT_PROVIDERS.filter((p) => p.exposureType !== "cash");
+
+    // 8a. Financials — SEC XBRL primary, vendor IR fallback via Claude.
+    const fin = await fetchFinancialsForProviders(targets);
+    await saveFinancials(fin.metrics);
+    const finFromSec = fin.reports.filter((r) => r.source === "sec_xbrl").length;
+    const finFromIr = fin.reports.filter((r) => r.source === "ir_page_llm").length;
+    const finErrors = fin.reports.filter((r) => r.error !== null).length;
+
+    // 8b. Valuations — Stooq close × SEC shares outstanding.
+    const val = await fetchValuationForProviders(targets, fin.metrics);
+    await saveValuations(val.metrics);
+    const valOk = val.reports.filter((r) => r.source !== "none").length;
+    const valErrors = val.reports.filter((r) => r.error !== null).length;
+
+    // 8c. IPO forecasts — LLM + news, deterministic fallback.
+    const ipo = await estimateAllIpoForecasts();
+    await saveIpoForecasts(ipo.forecasts);
+    const ipoFromLlm = ipo.reports.filter((r) => r.source === "llm").length;
+    const ipoFromDeterministic = ipo.reports.filter((r) => r.source === "deterministic").length;
+
+    // 8d. Analyst coverage — curated web scrape via Claude.
+    const ac = await fetchAnalystCoverageForAllProviders();
+    await saveAnalystCoverage(ac.items);
+    const acItems = ac.items.length;
+    const acVendorsWithCoverage = new Set(ac.items.map((i) => i.providerId)).size;
+    const acErrors = ac.reports.filter((r) => r.error !== null).length;
+
+    return {
+      financialsFromSec: finFromSec,
+      financialsFromIrFallback: finFromIr,
+      financialsErrors: finErrors,
+      financialsRows: fin.metrics.length,
+      valuationsComputed: valOk,
+      valuationsErrors: valErrors,
+      ipoForecastsLlm: ipoFromLlm,
+      ipoForecastsDeterministic: ipoFromDeterministic,
+      analystCoverageItems: acItems,
+      analystCoverageVendors: acVendorsWithCoverage,
+      analystCoverageErrors: acErrors,
     };
   }));
 

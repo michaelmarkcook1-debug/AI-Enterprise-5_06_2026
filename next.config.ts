@@ -2,6 +2,15 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   allowedDevOrigins: ["127.0.0.1"],
+  // Pin Turbopack to this project root. Without this, Next infers the
+  // workspace root from the nearest lockfile and was picking up
+  // ~/package-lock.json, causing it to scan the entire home directory
+  // tree on every change. That made first-compile take ~5 minutes and
+  // requests hang. `import.meta.dirname` is the absolute path of this
+  // file's directory (Node 20.11+).
+  turbopack: {
+    root: import.meta.dirname,
+  },
   async redirects() {
     // Section 5 of the prompt pack made /investor-tools the canonical surface.
     // The real page implementations live under /app/investing/* and are

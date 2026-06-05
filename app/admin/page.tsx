@@ -95,6 +95,11 @@ export default async function AdminHome() {
             body="Env-var gates and the production readiness contract."
           />
           <AdminCard
+            href="/admin/pipeline-health"
+            title="Pipeline health"
+            body="Last daily-refresh run, per-step status, and competitive-intel monitor health. Shows whether the Anthropic-backed news refresh is alive."
+          />
+          <AdminCard
             href="/admin/exposure-edits"
             title="Exposure-map edits"
             body="Propose adds / updates / removals to the indirect-exposure graph. Append-only JSONL audit; nothing live until a reviewer folds it in."

@@ -22,6 +22,8 @@ export interface QuadrantPoint {
   /** True iff the vendor appears in the dashboard "Who's losing" list. */
   isLosing: boolean;
   crossedQuadrant: boolean;
+  /** Aggregated market share across all market categories (0–100). */
+  marketShare: number;
   /** Component breakdown surfaced in the hover detail. */
   components: {
     execute: { confidence: number; reliability: number; breadth: number; riskDrag: number };

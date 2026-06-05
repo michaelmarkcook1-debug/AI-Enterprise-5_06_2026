@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 export default function ExposureMapPage() {
   return (
     <PageFrame
-      title="Indirect exposure map"
+      title="AI Ecosystem Navigator"
       kicker="Public to private linkage"
       description="Hover a logo to highlight its dependencies. Click to pin (up to 3). Filter by relationship type or confidence. Every edge here is publicly source-backed — seed-confidence edges render dashed and require independent verification."
     >

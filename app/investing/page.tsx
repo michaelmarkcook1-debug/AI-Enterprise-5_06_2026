@@ -5,6 +5,8 @@ import { VendorNameWithOwnership } from "@/components/ownership-indicator";
 import { getInvestmentDashboard } from "@/lib/investing/intelligence";
 import type { InvestmentProviderProfile } from "@/lib/investing/types";
 import { listNewsItems } from "@/lib/intelligence/repository";
+import { enrichInvestmentProviders } from "@/lib/investing/live-data";
+import { aggregateUptake } from "@/lib/intelligence/vendor-uptake-seed";
 import { InvestingCard, ProviderScoreTable, WarningStrip, label, ownershipFor } from "./investing-ui";
 
 export const dynamic = "force-dynamic";
@@ -16,6 +18,14 @@ export default async function InvestingDashboardPage() {
     .sort((a, b) => b.impactScore - a.impactScore)
     .slice(0, 6);
 
+  // Live overlay — enrich the top 8 ranked public providers with the
+  // app-wide spine (AI Atlas, uptake, news) so the hub surfaces the
+  // freshly classified data alongside the seed scoring model.
+  const topPublicProviders = dashboard.corePublicPlatforms.slice(0, 8).map((row) => row.provider);
+  const enrichedTop = await enrichInvestmentProviders(topPublicProviders, { skipQuotes: true, newsLimit: 1 });
+  const uptakeTop = aggregateUptake({}).slice(0, 5);
+  const newsTickerTop = (await listNewsItems()).slice(0, 5);
+
   return (
     <PageFrame
       title="Investment Intelligence"
@@ -23,7 +33,68 @@ export default async function InvestingDashboardPage() {
       description="A specialist AI-provider investment intelligence layer separating provider quality from investment attractiveness, valuation discipline, retail access, IPO risk, and indirect exposure."
     >
       <div className="space-y-5">
-        <WarningStrip />
+        {/* Live overlay strip — pulls from the same data the QUAD tabs use. */}
+        <div className="grid gap-4 lg:grid-cols-[1.1fr_0.95fr_1fr]">
+          <Panel title="AI Atlas position — top public providers">
+            <p className="mb-2 text-[11px] text-[#5f685a] dark:text-zinc-400">
+              Live Enhance × Innovate quadrant for each tracked public provider, sourced from the
+              <Link href="/query" className="ml-1 underline">Query tab</Link>.
+            </p>
+            <ul className="space-y-1.5 text-xs">
+              {enrichedTop.map((e) => (
+                <li key={e.provider.id} className="flex items-center justify-between gap-2">
+                  <Link href={`/investor-tools/provider/${e.provider.slug}`} className="truncate font-medium hover:underline">
+                    {e.provider.name}
+                  </Link>
+                  {e.atlas ? (
+                    <span className={`rounded-full px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${
+                      e.atlas.quadrant === "leaders"
+                        ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300"
+                        : e.atlas.quadrant === "challengers"
+                        ? "bg-blue-100 text-blue-800 dark:bg-blue-950/50 dark:text-blue-300"
+                        : e.atlas.quadrant === "visionaries"
+                        ? "bg-amber-100 text-amber-800 dark:bg-amber-950/50 dark:text-amber-200"
+                        : "bg-rose-100 text-rose-800 dark:bg-rose-950/50 dark:text-rose-300"
+                    }`}>{e.atlas.quadrant}</span>
+                  ) : <span className="text-[#66705f]">—</span>}
+                </li>
+              ))}
+            </ul>
+          </Panel>
+
+          <Panel title="Vendor uptake share — top 5 (May 2026 research)">
+            <p className="mb-2 text-[11px] text-[#5f685a] dark:text-zinc-400">
+              Share-of-named-vendor-usage from the
+              <Link href="/demonstrate#uptake" className="ml-1 underline">Demonstrate explorer</Link>.
+            </p>
+            <ul className="space-y-1.5 text-xs">
+              {uptakeTop.map((row, i) => (
+                <li key={row.vendor} className="flex items-center justify-between gap-2">
+                  <span className="truncate"><span className="mr-1.5 inline-block w-3 text-right font-mono text-[10px] text-[#697362]">{i + 1}</span>{row.vendor}</span>
+                  <span className="font-mono font-semibold">{(row.share * 100).toFixed(1)}%</span>
+                </li>
+              ))}
+            </ul>
+          </Panel>
+
+          <Panel title="Classified news ticker">
+            <p className="mb-2 text-[11px] text-[#5f685a] dark:text-zinc-400">
+              Latest items from the competitive-intel monitor.
+            </p>
+            <ul className="space-y-1.5 text-xs">
+              {newsTickerTop.map((item) => (
+                <li key={item.id} className="border-l-2 border-[#dfe4da] pl-2">
+                  <div className="truncate text-[#18201b] dark:text-zinc-100" title={item.title}>{item.title}</div>
+                  <div className="flex items-center gap-2 text-[10px] text-[#66705f]">
+                    <span>{new Date(item.publishedAt).toLocaleDateString()}</span>
+                    <span>impact {item.impactScore}</span>
+                    <SeedDataBadge label={item.sourceKind === "real" ? "live" : "seed"} provenance={item.sourceKind === "real" ? "live" : "seed"} />
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </Panel>
+        </div>
 
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <InvestingCard title="Top long-term AI exposure" provider={dashboard.cards.topLongTerm?.provider ?? null} score={dashboard.cards.topLongTerm?.provider.longTermHoldScore} href={`/investor-tools/provider/${dashboard.cards.topLongTerm?.provider.slug ?? ""}`} />

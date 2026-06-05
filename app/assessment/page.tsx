@@ -1,5 +1,5 @@
 import { INDUSTRIES } from "@/lib/industries";
-import { USE_CASES, PRIMARY_OBJECTIVES, ECOSYSTEMS } from "@/lib/use-cases";
+import { PRIMARY_OBJECTIVES, ECOSYSTEMS, workflowsForTier } from "@/lib/use-cases";
 import { listVendorProfiles } from "@/lib/repositories/vendor-profiles";
 import AssessForm from "../assess/AssessForm";
 import TierBar from "./TierBar";
@@ -27,7 +27,13 @@ export default async function AssessmentPage({ searchParams }: PageProps) {
       <AssessForm
         tier={tier}
         industries={Object.values(INDUSTRIES).map((i) => ({ id: i.id, name: i.name }))}
-        useCases={USE_CASES.map((u) => ({ id: u.id, label: u.label }))}
+        useCases={workflowsForTier(tier).map((u) => ({
+          id: u.id,
+          label: u.label,
+          category: u.category,
+          subcategory: u.subcategory,
+          description: u.description,
+        }))}
         objectives={PRIMARY_OBJECTIVES}
         ecosystems={ECOSYSTEMS}
         vendors={vendors.map((v) => ({ id: v.id, name: v.name, category: v.category, ownershipType: v.ownership }))}

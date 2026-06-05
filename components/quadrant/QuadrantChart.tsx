@@ -1,6 +1,6 @@
 "use client";
 
-// Magic Quadrant chart — Gartner-style 2x2.
+// AI Atlas chart — analyst-style 2x2.
 // ─────────────────────────────────────────
 // Y = ability to execute, X = completeness of vision (see
 // lib/intelligence/vendor-health.ts computeQuadrantAxes for the math).
@@ -18,16 +18,25 @@ const PAD = { top: 28, right: 28, bottom: 44, left: 64 };
 const INNER_W = WIDTH - PAD.left - PAD.right;
 const INNER_H = HEIGHT - PAD.top - PAD.bottom;
 
-// Both axes range 25-90 since execute + vision are 0-100 composites
-// that in practice stay inside that window.
-const AXIS_X_MIN = 25;
-const AXIS_X_MAX = 90;
-const AXIS_Y_MIN = 25;
-const AXIS_Y_MAX = 90;
-const X_TICKS = [25, 40, 50, 60, 70, 80, 90];
-const Y_TICKS = [25, 40, 50, 60, 70, 80, 90];
+// Both axes range 35-85 to spread vendors visually across the quadrant.
+// Execute + vision are 0-100 composites; narrowing from the extremes
+// prevents clustering in the center and makes distribution more apparent.
+const AXIS_X_MIN = 35;
+const AXIS_X_MAX = 85;
+const AXIS_Y_MIN = 35;
+const AXIS_Y_MAX = 85;
+
+const X_TICKS = [35, 45, 55, 65, 75, 85];
+const Y_TICKS = [35, 45, 55, 65, 75, 85];
 
 function clamp01(v: number) { return Math.max(0, Math.min(1, v)); }
+
+function radiusForShare(share: number, minShare: number, maxShare: number) {
+  if (maxShare === minShare) return 6;
+  const normalized = (share - minShare) / (maxShare - minShare);
+  // Market share bubble radius scaling: min 3px, max 10px.
+  return 3 + normalized * 7;
+}
 
 /** Project (vision, execute) into the SVG plot area. */
 function pos(vision: number, execute: number) {
@@ -59,17 +68,53 @@ export default function QuadrantChart({ data }: { data: QuadrantData }) {
   const [hovered, setHovered] = useState<string | null>(null);
   const [onlyCrossings, setOnlyCrossings] = useState(false);
 
+  const uniquePoints = useMemo(() => {
+    const byVendor = new Map<string, QuadrantData["points"][number]>();
+
+    for (const point of data.points) {
+      const current = byVendor.get(point.vendor.id);
+      const candidateIsStronger =
+        !current ||
+        point.now.score > current.now.score ||
+        (point.now.score === current.now.score && point.now.momentum > current.now.momentum);
+
+      if (candidateIsStronger) {
+        byVendor.set(point.vendor.id, point);
+      }
+    }
+
+    return Array.from(byVendor.values());
+  }, [data.points]);
+
   const points = useMemo(() => {
-    return onlyCrossings ? data.points.filter((p) => p.crossedQuadrant) : data.points;
-  }, [data.points, onlyCrossings]);
+    return onlyCrossings ? uniquePoints.filter((p) => p.crossedQuadrant) : uniquePoints;
+  }, [uniquePoints, onlyCrossings]);
+
+  const radiusBounds = useMemo(() => {
+    if (uniquePoints.length === 0) return null;
+    const shares = uniquePoints.map((p) => p.marketShare);
+    return {
+      minShare: Math.min(...shares),
+      maxShare: Math.max(...shares),
+    };
+  }, [uniquePoints]);
 
   const counts = useMemo(() => {
     const c: Record<QuadrantId, number> = { leaders: 0, challengers: 0, visionaries: 0, niche: 0 };
-    for (const p of data.points) {
+    for (const p of uniquePoints) {
       c[quadrantOf(p.now.execute, p.now.vision, data.executeCut, data.visionCut)] += 1;
     }
     return c;
-  }, [data]);
+  }, [data.executeCut, data.visionCut, uniquePoints]);
+
+  const movementSinceLabel = useMemo(() => {
+    const generatedAtMs = Date.parse(data.generatedAt);
+    if (!Number.isFinite(generatedAtMs)) {
+      return `${data.windowDays} days ago`;
+    }
+
+    return new Date(generatedAtMs - data.windowDays * 86400 * 1000).toISOString().slice(0, 10);
+  }, [data.generatedAt, data.windowDays]);
 
   function updateParam(key: string, value: string) {
     const params = new URLSearchParams(searchParams.toString());
@@ -81,7 +126,7 @@ export default function QuadrantChart({ data }: { data: QuadrantData }) {
   const cutX = cutPos.x;
   const cutY = cutPos.y;
 
-  const hoveredPoint = hovered ? data.points.find((p) => p.vendor.id === hovered) ?? null : null;
+  const hoveredPoint = hovered ? uniquePoints.find((p) => p.vendor.id === hovered) ?? null : null;
 
   return (
     <div className="space-y-4">
@@ -106,7 +151,7 @@ export default function QuadrantChart({ data }: { data: QuadrantData }) {
         </div>
 
         <label className="flex items-center gap-1.5">
-          <span className="font-semibold uppercase tracking-wide text-[#6a725f] dark:text-zinc-500">Execute cut</span>
+          <span className="font-semibold uppercase tracking-wide text-[#6a725f] dark:text-zinc-500">Enhance cut</span>
           <input
             type="number"
             min={1}
@@ -118,7 +163,7 @@ export default function QuadrantChart({ data }: { data: QuadrantData }) {
         </label>
 
         <label className="flex items-center gap-1.5">
-          <span className="font-semibold uppercase tracking-wide text-[#6a725f] dark:text-zinc-500">Vision cut</span>
+          <span className="font-semibold uppercase tracking-wide text-[#6a725f] dark:text-zinc-500">Innovate cut</span>
           <input
             type="number"
             min={1}
@@ -149,7 +194,7 @@ export default function QuadrantChart({ data }: { data: QuadrantData }) {
 
       {/* Chart */}
       <div className="rounded-lg border border-[#dfe4da] bg-white p-4 dark:border-zinc-800 dark:bg-[#071827]">
-        <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} className="w-full" role="img" aria-label="Magic quadrant: ability to execute vs completeness of vision">
+        <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} className="w-full" role="img" aria-label="AI Atlas: Enhance vs Innovate">
           {/* Quadrant background fills */}
           {(["leaders", "challengers", "visionaries", "niche"] as const).map((q) => {
             const x = q === "leaders" || q === "visionaries" ? cutX : PAD.left;
@@ -215,10 +260,10 @@ export default function QuadrantChart({ data }: { data: QuadrantData }) {
           })}
           {/* Axis labels */}
           <text x={PAD.left + INNER_W / 2} y={HEIGHT - 8} textAnchor="middle" fontSize={11} fontWeight={600} className="fill-[#4d574b] dark:fill-zinc-300">
-            Completeness of vision →
+            Innovate →
           </text>
           <text x={16} y={PAD.top + INNER_H / 2} textAnchor="middle" fontSize={11} fontWeight={600} transform={`rotate(-90, 16, ${PAD.top + INNER_H / 2})`} className="fill-[#4d574b] dark:fill-zinc-300">
-            Ability to execute →
+            Enhance →
           </text>
 
           {/* Arrow marker definition */}
@@ -235,6 +280,7 @@ export default function QuadrantChart({ data }: { data: QuadrantData }) {
             const isHovered = hovered === p.vendor.id;
             const qNow = quadrantOf(p.now.execute, p.now.vision, data.executeCut, data.visionCut);
             const colour = QUADRANT_COLOURS[qNow];
+            const radius = radiusBounds ? radiusForShare(p.marketShare, radiusBounds.minShare, radiusBounds.maxShare) : 6;
 
             const movedEnough = prevPos && (Math.abs(prevPos.x - nowPos.x) + Math.abs(prevPos.y - nowPos.y) > 4);
 
@@ -261,7 +307,7 @@ export default function QuadrantChart({ data }: { data: QuadrantData }) {
                 )}
                 <circle
                   cx={nowPos.x} cy={nowPos.y}
-                  r={isHovered ? 7 : 5}
+                  r={isHovered ? radius + 1.5 : radius}
                   fill={colour.label}
                   stroke="white" strokeWidth={1.5}
                   className="dark:stroke-zinc-900"
@@ -296,7 +342,7 @@ export default function QuadrantChart({ data }: { data: QuadrantData }) {
               )}
             </div>
             <div>
-              <div className="text-[10px] uppercase tracking-wide text-[#6a725f] dark:text-zinc-500">Execute</div>
+              <div className="text-[10px] uppercase tracking-wide text-[#6a725f] dark:text-zinc-500">Enhance</div>
               <div className="font-mono font-semibold dark:text-zinc-100">{hoveredPoint.now.execute.toFixed(1)}</div>
               {hoveredPoint.delta && (
                 <div className={`text-[10px] font-medium ${hoveredPoint.delta.execute >= 0 ? "text-emerald-700 dark:text-emerald-400" : "text-rose-700 dark:text-rose-400"}`}>
@@ -311,7 +357,7 @@ export default function QuadrantChart({ data }: { data: QuadrantData }) {
               </div>
             </div>
             <div>
-              <div className="text-[10px] uppercase tracking-wide text-[#6a725f] dark:text-zinc-500">Vision</div>
+              <div className="text-[10px] uppercase tracking-wide text-[#6a725f] dark:text-zinc-500">Innovate</div>
               <div className="font-mono font-semibold dark:text-zinc-100">{hoveredPoint.now.vision.toFixed(1)}</div>
               {hoveredPoint.delta && (
                 <div className={`text-[10px] font-medium ${hoveredPoint.delta.vision >= 0 ? "text-emerald-700 dark:text-emerald-400" : "text-rose-700 dark:text-rose-400"}`}>
@@ -346,7 +392,7 @@ export default function QuadrantChart({ data }: { data: QuadrantData }) {
       </div>
 
       <div className="text-[11px] leading-5 text-[#6a725f] dark:text-zinc-500">
-        Cuts at execute = {data.executeCut}, vision = {data.visionCut}. Execute = 0.40·confidence + 0.30·(enterprise-control + reliability-safety + vendor-resilience) + 0.20·industry breadth − 7·risk count. Vision = 0.40·momentum + 0.30·(business-fit + market-strength + integration-ops) + 0.20·use-case breadth − 1.5·negative share drift. Vendors on the &quot;Who&apos;s losing&quot; list are guaranteed to fall outside the Leaders quadrant. Arrows show movement since {new Date(Date.now() - data.windowDays * 86400 * 1000).toLocaleDateString()}.
+        Cuts at Enhance = {data.executeCut}, Innovate = {data.visionCut}. Enhance = 0.40·confidence + 0.30·(enterprise-control + reliability-safety + vendor-resilience) + 0.20·industry breadth − 7·risk count. Innovate = 0.40·momentum + 0.30·(business-fit + market-strength + integration-ops) + 0.20·use-case breadth − 1.5·negative share drift. Vendors on the &quot;Who&apos;s losing&quot; list are guaranteed to fall outside the Leaders quadrant. Arrows show movement since {movementSinceLabel}.
       </div>
     </div>
   );

@@ -32,9 +32,9 @@ export default async function QuadrantPage({ searchParams }: PageProps) {
 
   return (
     <PageFrame
-      title="Magic quadrant"
-      kicker="Ability to execute × completeness of vision"
-      description="Position of every tracked vendor on the analyst-standard two axes. Execute folds in evidence depth, reliability + enterprise-control pillars, industry breadth, and risk drag. Vision folds in momentum, business-fit + market-strength pillars, use-case breadth, and share drift. Vendors on the dashboard's 'Who's losing' list are mechanically pushed out of the Leaders quadrant. Arrows show movement since the prior snapshot."
+      title="AI Atlas"
+      kicker="Enhance × Innovate"
+      description="Position of every tracked vendor on the AI Atlas two axes. Enhance folds in evidence depth, reliability + enterprise-control pillars, industry breadth, and risk drag. Innovate folds in momentum, business-fit + market-strength pillars, use-case breadth, and share drift. Vendors on the dashboard's 'Who's losing' list are mechanically pushed out of the Leaders quadrant. Arrows show movement since the prior snapshot."
     >
       <QuadrantChart data={data} />
     </PageFrame>

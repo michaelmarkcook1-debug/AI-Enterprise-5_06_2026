@@ -108,11 +108,14 @@ export async function buildQuadrantData(opts: BuildQuadrantOptions = {}): Promis
   }
 
   const negShareByVendor = new Map<string, number>();
+  const marketShareByVendor = new Map<string, number>();
   for (const s of shares) {
     const drag = Math.abs(Math.min(0, s.changePct));
     if (drag > 0) {
       negShareByVendor.set(s.vendorId, (negShareByVendor.get(s.vendorId) ?? 0) + drag);
     }
+    const current = marketShareByVendor.get(s.vendorId) ?? 0;
+    marketShareByVendor.set(s.vendorId, current + s.estimatedShare);
   }
 
   const priors = await fetchPriorSnapshots(vendors.map((v) => v.id), windowDays, now);
@@ -179,8 +182,84 @@ export async function buildQuadrantData(opts: BuildQuadrantOptions = {}): Promis
       delta,
       isLosing,
       crossedQuadrant,
+      marketShare: marketShareByVendor.get(vendor.id) ?? 0,
       components: axes.components,
     };
+  });
+
+  // ─── Per-axis percentile spread ─────────────────────────────────────
+  // The raw execute/vision math tends to cluster vendors in the centre
+  // because most pillar/momentum inputs sit in the 50–70 band. To get
+  // a readable analyst-style chart that fills all FOUR quadrants
+  // (Leaders / Challengers / Visionaries / Niche), each axis is
+  // independently re-spread by percentile rank across [SPREAD_MIN,
+  // SPREAD_MAX]. A vendor strong on Enhance but weak on Innovate lands
+  // in Challengers; weak-Enhance + strong-Innovate lands in Visionaries;
+  // bottom-both in Niche; top-both in Leaders. The axis ordering is
+  // preserved (#1 in Enhance is still topmost) — only the spacing is
+  // normalised so every vendor is visible and the four quadrants are
+  // meaningfully populated.
+  const SPREAD_MIN = 38; // just above the bottom edge (axis min = 35)
+  const SPREAD_MAX = 82; // just below the top edge (axis max = 85)
+
+  function axisT(rank: number, n: number): number {
+    return n === 1 ? 0.5 : rank / (n - 1);
+  }
+  function axisPos(t: number): number {
+    return round1(SPREAD_MIN + (SPREAD_MAX - SPREAD_MIN) * t);
+  }
+
+  function spreadByPercentile(points: QuadrantPoint[]): QuadrantPoint[] {
+    if (points.length === 0) return points;
+    const N = points.length;
+
+    // Independent rank maps for execute and vision in the CURRENT window.
+    const executeRanksNow = rankIndex(points.map((p) => p.now.execute));
+    const visionRanksNow = rankIndex(points.map((p) => p.now.vision));
+
+    // To keep movement arrows on a consistent scale, rank the prior
+    // positions across the SAME vendor set and apply the same axis
+    // mapping. Without this, the arrow spans (raw prev) → (percentile
+    // spread now) which is meaningless and visually dominates the chart.
+    // Vendors with no prior snapshot are pinned to today's position so
+    // they render no arrow at all (delta = 0).
+    const prevExecuteRaw = points.map((p) => p.prev?.execute ?? p.now.execute);
+    const prevVisionRaw = points.map((p) => p.prev?.vision ?? p.now.vision);
+    const executeRanksPrev = rankIndex(prevExecuteRaw);
+    const visionRanksPrev = rankIndex(prevVisionRaw);
+
+    return points.map((p, i) => {
+      const nowExecute = axisPos(axisT(executeRanksNow[i], N));
+      const nowVision = axisPos(axisT(visionRanksNow[i], N));
+      const next: QuadrantPoint = {
+        ...p,
+        now: { ...p.now, execute: nowExecute, vision: nowVision },
+      };
+      if (p.prev) {
+        const prevExecute = axisPos(axisT(executeRanksPrev[i], N));
+        const prevVision = axisPos(axisT(visionRanksPrev[i], N));
+        next.prev = { ...p.prev, execute: prevExecute, vision: prevVision };
+      }
+      return next;
+    });
+  }
+
+  const spreadPoints = spreadByPercentile(points);
+
+  // Recompute delta + crossedQuadrant against the new positions so the
+  // hover detail and movement-arrow data stay consistent.
+  const finalPoints: QuadrantPoint[] = spreadPoints.map((p) => {
+    if (!p.prev) return p;
+    const delta = {
+      score: p.delta?.score ?? 0,
+      momentum: p.delta?.momentum ?? 0,
+      execute: round1(p.now.execute - p.prev.execute),
+      vision: round1(p.now.vision - p.prev.vision),
+    };
+    const crossedQuadrant =
+      quadrantOf(p.now.execute, p.now.vision, executeCut, visionCut) !==
+      quadrantOf(p.prev.execute, p.prev.vision, executeCut, visionCut);
+    return { ...p, delta, crossedQuadrant };
   });
 
   return {
@@ -188,6 +267,26 @@ export async function buildQuadrantData(opts: BuildQuadrantOptions = {}): Promis
     windowDays,
     executeCut,
     visionCut,
-    points,
+    points: finalPoints,
   };
+}
+
+function round1(value: number): number {
+  return Math.round(value * 10) / 10;
+}
+
+/**
+ * Return an array where rankIndex[i] is the percentile rank (0..N-1) of
+ * values[i] after sorting ascending. Ties are broken by stable index
+ * order so two equal scores still get distinct adjacent ranks (avoids
+ * dot-stacking on the chart).
+ */
+function rankIndex(values: number[]): number[] {
+  const indexed = values.map((v, i) => ({ v, i }));
+  indexed.sort((a, b) => a.v - b.v || a.i - b.i);
+  const ranks = new Array<number>(values.length);
+  indexed.forEach((entry, rank) => {
+    ranks[entry.i] = rank;
+  });
+  return ranks;
 }

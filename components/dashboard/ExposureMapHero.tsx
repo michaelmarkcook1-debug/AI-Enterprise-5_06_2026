@@ -1,6 +1,6 @@
 "use client";
 
-// Indirect Exposure Map — premium hero.
+// AI Ecosystem Navigator — premium hero.
 // ────────────────────────────────────
 // Replaces the previous diagnostic widget with a strategic-intelligence
 // hero per the May-2026 redesign brief. Key changes from the prior
@@ -252,7 +252,7 @@ export default function ExposureMapHero(_: { edges?: unknown } = {}) {
       {/* Header */}
       <div className="mb-5">
         <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-700 dark:text-emerald-400">
-          Indirect exposure map
+          AI Ecosystem Navigator
         </div>
         <h2 className="mt-1 text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50 md:text-3xl">
           Understand the AI Market at a Glance

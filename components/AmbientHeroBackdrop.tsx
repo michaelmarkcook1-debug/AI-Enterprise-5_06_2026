@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { usePortalTheme } from "@/lib/use-theme";
 
@@ -21,10 +20,6 @@ export default function AmbientHeroBackdrop() {
   // Skip on the home shell — it already paints a full hero.
   if (pathname === "/") return null;
 
-  // Always render the dark homescreen hero, in both light and dark modes —
-  // its cream-on-navy orbital atom gives the whole app a consistent
-  // AI Enterprise brand undertone. Opacity tuned so content stays readable.
-  const src = "/brand/ai-enterprise-dark.png";
   const opacity = theme === "dark" ? 0.18 : 0.08;
 
   return (
@@ -33,18 +28,12 @@ export default function AmbientHeroBackdrop() {
       className="pointer-events-none fixed inset-0 z-0 overflow-hidden"
       style={{ contain: "strict" }}
     >
-      <Image
-        key={src}
-        src={src}
-        alt=""
-        fill
-        priority={false}
-        sizes="100vw"
+      <div
+        className="absolute inset-[-18%]"
         style={{
-          objectFit: "cover",
-          objectPosition: "center",
-          filter: "blur(80px) saturate(0.9)",
-          transform: "scale(1.25)",
+          background:
+            "radial-gradient(circle at 24% 18%, rgba(52,211,153,0.28), transparent 24%), radial-gradient(circle at 76% 12%, rgba(245,196,81,0.18), transparent 22%), radial-gradient(circle at 52% 68%, rgba(34,211,238,0.22), transparent 28%)",
+          filter: "blur(84px) saturate(0.9)",
           opacity,
         }}
       />

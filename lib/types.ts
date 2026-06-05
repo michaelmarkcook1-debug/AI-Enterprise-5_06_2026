@@ -93,6 +93,30 @@ export type AutonomyAppetite = "advisory_only" | "human_in_loop" | "supervised_a
 export type AdoptionMaturityBand = "nascent" | "emerging" | "developing" | "mainstream" | "advanced";
 
 // User input — context that drives scoring (spec §7)
+/* ─── Guided tier additional inputs ─────────────────────────────── */
+
+export type GovernanceStrictness = 1 | 2 | 3 | 4 | 5;
+export type IntegrationDepth = "shallow" | "moderate" | "deep" | "core_system";
+export type HumanReviewModel = "no_review" | "sampling" | "approval_gate" | "dual_approval";
+export type LockInTolerance = "averse" | "cautious" | "comfortable" | "indifferent";
+export type DataResidency = "no_constraint" | "us_only" | "eu_only" | "uk_only" | "apac_only" | "sovereign_required";
+
+/* ─── Advanced tier additional inputs ───────────────────────────── */
+
+export type SwitchingCostTolerance = 1 | 2 | 3 | 4 | 5;
+export type SovereigntyRequirement = "none" | "soft" | "hard";
+export type RfpCycle = "informal" | "structured" | "formal_rfp" | "public_procurement";
+export type StackAppetite = "single_vendor" | "two_to_three" | "best_of_breed";
+export type ConcentrationRiskTolerance = "avoid_concentration" | "balanced" | "accept_concentration";
+export type TcoHorizon = "1_year" | "3_year" | "5_year" | "10_year";
+export type NegotiationPower = "low" | "medium" | "high";
+export type RequiredCertification =
+  | "soc2_type2" | "iso_27001" | "iso_42001"
+  | "hipaa" | "fedramp_moderate" | "fedramp_high"
+  | "pci_dss" | "gdpr_eu_dpa"
+  | "eu_ai_act_high_risk" | "uk_gov_g_cloud";
+export type OutputMode = "executive" | "buyer" | "technical" | "procurement";
+
 export interface AssessmentInput {
   industry: IndustryArchetype;
   region?: string;
@@ -107,6 +131,40 @@ export interface AssessmentInput {
   deploymentPreference: DeploymentPreference;
   budgetSensitivity: 1 | 2 | 3 | 4 | 5;
   vendorIds: string[]; // explicit set; if empty -> recommend
+
+  /* ─── v1.2 Guided fields (all optional) ───────────────────────── */
+
+  /** 1 = light-touch, 5 = SOX-strict end-to-end controls. */
+  governanceStrictness?: GovernanceStrictness;
+  /** How much of the org's stack the AI workflow touches. */
+  integrationDepth?: IntegrationDepth;
+  /** How outputs are reviewed before they affect the business. */
+  humanReviewModel?: HumanReviewModel;
+  /** How aversely the buyer treats vendor switching costs. */
+  lockInTolerance?: LockInTolerance;
+  /** Data-residency constraint inherited from policy or regulation. */
+  dataResidency?: DataResidency;
+
+  /* ─── v1.2 Advanced fields (all optional) ─────────────────────── */
+
+  /** 1 = will accept high re-platforming cost, 5 = zero appetite. */
+  switchingCostTolerance?: SwitchingCostTolerance;
+  /** Sovereignty / nationality requirement on the vendor + their cloud. */
+  sovereigntyRequirement?: SovereigntyRequirement;
+  /** Procurement ceremony the assessment must support. */
+  rfpCycle?: RfpCycle;
+  /** How many vendors the buyer wants in the final shortlist. */
+  stackAppetite?: StackAppetite;
+  /** How much vendor / cloud concentration the buyer will accept. */
+  concentrationRiskTolerance?: ConcentrationRiskTolerance;
+  /** TCO horizon used for valuation comparisons. */
+  tcoHorizon?: TcoHorizon;
+  /** Buyer's negotiation leverage with the shortlisted vendors. */
+  negotiationPower?: NegotiationPower;
+  /** Required vendor certifications (multi-select). */
+  requiredCertifications?: RequiredCertification[];
+  /** Output mode the results page should render. */
+  outputMode?: OutputMode;
 }
 
 export interface EvidenceItem {

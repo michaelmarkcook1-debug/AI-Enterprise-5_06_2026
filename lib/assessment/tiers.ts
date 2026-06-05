@@ -23,21 +23,21 @@ export const TIERS: TierMeta[] = [
     label: "Quick Assessment",
     estTime: "~2–4 min",
     description:
-      "The existing 4-step fit assessment. Best for fast triage and a first read.",
+      "4-step fit assessment with 12 most-common workflows. Fast triage and a first read.",
   },
   {
     id: "guided",
     label: "Guided Assessment",
-    estTime: "~5–8 min",
+    estTime: "~6–9 min",
     description:
-      "Adds decision-shaping depth — governance, integration depth, and human-review model. Adaptive follow-ups arrive in Phase 1B.",
+      "5 steps with ~30 workflows + a Governance step: strictness, integration depth, human-review model, lock-in tolerance, data residency. Adjusts pillar weights and applies vendor-by-vendor penalties.",
   },
   {
     id: "advanced",
     label: "Advanced Assessment",
-    estTime: "~10–15 min",
+    estTime: "~12–18 min",
     description:
-      "Procurement-grade depth for regulated deployment, RFP, and board scrutiny. Stack-based output + four output modes arrive in Phase 1B.",
+      "6 steps with all 65 workflows + Governance + Procurement: switching cost, sovereignty, RFP cycle, stack appetite, concentration risk, TCO horizon, required certifications, output mode. Procurement-grade with hard exclusions.",
   },
 ];
 

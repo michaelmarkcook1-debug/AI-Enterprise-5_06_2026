@@ -1,5 +1,5 @@
-import AIEnterpriseShell from "@/components/AIEnterpriseShell";
+import { redirect } from "next/navigation";
 
 export default function Home() {
-  return <AIEnterpriseShell />;
+  redirect("/atlas");
 }

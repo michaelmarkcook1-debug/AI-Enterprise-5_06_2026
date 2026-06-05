@@ -20,8 +20,19 @@ import {
   VendorResult,
 } from "./types";
 import { getIndustry, industryMaturityScore } from "./industries";
+import {
+  deriveWorkflowRiskProfile,
+  regulatoryEvidenceGapPenalty,
+  autonomyConflictPenalty,
+  type WorkflowRiskProfile,
+} from "./workflow-risk";
+import {
+  applyTierWeightDelta,
+  deriveTierOverlay,
+  type TierAdjustment,
+} from "./tier-overlay";
 
-export const SCORING_RULE_VERSION = "v1.0.0";
+export const SCORING_RULE_VERSION = "v1.2.0";
 
 // Stable hash for context — used for run reproducibility (spec §16 vendor_scores.context_hash)
 export function hashContext(input: AssessmentInput): string {
@@ -66,11 +77,29 @@ function scoreDomain(evidence: EvidenceItem[], strictness: number): {
 }
 
 // Dynamic context-aware pillar weights (spec §10 + §7).
-function dynamicWeights(industry: IndustryProfile, input: AssessmentInput): Record<PillarId, number> {
+// v1.1.0 — accepts an optional workflow-risk profile so weights use
+// the EFFECTIVE data sensitivity / reliability requirement derived
+// from the selected use cases, not just the dialled slider values.
+// When no profile is passed, behaviour is identical to v1.0.0.
+function dynamicWeights(
+  industry: IndustryProfile,
+  input: AssessmentInput,
+  profile?: WorkflowRiskProfile,
+): Record<PillarId, number> {
   const weights = { ...industry.weights };
-  // Data sensitivity bumps Enterprise Control.
-  const sensBump = (input.dataSensitivity - 3) * 0.02;
+  // Data sensitivity bumps Enterprise Control — use the effective
+  // value when a workflow profile is supplied so regulatory regimes
+  // implicitly tighten enterprise-control weighting.
+  const effectiveSensitivity = profile?.effectiveDataSensitivity ?? input.dataSensitivity;
+  const sensBump = (effectiveSensitivity - 3) * 0.02;
   weights.enterprise_control += sensBump;
+  // Reliability requirement tilt — if the selected workflows demand
+  // higher reliability than the buyer's risk tolerance would suggest,
+  // load more weight onto reliability_safety.
+  const effectiveReliability = profile?.effectiveReliabilityRequirement ?? 3;
+  const reliabilityBump = Math.max(0, effectiveReliability - 3) * 0.012;
+  weights.reliability_safety += reliabilityBump;
+  weights.market_strength -= reliabilityBump;
   // Risk tolerance: low tolerance → more weight on Reliability & Control, less on Market Strength.
   const riskAdj = (3 - input.riskTolerance) * 0.015;
   weights.reliability_safety += riskAdj;
@@ -293,6 +322,8 @@ export function scoreVendor(
   input: AssessmentInput,
   weights: Record<PillarId, number>,
   industry: IndustryProfile,
+  profile?: WorkflowRiskProfile,
+  tierOverlay?: TierAdjustment,
 ): VendorResult {
   const { breakdown, pillarScores, confidence } = buildPillarBreakdown(vendor, weights, industry);
   const sfBonus = strategicFitBonus(vendor, input);
@@ -301,14 +332,38 @@ export function scoreVendor(
   const { penalty: mePenalty, missing } = missingEvidencePenalty(vendor, weights);
   const adoptionFriction = adoptionFrictionPenalty(industry, input);
 
+  // v1.1.0 — workflow-risk overlay penalties. Applied softly so the
+  // scoring stays interpretable and rank order stays driven by the
+  // pillar evidence; these are tilts, not vetoes.
+  const regGap = profile
+    ? regulatoryEvidenceGapPenalty(vendor.evidence, profile)
+    : { penalty: 0, missingDomains: [] };
+  const autoConflict = profile ? autonomyConflictPenalty(profile) : 0;
+  const workflowOverlayPenalty = regGap.penalty + autoConflict;
+
+  // v1.2.0 — tier overlay. Adds per-vendor bonuses, penalties, and
+  // exclusions derived from the Guided + Advanced fields. The weight
+  // delta has already been applied to `weights` upstream in
+  // runAssessment so we only sum the per-vendor contributions here.
+  const tierPen = tierOverlay ? tierOverlay.perVendorPenalty(vendor) : 0;
+  const tierBon = tierOverlay ? tierOverlay.perVendorBonus(vendor) : 0;
+  const tierExcludedReason = tierOverlay ? tierOverlay.perVendorExclusion(vendor) : null;
+
   const baseScore = breakdown.reduce((s, b) => s + b.weightedContribution, 0);
   // Apply confidence as a soft modifier on the base (verified evidence raises ceiling).
   const confidenceBlend = 0.7 + 0.3 * (confidence / 100);
   const adjustedBase = baseScore * confidenceBlend;
-  const finalRaw = adjustedBase + sfBonus + saBonus - riskPenalty - mePenalty - adoptionFriction;
-  const finalScore = excluded ? 0 : Math.max(0, Math.min(100, finalRaw));
+  const finalRaw = adjustedBase + sfBonus + saBonus + tierBon - riskPenalty - mePenalty - adoptionFriction - workflowOverlayPenalty - tierPen;
+  const fullyExcluded = excluded || tierExcludedReason !== null;
+  const finalScore = fullyExcluded ? 0 : Math.max(0, Math.min(100, finalRaw));
 
-  const fatalCount = triggered.filter((r) => r.severity === "fatal").length;
+  const fatalCount = triggered.filter((r) => r.severity === "fatal").length + (tierExcludedReason ? 1 : 0);
+
+  // Surface regulatory evidence gaps as missing-evidence reasoning
+  // entries so users see WHY the vendor lost points.
+  const overlayMissing = regGap.missingDomains.map(
+    (d) => `Lacks E3+ evidence in ${d.replace(/_/g, " ")} (required by ${profile?.regulatoryRegimes.join(", ")})`,
+  );
 
   return {
     vendorId: vendor.id,
@@ -322,15 +377,26 @@ export function scoreVendor(
     pillarBreakdown: breakdown,
     topStrengths: topItems(strengthsFromBreakdown(breakdown), 4),
     topRisks: risksToText(triggered),
-    missingEvidence: missing.slice(0, 5),
-    validationSteps: validationStepsFor(missing, triggered),
+    missingEvidence: [...missing, ...overlayMissing].slice(0, 6),
+    validationSteps: validationStepsFor([...missing, ...overlayMissing], triggered),
     industryRationale: industryRationaleText(industry, weights),
     evidenceIds: vendor.evidence.map((e) => e.id),
     riskFlagsTriggered: triggered,
-    excluded,
-    excludedReason,
+    excluded: fullyExcluded,
+    excludedReason: excludedReason ?? tierExcludedReason ?? undefined,
     bonuses: { strategicFit: sfBonus, sectorAdoptionFit: saBonus },
-    penalties: { risk: riskPenalty, missingEvidence: mePenalty, adoptionFriction },
+    penalties: {
+      risk: riskPenalty,
+      missingEvidence: mePenalty,
+      adoptionFriction,
+      // v1.1.0 — surface the overlay component on the result so the UI
+      // can show "X pts deducted for regulatory evidence gaps". Extra
+      // key on the existing `penalties` map; the type widening is
+      // intentional and the existing UI ignores unknown keys.
+      ...(workflowOverlayPenalty > 0
+        ? { workflowOverlay: workflowOverlayPenalty }
+        : {}),
+    } as VendorResult["penalties"] & { workflowOverlay?: number },
   };
 }
 
@@ -340,13 +406,27 @@ export function runAssessment(
   runIdSeed: string = hashContext(input),
 ): AssessmentResult {
   const industry = getIndustry(input.industry);
-  const weights = dynamicWeights(industry, input);
+  // v1.1.0 — derive the workflow-risk overlay once, then thread it
+  // through the weight derivation and per-vendor scoring so every
+  // step uses the same effective sensitivity / reliability values.
+  const profile = deriveWorkflowRiskProfile(
+    input.useCases,
+    input.dataSensitivity,
+    input.riskTolerance,
+    input.autonomyAppetite,
+  );
+  // v1.2.0 — derive tier overlay (Guided + Advanced fields) and apply
+  // its weight delta on top of the dynamicWeights output. The per-vendor
+  // bonus / penalty / exclusion functions are threaded into scoreVendor.
+  const tierOverlay = deriveTierOverlay(input);
+  const baseWeights = dynamicWeights(industry, input, profile);
+  const weights = applyTierWeightDelta(baseWeights, tierOverlay.weightDelta);
   const selected = input.vendorIds.length > 0
     ? vendors.filter((v) => input.vendorIds.includes(v.id))
     : vendors;
 
   const results = selected
-    .map((v) => scoreVendor(v, input, weights, industry))
+    .map((v) => scoreVendor(v, input, weights, industry, profile, tierOverlay))
     .sort((a, b) => {
       if (a.excluded !== b.excluded) return a.excluded ? 1 : -1;
       return b.finalScore - a.finalScore;
@@ -370,5 +450,22 @@ export function runAssessment(
     inputSummary: { ...input, industryName: industry.name },
     ranking: results,
     comparisonSummary,
+    // v1.1.0 — surface the workflow-risk profile on the result so the
+    // /results UI can render the "why these effective values?" panel.
+    // Extra field; the original AssessmentResult type doesn't declare
+    // it so we cast on the way out. The UI checks for presence before
+    // rendering, so older consumers still work.
+    workflowRiskProfile: profile,
+    // v1.2.0 — surface the tier-overlay rationale so the /results UI
+    // can render the "which Guided / Advanced inputs changed the
+    // scoring" panel. Functions are stripped since they don't survive
+    // sessionStorage JSON round-trip; rationale + weightDelta survive.
+    tierOverlay: {
+      weightDelta: tierOverlay.weightDelta,
+      rationale: tierOverlay.rationale,
+    },
+  } as AssessmentResult & {
+    workflowRiskProfile: WorkflowRiskProfile;
+    tierOverlay: { weightDelta: Partial<Record<PillarId, number>>; rationale: string[] };
   };
 }
