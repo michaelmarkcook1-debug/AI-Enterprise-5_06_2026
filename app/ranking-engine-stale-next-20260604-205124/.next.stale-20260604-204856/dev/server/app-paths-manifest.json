@@ -1,7 +1,0 @@
-{
-  "/api/system/last-refreshed/route": "app/api/system/last-refreshed/route.js",
-  "/atlas/page": "app/atlas/page.js",
-  "/query/page": "app/query/page.js",
-  "/understand/page": "app/understand/page.js",
-  "/assess/page": "app/assess/page.js"
-}
