@@ -1,0 +1,12 @@
+node_modules
+.next
+.next.*
+out
+dist
+build
+.vercel
+.DS_Store
+.playwright-mcp
+*.log
+.env
+.env.local
