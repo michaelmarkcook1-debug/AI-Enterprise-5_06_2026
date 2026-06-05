@@ -1,0 +1,219 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]:
+      - link "AI Enterpise" [ref=e4] [cursor=pointer]:
+        - /url: /
+        - text: AI Enterpise
+      - navigation [ref=e6]:
+        - link "Dashboard" [ref=e7] [cursor=pointer]:
+          - /url: /
+        - link "Vendors" [ref=e8] [cursor=pointer]:
+          - /url: /vendors
+        - link "Market Tracker" [ref=e9] [cursor=pointer]:
+          - /url: /market
+        - link "News" [ref=e10] [cursor=pointer]:
+          - /url: /news
+        - link "Capabilities" [ref=e11] [cursor=pointer]:
+          - /url: /capabilities
+        - link "Assessment" [ref=e12] [cursor=pointer]:
+          - /url: /assessment
+        - link "Briefings" [ref=e13] [cursor=pointer]:
+          - /url: /briefings
+        - link "Watchlists" [ref=e14] [cursor=pointer]:
+          - /url: /watchlists
+      - link "Admin" [ref=e16] [cursor=pointer]:
+        - /url: /admin
+  - main [ref=e19]:
+    - generic [ref=e20]:
+      - generic [ref=e21]: Frontier model/API
+      - heading "OpenAI" [level=1] [ref=e22]
+      - paragraph [ref=e23]: Category shaper with strong model cadence and fast enterprise API expansion.
+    - generic [ref=e24]:
+      - generic [ref=e25]:
+        - heading "Overview" [level=2] [ref=e27]
+        - generic [ref=e28]:
+          - generic [ref=e29]:
+            - generic [ref=e30]:
+              - generic [ref=e31]: Market position
+              - generic [ref=e32]: Leader
+            - generic [ref=e33]:
+              - generic [ref=e34]: Overall score
+              - generic [ref=e35]: 91/100
+            - generic [ref=e36]:
+              - generic [ref=e37]: Evidence
+              - generic [ref=e39]: Confidence 78/100
+          - generic [ref=e40]: Winning, but buyers should separate model capability from enterprise operating control.
+      - generic [ref=e41]:
+        - heading "Strategy" [level=2] [ref=e43]
+        - generic [ref=e44]:
+          - paragraph [ref=e45]: Lead with model quality, agent runtime, enterprise controls, and ecosystem distribution through strategic partners.
+          - generic [ref=e46]: Deployment
+          - generic [ref=e47]:
+            - generic [ref=e48]: saas
+            - generic [ref=e49]: vpc
+    - generic [ref=e50]:
+      - generic [ref=e51]:
+        - heading "Six-pillar intelligence" [level=2] [ref=e53]
+        - generic [ref=e55]:
+          - generic [ref=e56]:
+            - generic [ref=e57]:
+              - generic [ref=e58]: Business Fit
+              - generic [ref=e59]: E3 tested
+            - generic [ref=e62]: "81"
+            - generic [ref=e65]: business fit signal is directionally strong for Frontier model/API.
+          - generic [ref=e66]:
+            - generic [ref=e67]:
+              - generic [ref=e68]: Enterprise Control
+              - generic [ref=e69]: E3 tested
+            - generic [ref=e72]: "85"
+            - generic [ref=e75]: enterprise control signal is directionally strong for Frontier model/API.
+          - generic [ref=e76]:
+            - generic [ref=e77]:
+              - generic [ref=e78]: Reliability & Safety
+              - generic [ref=e79]: E4 verified
+            - generic [ref=e82]: "89"
+            - generic [ref=e85]: reliability safety signal is directionally strong for Frontier model/API.
+          - generic [ref=e86]:
+            - generic [ref=e87]:
+              - generic [ref=e88]: Integration & Operations
+              - generic [ref=e89]: E4 verified
+            - generic [ref=e92]: "93"
+            - generic [ref=e95]: integration ops signal is directionally strong for Frontier model/API.
+          - generic [ref=e96]:
+            - generic [ref=e97]:
+              - generic [ref=e98]: Vendor Resilience
+              - generic [ref=e99]: E4 verified
+            - generic [ref=e102]: "97"
+            - generic [ref=e105]: vendor resilience signal is directionally strong for Frontier model/API.
+          - generic [ref=e106]:
+            - generic [ref=e107]:
+              - generic [ref=e108]: Market Strength
+              - generic [ref=e109]: E4 verified
+            - generic [ref=e112]: "87"
+            - generic [ref=e115]: market strength signal is directionally strong for Frontier model/API.
+      - generic [ref=e116]:
+        - heading "Capability tracker" [level=2] [ref=e118]
+        - generic [ref=e120]:
+          - generic [ref=e121]:
+            - generic [ref=e122]:
+              - generic [ref=e123]: Models
+              - generic [ref=e124]: E4 verified
+            - generic [ref=e127]: "96"
+            - generic [ref=e130]: OpenAI models signal is supported by stronger external evidence.
+          - generic [ref=e131]:
+            - generic [ref=e132]:
+              - generic [ref=e133]: Enterprise assistant
+              - generic [ref=e134]: E3 tested
+            - generic [ref=e137]: "82"
+            - generic [ref=e140]: OpenAI enterprise assistant signal is tested in public/proxy evidence.
+          - generic [ref=e141]:
+            - generic [ref=e142]:
+              - generic [ref=e143]: RAG / enterprise knowledge
+              - generic [ref=e144]: E3 tested
+            - generic [ref=e147]: "83"
+            - generic [ref=e150]: OpenAI rag / enterprise knowledge signal is tested in public/proxy evidence.
+          - generic [ref=e151]:
+            - generic [ref=e152]:
+              - generic [ref=e153]: Agents
+              - generic [ref=e154]: E4 verified
+            - generic [ref=e157]: "88"
+            - generic [ref=e160]: OpenAI agents signal is supported by stronger external evidence.
+          - generic [ref=e161]:
+            - generic [ref=e162]:
+              - generic [ref=e163]: Governance
+              - generic [ref=e164]: E3 tested
+            - generic [ref=e167]: "76"
+            - generic [ref=e170]: OpenAI governance signal is tested in public/proxy evidence.
+          - generic [ref=e171]:
+            - generic [ref=e172]:
+              - generic [ref=e173]: Security
+              - generic [ref=e174]: E2 documented
+            - generic [ref=e177]: "73"
+            - generic [ref=e180]: OpenAI security signal is documented.
+          - generic [ref=e181]:
+            - generic [ref=e182]:
+              - generic [ref=e183]: Integrations
+              - generic [ref=e184]: E3 tested
+            - generic [ref=e187]: "78"
+            - generic [ref=e190]: OpenAI integrations signal is tested in public/proxy evidence.
+          - generic [ref=e191]:
+            - generic [ref=e192]:
+              - generic [ref=e193]: Cost controls
+              - generic [ref=e194]: E2 documented
+            - generic [ref=e197]: "65"
+            - generic [ref=e200]: OpenAI cost controls signal is documented.
+          - generic [ref=e201]:
+            - generic [ref=e202]:
+              - generic [ref=e203]: Deployment options
+              - generic [ref=e204]: E4 verified
+            - generic [ref=e207]: "88"
+            - generic [ref=e210]: OpenAI deployment options signal is supported by stronger external evidence.
+          - generic [ref=e211]:
+            - generic [ref=e212]:
+              - generic [ref=e213]: Portability
+              - generic [ref=e214]: E4 verified
+            - generic [ref=e217]: "93"
+            - generic [ref=e220]: OpenAI portability signal is supported by stronger external evidence.
+    - generic [ref=e221]:
+      - generic [ref=e222]:
+        - heading "Industry strength" [level=2] [ref=e224]
+        - generic [ref=e226]:
+          - generic [ref=e227]:
+            - generic [ref=e229]:
+              - generic [ref=e230]: Technology
+              - generic [ref=e231]: "78"
+            - generic [ref=e234]: Good developer and platform fit.
+          - generic [ref=e235]:
+            - generic [ref=e237]:
+              - generic [ref=e238]: Financial services
+              - generic [ref=e239]: "68"
+            - generic [ref=e242]: Requires control validation.
+          - generic [ref=e243]:
+            - generic [ref=e245]:
+              - generic [ref=e246]: Healthcare
+              - generic [ref=e247]: "62"
+            - generic [ref=e250]: Needs privacy and clinical workflow evidence.
+      - generic [ref=e251]:
+        - heading "Market share by category" [level=2] [ref=e253]
+        - generic [ref=e255]:
+          - generic [ref=e256]:
+            - generic [ref=e257]: Frontier model/API
+            - generic [ref=e258]: 29%
+          - generic [ref=e259]:
+            - generic [ref=e260]: Enterprise assistant
+            - generic [ref=e261]: 15%
+          - generic [ref=e262]:
+            - generic [ref=e263]: Developer/coding agent
+            - generic [ref=e264]: 12%
+          - generic [ref=e265]:
+            - generic [ref=e266]: Agent platform
+            - generic [ref=e267]: 18%
+      - generic [ref=e268]:
+        - heading "Risk profile" [level=2] [ref=e270]
+        - generic [ref=e272]:
+          - generic [ref=e273]: Commercial dependency concentration
+          - generic [ref=e274]: fast-changing roadmap
+    - generic [ref=e276]:
+      - heading "News timeline" [level=2] [ref=e278]
+      - generic [ref=e280]:
+        - link "OpenAI expands enterprise agent runtime controls 88 Improves the agent operating model, but buyers still need proof across permission inheritance and audit trails." [ref=e281] [cursor=pointer]:
+          - /url: /news
+          - generic [ref=e282]:
+            - generic [ref=e283]: OpenAI expands enterprise agent runtime controls
+            - generic [ref=e284]: "88"
+          - generic [ref=e285]: Improves the agent operating model, but buyers still need proof across permission inheritance and audit trails.
+        - link "Enterprise buyers flag rising AI usage-cost variance 82 Cost variance can derail scale even when pilots look successful; demand telemetry and usage guardrails." [ref=e286] [cursor=pointer]:
+          - /url: /news
+          - generic [ref=e287]:
+            - generic [ref=e288]: Enterprise buyers flag rising AI usage-cost variance
+            - generic [ref=e289]: "82"
+          - generic [ref=e290]: Cost variance can derail scale even when pilots look successful; demand telemetry and usage guardrails.
+        - link "Regulatory pressure increases demand for evidence packs 84 Vendors with documented and verified controls should benefit; inferred claims should be discounted." [ref=e291] [cursor=pointer]:
+          - /url: /news
+          - generic [ref=e292]:
+            - generic [ref=e293]: Regulatory pressure increases demand for evidence packs
+            - generic [ref=e294]: "84"
+          - generic [ref=e295]: Vendors with documented and verified controls should benefit; inferred claims should be discounted.
+  - contentinfo [ref=e296]: AI Enterpise · Enterprise AI Market Intelligence · Mock data — confidence indicators on every estimate · v0.2
+  - button "Open Next.js Dev Tools" [ref=e302] [cursor=pointer]:
+    - img [ref=e303]

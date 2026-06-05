@@ -1,0 +1,322 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]:
+      - link "AI Enterpise" [ref=e4] [cursor=pointer]:
+        - /url: /
+        - text: AI Enterpise
+      - navigation [ref=e6]:
+        - link "Dashboard" [ref=e7] [cursor=pointer]:
+          - /url: /
+        - link "Vendors" [ref=e8] [cursor=pointer]:
+          - /url: /vendors
+        - link "Market Tracker" [ref=e9] [cursor=pointer]:
+          - /url: /market
+        - link "News" [ref=e10] [cursor=pointer]:
+          - /url: /news
+        - link "Capabilities" [ref=e11] [cursor=pointer]:
+          - /url: /capabilities
+        - link "Assessment" [ref=e12] [cursor=pointer]:
+          - /url: /assessment
+        - link "Briefings" [ref=e13] [cursor=pointer]:
+          - /url: /briefings
+        - link "Watchlists" [ref=e14] [cursor=pointer]:
+          - /url: /watchlists
+      - link "Admin" [ref=e16] [cursor=pointer]:
+        - /url: /admin
+  - main [ref=e19]:
+    - generic [ref=e20]:
+      - generic [ref=e21]:
+        - generic [ref=e22]: Executive market dashboard
+        - heading "AI Enterpise tracks who is winning, where momentum is moving, and which enterprise AI risks matter." [level=1] [ref=e23]
+        - paragraph [ref=e24]: Directional market intelligence across enterprise AI platforms, category share, agentic momentum, capability change, and evidence confidence.
+      - generic [ref=e25]:
+        - generic [ref=e26]:
+          - generic [ref=e27]: "20"
+          - generic [ref=e28]: Tracked vendors
+          - generic [ref=e29]: MVP universe
+        - generic [ref=e30]:
+          - generic [ref=e31]: "6"
+          - generic [ref=e32]: Major signals
+          - generic [ref=e33]: This week
+        - generic [ref=e34]:
+          - generic [ref=e35]: "8"
+          - generic [ref=e36]: Risk alerts
+          - generic [ref=e37]: Confidence labelled
+        - generic [ref=e38]:
+          - generic [ref=e39]: "10"
+          - generic [ref=e40]: Categories
+          - generic [ref=e41]: No generic share
+    - generic [ref=e42]:
+      - generic [ref=e43]:
+        - generic [ref=e44]:
+          - heading "Top enterprise AI platform vendors" [level=2] [ref=e45]
+          - link "View all" [ref=e46] [cursor=pointer]:
+            - /url: /vendors
+        - generic [ref=e48]:
+          - link "1 OpenAI Frontier model/API - Leader 91 Confidence 78/100" [ref=e49] [cursor=pointer]:
+            - /url: /vendors/openai
+            - generic [ref=e50]: "1"
+            - generic [ref=e51]:
+              - generic [ref=e52]: OpenAI
+              - generic [ref=e53]: Frontier model/API - Leader
+            - generic [ref=e54]:
+              - generic [ref=e55]: "91"
+              - generic [ref=e56]: Confidence 78/100
+          - link "2 Microsoft Cloud AI platform - Leader 90 Confidence 84/100" [ref=e57] [cursor=pointer]:
+            - /url: /vendors/microsoft
+            - generic [ref=e58]: "2"
+            - generic [ref=e59]:
+              - generic [ref=e60]: Microsoft
+              - generic [ref=e61]: Cloud AI platform - Leader
+            - generic [ref=e62]:
+              - generic [ref=e63]: "90"
+              - generic [ref=e64]: Confidence 84/100
+          - link "3 Google Cloud AI platform - Major challenger 86 Confidence 76/100" [ref=e65] [cursor=pointer]:
+            - /url: /vendors/google
+            - generic [ref=e66]: "3"
+            - generic [ref=e67]:
+              - generic [ref=e68]: Google
+              - generic [ref=e69]: Cloud AI platform - Major challenger
+            - generic [ref=e70]:
+              - generic [ref=e71]: "86"
+              - generic [ref=e72]: Confidence 76/100
+          - link "4 Anthropic Frontier model/API - Major challenger 84 Confidence 73/100" [ref=e73] [cursor=pointer]:
+            - /url: /vendors/anthropic
+            - generic [ref=e74]: "4"
+            - generic [ref=e75]:
+              - generic [ref=e76]: Anthropic
+              - generic [ref=e77]: Frontier model/API - Major challenger
+            - generic [ref=e78]:
+              - generic [ref=e79]: "84"
+              - generic [ref=e80]: Confidence 73/100
+          - link "5 AWS Cloud AI platform - Major challenger 83 Confidence 82/100" [ref=e81] [cursor=pointer]:
+            - /url: /vendors/aws
+            - generic [ref=e82]: "5"
+            - generic [ref=e83]:
+              - generic [ref=e84]: AWS
+              - generic [ref=e85]: Cloud AI platform - Major challenger
+            - generic [ref=e86]:
+              - generic [ref=e87]: "83"
+              - generic [ref=e88]: Confidence 82/100
+          - link "6 Salesforce CRM/customer AI - Major challenger 80 Confidence 75/100" [ref=e89] [cursor=pointer]:
+            - /url: /vendors/salesforce
+            - generic [ref=e90]: "6"
+            - generic [ref=e91]:
+              - generic [ref=e92]: Salesforce
+              - generic [ref=e93]: CRM/customer AI - Major challenger
+            - generic [ref=e94]:
+              - generic [ref=e95]: "80"
+              - generic [ref=e96]: Confidence 75/100
+          - link "7 Databricks Cloud AI platform - Category leader 79 Confidence 76/100" [ref=e97] [cursor=pointer]:
+            - /url: /vendors/databricks
+            - generic [ref=e98]: "7"
+            - generic [ref=e99]:
+              - generic [ref=e100]: Databricks
+              - generic [ref=e101]: Cloud AI platform - Category leader
+            - generic [ref=e102]:
+              - generic [ref=e103]: "79"
+              - generic [ref=e104]: Confidence 76/100
+      - generic [ref=e105]:
+        - heading "Who is winning and losing" [level=2] [ref=e107]
+        - generic [ref=e109]:
+          - generic [ref=e110]:
+            - generic [ref=e111]: Winning
+            - generic [ref=e112]:
+              - generic [ref=e113]:
+                - generic [ref=e114]: Microsoft
+                - generic [ref=e115]: Momentum 70/100 with visible category movement.
+              - generic [ref=e116]:
+                - generic [ref=e117]: Google
+                - generic [ref=e118]: Momentum 68/100 with visible category movement.
+              - generic [ref=e119]:
+                - generic [ref=e120]: OpenAI
+                - generic [ref=e121]: Momentum 68/100 with visible category movement.
+              - generic [ref=e122]:
+                - generic [ref=e123]: AWS
+                - generic [ref=e124]: Momentum 67/100 with visible category movement.
+          - generic [ref=e125]:
+            - generic [ref=e126]: Losing ground
+            - generic [ref=e127]:
+              - generic [ref=e128]:
+                - generic [ref=e129]: Rogo
+                - generic [ref=e130]: Confidence, evidence depth, or category concentration is limiting the current view.
+              - generic [ref=e131]:
+                - generic [ref=e132]: Hebbia
+                - generic [ref=e133]: Confidence, evidence depth, or category concentration is limiting the current view.
+              - generic [ref=e134]:
+                - generic [ref=e135]: Mistral
+                - generic [ref=e136]: Confidence, evidence depth, or category concentration is limiting the current view.
+              - generic [ref=e137]:
+                - generic [ref=e138]: Cohere
+                - generic [ref=e139]: Confidence, evidence depth, or category concentration is limiting the current view.
+    - generic [ref=e140]:
+      - generic [ref=e141]:
+        - heading "Biggest weekly movers" [level=2] [ref=e143]
+        - generic [ref=e145]:
+          - generic [ref=e146]:
+            - generic [ref=e147]:
+              - generic [ref=e148]: Mistral
+              - generic [ref=e149]: +40%
+            - generic [ref=e150]: frontier model api estimate moved from 5 to 7%.
+          - generic [ref=e151]:
+            - generic [ref=e152]:
+              - generic [ref=e153]: Harvey
+              - generic [ref=e154]: +30%
+            - generic [ref=e155]: regulated industry ai estimate moved from 10 to 13%.
+          - generic [ref=e156]:
+            - generic [ref=e157]:
+              - generic [ref=e158]: OpenAI
+              - generic [ref=e159]: +28.6%
+            - generic [ref=e160]: agent platform estimate moved from 14 to 18%.
+          - generic [ref=e161]:
+            - generic [ref=e162]:
+              - generic [ref=e163]: ServiceNow
+              - generic [ref=e164]: +28.6%
+            - generic [ref=e165]: agent platform estimate moved from 7 to 9%.
+          - generic [ref=e166]:
+            - generic [ref=e167]:
+              - generic [ref=e168]: Glean
+              - generic [ref=e169]: +25%
+            - generic [ref=e170]: enterprise assistant estimate moved from 8 to 10%.
+      - generic [ref=e171]:
+        - heading "Agentic AI momentum" [level=2] [ref=e173]
+        - generic [ref=e175]:
+          - generic [ref=e177]:
+            - generic [ref=e178]: Microsoft
+            - generic [ref=e179]: "70"
+          - generic [ref=e183]:
+            - generic [ref=e184]: OpenAI
+            - generic [ref=e185]: "68"
+          - generic [ref=e189]:
+            - generic [ref=e190]: AWS
+            - generic [ref=e191]: "67"
+          - generic [ref=e195]:
+            - generic [ref=e196]: Databricks
+            - generic [ref=e197]: "66"
+          - generic [ref=e201]:
+            - generic [ref=e202]: ServiceNow
+            - generic [ref=e203]: "63"
+      - generic [ref=e206]:
+        - heading "Enterprise risk alerts" [level=2] [ref=e208]
+        - generic [ref=e210]:
+          - generic [ref=e211]:
+            - generic [ref=e212]:
+              - generic [ref=e213]: Anthropic
+              - generic [ref=e214]: medium
+            - generic [ref=e215]: Narrower first-party enterprise suite
+          - generic [ref=e216]:
+            - generic [ref=e217]:
+              - generic [ref=e218]: AWS
+              - generic [ref=e219]: watch
+            - generic [ref=e220]: Complexity for non-AWS estates
+          - generic [ref=e221]:
+            - generic [ref=e222]:
+              - generic [ref=e223]: Cohere
+              - generic [ref=e224]: medium
+            - generic [ref=e225]: Lower broad-market visibility
+          - generic [ref=e226]:
+            - generic [ref=e227]:
+              - generic [ref=e228]: Databricks
+              - generic [ref=e229]: watch
+            - generic [ref=e230]: Business-user assistant reach
+          - generic [ref=e231]:
+            - generic [ref=e232]:
+              - generic [ref=e233]: Glean
+              - generic [ref=e234]: medium
+            - generic [ref=e235]: Platform breadth
+    - generic [ref=e236]:
+      - generic [ref=e237]:
+        - heading "Recent major news" [level=2] [ref=e239]
+        - generic [ref=e241]:
+          - link "OpenAI expands enterprise agent runtime controls 88 Improves the agent operating model, but buyers still need proof across permission inheritance and audit trails." [ref=e242] [cursor=pointer]:
+            - /url: /news
+            - generic [ref=e243]:
+              - generic [ref=e244]: OpenAI expands enterprise agent runtime controls
+              - generic [ref=e245]: "88"
+            - generic [ref=e246]: Improves the agent operating model, but buyers still need proof across permission inheritance and audit trails.
+          - link "Microsoft pushes Copilot agents deeper into enterprise workflows 86 Distribution advantage is meaningful, but market share remains category-specific and cost governance stays material." [ref=e247] [cursor=pointer]:
+            - /url: /news
+            - generic [ref=e248]:
+              - generic [ref=e249]: Microsoft pushes Copilot agents deeper into enterprise workflows
+              - generic [ref=e250]: "86"
+            - generic [ref=e251]: Distribution advantage is meaningful, but market share remains category-specific and cost governance stays material.
+          - link "Google strengthens multimodal enterprise AI packaging 76 Multimodal quality can shift workload-level fit, especially in content-rich operational processes." [ref=e252] [cursor=pointer]:
+            - /url: /news
+            - generic [ref=e253]:
+              - generic [ref=e254]: Google strengthens multimodal enterprise AI packaging
+              - generic [ref=e255]: "76"
+            - generic [ref=e256]: Multimodal quality can shift workload-level fit, especially in content-rich operational processes.
+          - link "Anthropic extends enterprise safety positioning 74 The control narrative is useful, but procurement should inspect deployment, logging, and retention evidence." [ref=e257] [cursor=pointer]:
+            - /url: /news
+            - generic [ref=e258]:
+              - generic [ref=e259]: Anthropic extends enterprise safety positioning
+              - generic [ref=e260]: "74"
+            - generic [ref=e261]: The control narrative is useful, but procurement should inspect deployment, logging, and retention evidence.
+          - link "Salesforce packages CRM agents around service and sales workflows 78 Workflow ownership makes the signal relevant in CRM-heavy estates, not as generic platform leadership." [ref=e262] [cursor=pointer]:
+            - /url: /news
+            - generic [ref=e263]:
+              - generic [ref=e264]: Salesforce packages CRM agents around service and sales workflows
+              - generic [ref=e265]: "78"
+            - generic [ref=e266]: Workflow ownership makes the signal relevant in CRM-heavy estates, not as generic platform leadership.
+          - link "ServiceNow advances service workflow AI roadmap 77 ServiceNow can convert workflow ownership into agent adoption if approvals and auditability remain clear." [ref=e267] [cursor=pointer]:
+            - /url: /news
+            - generic [ref=e268]:
+              - generic [ref=e269]: ServiceNow advances service workflow AI roadmap
+              - generic [ref=e270]: "77"
+            - generic [ref=e271]: ServiceNow can convert workflow ownership into agent adoption if approvals and auditability remain clear.
+      - generic [ref=e272]:
+        - heading "Sector-specific leaders" [level=2] [ref=e274]
+        - generic [ref=e276]:
+          - generic [ref=e277]:
+            - generic [ref=e278]: Technology
+            - generic [ref=e279]:
+              - generic [ref=e280]:
+                - generic [ref=e281]: Anthropic
+                - generic [ref=e282]: "78"
+              - generic [ref=e283]:
+                - generic [ref=e284]: AWS
+                - generic [ref=e285]: "78"
+              - generic [ref=e286]:
+                - generic [ref=e287]: Cohere
+                - generic [ref=e288]: "78"
+          - generic [ref=e289]:
+            - generic [ref=e290]: Financial services
+            - generic [ref=e291]:
+              - generic [ref=e292]:
+                - generic [ref=e293]: Rogo
+                - generic [ref=e294]: "86"
+              - generic [ref=e295]:
+                - generic [ref=e296]: Anthropic
+                - generic [ref=e297]: "68"
+              - generic [ref=e298]:
+                - generic [ref=e299]: AWS
+                - generic [ref=e300]: "68"
+          - generic [ref=e301]:
+            - generic [ref=e302]: Healthcare
+            - generic [ref=e303]:
+              - generic [ref=e304]:
+                - generic [ref=e305]: Anthropic
+                - generic [ref=e306]: "62"
+              - generic [ref=e307]:
+                - generic [ref=e308]: AWS
+                - generic [ref=e309]: "62"
+              - generic [ref=e310]:
+                - generic [ref=e311]: Cohere
+                - generic [ref=e312]: "62"
+          - generic [ref=e313]:
+            - generic [ref=e314]: Legal
+            - generic [ref=e316]:
+              - generic [ref=e317]: Harvey
+              - generic [ref=e318]: "91"
+          - generic [ref=e319]:
+            - generic [ref=e320]: Regulated enterprise
+            - generic [ref=e322]:
+              - generic [ref=e323]: IBM
+              - generic [ref=e324]: "82"
+          - generic [ref=e325]:
+            - generic [ref=e326]: Customer operations
+            - generic [ref=e328]:
+              - generic [ref=e329]: Salesforce
+              - generic [ref=e330]: "89"
+    - paragraph [ref=e332]: Estimated or inferred values are confidence-labelled. Market share and momentum are directional signals, not proof of vendor quality.
+  - contentinfo [ref=e333]: AI Enterpise · Enterprise AI Market Intelligence · Mock data — confidence indicators on every estimate · v0.2

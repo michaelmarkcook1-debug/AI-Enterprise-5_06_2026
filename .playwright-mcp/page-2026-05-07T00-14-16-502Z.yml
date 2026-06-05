@@ -1,0 +1,31 @@
+- generic [ref=e1]:
+  - button "Open Next.js Dev Tools" [ref=e26] [cursor=pointer]:
+    - img [ref=e27]
+  - alert [ref=e20]
+  - main [ref=e31]:
+    - generic [ref=e32]:
+      - generic [ref=e33]:
+        - generic [ref=e34]:
+          - generic [ref=e36]: Context
+          - generic [ref=e37]: →
+        - generic [ref=e38]:
+          - generic [ref=e40]: Use case
+          - generic [ref=e41]: →
+        - generic [ref=e42]:
+          - generic [ref=e44]: Risk & ecosystem
+          - generic [ref=e45]: →
+        - generic [ref=e48]: Vendors
+      - heading "Vendors" [level=1] [ref=e133]
+    - generic [ref=e50]:
+      - generic [ref=e134]:
+        - paragraph [ref=e135]: Select vendors to compare, or leave empty to score the full universe.
+        - generic [ref=e136]:
+          - button "Atlas Enterprise AI — Enterprise AI Platform" [ref=e137]
+          - button "Borealis Frontier — Frontier Model + Enterprise API" [ref=e138]
+          - button "Caelum Legal AI — Legal Vertical AI" [ref=e139]
+          - button "Delta Open Stack — Open-source AI Platform" [ref=e140]
+          - button "Evergreen Clinical AI — Health & Life Sciences AI" [ref=e141]
+          - button "Falcon Agents — Agentic Automation Startup" [ref=e142]
+      - generic [ref=e64]:
+        - button "Back" [ref=e65]
+        - button "Run assessment" [active] [ref=e143]

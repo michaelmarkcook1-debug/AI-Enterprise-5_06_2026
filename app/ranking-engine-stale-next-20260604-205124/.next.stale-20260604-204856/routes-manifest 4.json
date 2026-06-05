@@ -1,0 +1,1090 @@
+{
+  "version": 3,
+  "pages404": true,
+  "appType": "app",
+  "caseSensitive": false,
+  "basePath": "",
+  "redirects": [
+    {
+      "source": "/:path+/",
+      "destination": "/:path+",
+      "internal": true,
+      "priority": true,
+      "statusCode": 308,
+      "regex": "^(?:/((?:[^/]+?)(?:/(?:[^/]+?))*))/$"
+    },
+    {
+      "source": "/investment",
+      "destination": "/investor-tools/simulator",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/investment(?:/)?$"
+    },
+    {
+      "source": "/investment-pack",
+      "destination": "/investor-tools/simulator",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/investment-pack(?:/)?$"
+    },
+    {
+      "source": "/investing",
+      "destination": "/investor-tools",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/investing(?:/)?$"
+    },
+    {
+      "source": "/investing/simulator",
+      "destination": "/investor-tools/simulator",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/investing/simulator(?:/)?$"
+    },
+    {
+      "source": "/investing/public",
+      "destination": "/investor-tools/public",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/investing/public(?:/)?$"
+    },
+    {
+      "source": "/investing/ipo-watch",
+      "destination": "/investor-tools/ipo-watch",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/investing/ipo-watch(?:/)?$"
+    },
+    {
+      "source": "/investing/exposure-map",
+      "destination": "/investor-tools/exposure-map",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/investing/exposure-map(?:/)?$"
+    },
+    {
+      "source": "/investing/briefing",
+      "destination": "/investor-tools/briefing",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/investing/briefing(?:/)?$"
+    },
+    {
+      "source": "/investing/watchlist",
+      "destination": "/investor-tools/watchlist",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/investing/watchlist(?:/)?$"
+    },
+    {
+      "source": "/investing/provider/:slug",
+      "destination": "/investor-tools/provider/:slug",
+      "statusCode": 308,
+      "regex": "^(?!/_next)/investing/provider(?:/([^/]+?))(?:/)?$"
+    }
+  ],
+  "headers": [],
+  "onMatchHeaders": [],
+  "rewrites": {
+    "beforeFiles": [],
+    "afterFiles": [],
+    "fallback": []
+  },
+  "dynamicRoutes": [
+    {
+      "page": "/api/admin/evidence/batch-action/[id]",
+      "regex": "^/api/admin/evidence/batch\\-action/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/api/admin/evidence/batch\\-action/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/api/admin/proposals/[id]",
+      "regex": "^/api/admin/proposals/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/api/admin/proposals/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/api/admin/proposals/[id]/linkage",
+      "regex": "^/api/admin/proposals/([^/]+?)/linkage(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/api/admin/proposals/(?<nxtPid>[^/]+?)/linkage(?:/)?$"
+    },
+    {
+      "page": "/api/assessment/[id]",
+      "regex": "^/api/assessment/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/api/assessment/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/api/assessment/[id]/export",
+      "regex": "^/api/assessment/([^/]+?)/export(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/api/assessment/(?<nxtPid>[^/]+?)/export(?:/)?$"
+    },
+    {
+      "page": "/api/data-sources/sec/[cik]",
+      "regex": "^/api/data\\-sources/sec/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPcik": "nxtPcik"
+      },
+      "namedRegex": "^/api/data\\-sources/sec/(?<nxtPcik>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/api/data-sources/[connectorId]",
+      "regex": "^/api/data\\-sources/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPconnectorId": "nxtPconnectorId"
+      },
+      "namedRegex": "^/api/data\\-sources/(?<nxtPconnectorId>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/api/investing/providers/[slug]",
+      "regex": "^/api/investing/providers/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPslug": "nxtPslug"
+      },
+      "namedRegex": "^/api/investing/providers/(?<nxtPslug>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/api/investing/simulations/[id]",
+      "regex": "^/api/investing/simulations/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/api/investing/simulations/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/api/investor-tools/ipo-watch/[providerSlug]",
+      "regex": "^/api/investor\\-tools/ipo\\-watch/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPproviderSlug": "nxtPproviderSlug"
+      },
+      "namedRegex": "^/api/investor\\-tools/ipo\\-watch/(?<nxtPproviderSlug>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/api/investor-tools/product-scope/[vendorId]",
+      "regex": "^/api/investor\\-tools/product\\-scope/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPvendorId": "nxtPvendorId"
+      },
+      "namedRegex": "^/api/investor\\-tools/product\\-scope/(?<nxtPvendorId>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/api/investor-tools/providers/[slug]",
+      "regex": "^/api/investor\\-tools/providers/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPslug": "nxtPslug"
+      },
+      "namedRegex": "^/api/investor\\-tools/providers/(?<nxtPslug>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/api/investor-tools/simulator/[id]",
+      "regex": "^/api/investor\\-tools/simulator/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/api/investor\\-tools/simulator/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/api/model-inventory/vendors/[vendorId]",
+      "regex": "^/api/model\\-inventory/vendors/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPvendorId": "nxtPvendorId"
+      },
+      "namedRegex": "^/api/model\\-inventory/vendors/(?<nxtPvendorId>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/api/truth/claims/[id]",
+      "regex": "^/api/truth/claims/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/api/truth/claims/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/api/vendor/[id]",
+      "regex": "^/api/vendor/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/api/vendor/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/api/vendor/[id]/evidence",
+      "regex": "^/api/vendor/([^/]+?)/evidence(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/api/vendor/(?<nxtPid>[^/]+?)/evidence(?:/)?$"
+    },
+    {
+      "page": "/api/vendors/[id]",
+      "regex": "^/api/vendors/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPid": "nxtPid"
+      },
+      "namedRegex": "^/api/vendors/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/investing/provider/[slug]",
+      "regex": "^/investing/provider/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPslug": "nxtPslug"
+      },
+      "namedRegex": "^/investing/provider/(?<nxtPslug>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/investing/provider 2/[slug]",
+      "regex": "^/investing/provider 2/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPslug": "nxtPslug"
+      },
+      "namedRegex": "^/investing/provider 2/(?<nxtPslug>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/investor-tools/ipo-watch/[providerSlug]",
+      "regex": "^/investor\\-tools/ipo\\-watch/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPproviderSlug": "nxtPproviderSlug"
+      },
+      "namedRegex": "^/investor\\-tools/ipo\\-watch/(?<nxtPproviderSlug>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/investor-tools/provider/[slug]",
+      "regex": "^/investor\\-tools/provider/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPslug": "nxtPslug"
+      },
+      "namedRegex": "^/investor\\-tools/provider/(?<nxtPslug>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/results/[runId]",
+      "regex": "^/results/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPrunId": "nxtPrunId"
+      },
+      "namedRegex": "^/results/(?<nxtPrunId>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/vendors/[slug]",
+      "regex": "^/vendors/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPslug": "nxtPslug"
+      },
+      "namedRegex": "^/vendors/(?<nxtPslug>[^/]+?)(?:/)?$"
+    }
+  ],
+  "staticRoutes": [
+    {
+      "page": "/",
+      "regex": "^/(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/(?:/)?$"
+    },
+    {
+      "page": "/_global-error",
+      "regex": "^/_global\\-error(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/_global\\-error(?:/)?$"
+    },
+    {
+      "page": "/_not-found",
+      "regex": "^/_not\\-found(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/_not\\-found(?:/)?$"
+    },
+    {
+      "page": "/admin",
+      "regex": "^/admin(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin(?:/)?$"
+    },
+    {
+      "page": "/admin/data-sources",
+      "regex": "^/admin/data\\-sources(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/data\\-sources(?:/)?$"
+    },
+    {
+      "page": "/admin/evidence",
+      "regex": "^/admin/evidence(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/evidence(?:/)?$"
+    },
+    {
+      "page": "/admin/evidence/batch",
+      "regex": "^/admin/evidence/batch(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/evidence/batch(?:/)?$"
+    },
+    {
+      "page": "/admin/exposure-edits",
+      "regex": "^/admin/exposure\\-edits(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/exposure\\-edits(?:/)?$"
+    },
+    {
+      "page": "/admin/ingestion",
+      "regex": "^/admin/ingestion(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/ingestion(?:/)?$"
+    },
+    {
+      "page": "/admin/pipeline-health",
+      "regex": "^/admin/pipeline\\-health(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/pipeline\\-health(?:/)?$"
+    },
+    {
+      "page": "/admin/production-status",
+      "regex": "^/admin/production\\-status(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/admin/production\\-status(?:/)?$"
+    },
+    {
+      "page": "/api/admin/evidence/apply-linkages",
+      "regex": "^/api/admin/evidence/apply\\-linkages(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/admin/evidence/apply\\-linkages(?:/)?$"
+    },
+    {
+      "page": "/api/admin/evidence/batch-action/ids",
+      "regex": "^/api/admin/evidence/batch\\-action/ids(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/admin/evidence/batch\\-action/ids(?:/)?$"
+    },
+    {
+      "page": "/api/admin/evidence/dedup",
+      "regex": "^/api/admin/evidence/dedup(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/admin/evidence/dedup(?:/)?$"
+    },
+    {
+      "page": "/api/admin/evidence/failures",
+      "regex": "^/api/admin/evidence/failures(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/admin/evidence/failures(?:/)?$"
+    },
+    {
+      "page": "/api/admin/evidence/linkage",
+      "regex": "^/api/admin/evidence/linkage(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/admin/evidence/linkage(?:/)?$"
+    },
+    {
+      "page": "/api/admin/evidence/triage",
+      "regex": "^/api/admin/evidence/triage(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/admin/evidence/triage(?:/)?$"
+    },
+    {
+      "page": "/api/admin/exposure-edits",
+      "regex": "^/api/admin/exposure\\-edits(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/admin/exposure\\-edits(?:/)?$"
+    },
+    {
+      "page": "/api/admin/ingestion/jobs",
+      "regex": "^/api/admin/ingestion/jobs(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/admin/ingestion/jobs(?:/)?$"
+    },
+    {
+      "page": "/api/admin/ingestion/run",
+      "regex": "^/api/admin/ingestion/run(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/admin/ingestion/run(?:/)?$"
+    },
+    {
+      "page": "/api/admin/intelligence/recompute",
+      "regex": "^/api/admin/intelligence/recompute(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/admin/intelligence/recompute(?:/)?$"
+    },
+    {
+      "page": "/api/admin/production-status",
+      "regex": "^/api/admin/production\\-status(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/admin/production\\-status(?:/)?$"
+    },
+    {
+      "page": "/api/admin/proposals",
+      "regex": "^/api/admin/proposals(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/admin/proposals(?:/)?$"
+    },
+    {
+      "page": "/api/admin/sourcing/logs",
+      "regex": "^/api/admin/sourcing/logs(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/admin/sourcing/logs(?:/)?$"
+    },
+    {
+      "page": "/api/admin/sourcing/manifest",
+      "regex": "^/api/admin/sourcing/manifest(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/admin/sourcing/manifest(?:/)?$"
+    },
+    {
+      "page": "/api/admin/sourcing/run",
+      "regex": "^/api/admin/sourcing/run(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/admin/sourcing/run(?:/)?$"
+    },
+    {
+      "page": "/api/assessment/score",
+      "regex": "^/api/assessment/score(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/assessment/score(?:/)?$"
+    },
+    {
+      "page": "/api/briefings/weekly",
+      "regex": "^/api/briefings/weekly(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/briefings/weekly(?:/)?$"
+    },
+    {
+      "page": "/api/capabilities",
+      "regex": "^/api/capabilities(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/capabilities(?:/)?$"
+    },
+    {
+      "page": "/api/cron/competitive-intel",
+      "regex": "^/api/cron/competitive\\-intel(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/cron/competitive\\-intel(?:/)?$"
+    },
+    {
+      "page": "/api/cron/daily-refresh",
+      "regex": "^/api/cron/daily\\-refresh(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/cron/daily\\-refresh(?:/)?$"
+    },
+    {
+      "page": "/api/cron/ranking-snapshot",
+      "regex": "^/api/cron/ranking\\-snapshot(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/cron/ranking\\-snapshot(?:/)?$"
+    },
+    {
+      "page": "/api/cron/safe-actions",
+      "regex": "^/api/cron/safe\\-actions(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/cron/safe\\-actions(?:/)?$"
+    },
+    {
+      "page": "/api/cron/sourcing-rolling",
+      "regex": "^/api/cron/sourcing\\-rolling(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/cron/sourcing\\-rolling(?:/)?$"
+    },
+    {
+      "page": "/api/data-sources/eia/retail-sales",
+      "regex": "^/api/data\\-sources/eia/retail\\-sales(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/data\\-sources/eia/retail\\-sales(?:/)?$"
+    },
+    {
+      "page": "/api/data-sources/refresh",
+      "regex": "^/api/data\\-sources/refresh(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/data\\-sources/refresh(?:/)?$"
+    },
+    {
+      "page": "/api/data-sources/status",
+      "regex": "^/api/data\\-sources/status(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/data\\-sources/status(?:/)?$"
+    },
+    {
+      "page": "/api/data-sources/vendor-docs",
+      "regex": "^/api/data\\-sources/vendor\\-docs(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/data\\-sources/vendor\\-docs(?:/)?$"
+    },
+    {
+      "page": "/api/demo/status",
+      "regex": "^/api/demo/status(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/demo/status(?:/)?$"
+    },
+    {
+      "page": "/api/evidence/claims",
+      "regex": "^/api/evidence/claims(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/evidence/claims(?:/)?$"
+    },
+    {
+      "page": "/api/evidence/sources",
+      "regex": "^/api/evidence/sources(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/evidence/sources(?:/)?$"
+    },
+    {
+      "page": "/api/evidence/validate-claim",
+      "regex": "^/api/evidence/validate\\-claim(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/evidence/validate\\-claim(?:/)?$"
+    },
+    {
+      "page": "/api/investing/apply-shock",
+      "regex": "^/api/investing/apply\\-shock(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/investing/apply\\-shock(?:/)?$"
+    },
+    {
+      "page": "/api/investing/briefing",
+      "regex": "^/api/investing/briefing(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/investing/briefing(?:/)?$"
+    },
+    {
+      "page": "/api/investing/exposure-map",
+      "regex": "^/api/investing/exposure\\-map(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/investing/exposure\\-map(?:/)?$"
+    },
+    {
+      "page": "/api/investing/ipo-watch",
+      "regex": "^/api/investing/ipo\\-watch(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/investing/ipo\\-watch(?:/)?$"
+    },
+    {
+      "page": "/api/investing/providers",
+      "regex": "^/api/investing/providers(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/investing/providers(?:/)?$"
+    },
+    {
+      "page": "/api/investing/public",
+      "regex": "^/api/investing/public(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/investing/public(?:/)?$"
+    },
+    {
+      "page": "/api/investing/recalculate",
+      "regex": "^/api/investing/recalculate(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/investing/recalculate(?:/)?$"
+    },
+    {
+      "page": "/api/investing/save-simulation",
+      "regex": "^/api/investing/save\\-simulation(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/investing/save\\-simulation(?:/)?$"
+    },
+    {
+      "page": "/api/investing/scores",
+      "regex": "^/api/investing/scores(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/investing/scores(?:/)?$"
+    },
+    {
+      "page": "/api/investing/seed-portfolio",
+      "regex": "^/api/investing/seed\\-portfolio(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/investing/seed\\-portfolio(?:/)?$"
+    },
+    {
+      "page": "/api/investing/simulate",
+      "regex": "^/api/investing/simulate(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/investing/simulate(?:/)?$"
+    },
+    {
+      "page": "/api/investor-tools/briefing",
+      "regex": "^/api/investor\\-tools/briefing(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/investor\\-tools/briefing(?:/)?$"
+    },
+    {
+      "page": "/api/investor-tools/briefings",
+      "regex": "^/api/investor\\-tools/briefings(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/investor\\-tools/briefings(?:/)?$"
+    },
+    {
+      "page": "/api/investor-tools/exposure-map",
+      "regex": "^/api/investor\\-tools/exposure\\-map(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/investor\\-tools/exposure\\-map(?:/)?$"
+    },
+    {
+      "page": "/api/investor-tools/intelligence",
+      "regex": "^/api/investor\\-tools/intelligence(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/investor\\-tools/intelligence(?:/)?$"
+    },
+    {
+      "page": "/api/investor-tools/ipo-watch",
+      "regex": "^/api/investor\\-tools/ipo\\-watch(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/investor\\-tools/ipo\\-watch(?:/)?$"
+    },
+    {
+      "page": "/api/investor-tools/nav",
+      "regex": "^/api/investor\\-tools/nav(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/investor\\-tools/nav(?:/)?$"
+    },
+    {
+      "page": "/api/investor-tools/product-scope",
+      "regex": "^/api/investor\\-tools/product\\-scope(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/investor\\-tools/product\\-scope(?:/)?$"
+    },
+    {
+      "page": "/api/investor-tools/products",
+      "regex": "^/api/investor\\-tools/products(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/investor\\-tools/products(?:/)?$"
+    },
+    {
+      "page": "/api/investor-tools/providers",
+      "regex": "^/api/investor\\-tools/providers(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/investor\\-tools/providers(?:/)?$"
+    },
+    {
+      "page": "/api/investor-tools/public",
+      "regex": "^/api/investor\\-tools/public(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/investor\\-tools/public(?:/)?$"
+    },
+    {
+      "page": "/api/investor-tools/scores",
+      "regex": "^/api/investor\\-tools/scores(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/investor\\-tools/scores(?:/)?$"
+    },
+    {
+      "page": "/api/investor-tools/simulator/apply-random-shock",
+      "regex": "^/api/investor\\-tools/simulator/apply\\-random\\-shock(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/investor\\-tools/simulator/apply\\-random\\-shock(?:/)?$"
+    },
+    {
+      "page": "/api/investor-tools/simulator/apply-shock",
+      "regex": "^/api/investor\\-tools/simulator/apply\\-shock(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/investor\\-tools/simulator/apply\\-shock(?:/)?$"
+    },
+    {
+      "page": "/api/investor-tools/simulator/eligible-universe",
+      "regex": "^/api/investor\\-tools/simulator/eligible\\-universe(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/investor\\-tools/simulator/eligible\\-universe(?:/)?$"
+    },
+    {
+      "page": "/api/investor-tools/simulator/exposure-network",
+      "regex": "^/api/investor\\-tools/simulator/exposure\\-network(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/investor\\-tools/simulator/exposure\\-network(?:/)?$"
+    },
+    {
+      "page": "/api/investor-tools/simulator/filter-universe",
+      "regex": "^/api/investor\\-tools/simulator/filter\\-universe(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/investor\\-tools/simulator/filter\\-universe(?:/)?$"
+    },
+    {
+      "page": "/api/investor-tools/simulator/providers",
+      "regex": "^/api/investor\\-tools/simulator/providers(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/investor\\-tools/simulator/providers(?:/)?$"
+    },
+    {
+      "page": "/api/investor-tools/simulator/save",
+      "regex": "^/api/investor\\-tools/simulator/save(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/investor\\-tools/simulator/save(?:/)?$"
+    },
+    {
+      "page": "/api/investor-tools/simulator/scatter-domain",
+      "regex": "^/api/investor\\-tools/simulator/scatter\\-domain(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/investor\\-tools/simulator/scatter\\-domain(?:/)?$"
+    },
+    {
+      "page": "/api/investor-tools/simulator/simulate",
+      "regex": "^/api/investor\\-tools/simulator/simulate(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/investor\\-tools/simulator/simulate(?:/)?$"
+    },
+    {
+      "page": "/api/investor-tools/simulator/tooltips",
+      "regex": "^/api/investor\\-tools/simulator/tooltips(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/investor\\-tools/simulator/tooltips(?:/)?$"
+    },
+    {
+      "page": "/api/investor-tools/simulator/validate",
+      "regex": "^/api/investor\\-tools/simulator/validate(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/investor\\-tools/simulator/validate(?:/)?$"
+    },
+    {
+      "page": "/api/investor-tools/simulator/validate-cross-feed",
+      "regex": "^/api/investor\\-tools/simulator/validate\\-cross\\-feed(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/investor\\-tools/simulator/validate\\-cross\\-feed(?:/)?$"
+    },
+    {
+      "page": "/api/market-dashboard",
+      "regex": "^/api/market\\-dashboard(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/market\\-dashboard(?:/)?$"
+    },
+    {
+      "page": "/api/metadata",
+      "regex": "^/api/metadata(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/metadata(?:/)?$"
+    },
+    {
+      "page": "/api/model-inventory",
+      "regex": "^/api/model\\-inventory(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/model\\-inventory(?:/)?$"
+    },
+    {
+      "page": "/api/model-inventory/refresh",
+      "regex": "^/api/model\\-inventory/refresh(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/model\\-inventory/refresh(?:/)?$"
+    },
+    {
+      "page": "/api/model-inventory/sources",
+      "regex": "^/api/model\\-inventory/sources(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/model\\-inventory/sources(?:/)?$"
+    },
+    {
+      "page": "/api/model-inventory/vendors",
+      "regex": "^/api/model\\-inventory/vendors(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/model\\-inventory/vendors(?:/)?$"
+    },
+    {
+      "page": "/api/news",
+      "regex": "^/api/news(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/news(?:/)?$"
+    },
+    {
+      "page": "/api/rank",
+      "regex": "^/api/rank(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/rank(?:/)?$"
+    },
+    {
+      "page": "/api/system/last-refreshed",
+      "regex": "^/api/system/last\\-refreshed(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/system/last\\-refreshed(?:/)?$"
+    },
+    {
+      "page": "/api/system/refresh-history",
+      "regex": "^/api/system/refresh\\-history(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/system/refresh\\-history(?:/)?$"
+    },
+    {
+      "page": "/api/truth/claims",
+      "regex": "^/api/truth/claims(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/truth/claims(?:/)?$"
+    },
+    {
+      "page": "/api/truth/flag-unsupported",
+      "regex": "^/api/truth/flag\\-unsupported(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/truth/flag\\-unsupported(?:/)?$"
+    },
+    {
+      "page": "/api/truth/refresh-required",
+      "regex": "^/api/truth/refresh\\-required(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/truth/refresh\\-required(?:/)?$"
+    },
+    {
+      "page": "/api/truth/stale",
+      "regex": "^/api/truth/stale(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/truth/stale(?:/)?$"
+    },
+    {
+      "page": "/api/truth/validate",
+      "regex": "^/api/truth/validate(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/truth/validate(?:/)?$"
+    },
+    {
+      "page": "/api/vendors",
+      "regex": "^/api/vendors(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/vendors(?:/)?$"
+    },
+    {
+      "page": "/api/watchlists",
+      "regex": "^/api/watchlists(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/watchlists(?:/)?$"
+    },
+    {
+      "page": "/assess",
+      "regex": "^/assess(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/assess(?:/)?$"
+    },
+    {
+      "page": "/assessment",
+      "regex": "^/assessment(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/assessment(?:/)?$"
+    },
+    {
+      "page": "/briefings",
+      "regex": "^/briefings(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/briefings(?:/)?$"
+    },
+    {
+      "page": "/capabilities",
+      "regex": "^/capabilities(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/capabilities(?:/)?$"
+    },
+    {
+      "page": "/dashboard",
+      "regex": "^/dashboard(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/dashboard(?:/)?$"
+    },
+    {
+      "page": "/demonstrate",
+      "regex": "^/demonstrate(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/demonstrate(?:/)?$"
+    },
+    {
+      "page": "/exposure-map",
+      "regex": "^/exposure\\-map(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/exposure\\-map(?:/)?$"
+    },
+    {
+      "page": "/investing",
+      "regex": "^/investing(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/investing(?:/)?$"
+    },
+    {
+      "page": "/investing/briefing",
+      "regex": "^/investing/briefing(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/investing/briefing(?:/)?$"
+    },
+    {
+      "page": "/investing/briefing 2",
+      "regex": "^/investing/briefing 2(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/investing/briefing 2(?:/)?$"
+    },
+    {
+      "page": "/investing/exposure-map",
+      "regex": "^/investing/exposure\\-map(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/investing/exposure\\-map(?:/)?$"
+    },
+    {
+      "page": "/investing/exposure-map 2",
+      "regex": "^/investing/exposure\\-map 2(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/investing/exposure\\-map 2(?:/)?$"
+    },
+    {
+      "page": "/investing/ipo-watch",
+      "regex": "^/investing/ipo\\-watch(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/investing/ipo\\-watch(?:/)?$"
+    },
+    {
+      "page": "/investing/ipo-watch 2",
+      "regex": "^/investing/ipo\\-watch 2(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/investing/ipo\\-watch 2(?:/)?$"
+    },
+    {
+      "page": "/investing/public",
+      "regex": "^/investing/public(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/investing/public(?:/)?$"
+    },
+    {
+      "page": "/investing/public 2",
+      "regex": "^/investing/public 2(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/investing/public 2(?:/)?$"
+    },
+    {
+      "page": "/investing/simulator",
+      "regex": "^/investing/simulator(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/investing/simulator(?:/)?$"
+    },
+    {
+      "page": "/investing/simulator 2",
+      "regex": "^/investing/simulator 2(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/investing/simulator 2(?:/)?$"
+    },
+    {
+      "page": "/investing/watchlist",
+      "regex": "^/investing/watchlist(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/investing/watchlist(?:/)?$"
+    },
+    {
+      "page": "/investing/watchlist 2",
+      "regex": "^/investing/watchlist 2(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/investing/watchlist 2(?:/)?$"
+    },
+    {
+      "page": "/investor-tools",
+      "regex": "^/investor\\-tools(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/investor\\-tools(?:/)?$"
+    },
+    {
+      "page": "/investor-tools/briefing",
+      "regex": "^/investor\\-tools/briefing(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/investor\\-tools/briefing(?:/)?$"
+    },
+    {
+      "page": "/investor-tools/briefings",
+      "regex": "^/investor\\-tools/briefings(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/investor\\-tools/briefings(?:/)?$"
+    },
+    {
+      "page": "/investor-tools/exposure-map",
+      "regex": "^/investor\\-tools/exposure\\-map(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/investor\\-tools/exposure\\-map(?:/)?$"
+    },
+    {
+      "page": "/investor-tools/intelligence",
+      "regex": "^/investor\\-tools/intelligence(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/investor\\-tools/intelligence(?:/)?$"
+    },
+    {
+      "page": "/investor-tools/ipo-watch",
+      "regex": "^/investor\\-tools/ipo\\-watch(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/investor\\-tools/ipo\\-watch(?:/)?$"
+    },
+    {
+      "page": "/investor-tools/public",
+      "regex": "^/investor\\-tools/public(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/investor\\-tools/public(?:/)?$"
+    },
+    {
+      "page": "/investor-tools/signals",
+      "regex": "^/investor\\-tools/signals(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/investor\\-tools/signals(?:/)?$"
+    },
+    {
+      "page": "/investor-tools/simulator",
+      "regex": "^/investor\\-tools/simulator(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/investor\\-tools/simulator(?:/)?$"
+    },
+    {
+      "page": "/investor-tools/watchlist",
+      "regex": "^/investor\\-tools/watchlist(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/investor\\-tools/watchlist(?:/)?$"
+    },
+    {
+      "page": "/market",
+      "regex": "^/market(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/market(?:/)?$"
+    },
+    {
+      "page": "/methodology",
+      "regex": "^/methodology(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/methodology(?:/)?$"
+    },
+    {
+      "page": "/news",
+      "regex": "^/news(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/news(?:/)?$"
+    },
+    {
+      "page": "/quadrant",
+      "regex": "^/quadrant(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/quadrant(?:/)?$"
+    },
+    {
+      "page": "/query",
+      "regex": "^/query(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/query(?:/)?$"
+    },
+    {
+      "page": "/reputation",
+      "regex": "^/reputation(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/reputation(?:/)?$"
+    },
+    {
+      "page": "/understand",
+      "regex": "^/understand(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/understand(?:/)?$"
+    },
+    {
+      "page": "/vendors",
+      "regex": "^/vendors(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/vendors(?:/)?$"
+    },
+    {
+      "page": "/watchlists",
+      "regex": "^/watchlists(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/watchlists(?:/)?$"
+    }
+  ],
+  "dataRoutes": [],
+  "rsc": {
+    "header": "rsc",
+    "varyHeader": "rsc, next-router-state-tree, next-router-prefetch, next-router-segment-prefetch",
+    "prefetchHeader": "next-router-prefetch",
+    "didPostponeHeader": "x-nextjs-postponed",
+    "contentTypeHeader": "text/x-component",
+    "suffix": ".rsc",
+    "prefetchSegmentHeader": "next-router-segment-prefetch",
+    "prefetchSegmentSuffix": ".segment.rsc",
+    "prefetchSegmentDirSuffix": ".segments",
+    "clientParamParsing": false,
+    "dynamicRSCPrerender": false
+  },
+  "rewriteHeaders": {
+    "pathHeader": "x-nextjs-rewritten-path",
+    "queryHeader": "x-nextjs-rewritten-query"
+  }
+}

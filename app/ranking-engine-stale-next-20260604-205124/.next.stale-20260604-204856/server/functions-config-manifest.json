@@ -1,0 +1,67 @@
+{
+  "version": 1,
+  "functions": {
+    "/api/admin/evidence/apply-linkages": {},
+    "/api/admin/evidence/batch-action/[id]": {},
+    "/api/admin/evidence/batch-action/ids": {},
+    "/api/admin/evidence/dedup": {},
+    "/api/admin/evidence/failures": {},
+    "/api/admin/evidence/linkage": {},
+    "/api/admin/evidence/triage": {},
+    "/api/admin/exposure-edits": {},
+    "/api/admin/ingestion/jobs": {},
+    "/api/admin/ingestion/run": {},
+    "/api/admin/intelligence/recompute": {
+      "maxDuration": 300
+    },
+    "/api/admin/production-status": {},
+    "/api/admin/proposals": {},
+    "/api/admin/proposals/[id]": {},
+    "/api/admin/proposals/[id]/linkage": {},
+    "/api/admin/sourcing/logs": {},
+    "/api/admin/sourcing/manifest": {},
+    "/api/admin/sourcing/run": {},
+    "/api/assessment/[id]": {},
+    "/api/assessment/[id]/export": {},
+    "/api/assessment/score": {},
+    "/api/briefings/weekly": {},
+    "/api/capabilities": {},
+    "/api/cron/competitive-intel": {
+      "maxDuration": 300
+    },
+    "/api/cron/daily-refresh": {
+      "maxDuration": 600
+    },
+    "/api/cron/ranking-snapshot": {
+      "maxDuration": 120
+    },
+    "/api/cron/safe-actions": {
+      "maxDuration": 300
+    },
+    "/api/cron/sourcing-rolling": {
+      "maxDuration": 300
+    },
+    "/api/data-sources/eia/retail-sales": {},
+    "/api/data-sources/sec/[cik]": {},
+    "/api/data-sources/vendor-docs": {},
+    "/api/demo/status": {},
+    "/api/investing/briefing": {},
+    "/api/investing/providers/[slug]": {},
+    "/api/investing/public": {},
+    "/api/investing/recalculate": {},
+    "/api/investing/save-simulation": {},
+    "/api/investing/scores": {},
+    "/api/investing/simulations/[id]": {},
+    "/api/market-dashboard": {},
+    "/api/metadata": {},
+    "/api/news": {},
+    "/api/rank": {},
+    "/api/system/last-refreshed": {},
+    "/api/system/refresh-history": {},
+    "/api/vendor/[id]": {},
+    "/api/vendor/[id]/evidence": {},
+    "/api/vendors": {},
+    "/api/vendors/[id]": {},
+    "/api/watchlists": {}
+  }
+}

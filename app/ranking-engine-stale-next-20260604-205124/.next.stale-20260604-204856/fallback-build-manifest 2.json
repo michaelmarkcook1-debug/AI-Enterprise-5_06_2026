@@ -1,0 +1,13 @@
+{
+  "pages": {
+    "/_app": []
+  },
+  "devFiles": [],
+  "polyfillFiles": [],
+  "lowPriorityFiles": [
+    "static/YNdofwTabC-6DrIGhV_f3/_buildManifest.js",
+    "static/YNdofwTabC-6DrIGhV_f3/_ssgManifest.js",
+    "static/YNdofwTabC-6DrIGhV_f3/_clientMiddlewareManifest.js"
+  ],
+  "rootMainFiles": []
+}

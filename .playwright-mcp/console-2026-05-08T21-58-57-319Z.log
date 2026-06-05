@@ -1,0 +1,2882 @@
+[      96ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[     151ms] [LOG] [HMR] connected @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 3196920ms] [LOG] [HMR] connected @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 5516392ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 5516675ms] [LOG] [Fast Refresh] done in 384ms @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 5518364ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 5518456ms] [LOG] [Fast Refresh] done in 192ms @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 5559579ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 5559755ms] [LOG] [Fast Refresh] done in 276ms @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 5579687ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 5579699ms] [LOG] [Fast Refresh] done in 115ms @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 5591214ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 5591257ms] [LOG] [Fast Refresh] done in 148ms @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 5895680ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 5895760ms] [LOG] [Fast Refresh] done in 182ms @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 5897649ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 5897658ms] [LOG] [Fast Refresh] done in 110ms @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 5900122ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 5900128ms] [LOG] [Fast Refresh] done in 108ms @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 5926785ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 5926935ms] [LOG] [Fast Refresh] done in 253ms @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 5944414ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 5949136ms] [LOG] [Fast Refresh] done in 4823ms @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 6114519ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 6114793ms] [LOG] [Fast Refresh] done in 375ms @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8307646ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8307658ms] [LOG] [Fast Refresh] done in 112ms @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8793320ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8793521ms] [LOG] [Fast Refresh] done in 302ms @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8814869ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8818605ms] [ERROR] ./app/investor-tools/simulator/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/simulator/page'
+> 1 | import InvestmentSimulatorPage from "@/app/investing/simulator/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestmentSimulatorPage;
+
+Import map: aliased to relative './app/investing/simulator/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8818605ms] [ERROR] ./app/investor-tools/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/page'
+> 1 | import InvestingDashboardPage from "@/app/investing/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestingDashboardPage;
+
+Import map: aliased to relative './app/investing/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8818606ms] [ERROR] ./app/investor-tools/intelligence/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/page'
+> 1 | import InvestingDashboardPage from "@/app/investing/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestingDashboardPage;
+
+Import map: aliased to relative './app/investing/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8818606ms] [ERROR] ./app/investor-tools/public/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/public/page'
+> 1 | import PublicAiStocksPage from "@/app/investing/public/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default PublicAiStocksPage;
+
+Import map: aliased to relative './app/investing/public/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8818606ms] [ERROR] ./app/investor-tools/ipo-watch/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/ipo-watch/page'
+> 1 | import IpoWatchPage from "@/app/investing/ipo-watch/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default IpoWatchPage;
+
+Import map: aliased to relative './app/investing/ipo-watch/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8818606ms] [ERROR] ./app/investor-tools/exposure-map/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/exposure-map/page'
+> 1 | import ExposureMapPage from "@/app/investing/exposure-map/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default ExposureMapPage;
+
+Import map: aliased to relative './app/investing/exposure-map/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8818606ms] [ERROR] ./app/investor-tools/briefing/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/briefing/page'
+> 1 | import InvestmentBriefingPage from "@/app/investing/briefing/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestmentBriefingPage;
+
+Import map: aliased to relative './app/investing/briefing/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8818606ms] [ERROR] ./app/investor-tools/watchlist/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/watchlist/page'
+> 1 | import InvestmentWatchlistPage from "@/app/investing/watchlist/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestmentWatchlistPage;
+
+Import map: aliased to relative './app/investing/watchlist/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8818607ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8818607ms] [ERROR] ./app/investor-tools/provider/[slug]/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/provider/[slug]/page'
+> 1 | import ProviderInvestmentPage from "@/app/investing/provider/[slug]/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default ProviderInvestmentPage;
+
+Import map: aliased to relative './app/investing/provider/[slug]/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8818607ms] [ERROR] ./app/investor-tools/briefings/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/briefing/page'
+> 1 | import InvestmentBriefingPage from "@/app/investing/briefing/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestmentBriefingPage;
+
+Import map: aliased to relative './app/investing/briefing/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8818768ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8818797ms] [ERROR] ./app/investor-tools/simulator/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/simulator/page'
+> 1 | import InvestmentSimulatorPage from "@/app/investing/simulator/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestmentSimulatorPage;
+
+Import map: aliased to relative './app/investing/simulator/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8818798ms] [ERROR] ./app/investor-tools/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/page'
+> 1 | import InvestingDashboardPage from "@/app/investing/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestingDashboardPage;
+
+Import map: aliased to relative './app/investing/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8818798ms] [ERROR] ./app/investor-tools/intelligence/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/page'
+> 1 | import InvestingDashboardPage from "@/app/investing/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestingDashboardPage;
+
+Import map: aliased to relative './app/investing/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8818798ms] [ERROR] ./app/investor-tools/public/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/public/page'
+> 1 | import PublicAiStocksPage from "@/app/investing/public/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default PublicAiStocksPage;
+
+Import map: aliased to relative './app/investing/public/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8818798ms] [ERROR] ./app/investor-tools/ipo-watch/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/ipo-watch/page'
+> 1 | import IpoWatchPage from "@/app/investing/ipo-watch/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default IpoWatchPage;
+
+Import map: aliased to relative './app/investing/ipo-watch/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8818798ms] [ERROR] ./app/investor-tools/exposure-map/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/exposure-map/page'
+> 1 | import ExposureMapPage from "@/app/investing/exposure-map/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default ExposureMapPage;
+
+Import map: aliased to relative './app/investing/exposure-map/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8818798ms] [ERROR] ./app/investor-tools/briefing/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/briefing/page'
+> 1 | import InvestmentBriefingPage from "@/app/investing/briefing/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestmentBriefingPage;
+
+Import map: aliased to relative './app/investing/briefing/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8818798ms] [ERROR] ./app/investor-tools/watchlist/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/watchlist/page'
+> 1 | import InvestmentWatchlistPage from "@/app/investing/watchlist/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestmentWatchlistPage;
+
+Import map: aliased to relative './app/investing/watchlist/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8818798ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8818798ms] [ERROR] ./app/investor-tools/provider/[slug]/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/provider/[slug]/page'
+> 1 | import ProviderInvestmentPage from "@/app/investing/provider/[slug]/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default ProviderInvestmentPage;
+
+Import map: aliased to relative './app/investing/provider/[slug]/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8818798ms] [ERROR] ./app/investor-tools/briefings/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/briefing/page'
+> 1 | import InvestmentBriefingPage from "@/app/investing/briefing/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestmentBriefingPage;
+
+Import map: aliased to relative './app/investing/briefing/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8818826ms] [ERROR] ./app/investor-tools/simulator/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/simulator/page'
+> 1 | import InvestmentSimulatorPage from "@/app/investing/simulator/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestmentSimulatorPage;
+
+Import map: aliased to relative './app/investing/simulator/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8818826ms] [ERROR] ./app/investor-tools/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/page'
+> 1 | import InvestingDashboardPage from "@/app/investing/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestingDashboardPage;
+
+Import map: aliased to relative './app/investing/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8818826ms] [ERROR] ./app/investor-tools/intelligence/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/page'
+> 1 | import InvestingDashboardPage from "@/app/investing/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestingDashboardPage;
+
+Import map: aliased to relative './app/investing/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8818826ms] [ERROR] ./app/investor-tools/public/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/public/page'
+> 1 | import PublicAiStocksPage from "@/app/investing/public/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default PublicAiStocksPage;
+
+Import map: aliased to relative './app/investing/public/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8818827ms] [ERROR] ./app/investor-tools/ipo-watch/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/ipo-watch/page'
+> 1 | import IpoWatchPage from "@/app/investing/ipo-watch/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default IpoWatchPage;
+
+Import map: aliased to relative './app/investing/ipo-watch/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8818827ms] [ERROR] ./app/investor-tools/exposure-map/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/exposure-map/page'
+> 1 | import ExposureMapPage from "@/app/investing/exposure-map/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default ExposureMapPage;
+
+Import map: aliased to relative './app/investing/exposure-map/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8818827ms] [ERROR] ./app/investor-tools/briefing/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/briefing/page'
+> 1 | import InvestmentBriefingPage from "@/app/investing/briefing/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestmentBriefingPage;
+
+Import map: aliased to relative './app/investing/briefing/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8818827ms] [ERROR] ./app/investor-tools/watchlist/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/watchlist/page'
+> 1 | import InvestmentWatchlistPage from "@/app/investing/watchlist/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestmentWatchlistPage;
+
+Import map: aliased to relative './app/investing/watchlist/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8818827ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8818827ms] [ERROR] ./app/investor-tools/provider/[slug]/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/provider/[slug]/page'
+> 1 | import ProviderInvestmentPage from "@/app/investing/provider/[slug]/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default ProviderInvestmentPage;
+
+Import map: aliased to relative './app/investing/provider/[slug]/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8818827ms] [ERROR] ./app/investor-tools/briefings/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/briefing/page'
+> 1 | import InvestmentBriefingPage from "@/app/investing/briefing/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestmentBriefingPage;
+
+Import map: aliased to relative './app/investing/briefing/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8818918ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8819024ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8819497ms] [ERROR] ./app/investor-tools/simulator/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/simulator/page'
+> 1 | import InvestmentSimulatorPage from "@/app/investing/simulator/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestmentSimulatorPage;
+
+Import map: aliased to relative './app/investing/simulator/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8819498ms] [ERROR] ./app/investor-tools/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/page'
+> 1 | import InvestingDashboardPage from "@/app/investing/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestingDashboardPage;
+
+Import map: aliased to relative './app/investing/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8819498ms] [ERROR] ./app/investor-tools/intelligence/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/page'
+> 1 | import InvestingDashboardPage from "@/app/investing/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestingDashboardPage;
+
+Import map: aliased to relative './app/investing/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8819498ms] [ERROR] ./app/investor-tools/public/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/public/page'
+> 1 | import PublicAiStocksPage from "@/app/investing/public/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default PublicAiStocksPage;
+
+Import map: aliased to relative './app/investing/public/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8819498ms] [ERROR] ./app/investor-tools/ipo-watch/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/ipo-watch/page'
+> 1 | import IpoWatchPage from "@/app/investing/ipo-watch/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default IpoWatchPage;
+
+Import map: aliased to relative './app/investing/ipo-watch/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8819498ms] [ERROR] ./app/investor-tools/exposure-map/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/exposure-map/page'
+> 1 | import ExposureMapPage from "@/app/investing/exposure-map/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default ExposureMapPage;
+
+Import map: aliased to relative './app/investing/exposure-map/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8819498ms] [ERROR] ./app/investor-tools/briefing/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/briefing/page'
+> 1 | import InvestmentBriefingPage from "@/app/investing/briefing/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestmentBriefingPage;
+
+Import map: aliased to relative './app/investing/briefing/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8819498ms] [ERROR] ./app/investor-tools/watchlist/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/watchlist/page'
+> 1 | import InvestmentWatchlistPage from "@/app/investing/watchlist/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestmentWatchlistPage;
+
+Import map: aliased to relative './app/investing/watchlist/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8819498ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8819498ms] [ERROR] ./app/investor-tools/provider/[slug]/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/provider/[slug]/page'
+> 1 | import ProviderInvestmentPage from "@/app/investing/provider/[slug]/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default ProviderInvestmentPage;
+
+Import map: aliased to relative './app/investing/provider/[slug]/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8819498ms] [ERROR] ./app/investor-tools/briefings/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/briefing/page'
+> 1 | import InvestmentBriefingPage from "@/app/investing/briefing/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestmentBriefingPage;
+
+Import map: aliased to relative './app/investing/briefing/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8819499ms] [ERROR] ./app/investor-tools/simulator/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/simulator/page'
+> 1 | import InvestmentSimulatorPage from "@/app/investing/simulator/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestmentSimulatorPage;
+
+Import map: aliased to relative './app/investing/simulator/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8819499ms] [ERROR] ./app/investor-tools/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/page'
+> 1 | import InvestingDashboardPage from "@/app/investing/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestingDashboardPage;
+
+Import map: aliased to relative './app/investing/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8819499ms] [ERROR] ./app/investor-tools/intelligence/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/page'
+> 1 | import InvestingDashboardPage from "@/app/investing/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestingDashboardPage;
+
+Import map: aliased to relative './app/investing/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8819499ms] [ERROR] ./app/investor-tools/public/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/public/page'
+> 1 | import PublicAiStocksPage from "@/app/investing/public/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default PublicAiStocksPage;
+
+Import map: aliased to relative './app/investing/public/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8819499ms] [ERROR] ./app/investor-tools/ipo-watch/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/ipo-watch/page'
+> 1 | import IpoWatchPage from "@/app/investing/ipo-watch/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default IpoWatchPage;
+
+Import map: aliased to relative './app/investing/ipo-watch/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8819499ms] [ERROR] ./app/investor-tools/exposure-map/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/exposure-map/page'
+> 1 | import ExposureMapPage from "@/app/investing/exposure-map/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default ExposureMapPage;
+
+Import map: aliased to relative './app/investing/exposure-map/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8819499ms] [ERROR] ./app/investor-tools/briefing/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/briefing/page'
+> 1 | import InvestmentBriefingPage from "@/app/investing/briefing/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestmentBriefingPage;
+
+Import map: aliased to relative './app/investing/briefing/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8819499ms] [ERROR] ./app/investor-tools/watchlist/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/watchlist/page'
+> 1 | import InvestmentWatchlistPage from "@/app/investing/watchlist/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestmentWatchlistPage;
+
+Import map: aliased to relative './app/investing/watchlist/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8819499ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8819499ms] [ERROR] ./app/investor-tools/provider/[slug]/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/provider/[slug]/page'
+> 1 | import ProviderInvestmentPage from "@/app/investing/provider/[slug]/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default ProviderInvestmentPage;
+
+Import map: aliased to relative './app/investing/provider/[slug]/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8819499ms] [ERROR] ./app/investor-tools/briefings/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/briefing/page'
+> 1 | import InvestmentBriefingPage from "@/app/investing/briefing/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestmentBriefingPage;
+
+Import map: aliased to relative './app/investing/briefing/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8819580ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://127.0.0.1:3000/dashboard?_rsc=baRm8Hg-bKr8antF:0
+[ 8819622ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8819675ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://127.0.0.1:3000/dashboard?_rsc=baRm8Hg-bKr8antF:0
+[ 8819747ms] [ERROR] ./app/investor-tools/simulator/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/simulator/page'
+> 1 | import InvestmentSimulatorPage from "@/app/investing/simulator/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestmentSimulatorPage;
+
+Import map: aliased to relative './app/investing/simulator/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8819747ms] [ERROR] ./app/investor-tools/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/page'
+> 1 | import InvestingDashboardPage from "@/app/investing/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestingDashboardPage;
+
+Import map: aliased to relative './app/investing/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8819747ms] [ERROR] ./app/investor-tools/intelligence/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/page'
+> 1 | import InvestingDashboardPage from "@/app/investing/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestingDashboardPage;
+
+Import map: aliased to relative './app/investing/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8819747ms] [ERROR] ./app/investor-tools/public/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/public/page'
+> 1 | import PublicAiStocksPage from "@/app/investing/public/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default PublicAiStocksPage;
+
+Import map: aliased to relative './app/investing/public/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8819747ms] [ERROR] ./app/investor-tools/ipo-watch/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/ipo-watch/page'
+> 1 | import IpoWatchPage from "@/app/investing/ipo-watch/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default IpoWatchPage;
+
+Import map: aliased to relative './app/investing/ipo-watch/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8819748ms] [ERROR] ./app/investor-tools/exposure-map/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/exposure-map/page'
+> 1 | import ExposureMapPage from "@/app/investing/exposure-map/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default ExposureMapPage;
+
+Import map: aliased to relative './app/investing/exposure-map/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8819748ms] [ERROR] ./app/investor-tools/briefing/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/briefing/page'
+> 1 | import InvestmentBriefingPage from "@/app/investing/briefing/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestmentBriefingPage;
+
+Import map: aliased to relative './app/investing/briefing/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8819748ms] [ERROR] ./app/investor-tools/watchlist/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/watchlist/page'
+> 1 | import InvestmentWatchlistPage from "@/app/investing/watchlist/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestmentWatchlistPage;
+
+Import map: aliased to relative './app/investing/watchlist/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8819748ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8819748ms] [ERROR] ./app/investor-tools/provider/[slug]/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/provider/[slug]/page'
+> 1 | import ProviderInvestmentPage from "@/app/investing/provider/[slug]/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default ProviderInvestmentPage;
+
+Import map: aliased to relative './app/investing/provider/[slug]/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8819748ms] [ERROR] ./app/investor-tools/briefings/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/briefing/page'
+> 1 | import InvestmentBriefingPage from "@/app/investing/briefing/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestmentBriefingPage;
+
+Import map: aliased to relative './app/investing/briefing/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8819806ms] [ERROR] ./app/investor-tools/simulator/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/simulator/page'
+> 1 | import InvestmentSimulatorPage from "@/app/investing/simulator/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestmentSimulatorPage;
+
+Import map: aliased to relative './app/investing/simulator/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8819807ms] [ERROR] ./app/investor-tools/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/page'
+> 1 | import InvestingDashboardPage from "@/app/investing/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestingDashboardPage;
+
+Import map: aliased to relative './app/investing/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8819808ms] [ERROR] ./app/investor-tools/intelligence/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/page'
+> 1 | import InvestingDashboardPage from "@/app/investing/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestingDashboardPage;
+
+Import map: aliased to relative './app/investing/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8819808ms] [ERROR] ./app/investor-tools/public/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/public/page'
+> 1 | import PublicAiStocksPage from "@/app/investing/public/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default PublicAiStocksPage;
+
+Import map: aliased to relative './app/investing/public/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8819808ms] [ERROR] ./app/investor-tools/ipo-watch/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/ipo-watch/page'
+> 1 | import IpoWatchPage from "@/app/investing/ipo-watch/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default IpoWatchPage;
+
+Import map: aliased to relative './app/investing/ipo-watch/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8819808ms] [ERROR] ./app/investor-tools/exposure-map/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/exposure-map/page'
+> 1 | import ExposureMapPage from "@/app/investing/exposure-map/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default ExposureMapPage;
+
+Import map: aliased to relative './app/investing/exposure-map/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8819808ms] [ERROR] ./app/investor-tools/briefing/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/briefing/page'
+> 1 | import InvestmentBriefingPage from "@/app/investing/briefing/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestmentBriefingPage;
+
+Import map: aliased to relative './app/investing/briefing/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8819808ms] [ERROR] ./app/investor-tools/watchlist/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/watchlist/page'
+> 1 | import InvestmentWatchlistPage from "@/app/investing/watchlist/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestmentWatchlistPage;
+
+Import map: aliased to relative './app/investing/watchlist/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8819808ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8819808ms] [ERROR] ./app/investor-tools/provider/[slug]/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/provider/[slug]/page'
+> 1 | import ProviderInvestmentPage from "@/app/investing/provider/[slug]/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default ProviderInvestmentPage;
+
+Import map: aliased to relative './app/investing/provider/[slug]/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8819808ms] [ERROR] ./app/investor-tools/briefings/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/briefing/page'
+> 1 | import InvestmentBriefingPage from "@/app/investing/briefing/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestmentBriefingPage;
+
+Import map: aliased to relative './app/investing/briefing/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8819980ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8820093ms] [ERROR] ./app/investor-tools/simulator/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/simulator/page'
+> 1 | import InvestmentSimulatorPage from "@/app/investing/simulator/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestmentSimulatorPage;
+
+Import map: aliased to relative './app/investing/simulator/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8820093ms] [ERROR] ./app/investor-tools/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/page'
+> 1 | import InvestingDashboardPage from "@/app/investing/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestingDashboardPage;
+
+Import map: aliased to relative './app/investing/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8820093ms] [ERROR] ./app/investor-tools/intelligence/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/page'
+> 1 | import InvestingDashboardPage from "@/app/investing/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestingDashboardPage;
+
+Import map: aliased to relative './app/investing/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8820094ms] [ERROR] ./app/investor-tools/public/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/public/page'
+> 1 | import PublicAiStocksPage from "@/app/investing/public/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default PublicAiStocksPage;
+
+Import map: aliased to relative './app/investing/public/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8820094ms] [ERROR] ./app/investor-tools/ipo-watch/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/ipo-watch/page'
+> 1 | import IpoWatchPage from "@/app/investing/ipo-watch/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default IpoWatchPage;
+
+Import map: aliased to relative './app/investing/ipo-watch/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8820094ms] [ERROR] ./app/investor-tools/exposure-map/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/exposure-map/page'
+> 1 | import ExposureMapPage from "@/app/investing/exposure-map/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default ExposureMapPage;
+
+Import map: aliased to relative './app/investing/exposure-map/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8820094ms] [ERROR] ./app/investor-tools/briefing/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/briefing/page'
+> 1 | import InvestmentBriefingPage from "@/app/investing/briefing/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestmentBriefingPage;
+
+Import map: aliased to relative './app/investing/briefing/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8820094ms] [ERROR] ./app/investor-tools/watchlist/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/watchlist/page'
+> 1 | import InvestmentWatchlistPage from "@/app/investing/watchlist/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestmentWatchlistPage;
+
+Import map: aliased to relative './app/investing/watchlist/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8820094ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8820094ms] [ERROR] ./app/investor-tools/provider/[slug]/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/provider/[slug]/page'
+> 1 | import ProviderInvestmentPage from "@/app/investing/provider/[slug]/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default ProviderInvestmentPage;
+
+Import map: aliased to relative './app/investing/provider/[slug]/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8820094ms] [ERROR] ./app/investor-tools/briefings/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/briefing/page'
+> 1 | import InvestmentBriefingPage from "@/app/investing/briefing/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestmentBriefingPage;
+
+Import map: aliased to relative './app/investing/briefing/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8820162ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://127.0.0.1:3000/dashboard?_rsc=baRm8Hg-bKr8antF:0
+[ 8820165ms] [ERROR] ./app/investor-tools/simulator/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/simulator/page'
+> 1 | import InvestmentSimulatorPage from "@/app/investing/simulator/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestmentSimulatorPage;
+
+Import map: aliased to relative './app/investing/simulator/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8820166ms] [ERROR] ./app/investor-tools/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/page'
+> 1 | import InvestingDashboardPage from "@/app/investing/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestingDashboardPage;
+
+Import map: aliased to relative './app/investing/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8820166ms] [ERROR] ./app/investor-tools/intelligence/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/page'
+> 1 | import InvestingDashboardPage from "@/app/investing/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestingDashboardPage;
+
+Import map: aliased to relative './app/investing/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8820166ms] [ERROR] ./app/investor-tools/public/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/public/page'
+> 1 | import PublicAiStocksPage from "@/app/investing/public/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default PublicAiStocksPage;
+
+Import map: aliased to relative './app/investing/public/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8820166ms] [ERROR] ./app/investor-tools/ipo-watch/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/ipo-watch/page'
+> 1 | import IpoWatchPage from "@/app/investing/ipo-watch/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default IpoWatchPage;
+
+Import map: aliased to relative './app/investing/ipo-watch/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8820166ms] [ERROR] ./app/investor-tools/exposure-map/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/exposure-map/page'
+> 1 | import ExposureMapPage from "@/app/investing/exposure-map/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default ExposureMapPage;
+
+Import map: aliased to relative './app/investing/exposure-map/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8820166ms] [ERROR] ./app/investor-tools/briefing/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/briefing/page'
+> 1 | import InvestmentBriefingPage from "@/app/investing/briefing/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestmentBriefingPage;
+
+Import map: aliased to relative './app/investing/briefing/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8820166ms] [ERROR] ./app/investor-tools/watchlist/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/watchlist/page'
+> 1 | import InvestmentWatchlistPage from "@/app/investing/watchlist/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestmentWatchlistPage;
+
+Import map: aliased to relative './app/investing/watchlist/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8820166ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8820166ms] [ERROR] ./app/investor-tools/provider/[slug]/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/provider/[slug]/page'
+> 1 | import ProviderInvestmentPage from "@/app/investing/provider/[slug]/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default ProviderInvestmentPage;
+
+Import map: aliased to relative './app/investing/provider/[slug]/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8820166ms] [ERROR] ./app/investor-tools/briefings/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/briefing/page'
+> 1 | import InvestmentBriefingPage from "@/app/investing/briefing/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestmentBriefingPage;
+
+Import map: aliased to relative './app/investing/briefing/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8820271ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8820329ms] [ERROR] ./app/investor-tools/simulator/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/simulator/page'
+> 1 | import InvestmentSimulatorPage from "@/app/investing/simulator/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestmentSimulatorPage;
+
+Import map: aliased to relative './app/investing/simulator/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8820329ms] [ERROR] ./app/investor-tools/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/page'
+> 1 | import InvestingDashboardPage from "@/app/investing/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestingDashboardPage;
+
+Import map: aliased to relative './app/investing/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8820329ms] [ERROR] ./app/investor-tools/intelligence/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/page'
+> 1 | import InvestingDashboardPage from "@/app/investing/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestingDashboardPage;
+
+Import map: aliased to relative './app/investing/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8820330ms] [ERROR] ./app/investor-tools/public/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/public/page'
+> 1 | import PublicAiStocksPage from "@/app/investing/public/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default PublicAiStocksPage;
+
+Import map: aliased to relative './app/investing/public/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8820330ms] [ERROR] ./app/investor-tools/ipo-watch/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/ipo-watch/page'
+> 1 | import IpoWatchPage from "@/app/investing/ipo-watch/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default IpoWatchPage;
+
+Import map: aliased to relative './app/investing/ipo-watch/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8820330ms] [ERROR] ./app/investor-tools/exposure-map/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/exposure-map/page'
+> 1 | import ExposureMapPage from "@/app/investing/exposure-map/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default ExposureMapPage;
+
+Import map: aliased to relative './app/investing/exposure-map/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8820330ms] [ERROR] ./app/investor-tools/briefing/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/briefing/page'
+> 1 | import InvestmentBriefingPage from "@/app/investing/briefing/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestmentBriefingPage;
+
+Import map: aliased to relative './app/investing/briefing/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8820330ms] [ERROR] ./app/investor-tools/watchlist/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/watchlist/page'
+> 1 | import InvestmentWatchlistPage from "@/app/investing/watchlist/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestmentWatchlistPage;
+
+Import map: aliased to relative './app/investing/watchlist/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8820330ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8820330ms] [ERROR] ./app/investor-tools/provider/[slug]/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/provider/[slug]/page'
+> 1 | import ProviderInvestmentPage from "@/app/investing/provider/[slug]/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default ProviderInvestmentPage;
+
+Import map: aliased to relative './app/investing/provider/[slug]/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8820330ms] [ERROR] ./app/investor-tools/briefings/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/briefing/page'
+> 1 | import InvestmentBriefingPage from "@/app/investing/briefing/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestmentBriefingPage;
+
+Import map: aliased to relative './app/investing/briefing/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8820425ms] [ERROR] ./app/investor-tools/simulator/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/simulator/page'
+> 1 | import InvestmentSimulatorPage from "@/app/investing/simulator/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestmentSimulatorPage;
+
+Import map: aliased to relative './app/investing/simulator/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8820425ms] [ERROR] ./app/investor-tools/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/page'
+> 1 | import InvestingDashboardPage from "@/app/investing/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestingDashboardPage;
+
+Import map: aliased to relative './app/investing/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8820425ms] [ERROR] ./app/investor-tools/intelligence/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/page'
+> 1 | import InvestingDashboardPage from "@/app/investing/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestingDashboardPage;
+
+Import map: aliased to relative './app/investing/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8820425ms] [ERROR] ./app/investor-tools/public/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/public/page'
+> 1 | import PublicAiStocksPage from "@/app/investing/public/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default PublicAiStocksPage;
+
+Import map: aliased to relative './app/investing/public/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8820425ms] [ERROR] ./app/investor-tools/ipo-watch/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/ipo-watch/page'
+> 1 | import IpoWatchPage from "@/app/investing/ipo-watch/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default IpoWatchPage;
+
+Import map: aliased to relative './app/investing/ipo-watch/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8820425ms] [ERROR] ./app/investor-tools/exposure-map/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/exposure-map/page'
+> 1 | import ExposureMapPage from "@/app/investing/exposure-map/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default ExposureMapPage;
+
+Import map: aliased to relative './app/investing/exposure-map/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8820425ms] [ERROR] ./app/investor-tools/briefing/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/briefing/page'
+> 1 | import InvestmentBriefingPage from "@/app/investing/briefing/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestmentBriefingPage;
+
+Import map: aliased to relative './app/investing/briefing/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8820425ms] [ERROR] ./app/investor-tools/watchlist/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/watchlist/page'
+> 1 | import InvestmentWatchlistPage from "@/app/investing/watchlist/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestmentWatchlistPage;
+
+Import map: aliased to relative './app/investing/watchlist/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8820425ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8820426ms] [ERROR] ./app/investor-tools/provider/[slug]/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/provider/[slug]/page'
+> 1 | import ProviderInvestmentPage from "@/app/investing/provider/[slug]/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default ProviderInvestmentPage;
+
+Import map: aliased to relative './app/investing/provider/[slug]/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8820426ms] [ERROR] ./app/investor-tools/briefings/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/briefing/page'
+> 1 | import InvestmentBriefingPage from "@/app/investing/briefing/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestmentBriefingPage;
+
+Import map: aliased to relative './app/investing/briefing/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:3318
+[ 8820452ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8820576ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://127.0.0.1:3000/dashboard:0
+[ 8821163ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://127.0.0.1:3000/_next/static/chunks/node_modules_react-dom_0bruynb._.js:15305
+[ 8821223ms] Error: ./app/investor-tools/simulator/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/simulator/page'
+> 1 | import InvestmentSimulatorPage from "@/app/investing/simulator/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestmentSimulatorPage;
+
+Import map: aliased to relative './app/investing/simulator/page' inside of [project]/
+
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+    at <unknown> (Error: ./app/investor-tools/simulator/page.tsx:1:1)
+    at <unknown> (https://nextjs.org/docs/messages/module-not-found)
+    at Object.getCompilationErrors (file:///Users/michaelcook/Documents/Dev Projects/AI Enterpise dev fev1.0/app/ranking-engine/node_modules/next/dist/server/dev/hot-reloader-turbopack.js:1186:59)
+    at DevBundlerService.getCompilationError (file:///Users/michaelcook/Documents/Dev Projects/AI Enterpise dev fev1.0/app/ranking-engine/node_modules/next/dist/server/lib/dev-bundler-service.js:44:55)
+    at DevServer.getCompilationError (file:///Users/michaelcook/Documents/Dev Projects/AI Enterpise dev fev1.0/app/ranking-engine/node_modules/next/dist/server/dev/next-dev-server.js:720:42)
+    at DevServer.findPageComponents (file:///Users/michaelcook/Documents/Dev Projects/AI Enterpise dev fev1.0/app/ranking-engine/node_modules/next/dist/server/dev/next-dev-server.js:690:43)
+    at async DevServer.renderErrorToResponseImpl (file:///Users/michaelcook/Documents/Dev Projects/AI Enterpise dev fev1.0/app/ranking-engine/node_modules/next/dist/server/base-server.js:1753:26)
+[ 8821261ms] [LOG] [HMR] connected @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1226
+[ 8821263ms] [ERROR] ./app/investor-tools/simulator/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/simulator/page'
+> 1 | import InvestmentSimulatorPage from "@/app/investing/simulator/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestmentSimulatorPage;
+
+Import map: aliased to relative './app/investing/simulator/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8821264ms] [ERROR] ./app/investor-tools/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/page'
+> 1 | import InvestingDashboardPage from "@/app/investing/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestingDashboardPage;
+
+Import map: aliased to relative './app/investing/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8821264ms] [ERROR] ./app/investor-tools/intelligence/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/page'
+> 1 | import InvestingDashboardPage from "@/app/investing/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestingDashboardPage;
+
+Import map: aliased to relative './app/investing/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8821264ms] [ERROR] ./app/investor-tools/public/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/public/page'
+> 1 | import PublicAiStocksPage from "@/app/investing/public/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default PublicAiStocksPage;
+
+Import map: aliased to relative './app/investing/public/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8821264ms] [ERROR] ./app/investor-tools/ipo-watch/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/ipo-watch/page'
+> 1 | import IpoWatchPage from "@/app/investing/ipo-watch/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default IpoWatchPage;
+
+Import map: aliased to relative './app/investing/ipo-watch/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8821264ms] [ERROR] ./app/investor-tools/exposure-map/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/exposure-map/page'
+> 1 | import ExposureMapPage from "@/app/investing/exposure-map/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default ExposureMapPage;
+
+Import map: aliased to relative './app/investing/exposure-map/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8821264ms] [ERROR] ./app/investor-tools/briefing/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/briefing/page'
+> 1 | import InvestmentBriefingPage from "@/app/investing/briefing/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestmentBriefingPage;
+
+Import map: aliased to relative './app/investing/briefing/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8821264ms] [ERROR] ./app/investor-tools/watchlist/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/watchlist/page'
+> 1 | import InvestmentWatchlistPage from "@/app/investing/watchlist/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestmentWatchlistPage;
+
+Import map: aliased to relative './app/investing/watchlist/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8821264ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8821264ms] [ERROR] ./app/investor-tools/provider/[slug]/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/provider/[slug]/page'
+> 1 | import ProviderInvestmentPage from "@/app/investing/provider/[slug]/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default ProviderInvestmentPage;
+
+Import map: aliased to relative './app/investing/provider/[slug]/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8821264ms] [ERROR] ./app/investor-tools/briefings/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/briefing/page'
+> 1 | import InvestmentBriefingPage from "@/app/investing/briefing/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestmentBriefingPage;
+
+Import map: aliased to relative './app/investing/briefing/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8821309ms] [ERROR] ./app/investor-tools/simulator/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/simulator/page'
+> 1 | import InvestmentSimulatorPage from "@/app/investing/simulator/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestmentSimulatorPage;
+
+Import map: aliased to relative './app/investing/simulator/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8821309ms] [ERROR] ./app/investor-tools/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/page'
+> 1 | import InvestingDashboardPage from "@/app/investing/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestingDashboardPage;
+
+Import map: aliased to relative './app/investing/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8821309ms] [ERROR] ./app/investor-tools/intelligence/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/page'
+> 1 | import InvestingDashboardPage from "@/app/investing/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestingDashboardPage;
+
+Import map: aliased to relative './app/investing/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8821309ms] [ERROR] ./app/investor-tools/public/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/public/page'
+> 1 | import PublicAiStocksPage from "@/app/investing/public/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default PublicAiStocksPage;
+
+Import map: aliased to relative './app/investing/public/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8821309ms] [ERROR] ./app/investor-tools/ipo-watch/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/ipo-watch/page'
+> 1 | import IpoWatchPage from "@/app/investing/ipo-watch/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default IpoWatchPage;
+
+Import map: aliased to relative './app/investing/ipo-watch/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8821309ms] [ERROR] ./app/investor-tools/exposure-map/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/exposure-map/page'
+> 1 | import ExposureMapPage from "@/app/investing/exposure-map/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default ExposureMapPage;
+
+Import map: aliased to relative './app/investing/exposure-map/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8821309ms] [ERROR] ./app/investor-tools/briefing/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/briefing/page'
+> 1 | import InvestmentBriefingPage from "@/app/investing/briefing/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestmentBriefingPage;
+
+Import map: aliased to relative './app/investing/briefing/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8821309ms] [ERROR] ./app/investor-tools/watchlist/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/watchlist/page'
+> 1 | import InvestmentWatchlistPage from "@/app/investing/watchlist/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestmentWatchlistPage;
+
+Import map: aliased to relative './app/investing/watchlist/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8821309ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8821309ms] [ERROR] ./app/investor-tools/provider/[slug]/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/provider/[slug]/page'
+> 1 | import ProviderInvestmentPage from "@/app/investing/provider/[slug]/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default ProviderInvestmentPage;
+
+Import map: aliased to relative './app/investing/provider/[slug]/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8821309ms] [ERROR] ./app/investor-tools/briefings/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/briefing/page'
+> 1 | import InvestmentBriefingPage from "@/app/investing/briefing/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestmentBriefingPage;
+
+Import map: aliased to relative './app/investing/briefing/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8821343ms] [ERROR] ./app/investor-tools/simulator/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/simulator/page'
+> 1 | import InvestmentSimulatorPage from "@/app/investing/simulator/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestmentSimulatorPage;
+
+Import map: aliased to relative './app/investing/simulator/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8821343ms] [ERROR] ./app/investor-tools/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/page'
+> 1 | import InvestingDashboardPage from "@/app/investing/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestingDashboardPage;
+
+Import map: aliased to relative './app/investing/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8821343ms] [ERROR] ./app/investor-tools/intelligence/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/page'
+> 1 | import InvestingDashboardPage from "@/app/investing/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestingDashboardPage;
+
+Import map: aliased to relative './app/investing/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8821343ms] [ERROR] ./app/investor-tools/public/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/public/page'
+> 1 | import PublicAiStocksPage from "@/app/investing/public/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default PublicAiStocksPage;
+
+Import map: aliased to relative './app/investing/public/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8821343ms] [ERROR] ./app/investor-tools/ipo-watch/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/ipo-watch/page'
+> 1 | import IpoWatchPage from "@/app/investing/ipo-watch/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default IpoWatchPage;
+
+Import map: aliased to relative './app/investing/ipo-watch/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8821343ms] [ERROR] ./app/investor-tools/exposure-map/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/exposure-map/page'
+> 1 | import ExposureMapPage from "@/app/investing/exposure-map/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default ExposureMapPage;
+
+Import map: aliased to relative './app/investing/exposure-map/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8821343ms] [ERROR] ./app/investor-tools/briefing/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/briefing/page'
+> 1 | import InvestmentBriefingPage from "@/app/investing/briefing/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestmentBriefingPage;
+
+Import map: aliased to relative './app/investing/briefing/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8821343ms] [ERROR] ./app/investor-tools/watchlist/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/watchlist/page'
+> 1 | import InvestmentWatchlistPage from "@/app/investing/watchlist/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestmentWatchlistPage;
+
+Import map: aliased to relative './app/investing/watchlist/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8821344ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8821344ms] [ERROR] ./app/investor-tools/provider/[slug]/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/provider/[slug]/page'
+> 1 | import ProviderInvestmentPage from "@/app/investing/provider/[slug]/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default ProviderInvestmentPage;
+
+Import map: aliased to relative './app/investing/provider/[slug]/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8821344ms] [ERROR] ./app/investor-tools/briefings/page.tsx:1:1
+Module not found: Can't resolve '@/app/investing/briefing/page'
+> 1 | import InvestmentBriefingPage from "@/app/investing/briefing/page";
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  2 |
+  3 | export const dynamic = "force-dynamic";
+  4 | export default InvestmentBriefingPage;
+
+Import map: aliased to relative './app/investing/briefing/page' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8821413ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1226
+[ 8827210ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1226
+[ 8828898ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8828951ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8829015ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1226
+[ 8829596ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8829699ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1226
+[ 8829714ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8830038ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1226
+[ 8830247ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8830321ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8830392ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8830461ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8830497ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8830532ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8830570ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8830609ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8830648ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8830751ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1226
+[ 8830929ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8831034ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1226
+[ 8831125ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8831193ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8831228ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8831264ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8831331ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8831441ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1226
+[ 8831646ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8831744ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8831779ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8831876ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8831880ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1226
+[ 8831981ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1226
+[ 8832425ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8832496ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8832568ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8832635ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8832704ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8832804ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8832869ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8832972ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1226
+[ 8833211ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8833317ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1226
+[ 8833463ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8833566ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1226
+[ 8833678ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8833715ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8833824ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1226
+[ 8834391ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8834498ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1226
+[ 8834705ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8834770ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8834873ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1226
+[ 8834928ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8835030ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1226
+[ 8835051ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8835119ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8835188ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8835298ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1226
+[ 8835470ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8835573ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1226
+[ 8835747ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8835851ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1226
+[ 8835931ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8836036ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8836130ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8836232ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1226
+[ 8836340ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8836407ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8836447ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8836484ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8836520ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8836586ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8836627ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8836695ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8836731ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8836799ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8836869ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8836917ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1226
+[ 8836998ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8837035ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8837124ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8837225ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1226
+[ 8837281ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8837282ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8837389ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1226
+[ 8837497ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8837590ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8837692ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1226
+[ 8837712ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8837813ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1226
+[ 8838046ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8838149ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1226
+[ 8838320ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8838421ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1226
+[ 8838533ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8838640ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1226
+[ 8839072ms] [ERROR] ./app/investor-tools/ipo-watch/[providerSlug]/page.tsx:7:1
+Module not found: Can't resolve '@/app/investing/investing-ui'
+   5 | import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/i...
+   6 | import type { PostIPOFluctuationBand } from "@/lib/investing/types";
+>  7 | import { WarningStrip, label } from "@/app/investing/investing-ui";
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   8 |
+   9 | export const dynamic = "force-dynamic";
+  10 |
+
+Import map: aliased to relative './app/investing/investing-ui' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1945
+[ 8839177ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1226
+[ 8839721ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3000/_next/static/development/_devPagesManifest.json:0
+[ 8839721ms] [LOG] Failed to fetch devPagesManifest TypeError: Failed to fetch
+    at http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:3957:25
+    at WebSocket.handleMessage (http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_client_0pe1dg-._.js:2325:17) @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1226
+[ 8839722ms] [ERROR] WebSocket is already in CLOSING or CLOSED state. @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_0u_w_5s._.js:1585
+[ 8912181ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8912264ms] [LOG] [HMR] connected @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8914032ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8914139ms] [LOG] [Fast Refresh] done in 207ms @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8914897ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8914906ms] [LOG] [Fast Refresh] done in 111ms @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8915014ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8915024ms] [LOG] [Fast Refresh] done in 112ms @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8915131ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8915366ms] [LOG] [Fast Refresh] done in 336ms @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8915665ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8915708ms] [LOG] [Fast Refresh] done in 144ms @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8915892ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8915940ms] [LOG] [Fast Refresh] done in 150ms @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8917333ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8917432ms] [LOG] [Fast Refresh] done in 200ms @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8917562ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8917614ms] [LOG] [Fast Refresh] done in 154ms @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8918034ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8918053ms] [LOG] [Fast Refresh] done in 121ms @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8918364ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8918463ms] [LOG] [Fast Refresh] done in 201ms @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8918594ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8918787ms] [LOG] [Fast Refresh] done in 294ms @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8918892ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8918960ms] [LOG] [Fast Refresh] done in 168ms @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8919913ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8920054ms] [LOG] [Fast Refresh] done in 242ms @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8920277ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8920417ms] [LOG] [Fast Refresh] done in 243ms @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8924941ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8925088ms] [LOG] [Fast Refresh] done in 119ms @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8926215ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8926223ms] [LOG] [Fast Refresh] done in 114ms @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8926597ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8926695ms] [LOG] [Fast Refresh] done in 198ms @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8938874ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3000/_next/webpack-hmr?id=aV-5Yq0fGTiYVIq_XKbTm' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13322
+[ 8939877ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3000/_next/webpack-hmr?id=aV-5Yq0fGTiYVIq_XKbTm' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13322
+[ 8940880ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3000/_next/webpack-hmr?id=aV-5Yq0fGTiYVIq_XKbTm' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13322
+[ 8941882ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3000/_next/webpack-hmr?id=aV-5Yq0fGTiYVIq_XKbTm' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13322
+[ 8942886ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3000/_next/webpack-hmr?id=aV-5Yq0fGTiYVIq_XKbTm' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13322
+[ 8947889ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3000/_next/webpack-hmr?id=aV-5Yq0fGTiYVIq_XKbTm' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13322
+[ 8952892ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3000/_next/webpack-hmr?id=aV-5Yq0fGTiYVIq_XKbTm' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13322
+[ 8957899ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3000/_next/webpack-hmr?id=aV-5Yq0fGTiYVIq_XKbTm' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13322
+[ 8962923ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3000/_next/webpack-hmr?id=aV-5Yq0fGTiYVIq_XKbTm' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13322
+[ 8967962ms] [LOG] [HMR] connected @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8969980ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8970039ms] [LOG] [HMR] connected @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8970323ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8970381ms] [LOG] [Fast Refresh] done in 160ms @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8970482ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8970548ms] [LOG] [Fast Refresh] done in 166ms @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8970650ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8970720ms] [LOG] [Fast Refresh] done in 171ms @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8970834ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8970941ms] [LOG] [Fast Refresh] done in 208ms @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8971078ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8971133ms] [LOG] [Fast Refresh] done in 156ms @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8971235ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8971280ms] [LOG] [Fast Refresh] done in 147ms @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8971384ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8971430ms] [LOG] [Fast Refresh] done in 149ms @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8971706ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8971750ms] [LOG] [Fast Refresh] done in 145ms @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8971851ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8971897ms] [LOG] [Fast Refresh] done in 147ms @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8972000ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8972039ms] [LOG] [Fast Refresh] done in 141ms @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8982664ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8982935ms] [LOG] [Fast Refresh] done in 374ms @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8983038ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8984396ms] [LOG] [Fast Refresh] done in 1460ms @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8986358ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8986474ms] [LOG] [Fast Refresh] done in 217ms @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8987737ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8987932ms] [LOG] [Fast Refresh] done in 297ms @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8993206ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8993272ms] [LOG] [Fast Refresh] done in 169ms @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8993377ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8993895ms] [LOG] [Fast Refresh] done in 620ms @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8995058ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 8995374ms] [LOG] [Fast Refresh] done in 419ms @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 9000555ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 9000577ms] [LOG] [Fast Refresh] done in 123ms @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 9000783ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 9000942ms] [LOG] [Fast Refresh] done in 261ms @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 9024175ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 9024356ms] [LOG] [Fast Refresh] done in 283ms @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 9024459ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 9024481ms] [LOG] [Fast Refresh] done in 124ms @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 9031138ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 9031182ms] [LOG] [Fast Refresh] done in 146ms @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 9031287ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 9031418ms] [LOG] [Fast Refresh] done in 233ms @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 9045422ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 9045449ms] [LOG] [Fast Refresh] done in 66ms @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 9045553ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 9045910ms] [LOG] [Fast Refresh] done in 269ms @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 9046105ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 9046106ms] [LOG] [Fast Refresh] done in 1ms @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 9046712ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 9046844ms] [LOG] [Fast Refresh] done in 231ms @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 9047338ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 9047391ms] [LOG] [Fast Refresh] done in 153ms @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 9047497ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 9047813ms] [LOG] [Fast Refresh] done in 422ms @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 9048390ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 9048697ms] [LOG] [Fast Refresh] done in 411ms @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 9048812ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 9048858ms] [LOG] [Fast Refresh] done in 153ms @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 9049352ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 9049429ms] [LOG] [Fast Refresh] done in 182ms @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 9049541ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 9049875ms] [LOG] [Fast Refresh] done in 434ms @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 9050439ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 9050559ms] [LOG] [Fast Refresh] done in 221ms @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 9060781ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 9061845ms] [LOG] [HMR] connected @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 9063590ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 9063636ms] [LOG] [HMR] connected @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 9083032ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3000/_next/webpack-hmr?id=xl14gcuNdDt0Vib1VDPPw' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13322
+[ 9084036ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3000/_next/webpack-hmr?id=xl14gcuNdDt0Vib1VDPPw' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13322
+[ 9085082ms] [LOG] [HMR] connected @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 9088109ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 9088132ms] [LOG] [HMR] connected @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 9088343ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 9088460ms] [LOG] [Fast Refresh] done in 219ms @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 9089219ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 9089305ms] [LOG] [Fast Refresh] done in 188ms @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 9089424ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 9089517ms] [LOG] [Fast Refresh] done in 196ms @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 9089628ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 9089713ms] [LOG] [Fast Refresh] done in 185ms @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 9089825ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 9089894ms] [LOG] [Fast Refresh] done in 171ms @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 9090005ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 9090066ms] [LOG] [Fast Refresh] done in 163ms @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 9090189ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[ 9090270ms] [LOG] [Fast Refresh] done in 183ms @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[10845977ms] [LOG] [HMR] connected @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[15639686ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[15641831ms] [LOG] [Fast Refresh] done in 2257ms @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[15642014ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[15642184ms] [LOG] [Fast Refresh] done in 271ms @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[15642286ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[15642375ms] [LOG] [Fast Refresh] done in 191ms @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[15648288ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[15648298ms] [LOG] [Fast Refresh] done in 111ms @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[15648400ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[15648407ms] [LOG] [Fast Refresh] done in 108ms @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[15648513ms] [LOG] [Fast Refresh] rebuilding @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[15648524ms] [LOG] [Fast Refresh] done in 112ms @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2477
+[15716131ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3000/_next/webpack-hmr?id=MOJpOuUFcle8yGZvEj5gr' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13322
+[15717138ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3000/_next/webpack-hmr?id=MOJpOuUFcle8yGZvEj5gr' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13322
+[15718141ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3000/_next/webpack-hmr?id=MOJpOuUFcle8yGZvEj5gr' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13322
+[15719144ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3000/_next/webpack-hmr?id=MOJpOuUFcle8yGZvEj5gr' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13322
+[15720148ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3000/_next/webpack-hmr?id=MOJpOuUFcle8yGZvEj5gr' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13322
+[15725156ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3000/_next/webpack-hmr?id=MOJpOuUFcle8yGZvEj5gr' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13322
+[15730166ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3000/_next/webpack-hmr?id=MOJpOuUFcle8yGZvEj5gr' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13322
+[15735186ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3000/_next/webpack-hmr?id=MOJpOuUFcle8yGZvEj5gr' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13322
+[15740226ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3000/_next/webpack-hmr?id=MOJpOuUFcle8yGZvEj5gr' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13322
+[15745297ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3000/_next/webpack-hmr?id=MOJpOuUFcle8yGZvEj5gr' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13322
+[15750353ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3000/_next/webpack-hmr?id=MOJpOuUFcle8yGZvEj5gr' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13322
+[15755652ms] [ERROR] WebSocket connection to 'ws://127.0.0.1:3000/_next/webpack-hmr?id=MOJpOuUFcle8yGZvEj5gr' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:3000/_next/static/chunks/node_modules_next_dist_client_0fhqo1d._.js:13322

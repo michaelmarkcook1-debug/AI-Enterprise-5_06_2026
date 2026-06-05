@@ -1,0 +1,453 @@
+/*!***********************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[15].oneOf[5].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[15].oneOf[5].use[3]!./components/AIEnterpriseShell.module.css ***!
+  \***********************************************************************************************************************************************************************************************************************************************************************************/
+/* cache-bust 2026-05-10 — AnalystGenius-style orbital command surface */
+
+.AIEnterpriseShell_root__dKjd8 {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100dvh;
+  overflow: hidden;
+  font-family: var(--font-geist-sans), system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+
+  /* CSS custom properties switched by data-theme */
+  --bg-1: #0a1628;
+  --bg-2: #050d1a;
+  --text-strong: #f4eedf;
+  --text-mute: rgba(244, 238, 223, 0.62);
+  --text-soft: rgba(244, 238, 223, 0.45);
+  --accent: #d4ad5c;
+  --accent-soft: rgba(212, 173, 92, 0.6);
+  --ring-stroke: rgba(212, 173, 92, 0.22);
+  --ring-planet: rgba(212, 173, 92, 0.7);
+  --ring-glow: #d4ad5c;
+  --pill-bg: rgba(244, 238, 223, 0.04);
+  --pill-border: rgba(212, 173, 92, 0.45);
+  --pill-text: #f4eedf;
+
+  background: var(--bg-1);
+  color: var(--text-strong);
+}
+
+.AIEnterpriseShell_root__dKjd8[data-theme="light"] {
+  --bg-1: #ece8de;
+  --bg-2: #d8d4ca;
+  --text-strong: #18201b;
+  --text-mute: rgba(24, 32, 27, 0.62);
+  --text-soft: rgba(24, 32, 27, 0.42);
+  --accent: #b8923c;
+  --accent-soft: rgba(184, 146, 60, 0.6);
+  --ring-stroke: rgba(184, 146, 60, 0.32);
+  --ring-planet: rgba(184, 146, 60, 0.78);
+  --ring-glow: #d4b97a;
+  --pill-bg: rgba(255, 255, 255, 0.5);
+  --pill-border: rgba(24, 32, 27, 0.18);
+  --pill-text: #18201b;
+}
+
+.AIEnterpriseShell_bgWash__8Ct2Y {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse at 50% 40%, color-mix(in srgb, var(--accent) 18%, transparent), transparent 55%),
+    radial-gradient(ellipse at 50% 100%, color-mix(in srgb, var(--bg-2) 90%, transparent), transparent 60%),
+    linear-gradient(180deg, var(--bg-1), var(--bg-2));
+}
+
+.AIEnterpriseShell_orbits__6iop8 {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+@keyframes AIEnterpriseShell_orbitCW__WI88D {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+@keyframes AIEnterpriseShell_orbitCCW__0lLF6 {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(-360deg); }
+}
+
+/* Only the horizontal-plane ring set rotates. The tilted set stays static —
+   creates a sense of one constellation orbiting around a fixed reference frame
+   rather than two overlapping spinners (which read as visual noise). */
+.AIEnterpriseShell_layerA__g3noA {
+  transform-origin: center;
+  transform-box: fill-box;
+  animation: AIEnterpriseShell_orbitCW__WI88D 90s linear infinite;
+}
+
+.AIEnterpriseShell_layerB__cQYb4 {
+  /* static — provides depth + the cross-axis reference plane */
+  transform-origin: center;
+  transform-box: fill-box;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .AIEnterpriseShell_layerA__g3noA { animation: none; }
+}
+
+/* ─────────── Top brand ─────────── */
+
+.AIEnterpriseShell_brand__4PSfR {
+  position: absolute;
+  top: 28px;
+  left: 32px;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: var(--text-strong);
+}
+
+.AIEnterpriseShell_brandMark__9GsjD {
+  color: var(--accent);
+}
+
+.AIEnterpriseShell_brandWordStack__s7_PB {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+}
+
+.AIEnterpriseShell_brandWord__qRd7G {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.005em;
+}
+
+.AIEnterpriseShell_brandWordMute__n0Rgq {
+  color: var(--text-strong);
+}
+
+.AIEnterpriseShell_brandWordAccent__G1iw_ {
+  color: var(--accent);
+}
+
+.AIEnterpriseShell_brandSubline__H3fbY {
+  margin-top: 2px;
+  font-size: 10px;
+  letter-spacing: 0.02em;
+  color: var(--text-soft);
+  font-weight: 400;
+}
+
+/* ─────────── Theme toggle ─────────── */
+
+.AIEnterpriseShell_themeToggle__rDKhj {
+  position: absolute;
+  top: 24px;
+  right: 32px;
+  z-index: 5;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 18px 9px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--pill-border);
+  background: var(--pill-bg);
+  color: var(--pill-text);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: background 180ms ease, border-color 180ms ease, transform 180ms ease;
+}
+
+.AIEnterpriseShell_themeToggle__rDKhj:hover {
+  background: color-mix(in srgb, var(--accent) 14%, var(--pill-bg));
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+
+.AIEnterpriseShell_toggleDot__eZX9M {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--accent);
+  box-shadow: 0 0 12px var(--accent-soft);
+}
+
+/* ─────────── Hero content ─────────── */
+
+.AIEnterpriseShell_content__iLowH {
+  position: relative;
+  z-index: 4;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0 24px;
+}
+
+.AIEnterpriseShell_eyebrow__6ffBc {
+  margin: 0 0 26px;
+  font-size: 11px;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  font-weight: 500;
+  color: var(--text-mute);
+}
+
+.AIEnterpriseShell_wordmark__DHCAQ {
+  margin: 0;
+  /* Display wordmark — heavy humanist sans, matches the May-2026
+     reference image. Falls back to system humanist sans stack so the
+     mark still reads strong if the network font is slow. */
+  font-family: var(--font-display), "Plus Jakarta Sans", "Inter",
+    -apple-system, "Segoe UI", system-ui, sans-serif;
+  font-weight: 800;
+  font-size: clamp(56px, 9vw, 128px);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  text-shadow: 0 4px 40px color-mix(in srgb, var(--accent) 35%, transparent);
+}
+
+.AIEnterpriseShell_wordmarkMute__6LjkH {
+  color: var(--text-strong);
+  font-style: normal;
+}
+
+.AIEnterpriseShell_wordmarkAccent__K1kTc {
+  color: var(--accent);
+  font-style: normal;
+}
+
+.AIEnterpriseShell_subtitle__80A4J {
+  margin: 18px 0 0;
+  font-size: 11px;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  font-weight: 500;
+  color: var(--text-mute);
+}
+
+.AIEnterpriseShell_divider__N882x {
+  width: 96px;
+  height: 1px;
+  margin: 28px auto 28px;
+  background: linear-gradient(90deg, transparent, var(--accent-soft), transparent);
+}
+
+.AIEnterpriseShell_tagline__ZBqA6 {
+  margin: 0 0 14px;
+  font-family: var(--font-cormorant), Georgia, serif;
+  font-size: clamp(18px, 1.8vw, 22px);
+  color: var(--text-strong);
+  letter-spacing: 0.02em;
+}
+
+.AIEnterpriseShell_tagline__ZBqA6 em {
+  font-style: italic;
+  font-weight: 500;
+}
+
+.AIEnterpriseShell_lede__kdXE_ {
+  margin: 0 0 36px;
+  font-size: clamp(13px, 1.1vw, 15px);
+  line-height: 1.6;
+  color: var(--text-mute);
+  max-width: 64ch;
+}
+
+.AIEnterpriseShell_ctaRow__KPVzG {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  /* Gap sized so the 1.45× pulse halo around the primary CTA stops
+   * short of the secondary CTA — visually adjacent but never touching
+   * at peak pulse. Only the primary pulses, so half the clearance
+   * needed vs. when both pulsed. */
+  gap: 84px;
+  margin-bottom: 40px;
+}
+
+@media (max-width: 720px) {
+  .AIEnterpriseShell_ctaRow__KPVzG {
+    gap: 48px;
+  }
+}
+
+.AIEnterpriseShell_ctaPrimary__IPW9F,
+.AIEnterpriseShell_ctaSecondary___bhO8 {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 28px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 180ms ease, border-color 180ms ease, transform 180ms ease, box-shadow 180ms ease;
+}
+
+.AIEnterpriseShell_ctaPrimary__IPW9F {
+  border: 1px solid var(--accent);
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  color: var(--text-strong);
+  box-shadow: 0 0 32px color-mix(in srgb, var(--accent) 22%, transparent);
+}
+
+.AIEnterpriseShell_ctaPrimary__IPW9F:hover {
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+  transform: translateY(-1px);
+}
+
+/* Strong primary: same geometry as ctaPrimary but a filled gold body with
+   high-contrast inverse text + a richer halo. Reserved for the single most
+   important CTA on the page (Enter portal). */
+.AIEnterpriseShell_ctaPrimaryStrong__Ga5gX {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 28px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 180ms ease, border-color 180ms ease, transform 180ms ease, box-shadow 180ms ease;
+
+  /* Filled gold body. Border tightens the silhouette against the navy bg. */
+  background: linear-gradient(135deg,
+    color-mix(in srgb, var(--accent) 96%, white 6%),
+    color-mix(in srgb, var(--accent) 88%, black 6%));
+  border: 1px solid color-mix(in srgb, var(--accent) 90%, white 10%);
+  /* Inverse text — near-black so the bg can carry the visual weight. */
+  color: #14181f;
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--accent) 40%, transparent),
+    0 0 48px color-mix(in srgb, var(--accent) 55%, transparent),
+    0 8px 24px color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+.AIEnterpriseShell_ctaPrimaryStrong__Ga5gX:hover {
+  transform: translateY(-1px);
+  background: linear-gradient(135deg,
+    color-mix(in srgb, var(--accent) 100%, white 8%),
+    color-mix(in srgb, var(--accent) 92%, black 4%));
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--accent) 55%, transparent),
+    0 0 64px color-mix(in srgb, var(--accent) 70%, transparent),
+    0 10px 28px color-mix(in srgb, var(--accent) 38%, transparent);
+}
+
+.AIEnterpriseShell_ctaDotStrong___asiJ {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: #14181f;
+  box-shadow: 0 0 6px rgba(20, 24, 31, 0.35);
+}
+
+.AIEnterpriseShell_ctaDot__Sk6RD {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--accent);
+  box-shadow: 0 0 10px var(--accent);
+}
+
+.AIEnterpriseShell_ctaArrow__6Uu_i {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.AIEnterpriseShell_ctaSecondary___bhO8 {
+  border: 1px solid color-mix(in srgb, var(--text-strong) 30%, transparent);
+  background: transparent;
+  color: var(--text-strong);
+}
+
+.AIEnterpriseShell_ctaSecondary___bhO8:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  transform: translateY(-1px);
+}
+
+/* ─────────── Pulsating CTA wrapper ───────────
+   Each pulse is an absolutely-positioned ring that expands + fades. Two rings
+   per CTA, offset in time, give a continuous halo without feeling busy. */
+.AIEnterpriseShell_ctaWrap__LgoNe {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.AIEnterpriseShell_pulseRing__6v7R0 {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  border: 1.5px solid var(--accent);
+  pointer-events: none;
+  opacity: 0;
+  animation: AIEnterpriseShell_ctaPulse__xABpp 2.4s ease-out infinite;
+  will-change: transform, opacity;
+}
+
+.AIEnterpriseShell_pulseRingDelay0__2s0GK {
+  animation-delay: 0s;
+}
+
+.AIEnterpriseShell_pulseRingDelay1__k_gNH {
+  animation-delay: 1.2s;
+}
+
+@keyframes AIEnterpriseShell_ctaPulse__xABpp {
+  0% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  80% {
+    transform: scale(1.45);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1.45);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .AIEnterpriseShell_pulseRing__6v7R0 {
+    animation: none;
+    opacity: 0.4;
+  }
+}
+
+.AIEnterpriseShell_foot__0bzwf {
+  margin: 0;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--text-soft);
+}
+
+.AIEnterpriseShell_urlSig__pevTL {
+  position: absolute;
+  bottom: 22px;
+  right: 32px;
+  z-index: 4;
+  font-family: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  color: var(--text-soft);
+  text-transform: lowercase;
+}
+

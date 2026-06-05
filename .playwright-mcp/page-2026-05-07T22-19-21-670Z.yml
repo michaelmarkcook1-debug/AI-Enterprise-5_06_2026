@@ -1,0 +1,625 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]: Seed intelligence preview | estimated market signals remain confidence-labelled until live ingestion is connected.
+    - generic [ref=e4]:
+      - link "AI Enterpise home" [ref=e5] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e6]:
+          - img [ref=e7]
+          - generic [ref=e8]: AI Enterpise
+      - navigation [ref=e9]:
+        - link "Investor Tools" [ref=e11] [cursor=pointer]:
+          - /url: /investor-tools
+        - link "Dashboard" [ref=e12] [cursor=pointer]:
+          - /url: /dashboard
+        - link "Vendors" [ref=e13] [cursor=pointer]:
+          - /url: /vendors
+        - link "Market Tracker" [ref=e14] [cursor=pointer]:
+          - /url: /market
+        - link "News" [ref=e15] [cursor=pointer]:
+          - /url: /news
+        - link "Capabilities" [ref=e16] [cursor=pointer]:
+          - /url: /capabilities
+        - link "Assessment" [ref=e17] [cursor=pointer]:
+          - /url: /assessment
+        - link "Briefings" [ref=e18] [cursor=pointer]:
+          - /url: /briefings
+        - link "Watchlists" [ref=e19] [cursor=pointer]:
+          - /url: /watchlists
+      - button "Toggle light and dark mode" [ref=e20]: Dark
+  - main [ref=e23]:
+    - generic [ref=e24]:
+      - generic [ref=e25]: AI Enterpise investment scenario modelling
+      - heading "Investment Simulator" [level=1] [ref=e26]
+      - paragraph [ref=e27]: Hypothetical AI-provider portfolio modelling for public, indirect, and IPO-watch exposure. Outputs are seed-based, confidence-weighted, and not financial advice.
+    - generic [ref=e28]:
+      - generic [ref=e29]:
+        - generic "Hypothetical simulator, not financial advice." [ref=e30]: Scenario tool
+        - generic [ref=e31]: Investor Tools are for market intelligence and hypothetical scenario modelling only. They are not financial advice. Outputs are based on documented, estimated, inferred, or seed data as labelled. Future returns are not guaranteed.
+      - generic [ref=e32]:
+        - generic [ref=e33]:
+          - generic [ref=e34]: Starting capital
+          - generic [ref=e35]: $10,000
+          - generic [ref=e36]: Seed model
+        - generic [ref=e37]:
+          - generic [ref=e38]: Time horizon
+          - generic [ref=e39]: 5y
+          - generic [ref=e40]: annually
+        - generic [ref=e41]:
+          - generic [ref=e42]: Risk profile
+          - generic [ref=e43]: Balanced
+          - generic [ref=e44]: model guided
+        - generic [ref=e45]:
+          - generic [ref=e46]: Universe
+          - generic [ref=e47]: public and indirect
+          - generic [ref=e48]: Global
+        - generic [ref=e49]:
+          - generic [ref=e50]: Confidence
+          - generic [ref=e51]: 81/100
+          - generic [ref=e52]: weighted evidence
+      - generic [ref=e54]:
+        - generic [ref=e55]: Simulation state
+        - generic [ref=e56]: "State hash: 1kruke4"
+        - generic [ref=e57]: "Last updated: 11:19:21 PM"
+      - generic [ref=e58]:
+        - generic [ref=e59]:
+          - heading "Inputs and assumptions" [level=2] [ref=e61]
+          - generic [ref=e63]:
+            - generic [ref=e64]:
+              - generic [ref=e65]:
+                - text: Starting capital
+                - generic "Capital base used to calculate holding amounts and scenario paths. It affects chart values, not provider eligibility." [ref=e66]: i
+              - spinbutton "Starting capital Capital base used to calculate holding amounts and scenario paths. It affects chart values, not provider eligibility." [ref=e68]: "10000"
+            - generic [ref=e69]:
+              - generic [ref=e70]:
+                - text: Horizon
+                - generic "Number of years to model. It changes scenario path length, shock timing, drawdown, and x-axis scale." [ref=e71]: i
+              - generic [ref=e73]:
+                - button "Horizon Number of years to model. It changes scenario path length, shock timing, drawdown, and x-axis scale. 3y 5y 10y" [ref=e74]: 1y
+                - button "3y" [ref=e75]
+                - button "5y" [ref=e76]
+                - button "10y" [ref=e77]
+            - generic [ref=e78]:
+              - generic [ref=e79]:
+                - text: Risk profile
+                - generic "Risk appetite adjusts scenario return multipliers, shock severity, model selection, and risk radar." [ref=e80]: i
+              - combobox "Risk profile Risk appetite adjusts scenario return multipliers, shock severity, model selection, and risk radar." [ref=e82]:
+                - option "conservative"
+                - option "balanced" [selected]
+                - option "aggressive"
+                - option "speculative"
+            - generic [ref=e83]:
+              - generic [ref=e84]:
+                - text: Allocation style
+                - generic "Model-guided builds a seed allocation. Manual lets you select vendors and weights; invalid totals block chart output." [ref=e85]: i
+              - combobox "Allocation style Model-guided builds a seed allocation. Manual lets you select vendors and weights; invalid totals block chart output." [ref=e87]:
+                - option "manual"
+                - option "model guided" [selected]
+                - option "thesis based"
+            - generic [ref=e88]:
+              - generic [ref=e89]:
+                - text: Investment universe
+                - generic "Controls eligible vendors. Public Only excludes private names; IPO Watch excludes public direct holdings." [ref=e90]: i
+              - combobox "Investment universe Controls eligible vendors. Public Only excludes private names; IPO Watch excludes public direct holdings." [ref=e92]:
+                - option "public only"
+                - option "public and indirect" [selected]
+                - option "ipo watch"
+                - option "speculative all"
+            - generic [ref=e93]:
+              - generic [ref=e94]:
+                - text: Region
+                - generic "Region currently labels the scenario context. Future live feeds will use it for eligible instruments and regulatory risk." [ref=e95]: i
+              - combobox "Region Region currently labels the scenario context. Future live feeds will use it for eligible instruments and regulatory risk." [ref=e97]:
+                - option "US"
+                - option "Europe"
+                - option "Global" [selected]
+            - generic [ref=e98]:
+              - generic [ref=e99]:
+                - text: Private exposure
+                - generic "Controls whether private providers are hidden, shown only through indirect links, or displayed as IPO-watch scenario items." [ref=e100]: i
+              - combobox "Private exposure Controls whether private providers are hidden, shown only through indirect links, or displayed as IPO-watch scenario items." [ref=e102]:
+                - option "no"
+                - option "indirect only" [selected]
+                - option "ipo watchlist"
+            - generic [ref=e103]:
+              - generic [ref=e104]:
+                - text: Rebalance
+                - generic "Rebalance frequency is captured for state integrity. Seed paths currently use static annual holdings." [ref=e105]: i
+              - combobox "Rebalance Rebalance frequency is captured for state integrity. Seed paths currently use static annual holdings." [ref=e107]:
+                - option "none"
+                - option "quarterly"
+                - option "annually" [selected]
+            - generic [ref=e108]:
+              - generic [ref=e109]:
+                - text: Cash reserve
+                - generic "Cash reserve lowers invested allocation and volatility. In manual mode, vendor allocations plus cash must total 100%." [ref=e110]: i
+              - generic [ref=e111]:
+                - slider "Cash reserve Cash reserve lowers invested allocation and volatility. In manual mode, vendor allocations plus cash must total 100%. 8% cash reserve" [ref=e112]: "8"
+                - generic [ref=e113]: 8% cash reserve
+            - generic [ref=e114]:
+              - button "Reset model" [ref=e115]
+              - button "Apply shock" [ref=e116]
+        - generic [ref=e117]:
+          - heading "Scenario fan chart" [level=2] [ref=e119]
+          - generic [ref=e120]:
+            - img "Scenario fan chart" [ref=e121]:
+              - generic [ref=e127]: Bull
+              - generic [ref=e128]: Base
+              - generic [ref=e129]: Bear
+              - generic [ref=e130]: Stress
+              - generic [ref=e131]: Years
+              - generic [ref=e132]: Hypothetical seed paths
+            - generic [ref=e133]:
+              - generic [ref=e134]:
+                - generic [ref=e135]: Bull
+                - generic [ref=e136]: $27,114
+              - generic [ref=e137]:
+                - generic [ref=e138]: Base
+                - generic [ref=e139]: $16,060
+              - generic [ref=e140]:
+                - generic [ref=e141]: Bear
+                - generic [ref=e142]: $6,045
+              - generic [ref=e143]:
+                - generic [ref=e144]: Stress
+                - generic [ref=e145]: $2,521
+        - generic [ref=e146]:
+          - heading "Risk, confidence, thesis" [level=2] [ref=e148]
+          - generic [ref=e150]:
+            - generic [ref=e152]:
+              - generic [ref=e153]: AI exposure score
+              - generic [ref=e154]: "62"
+            - generic [ref=e158]:
+              - generic [ref=e159]: Quality score
+              - generic [ref=e160]: "78"
+            - generic [ref=e164]:
+              - generic [ref=e165]: Speculation score
+              - generic [ref=e166]: "39"
+            - generic [ref=e170]:
+              - generic [ref=e171]: Risk score
+              - generic [ref=e172]: "40"
+            - generic [ref=e175]: Confidence 81/100
+            - generic "Confidence score is evidence-weighted and seed-labelled. It changes when selected holdings, evidence confidence, or universe composition changes." [ref=e176]: i
+            - paragraph [ref=e177]: The current pack is tilted toward public platform and infrastructure exposure, with IPO-watch upside modelled as scenario sensitivity rather than direct ownership.
+            - paragraph [ref=e178]: Private companies and IPO watchlist providers may not be directly investable by retail users.
+      - generic [ref=e179]:
+        - generic [ref=e180]:
+          - heading "Portfolio allocation" [level=2] [ref=e182]
+          - generic [ref=e184]:
+            - img "Portfolio allocation donut" [ref=e185]:
+              - generic [ref=e196]: "9"
+              - generic [ref=e197]: holdings
+            - generic [ref=e198]:
+              - generic [ref=e199]:
+                - generic [ref=e200]: Microsoft
+                - generic [ref=e202]: 12.4%
+              - generic [ref=e203]:
+                - generic [ref=e204]: Alphabet
+                - generic [ref=e206]: 12.3%
+              - generic [ref=e207]:
+                - generic [ref=e208]: Amazon
+                - generic [ref=e210]: 11.7%
+              - generic [ref=e211]:
+                - generic [ref=e212]: Nvidia
+                - generic [ref=e214]: 11.4%
+              - generic [ref=e215]:
+                - generic [ref=e216]: ServiceNow
+                - generic [ref=e218]: 11.4%
+              - generic [ref=e219]:
+                - generic [ref=e220]: Salesforce
+                - generic [ref=e222]: 11.1%
+              - generic [ref=e223]:
+                - generic [ref=e224]: ASML
+                - generic [ref=e226]: 10.8%
+              - generic [ref=e227]:
+                - generic [ref=e228]: Broadcom
+                - generic [ref=e230]: 10.8%
+              - generic [ref=e231]:
+                - generic [ref=e232]: Cash reserve
+                - generic [ref=e234]: 8.0%
+        - generic [ref=e235]:
+          - heading "Risk-return scatterplot" [level=2] [ref=e237]
+          - img "Risk return scatterplot" [ref=e239]:
+            - generic "Microsoft True risk 40.3 True attractiveness 82.0 State 1kruke4" [ref=e241]:
+              - generic [ref=e243]: MSFT
+            - generic "Alphabet True risk 40.0 True attractiveness 84.0 State 1kruke4" [ref=e244]:
+              - generic [ref=e246]: GOOGL
+            - generic "Amazon True risk 48.0 True attractiveness 81.0 State 1kruke4" [ref=e247]:
+              - generic [ref=e249]: AMZN
+            - generic "Nvidia True risk 62.7 True attractiveness 78.0 State 1kruke4" [ref=e250]:
+              - generic [ref=e252]: NVDA
+            - generic "ServiceNow True risk 38.7 True attractiveness 76.0 State 1kruke4" [ref=e253]:
+              - generic [ref=e255]: NOW
+            - generic "Salesforce True risk 35.3 True attractiveness 74.0 State 1kruke4" [ref=e256]:
+              - generic [ref=e258]: CRM
+            - generic "ASML True risk 48.7 True attractiveness 73.0 State 1kruke4" [ref=e259]:
+              - generic [ref=e261]: ASML
+            - generic "Broadcom True risk 50.7 True attractiveness 74.0 State 1kruke4" [ref=e262]:
+              - generic [ref=e264]: AVGO
+            - generic "Cash reserve True risk 0.0 True attractiveness 0.0 State 1kruke4" [ref=e265]:
+              - generic [ref=e267]: Cash reserve
+            - generic [ref=e268]: Attractiveness
+            - generic [ref=e269]: Risk score
+        - generic [ref=e270]:
+          - heading "Indirect exposure network" [level=2] [ref=e272]
+          - img "Indirect exposure network graph" [ref=e274]:
+            - generic [ref=e287]: Microsoft
+            - generic [ref=e290]: Amazon
+            - generic [ref=e293]: Alphabet
+            - generic [ref=e296]: Nvidia
+            - generic [ref=e299]: Oracle
+            - generic [ref=e302]: ASML
+            - generic [ref=e305]: OpenAI
+            - generic [ref=e308]: Anthropic
+            - generic [ref=e311]: frontier labs
+            - generic [ref=e314]: ai infrastructure
+            - generic [ref=e317]: Mistral
+            - generic [ref=e318]: Indirect exposure is not the same as owning the private company
+        - generic [ref=e319]:
+          - heading "IPO lifecycle timeline" [level=2] [ref=e321]
+          - generic [ref=e323]:
+            - generic [ref=e324]:
+              - generic [ref=e325]:
+                - generic [ref=e326]: OpenAI
+                - generic [ref=e327]: R3 | wait for lockup candidate
+              - generic [ref=e328]:
+                - generic "Rumour" [ref=e329]
+                - generic "Confidential filing" [ref=e330]
+                - generic "S-1" [ref=e331]
+                - generic "Pricing" [ref=e332]
+                - generic "Listing" [ref=e333]
+                - generic "First earnings" [ref=e334]
+                - generic "Lock-up expiry" [ref=e335]
+            - generic [ref=e336]:
+              - generic [ref=e337]:
+                - generic [ref=e338]: Anthropic
+                - generic [ref=e339]: R3 | wait for lockup candidate
+              - generic [ref=e340]:
+                - generic "Rumour" [ref=e341]
+                - generic "Confidential filing" [ref=e342]
+                - generic "S-1" [ref=e343]
+                - generic "Pricing" [ref=e344]
+                - generic "Listing" [ref=e345]
+                - generic "First earnings" [ref=e346]
+                - generic "Lock-up expiry" [ref=e347]
+            - generic [ref=e348]:
+              - generic [ref=e349]:
+                - generic [ref=e350]: Databricks
+                - generic [ref=e351]: R4 | compounder candidate
+              - generic [ref=e352]:
+                - generic "Rumour" [ref=e353]
+                - generic "Confidential filing" [ref=e354]
+                - generic "S-1" [ref=e355]
+                - generic "Pricing" [ref=e356]
+                - generic "Listing" [ref=e357]
+                - generic "First earnings" [ref=e358]
+                - generic "Lock-up expiry" [ref=e359]
+            - generic [ref=e360]:
+              - generic [ref=e361]:
+                - generic [ref=e362]: Cerebras
+                - generic [ref=e363]: R4 | trading ipo
+              - generic [ref=e364]:
+                - generic "Rumour" [ref=e365]
+                - generic "Confidential filing" [ref=e366]
+                - generic "S-1" [ref=e367]
+                - generic "Pricing" [ref=e368]
+                - generic "Listing" [ref=e369]
+                - generic "First earnings" [ref=e370]
+                - generic "Lock-up expiry" [ref=e371]
+            - generic [ref=e372]:
+              - generic [ref=e373]:
+                - generic [ref=e374]: Harvey
+                - generic [ref=e375]: R2 | avoid until s1 clarity
+              - generic [ref=e376]:
+                - generic "Rumour" [ref=e377]
+                - generic "Confidential filing" [ref=e378]
+                - generic "S-1" [ref=e379]
+                - generic "Pricing" [ref=e380]
+                - generic "Listing" [ref=e381]
+                - generic "First earnings" [ref=e382]
+                - generic "Lock-up expiry" [ref=e383]
+            - generic [ref=e384]:
+              - generic [ref=e385]:
+                - generic [ref=e386]: Cohere
+                - generic [ref=e387]: R2 | avoid until s1 clarity
+              - generic [ref=e388]:
+                - generic "Rumour" [ref=e389]
+                - generic "Confidential filing" [ref=e390]
+                - generic "S-1" [ref=e391]
+                - generic "Pricing" [ref=e392]
+                - generic "Listing" [ref=e393]
+                - generic "First earnings" [ref=e394]
+                - generic "Lock-up expiry" [ref=e395]
+        - generic [ref=e396]:
+          - heading "Drawdown and stress path" [level=2] [ref=e398]
+          - img "Drawdown chart" [ref=e400]:
+            - generic [ref=e403]: Stress drawdown path
+        - generic [ref=e404]:
+          - heading "Stacked exposure bar" [level=2] [ref=e406]
+          - generic [ref=e408]:
+            - generic [ref=e409]:
+              - generic "public platform 36.4%" [ref=e410]
+              - generic "ai infrastructure 33.1%" [ref=e411]
+              - generic "enterprise workflow ai 22.5%" [ref=e412]
+              - generic "cash 8.0%" [ref=e413]
+            - generic [ref=e414]:
+              - generic [ref=e415]:
+                - generic [ref=e416]: public platform
+                - generic [ref=e418]: 36.4%
+              - generic [ref=e419]:
+                - generic [ref=e420]: ai infrastructure
+                - generic [ref=e422]: 33.1%
+              - generic [ref=e423]:
+                - generic [ref=e424]: enterprise workflow ai
+                - generic [ref=e426]: 22.5%
+              - generic [ref=e427]:
+                - generic [ref=e428]: cash
+                - generic [ref=e430]: 8.0%
+        - generic [ref=e431]:
+          - heading "Confidence heatmap" [level=2] [ref=e433]
+          - generic [ref=e436]:
+            - generic [ref=e437]:
+              - generic [ref=e439]: financial
+              - generic [ref=e440]: AI exposure
+              - generic [ref=e441]: momentum
+              - generic [ref=e442]: IPO data
+              - generic [ref=e443]: valuation
+              - generic [ref=e444]: risk
+              - generic [ref=e445]: indirect
+            - generic [ref=e446]:
+              - generic [ref=e447]: Microsoft
+              - generic [ref=e448]: "82"
+              - generic [ref=e449]: "88"
+              - generic [ref=e450]: "76"
+              - generic [ref=e451]: "35"
+              - generic [ref=e452]: "55"
+              - generic [ref=e453]: "76"
+              - generic [ref=e454]: "70"
+            - generic [ref=e455]:
+              - generic [ref=e456]: Alphabet
+              - generic [ref=e457]: "82"
+              - generic [ref=e458]: "86"
+              - generic [ref=e459]: "82"
+              - generic [ref=e460]: "35"
+              - generic [ref=e461]: "58"
+              - generic [ref=e462]: "78"
+              - generic [ref=e463]: "70"
+            - generic [ref=e464]:
+              - generic [ref=e465]: Amazon
+              - generic [ref=e466]: "80"
+              - generic [ref=e467]: "84"
+              - generic [ref=e468]: "80"
+              - generic [ref=e469]: "35"
+              - generic [ref=e470]: "52"
+              - generic [ref=e471]: "76"
+              - generic [ref=e472]: "70"
+            - generic [ref=e473]:
+              - generic [ref=e474]: Nvidia
+              - generic [ref=e475]: "86"
+              - generic [ref=e476]: "98"
+              - generic [ref=e477]: "85"
+              - generic [ref=e478]: "35"
+              - generic [ref=e479]: "22"
+              - generic [ref=e480]: "72"
+              - generic [ref=e481]: "70"
+            - generic [ref=e482]:
+              - generic [ref=e483]: ServiceNow
+              - generic [ref=e484]: "76"
+              - generic [ref=e485]: "78"
+              - generic [ref=e486]: "72"
+              - generic [ref=e487]: "35"
+              - generic [ref=e488]: "42"
+              - generic [ref=e489]: "80"
+              - generic [ref=e490]: "70"
+            - generic [ref=e491]:
+              - generic [ref=e492]: Salesforce
+              - generic [ref=e493]: "75"
+              - generic [ref=e494]: "76"
+              - generic [ref=e495]: "73"
+              - generic [ref=e496]: "35"
+              - generic [ref=e497]: "50"
+              - generic [ref=e498]: "80"
+              - generic [ref=e499]: "70"
+            - generic [ref=e500]:
+              - generic [ref=e501]: ASML
+              - generic [ref=e502]: "82"
+              - generic [ref=e503]: "82"
+              - generic [ref=e504]: "68"
+              - generic [ref=e505]: "35"
+              - generic [ref=e506]: "46"
+              - generic [ref=e507]: "82"
+              - generic [ref=e508]: "70"
+            - generic [ref=e509]:
+              - generic [ref=e510]: Broadcom
+              - generic [ref=e511]: "78"
+              - generic [ref=e512]: "82"
+              - generic [ref=e513]: "76"
+              - generic [ref=e514]: "35"
+              - generic [ref=e515]: "38"
+              - generic [ref=e516]: "80"
+              - generic [ref=e517]: "70"
+        - generic [ref=e518]:
+          - heading "Contribution waterfall" [level=2] [ref=e520]
+          - generic [ref=e522]:
+            - generic [ref=e524]:
+              - generic [ref=e525]: Microsoft
+              - generic [ref=e526]: 1.18 pts
+            - generic [ref=e530]:
+              - generic [ref=e531]: Alphabet
+              - generic [ref=e532]: 1.15 pts
+            - generic [ref=e536]:
+              - generic [ref=e537]: Nvidia
+              - generic [ref=e538]: 1.14 pts
+            - generic [ref=e542]:
+              - generic [ref=e543]: ASML
+              - generic [ref=e544]: 1.04 pts
+            - generic [ref=e548]:
+              - generic [ref=e549]: Amazon
+              - generic [ref=e550]: 0.99 pts
+            - generic [ref=e554]:
+              - generic [ref=e555]: Broadcom
+              - generic [ref=e556]: 0.95 pts
+            - generic [ref=e560]:
+              - generic [ref=e561]: ServiceNow
+              - generic [ref=e562]: 0.79 pts
+            - generic [ref=e566]:
+              - generic [ref=e567]: Salesforce
+              - generic [ref=e568]: 0.77 pts
+      - generic [ref=e571]:
+        - heading "Risk radar" [level=2] [ref=e573]
+        - img "Risk radar" [ref=e575]:
+          - generic [ref=e582]: valuation
+          - generic [ref=e585]: liquidity
+          - generic [ref=e587]: capex
+          - generic [ref=e590]: regulation
+          - generic [ref=e592]: concentration
+          - generic [ref=e595]: IPO
+          - generic [ref=e597]: infrastructure
+          - generic [ref=e600]: evidence gap
+      - generic [ref=e602]:
+        - heading "Provider detail table" [level=2] [ref=e604]
+        - generic [ref=e605]:
+          - generic "Provider ownership color legend" [ref=e607]:
+            - generic [ref=e608]: Ownership key
+            - generic "Provider is publicly traded." [ref=e609]: Public
+            - generic "Provider is privately held." [ref=e611]: Private
+            - generic "Provider is a subsidiary or business unit of a publicly traded parent." [ref=e613]: Subsidiary
+          - table [ref=e616]:
+            - rowgroup [ref=e617]:
+              - row "Provider Exposure Investability Weight Attractiveness Risk Evidence Main risk" [ref=e618]:
+                - columnheader "Provider" [ref=e619]
+                - columnheader "Exposure" [ref=e620]
+                - columnheader "Investability" [ref=e621]
+                - columnheader "Weight" [ref=e622]
+                - columnheader "Attractiveness" [ref=e623]
+                - columnheader "Risk" [ref=e624]
+                - columnheader "Evidence" [ref=e625]
+                - columnheader "Main risk" [ref=e626]
+            - rowgroup [ref=e627]:
+              - row "Microsoft Public MSFT public platform public direct 12.4% 82/100 45/100 E3 tested Valuation and AI monetisation proof." [ref=e628]:
+                - cell "Microsoft Public MSFT" [ref=e629]:
+                  - generic [ref=e630]:
+                    - generic [ref=e631]: Microsoft
+                    - generic "Provider is publicly traded." [ref=e632]: Public
+                  - text: MSFT
+                - cell "public platform" [ref=e634]
+                - cell "public direct" [ref=e635]
+                - cell "12.4%" [ref=e636]
+                - cell "82/100" [ref=e637]
+                - cell "45/100" [ref=e638]
+                - cell "E3 tested" [ref=e639]:
+                  - generic [ref=e640]: E3 tested
+                - cell "Valuation and AI monetisation proof." [ref=e641]
+              - row "Alphabet Public GOOGL public platform public direct 12.3% 84/100 42/100 E3 tested Regulatory pressure and search disruption." [ref=e642]:
+                - cell "Alphabet Public GOOGL" [ref=e643]:
+                  - generic [ref=e644]:
+                    - generic [ref=e645]: Alphabet
+                    - generic "Provider is publicly traded." [ref=e646]: Public
+                  - text: GOOGL
+                - cell "public platform" [ref=e648]
+                - cell "public direct" [ref=e649]
+                - cell "12.3%" [ref=e650]
+                - cell "84/100" [ref=e651]
+                - cell "42/100" [ref=e652]
+                - cell "E3 tested" [ref=e653]:
+                  - generic [ref=e654]: E3 tested
+                - cell "Regulatory pressure and search disruption." [ref=e655]
+              - row "Amazon Public AMZN public platform public direct 11.7% 81/100 48/100 E3 tested Capex intensity and cloud competition." [ref=e656]:
+                - cell "Amazon Public AMZN" [ref=e657]:
+                  - generic [ref=e658]:
+                    - generic [ref=e659]: Amazon
+                    - generic "Provider is publicly traded." [ref=e660]: Public
+                  - text: AMZN
+                - cell "public platform" [ref=e662]
+                - cell "public direct" [ref=e663]
+                - cell "11.7%" [ref=e664]
+                - cell "81/100" [ref=e665]
+                - cell "48/100" [ref=e666]
+                - cell "E3 tested" [ref=e667]:
+                  - generic [ref=e668]: E3 tested
+                - cell "Capex intensity and cloud competition." [ref=e669]
+              - row "Nvidia Public NVDA ai infrastructure public direct 11.4% 78/100 78/100 E3 tested Valuation and capex cycle sensitivity." [ref=e670]:
+                - cell "Nvidia Public NVDA" [ref=e671]:
+                  - generic [ref=e672]:
+                    - generic [ref=e673]: Nvidia
+                    - generic "Provider is publicly traded." [ref=e674]: Public
+                  - text: NVDA
+                - cell "ai infrastructure" [ref=e676]
+                - cell "public direct" [ref=e677]
+                - cell "11.4%" [ref=e678]
+                - cell "78/100" [ref=e679]
+                - cell "78/100" [ref=e680]
+                - cell "E3 tested" [ref=e681]:
+                  - generic [ref=e682]: E3 tested
+                - cell "Valuation and capex cycle sensitivity." [ref=e683]
+              - row "ServiceNow Public NOW enterprise workflow ai public direct 11.4% 76/100 58/100 E3 tested Premium valuation and platform implementation complexity." [ref=e684]:
+                - cell "ServiceNow Public NOW" [ref=e685]:
+                  - generic [ref=e686]:
+                    - generic [ref=e687]: ServiceNow
+                    - generic "Provider is publicly traded." [ref=e688]: Public
+                  - text: NOW
+                - cell "enterprise workflow ai" [ref=e690]
+                - cell "public direct" [ref=e691]
+                - cell "11.4%" [ref=e692]
+                - cell "76/100" [ref=e693]
+                - cell "58/100" [ref=e694]
+                - cell "E3 tested" [ref=e695]:
+                  - generic [ref=e696]: E3 tested
+                - cell "Premium valuation and platform implementation complexity." [ref=e697]
+              - row "Salesforce Public CRM enterprise workflow ai public direct 11.1% 74/100 50/100 E3 tested CRM-centric scope and monetisation clarity." [ref=e698]:
+                - cell "Salesforce Public CRM" [ref=e699]:
+                  - generic [ref=e700]:
+                    - generic [ref=e701]: Salesforce
+                    - generic "Provider is publicly traded." [ref=e702]: Public
+                  - text: CRM
+                - cell "enterprise workflow ai" [ref=e704]
+                - cell "public direct" [ref=e705]
+                - cell "11.1%" [ref=e706]
+                - cell "74/100" [ref=e707]
+                - cell "50/100" [ref=e708]
+                - cell "E3 tested" [ref=e709]:
+                  - generic [ref=e710]: E3 tested
+                - cell "CRM-centric scope and monetisation clarity." [ref=e711]
+              - row "ASML Public ASML ai infrastructure public direct 10.8% 73/100 54/100 E3 tested Export controls and semiconductor cycle risk." [ref=e712]:
+                - cell "ASML Public ASML" [ref=e713]:
+                  - generic [ref=e714]:
+                    - generic [ref=e715]: ASML
+                    - generic "Provider is publicly traded." [ref=e716]: Public
+                  - text: ASML
+                - cell "ai infrastructure" [ref=e718]
+                - cell "public direct" [ref=e719]
+                - cell "10.8%" [ref=e720]
+                - cell "73/100" [ref=e721]
+                - cell "54/100" [ref=e722]
+                - cell "E3 tested" [ref=e723]:
+                  - generic [ref=e724]: E3 tested
+                - cell "Export controls and semiconductor cycle risk." [ref=e725]
+              - row "Broadcom Public AVGO ai infrastructure public direct 10.8% 74/100 62/100 E2 documented Customer concentration and valuation sensitivity." [ref=e726]:
+                - cell "Broadcom Public AVGO" [ref=e727]:
+                  - generic [ref=e728]:
+                    - generic [ref=e729]: Broadcom
+                    - generic "Provider is publicly traded." [ref=e730]: Public
+                  - text: AVGO
+                - cell "ai infrastructure" [ref=e732]
+                - cell "public direct" [ref=e733]
+                - cell "10.8%" [ref=e734]
+                - cell "74/100" [ref=e735]
+                - cell "62/100" [ref=e736]
+                - cell "E2 documented" [ref=e737]:
+                  - generic [ref=e738]: E2 documented
+                - cell "Customer concentration and valuation sensitivity." [ref=e739]
+              - row "Cash reserve Subsidiary cash cash 8.0% 0/100 0/100 E2 documented Inflation and opportunity-cost drag." [ref=e740]:
+                - cell "Cash reserve Subsidiary" [ref=e741]:
+                  - generic [ref=e742]:
+                    - generic [ref=e743]: Cash reserve
+                    - generic "Provider is a subsidiary or business unit of a publicly traded parent." [ref=e744]: Subsidiary
+                - cell "cash" [ref=e746]
+                - cell "cash" [ref=e747]
+                - cell "8.0%" [ref=e748]
+                - cell "0/100" [ref=e749]
+                - cell "0/100" [ref=e750]
+                - cell "E2 documented" [ref=e751]:
+                  - generic [ref=e752]: E2 documented
+                - cell "Inflation and opportunity-cost drag." [ref=e753]
+  - contentinfo [ref=e754]: AI Enterpise | Enterprise AI Market Intelligence | Confidence-labelled seed intelligence | v0.2
+  - button "Open Next.js Dev Tools" [ref=e760] [cursor=pointer]:
+    - img [ref=e761]

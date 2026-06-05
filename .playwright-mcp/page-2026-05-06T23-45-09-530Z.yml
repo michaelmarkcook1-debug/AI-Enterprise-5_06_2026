@@ -1,0 +1,72 @@
+- generic [ref=e1]:
+  - button "Open Next.js Dev Tools" [ref=e26] [cursor=pointer]:
+    - img [ref=e27]
+  - alert [ref=e20]
+  - main [ref=e31]:
+    - generic [ref=e32]:
+      - generic [ref=e33]:
+        - generic [ref=e34]:
+          - generic [ref=e36]: Context
+          - generic [ref=e37]: →
+        - generic [ref=e38]:
+          - generic [ref=e40]: Use case
+          - generic [ref=e41]: →
+        - generic [ref=e42]:
+          - generic [ref=e44]: Risk & ecosystem
+          - generic [ref=e45]: →
+        - generic [ref=e48]: Vendors
+      - heading "Risk & ecosystem" [level=1] [ref=e91]
+    - generic [ref=e50]:
+      - generic [ref=e92]:
+        - generic [ref=e93]:
+          - generic [ref=e94]:
+            - generic [ref=e95]: Data sensitivity
+            - generic [ref=e96]: "3"
+          - slider [ref=e97]: "3"
+          - generic [ref=e98]: 1 = public, 5 = highly regulated
+        - generic [ref=e99]:
+          - generic [ref=e100]:
+            - generic [ref=e101]: Risk tolerance
+            - generic [ref=e102]: "3"
+          - slider [ref=e103]: "3"
+          - generic [ref=e104]: 1 = zero tolerance, 5 = high tolerance
+        - generic [ref=e105]:
+          - generic [ref=e106]:
+            - generic [ref=e107]: Budget sensitivity
+            - generic [ref=e108]: "3"
+          - slider [ref=e109]: "3"
+          - generic [ref=e110]: 1 = budget no constraint, 5 = highly constrained
+        - generic [ref=e111]:
+          - generic [ref=e112]: Autonomy appetite
+          - combobox "Autonomy appetite" [ref=e113]:
+            - option "Advisory only"
+            - option "Human-in-the-loop" [selected]
+            - option "Supervised agent"
+            - option "Autonomous"
+        - generic [ref=e114]:
+          - generic [ref=e115]: Deployment preference
+          - combobox "Deployment preference" [ref=e116]:
+            - option "SaaS / multi-tenant" [selected]
+            - option "VPC / dedicated tenant"
+            - option "On-premises"
+            - option "Sovereign cloud"
+            - option "Hybrid"
+        - generic [ref=e117]:
+          - generic [ref=e118]: Existing ecosystem
+          - generic [ref=e119]:
+            - button "Existing ecosystem google workspace salesforce aws azure gcp databricks snowflake servicenow sap oracle atlassian workday" [ref=e120]: microsoft
+            - button "google workspace" [ref=e121]
+            - button "salesforce" [ref=e122]
+            - button "aws" [ref=e123]
+            - button "azure" [ref=e124]
+            - button "gcp" [ref=e125]
+            - button "databricks" [ref=e126]
+            - button "snowflake" [ref=e127]
+            - button "servicenow" [ref=e128]
+            - button "sap" [ref=e129]
+            - button "oracle" [ref=e130]
+            - button "atlassian" [ref=e131]
+            - button "workday" [ref=e132]
+      - generic [ref=e64]:
+        - button "Back" [ref=e65]
+        - button "Continue" [active] [ref=e66]

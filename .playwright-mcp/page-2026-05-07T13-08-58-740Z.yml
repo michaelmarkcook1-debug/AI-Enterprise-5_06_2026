@@ -1,0 +1,9 @@
+- generic [active]:
+  - generic [ref=e1]:
+    - img [ref=e2]
+    - link "Enter portal" [ref=e6] [cursor=pointer]:
+      - /url: /dashboard
+      - text: Enter >
+  - button "Open Next.js Dev Tools" [ref=e12] [cursor=pointer]:
+    - img [ref=e13]
+  - alert [ref=e16]

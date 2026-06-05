@@ -1,0 +1,399 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]: Seed intelligence preview | estimated market signals remain confidence-labelled until live ingestion is connected.
+    - generic [ref=e4]:
+      - link "AI Enterpise home" [ref=e5] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e6]:
+          - img [ref=e7]
+          - generic [ref=e8]: AI Enterpise
+      - navigation [ref=e9]:
+        - link "Investor Tools" [ref=e11] [cursor=pointer]:
+          - /url: /investor-tools
+        - link "Dashboard" [ref=e12] [cursor=pointer]:
+          - /url: /dashboard
+        - link "Vendors" [ref=e13] [cursor=pointer]:
+          - /url: /vendors
+        - link "Market Tracker" [ref=e14] [cursor=pointer]:
+          - /url: /market
+        - link "News" [ref=e15] [cursor=pointer]:
+          - /url: /news
+        - link "Capabilities" [ref=e16] [cursor=pointer]:
+          - /url: /capabilities
+        - link "Assessment" [ref=e17] [cursor=pointer]:
+          - /url: /assessment
+        - link "Briefings" [ref=e18] [cursor=pointer]:
+          - /url: /briefings
+        - link "Watchlists" [ref=e19] [cursor=pointer]:
+          - /url: /watchlists
+      - button "Toggle light and dark mode" [ref=e20]: Dark
+  - main [ref=e23]:
+    - generic [ref=e24]:
+      - generic [ref=e25]: Modelled IPO windows, evidence, and post-listing bands
+      - heading "IPO watch" [level=1] [ref=e26]
+      - paragraph [ref=e27]: Tracks evidence quality, modelled IPO windows, readiness, pricing risk, and 1-10 month percentage bands. Watchlist-only until access and disclosure improve.
+    - generic [ref=e28]:
+      - generic [ref=e29]:
+        - generic [ref=e30]: Investor Tools
+        - generic [ref=e31]: Not financial advice
+      - text: Investor Tools are for market intelligence and hypothetical scenario modelling only. They are not financial advice. Outputs are based on documented, estimated, inferred, or seed data as labelled. Future returns are not guaranteed.
+    - generic [ref=e32]: This is a modelled IPO forecast, not a factual listing date or investment recommendation. Timing and price bands are based on public signals, evidence confidence, and scenario assumptions. They should be updated when an S-1/F-1, price range, float, lock-up terms, or audited financials become available.
+    - generic [ref=e33]:
+      - generic [ref=e34]:
+        - heading "IPO forecast monitor" [level=2] [ref=e35]
+        - generic "Seed forecast model. Not a factual IPO date or offer price." [ref=e36]: Modelled estimate
+      - generic [ref=e38]:
+        - 'link "Cerebras ai infrastructure ipo R4_or_R5 Bankers / advisers Forecast window 2026-05 Estimated month 2026-05 Forecast status active process Bands M1-M10 speculative ai infrastructurePercentage bands are relative to IPO offer price. Confidence 76/100 E1 inferred Estimated Missing: S-1/F-1 filing or confirmed confidential filing | Offer price range and share count | Free float and lock-up terms" [ref=e39] [cursor=pointer]':
+          - /url: /investor-tools/ipo-watch/cerebras
+          - generic [ref=e40]:
+            - generic [ref=e41]:
+              - generic [ref=e42]: Cerebras
+              - generic [ref=e43]: ai infrastructure ipo
+            - generic [ref=e44]: R4_or_R5
+          - paragraph [ref=e45]: Bankers / advisers
+          - generic [ref=e46]:
+            - generic [ref=e47]:
+              - term [ref=e48]: Forecast window
+              - definition [ref=e49]: 2026-05
+            - generic [ref=e50]:
+              - term [ref=e51]: Estimated month
+              - definition [ref=e52]: 2026-05
+            - generic [ref=e53]:
+              - term [ref=e54]: Forecast status
+              - definition [ref=e55]: active process
+            - generic [ref=e56]:
+              - term [ref=e57]: Bands
+              - definition [ref=e58]: M1-M10
+          - generic [ref=e59]: speculative ai infrastructurePercentage bands are relative to IPO offer price.
+          - generic [ref=e60]:
+            - generic [ref=e61]: Confidence 76/100
+            - generic [ref=e62]: E1 inferred
+            - generic [ref=e63]: Estimated
+          - paragraph [ref=e64]: "Missing: S-1/F-1 filing or confirmed confidential filing | Offer price range and share count | Free float and lock-up terms"
+        - 'link "OpenAI frontier private ai lab R3_or_R4 Specific timing/valuation Forecast window 2026-12 to 2027-09 Estimated month 2027-05 Forecast status model estimate not fact Bands M1-M10 mega hype valuation sensitivePercentage bands are relative to IPO offer price. Confidence 48/100 E1 inferred Estimated Missing: S-1/F-1 filing or confirmed confidential filing | Offer price range and share count | Free float and lock-up terms" [ref=e65] [cursor=pointer]':
+          - /url: /investor-tools/ipo-watch/openai
+          - generic [ref=e66]:
+            - generic [ref=e67]:
+              - generic [ref=e68]: OpenAI
+              - generic [ref=e69]: frontier private ai lab
+            - generic [ref=e70]: R3_or_R4
+          - paragraph [ref=e71]: Specific timing/valuation
+          - generic [ref=e72]:
+            - generic [ref=e73]:
+              - term [ref=e74]: Forecast window
+              - definition [ref=e75]: 2026-12 to 2027-09
+            - generic [ref=e76]:
+              - term [ref=e77]: Estimated month
+              - definition [ref=e78]: 2027-05
+            - generic [ref=e79]:
+              - term [ref=e80]: Forecast status
+              - definition [ref=e81]: model estimate not fact
+            - generic [ref=e82]:
+              - term [ref=e83]: Bands
+              - definition [ref=e84]: M1-M10
+          - generic [ref=e85]: mega hype valuation sensitivePercentage bands are relative to IPO offer price.
+          - generic [ref=e86]:
+            - generic [ref=e87]: Confidence 48/100
+            - generic [ref=e88]: E1 inferred
+            - generic [ref=e89]: Estimated
+          - paragraph [ref=e90]: "Missing: S-1/F-1 filing or confirmed confidential filing | Offer price range and share count | Free float and lock-up terms"
+        - 'link "Anthropic frontier private ai lab R3 Specific timing/valuation Forecast window 2026-12 to 2027-12 Estimated month 2027-09 Forecast status model estimate not fact Bands M1-M10 high quality compute and valuation riskPercentage bands are relative to IPO offer price. Confidence 48/100 E1 inferred Estimated Missing: S-1/F-1 filing or confirmed confidential filing | Offer price range and share count | Free float and lock-up terms" [ref=e91] [cursor=pointer]':
+          - /url: /investor-tools/ipo-watch/anthropic
+          - generic [ref=e92]:
+            - generic [ref=e93]:
+              - generic [ref=e94]: Anthropic
+              - generic [ref=e95]: frontier private ai lab
+            - generic [ref=e96]: R3
+          - paragraph [ref=e97]: Specific timing/valuation
+          - generic [ref=e98]:
+            - generic [ref=e99]:
+              - term [ref=e100]: Forecast window
+              - definition [ref=e101]: 2026-12 to 2027-12
+            - generic [ref=e102]:
+              - term [ref=e103]: Estimated month
+              - definition [ref=e104]: 2027-09
+            - generic [ref=e105]:
+              - term [ref=e106]: Forecast status
+              - definition [ref=e107]: model estimate not fact
+            - generic [ref=e108]:
+              - term [ref=e109]: Bands
+              - definition [ref=e110]: M1-M10
+          - generic [ref=e111]: high quality compute and valuation riskPercentage bands are relative to IPO offer price.
+          - generic [ref=e112]:
+            - generic [ref=e113]: Confidence 48/100
+            - generic [ref=e114]: E1 inferred
+            - generic [ref=e115]: Estimated
+          - paragraph [ref=e116]: "Missing: S-1/F-1 filing or confirmed confidential filing | Offer price range and share count | Free float and lock-up terms"
+        - 'link "Databricks data analytics ai layer R2_or_R3 Reputable report, vague Forecast window 2027-05 to 2028-04 Estimated month 2027-11 Forecast status model estimate not fact Bands M1-M10 software compounder candidatePercentage bands are relative to IPO offer price. Confidence 58/100 E1 inferred Estimated Missing: S-1/F-1 filing or confirmed confidential filing | Offer price range and share count | Free float and lock-up terms" [ref=e117] [cursor=pointer]':
+          - /url: /investor-tools/ipo-watch/databricks
+          - generic [ref=e118]:
+            - generic [ref=e119]:
+              - generic [ref=e120]: Databricks
+              - generic [ref=e121]: data analytics ai layer
+            - generic [ref=e122]: R2_or_R3
+          - paragraph [ref=e123]: Reputable report, vague
+          - generic [ref=e124]:
+            - generic [ref=e125]:
+              - term [ref=e126]: Forecast window
+              - definition [ref=e127]: 2027-05 to 2028-04
+            - generic [ref=e128]:
+              - term [ref=e129]: Estimated month
+              - definition [ref=e130]: 2027-11
+            - generic [ref=e131]:
+              - term [ref=e132]: Forecast status
+              - definition [ref=e133]: model estimate not fact
+            - generic [ref=e134]:
+              - term [ref=e135]: Bands
+              - definition [ref=e136]: M1-M10
+          - generic [ref=e137]: software compounder candidatePercentage bands are relative to IPO offer price.
+          - generic [ref=e138]:
+            - generic [ref=e139]: Confidence 58/100
+            - generic [ref=e140]: E1 inferred
+            - generic [ref=e141]: Estimated
+          - paragraph [ref=e142]: "Missing: S-1/F-1 filing or confirmed confidential filing | Offer price range and share count | Free float and lock-up terms"
+        - 'link "Cohere frontier private ai lab R2 Reputable report, vague Forecast window 2027-09 to 2028-06 Estimated month 2027-12 Forecast status model estimate not fact Bands M1-M10 enterprise ai valuation dependentPercentage bands are relative to IPO offer price. Confidence 48/100 E1 inferred Estimated Missing: S-1/F-1 filing or confirmed confidential filing | Offer price range and share count | Free float and lock-up terms" [ref=e143] [cursor=pointer]':
+          - /url: /investor-tools/ipo-watch/cohere
+          - generic [ref=e144]:
+            - generic [ref=e145]:
+              - generic [ref=e146]: Cohere
+              - generic [ref=e147]: frontier private ai lab
+            - generic [ref=e148]: R2
+          - paragraph [ref=e149]: Reputable report, vague
+          - generic [ref=e150]:
+            - generic [ref=e151]:
+              - term [ref=e152]: Forecast window
+              - definition [ref=e153]: 2027-09 to 2028-06
+            - generic [ref=e154]:
+              - term [ref=e155]: Estimated month
+              - definition [ref=e156]: 2027-12
+            - generic [ref=e157]:
+              - term [ref=e158]: Forecast status
+              - definition [ref=e159]: model estimate not fact
+            - generic [ref=e160]:
+              - term [ref=e161]: Bands
+              - definition [ref=e162]: M1-M10
+          - generic [ref=e163]: enterprise ai valuation dependentPercentage bands are relative to IPO offer price.
+          - generic [ref=e164]:
+            - generic [ref=e165]: Confidence 48/100
+            - generic [ref=e166]: E1 inferred
+            - generic [ref=e167]: Estimated
+          - paragraph [ref=e168]: "Missing: S-1/F-1 filing or confirmed confidential filing | Offer price range and share count | Free float and lock-up terms"
+        - 'link "Harvey vertical ai specialist R1_or_R2 General speculation Forecast window 2028-01 to 2029-12 Estimated month 2028-06 Forecast status model estimate not fact Bands M1-M10 vertical ai tam proof neededPercentage bands are relative to IPO offer price. Confidence 42/100 E1 inferred Estimated Missing: S-1/F-1 filing or confirmed confidential filing | Offer price range and share count | Free float and lock-up terms" [ref=e169] [cursor=pointer]':
+          - /url: /investor-tools/ipo-watch/harvey
+          - generic [ref=e170]:
+            - generic [ref=e171]:
+              - generic [ref=e172]: Harvey
+              - generic [ref=e173]: vertical ai specialist
+            - generic [ref=e174]: R1_or_R2
+          - paragraph [ref=e175]: General speculation
+          - generic [ref=e176]:
+            - generic [ref=e177]:
+              - term [ref=e178]: Forecast window
+              - definition [ref=e179]: 2028-01 to 2029-12
+            - generic [ref=e180]:
+              - term [ref=e181]: Estimated month
+              - definition [ref=e182]: 2028-06
+            - generic [ref=e183]:
+              - term [ref=e184]: Forecast status
+              - definition [ref=e185]: model estimate not fact
+            - generic [ref=e186]:
+              - term [ref=e187]: Bands
+              - definition [ref=e188]: M1-M10
+          - generic [ref=e189]: vertical ai tam proof neededPercentage bands are relative to IPO offer price.
+          - generic [ref=e190]:
+            - generic [ref=e191]: Confidence 42/100
+            - generic [ref=e192]: E1 inferred
+            - generic [ref=e193]: Estimated
+          - paragraph [ref=e194]: "Missing: S-1/F-1 filing or confirmed confidential filing | Offer price range and share count | Free float and lock-up terms"
+        - 'link "Glean enterprise search work ai R1 General speculation Forecast window 2028-01 to 2029-12 Estimated month 2028-09 Forecast status model estimate not fact Bands M1-M10 enterprise knowledge layer watchPercentage bands are relative to IPO offer price. Confidence 42/100 E1 inferred Estimated Missing: S-1/F-1 filing or confirmed confidential filing | Offer price range and share count | Free float and lock-up terms" [ref=e195] [cursor=pointer]':
+          - /url: /investor-tools/ipo-watch/glean
+          - generic [ref=e196]:
+            - generic [ref=e197]:
+              - generic [ref=e198]: Glean
+              - generic [ref=e199]: enterprise search work ai
+            - generic [ref=e200]: R1
+          - paragraph [ref=e201]: General speculation
+          - generic [ref=e202]:
+            - generic [ref=e203]:
+              - term [ref=e204]: Forecast window
+              - definition [ref=e205]: 2028-01 to 2029-12
+            - generic [ref=e206]:
+              - term [ref=e207]: Estimated month
+              - definition [ref=e208]: 2028-09
+            - generic [ref=e209]:
+              - term [ref=e210]: Forecast status
+              - definition [ref=e211]: model estimate not fact
+            - generic [ref=e212]:
+              - term [ref=e213]: Bands
+              - definition [ref=e214]: M1-M10
+          - generic [ref=e215]: enterprise knowledge layer watchPercentage bands are relative to IPO offer price.
+          - generic [ref=e216]:
+            - generic [ref=e217]: Confidence 42/100
+            - generic [ref=e218]: E1 inferred
+            - generic [ref=e219]: Estimated
+          - paragraph [ref=e220]: "Missing: S-1/F-1 filing or confirmed confidential filing | Offer price range and share count | Free float and lock-up terms"
+        - 'link "Mistral sovereign ai R1 General speculation Forecast window 2028-01 to 2029-12 Estimated month 2028-11 Forecast status model estimate not fact Bands M1-M10 sovereign ai strategic betPercentage bands are relative to IPO offer price. Confidence 42/100 E1 inferred Estimated Missing: S-1/F-1 filing or confirmed confidential filing | Offer price range and share count | Free float and lock-up terms" [ref=e221] [cursor=pointer]':
+          - /url: /investor-tools/ipo-watch/mistral
+          - generic [ref=e222]:
+            - generic [ref=e223]:
+              - generic [ref=e224]: Mistral
+              - generic [ref=e225]: sovereign ai
+            - generic [ref=e226]: R1
+          - paragraph [ref=e227]: General speculation
+          - generic [ref=e228]:
+            - generic [ref=e229]:
+              - term [ref=e230]: Forecast window
+              - definition [ref=e231]: 2028-01 to 2029-12
+            - generic [ref=e232]:
+              - term [ref=e233]: Estimated month
+              - definition [ref=e234]: 2028-11
+            - generic [ref=e235]:
+              - term [ref=e236]: Forecast status
+              - definition [ref=e237]: model estimate not fact
+            - generic [ref=e238]:
+              - term [ref=e239]: Bands
+              - definition [ref=e240]: M1-M10
+          - generic [ref=e241]: sovereign ai strategic betPercentage bands are relative to IPO offer price.
+          - generic [ref=e242]:
+            - generic [ref=e243]: Confidence 42/100
+            - generic [ref=e244]: E1 inferred
+            - generic [ref=e245]: Estimated
+          - paragraph [ref=e246]: "Missing: S-1/F-1 filing or confirmed confidential filing | Offer price range and share count | Free float and lock-up terms"
+        - 'link "Perplexity vertical ai specialist R1 General speculation Forecast window 2028-01 to 2029-12 Estimated month 2028-06 Forecast status model estimate not fact Bands M1-M10 search answer engine volatilityPercentage bands are relative to IPO offer price. Confidence 30/100 E1 inferred Estimated Missing: S-1/F-1 filing or confirmed confidential filing | Offer price range and share count | Free float and lock-up terms" [ref=e247] [cursor=pointer]':
+          - /url: /investor-tools/ipo-watch/perplexity
+          - generic [ref=e248]:
+            - generic [ref=e249]:
+              - generic [ref=e250]: Perplexity
+              - generic [ref=e251]: vertical ai specialist
+            - generic [ref=e252]: R1
+          - paragraph [ref=e253]: General speculation
+          - generic [ref=e254]:
+            - generic [ref=e255]:
+              - term [ref=e256]: Forecast window
+              - definition [ref=e257]: 2028-01 to 2029-12
+            - generic [ref=e258]:
+              - term [ref=e259]: Estimated month
+              - definition [ref=e260]: 2028-06
+            - generic [ref=e261]:
+              - term [ref=e262]: Forecast status
+              - definition [ref=e263]: model estimate not fact
+            - generic [ref=e264]:
+              - term [ref=e265]: Bands
+              - definition [ref=e266]: M1-M10
+          - generic [ref=e267]: search answer engine volatilityPercentage bands are relative to IPO offer price.
+          - generic [ref=e268]:
+            - generic [ref=e269]: Confidence 30/100
+            - generic [ref=e270]: E1 inferred
+            - generic [ref=e271]: Estimated
+          - paragraph [ref=e272]: "Missing: S-1/F-1 filing or confirmed confidential filing | Offer price range and share count | Free float and lock-up terms"
+        - 'link "Writer vertical ai specialist R0_or_R1 No credible rumour Forecast window 2029-01 to 2030-12 Estimated month 2029-09 Forecast status model estimate not fact Bands M1-M10 enterprise agentic watchPercentage bands are relative to IPO offer price. Confidence 30/100 E1 inferred Estimated Missing: S-1/F-1 filing or confirmed confidential filing | Offer price range and share count | Free float and lock-up terms" [ref=e273] [cursor=pointer]':
+          - /url: /investor-tools/ipo-watch/writer
+          - generic [ref=e274]:
+            - generic [ref=e275]:
+              - generic [ref=e276]: Writer
+              - generic [ref=e277]: vertical ai specialist
+            - generic [ref=e278]: R0_or_R1
+          - paragraph [ref=e279]: No credible rumour
+          - generic [ref=e280]:
+            - generic [ref=e281]:
+              - term [ref=e282]: Forecast window
+              - definition [ref=e283]: 2029-01 to 2030-12
+            - generic [ref=e284]:
+              - term [ref=e285]: Estimated month
+              - definition [ref=e286]: 2029-09
+            - generic [ref=e287]:
+              - term [ref=e288]: Forecast status
+              - definition [ref=e289]: model estimate not fact
+            - generic [ref=e290]:
+              - term [ref=e291]: Bands
+              - definition [ref=e292]: M1-M10
+          - generic [ref=e293]: enterprise agentic watchPercentage bands are relative to IPO offer price.
+          - generic [ref=e294]:
+            - generic [ref=e295]: Confidence 30/100
+            - generic [ref=e296]: E1 inferred
+            - generic [ref=e297]: Estimated
+          - paragraph [ref=e298]: "Missing: S-1/F-1 filing or confirmed confidential filing | Offer price range and share count | Free float and lock-up terms"
+        - 'link "Hebbia vertical ai specialist R0 No credible rumour Forecast window No reliable window Estimated month No reliable estimate Forecast status no reliable month estimate Bands Disabled too earlyNo reliable month-level IPO forecast available. Confidence 18/100 E1 inferred Disabled Missing: S-1/F-1 filing or confirmed confidential filing | Offer price range and share count | Free float and lock-up terms" [ref=e299] [cursor=pointer]':
+          - /url: /investor-tools/ipo-watch/hebbia
+          - generic [ref=e300]:
+            - generic [ref=e301]:
+              - generic [ref=e302]: Hebbia
+              - generic [ref=e303]: vertical ai specialist
+            - generic [ref=e304]: R0
+          - paragraph [ref=e305]: No credible rumour
+          - generic [ref=e306]:
+            - generic [ref=e307]:
+              - term [ref=e308]: Forecast window
+              - definition [ref=e309]: No reliable window
+            - generic [ref=e310]:
+              - term [ref=e311]: Estimated month
+              - definition [ref=e312]: No reliable estimate
+            - generic [ref=e313]:
+              - term [ref=e314]: Forecast status
+              - definition [ref=e315]: no reliable month estimate
+            - generic [ref=e316]:
+              - term [ref=e317]: Bands
+              - definition [ref=e318]: Disabled
+          - generic [ref=e319]: too earlyNo reliable month-level IPO forecast available.
+          - generic [ref=e320]:
+            - generic [ref=e321]: Confidence 18/100
+            - generic [ref=e322]: E1 inferred
+            - generic [ref=e323]: Disabled
+          - paragraph [ref=e324]: "Missing: S-1/F-1 filing or confirmed confidential filing | Offer price range and share count | Free float and lock-up terms"
+        - 'link "Rogo vertical ai specialist R0 No credible rumour Forecast window No reliable window Estimated month No reliable estimate Forecast status no reliable month estimate Bands Disabled too earlyNo reliable month-level IPO forecast available. Confidence 18/100 E1 inferred Disabled Missing: S-1/F-1 filing or confirmed confidential filing | Offer price range and share count | Free float and lock-up terms" [ref=e325] [cursor=pointer]':
+          - /url: /investor-tools/ipo-watch/rogo
+          - generic [ref=e326]:
+            - generic [ref=e327]:
+              - generic [ref=e328]: Rogo
+              - generic [ref=e329]: vertical ai specialist
+            - generic [ref=e330]: R0
+          - paragraph [ref=e331]: No credible rumour
+          - generic [ref=e332]:
+            - generic [ref=e333]:
+              - term [ref=e334]: Forecast window
+              - definition [ref=e335]: No reliable window
+            - generic [ref=e336]:
+              - term [ref=e337]: Estimated month
+              - definition [ref=e338]: No reliable estimate
+            - generic [ref=e339]:
+              - term [ref=e340]: Forecast status
+              - definition [ref=e341]: no reliable month estimate
+            - generic [ref=e342]:
+              - term [ref=e343]: Bands
+              - definition [ref=e344]: Disabled
+          - generic [ref=e345]: too earlyNo reliable month-level IPO forecast available.
+          - generic [ref=e346]:
+            - generic [ref=e347]: Confidence 18/100
+            - generic [ref=e348]: E1 inferred
+            - generic [ref=e349]: Disabled
+          - paragraph [ref=e350]: "Missing: S-1/F-1 filing or confirmed confidential filing | Offer price range and share count | Free float and lock-up terms"
+        - 'link "xAI frontier private ai lab R0_standalone No credible rumour Forecast window No reliable window Estimated month No reliable estimate Forecast status not modelled standalone Bands Disabled spacex linked onlyxAI standalone IPO is not modelled. Use SpaceX-linked exposure if credible SpaceX IPO route emerges. Confidence 58/100 E1 inferred Disabled Missing: S-1/F-1 filing or confirmed confidential filing | Offer price range and share count | Free float and lock-up terms" [ref=e351] [cursor=pointer]':
+          - /url: /investor-tools/ipo-watch/xai
+          - generic [ref=e352]:
+            - generic [ref=e353]:
+              - generic [ref=e354]: xAI
+              - generic [ref=e355]: frontier private ai lab
+            - generic [ref=e356]: R0_standalone
+          - paragraph [ref=e357]: No credible rumour
+          - generic [ref=e358]:
+            - generic [ref=e359]:
+              - term [ref=e360]: Forecast window
+              - definition [ref=e361]: No reliable window
+            - generic [ref=e362]:
+              - term [ref=e363]: Estimated month
+              - definition [ref=e364]: No reliable estimate
+            - generic [ref=e365]:
+              - term [ref=e366]: Forecast status
+              - definition [ref=e367]: not modelled standalone
+            - generic [ref=e368]:
+              - term [ref=e369]: Bands
+              - definition [ref=e370]: Disabled
+          - generic [ref=e371]: spacex linked onlyxAI standalone IPO is not modelled. Use SpaceX-linked exposure if credible SpaceX IPO route emerges.
+          - generic [ref=e372]:
+            - generic [ref=e373]: Confidence 58/100
+            - generic [ref=e374]: E1 inferred
+            - generic [ref=e375]: Disabled
+          - paragraph [ref=e376]: "Missing: S-1/F-1 filing or confirmed confidential filing | Offer price range and share count | Free float and lock-up terms"
+  - contentinfo [ref=e377]: AI Enterpise | Enterprise AI Market Intelligence | Confidence-labelled seed intelligence | v0.2
+  - button "Open Next.js Dev Tools" [ref=e383] [cursor=pointer]:
+    - img [ref=e384]

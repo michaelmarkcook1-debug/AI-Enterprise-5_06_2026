@@ -1,0 +1,18 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - img [ref=e4]
+    - link "AI Enterpise dashboard" [ref=e6] [cursor=pointer]:
+      - /url: /dashboard
+      - generic [ref=e8]: AI Enterpise
+    - button "Toggle light and dark mode" [ref=e9] [cursor=pointer]: Dark
+    - generic [ref=e10]:
+      - generic [ref=e11]: Executive AI market intelligence
+      - heading "AI Enterpise" [level=1] [ref=e12]
+      - paragraph [ref=e13]: Market signals, vendor intelligence, risk posture, and platform-fit evidence for enterprise AI decisions.
+      - link "Enter portal" [ref=e15] [cursor=pointer]:
+        - /url: /dashboard
+        - text: Enter portal >
+    - generic [ref=e16]: "Seed data MVP shell | image: /brand/ai-enterprise-light.jpg"
+  - button "Open Next.js Dev Tools" [ref=e22] [cursor=pointer]:
+    - img [ref=e23]
+  - alert [ref=e26]
