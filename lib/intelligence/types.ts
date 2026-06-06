@@ -50,6 +50,14 @@ export interface Vendor {
   riskProfile: string[];
   analystInterpretation: string;
   lastUpdated: string;
+  // Optional cross-tab enrichment (added when folding the Query-v2 entity
+  // model into the repository spine). roleTags carries the multi-role
+  // membership a vendor has across categories (e.g. Microsoft is platform +
+  // application + investor + infrastructure). infraBand places infrastructure
+  // vendors in their layer (silicon / cloud_compute / neocloud / data_platform).
+  // Both optional so every existing vendor record stays valid without change.
+  roleTags?: string[];
+  infraBand?: string;
 }
 
 export interface VendorPillarScore {
