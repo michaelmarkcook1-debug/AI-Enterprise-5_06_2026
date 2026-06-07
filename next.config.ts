@@ -18,6 +18,7 @@ const nextConfig: NextConfig = {
     // /investing/* URLs to the canonical /investor-tools/* paths. Module
     // imports between the two are unaffected (they're file imports, not URLs).
     return [
+      { source: "/query", destination: "/query-v2", permanent: false },
       { source: "/investment", destination: "/investor-tools/simulator", permanent: true },
       { source: "/investment-pack", destination: "/investor-tools/simulator", permanent: true },
       { source: "/investing", destination: "/investor-tools", permanent: true },
