@@ -23,14 +23,18 @@ export default function AIEnterpriseShell() {
 
   return (
     <div className={styles.root} data-theme={theme} suppressHydrationWarning>
-      {/* Background gradient + ambient grain. The orbital rings sit on top. */}
-      <div className={styles.bgWash} aria-hidden />
-
-      {/* Orbital rings — only the horizontal set rotates; tilted set stays static. */}
-      <OrbitalRings />
+      {/* Hero background image — Möbius-band globe/chart artwork */}
+      <div className={styles.bgWash} aria-hidden>
+        <img
+          src="/brand/ai-enterprise-light-hero.png"
+          alt=""
+          aria-hidden
+          className={styles.heroImage}
+        />
+      </div>
 
       {/* Top brand — AnalystGenius parent brand */}
-      <Link href="/dashboard" className={styles.brand} aria-label="AnalystGenius dashboard">
+      <Link href="/query" className={styles.brand} aria-label="AnalystGenius — AI Enterprise">
         <BrandMark />
         <span className={styles.brandWord}>
           <span className={styles.brandWordMute}>Analyst</span>
@@ -53,47 +57,43 @@ export default function AIEnterpriseShell() {
 
       {/* Hero content */}
       <main className={styles.content}>
-        <p className={styles.eyebrow}>Executive AI Market Intelligence</p>
+        <p className={styles.eyebrow}>CIO Decision Intelligence Platform</p>
         <h1 className={styles.wordmark}>
           <span className={styles.wordmarkMute}>AI </span>
           <span className={styles.wordmarkAccent}>Enterprise</span>
         </h1>
-        <p className={styles.subtitle}>Assessment · Vendor · Capability · Briefing Intelligence</p>
+        <p className={styles.subtitle}>Query · Understand · Assess · Demonstrate · Monitor</p>
         <div className={styles.divider} aria-hidden />
         <p className={styles.tagline}>
-          <em>Track</em> · <em>Score</em> · <em>Forecast</em> · <em>Decide</em>
+          <em>Discover</em> · <em>Evaluate</em> · <em>Defend</em> · <em>Monitor</em>
         </p>
         <p className={styles.lede}>
-          Source-cited, evidence-graded AI vendor intelligence — start with an assessment of your AI platform fit.
+          Evidence-graded AI market intelligence for CIOs — assess your AI platform fit, defend the decision to the board, and monitor whether it holds.
         </p>
         <div className={styles.ctaRow}>
-          {/* Enter portal is the pulsing strong primary; Take Assessment
-              sits beside it as a secondary CTA. Assessment remains a
-              first-class function — it has a dedicated nav slot and is
-              named in the subtitle/lede above. */}
           <span className={styles.ctaWrap}>
             <span className={`${styles.pulseRing} ${styles.pulseRingDelay0}`} aria-hidden />
             <span className={`${styles.pulseRing} ${styles.pulseRingDelay1}`} aria-hidden />
-            <Link href="/dashboard" className={styles.ctaPrimaryStrong}>
+            <Link href="/query" className={styles.ctaPrimaryStrong}>
               <span className={styles.ctaDotStrong} aria-hidden />
-              Enter portal
+              Enter platform
               <span className={styles.ctaArrow} aria-hidden>→</span>
             </Link>
           </span>
           <span className={styles.ctaWrap}>
-            <Link href="/assessment" className={styles.ctaPrimary}>
+            <Link href="/assess" className={styles.ctaPrimary}>
               <span className={styles.ctaDot} aria-hidden />
-              Take Assessment
+              Start Assessment
               <span className={styles.ctaArrow} aria-hidden>→</span>
             </Link>
           </span>
         </div>
         <p className={styles.foot}>
-          Source-cited · Truthfulness gated · Evidence E0–E5 · IPO modelled · Light/dark parity
+          Source-cited · Truthfulness gated · Evidence E0–E5 · Board-ready · AnalystGenius methodology
         </p>
       </main>
 
-      <span className={styles.urlSig}>ai-enterpise.app</span>
+      <span className={styles.urlSig}>ai-enterprise.app</span>
     </div>
   );
 }

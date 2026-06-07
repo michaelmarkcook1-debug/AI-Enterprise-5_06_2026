@@ -43,19 +43,18 @@ function useLastRefreshedAt(enabled = true): string | null {
   return iso;
 }
 
-// Atlas-first navigation. Q.U.A.D remains accessible as analysis layers;
-// the specialist investor tooling is intentionally kept out of this chrome.
+// CIO Decision Lifecycle — five primary tabs.
+// Atlas and Leadership are accessible from Understand, not top nav.
+// Investor Tools is visually separated as a secondary workflow.
 const NAV: { href: string; label: string }[] = [
-  { href: "/atlas", label: "AI Atlas" },
   { href: "/query", label: "Query" },
   { href: "/understand", label: "Understand" },
   { href: "/assess", label: "Assess" },
   { href: "/demonstrate", label: "Demonstrate" },
-  { href: "/quadrant", label: "Leadership" },
+  { href: "/monitor", label: "Monitor" },
 ];
 
 function isActiveNavItem(pathname: string, href: string) {
-  if (href === "/query") return pathname === "/query";
   return href === "/" ? pathname === "/" : pathname.startsWith(href);
 }
 
@@ -65,7 +64,7 @@ export default function TopNav() {
   const lastRefreshedAt = useLastRefreshedAt(!pathname.startsWith("/atlas"));
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  // Home redirects into Atlas; avoid a flash of duplicate chrome while the
+  // Home redirects into Query; avoid a flash of duplicate chrome while the
   // redirect resolves.
   if (pathname === "/") return null;
 
@@ -98,10 +97,20 @@ export default function TopNav() {
               </Link>
             );
           })}
+          {/* Investor Tools — visually separated secondary workflow */}
+          <span className="mx-1 h-5 w-px bg-[#dfe4da] dark:bg-zinc-700" aria-hidden />
+          <Link
+            href="/investor-tools"
+            aria-current={pathname.startsWith("/investor-tools") || pathname.startsWith("/investing") ? "page" : undefined}
+            className={`rounded-md px-3 py-1.5 transition-colors ${
+              pathname.startsWith("/investor-tools") || pathname.startsWith("/investing")
+                ? "bg-[#192319] !text-white font-semibold shadow-sm dark:bg-white dark:!text-[#0c1220]"
+                : "font-medium text-[#8a7a5a] hover:bg-[#f0ebe0] hover:text-[#5a4e36] dark:text-amber-400/80 dark:hover:bg-amber-950/40 dark:hover:text-amber-200"
+            }`}
+          >
+            Investor Tools
+          </Link>
         </nav>
-        {/* Data-freshness badge — proxies "when did the daily refresh last
-            succeed" via the most-recent VendorRankingSnapshot.capturedAt
-            (every successful run writes one snapshot per vendor). */}
         {/* Utility area — right side of the header bar */}
         <div className="ml-auto flex items-center gap-2">
           {lastRefreshedAt && (
@@ -168,8 +177,7 @@ export default function TopNav() {
         </button>
       </div>
 
-      {/* Mobile drawer — collapses below `md`. Lists the same Atlas-first
-          app spine as desktop plus utility controls. */}
+      {/* Mobile drawer — CIO lifecycle + separated Investor Tools + utility controls. */}
       {mobileOpen && (
         <nav
           id="mobile-nav-drawer"
@@ -197,9 +205,24 @@ export default function TopNav() {
               );
             })}
 
+            {/* Investor Tools — separated secondary workflow */}
+            <li className="mt-1 border-t border-[#dfe4da] pt-2 dark:border-zinc-800">
+              <Link
+                href="/investor-tools"
+                onClick={() => setMobileOpen(false)}
+                aria-current={pathname.startsWith("/investor-tools") || pathname.startsWith("/investing") ? "page" : undefined}
+                className={`block rounded-md px-3 py-2.5 transition-colors ${
+                  pathname.startsWith("/investor-tools") || pathname.startsWith("/investing")
+                    ? "bg-[#192319] !text-white font-semibold shadow-sm dark:bg-white dark:!text-[#0c1220]"
+                    : "font-medium text-[#8a7a5a] hover:bg-[#f0ebe0] hover:text-[#5a4e36] dark:text-amber-400/80 dark:hover:bg-amber-950/40 dark:hover:text-amber-200"
+                }`}
+              >
+                Investor Tools
+              </Link>
+            </li>
           </ul>
 
-          {/* Admin utility link — visually separated from the primary app spine. */}
+          {/* Admin utility link — visually separated. */}
           <div className="mt-1 border-t border-[#dfe4da] pt-2 dark:border-zinc-800">
             <Link
               href="/admin"

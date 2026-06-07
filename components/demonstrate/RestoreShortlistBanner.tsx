@@ -61,16 +61,25 @@ export default function RestoreShortlistBanner({ hasUrlShortlist }: Props) {
 
   useEffect(() => {
     if (hasUrlShortlist) return;
+    // Try sessionStorage first (instant)
     try {
       const raw = window.sessionStorage.getItem("demonstrate_shortlist");
-      if (!raw) return;
-      const parsed = JSON.parse(raw) as StoredShortlist;
-      if (parsed.vendorIds && parsed.vendorIds.length > 0) {
-        setStored(parsed);
+      if (raw) {
+        const parsed = JSON.parse(raw) as StoredShortlist;
+        if (parsed.vendorIds && parsed.vendorIds.length > 0) {
+          setStored(parsed);
+          return;
+        }
       }
-    } catch {
-      // sessionStorage unavailable; swallow.
-    }
+    } catch {}
+    // Fall back to DB (durable, survives browser close)
+    import("@/lib/user-state/client").then(({ loadState }) =>
+      loadState<StoredShortlist>("demonstrate_shortlist"),
+    ).then((db) => {
+      if (db && db.vendorIds && db.vendorIds.length > 0) {
+        setStored(db);
+      }
+    }).catch(() => {});
   }, [hasUrlShortlist]);
 
   if (hasUrlShortlist || !stored || dismissed) return null;

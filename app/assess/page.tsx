@@ -11,6 +11,7 @@
 //   5. Watchlists & alerts (ongoing monitoring setup)
 // Force-dynamic so the briefing reflects the latest refresh.
 
+import Link from "next/link";
 import { PageFrame } from "@/components/app-shell";
 import { Confidence, Panel, SeedDataBadge } from "@/components/intelligence-ui";
 import { VendorNameWithOwnership } from "@/components/ownership-indicator";
@@ -50,8 +51,8 @@ export default async function AssessPage({ searchParams }: PageProps) {
   return (
     <PageFrame
       title="Assess"
-      kicker="Assess vendors against your specific needs"
-      description="Score vendors against your industries, use cases, objectives, ecosystem, data-sensitivity, risk-tolerance and budget. Includes the board-ready executive briefing, the enterprise-risk radar, the platform-fit form (Quick / Guided / Advanced), and watchlist setup for ongoing alerts."
+      kicker="What should your organisation deploy?"
+      description="Three assessment tiers: Opportunity (where should we start?), Strategy (what should we deploy?), and Procurement (should we buy this?). Each tier scores vendors against your industry, workflows, risk profile, governance, and budget — with results flowing directly into Demonstrate for board defence."
     >
       {/* 1. Executive briefing */}
       <section className="mb-6 grid gap-5 lg:grid-cols-[1fr_0.75fr]">
@@ -72,11 +73,11 @@ export default async function AssessPage({ searchParams }: PageProps) {
 
       {/* 1. Assessment form — FIRST so the primary action is immediately reachable */}
       <section id="fit" className="mb-8">
-        <Panel title="AI platform fit assessment">
+        <Panel title="Choose your assessment">
           <p className="mb-4 text-sm text-[#4d574b]">
-            Pick a tier and parameters. The assessment scores each tracked vendor against your
-            industries, use cases, objectives, ecosystem requirements, and shortlist. Results
-            include source citations and evidence grading.
+            Select the assessment that matches your decision stage. Opportunity identifies where
+            to start. Strategy recommends what to deploy. Procurement scores whether to buy.
+            All three use the AnalystGenius proprietary scoring engine with evidence grading.
           </p>
           <TierBar current={tier} />
           <AssessForm
@@ -167,6 +168,13 @@ export default async function AssessPage({ searchParams }: PageProps) {
           />
         </Panel>
       </section>
+
+      {/* Next actions */}
+      <div className="mt-4 flex flex-wrap gap-2 text-xs">
+        <Link href="/understand" className="rounded-md border border-[#cfd7c8] px-3 py-2 font-semibold hover:bg-[#eef2e8] dark:border-zinc-700 dark:hover:bg-zinc-900">← Research vendors</Link>
+        <Link href="/demonstrate" className="rounded-md border border-[#cfd7c8] px-3 py-2 font-semibold hover:bg-[#eef2e8] dark:border-zinc-700 dark:hover:bg-zinc-900">Defend decision →</Link>
+        <Link href="/monitor" className="rounded-md border border-[#cfd7c8] px-3 py-2 font-semibold hover:bg-[#eef2e8] dark:border-zinc-700 dark:hover:bg-zinc-900">Monitor decisions →</Link>
+      </div>
     </PageFrame>
   );
 }

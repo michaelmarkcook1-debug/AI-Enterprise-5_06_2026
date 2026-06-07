@@ -37,4 +37,9 @@ export function persistTheme(theme: Theme) {
   }
 
   window.localStorage.setItem(THEME_STORAGE_KEY, theme);
+
+  // Write-through to DB (durable across devices, fire-and-forget)
+  import("@/lib/user-state/client").then(({ saveState }) =>
+    saveState("theme", { theme }),
+  ).catch(() => {});
 }

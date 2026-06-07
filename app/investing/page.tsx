@@ -28,9 +28,9 @@ export default async function InvestingDashboardPage() {
 
   return (
     <PageFrame
-      title="Investment Intelligence"
-      kicker="AI-provider investment cockpit"
-      description="A specialist AI-provider investment intelligence layer separating provider quality from investment attractiveness, valuation discipline, retail access, IPO risk, and indirect exposure."
+      title="Investor Tools"
+      kicker="Where should capital be allocated?"
+      description="Separated from the CIO decision workflow. Serves VC, PE, public market investors, corporate development, strategy teams, and M&A. Tracks vendor momentum, category growth, valuation signals, exposure risk, and scenario modelling."
     >
       <div className="space-y-5">
         {/* Live overlay strip — pulls from the same data the QUAD tabs use. */}

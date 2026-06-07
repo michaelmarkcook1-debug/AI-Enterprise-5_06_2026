@@ -43,24 +43,23 @@ function buildDemonstrateUrl(result: AssessmentResult): { url: string; top: Vend
  */
 function persistShortlistForDemonstrate(result: AssessmentResult, top: VendorResult[]): void {
   if (typeof window === "undefined") return;
-  try {
-    window.sessionStorage.setItem(
-      "demonstrate_shortlist",
-      JSON.stringify({
-        runId: result.runId,
-        generatedAt: result.generatedAt,
-        vendorIds: top.map((v) => v.vendorId),
-        vendorNames: top.map((v) => v.vendorName),
-        industries: result.inputSummary.industryName ? [result.inputSummary.industryName] : [],
-        useCases: result.inputSummary.useCases,
-        region: result.inputSummary.region ?? "",
-        dataSensitivity: result.inputSummary.dataSensitivity,
-        costSensitivity: result.inputSummary.budgetSensitivity,
-      }),
-    );
-  } catch {
-    // sessionStorage can throw in private/incognito; swallow.
-  }
+  const payload = {
+    runId: result.runId,
+    generatedAt: result.generatedAt,
+    vendorIds: top.map((v) => v.vendorId),
+    vendorNames: top.map((v) => v.vendorName),
+    industries: result.inputSummary.industryName ? [result.inputSummary.industryName] : [],
+    useCases: result.inputSummary.useCases,
+    region: result.inputSummary.region ?? "",
+    dataSensitivity: result.inputSummary.dataSensitivity,
+    costSensitivity: result.inputSummary.budgetSensitivity,
+  };
+  // sessionStorage (instant)
+  try { window.sessionStorage.setItem("demonstrate_shortlist", JSON.stringify(payload)); } catch {}
+  // DB (durable, fire-and-forget)
+  import("@/lib/user-state/client").then(({ saveState }) =>
+    saveState("demonstrate_shortlist", payload),
+  ).catch(() => {});
 }
 
 const BAND_LABEL: Record<string, { label: string; tone: string }> = {
@@ -70,13 +69,35 @@ const BAND_LABEL: Record<string, { label: string; tone: string }> = {
   not_recommended: { label: "Not recommended", tone: "bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300" },
 };
 
-export default function ResultsView({ runId }: { runId: string }) {
-  const [data] = useState<AssessmentResult | null>(() => {
+export default function ResultsView({ runId, serverData }: { runId: string; serverData?: AssessmentResult | null }) {
+  const [data, setData] = useState<AssessmentResult | null>(() => {
+    // Priority: server-pre-fetched > sessionStorage > null (triggers API fetch)
+    if (serverData) return serverData;
     if (typeof window === "undefined") return null;
     const cached = window.sessionStorage.getItem(`assessment_${runId}`);
     return cached ? (JSON.parse(cached) as AssessmentResult) : null;
   });
+  const [loading, setLoading] = useState(false);
   const [openVendor, setOpenVendor] = useState<string | null>(null);
+
+  // If no data from sessionStorage or server, fetch from DB via API.
+  // This handles the case where a user shares a results URL, returns
+  // after closing the browser, or opens in a different device.
+  useEffect(() => {
+    if (data || loading) return;
+    setLoading(true);
+    fetch(`/api/assessment/${encodeURIComponent(runId)}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((result) => {
+        if (result) {
+          setData(result as AssessmentResult);
+          // Cache in sessionStorage so subsequent navigations are instant
+          try { window.sessionStorage.setItem(`assessment_${runId}`, JSON.stringify(result)); } catch {}
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, [data, loading, runId]);
 
   // Pre-build the Demonstrate URL the moment we have a result so the
   // CTA below can render synchronously without a render-tear flash.
@@ -94,12 +115,24 @@ export default function ResultsView({ runId }: { runId: string }) {
     }
   }, [data, demonstrate]);
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-zinc-600">
+        <div className="text-center">
+          <div className="mb-3 h-6 w-6 mx-auto animate-spin rounded-full border-2 border-zinc-300 border-t-zinc-900 dark:border-zinc-700 dark:border-t-white" />
+          <p className="text-sm">Loading assessment results…</p>
+        </div>
+      </div>
+    );
+  }
+
   if (!data) {
     return (
       <div className="min-h-screen flex items-center justify-center text-zinc-600">
-        <div>
-          No cached result for run <code className="font-mono text-xs">{runId}</code>.{" "}
-          <Link href="/assess" className="underline">Start a new assessment</Link>.
+        <div className="text-center">
+          <p>No result found for run <code className="font-mono text-xs">{runId}</code>.</p>
+          <p className="mt-2 text-sm">The assessment may have expired or the link may be incorrect.</p>
+          <Link href="/assess" className="mt-3 inline-block underline font-semibold">Start a new assessment</Link>
         </div>
       </div>
     );

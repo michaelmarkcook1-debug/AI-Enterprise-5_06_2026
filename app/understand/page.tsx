@@ -1,15 +1,17 @@
-// Understand tab — market nuance, vendor universe, and exposure.
+// Understand — what is this vendor and where does it fit?
+// ───────────────────────────────────────────────────────
+// The definitive AI vendor intelligence layer. Answers:
+// "What is this vendor and where does it fit in the AI ecosystem?"
 //
-// Consolidates the previously separate /vendors universe, /capabilities
-// matrix and coverage stats, /exposure-map relationship view, and the
-// /methodology framework reference into a single deep-dive page.
 // Sections in render order:
-//   1. Capability coverage overview (verified / documented / seed / stale / disputed / unknown)
-//   2. Data sources backing this surface (connector health + provenance)
-//   3. Capability matrix + sub-tabs (UnderstandTabs component)
-//   4. Vendor universe (ranked list with momentum + confidence)
-//   5. AI Ecosystem Navigator (public→private linkage)
-//   6. Methodology — six pillars · evidence grading · score formula
+//   0. Quick access — AI Atlas + Leadership Matrix
+//   1. AI Ecosystem Navigator (public→private linkage)
+//   2. Coverage overview
+//   3. Data sources / connector health
+//   4. Capability matrix
+//   5. Strategic intelligence (sustainability, encroachment, dependency, optionality)
+//   6. Vendor universe
+//   7. Methodology
 
 import Link from "next/link";
 import { PageFrame } from "@/components/app-shell";
@@ -31,6 +33,7 @@ import {
 } from "@/lib/intelligence/capabilities-truthfulness";
 import { listConnectorHealth } from "@/lib/connectors/registry";
 import { getDataProvenance } from "@/lib/intelligence/provenance";
+import { SeedDataBadge } from "@/components/intelligence-ui";
 
 export const dynamic = "force-dynamic";
 
@@ -74,15 +77,85 @@ export default async function UnderstandPage({ searchParams }: PageProps) {
   return (
     <PageFrame
       title="Understand"
-      kicker="Market nuance, vendor universe, and exposure"
-      description="Deep-dive vendor analysis: capability matrix with maturity scoring, the ranked vendor universe, the AI Ecosystem Navigator (public→private linkages), and the methodology backbone — six pillars, evidence grading (E0–E5), and the final-score formula. Filter by vendor or pillar to scope the matrix."
+      kicker="What is this vendor and where does it fit?"
+      description="The definitive AI vendor intelligence layer — capability matrix, strategic sustainability, platform encroachment risk, dependency analysis, vendor viability, and the methodology backbone. Understand every vendor's position, defensibility, and risk profile before you assess."
     >
       <div className="mb-5">
         <OwnershipLegend />
       </div>
 
-      {/* 1. Exposure map — moved to the top so the public→private
-            linkage view is the first thing the user sees on Understand. */}
+      {/* 0. Quick access — AI Atlas + Leadership Matrix (removed from top nav, accessible here) */}
+      <section className="mb-6 grid gap-4 md:grid-cols-2">
+        <Link
+          href="/atlas"
+          className="group rounded-xl border border-[#dfe4da] bg-white p-5 transition-colors hover:border-emerald-400 hover:bg-emerald-50/50 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-emerald-600 dark:hover:bg-emerald-950/30"
+        >
+          <div className="text-[10px] font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">Interactive</div>
+          <div className="mt-1 text-lg font-semibold text-[#18201b] dark:text-zinc-100">AI Ecosystem Navigator</div>
+          <p className="mt-1 text-xs text-[#5f685a] dark:text-zinc-400">
+            Full interactive ecosystem map — who backs whom, who hosts whom, where risk concentrates. Click to explore.
+          </p>
+          <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 transition-colors group-hover:text-emerald-800 dark:text-emerald-400 dark:group-hover:text-emerald-300">
+            Open Atlas →
+          </span>
+        </Link>
+        <Link
+          href="/quadrant"
+          className="group rounded-xl border border-[#dfe4da] bg-white p-5 transition-colors hover:border-sky-400 hover:bg-sky-50/50 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-sky-600 dark:hover:bg-sky-950/30"
+        >
+          <div className="text-[10px] font-semibold uppercase tracking-wider text-sky-700 dark:text-sky-400">Interactive</div>
+          <div className="mt-1 text-lg font-semibold text-[#18201b] dark:text-zinc-100">Vendor Leadership Matrix</div>
+          <p className="mt-1 text-xs text-[#5f685a] dark:text-zinc-400">
+            Enhance × Innovate positioning for every tracked vendor. Arrows show movement since the prior snapshot.
+          </p>
+          <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-sky-700 transition-colors group-hover:text-sky-800 dark:text-sky-400 dark:group-hover:text-sky-300">
+            Open Leadership Matrix →
+          </span>
+        </Link>
+      </section>
+
+      {/* 0.5 Strategic Sustainability Overview */}
+      <section className="mb-6">
+        <Panel title="Strategic sustainability overview">
+          <p className="mb-3 text-xs text-[#5f685a] dark:text-zinc-400">
+            Aggregate view of vendor defensibility across the tracked universe. Identifies which vendors have durable advantages and which face disruption risk.
+          </p>
+          {(() => {
+            const top12 = vendorsRanked.slice(0, 12);
+            const scores = top12.map((v) => {
+              const mom = momentumByVendor.get(v.id);
+              const momScore = mom?.momentumScore ?? 50;
+              const sustainability = Math.min(100, Math.round(v.overallScore * 0.3 + momScore * 0.25 + v.confidenceScore * 0.2 + (v.marketPosition === "Leader" ? 20 : v.marketPosition === "Strong performer" ? 12 : 5) + 5));
+              const encroachment = Math.min(100, Math.max(0, Math.round(100 - v.overallScore * 0.4 - momScore * 0.2 + (v.category.includes("vertical") || v.category.includes("Legal") ? 25 : 0) - (v.category.includes("Platform") || v.category.includes("Cloud") ? 15 : 0))));
+              return { vendor: v, sustainability, encroachment };
+            });
+            const avgSus = scores.length > 0 ? Math.round(scores.reduce((s, x) => s + x.sustainability, 0) / scores.length) : 0;
+            const highestSus = scores.sort((a, b) => b.sustainability - a.sustainability)[0];
+            const highestRisk = scores.sort((a, b) => b.encroachment - a.encroachment)[0];
+            return (
+              <div className="grid gap-3 md:grid-cols-3">
+                <div className="rounded-md border border-[#dfe4da] p-3 dark:border-zinc-800">
+                  <div className="text-[10px] uppercase tracking-wider text-[#697362]">Avg sustainability</div>
+                  <div className="mt-1 font-mono text-2xl font-semibold text-[#18201b] dark:text-zinc-100">{avgSus}/100</div>
+                </div>
+                <div className="rounded-md border border-emerald-200 bg-emerald-50/60 p-3 dark:border-emerald-900/60 dark:bg-emerald-950/20">
+                  <div className="text-[10px] uppercase tracking-wider text-emerald-700 dark:text-emerald-300">Most durable</div>
+                  <div className="mt-1 text-sm font-semibold text-emerald-800 dark:text-emerald-200">{highestSus?.vendor.name ?? "—"}</div>
+                  <div className="text-[10px] text-emerald-700/70 dark:text-emerald-300/70">Sustainability: {highestSus?.sustainability ?? 0}</div>
+                </div>
+                <div className="rounded-md border border-rose-200 bg-rose-50/60 p-3 dark:border-rose-900/60 dark:bg-rose-950/20">
+                  <div className="text-[10px] uppercase tracking-wider text-rose-700 dark:text-rose-300">Highest disruption risk</div>
+                  <div className="mt-1 text-sm font-semibold text-rose-800 dark:text-rose-200">{highestRisk?.vendor.name ?? "—"}</div>
+                  <div className="text-[10px] text-rose-700/70 dark:text-rose-300/70">Encroachment: {highestRisk?.encroachment ?? 0}</div>
+                </div>
+              </div>
+            );
+          })()}
+          <SeedDataBadge label="Estimated" provenance="seed" reason="Sustainability scores computed from seed pillar data." />
+        </Panel>
+      </section>
+
+      {/* 1. AI Ecosystem Navigator (public→private linkage snapshot) */}
       <section id="exposure" className="mb-8">
         <Panel title="AI Ecosystem Navigator (public → private linkage)">
           <p className="mb-3 text-xs leading-5 text-[#5f685a] dark:text-zinc-400">
@@ -148,7 +221,92 @@ export default async function UnderstandPage({ searchParams }: PageProps) {
         />
       </section>
 
-      {/* 5. Vendor universe */}
+      {/* 5. Strategic Intelligence — new scores from the implementation pack */}
+      <section id="strategic" className="mb-8">
+        <Panel title="Strategic vendor intelligence">
+          <p className="mb-2 text-xs text-[#5f685a] dark:text-zinc-400">
+            Strategic sustainability, platform encroachment risk, dependency risk, and optionality
+            for the top tracked vendors. These scores are derived from existing pillar scores,
+            momentum, market position, and ecosystem data.
+          </p>
+          <SeedDataBadge label="Estimated" provenance="seed" reason="Strategic scores are computed from seed pillar data. Will refine as live evidence deepens." />
+          <div className="mt-4 overflow-x-auto">
+            <table className="min-w-full text-sm">
+              <thead>
+                <tr className="border-b border-[#dfe4da] text-left text-[10px] uppercase tracking-wide text-[#5f685a]">
+                  <th className="py-2 pr-3">Vendor</th>
+                  <th className="py-2 pr-3 text-right">Sustainability</th>
+                  <th className="py-2 pr-3 text-right">Encroachment risk</th>
+                  <th className="py-2 pr-3 text-right">Dependency risk</th>
+                  <th className="py-2 pr-3 text-right">Optionality</th>
+                  <th className="py-2 text-right">Viability</th>
+                </tr>
+              </thead>
+              <tbody>
+                {vendorsRanked.slice(0, 12).map((vendor) => {
+                  const mom = momentumByVendor.get(vendor.id);
+                  const momScore = mom?.momentumScore ?? 50;
+                  // Strategic Sustainability: moat + market position + momentum
+                  const sustainability = Math.min(100, Math.round(
+                    vendor.overallScore * 0.3 + momScore * 0.25 + vendor.confidenceScore * 0.2
+                    + (vendor.marketPosition === "Leader" ? 20 : vendor.marketPosition === "Strong performer" ? 12 : 5)
+                    + 5 // base
+                  ));
+                  // Encroachment risk: higher for niche/vertical, lower for platforms
+                  const encroachment = Math.min(100, Math.max(0, Math.round(
+                    100 - vendor.overallScore * 0.4 - momScore * 0.2
+                    + (vendor.category.includes("vertical") || vendor.category.includes("Legal") || vendor.category.includes("Financial") ? 25 : 0)
+                    - (vendor.category.includes("Platform") || vendor.category.includes("Cloud") ? 15 : 0)
+                  )));
+                  // Dependency risk: infrastructure vendors low, app vendors high
+                  const dependency = Math.min(100, Math.max(0, Math.round(
+                    60 - vendor.overallScore * 0.15
+                    + (vendor.ownershipType === "private" ? 15 : 0)
+                    - (vendor.category.includes("Infrastructure") || vendor.category.includes("Cloud") ? 20 : 0)
+                    + (vendor.category.includes("Workflow") || vendor.category.includes("vertical") ? 20 : 0)
+                  )));
+                  // Optionality: high for open/multi-cloud, low for proprietary
+                  const optionality = Math.min(100, Math.max(0, Math.round(
+                    vendor.overallScore * 0.3 + vendor.confidenceScore * 0.2
+                    + (vendor.ownershipType === "public" ? 10 : 0)
+                    + (vendor.category.includes("Platform") ? 15 : 5)
+                    + 10 // base
+                  )));
+                  // Viability: overall + momentum + confidence
+                  const viability = Math.min(100, Math.round(
+                    vendor.overallScore * 0.4 + momScore * 0.3 + vendor.confidenceScore * 0.3
+                  ));
+
+                  const riskTone = (v: number) => v >= 60 ? "text-rose-700 dark:text-rose-300" : v >= 35 ? "text-amber-700 dark:text-amber-300" : "text-emerald-700 dark:text-emerald-300";
+                  const scoreTone = (v: number) => v >= 70 ? "text-emerald-700 dark:text-emerald-300" : v >= 45 ? "text-amber-700 dark:text-amber-300" : "text-rose-700 dark:text-rose-300";
+
+                  return (
+                    <tr key={vendor.id} className="border-b border-[#edf0ea]/60">
+                      <td className="py-2.5 pr-3">
+                        <VendorNameWithOwnership name={vendor.name} ownershipType={vendor.ownershipType} />
+                      </td>
+                      <td className={`py-2.5 pr-3 text-right font-mono font-semibold ${scoreTone(sustainability)}`}>{sustainability}</td>
+                      <td className={`py-2.5 pr-3 text-right font-mono font-semibold ${riskTone(encroachment)}`}>{encroachment}</td>
+                      <td className={`py-2.5 pr-3 text-right font-mono font-semibold ${riskTone(dependency)}`}>{dependency}</td>
+                      <td className={`py-2.5 pr-3 text-right font-mono font-semibold ${scoreTone(optionality)}`}>{optionality}</td>
+                      <td className={`py-2.5 text-right font-mono font-semibold ${scoreTone(viability)}`}>{viability}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+          <div className="mt-3 grid gap-3 text-[11px] text-[#5f685a] dark:text-zinc-400 md:grid-cols-2 lg:grid-cols-3">
+            <div><strong>Sustainability:</strong> Likelihood the vendor&apos;s advantage remains defensible over 6–24 months.</div>
+            <div><strong>Encroachment risk:</strong> Risk that a frontier model or hyperscaler absorbs the vendor&apos;s differentiation.</div>
+            <div><strong>Dependency risk:</strong> Exposure to model, cloud, GPU, or platform dependencies.</div>
+            <div><strong>Optionality:</strong> Whether adopting this vendor increases or reduces future flexibility.</div>
+            <div><strong>Viability:</strong> Vendor health — funding, revenue maturity, customer base, delivery record.</div>
+          </div>
+        </Panel>
+      </section>
+
+      {/* 6. Vendor universe */}
       <section id="vendors" className="mb-8">
         <Panel title="Vendor universe — ranked by overall score">
           <div className="divide-y divide-[#edf0ea] dark:divide-zinc-800">
@@ -182,8 +340,7 @@ export default async function UnderstandPage({ searchParams }: PageProps) {
         </Panel>
       </section>
 
-
-      {/* 6. Methodology */}
+      {/* 7. Methodology */}
       <section id="methodology" className="mb-2">
         <Panel title="Methodology — Enterprise AI Assessment Framework v2.0">
           <div className="grid gap-6 lg:grid-cols-2">
@@ -240,6 +397,13 @@ export default async function UnderstandPage({ searchParams }: PageProps) {
           </div>
         </Panel>
       </section>
+
+      {/* Next actions */}
+      <div className="mt-4 flex flex-wrap gap-2 text-xs">
+        <Link href="/query" className="rounded-md border border-[#cfd7c8] px-3 py-2 font-semibold hover:bg-[#eef2e8] dark:border-zinc-700 dark:hover:bg-zinc-900">← Market intelligence</Link>
+        <Link href="/assess" className="rounded-md border border-[#cfd7c8] px-3 py-2 font-semibold hover:bg-[#eef2e8] dark:border-zinc-700 dark:hover:bg-zinc-900">Assess your needs →</Link>
+        <Link href="/atlas" className="rounded-md border border-[#cfd7c8] px-3 py-2 font-semibold hover:bg-[#eef2e8] dark:border-zinc-700 dark:hover:bg-zinc-900">Open AI Atlas →</Link>
+      </div>
     </PageFrame>
   );
 }

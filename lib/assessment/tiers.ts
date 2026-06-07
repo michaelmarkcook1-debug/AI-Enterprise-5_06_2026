@@ -20,24 +20,24 @@ export interface TierMeta {
 export const TIERS: TierMeta[] = [
   {
     id: "quick",
-    label: "Quick Assessment",
-    estTime: "~2–4 min",
+    label: "AI Opportunity Assessment",
+    estTime: "5–10 min",
     description:
-      "4-step fit assessment with 12 most-common workflows. Fast triage and a first read.",
+      "Where should we start? Identifies top AI opportunity areas, risk, and readiness for CIOs, COOs, and innovation leaders.",
   },
   {
     id: "guided",
-    label: "Guided Assessment",
-    estTime: "~6–9 min",
+    label: "AI Strategy Assessment",
+    estTime: "20–30 min",
     description:
-      "5 steps with ~30 workflows + a Governance step: strictness, integration depth, human-review model, lock-in tolerance, data residency. Adjusts pillar weights and applies vendor-by-vendor penalties.",
+      "What should we deploy? Recommended architecture, vendor shortlist, sustainability view, and implementation roadmap for CIOs, CTOs, and enterprise architects.",
   },
   {
     id: "advanced",
-    label: "Advanced Assessment",
-    estTime: "~12–18 min",
+    label: "AI Procurement Assessment",
+    estTime: "60–120 min",
     description:
-      "6 steps with all 65 workflows + Governance + Procurement: switching cost, sovereignty, RFP cycle, stack appetite, concentration risk, TCO horizon, required certifications, output mode. Procurement-grade with hard exclusions.",
+      "Should we buy this? Procurement-grade scoring across business value, risk, security, governance, integration, cost, sovereignty, and strategic sustainability for CIOs, procurement, legal, security, and CFOs.",
   },
 ];
 

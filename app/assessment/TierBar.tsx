@@ -33,7 +33,7 @@ const TIER_STYLE: Record<AssessmentTier, {
   pillInactive: string;
 }> = {
   quick: {
-    badgeLabel: "Tier 1 · Entry",
+    badgeLabel: "Tier 1 · Opportunity",
     accentBar: "bg-emerald-500",
     activeClass:
       "border-emerald-600 bg-emerald-600 text-white shadow-sm shadow-emerald-600/20 dark:border-emerald-400 dark:bg-emerald-500 dark:text-white",
@@ -47,7 +47,7 @@ const TIER_STYLE: Record<AssessmentTier, {
     pillInactive: "bg-emerald-100 text-emerald-900 dark:bg-emerald-900/60 dark:text-emerald-100",
   },
   guided: {
-    badgeLabel: "Tier 2 · Decision-shaping",
+    badgeLabel: "Tier 2 · Strategy",
     accentBar: "bg-sky-500",
     activeClass:
       "border-sky-600 bg-sky-600 text-white shadow-sm shadow-sky-600/20 dark:border-sky-400 dark:bg-sky-500 dark:text-white",
@@ -61,7 +61,7 @@ const TIER_STYLE: Record<AssessmentTier, {
     pillInactive: "bg-sky-100 text-sky-900 dark:bg-sky-900/60 dark:text-sky-100",
   },
   advanced: {
-    badgeLabel: "Tier 3 · Procurement-grade",
+    badgeLabel: "Tier 3 · Procurement",
     accentBar: "bg-amber-500",
     activeClass:
       "border-amber-600 bg-amber-600 text-white shadow-sm shadow-amber-600/20 dark:border-amber-400 dark:bg-amber-500 dark:text-white",

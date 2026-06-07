@@ -74,20 +74,32 @@ interface PersistedFormState {
 function loadPersisted(): Partial<PersistedFormState> | null {
   if (typeof window === "undefined") return null;
   try {
+    // Try sessionStorage first (instant)
     const raw = window.sessionStorage.getItem(ASSESSMENT_FORM_STATE_KEY);
-    if (!raw) return null;
-    return JSON.parse(raw) as Partial<PersistedFormState>;
-  } catch {
-    return null;
-  }
+    if (raw) return JSON.parse(raw) as Partial<PersistedFormState>;
+  } catch {}
+  return null;
 }
 
 function savePersisted(state: PersistedFormState): void {
   if (typeof window === "undefined") return;
+  // Write to sessionStorage (instant)
   try {
     window.sessionStorage.setItem(ASSESSMENT_FORM_STATE_KEY, JSON.stringify(state));
+  } catch {}
+  // Write-through to DB (durable, fire-and-forget)
+  import("@/lib/user-state/client").then(({ saveState }) =>
+    saveState("assessment_draft", state),
+  ).catch(() => {});
+}
+
+/** Async loader for DB-backed draft (called once on mount). */
+async function loadPersistedFromDb(): Promise<Partial<PersistedFormState> | null> {
+  try {
+    const { loadState } = await import("@/lib/user-state/client");
+    return await loadState<Partial<PersistedFormState>>("assessment_draft");
   } catch {
-    // sessionStorage may be unavailable (privacy mode) — proceed without persistence.
+    return null;
   }
 }
 
@@ -98,11 +110,13 @@ export default function AssessForm({ industries, useCases, objectives, ecosystem
   const [error, setError] = useState<string | null>(null);
 
   // Hydrate from sessionStorage on mount so a user switching tiers keeps answers.
+  // If sessionStorage is empty, fire a one-time DB fetch to recover the draft.
   const initial = useRef<Partial<PersistedFormState> | null>(null);
   if (initial.current === null && typeof window !== "undefined") {
     initial.current = loadPersisted() ?? {};
   }
   const seed = initial.current ?? {};
+  const [dbLoaded, setDbLoaded] = useState(false);
 
   const [industry, setIndustry] = useState(seed.industry ?? industries[0]?.id ?? "");
   const [orgSize, setOrgSize] = useState(seed.orgSize ?? "enterprise");
@@ -135,6 +149,28 @@ export default function AssessForm({ industries, useCases, objectives, ecosystem
   const [negotiationPower, setNegotiationPower] = useState<string>(seed.negotiationPower ?? "medium");
   const [requiredCertifications, setRequiredCertifications] = useState<string[]>(seed.requiredCertifications ?? []);
   const [outputMode, setOutputMode] = useState<string>(seed.outputMode ?? "buyer");
+
+  // One-time DB hydration when sessionStorage was empty (new device / cleared cache).
+  useEffect(() => {
+    if (dbLoaded || Object.keys(seed).length > 1) return; // Already have local data
+    loadPersistedFromDb().then((db) => {
+      if (db && Object.keys(db).length > 0) {
+        // Backfill fields from DB — only if current field still has the default value
+        if (db.industry && industry === (industries[0]?.id ?? "")) setIndustry(db.industry);
+        if (db.orgSize) setOrgSize(db.orgSize);
+        if (db.region) setRegion(db.region);
+        if (db.primaryObjectives?.length) setPrimaryObjectives(db.primaryObjectives);
+        if (db.selectedUseCases?.length) setSelectedUseCases(db.selectedUseCases);
+        if (db.dataSensitivity) setDataSensitivity(db.dataSensitivity);
+        if (db.riskTolerance) setRiskTolerance(db.riskTolerance);
+        if (db.autonomyAppetite) setAutonomyAppetite(db.autonomyAppetite);
+        if (db.ecosystem?.length) setEcosystem(db.ecosystem);
+        if (db.deploymentPreference) setDeploymentPreference(db.deploymentPreference);
+        if (db.budgetSensitivity) setBudgetSensitivity(db.budgetSensitivity);
+      }
+      setDbLoaded(true);
+    });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Persist whenever any input changes so a tier switch never loses state.
   useEffect(() => {
