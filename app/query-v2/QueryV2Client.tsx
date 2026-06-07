@@ -4,20 +4,32 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Metric, Panel, SeedDataBadge } from "@/components/intelligence-ui";
 import { OwnershipBadge, VendorNameWithOwnership } from "@/components/ownership-indicator";
+import {
+  type Role,
+  type Entity,
+  type InfraBand,
+  rolesFor,
+  ENTITIES,
+  WINNING_BY_LAYER,
+} from "@/lib/intelligence/entities";
 
-type Role =
-  | "Platform Vendor"
-  | "Model Provider"
-  | "Application Vendor"
-  | "Infrastructure Player"
-  | "Investor"
-  | "Hardware Provider"
-  | "Data & Services Provider"
-  | "Cloud / Hosting Provider"
-  | "Sovereign / Regional AI"
-  | "Regulator / Policy Actor"
-  | "Open-Source Ecosystem"
-  | "Vertical Specialist";
+// Infrastructure sub-bands (Silicon / Cloud Compute / Neocloud / Data Platforms).
+// Each band represents a DIFFERENT risk type, which is why Infrastructure is the
+// one category that earns sub-structure where the others stay flat.
+const INFRA_BANDS: Array<{ key: InfraBand; label: string; note: string }> = [
+  { key: "silicon", label: "Silicon", note: "Chips, accelerators, networking and fabrication. Risk type: supply concentration." },
+  { key: "cloud_compute", label: "Cloud Compute", note: "Hyperscaler and sovereign cloud capacity. Risk type: lock-in and pricing power." },
+  { key: "neocloud", label: "Neocloud", note: "AI-specialist GPU/inference clouds. Risk type: counterparty and viability." },
+  { key: "data_platform", label: "Data Platforms", note: "Governed data + AI layer compute runs on. Risk type: data gravity and governance." },
+];
+
+const INFRA_BAND_LABEL: Record<InfraBand, string> = {
+  silicon: "Silicon",
+  cloud_compute: "Cloud",
+  neocloud: "Neocloud",
+  inference: "Inference",
+  data_platform: "Data",
+};
 
 type CategoryKey =
   | "all"
@@ -29,41 +41,6 @@ type CategoryKey =
   | "hardware"
   | "sovereign"
   | "vertical";
-
-type Ownership = "public" | "private" | "subsidiary";
-
-type Entity = {
-  id: string;
-  name: string;
-  slug: string;
-  ownership: Ownership;
-  primaryRole: Role;
-  secondaryRoles: Role[];
-  leadershipScore: number;
-  momentum: number;
-  ecosystemReach: number;
-  risk: "low" | "medium" | "high";
-  confidence: number;
-  usageShare: number;
-  innovation: number;
-  readiness: number;
-  movement: { dx: number; dy: number };
-  deltas: {
-    leadership: number;
-    reach: number;
-    adoption: number;
-    infrastructure: number;
-    risk: number;
-  };
-  modelsOwned: string[];
-  hostedThirdParty: string[];
-  infrastructureExposure: string[];
-  investorRelationships: string[];
-  hardwareDependencies: string[];
-  cioInterpretation: string;
-  evidenceGrade: "E1" | "E2" | "E3" | "E4" | "E5";
-  dataCaveats: string;
-};
 
 const CATEGORY_OPTIONS: Array<{ key: CategoryKey; label: string; roles: Role[]; summary: string; interpretation: string }> = [
   {
@@ -146,47 +123,6 @@ const ROLE_TONE: Record<Role, { bg: string; text: string; fill: string }> = {
   "Vertical Specialist": { bg: "bg-fuchsia-50 dark:bg-fuchsia-950/40", text: "text-fuchsia-900 dark:text-fuchsia-300", fill: "#d946ef" },
 };
 
-const ENTITIES: Entity[] = [
-  entity("microsoft", "Microsoft", "public", "Platform Vendor", ["Application Vendor", "Investor", "Infrastructure Player", "Model Provider", "Cloud / Hosting Provider"], 91, 72, 96, "medium", 86, 18.8, 76, 91, [2, 1], [3, 4, 3, 2, 1], ["Phi", "MAI"], ["OpenAI GPT", "Mistral", "Llama"], ["Azure AI", "Azure OpenAI", "GitHub", "Microsoft 365", "Entra"], ["OpenAI strategic investment", "Mistral partnership"], ["NVIDIA GPU supply", "AMD MI-series optionality"], "Microsoft ranks as a platform leader because it controls enterprise distribution, cloud deployment, identity/security surfaces, Copilot applications and Azure AI access. It should not be treated as only a model provider, despite owning Phi and MAI model assets.", "E4", "Strong public evidence, but Copilot usage, Azure-hosted model traffic and first-party model share must be separated."),
-  entity("openai", "OpenAI", "private", "Model Provider", ["Application Vendor"], 89, 74, 89, "medium", 78, 17.6, 90, 78, [1, 1], [2, 2, 4, 0, 2], ["GPT", "o-series", "image/audio models"], [], ["Azure distribution", "API platform", "ChatGPT Enterprise"], ["Microsoft strategic investment"], ["NVIDIA GPU supply", "cloud partner capacity"], "OpenAI remains the model and product cadence shaper, but enterprise buyers should separate model quality from operating controls, data-retention evidence and dependency on Microsoft/Azure distribution.", "E3", "Usage share is directional and heavily influenced by public mindshare, API visibility and ChatGPT Enterprise references."),
-  entity("anthropic", "Anthropic", "private", "Model Provider", ["Application Vendor"], 88, 76, 84, "medium", 76, 15.8, 88, 80, [2, 2], [3, 3, 5, 1, 1], ["Claude Opus", "Claude Sonnet", "Claude Haiku"], [], ["AWS Bedrock", "Google Vertex AI", "Snowflake", "Databricks"], ["Amazon investment", "Google investment"], ["NVIDIA GPU supply", "AWS Trainium exposure"], "Anthropic is a model provider with rising application pull through Claude Code and computer-use patterns. Its enterprise attractiveness is strongest where reasoning, coding and safety posture matter more than packaged suite breadth.", "E3", "Distribution is multi-cloud but partner-dependent; first-party enterprise application footprint is narrower than Microsoft or Google."),
-  entity("google", "Google", "public", "Platform Vendor", ["Model Provider", "Cloud / Hosting Provider", "Hardware Provider", "Application Vendor"], 86, 69, 88, "medium", 82, 14.9, 84, 82, [1, 1], [1, 2, 2, 3, 0], ["Gemini", "Imagen", "Veo", "Gemma"], ["Anthropic Claude via Vertex"], ["Google Cloud", "Vertex AI", "Workspace", "TPU ecosystem"], ["Anthropic investment"], ["TPUs", "NVIDIA GPUs"], "Google is both platform and model provider: Gemini, Workspace, Vertex AI and TPU infrastructure should be read as one integrated stack, with enterprise traction strongest in cloud/data-heavy and Workspace-heavy estates.", "E4", "Public evidence is broad; commercial share varies by Workspace, Cloud and model API segment."),
-  entity("aws", "AWS", "public", "Platform Vendor", ["Cloud / Hosting Provider", "Investor", "Infrastructure Player"], 84, 68, 92, "medium", 84, 10.6, 72, 86, [1, 0], [2, 3, 2, 4, 0], ["Nova", "Titan"], ["Claude", "Llama", "Mistral"], ["Bedrock", "SageMaker", "AWS AI infrastructure"], ["Anthropic investment"], ["Trainium", "Inferentia", "NVIDIA GPUs"], "AWS is a platform and infrastructure control plane with model optionality. It wins where buyers want cloud-native deployment depth rather than a single assistant or model brand.", "E4", "Bedrock adoption and hosted-model mix are hard to disaggregate from AWS account penetration."),
-  entity("nvidia", "NVIDIA", "public", "Hardware Provider", ["Infrastructure Player", "Investor"], 83, 73, 94, "low", 84, 8.2, 78, 88, [3, 1], [2, 5, 4, 6, -1], ["Nemotron"], [], ["CUDA", "DGX Cloud", "GPU supply", "AI Enterprise software"], ["Strategic investments across AI ecosystem"], ["Own GPU and networking stack"], "NVIDIA is the upstream hardware and software ecosystem winner. For CIOs, it is a dependency and infrastructure-cost signal more than a direct application shortlist name.", "E4", "Infrastructure exposure is high, but downstream enterprise usage share should not be treated as vendor application share."),
-  entity("meta", "Meta", "public", "Model Provider", ["Open-Source Ecosystem", "Application Vendor"], 81, 66, 83, "medium", 70, 5.8, 79, 65, [1, 0], [1, 3, 2, 0, 1], ["Llama"], [], ["Open-weight ecosystem", "hyperscaler hosting"], [], ["NVIDIA GPUs"], "Meta matters because Llama changes enterprise negotiation leverage and open-weight strategy. It is less mature as a packaged enterprise platform.", "E2", "Enterprise controls often come from hosting partners rather than Meta first-party surfaces."),
-  entity("mistral", "Mistral AI", "private", "Model Provider", ["Sovereign / Regional AI", "Open-Source Ecosystem"], 77, 70, 68, "medium", 67, 4.9, 80, 66, [2, 1], [3, 2, 2, 0, 1], ["Large", "Medium", "Small", "Codestral", "Magistral"], [], ["Azure AI Foundry", "La Plateforme"], ["Microsoft partnership"], ["NVIDIA GPUs"], "Mistral is the clearest European sovereign-model alternative with open-weight leverage, but buyers still need to validate enterprise controls and account support depth.", "E2", "Momentum is visible; enterprise production evidence remains more selective than US hyperscaler-backed peers."),
-  entity("cohere", "Cohere", "private", "Model Provider", ["Data & Services Provider", "Sovereign / Regional AI"], 73, 59, 61, "medium", 68, 3.4, 66, 67, [-1, 0], [0, 1, 0, 0, 1], ["Command", "Embed", "Rerank"], [], ["Private deployment", "RAG workloads"], ["Oracle partnership"], ["NVIDIA GPUs"], "Cohere is a credible enterprise-oriented model and retrieval provider, strongest where private deployment and RAG matter more than broad-market visibility.", "E2", "Lower public adoption visibility means confidence depends on named customer and deployment evidence."),
-  entity("ibm", "IBM", "public", "Platform Vendor", ["Model Provider", "Data & Services Provider"], 74, 62, 69, "low", 78, 3.0, 61, 76, [0, 0], [1, 1, 0, 1, -1], ["Granite"], ["Mistral", "Llama"], ["watsonx", "Red Hat", "hybrid cloud"], [], ["NVIDIA GPUs", "IBM Z acceleration"], "IBM is a control, governance and hybrid-AI benchmark. It is less of a hype leader, but it matters in regulated deployments where auditability outranks speed.", "E4", "Momentum is more conservative; score should be weighted differently for high-control buyers."),
-  entity("databricks", "Databricks", "private", "Data & Services Provider", ["Platform Vendor", "Infrastructure Player"], 78, 67, 76, "medium", 74, 3.7, 71, 74, [1, 1], [2, 2, 2, 2, 0], ["DBRX", "Mosaic lineage"], ["Claude", "Llama", "Mistral"], ["Lakehouse", "Mosaic AI", "model serving"], [], ["NVIDIA GPUs", "cloud GPUs"], "Databricks is a build-and-data platform: high relevance for enterprises treating governed data as the AI foundation, less so for packaged assistant-only needs.", "E3", "Category share depends heavily on data engineering maturity and existing lakehouse footprint."),
-  entity("snowflake", "Snowflake", "public", "Data & Services Provider", ["Platform Vendor", "Infrastructure Player"], 76, 64, 73, "medium", 73, 3.2, 68, 73, [1, 0], [1, 1, 1, 2, 0], ["Arctic"], ["Claude", "Mistral", "Llama"], ["Cortex AI", "Snowpark", "Data Cloud"], [], ["Cloud GPU supply"], "Snowflake is a governed data-cloud AI player. CIOs should read it as a data/control layer rather than a standalone frontier model competitor.", "E3", "First-party model claims are secondary to data-cloud adoption and partner model access."),
-  entity("servicenow", "ServiceNow", "public", "Application Vendor", ["Platform Vendor", "Vertical Specialist"], 79, 66, 78, "medium", 76, 3.1, 70, 78, [1, 1], [2, 2, 2, 1, 0], ["Now LLM"], ["OpenAI", "Azure OpenAI"], ["Now Platform", "ITSM/HR workflows"], [], ["Cloud GPU supply"], "ServiceNow is an application/workflow platform for enterprise service processes. Its agent story is strongest where workflows and approvals already live in ServiceNow.", "E3", "Adoption should be read by ITSM/HR/service workflow, not generic enterprise AI share."),
-  entity("salesforce", "Salesforce", "public", "Application Vendor", ["Platform Vendor", "Data & Services Provider"], 78, 65, 77, "medium", 75, 2.8, 69, 77, [1, 0], [1, 1, 1, 0, 1], ["Einstein family"], ["OpenAI", "Anthropic", "Google"], ["Agentforce", "Data Cloud", "CRM workflows"], [], ["Cloud GPU supply"], "Salesforce is an application-layer agent platform where CRM workflow ownership drives adoption. Cost and per-action economics need careful buyer scrutiny.", "E3", "CRM and service workflow share should not be projected to broad AI platform share."),
-  entity("oracle", "Oracle", "public", "Platform Vendor", ["Cloud / Hosting Provider", "Infrastructure Player"], 75, 61, 74, "medium", 72, 2.7, 63, 74, [0, 0], [1, 1, 0, 2, 0], [], ["Cohere", "Llama"], ["OCI", "Oracle Database", "sovereign regions"], ["Cohere partnership"], ["NVIDIA GPUs"], "Oracle is relevant where database, enterprise applications and OCI infrastructure are already strategic. Sovereign and dedicated cloud claims need region-level validation.", "E2", "AI leadership varies sharply by Oracle estate depth and workload."),
-  entity("perplexity", "Perplexity", "private", "Application Vendor", ["Model Provider"], 72, 66, 61, "medium", 58, 2.6, 72, 58, [1, 1], [1, 1, 2, 0, 1], ["Sonar"], ["OpenAI", "Anthropic"], ["Search and research product"], [], ["Cloud GPU supply"], "Perplexity is best read as an AI search and research application with model-provider characteristics through Sonar, not a horizontal enterprise platform.", "E2", "Enterprise controls and source quality evidence should be tested before knowledge-work scale-up."),
-  entity("harvey", "Harvey", "private", "Vertical Specialist", ["Application Vendor"], 76, 68, 57, "medium", 61, 2.5, 69, 64, [2, 1], [2, 1, 3, 0, 1], [], ["Multi-provider"], ["Legal workflow product"], [], ["Cloud GPU supply"], "Harvey is a vertical specialist with strong legal workflow credibility. It can outperform horizontal platforms in law and professional-services use cases.", "E2", "Vertical concentration and pricing opacity limit broad-market extrapolation."),
-  entity("rogo", "Rogo", "private", "Vertical Specialist", ["Application Vendor"], 69, 57, 46, "medium", 52, 1.6, 61, 55, [0, 0], [1, 0, 1, 0, 1], [], ["Multi-provider"], ["Financial research workflows"], [], ["Cloud GPU supply"], "Rogo is a financial-services specialist; useful for domain shortlists, but scale evidence and horizontal proof remain the diligence points.", "E1", "Small sample of public proof means confidence should stay conservative."),
-  entity("writer", "Writer", "private", "Application Vendor", ["Model Provider"], 73, 61, 58, "medium", 60, 2.2, 64, 66, [1, 1], [1, 1, 1, 0, 0], ["Palmyra"], [], ["Enterprise content workflow platform"], [], ["Cloud GPU supply"], "Writer is an enterprise application and model provider for governed content and knowledge workflows. It is not a universal platform, but it can win specific business-user use cases.", "E2", "Category is crowded; broad enterprise scale proof matters."),
-  entity("moveworks", "Moveworks", "private", "Application Vendor", ["Vertical Specialist"], 72, 60, 55, "medium", 63, 1.9, 62, 68, [0, 0], [1, 0, 1, 0, 0], [], ["Multi-provider"], ["Employee support automation"], [], ["Cloud GPU supply"], "Moveworks is a service-workflow application specialist, strongest in IT and HR support automation where deflection and resolution metrics are measurable.", "E2", "Suite competition from Microsoft and ServiceNow must be modelled."),
-  entity("deepseek", "DeepSeek", "private", "Model Provider", ["Sovereign / Regional AI", "Open-Source Ecosystem"], 76, 71, 65, "high", 55, 2.4, 84, 53, [3, 0], [2, 1, 3, 0, 3], ["R1", "V3"], [], ["API platform", "open release ecosystem"], [], ["GPU access constraints"], "DeepSeek is a cost-per-quality disruptor for model strategy, but regulated buyers must treat jurisdiction, data transfer and access compliance as gating factors.", "E1", "Performance and pricing signals are strong; enterprise controls and geopolitical access are uncertain."),
-  entity("alibaba-qwen", "Alibaba / Qwen", "public", "Model Provider", ["Cloud / Hosting Provider", "Sovereign / Regional AI", "Open-Source Ecosystem"], 77, 66, 70, "high", 58, 2.3, 78, 58, [1, 1], [1, 2, 2, 1, 2], ["Qwen"], [], ["Alibaba Cloud Model Studio"], [], ["GPU and accelerator supply"], "Qwen matters as a global frontier alternative with multilingual and regional reach. Western enterprise adoption depends on jurisdiction and procurement policy.", "E1", "Signals are strongest in APAC and open-weight contexts; global enterprise controls need validation."),
-  entity("moonshot-kimi", "Moonshot / Kimi", "private", "Model Provider", ["Sovereign / Regional AI"], 70, 63, 52, "high", 48, 1.4, 73, 50, [1, 0], [1, 0, 1, 0, 1], ["Kimi"], [], ["Platform API"], [], ["GPU supply"], "Moonshot/Kimi is a long-context and reasoning contender. It is useful for market scanning, but not yet a default enterprise platform choice.", "E1", "Enterprise packaging, procurement access and controls remain early."),
-  entity("zhipu-glm", "Zhipu / GLM", "private", "Model Provider", ["Sovereign / Regional AI"], 68, 58, 49, "high", 46, 1.2, 70, 49, [0, 0], [0, 0, 1, 0, 1], ["GLM"], [], ["API and regional enterprise deployments"], [], ["GPU supply"], "Zhipu/GLM is relevant for jurisdictional diversity and China-market coverage, with limited Western enterprise readiness evidence.", "E1", "Confidence is low outside domestic/regional contexts."),
-  entity("coreweave", "CoreWeave", "private", "Infrastructure Player", ["Cloud / Hosting Provider"], 74, 70, 79, "medium", 61, 1.7, 69, 73, [2, 1], [1, 3, 2, 5, 1], [], [], ["GPU cloud", "AI training infrastructure"], ["NVIDIA ecosystem ties"], ["NVIDIA GPUs"], "CoreWeave is a high-signal infrastructure player. It matters for supply, hosting and training capacity, not as an enterprise application vendor.", "E2", "Dependency and customer concentration should be watched."),
-  entity("amd", "AMD", "public", "Hardware Provider", ["Infrastructure Player"], 70, 65, 67, "medium", 70, 1.5, 65, 70, [1, 0], [1, 2, 1, 3, 0], [], [], ["MI accelerator ecosystem"], [], ["Own accelerator roadmap"], "AMD is an alternative accelerator provider that affects negotiating leverage and supply diversification more than direct AI application choice.", "E3", "Software ecosystem maturity remains the key counterweight to hardware performance."),
-  entity("broadcom", "Broadcom", "public", "Hardware Provider", ["Infrastructure Player"], 68, 62, 66, "low", 68, 1.3, 60, 69, [0, 0], [0, 2, 0, 3, -1], [], [], ["AI networking", "custom silicon"], [], ["Own networking and ASIC exposure"], "Broadcom is part of the infrastructure dependency map through networking and custom silicon. CIO relevance is indirect but important for cloud cost and capacity.", "E3", "Enterprise buyer visibility is indirect through cloud and infrastructure suppliers."),
-  entity("tsmc", "TSMC", "public", "Hardware Provider", ["Infrastructure Player"], 72, 60, 82, "low", 78, 1.4, 58, 83, [0, 0], [0, 4, 0, 4, -1], [], [], ["Semiconductor fabrication", "advanced process nodes"], [], ["Own fabrication capacity"], "TSMC is the fabrication backbone for AI hardware. It is a supply-chain and geopolitical risk signal rather than a direct software vendor.", "E4", "Risk is supply-chain and geopolitical, not product-fit."),
-  entity("xai", "xAI", "private", "Model Provider", ["Application Vendor", "Infrastructure Player"], 71, 66, 59, "medium", 47, 1.4, 74, 54, [1, 1], [1, 1, 1, 2, 1], ["Grok"], [], ["Colossus compute build-out", "X distribution"], [], ["NVIDIA GPU supply", "Oracle OCI exposure"], "xAI is a model provider with compute-scale ambitions and consumer distribution through X. Enterprise readiness evidence remains thin.", "E1", "Treat as watch-list until enterprise controls and customer proof mature."),
-];
-
-const WINNING_BY_LAYER: Array<{ title: string; names: string[]; note: string }> = [
-  { title: "Platform Vendors", names: ["Microsoft", "AWS", "Google Cloud", "IBM", "Databricks"], note: "Distribution, cloud control and enterprise-governance depth." },
-  { title: "Model Providers", names: ["OpenAI", "Anthropic", "Google DeepMind", "xAI", "Mistral", "Meta", "DeepSeek", "Qwen"], note: "Quality, cadence, deployment paths and model economics." },
-  { title: "Application Vendors", names: ["Microsoft Copilot", "Harvey", "Writer", "Moveworks", "Rogo", "Perplexity"], note: "Workflow conversion, domain fit and business-user adoption." },
-  { title: "Infrastructure Players", names: ["Azure", "AWS", "Google Cloud", "Oracle", "CoreWeave"], note: "Hosting, scale, deployment and compute access." },
-  { title: "Hardware", names: ["NVIDIA", "AMD", "Broadcom", "TSMC"], note: "Accelerators, networking, custom silicon and fabrication." },
-  { title: "Investors", names: ["Microsoft", "Amazon", "Google", "NVIDIA", "SoftBank"], note: "Strategic capital, distribution rights and ecosystem influence." },
-];
-
 const MODEL_GROUPS = [
   { title: "First-party models", items: ["OpenAI: GPT, o-series, image/audio models", "Anthropic: Claude Opus, Sonnet, Haiku", "Google: Gemini, Imagen, Veo", "Mistral: Large, Medium, Small, Codestral, Magistral", "Cohere: Command, Embed, Rerank", "IBM: Granite", "DeepSeek: R1, V3", "Alibaba: Qwen", "Moonshot: Kimi", "Zhipu: GLM"] },
   { title: "Hosted third-party models", items: ["Microsoft: hosted OpenAI, Mistral and Llama through Azure", "AWS: Claude, Llama, Mistral and other Bedrock models", "Google: Claude through Vertex AI", "Oracle: Cohere and Llama through OCI"] },
@@ -194,69 +130,6 @@ const MODEL_GROUPS = [
   { title: "Underlying product models", items: ["Microsoft Copilot: OpenAI + Microsoft small models", "Harvey: multi-provider legal AI stack", "Glean: multi-provider enterprise search stack", "ServiceNow: Now LLM + provider orchestration"] },
   { title: "Unknown / unverified", items: ["Vertical applications with multi-provider routing", "Private model routing where vendor disclosures are incomplete", "Product-level model mix that changes by customer contract"] },
 ];
-
-function entity(
-  id: string,
-  name: string,
-  ownership: Ownership,
-  primaryRole: Role,
-  secondaryRoles: Role[],
-  leadershipScore: number,
-  momentum: number,
-  ecosystemReach: number,
-  risk: Entity["risk"],
-  confidence: number,
-  usageShare: number,
-  innovation: number,
-  readiness: number,
-  movementTuple: [number, number],
-  deltaTuple: [number, number, number, number, number],
-  modelsOwned: string[],
-  hostedThirdParty: string[],
-  infrastructureExposure: string[],
-  investorRelationships: string[],
-  hardwareDependencies: string[],
-  cioInterpretation: string,
-  evidenceGrade: Entity["evidenceGrade"],
-  dataCaveats: string,
-): Entity {
-  return {
-    id,
-    name,
-    slug: id === "alibaba-qwen" ? "alibaba" : id === "moonshot-kimi" ? "moonshot" : id === "zhipu-glm" ? "zai" : id,
-    ownership,
-    primaryRole,
-    secondaryRoles,
-    leadershipScore,
-    momentum,
-    ecosystemReach,
-    risk,
-    confidence,
-    usageShare,
-    innovation,
-    readiness,
-    movement: { dx: movementTuple[0], dy: movementTuple[1] },
-    deltas: {
-      leadership: deltaTuple[0],
-      reach: deltaTuple[1],
-      adoption: deltaTuple[2],
-      infrastructure: deltaTuple[3],
-      risk: deltaTuple[4],
-    },
-    modelsOwned,
-    hostedThirdParty,
-    infrastructureExposure,
-    investorRelationships,
-    hardwareDependencies,
-    cioInterpretation,
-    evidenceGrade,
-    dataCaveats,
-  };
-}
-
-function rolesFor(entity: Entity) {
-  return [entity.primaryRole, ...entity.secondaryRoles];
-}
 
 function matchesCategory(entity: Entity, key: CategoryKey) {
   const option = CATEGORY_OPTIONS.find((item) => item.key === key);
@@ -386,6 +259,84 @@ export default function QueryV2Client() {
             </div>
           </div>
         </Panel>
+
+        {category === "infrastructure" && (
+          <section id="infra-bands" className="mt-6">
+            <Panel title="Infrastructure by layer">
+              <p className="mb-4 text-xs leading-5 text-[#5f685a] dark:text-zinc-400">
+                Infrastructure is not one shelf — each layer carries a different risk type.
+                Silicon is supply-concentration risk, cloud compute is lock-in and pricing-power risk,
+                neoclouds are counterparty / viability risk, and data platforms are data-gravity and
+                governance risk. Entities may carry a secondary band where they straddle layers
+                (e.g. AWS is cloud compute with its own Trainium/Inferentia silicon).
+              </p>
+              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                {INFRA_BANDS.map((band) => {
+                  const members = filtered
+                    .filter((e) => e.infraBand === band.key)
+                    .sort((a, b) => b.leadershipScore - a.leadershipScore);
+                  return (
+                    <div key={band.key} className="rounded-md border border-[#e2e7dc] bg-[#fbfcf8] p-3 dark:border-zinc-800 dark:bg-zinc-950/40">
+                      <h3 className="text-sm font-semibold text-[#18201b] dark:text-zinc-100">{band.label}</h3>
+                      <p className="mt-1 text-xs leading-5 text-[#66705f] dark:text-zinc-500">{band.note}</p>
+                      <div className="mt-3 space-y-1.5">
+                        {members.length ? members.map((e) => (
+                          <button
+                            key={e.id}
+                            type="button"
+                            onClick={() => setSelectedId(e.id)}
+                            className={`flex w-full items-center justify-between gap-2 rounded border px-2 py-1 text-left text-xs transition-colors ${
+                              e.id === selectedEntity.id
+                                ? "border-[#192319] bg-[#eef2e8] dark:border-white dark:bg-zinc-900"
+                                : "border-[#dfe4da] hover:bg-[#eef2e8] dark:border-zinc-800 dark:hover:bg-zinc-900"
+                            }`}
+                          >
+                            <span className="font-medium text-[#18201b] dark:text-zinc-100">{e.name}</span>
+                            {e.infraBandSecondary && (
+                              <span className="rounded bg-[#e8ede2] px-1.5 py-0.5 text-[10px] text-[#4d574b] dark:bg-zinc-800 dark:text-zinc-400">
+                                +{INFRA_BAND_LABEL[e.infraBandSecondary]}
+                              </span>
+                            )}
+                          </button>
+                        )) : <span className="text-xs text-[#697362] dark:text-zinc-500">No tracked entity in this layer.</span>}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              {(() => {
+                const banded = new Set(INFRA_BANDS.map((b) => b.key));
+                const other = filtered.filter((e) => !e.infraBand || !banded.has(e.infraBand));
+                if (!other.length) return null;
+                return (
+                  <div className="mt-4 rounded-md border border-dashed border-[#d7ddd1] bg-transparent p-3 dark:border-zinc-700">
+                    <h3 className="text-sm font-semibold text-[#18201b] dark:text-zinc-100">Other / cross-layer exposure</h3>
+                    <p className="mt-1 text-xs leading-5 text-[#66705f] dark:text-zinc-500">
+                      Tracked here for their infrastructure exposure but not owned to a single layer — typically
+                      data, application or model players whose infra role is incidental rather than primary.
+                    </p>
+                    <div className="mt-3 flex flex-wrap gap-1.5">
+                      {other.map((e) => (
+                        <button
+                          key={e.id}
+                          type="button"
+                          onClick={() => setSelectedId(e.id)}
+                          className={`rounded border px-2 py-1 text-xs transition-colors ${
+                            e.id === selectedEntity.id
+                              ? "border-[#192319] bg-[#eef2e8] dark:border-white dark:bg-zinc-900"
+                              : "border-[#dfe4da] hover:bg-[#eef2e8] dark:border-zinc-800 dark:hover:bg-zinc-900"
+                          }`}
+                        >
+                          {e.name}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
+            </Panel>
+          </section>
+        )}
 
         <section id="leaderboard" className="mt-6 grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
           <Panel title="Category-aware leaderboard">
