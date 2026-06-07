@@ -42,6 +42,8 @@ import {
   saveValuations,
 } from "../investing/live-cache";
 import { INVESTMENT_PROVIDERS } from "../investing/seed";
+import { fetchLiveGitHubSignals } from "../reputation/live-github";
+import { fetchAllMacroSignals } from "../market-signals/live-macro";
 import { deriveVendorScores } from "./derive-scores";
 import { persistRefreshReport, getLastRefreshRun } from "./daily-refresh-store";
 import { getPrisma, hasDatabase } from "../prisma";
@@ -213,6 +215,24 @@ export async function runDailyRefresh(now: Date = new Date()): Promise<DailyRefr
       analystCoverageItems: acItems,
       analystCoverageVendors: acVendorsWithCoverage,
       analystCoverageErrors: acErrors,
+    };
+  }));
+
+  // ── 9. Live reputation (GitHub API — no Anthropic needed) ────
+  steps.push(await timed("reputation_github", async () => {
+    const signals = await fetchLiveGitHubSignals();
+    return {
+      vendorsFetched: signals.length,
+      source: "github_api",
+    };
+  }));
+
+  // ── 10. Live macro signals (FRED + GDELT — no Anthropic needed) ─
+  steps.push(await timed("macro_signals", async () => {
+    const signals = await fetchAllMacroSignals();
+    return {
+      signalsFetched: signals.length,
+      sources: [...new Set(signals.map((s) => s.source))],
     };
   }));
 

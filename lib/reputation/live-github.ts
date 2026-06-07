@@ -1,0 +1,115 @@
+// Live GitHub reputation fetcher.
+// ────────────────────────────────
+// Fetches real-time GitHub repo stats for each vendor's flagship repo.
+// No API key required for public repos (unauthenticated rate limit: 60/hr).
+// Falls back gracefully to seed data when rate-limited or repo not found.
+
+import type { DeveloperReputation } from "./seed";
+
+/** Vendor → flagship GitHub repo mapping. */
+const VENDOR_REPOS: Record<string, string> = {
+  vendor_openai: "openai/openai-python",
+  vendor_anthropic: "anthropics/anthropic-sdk-python",
+  vendor_google: "google-gemini/generative-ai-python",
+  vendor_meta: "meta-llama/llama",
+  vendor_mistral: "mistralai/mistral-inference",
+  vendor_cohere: "cohere-ai/cohere-python",
+  vendor_ibm: "IBM/watsonx-ai-python-sdk",
+  vendor_xai: "xai-org/grok-1",
+  vendor_writer: "writer/writer-python",
+};
+
+interface GitHubRepoStats {
+  stargazers_count: number;
+  forks_count: number;
+  open_issues_count: number;
+  subscribers_count: number;
+  updated_at: string;
+}
+
+export interface LiveGitHubSignal {
+  vendorId: string;
+  repo: string;
+  stars: number;
+  forks: number;
+  openIssues: number;
+  watchers: number;
+  lastUpdated: string;
+  fetchedAt: string;
+}
+
+async function fetchRepoStats(repo: string): Promise<GitHubRepoStats | null> {
+  try {
+    const res = await fetch(`https://api.github.com/repos/${repo}`, {
+      headers: {
+        accept: "application/vnd.github.v3+json",
+        "user-agent": "AI-Enterprise-Reputation-Fetcher",
+      },
+      next: { revalidate: 3600 }, // Cache for 1 hour
+    });
+    if (!res.ok) return null;
+    return (await res.json()) as GitHubRepoStats;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Fetch live GitHub signals for all mapped vendors.
+ * Returns null entries for vendors without repos or on rate limit.
+ */
+export async function fetchLiveGitHubSignals(): Promise<LiveGitHubSignal[]> {
+  const fetchedAt = new Date().toISOString();
+  const results: LiveGitHubSignal[] = [];
+
+  // Sequential to respect GitHub rate limits (60/hr unauthenticated)
+  for (const [vendorId, repo] of Object.entries(VENDOR_REPOS)) {
+    const stats = await fetchRepoStats(repo);
+    if (stats) {
+      results.push({
+        vendorId,
+        repo,
+        stars: stats.stargazers_count,
+        forks: stats.forks_count,
+        openIssues: stats.open_issues_count,
+        watchers: stats.subscribers_count,
+        lastUpdated: stats.updated_at,
+        fetchedAt,
+      });
+    }
+  }
+
+  return results;
+}
+
+/**
+ * Merge live GitHub signals into seed developer reputation data.
+ * Updates githubScore based on real star counts, preserving other
+ * seed fields until those sources go live too.
+ */
+export function mergeGitHubIntoReputation(
+  seed: DeveloperReputation[],
+  live: LiveGitHubSignal[],
+): DeveloperReputation[] {
+  const byVendor = new Map(live.map((l) => [l.vendorId, l]));
+
+  return seed.map((s) => {
+    const l = byVendor.get(s.vendorId);
+    if (!l) return s;
+
+    // Derive a githubScore from stars — logarithmic scale, capped at 100
+    const starScore = Math.min(100, Math.round(Math.log10(Math.max(1, l.stars)) * 20));
+
+    return {
+      ...s,
+      githubScore: starScore,
+      githubStars: l.stars,
+      githubRepo: l.repo,
+      githubLastFetched: l.fetchedAt,
+      cellStatus: {
+        ...s.cellStatus,
+        github: "verified" as const,
+      },
+    };
+  });
+}
