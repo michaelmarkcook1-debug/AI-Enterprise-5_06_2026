@@ -1,65 +1,39 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# Dependencies
+node_modules/
 
-# dependencies
-/node_modules
-/.pnp
-.pnp.*
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/versions
-
-# testing
-/coverage
-
-# next.js
-/.next/
-/.next.stale-*/
-/out/
-
-# production
-/build
-
-# misc
-.DS_Store
-*.pem
-
-# debug
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
-
-# env files (can opt-in for committing if needed)
-.env*
-
-# vercel
-.vercel
-
-# typescript
-*.tsbuildinfo
+# Next.js build output
+.next/
+out/
 next-env.d.ts
+tsconfig.tsbuildinfo
 
-# prisma
-/generated/prisma/
+# Vercel
+.vercel/
 
-# operator log output (large NDJSON, regenerated on each ingest)
-/logs/
+# Prisma generated client (auto-rebuilt by `prisma generate`)
+generated/
 
-# linter-duplicate files (e.g. "page 2.tsx") that some IDEs create
-* 2.*
-* 2/
-* 2
+# Logs & local data
+logs/
+data/
 
-# audit / scratch scripts kept out of CI
-_test-*.ts
-_check.ts
-_ids.ts
-_classes.ts
+# Environment files (NEVER commit secrets)
+.env
 .env*.local
+.env.production
+.env.local.bak
 
-# Triage audit log (append-only forensic trail; not source-controlled)
-/data/triage-audit.jsonl
-/data/linkage-apply-audit.jsonl
-/data/*.jsonl
+# macOS junk
+.DS_Store
+
+# Duplicate-download artifacts (macOS " 2", " 3", timestamped copies)
+* 2.*
+* 3.*
+* 4.*
+* 5.*
+* 2/
+*[0-9].svg
+
+# Editor / tooling
+.vscode/
+.claude/
