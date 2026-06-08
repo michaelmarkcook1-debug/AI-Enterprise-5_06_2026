@@ -12,6 +12,7 @@ import {
   listVendorPillarScores,
 } from "./repository";
 import { getPrisma, hasDatabase } from "../prisma";
+import { isRankable } from "./roles";
 import { quadrantOf, type QuadrantData, type QuadrantPoint } from "./quadrant-shared";
 import { computeVendorHealth, computeQuadrantAxes } from "./vendor-health";
 import type { PillarId } from "../types";
@@ -91,12 +92,17 @@ export async function buildQuadrantData(opts: BuildQuadrantOptions = {}): Promis
   const executeCut = opts.executeCut ?? 60;
   const visionCut = opts.visionCut ?? 60;
 
-  const [vendors, momenta, shares, pillarScores] = await Promise.all([
+  const [allVendors, momenta, shares, pillarScores] = await Promise.all([
     listIntelligenceVendors(),
     listVendorMomentum(),
     listMarketShareEstimates(),
     listVendorPillarScores(),
   ]);
+
+  // Role-aware: the leadership matrix plots assessable AI products only —
+  // investors and pure hardware/fabs are part of the market map, not a
+  // competitive quadrant.
+  const vendors = allVendors.filter(isRankable);
 
   const momentumByVendor = new Map(momenta.map((m) => [m.vendorId, m.momentumScore]));
 

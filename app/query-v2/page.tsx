@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { PageFrame } from "@/components/app-shell";
 import { OwnershipLegend } from "@/components/ownership-indicator";
+import { getEntities, computeWinningByLayer } from "@/lib/intelligence/entities-adapter";
 import QueryV2Client from "./QueryV2Client";
 
 export const metadata: Metadata = {
@@ -10,7 +11,12 @@ export const metadata: Metadata = {
 
 export const dynamic = "force-dynamic";
 
-export default function QueryV2Page() {
+export default async function QueryV2Page() {
+  // Single source of truth: the live database spine. Numbers are derived from
+  // live ingestion (scores, momentum, pillars, market share, ranking snapshots).
+  const entities = await getEntities();
+  const winningByLayer = computeWinningByLayer(entities);
+
   return (
     <PageFrame
       title="Query"
@@ -20,7 +26,7 @@ export default function QueryV2Page() {
       <div className="mb-5">
         <OwnershipLegend />
       </div>
-      <QueryV2Client />
+      <QueryV2Client entities={entities} winningByLayer={winningByLayer} />
     </PageFrame>
   );
 }

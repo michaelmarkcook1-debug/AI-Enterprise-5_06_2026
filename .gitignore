@@ -17,6 +17,9 @@ generated/
 logs/
 data/
 
+# Database backups (contain production data — NEVER commit)
+backups/
+
 # Environment files (NEVER commit secrets)
 .env
 .env*.local

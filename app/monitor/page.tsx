@@ -25,6 +25,7 @@ import {
   listWatchlists,
 } from "@/lib/intelligence/repository";
 import { getDataProvenance } from "@/lib/intelligence/provenance";
+import { isRankable } from "@/lib/intelligence/roles";
 
 export const dynamic = "force-dynamic";
 
@@ -44,7 +45,9 @@ export default async function MonitorPage() {
   // overall score as "active recommendations" and computes drift from
   // momentum signals. Will be replaced by real stored recommendations
   // when the assessment → monitor pipeline is wired.
-  const topVendors = [...vendors].sort((a, b) => b.overallScore - a.overallScore).slice(0, 8);
+  // Role-aware: recommendations track assessable AI products only (exclude
+  // investors and pure hardware/fabs).
+  const topVendors = [...vendors].filter(isRankable).sort((a, b) => b.overallScore - a.overallScore).slice(0, 8);
   const recommendations = topVendors.map((v) => {
     const mom = momentumByVendor.get(v.id);
     const drift = mom ? Math.round((mom.momentumScore - 60) * 0.4) : 0;

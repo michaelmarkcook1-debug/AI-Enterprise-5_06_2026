@@ -438,6 +438,22 @@ model IntelligenceVendor {
   analystInterpretation String                @map("analyst_interpretation") @db.Text
   riskProfile         String[]                @default([]) @map("risk_profile")
   lastUpdated         DateTime                @map("last_updated")
+  // ─── Cross-tab enrichment (folds the Query-v2 entity model into the spine) ───
+  // Editorial/structural facts no live signal produces — stored as columns.
+  // Measured scores (leadership, momentum, usage, deltas) are NOT stored here;
+  // they are derived at read-time from overallScore / momentum / pillar / market-
+  // share / ranking-snapshot data so the surfaces stay dynamic on live ingestion.
+  roleTags               String[]              @default([]) @map("role_tags")
+  infraBand              String?               @map("infra_band")
+  infraBandSecondary     String?               @map("infra_band_secondary")
+  modelsOwned            String[]              @default([]) @map("models_owned")
+  hostedThirdParty       String[]              @default([]) @map("hosted_third_party")
+  infrastructureExposure String[]              @default([]) @map("infrastructure_exposure")
+  investorRelationships  String[]              @default([]) @map("investor_relationships")
+  hardwareDependencies   String[]              @default([]) @map("hardware_dependencies")
+  cioInterpretation      String?               @map("cio_interpretation") @db.Text
+  dataCaveats            String?               @map("data_caveats") @db.Text
+  evidenceGrade          String?               @map("evidence_grade")
   pillarScores        IntelligencePillarScore[]
   marketShares        MarketShareEstimate[]
   momentum            VendorMomentum[]
@@ -449,6 +465,7 @@ model IntelligenceVendor {
   @@index([category])
   @@index([overallScore])
   @@index([confidenceScore])
+  @@index([infraBand])
   @@map("intelligence_vendors")
 }
 

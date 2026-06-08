@@ -48,6 +48,17 @@ export const TOP_LEVEL_AI_CATEGORIES = [
   "Infrastructure",
 ] as const;
 
+// roleTags → category membership, used to auto-include any tracked vendor that
+// isn't in the curated placements below so the full live universe always
+// surfaces (investors carry only "Investor" and match none of these four
+// product categories, so they correctly stay off this view).
+const CATEGORY_ROLES: Record<TopLevelCategory, string[]> = {
+  Models: ["Model Provider"],
+  Platforms: ["Platform Vendor", "Data & Services Provider"],
+  Applications: ["Application Vendor", "Vertical Specialist"],
+  Infrastructure: ["Infrastructure Player", "Hardware Provider", "Cloud / Hosting Provider"],
+};
+
 /* ─── Category definitions with vendor placements ── */
 
 const CATEGORIES: CategoryDef[] = [
@@ -197,6 +208,17 @@ export default function CategoryCards({ vendors, momentum, provenance }: Props) 
           seen.add(v.id);
           if (p.tier === 1) resolvedTier1.push({ placement: p, vendor: v });
           else resolvedTier2.push({ placement: p, vendor: v });
+        }
+
+        // Auto-include any tracked vendor whose role matches this category but
+        // isn't curated above — so the full live universe is never silently
+        // excluded. These land in the tier-2 expansion area.
+        const wantRoles = CATEGORY_ROLES[cat.id];
+        for (const v of vendors) {
+          if (seen.has(v.id)) continue;
+          if (!(v.roleTags ?? []).some((r) => wantRoles.includes(r))) continue;
+          seen.add(v.id);
+          resolvedTier2.push({ placement: { name: v.name, displayName: v.name, tier: 2 }, vendor: v });
         }
 
         // Average confidence across resolved vendors

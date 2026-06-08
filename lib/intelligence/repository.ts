@@ -171,6 +171,11 @@ function mapVendor(row: PrismaVendor): Vendor {
     riskProfile: row.riskProfile,
     analystInterpretation: row.analystInterpretation,
     lastUpdated: toIso(row.lastUpdated),
+    // Cross-tab role/infra metadata (folded from the entity model). Optional
+    // columns may be absent on rows predating the migration → coalesce.
+    roleTags: row.roleTags ?? [],
+    infraBand: optionalString(row.infraBand) ?? undefined,
+    infraBandSecondary: optionalString(row.infraBandSecondary) ?? undefined,
   };
 }
 

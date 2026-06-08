@@ -9,9 +9,9 @@ import {
   type Entity,
   type InfraBand,
   rolesFor,
-  ENTITIES,
-  WINNING_BY_LAYER,
 } from "@/lib/intelligence/entities";
+
+type WinningLayer = { title: string; names: string[]; note: string };
 
 // Infrastructure sub-bands (Silicon / Cloud Compute / Neocloud / Data Platforms).
 // Each band represents a DIFFERENT risk type, which is why Infrastructure is the
@@ -162,16 +162,16 @@ function signed(value: number) {
   return `${value > 0 ? "+" : ""}${value}`;
 }
 
-export default function QueryV2Client() {
+export default function QueryV2Client({ entities, winningByLayer }: { entities: Entity[]; winningByLayer: WinningLayer[] }) {
   const [category, setCategory] = useState<CategoryKey>("all");
-  const [selectedId, setSelectedId] = useState(ENTITIES[0].id);
+  const [selectedId, setSelectedId] = useState(entities[0]?.id ?? "");
 
   const selectedOption = CATEGORY_OPTIONS.find((option) => option.key === category) ?? CATEGORY_OPTIONS[0];
   const filtered = useMemo(
-    () => ENTITIES.filter((entity) => matchesCategory(entity, category)).sort((a, b) => b.leadershipScore - a.leadershipScore),
-    [category],
+    () => entities.filter((entity) => matchesCategory(entity, category)).sort((a, b) => b.leadershipScore - a.leadershipScore),
+    [category, entities],
   );
-  const selectedEntity = filtered.find((entity) => entity.id === selectedId) ?? filtered[0] ?? ENTITIES[0];
+  const selectedEntity = filtered.find((entity) => entity.id === selectedId) ?? filtered[0] ?? entities[0];
   const maxShare = Math.max(...filtered.map((entity) => entity.usageShare), 1);
   const normalizedShare = filtered.map((entity) => ({
     entity,
@@ -179,21 +179,21 @@ export default function QueryV2Client() {
   }));
 
   function chooseCategory(nextCategory: CategoryKey) {
-    const nextFiltered = ENTITIES
+    const nextFiltered = entities
       .filter((entity) => matchesCategory(entity, nextCategory))
       .sort((a, b) => b.leadershipScore - a.leadershipScore);
     setCategory(nextCategory);
-    setSelectedId(nextFiltered[0]?.id ?? ENTITIES[0].id);
+    setSelectedId(nextFiltered[0]?.id ?? entities[0]?.id ?? "");
   }
 
   const kpis = [
-    { label: "Total tracked entities", value: ENTITIES.length, note: "role-classified universe" },
-    { label: "Platform vendors", value: ENTITIES.filter((entity) => rolesFor(entity).includes("Platform Vendor")).length, note: "control-plane layer" },
-    { label: "Model providers", value: ENTITIES.filter((entity) => rolesFor(entity).includes("Model Provider")).length, note: "frontier + specialist" },
-    { label: "Application vendors", value: ENTITIES.filter((entity) => rolesFor(entity).includes("Application Vendor")).length, note: "workflow products" },
-    { label: "Infra / hardware", value: ENTITIES.filter((entity) => rolesFor(entity).some((role) => role === "Infrastructure Player" || role === "Hardware Provider")).length, note: "dependency layer" },
-    { label: "Investor-linked", value: ENTITIES.filter((entity) => rolesFor(entity).includes("Investor") || entity.investorRelationships.length > 0).length, note: "capital influence" },
-    { label: "Evidence confidence", value: `${average(ENTITIES.map((entity) => entity.confidence)).toFixed(0)}%`, note: "directional model" },
+    { label: "Total tracked entities", value: entities.length, note: "role-classified universe" },
+    { label: "Platform vendors", value: entities.filter((entity) => rolesFor(entity).includes("Platform Vendor")).length, note: "control-plane layer" },
+    { label: "Model providers", value: entities.filter((entity) => rolesFor(entity).includes("Model Provider")).length, note: "frontier + specialist" },
+    { label: "Application vendors", value: entities.filter((entity) => rolesFor(entity).includes("Application Vendor")).length, note: "workflow products" },
+    { label: "Infra / hardware", value: entities.filter((entity) => rolesFor(entity).some((role) => role === "Infrastructure Player" || role === "Hardware Provider")).length, note: "dependency layer" },
+    { label: "Investor-linked", value: entities.filter((entity) => rolesFor(entity).includes("Investor") || entity.investorRelationships.length > 0).length, note: "capital influence" },
+    { label: "Evidence confidence", value: `${average(entities.map((entity) => entity.confidence)).toFixed(0)}%`, note: "directional model" },
   ];
 
   const movers = {
@@ -418,7 +418,7 @@ export default function QueryV2Client() {
         <section id="layer-winners" className="mt-6">
           <Panel title="Who is winning by layer">
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-              {WINNING_BY_LAYER.map((layer) => (
+              {winningByLayer.map((layer) => (
                 <div key={layer.title} className="border-l border-[#d6dccf] pl-4 dark:border-zinc-800">
                   <h3 className="text-sm font-semibold text-[#18201b] dark:text-zinc-100">{layer.title}</h3>
                   <p className="mt-1 text-xs leading-5 text-[#66705f] dark:text-zinc-500">{layer.note}</p>
@@ -589,7 +589,7 @@ function RoleScatter({ entities, selectedId, onSelect }: { entities: Entity[]; s
         </defs>
       </svg>
       <div className="mt-3 flex flex-wrap gap-2 text-xs">
-        {Array.from(new Set(ENTITIES.map((entity) => entity.primaryRole))).map((role) => (
+        {Array.from(new Set(entities.map((entity) => entity.primaryRole))).map((role) => (
           <span key={role} className={`rounded border border-current/20 px-2 py-1 ${ROLE_TONE[role].bg} ${ROLE_TONE[role].text}`}>{role}</span>
         ))}
       </div>

@@ -58,6 +58,9 @@ export interface Vendor {
   // Both optional so every existing vendor record stays valid without change.
   roleTags?: string[];
   infraBand?: string;
+  // Optional secondary infra band for entities straddling two layers
+  // (e.g. NVIDIA = silicon + neocloud; Cerebras = silicon + inference).
+  infraBandSecondary?: string;
 }
 
 export interface VendorPillarScore {

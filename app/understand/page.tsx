@@ -34,6 +34,7 @@ import {
 import { listConnectorHealth } from "@/lib/connectors/registry";
 import { getDataProvenance } from "@/lib/intelligence/provenance";
 import { SeedDataBadge } from "@/components/intelligence-ui";
+import { isRankable } from "@/lib/intelligence/roles";
 
 export const dynamic = "force-dynamic";
 
@@ -60,6 +61,10 @@ export default async function UnderstandPage({ searchParams }: PageProps) {
   ]);
 
   const vendorsRanked = [...vendors].sort((a, b) => b.overallScore - a.overallScore);
+  // Role-aware: strategic/ranked tables assess AI products only — exclude
+  // investors and pure hardware/fabs (they remain in the full universe catalog
+  // and on the market-map surfaces).
+  const rankableVendors = vendorsRanked.filter(isRankable);
   const byKey = new Map(vendorCapabilities.map((item) => [`${item.vendorId}_${item.capabilityId}`, item]));
   const allStates: CapabilityRenderState[] = vendorsRanked.flatMap((vendor) =>
     capabilities.map((cap) =>
@@ -121,7 +126,7 @@ export default async function UnderstandPage({ searchParams }: PageProps) {
             Aggregate view of vendor defensibility across the tracked universe. Identifies which vendors have durable advantages and which face disruption risk.
           </p>
           {(() => {
-            const top12 = vendorsRanked.slice(0, 12);
+            const top12 = rankableVendors.slice(0, 12);
             const scores = top12.map((v) => {
               const mom = momentumByVendor.get(v.id);
               const momScore = mom?.momentumScore ?? 50;
@@ -243,7 +248,7 @@ export default async function UnderstandPage({ searchParams }: PageProps) {
                 </tr>
               </thead>
               <tbody>
-                {vendorsRanked.slice(0, 12).map((vendor) => {
+                {rankableVendors.slice(0, 12).map((vendor) => {
                   const mom = momentumByVendor.get(vendor.id);
                   const momScore = mom?.momentumScore ?? 50;
                   // Strategic Sustainability: moat + market position + momentum
