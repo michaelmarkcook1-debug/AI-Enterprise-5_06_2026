@@ -56,6 +56,15 @@ function evidenceFromConfidence(confidence: number): Entity["evidenceGrade"] {
 export async function getEntities(): Promise<Entity[]> {
   if (!hasDatabase()) return ENTITIES;
 
+  try {
+    return await getEntitiesFromDB();
+  } catch (err) {
+    console.error("[entities-adapter] DB query failed, falling back to static ENTITIES:", err);
+    return ENTITIES;
+  }
+}
+
+async function getEntitiesFromDB(): Promise<Entity[]> {
   const prisma = getPrisma();
   const [rows, momentum, pillars, shares, snapshots] = await Promise.all([
     prisma.intelligenceVendor.findMany(),
