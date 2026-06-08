@@ -23,24 +23,97 @@ function formatRelative(iso: string): string {
   return `${days} day${days === 1 ? "" : "s"} ago`;
 }
 
+interface IngestionHealth {
+  runType: string;
+  stepsTotal: number;
+  stepsOk: number;
+  percentComplete: number;
+  failedSteps: string[];
+  crashed: boolean;
+  expectedSteps: number;
+  runId: string | null;
+  startedAt: string | null;
+  finishedAt: string | null;
+  durationMs: number;
+}
+
+interface RefreshData {
+  lastRefreshedAt: string | null;
+  ingestionHealth: IngestionHealth | null;
+}
+
 /**
- * Lazily fetch the most-recent daily-refresh timestamp once on mount.
- * Treats fetch errors as silent — the badge simply doesn't render.
+ * Lazily fetch the most-recent daily-refresh timestamp + ingestion
+ * health once on mount. Treats fetch errors as silent.
  */
-function useLastRefreshedAt(enabled = true): string | null {
-  const [iso, setIso] = useState<string | null>(null);
+function useRefreshData(enabled = true): RefreshData {
+  const [data, setData] = useState<RefreshData>({ lastRefreshedAt: null, ingestionHealth: null });
   useEffect(() => {
     if (!enabled) return;
     let cancelled = false;
     fetch("/api/system/last-refreshed", { cache: "no-store" })
       .then((r) => r.json())
-      .then((data: { lastRefreshedAt: string | null }) => {
-        if (!cancelled) setIso(data.lastRefreshedAt);
+      .then((d: RefreshData) => {
+        if (!cancelled) setData(d);
       })
       .catch(() => {});
     return () => { cancelled = true; };
   }, [enabled]);
-  return iso;
+  return data;
+}
+
+/** Dot colour based on ingestion completeness. */
+function healthDotClass(health: IngestionHealth | null): string {
+  if (!health) return "bg-emerald-500 dark:bg-emerald-300";
+  if (health.crashed) return "bg-rose-500 dark:bg-rose-300";
+  if (health.percentComplete === 100) return "bg-emerald-500 dark:bg-emerald-300";
+  if (health.percentComplete >= 70) return "bg-amber-500 dark:bg-amber-300";
+  return "bg-rose-500 dark:bg-rose-300";
+}
+
+function healthBorderClass(health: IngestionHealth | null): string {
+  if (!health) return "border-emerald-300 dark:border-emerald-800";
+  if (health.crashed) return "border-rose-300 dark:border-rose-800";
+  if (health.percentComplete === 100) return "border-emerald-300 dark:border-emerald-800";
+  if (health.percentComplete >= 70) return "border-amber-300 dark:border-amber-800";
+  return "border-rose-300 dark:border-rose-800";
+}
+
+function healthBgClass(health: IngestionHealth | null): string {
+  if (!health) return "bg-emerald-50 dark:bg-emerald-950/40";
+  if (health.crashed) return "bg-rose-50 dark:bg-rose-950/40";
+  if (health.percentComplete === 100) return "bg-emerald-50 dark:bg-emerald-950/40";
+  if (health.percentComplete >= 70) return "bg-amber-50 dark:bg-amber-950/40";
+  return "bg-rose-50 dark:bg-rose-950/40";
+}
+
+function healthTextClass(health: IngestionHealth | null): string {
+  if (!health) return "text-emerald-900 dark:text-emerald-200";
+  if (health.crashed) return "text-rose-900 dark:text-rose-200";
+  if (health.percentComplete === 100) return "text-emerald-900 dark:text-emerald-200";
+  if (health.percentComplete >= 70) return "text-amber-900 dark:text-amber-200";
+  return "text-rose-900 dark:text-rose-200";
+}
+
+function healthTitle(health: IngestionHealth | null, iso: string): string {
+  const base = `Last refresh: ${new Date(iso).toLocaleString()}`;
+  if (!health) return base;
+  if (health.crashed) {
+    return `${base}\n⚠ CRASHED — completed ${health.stepsTotal}/${health.expectedSteps} steps before timeout\nCompleted: ${health.stepsOk} OK, ${health.failedSteps.length} failed`;
+  }
+  const pct = `${health.percentComplete}% complete (${health.stepsOk}/${health.stepsTotal} steps)`;
+  if (health.failedSteps.length > 0) {
+    return `${base}\n${pct}\nFailed: ${health.failedSteps.join(", ")}`;
+  }
+  return `${base}\n${pct}`;
+}
+
+function badgeLabel(health: IngestionHealth | null, iso: string): string {
+  const relative = formatRelative(iso);
+  if (!health) return `Refreshed ${relative}`;
+  if (health.crashed) return `⚠ Crashed · ${relative}`;
+  if (health.percentComplete < 100) return `${health.percentComplete}% · ${relative}`;
+  return `Refreshed ${relative}`;
 }
 
 // CIO Decision Lifecycle — five primary tabs.
@@ -61,7 +134,7 @@ function isActiveNavItem(pathname: string, href: string) {
 export default function TopNav() {
   const pathname = usePathname();
   const [theme, setTheme] = usePortalTheme();
-  const lastRefreshedAt = useLastRefreshedAt(!pathname.startsWith("/atlas"));
+  const { lastRefreshedAt, ingestionHealth } = useRefreshData(!pathname.startsWith("/atlas"));
   const [mobileOpen, setMobileOpen] = useState(false);
 
   // Home redirects into Query; avoid a flash of duplicate chrome while the
@@ -114,13 +187,14 @@ export default function TopNav() {
         {/* Utility area — right side of the header bar */}
         <div className="ml-auto flex items-center gap-2">
           {lastRefreshedAt && (
-            <span
-              className="hidden items-center gap-1.5 rounded-full border border-emerald-300 bg-emerald-50 px-2.5 py-1 text-[11px] font-medium text-emerald-900 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-200 md:inline-flex"
-              title={`Last daily refresh completed at ${new Date(lastRefreshedAt).toLocaleString()}`}
+            <Link
+              href="/admin/pipeline-health"
+              className={`hidden items-center gap-1.5 rounded-full border ${healthBorderClass(ingestionHealth)} ${healthBgClass(ingestionHealth)} px-2.5 py-1 text-[11px] font-medium ${healthTextClass(ingestionHealth)} no-underline md:inline-flex`}
+              title={healthTitle(ingestionHealth, lastRefreshedAt)}
             >
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 dark:bg-emerald-300" aria-hidden />
-              Data refreshed {formatRelative(lastRefreshedAt)}
-            </span>
+              <span className={`h-1.5 w-1.5 rounded-full ${healthDotClass(ingestionHealth)}`} aria-hidden />
+              {badgeLabel(ingestionHealth, lastRefreshedAt)}
+            </Link>
           )}
           {/* Admin — gear icon, utility not primary nav */}
           <Link
@@ -245,13 +319,17 @@ export default function TopNav() {
               nav links because the header bar is too cramped on phones. */}
           <div className="mt-3 flex items-center justify-between gap-2 border-t border-[#dfe4da] pt-3 dark:border-zinc-800">
             {lastRefreshedAt ? (
-              <span
-                className="inline-flex items-center gap-1.5 rounded-full border border-emerald-300 bg-emerald-50 px-2.5 py-1 text-[11px] font-medium text-emerald-900 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-200"
-                title={`Last daily refresh completed at ${new Date(lastRefreshedAt).toLocaleString()}`}
+              <Link
+                href="/admin/pipeline-health"
+                onClick={() => setMobileOpen(false)}
+                className={`inline-flex items-center gap-1.5 rounded-full border ${healthBorderClass(ingestionHealth)} ${healthBgClass(ingestionHealth)} px-2.5 py-1 text-[11px] font-medium ${healthTextClass(ingestionHealth)} no-underline`}
+                title={healthTitle(ingestionHealth, lastRefreshedAt)}
               >
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 dark:bg-emerald-300" aria-hidden />
-                Refreshed {formatRelative(lastRefreshedAt)}
-              </span>
+                <span className={`h-1.5 w-1.5 rounded-full ${healthDotClass(ingestionHealth)}`} aria-hidden />
+                {ingestionHealth && ingestionHealth.percentComplete < 100
+                  ? `${ingestionHealth.percentComplete}% · ${formatRelative(lastRefreshedAt)}`
+                  : `Refreshed ${formatRelative(lastRefreshedAt)}`}
+              </Link>
             ) : <span />}
             <button
               type="button"

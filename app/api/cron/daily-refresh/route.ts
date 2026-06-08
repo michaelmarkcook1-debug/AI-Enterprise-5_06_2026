@@ -15,7 +15,7 @@
 // daily cadence with consolidated logging.
 
 import { isCronOrAdminRequest, cronUnauthorized } from "@/lib/cron/auth";
-import { runDailyRefresh } from "@/lib/system/daily-refresh";
+import { runDailyRefresh, DuplicateRunError } from "@/lib/system/daily-refresh";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -34,6 +34,13 @@ async function handle(request: Request): Promise<Response> {
       status: report.ok ? 200 : 207,
     });
   } catch (err) {
+    if (err instanceof DuplicateRunError) {
+      // 409 Conflict — a pipeline is already running. Vercel cron treats
+      // non-2xx as a failure to retry, but 409 is a clear signal that this
+      // is intentional: do NOT retry automatically.
+      console.warn("[cron/daily-refresh] duplicate run blocked:", err.message);
+      return Response.json({ ok: false, skipped: "duplicate_run", error: err.message }, { status: 409 });
+    }
     return Response.json(
       { ok: false, error: (err as Error).message },
       { status: 500 },

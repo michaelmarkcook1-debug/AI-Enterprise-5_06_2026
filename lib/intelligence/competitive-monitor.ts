@@ -123,6 +123,8 @@ export interface VendorMonitorResult {
   vendorName: string;
   findings: MonitorFinding[];
   searchesUsed: number;
+  tokensIn: number;
+  tokensOut: number;
   source: "anthropic" | "stub";
   error?: string;
 }
@@ -138,7 +140,7 @@ function isRecent(iso: string, today: Date): boolean {
 async function monitorVendor(target: CompetitiveTarget, today: Date): Promise<VendorMonitorResult> {
   const client = getClient();
   if (!client) {
-    return { vendorId: target.vendorId, vendorName: target.name, findings: [], searchesUsed: 0, source: "stub", error: "ANTHROPIC_API_KEY not configured" };
+    return { vendorId: target.vendorId, vendorName: target.name, findings: [], searchesUsed: 0, tokensIn: 0, tokensOut: 0, source: "stub", error: "ANTHROPIC_API_KEY not configured" };
   }
 
   const todayIso = today.toISOString().slice(0, 10);
@@ -155,9 +157,12 @@ async function monitorVendor(target: CompetitiveTarget, today: Date): Promise<Ve
     });
 
     const searchesUsed = (message.usage as { server_tool_use?: { web_search_requests?: number } }).server_tool_use?.web_search_requests ?? 0;
+    const tokensIn  = message.usage.input_tokens;
+    const tokensOut = message.usage.output_tokens;
+
     const block = message.content.find((b): b is Anthropic.ToolUseBlock => b.type === "tool_use" && b.name === "report_competitive_findings");
     if (!block) {
-      return { vendorId: target.vendorId, vendorName: target.name, findings: [], searchesUsed, source: "anthropic", error: "no report tool call" };
+      return { vendorId: target.vendorId, vendorName: target.name, findings: [], searchesUsed, tokensIn, tokensOut, source: "anthropic", error: "no report tool call" };
     }
 
     const raw = block.input as { findings?: Partial<MonitorFinding>[] };
@@ -178,9 +183,9 @@ async function monitorVendor(target: CompetitiveTarget, today: Date): Promise<Ve
         && isRecent(f.publishedAt, today),
       );
 
-    return { vendorId: target.vendorId, vendorName: target.name, findings, searchesUsed, source: "anthropic" };
+    return { vendorId: target.vendorId, vendorName: target.name, findings, searchesUsed, tokensIn, tokensOut, source: "anthropic" };
   } catch (err) {
-    return { vendorId: target.vendorId, vendorName: target.name, findings: [], searchesUsed: 0, source: "anthropic", error: (err as Error).message };
+    return { vendorId: target.vendorId, vendorName: target.name, findings: [], searchesUsed: 0, tokensIn: 0, tokensOut: 0, source: "anthropic", error: (err as Error).message };
   }
 }
 
@@ -190,14 +195,26 @@ function newsItemId(vendorId: string, url: string, publishedAt: string): string 
   return `compintel_${h.slice(0, 24)}`;
 }
 
+// Pricing constants for cost estimation (USD per token).
+// Update these if Anthropic changes pricing.
+const SONNET_PRICE_IN  = 3.00 / 1_000_000;
+const SONNET_PRICE_OUT = 15.00 / 1_000_000;
+const HAIKU_PRICE_IN   = 0.80 / 1_000_000;
+const HAIKU_PRICE_OUT  = 4.00 / 1_000_000;
+const WEB_SEARCH_PRICE = 0.01; // per search request
+
 export interface MonitorRunResult {
   ranAt: string;
   vendorsAttempted: number;
   vendorsWithFindings: number;
   itemsUpserted: number;
   totalSearches: number;
+  totalTokensIn: number;
+  totalTokensOut: number;
+  estimatedCostUsd: number;
   errors: { vendorId: string; error: string }[];
   source: "anthropic" | "stub";
+  modelUsed: string;
 }
 
 /**
@@ -213,8 +230,18 @@ export async function runCompetitiveIntelMonitor(
   const results = await Promise.all(targets.map((t) => monitorVendor(t, now)));
 
   const errors = results.flatMap((r) => (r.error ? [{ vendorId: r.vendorId, error: r.error }] : []));
-  const totalSearches = results.reduce((sum, r) => sum + r.searchesUsed, 0);
+  const totalSearches    = results.reduce((sum, r) => sum + r.searchesUsed, 0);
+  const totalTokensIn    = results.reduce((sum, r) => sum + r.tokensIn, 0);
+  const totalTokensOut   = results.reduce((sum, r) => sum + r.tokensOut, 0);
   const vendorsWithFindings = results.filter((r) => r.findings.length > 0).length;
+
+  // Estimate cost based on which model was used.
+  const isHaiku = DEFAULT_MODEL.includes("haiku");
+  const priceIn  = isHaiku ? HAIKU_PRICE_IN  : SONNET_PRICE_IN;
+  const priceOut = isHaiku ? HAIKU_PRICE_OUT : SONNET_PRICE_OUT;
+  const estimatedCostUsd = parseFloat(
+    ((totalTokensIn * priceIn) + (totalTokensOut * priceOut) + (totalSearches * WEB_SEARCH_PRICE)).toFixed(4),
+  );
 
   let itemsUpserted = 0;
   if (hasDatabase()) {
@@ -268,7 +295,11 @@ export async function runCompetitiveIntelMonitor(
     vendorsWithFindings,
     itemsUpserted,
     totalSearches,
+    totalTokensIn,
+    totalTokensOut,
+    estimatedCostUsd,
     errors,
     source,
+    modelUsed: DEFAULT_MODEL,
   };
 }

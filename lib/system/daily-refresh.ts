@@ -46,7 +46,14 @@ import { INVESTMENT_PROVIDERS } from "../investing/seed";
 import { fetchLiveGitHubSignals } from "../reputation/live-github";
 import { fetchAllMacroSignals } from "../market-signals/live-macro";
 import { deriveVendorScores } from "./derive-scores";
-import { persistRefreshReport, getLastRefreshRun } from "./daily-refresh-store";
+import {
+  persistRefreshReport,
+  getLastRefreshRun,
+  beginRun,
+  updateRunProgress,
+  finaliseRun,
+  isRunActive,
+} from "./daily-refresh-store";
 import { getPrisma, hasDatabase } from "../prisma";
 
 interface StepReport {
@@ -64,6 +71,9 @@ export interface DailyRefreshReport {
   databaseConfigured: boolean;
   steps: StepReport[];
   errors: string[];
+  totalTokensIn: number;
+  totalTokensOut: number;
+  estimatedCostUsd: number;
 }
 
 async function timed<T>(step: string, fn: () => Promise<T>): Promise<StepReport> {
@@ -87,13 +97,46 @@ async function timed<T>(step: string, fn: () => Promise<T>): Promise<StepReport>
   }
 }
 
+/**
+ * Thrown when a concurrent pipeline run is detected. The cron route catches
+ * this and returns 409 so the caller knows to back off rather than retry.
+ */
+export class DuplicateRunError extends Error {
+  constructor() {
+    super("A daily-refresh pipeline run is already in progress. Skipping to prevent duplicate spend.");
+    this.name = "DuplicateRunError";
+  }
+}
+
 export async function runDailyRefresh(
   now: Date = new Date(),
   opts: { force?: boolean } = {},
 ): Promise<DailyRefreshReport> {
+  // ── Deduplication lock ─────────────────────────────────────────────────
+  // Prevents two concurrent pipeline runs (e.g. Vercel cron + manual trigger
+  // firing simultaneously) from both burning Anthropic credits. The lock is
+  // DB-based: a live run keeps its `finished_at` updated every step, so a
+  // recent `finished_at` with ok=false is a reliable "still running" signal.
+  // `force=true` bypasses the lock for emergency admin re-runs.
+  if (!opts.force && await isRunActive()) {
+    throw new DuplicateRunError();
+  }
+
   const startedAt = now.toISOString();
   const steps: StepReport[] = [];
   const dbConfigured = hasDatabase();
+
+  // Progressive persistence — write a row NOW so even a mid-run crash
+  // leaves an audit trail. Each step updates the row incrementally.
+  const progressId = await beginRun(startedAt);
+
+  /** Helper: run a step, push to `steps`, persist progress. */
+  async function trackedStep(stepName: string, fn: () => Promise<Record<string, unknown>>): Promise<void> {
+    steps.push(await timed(stepName, fn));
+    if (progressId) {
+      await updateRunProgress(progressId, steps).catch(() => {});
+    }
+  }
   // Cost control (cadence tiering): the expensive web-search steps —
   // full-universe competitive news, analyst coverage, IPO estimates — run only
   // on the weekly day (Monday UTC). Daily runs cover the core vendor news plus
@@ -103,7 +146,7 @@ export async function runDailyRefresh(
   const isWeekly = opts.force === true || now.getUTCDay() === 1;
 
   // ── 1. Sourcing ────────────────────────────────────────────
-  steps.push(await timed("sourcing", async () => {
+  await trackedStep("sourcing", async () => {
     const r = await runSourcing({ persist: dbConfigured });
     return {
       runId: r.runId,
@@ -113,25 +156,28 @@ export async function runDailyRefresh(
       proposalsExtracted: r.totals.proposalsExtracted,
       proposalsPersisted: r.totals.proposalsPersisted,
       llmSource: r.llmSource,
+      tokensIn: r.totals.tokensIn,
+      tokensOut: r.totals.tokensOut,
+      estimatedCostUsd: r.totals.estimatedCostUsd,
     };
-  }));
+  });
 
   // ── 2. Safe linkage ────────────────────────────────────────
-  steps.push(await timed("safe_linkage", async () => {
+  await trackedStep("safe_linkage", async () => {
     if (!dbConfigured) return { skipped: "no_database" };
     const r = await runSafeLinkageApply({ dryRun: false });
     return r as unknown as Record<string, unknown>;
-  }));
+  });
 
   // ── 3. Triage (auto-approve strict-gate proposals) ─────────
-  steps.push(await timed("triage", async () => {
+  await trackedStep("triage", async () => {
     if (!dbConfigured) return { skipped: "no_database" };
     const r = await runTriage({ dryRun: false });
     return r as unknown as Record<string, unknown>;
-  }));
+  });
 
   // ── 4. Projection — verified evidence → read tables ────────
-  steps.push(await timed("projection", async () => {
+  await trackedStep("projection", async () => {
     if (!dbConfigured) return { skipped: "no_database" };
     const r = await projectEvidenceToIntelligence(getPrisma());
     return {
@@ -140,20 +186,20 @@ export async function runDailyRefresh(
       newsUpserted: r.newsUpserted,
       vendorsSkipped: r.vendorsSkipped.length,
     };
-  }));
+  });
 
   // ── 5. Derive headline scores from fresh evidence ──────────
   //     Recomputes IntelligenceVendor.overallScore + confidenceScore
   //     and VendorMomentum.{news,product}Velocity + momentumScore so
   //     the ranking algorithms and dashboard lists track the latest
   //     projected data. Must run AFTER projection.
-  steps.push(await timed("derive_scores", async () => {
+  await trackedStep("derive_scores", async () => {
     const r = await deriveVendorScores(now);
     return r as unknown as Record<string, unknown>;
-  }));
+  });
 
   // ── 6. Ranking snapshot (incl. one-time backfill) ──────────
-  steps.push(await timed("ranking_snapshot", async () => {
+  await trackedStep("ranking_snapshot", async () => {
     if (!dbConfigured) return { skipped: "no_database" };
     // Backfill only if the snapshot table is empty.
     const existing = await getPrisma().vendorRankingSnapshot.count();
@@ -164,10 +210,10 @@ export async function runDailyRefresh(
     }
     const capture = await captureRankingSnapshots(now);
     return { backfill, captured: capture.captured, snapshotDate: capture.snapshotDate };
-  }));
+  });
 
   // ── 7. Competitive-intel monitor ───────────────────────────
-  steps.push(await timed("competitive_intel", async () => {
+  await trackedStep("competitive_intel", async () => {
     // Daily: core vendors only. Weekly (Monday): full universe.
     const r = await runCompetitiveIntelMonitor(now, isWeekly ? {} : { targets: COMPETITIVE_CORE });
     return {
@@ -178,15 +224,19 @@ export async function runDailyRefresh(
       totalSearches: r.totalSearches,
       errorCount: r.errors.length,
       source: r.source,
+      modelUsed: r.modelUsed,
+      tokensIn: r.totalTokensIn,
+      tokensOut: r.totalTokensOut,
+      estimatedCostUsd: r.estimatedCostUsd,
     };
-  }));
+  });
 
   // ── 8. Investor-tools live refresh ─────────────────────────
   //     SEC XBRL financials → Stooq+SEC valuations → IPO estimator
   //     (LLM + news, deterministic fallback) → analyst coverage scrape.
   //     Each sub-step records its own success/error count so the
   //     /admin/pipeline-health panel can surface which source failed.
-  steps.push(await timed("investor_tools_refresh", async () => {
+  await trackedStep("investor_tools_refresh", async () => {
     if (!dbConfigured) return { skipped: "no_database" };
     const targets = INVESTMENT_PROVIDERS.filter((p) => p.exposureType !== "cash");
 
@@ -236,27 +286,35 @@ export async function runDailyRefresh(
       analystCoverageVendors: acVendorsWithCoverage,
       analystCoverageErrors: acErrors,
     };
-  }));
+  });
 
   // ── 9. Live reputation (GitHub API — no Anthropic needed) ────
-  steps.push(await timed("reputation_github", async () => {
+  await trackedStep("reputation_github", async () => {
     const signals = await fetchLiveGitHubSignals();
     return {
       vendorsFetched: signals.length,
       source: "github_api",
     };
-  }));
+  });
 
   // ── 10. Live macro signals (FRED + GDELT — no Anthropic needed) ─
-  steps.push(await timed("macro_signals", async () => {
+  await trackedStep("macro_signals", async () => {
     const signals = await fetchAllMacroSignals();
     return {
       signalsFetched: signals.length,
       sources: [...new Set(signals.map((s) => s.source))],
     };
-  }));
+  });
 
   const errors = steps.flatMap((s) => (s.error ? [`${s.step}: ${s.error}`] : []));
+
+  // Roll up token usage + cost across all LLM-backed steps.
+  const totalTokensIn  = steps.reduce((s, step) => s + (Number((step.summary as Record<string, unknown>).tokensIn)  || 0), 0);
+  const totalTokensOut = steps.reduce((s, step) => s + (Number((step.summary as Record<string, unknown>).tokensOut) || 0), 0);
+  const estimatedCostUsd = parseFloat(
+    steps.reduce((s, step) => s + (Number((step.summary as Record<string, unknown>).estimatedCostUsd) || 0), 0).toFixed(4),
+  );
+
   const report: DailyRefreshReport = {
     startedAt,
     finishedAt: new Date().toISOString(),
@@ -264,12 +322,19 @@ export async function runDailyRefresh(
     databaseConfigured: dbConfigured,
     steps,
     errors,
+    totalTokensIn,
+    totalTokensOut,
+    estimatedCostUsd,
   };
 
-  // Persist the run summary so the operator can audit history and the
-  // TopNav badge can read a real "last refreshed" timestamp from a
-  // dedicated table (rather than inferring it from VendorRankingSnapshot).
-  await persistRefreshReport(report);
+  // Finalise the progressive-persistence row (marks ok + final errors).
+  // Also persist the legacy full-report row for backward compat.
+  if (progressId) {
+    await finaliseRun(progressId, report.ok, errors);
+  } else {
+    // Fallback: progressive row wasn't created (DB was down at start?).
+    await persistRefreshReport(report);
+  }
 
   return report;
 }

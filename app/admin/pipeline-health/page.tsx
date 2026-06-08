@@ -87,6 +87,11 @@ export default async function PipelineHealthPage() {
   const okSteps = steps.filter((s) => s.ok).length;
   const failedSteps = steps.filter((s) => !s.ok);
 
+  // Roll up token cost across steps that track it.
+  const totalTokensIn  = steps.reduce((s, st) => s + (Number(st.summary?.tokensIn)           || 0), 0);
+  const totalTokensOut = steps.reduce((s, st) => s + (Number(st.summary?.tokensOut)          || 0), 0);
+  const estimatedCost  = steps.reduce((s, st) => s + (Number(st.summary?.estimatedCostUsd)   || 0), 0);
+
   return (
     <PageFrame
       title="Pipeline health"
@@ -113,10 +118,12 @@ export default async function PipelineHealthPage() {
           note={failedSteps.map((s) => STEP_LABELS[s.step]?.title ?? s.step).join(", ") || "—"}
         />
         <StatusCard
-          label="Next scheduled"
-          value="03:00 UTC"
+          label="Est. Anthropic cost"
+          value={estimatedCost > 0 ? `$${estimatedCost.toFixed(3)}` : "—"}
           tone="neutral"
-          note="Vercel cron · daily"
+          note={totalTokensIn > 0
+            ? `${(totalTokensIn / 1000).toFixed(0)}k in · ${(totalTokensOut / 1000).toFixed(0)}k out`
+            : "No LLM steps recorded"}
         />
       </div>
 
@@ -143,12 +150,17 @@ export default async function PipelineHealthPage() {
                   <th className="py-2 pr-3">Step</th>
                   <th className="py-2 pr-3">What it does</th>
                   <th className="py-2 pr-3">Duration</th>
+                  <th className="py-2 pr-3">Cost</th>
                   <th className="py-2">Summary</th>
                 </tr>
               </thead>
               <tbody>
                 {steps.map((s) => {
                   const meta = STEP_LABELS[s.step] ?? { title: s.step, what: "" };
+                  const stepCost    = Number(s.summary?.estimatedCostUsd) || 0;
+                  const stepTokIn   = Number(s.summary?.tokensIn)         || 0;
+                  const stepTokOut  = Number(s.summary?.tokensOut)        || 0;
+                  const stepModel   = typeof s.summary?.modelUsed === "string" ? s.summary.modelUsed : null;
                   return (
                     <tr key={s.step} className="border-b border-[#edf0ea]/60 align-top">
                       <td className="py-3 pr-3">
@@ -157,6 +169,23 @@ export default async function PipelineHealthPage() {
                       <td className="py-3 pr-3 font-semibold text-[#18201b] dark:text-zinc-100">{meta.title}</td>
                       <td className="py-3 pr-3 text-xs text-[#4d574b] dark:text-zinc-400">{meta.what}</td>
                       <td className="py-3 pr-3 font-mono text-xs text-[#5f685a]">{formatDuration(s.durationMs)}</td>
+                      <td className="py-3 pr-3 text-xs">
+                        {stepCost > 0 ? (
+                          <div>
+                            <span className="font-mono font-semibold text-amber-700 dark:text-amber-300">${stepCost.toFixed(3)}</span>
+                            <div className="mt-0.5 text-[10px] text-[#697362] dark:text-zinc-500">
+                              {(stepTokIn / 1000).toFixed(0)}k↑ {(stepTokOut / 1000).toFixed(0)}k↓
+                            </div>
+                            {stepModel && (
+                              <div className="mt-0.5 font-mono text-[9px] text-[#697362] dark:text-zinc-500 truncate max-w-[80px]" title={stepModel}>
+                                {stepModel.replace("claude-", "").replace("-latest", "")}
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-[#697362] dark:text-zinc-500">—</span>
+                        )}
+                      </td>
                       <td className="py-3 text-xs text-[#4d574b] dark:text-zinc-400">
                         {s.error ? (
                           <span className="text-rose-700 dark:text-rose-300">{truncate(s.error, 240)}</span>

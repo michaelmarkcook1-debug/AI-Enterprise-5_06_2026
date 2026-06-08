@@ -111,6 +111,8 @@ export interface SourceRunOutcome {
   llmSource: "anthropic" | "stub";
   bytes?: number;
   contentHash?: string;
+  tokensIn?: number;
+  tokensOut?: number;
   durationMs: number;
   error?: string;
 }
@@ -127,6 +129,9 @@ export interface SourcingRunResult {
     skipped: number;
     proposalsExtracted: number;
     proposalsPersisted: number;
+    tokensIn: number;
+    tokensOut: number;
+    estimatedCostUsd: number;
   };
   llmSource: "anthropic" | "stub";
   databaseConfigured: boolean;
@@ -192,6 +197,11 @@ export async function runSourcing(options: RunnerOptions = {}): Promise<Sourcing
   }
 
   const finishedAt = new Date();
+  const totalTokensIn  = outcomes.reduce((s, o) => s + (o.tokensIn  ?? 0), 0);
+  const totalTokensOut = outcomes.reduce((s, o) => s + (o.tokensOut ?? 0), 0);
+  // Haiku pricing (sourcing always uses Haiku via llm-client.ts)
+  const HAIKU_IN = 0.80 / 1_000_000;
+  const HAIKU_OUT = 4.00 / 1_000_000;
   const totals = {
     sources: outcomes.length,
     ok: outcomes.filter((o) => o.status === "ok").length,
@@ -199,6 +209,9 @@ export async function runSourcing(options: RunnerOptions = {}): Promise<Sourcing
     skipped: outcomes.filter((o) => o.status === "skipped").length,
     proposalsExtracted: outcomes.reduce((s, o) => s + o.proposalsExtracted, 0),
     proposalsPersisted: outcomes.reduce((s, o) => s + o.proposalsPersisted, 0),
+    tokensIn: totalTokensIn,
+    tokensOut: totalTokensOut,
+    estimatedCostUsd: parseFloat(((totalTokensIn * HAIKU_IN) + (totalTokensOut * HAIKU_OUT)).toFixed(4)),
   };
 
   await logEvent({
@@ -415,6 +428,8 @@ async function runOneSource(
     llmSource: extraction.source,
     bytes: fetched.byteLength,
     contentHash: fetched.contentHash,
+    tokensIn:  extraction.usage.inputTokens,
+    tokensOut: extraction.usage.outputTokens,
     durationMs: Date.now() - sourceStart,
   };
 }
