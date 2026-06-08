@@ -37,6 +37,25 @@ function riskDistribution(entities: Entity[]) {
 
 function seedDevelopments(entities: Entity[]): MarketDevelopment[] {
   const byName = new Map(entities.map((e) => [e.name.toLowerCase(), e]));
+  const ranked = [...entities].sort((a, b) => b.leadershipScore - a.leadershipScore);
+  const rankOf = (name: string) => {
+    const idx = ranked.findIndex((e) => e.name.toLowerCase() === name.toLowerCase());
+    return idx >= 0 ? idx + 1 : null;
+  };
+  const totalEntities = entities.length;
+  const totalUsageShare = entities.reduce((s, e) => s + e.usageShare, 0);
+  const shareOf = (e: Entity) => totalUsageShare > 0 ? ((e.usageShare / totalUsageShare) * 100).toFixed(1) : "n/a";
+
+  const modelProviders = entities.filter((e) => rolesFor(e).includes("Model Provider")).sort((a, b) => b.leadershipScore - a.leadershipScore);
+  const platformVendors = entities.filter((e) => rolesFor(e).includes("Platform Vendor")).sort((a, b) => b.leadershipScore - a.leadershipScore);
+  const hardwareProviders = entities.filter((e) => rolesFor(e).includes("Hardware Provider")).sort((a, b) => b.leadershipScore - a.leadershipScore);
+  const infraPlayers = entities.filter((e) => rolesFor(e).includes("Infrastructure Player")).sort((a, b) => b.leadershipScore - a.leadershipScore);
+
+  const layerRankOf = (name: string, layer: Entity[]) => {
+    const idx = layer.findIndex((e) => e.name.toLowerCase() === name.toLowerCase());
+    return idx >= 0 ? idx + 1 : null;
+  };
+
   const nvidia = byName.get("nvidia");
   const msft = byName.get("microsoft");
   const openai = byName.get("openai");
@@ -52,7 +71,7 @@ function seedDevelopments(entities: Entity[]): MarketDevelopment[] {
       headline: "NVIDIA posts record $44.1B quarterly data-centre revenue, Blackwell Ultra demand outpacing supply",
       entities: ["NVIDIA"],
       analystTake: nvidia
-        ? `NVIDIA's hardware dominance (leadership ${nvidia.leadershipScore}, confidence ${nvidia.confidence}%) is now structural — CIOs should assume 12-18 month GPU lead-times in capacity planning. The risk isn't performance, it's concentration: ${nvidia.risk}-risk rating reflects single-vendor dependency across the AI stack. Procurement teams need to factor NVIDIA allocation into every infrastructure RFP.`
+        ? `NVIDIA ranks #${rankOf("nvidia")} of ${totalEntities} in the overall leaderboard (leadership ${nvidia.leadershipScore}, momentum ${nvidia.momentum}) and #${layerRankOf("nvidia", hardwareProviders)} among ${hardwareProviders.length} hardware providers. Usage share sits at ${shareOf(nvidia)}% of the tracked universe. The risk isn't performance — it's concentration: ${nvidia.risk}-risk rating with ${nvidia.confidence}% evidence confidence reflects single-vendor dependency across the stack. Ecosystem reach of ${nvidia.ecosystemReach} underscores how deeply NVIDIA's tooling (CUDA, TensorRT) is embedded. CIOs should assume 12-18 month GPU lead-times and factor NVIDIA allocation into every infrastructure RFP.`
         : "NVIDIA continues to set the pace for AI infrastructure spend.",
       impact: "positive",
       source: "NVIDIA Q1 FY27 Earnings",
@@ -62,7 +81,7 @@ function seedDevelopments(entities: Entity[]): MarketDevelopment[] {
       headline: "Microsoft Azure AI processes 100B+ inference calls/day; Copilot Studio surpasses 1M enterprise deployments",
       entities: ["Microsoft"],
       analystTake: msft
-        ? `Microsoft's platform moat is widening — ${msft.leadershipScore} leadership with ${msft.confidence}% confidence makes them the default enterprise AI stack. The Copilot Studio milestone signals a shift from experimentation to production workloads. CIOs already committed to M365 should accelerate Copilot rollout; those exploring alternatives have a narrowing window before switching costs become prohibitive.`
+        ? `Microsoft holds #${rankOf("microsoft")} overall (leadership ${msft.leadershipScore}) and #${layerRankOf("microsoft", platformVendors)} among ${platformVendors.length} platform vendors — a dominant position reinforced by ${shareOf(msft)}% usage share, the highest ecosystem reach in the universe at ${msft.ecosystemReach}. Innovation score of ${msft.innovation} and readiness of ${msft.readiness} confirm execution capability. The Copilot Studio milestone signals production-grade adoption. CIOs on M365 should accelerate rollout; those exploring alternatives face a narrowing window before switching costs become prohibitive. Evidence confidence at ${msft.confidence}% — one of the most observable entities in the universe.`
         : "Microsoft continues to deepen its enterprise AI integration advantage.",
       impact: "positive",
       source: "Microsoft Build 2026",
@@ -72,7 +91,7 @@ function seedDevelopments(entities: Entity[]): MarketDevelopment[] {
       headline: "OpenAI launches o3-pro with 1M-token context and native tool orchestration; enterprise API pricing drops 40%",
       entities: ["OpenAI"],
       analystTake: openai
-        ? `OpenAI is aggressively trading margin for market share — the 40% price cut forces every model provider to respond. At leadership ${openai.leadershipScore} and momentum ${openai.momentum}, they're the model-layer incumbent CIOs benchmark against. The tool-orchestration capability is strategically important: it moves OpenAI from model provider toward agentic platform, directly competing with Microsoft's Copilot Studio and Google's Vertex Agent Builder.`
+        ? `OpenAI is #${rankOf("openai")} overall and #${layerRankOf("openai", modelProviders)} of ${modelProviders.length} model providers (leadership ${openai.leadershipScore}, momentum ${openai.momentum}). The 40% price cut forces every model provider to respond — usage share at ${shareOf(openai)}% but innovation score of ${openai.innovation} suggests they're trading margin for lock-in. Tool-orchestration moves OpenAI from model provider toward agentic platform, competing directly with Microsoft Copilot Studio (#${layerRankOf("microsoft", platformVendors)} platform) and Google Vertex Agent Builder. ${openai.risk}-risk with ${openai.confidence}% confidence — CIOs should evaluate carefully but avoid single-model dependency.`
         : "OpenAI's pricing pressure is reshaping the model-provider economics.",
       impact: "watch",
       source: "OpenAI Blog",
@@ -82,7 +101,7 @@ function seedDevelopments(entities: Entity[]): MarketDevelopment[] {
       headline: "Google DeepMind unveils Gemini 2.5 Ultra with native multimodal reasoning; Vertex AI surpasses $10B ARR",
       entities: ["Google"],
       analystTake: google
-        ? `Google's dual-track strategy — frontier research via DeepMind plus enterprise distribution via Vertex — is paying off. Leadership ${google.leadershipScore} with ${google.confidence}% confidence. The $10B Vertex ARR milestone puts them firmly in the enterprise AI platform conversation alongside Microsoft and AWS. CIOs running GCP workloads should evaluate Gemini 2.5 Ultra as a genuine alternative to GPT-4-class models, particularly for multimodal enterprise use cases.`
+        ? `Google ranks #${rankOf("google")} overall, #${layerRankOf("google", platformVendors)} among platforms and #${layerRankOf("google", modelProviders)} among model providers — uniquely competitive across both layers. Leadership ${google.leadershipScore} with ecosystem reach ${google.ecosystemReach} and momentum ${google.momentum}. The $10B Vertex ARR milestone puts them alongside Microsoft and AWS in the enterprise platform conversation. Usage share of ${shareOf(google)}% with innovation at ${google.innovation}. CIOs running GCP workloads should evaluate Gemini 2.5 Ultra as a genuine alternative to GPT-4-class models, particularly for multimodal use cases. ${google.confidence}% evidence confidence — strong observability.`
         : "Google's enterprise AI revenue is reaching meaningful scale.",
       impact: "positive",
       source: "Google I/O 2026",
@@ -92,7 +111,7 @@ function seedDevelopments(entities: Entity[]): MarketDevelopment[] {
       headline: "Anthropic raises $7.5B Series E at $120B valuation; announces Claude Enterprise with SOC2 and FedRAMP moderate",
       entities: ["Anthropic"],
       analystTake: anthropic
-        ? `Anthropic's enterprise push addresses the governance gap that kept them out of regulated-industry shortlists. At leadership ${anthropic.leadershipScore} with ${anthropic.risk}-risk, they're now a viable second-source for CIOs looking to avoid OpenAI/Microsoft lock-in. The FedRAMP certification is a meaningful differentiator — expect federal and financial services RFPs to include Anthropic for the first time. Valuation pressure means they need enterprise revenue, which should translate to aggressive pricing.`
+        ? `Anthropic sits at #${rankOf("anthropic")} overall and #${layerRankOf("anthropic", modelProviders)} of ${modelProviders.length} model providers (leadership ${anthropic.leadershipScore}, momentum ${anthropic.momentum}). Currently ${anthropic.risk}-risk — the enterprise push and FedRAMP certification should improve this in coming quarters. Innovation score of ${anthropic.innovation} is competitive but ecosystem reach of ${anthropic.ecosystemReach} lags the top 3, reflecting narrower distribution. Usage share at ${shareOf(anthropic)}% means they're not yet a default procurement choice. CIOs in regulated industries (federal, financial services) should now include Anthropic in RFPs — the FedRAMP credential is a meaningful differentiator against OpenAI's current enterprise offering.`
         : "Anthropic is positioning itself as the governance-first model provider.",
       impact: "positive",
       source: "Anthropic Press Release",
@@ -102,7 +121,7 @@ function seedDevelopments(entities: Entity[]): MarketDevelopment[] {
       headline: "Meta releases Llama 4 Behemoth (2T params) under updated open licence; enterprise adoption guidance included",
       entities: ["Meta"],
       analystTake: meta
-        ? `Llama 4 Behemoth changes the build-vs-buy equation for large enterprises. Meta's open-weight strategy (leadership ${meta.leadershipScore}, momentum ${meta.momentum}) doesn't generate direct revenue but erodes the pricing power of proprietary model providers. CIOs with strong ML engineering teams should evaluate Llama 4 for cost-sensitive inference workloads — but the real beneficiary is the hosting layer (AWS, Azure, GCP) that runs fine-tuned Llama variants.`
+        ? `Meta is #${rankOf("meta")} overall and #${layerRankOf("meta", modelProviders)} among model providers (leadership ${meta.leadershipScore}). Open-weight strategy means usage share (${shareOf(meta)}%) understates actual deployment — Llama derivatives run across AWS, Azure, and GCP without attribution. Innovation at ${meta.innovation} but ecosystem reach only ${meta.ecosystemReach} and readiness ${meta.readiness} — reflecting Meta's indirect enterprise model. ${meta.risk}-risk at ${meta.confidence}% confidence. CIOs with strong ML teams should benchmark Llama 4 for cost-sensitive inference; the real beneficiaries are the hosting platforms that fine-tune and serve it.`
         : "Meta's open-weight release continues to pressure proprietary model pricing.",
       impact: "neutral",
       source: "Meta AI Blog",
@@ -112,7 +131,7 @@ function seedDevelopments(entities: Entity[]): MarketDevelopment[] {
       headline: "CoreWeave IPO prices at $47/share, below range; post-IPO trading highlights GPU-cloud concentration risk",
       entities: ["CoreWeave"],
       analystTake: coreweave
-        ? `CoreWeave's below-range IPO pricing (confidence ${coreweave.confidence}%, ${coreweave.risk}-risk) validates the market's concern about GPU-cloud business model sustainability. Heavy capex, NVIDIA dependency, and customer concentration (Microsoft is ~60% of revenue) create structural fragility. CIOs should treat CoreWeave as a supplementary capacity source, not a primary infrastructure provider — and ensure contractual protections for GPU allocation in any neocloud agreement.`
+        ? `CoreWeave ranks #${rankOf("coreweave")} of ${totalEntities} overall and #${layerRankOf("coreweave", infraPlayers)} among ${infraPlayers.length} infrastructure players (leadership ${coreweave.leadershipScore}). Flagged ${coreweave.risk}-risk at only ${coreweave.confidence}% evidence confidence — one of the thinnest evidence profiles in the infrastructure layer. Usage share at ${shareOf(coreweave)}% with ecosystem reach of just ${coreweave.ecosystemReach}. Below-range IPO pricing validates market concerns about GPU-cloud sustainability: heavy capex, NVIDIA dependency, and customer concentration. CIOs should treat CoreWeave as supplementary capacity, not a primary provider — and ensure contractual GPU allocation protections.`
         : "CoreWeave's public market debut reveals investor caution about GPU-cloud economics.",
       impact: "negative",
       source: "CoreWeave S-1 / Market Data",
@@ -122,7 +141,7 @@ function seedDevelopments(entities: Entity[]): MarketDevelopment[] {
       headline: "Apple Intelligence 2.0 ships on-device reasoning engine; enterprise MDM integration enables private AI deployment",
       entities: ["Apple"],
       analystTake: apple
-        ? `Apple's on-device AI strategy offers CIOs something no cloud provider can: inference that never leaves the device. The MDM integration is the real enterprise play — it lets IT teams deploy AI capabilities through existing device management, avoiding the procurement complexity of cloud AI contracts. At leadership ${apple.leadershipScore}, Apple won't top any AI leaderboard, but for industries where data residency is non-negotiable (healthcare, legal, defence), this is a uniquely compelling proposition.`
+        ? `Apple ranks #${rankOf("apple")} overall (leadership ${apple.leadershipScore}, momentum ${apple.momentum}) — mid-table, but this ranking understates the on-device AI proposition. Readiness score of ${apple.readiness} and ecosystem reach of ${apple.ecosystemReach} reflect deep device-fleet penetration that no cloud provider can match. Usage share at ${shareOf(apple)}% in the AI universe is modest, but the MDM integration lets IT teams deploy AI through existing device management. Innovation at ${apple.innovation} with ${apple.confidence}% confidence. For healthcare, legal, and defence CIOs where data residency is non-negotiable, Apple's on-device path is uniquely compelling.`
         : "Apple's on-device AI creates a differentiated enterprise path for privacy-sensitive industries.",
       impact: "watch",
       source: "WWDC 2026",
