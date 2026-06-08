@@ -6,17 +6,26 @@
 
 import type { DeveloperReputation } from "./seed";
 
-/** Vendor → flagship GitHub repo mapping. */
+// Vendor → flagship GitHub repo mapping. Keys are CANONICAL plain spine ids
+// (matching DeveloperReputation.vendorId) — previously these used a "vendor_"
+// prefix that matched nothing, so live stars never merged into reputation.
 const VENDOR_REPOS: Record<string, string> = {
-  vendor_openai: "openai/openai-python",
-  vendor_anthropic: "anthropics/anthropic-sdk-python",
-  vendor_google: "google-gemini/generative-ai-python",
-  vendor_meta: "meta-llama/llama",
-  vendor_mistral: "mistralai/mistral-inference",
-  vendor_cohere: "cohere-ai/cohere-python",
-  vendor_ibm: "IBM/watsonx-ai-python-sdk",
-  vendor_xai: "xai-org/grok-1",
-  vendor_writer: "writer/writer-python",
+  openai: "openai/openai-python",
+  anthropic: "anthropics/anthropic-sdk-python",
+  google: "google-gemini/generative-ai-python",
+  meta: "meta-llama/llama",
+  mistral: "mistralai/mistral-inference",
+  cohere: "cohere-ai/cohere-python",
+  ibm: "IBM/watsonx-ai-python-sdk",
+  xai: "xai-org/grok-1",
+  writer: "writer/writer-python",
+  // New vendors (June 2026) — flagship public repos.
+  deepseek: "deepseek-ai/DeepSeek-V3",
+  alibaba: "QwenLM/Qwen",
+  nvidia: "NVIDIA/NeMo",
+  databricks: "databricks/dbrx",
+  together: "togethercomputer/together-python",
+  fireworks: "fw-ai/cookbook",
 };
 
 interface GitHubRepoStats {

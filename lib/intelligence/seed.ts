@@ -206,6 +206,9 @@ export const MARKET_CATEGORIES: MarketCategory[] = [
   { id: "itsm_hr_service_ai", name: "ITSM/HR/service AI", description: "Employee service, ITSM, HR, and enterprise service automation." },
   { id: "cloud_ai_platform", name: "Cloud AI platform", description: "Cloud-native AI build, deployment, security, and operations." },
   { id: "regulated_industry_ai", name: "Regulated-industry AI", description: "Legal, financial, healthcare, public-sector, and high-control vertical AI." },
+  { id: "ai_silicon", name: "AI silicon / accelerators", description: "GPUs, custom ASICs, wafer-scale and the fabrication behind AI compute. Supply-concentration market." },
+  { id: "ai_cloud_compute", name: "AI cloud & compute", description: "Hyperscaler and sovereign cloud capacity AI workloads run on." },
+  { id: "neocloud_inference", name: "Neocloud & inference", description: "AI-specialist GPU/inference clouds serving training and inference capacity." },
 ];
 
 // Rebalanced May 2026 against the LLM vendor audit:
@@ -249,6 +252,12 @@ const shareRows: [string, MarketCategoryId, number, number | undefined, number][
   ["servicenow", "itsm_hr_service_ai", 32, 29, 74], ["moveworks", "itsm_hr_service_ai", 13, 12, 55], ["microsoft", "itsm_hr_service_ai", 10, 9, 52],
   ["microsoft", "cloud_ai_platform", 25, 23, 78], ["aws", "cloud_ai_platform", 24, 22, 79], ["google", "cloud_ai_platform", 18, 17, 72], ["databricks", "cloud_ai_platform", 9, 8, 60], ["snowflake", "cloud_ai_platform", 7, 6, 58],
   ["harvey", "regulated_industry_ai", 13, 10, 57], ["ibm", "regulated_industry_ai", 12, 12, 65], ["cohere", "regulated_industry_ai", 8, 7, 50], ["rogo", "regulated_industry_ai", 5, 4, 42],
+  // AI silicon / accelerators — supply-concentration market (NVIDIA dominant).
+  ["nvidia", "ai_silicon", 78, 80, 80], ["amd", "ai_silicon", 9, 7, 65], ["broadcom", "ai_silicon", 6, 5, 60], ["tsmc", "ai_silicon", 3, 3, 70], ["cerebras", "ai_silicon", 2, 1, 55],
+  // AI cloud & compute — hyperscaler + sovereign capacity.
+  ["aws", "ai_cloud_compute", 26, 27, 72], ["microsoft", "ai_cloud_compute", 24, 23, 74], ["google", "ai_cloud_compute", 16, 15, 70], ["oracle", "ai_cloud_compute", 8, 6, 60], ["alibaba", "ai_cloud_compute", 6, 6, 55], ["coreweave", "ai_cloud_compute", 4, 2, 58], ["g42", "ai_cloud_compute", 1, 1, 48], ["humain", "ai_cloud_compute", 1, 0, 42],
+  // Neocloud & inference — AI-specialist GPU/inference clouds.
+  ["coreweave", "neocloud_inference", 30, 28, 60], ["together", "neocloud_inference", 14, 11, 56], ["fireworks", "neocloud_inference", 13, 10, 56], ["lambda", "neocloud_inference", 12, 12, 54], ["groq", "neocloud_inference", 10, 12, 48], ["nscale", "neocloud_inference", 4, 2, 46],
 ];
 
 export const MARKET_SHARE_ESTIMATES: MarketShareEstimate[] = shareRows.map(([vendorId, categoryId, estimatedShare, previousEstimate, confidence]) => ({

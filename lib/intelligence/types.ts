@@ -24,7 +24,10 @@ export type MarketCategoryId =
   | "crm_customer_ai"
   | "itsm_hr_service_ai"
   | "cloud_ai_platform"
-  | "regulated_industry_ai";
+  | "regulated_industry_ai"
+  | "ai_silicon"
+  | "ai_cloud_compute"
+  | "neocloud_inference";
 
 export interface Vendor {
   id: string;
