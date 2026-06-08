@@ -67,84 +67,84 @@ function seedDevelopments(entities: Entity[]): MarketDevelopment[] {
 
   const devs: MarketDevelopment[] = [
     {
-      date: "2026-06-05",
-      headline: "NVIDIA posts record $44.1B quarterly data-centre revenue, Blackwell Ultra demand outpacing supply",
+      date: "2026-05-28",
+      headline: "NVIDIA Q1 FY27: Record $81.6B revenue (+85% YoY), data-centre revenue hits $75.2B with Blackwell 300 ramp",
       entities: ["NVIDIA"],
       analystTake: nvidia
-        ? `NVIDIA ranks #${rankOf("nvidia")} of ${totalEntities} in the overall leaderboard (leadership ${nvidia.leadershipScore}, momentum ${nvidia.momentum}) and #${layerRankOf("nvidia", hardwareProviders)} among ${hardwareProviders.length} hardware providers. Usage share sits at ${shareOf(nvidia)}% of the tracked universe. The risk isn't performance — it's concentration: ${nvidia.risk}-risk rating with ${nvidia.confidence}% evidence confidence reflects single-vendor dependency across the stack. Ecosystem reach of ${nvidia.ecosystemReach} underscores how deeply NVIDIA's tooling (CUDA, TensorRT) is embedded. CIOs should assume 12-18 month GPU lead-times and factor NVIDIA allocation into every infrastructure RFP.`
-        : "NVIDIA continues to set the pace for AI infrastructure spend.",
+        ? `NVIDIA ranks #${rankOf("nvidia")} of ${totalEntities} in the overall leaderboard (leadership ${nvidia.leadershipScore}, momentum ${nvidia.momentum}) and #${layerRankOf("nvidia", hardwareProviders)} among ${hardwareProviders.length} hardware providers. Data-centre compute revenue of $60.4B and networking revenue of $14.8B (+199% YoY) confirm structural dominance. Usage share sits at ${shareOf(nvidia)}% of the tracked universe. Hyperscale is ~50% of DC revenue, with the other 50% diversifying into AI clouds, enterprise, and sovereign customers — widening the moat. Ecosystem reach of ${nvidia.ecosystemReach} underscores CUDA lock-in. ${nvidia.risk}-risk at ${nvidia.confidence}% confidence reflects concentration dependency. CIOs should assume extended GPU lead-times and factor NVIDIA allocation into every infrastructure RFP.`
+        : "NVIDIA posts record results driven by data-centre AI demand.",
       impact: "positive",
-      source: "NVIDIA Q1 FY27 Earnings",
-    },
-    {
-      date: "2026-06-03",
-      headline: "Microsoft Azure AI processes 100B+ inference calls/day; Copilot Studio surpasses 1M enterprise deployments",
-      entities: ["Microsoft"],
-      analystTake: msft
-        ? `Microsoft holds #${rankOf("microsoft")} overall (leadership ${msft.leadershipScore}) and #${layerRankOf("microsoft", platformVendors)} among ${platformVendors.length} platform vendors — a dominant position reinforced by ${shareOf(msft)}% usage share, the highest ecosystem reach in the universe at ${msft.ecosystemReach}. Innovation score of ${msft.innovation} and readiness of ${msft.readiness} confirm execution capability. The Copilot Studio milestone signals production-grade adoption. CIOs on M365 should accelerate rollout; those exploring alternatives face a narrowing window before switching costs become prohibitive. Evidence confidence at ${msft.confidence}% — one of the most observable entities in the universe.`
-        : "Microsoft continues to deepen its enterprise AI integration advantage.",
-      impact: "positive",
-      source: "Microsoft Build 2026",
-    },
-    {
-      date: "2026-05-30",
-      headline: "OpenAI launches o3-pro with 1M-token context and native tool orchestration; enterprise API pricing drops 40%",
-      entities: ["OpenAI"],
-      analystTake: openai
-        ? `OpenAI is #${rankOf("openai")} overall and #${layerRankOf("openai", modelProviders)} of ${modelProviders.length} model providers (leadership ${openai.leadershipScore}, momentum ${openai.momentum}). The 40% price cut forces every model provider to respond — usage share at ${shareOf(openai)}% but innovation score of ${openai.innovation} suggests they're trading margin for lock-in. Tool-orchestration moves OpenAI from model provider toward agentic platform, competing directly with Microsoft Copilot Studio (#${layerRankOf("microsoft", platformVendors)} platform) and Google Vertex Agent Builder. ${openai.risk}-risk with ${openai.confidence}% confidence — CIOs should evaluate carefully but avoid single-model dependency.`
-        : "OpenAI's pricing pressure is reshaping the model-provider economics.",
-      impact: "watch",
-      source: "OpenAI Blog",
+      source: "NVIDIA Q1 FY27 Earnings / CNBC",
     },
     {
       date: "2026-05-28",
-      headline: "Google DeepMind unveils Gemini 2.5 Ultra with native multimodal reasoning; Vertex AI surpasses $10B ARR",
+      headline: "Microsoft Build 2026: Copilot Studio gets computer-using agents (GA), A2A protocol, and 6x MAU growth to 20M+ users",
+      entities: ["Microsoft"],
+      analystTake: msft
+        ? `Microsoft holds #${rankOf("microsoft")} overall (leadership ${msft.leadershipScore}) and #${layerRankOf("microsoft", platformVendors)} among ${platformVendors.length} platform vendors — reinforced by ${shareOf(msft)}% usage share and ecosystem reach of ${msft.ecosystemReach}. Build 2026 signals production maturity: computer-using agents are now GA, agent-to-agent (A2A) communication enables cross-system orchestration, and the new orchestrator cuts token consumption 50% while improving evaluation 20%. The 6x MAU surge to 20M+ Copilot users confirms enterprise rollout is accelerating. New M365 Business SKUs with Copilot built-in (launching July 1) will push adoption into SMB. Innovation at ${msft.innovation}, readiness at ${msft.readiness}. CIOs on M365 face a narrowing window before switching costs become prohibitive.`
+        : "Microsoft deepens enterprise AI integration with agentic capabilities.",
+      impact: "positive",
+      source: "Microsoft Build 2026 / VentureBeat",
+    },
+    {
+      date: "2026-06-05",
+      headline: "OpenAI launches Codex enterprise plugins, ChatGPT Lockdown Mode, and GPT-Rosalind for life sciences; workspace agents extended",
+      entities: ["OpenAI"],
+      analystTake: openai
+        ? `OpenAI is #${rankOf("openai")} overall and #${layerRankOf("openai", modelProviders)} of ${modelProviders.length} model providers (leadership ${openai.leadershipScore}, momentum ${openai.momentum}). The six new Codex business plugins (sales, analytics, creative, design, equity research, investment banking) signal aggressive vertical enterprise expansion — moving beyond horizontal AI into workflow-specific tooling. Lockdown Mode for prompt-injection protection addresses a key enterprise security concern. Usage share at ${shareOf(openai)}% with innovation at ${openai.innovation}. The workspace-agents free-tier extension to July 6 suggests adoption is below target. ${openai.risk}-risk with ${openai.confidence}% confidence. CIOs should evaluate Codex plugins for specific workflows but avoid single-vendor lock-in across the agentic stack.`
+        : "OpenAI expands enterprise tooling with vertical plugins and security features.",
+      impact: "watch",
+      source: "OpenAI Newsroom / Build Fast with AI",
+    },
+    {
+      date: "2026-06-02",
+      headline: "Google I/O 2026: Gemini 3.5 Flash launched, Ultra price cut to $200/mo, Gemini Omni for multimodal generation, 900M MAU",
       entities: ["Google"],
       analystTake: google
-        ? `Google ranks #${rankOf("google")} overall, #${layerRankOf("google", platformVendors)} among platforms and #${layerRankOf("google", modelProviders)} among model providers — uniquely competitive across both layers. Leadership ${google.leadershipScore} with ecosystem reach ${google.ecosystemReach} and momentum ${google.momentum}. The $10B Vertex ARR milestone puts them alongside Microsoft and AWS in the enterprise platform conversation. Usage share of ${shareOf(google)}% with innovation at ${google.innovation}. CIOs running GCP workloads should evaluate Gemini 2.5 Ultra as a genuine alternative to GPT-4-class models, particularly for multimodal use cases. ${google.confidence}% evidence confidence — strong observability.`
-        : "Google's enterprise AI revenue is reaching meaningful scale.",
+        ? `Google ranks #${rankOf("google")} overall, #${layerRankOf("google", platformVendors)} among platforms and #${layerRankOf("google", modelProviders)} among model providers — uniquely competitive across both layers. Gemini 3.5 Flash with aggressive pricing signals a volume play; the Enterprise Agent Platform (evolution of Vertex AI) now provides access to 200+ models including third-party. 900M monthly users (up from 400M in May 2025) is consumer-driven but creates enterprise pipeline. Gemini Spark as a 24/7 personal AI agent for Workspace customers competes directly with Microsoft Copilot. Leadership ${google.leadershipScore}, ecosystem reach ${google.ecosystemReach}, usage share ${shareOf(google)}%. ${google.confidence}% confidence — strong observability.`
+        : "Google accelerates enterprise AI with cheaper Gemini models and agentic platform.",
       impact: "positive",
-      source: "Google I/O 2026",
+      source: "Google I/O 2026 / Google Cloud Blog",
     },
     {
-      date: "2026-05-25",
-      headline: "Anthropic raises $7.5B Series E at $120B valuation; announces Claude Enterprise with SOC2 and FedRAMP moderate",
+      date: "2026-06-01",
+      headline: "Anthropic files for IPO; Bristol Myers Squibb deploys Claude Enterprise across global operations; SAP integration announced",
       entities: ["Anthropic"],
       analystTake: anthropic
-        ? `Anthropic sits at #${rankOf("anthropic")} overall and #${layerRankOf("anthropic", modelProviders)} of ${modelProviders.length} model providers (leadership ${anthropic.leadershipScore}, momentum ${anthropic.momentum}). Currently ${anthropic.risk}-risk — the enterprise push and FedRAMP certification should improve this in coming quarters. Innovation score of ${anthropic.innovation} is competitive but ecosystem reach of ${anthropic.ecosystemReach} lags the top 3, reflecting narrower distribution. Usage share at ${shareOf(anthropic)}% means they're not yet a default procurement choice. CIOs in regulated industries (federal, financial services) should now include Anthropic in RFPs — the FedRAMP credential is a meaningful differentiator against OpenAI's current enterprise offering.`
-        : "Anthropic is positioning itself as the governance-first model provider.",
+        ? `Anthropic sits at #${rankOf("anthropic")} overall and #${layerRankOf("anthropic", modelProviders)} of ${modelProviders.length} model providers (leadership ${anthropic.leadershipScore}, momentum ${anthropic.momentum}). Three converging signals: the IPO filing positions Anthropic as a potential trillion-dollar debut; the BMS deal makes Claude the shared intelligence platform across pharma R&D, manufacturing, and commercial functions; the SAP integration puts Claude into S/4HANA, SuccessFactors, and Ariba workflows. Innovation at ${anthropic.innovation}, ecosystem reach ${anthropic.ecosystemReach} — the SAP and BMS deals should materially improve this. Usage share at ${shareOf(anthropic)}%. Managed Agents with enterprise-boundary MCP servers address the governance gap. CIOs in regulated industries should now include Anthropic in every RFP.`
+        : "Anthropic files for IPO while landing major enterprise platform deals.",
       impact: "positive",
-      source: "Anthropic Press Release",
+      source: "Washington Post / BMS / SAP News",
     },
     {
-      date: "2026-05-22",
-      headline: "Meta releases Llama 4 Behemoth (2T params) under updated open licence; enterprise adoption guidance included",
+      date: "2026-04-08",
+      headline: "Meta launches Llama 4 Scout and Maverick (multimodal MoE architecture); developing proprietary Avocado and Mango models",
       entities: ["Meta"],
       analystTake: meta
-        ? `Meta is #${rankOf("meta")} overall and #${layerRankOf("meta", modelProviders)} among model providers (leadership ${meta.leadershipScore}). Open-weight strategy means usage share (${shareOf(meta)}%) understates actual deployment — Llama derivatives run across AWS, Azure, and GCP without attribution. Innovation at ${meta.innovation} but ecosystem reach only ${meta.ecosystemReach} and readiness ${meta.readiness} — reflecting Meta's indirect enterprise model. ${meta.risk}-risk at ${meta.confidence}% confidence. CIOs with strong ML teams should benchmark Llama 4 for cost-sensitive inference; the real beneficiaries are the hosting platforms that fine-tune and serve it.`
-        : "Meta's open-weight release continues to pressure proprietary model pricing.",
+        ? `Meta is #${rankOf("meta")} overall and #${layerRankOf("meta", modelProviders)} among model providers (leadership ${meta.leadershipScore}). Llama 4 Scout and Maverick introduce mixture-of-experts architecture with native multimodality — available on Hugging Face and deployed across WhatsApp, Messenger, and Instagram. The parallel development of proprietary models (Avocado for LLM, Mango for multimedia) signals a strategic hedge: open-weight for ecosystem control, proprietary for premium capability. Usage share (${shareOf(meta)}%) understates actual deployment — Llama derivatives run across hyperscalers without attribution. Ecosystem reach ${meta.ecosystemReach}, innovation ${meta.innovation}. ${meta.risk}-risk at ${meta.confidence}% confidence. CIOs should benchmark Llama 4 MoE for cost-sensitive inference but monitor the open-vs-proprietary trajectory.`
+        : "Meta's Llama 4 introduces multimodal MoE while developing proprietary alternatives.",
       impact: "neutral",
-      source: "Meta AI Blog",
+      source: "Meta AI Blog / SiliconANGLE",
     },
     {
-      date: "2026-05-18",
-      headline: "CoreWeave IPO prices at $47/share, below range; post-IPO trading highlights GPU-cloud concentration risk",
+      date: "2026-06-02",
+      headline: "CoreWeave Q1 2026: Revenue $2.08B (+112% YoY), backlog surges to $99.4B including $21B Meta commitment; stock down 51% from peak",
       entities: ["CoreWeave"],
       analystTake: coreweave
-        ? `CoreWeave ranks #${rankOf("coreweave")} of ${totalEntities} overall and #${layerRankOf("coreweave", infraPlayers)} among ${infraPlayers.length} infrastructure players (leadership ${coreweave.leadershipScore}). Flagged ${coreweave.risk}-risk at only ${coreweave.confidence}% evidence confidence — one of the thinnest evidence profiles in the infrastructure layer. Usage share at ${shareOf(coreweave)}% with ecosystem reach of just ${coreweave.ecosystemReach}. Below-range IPO pricing validates market concerns about GPU-cloud sustainability: heavy capex, NVIDIA dependency, and customer concentration. CIOs should treat CoreWeave as supplementary capacity, not a primary provider — and ensure contractual GPU allocation protections.`
-        : "CoreWeave's public market debut reveals investor caution about GPU-cloud economics.",
+        ? `CoreWeave ranks #${rankOf("coreweave")} of ${totalEntities} overall and #${layerRankOf("coreweave", infraPlayers)} among ${infraPlayers.length} infrastructure players (leadership ${coreweave.leadershipScore}). The $99.4B backlog headline is impressive but masks structural risk: $50.8B in liabilities against volatile revenue, 51% stock decline from peak, and heavy customer concentration (the $21B Meta commitment is a double-edged sword). ${coreweave.risk}-risk at ${coreweave.confidence}% confidence — one of the thinnest evidence profiles in the infrastructure layer. Usage share ${shareOf(coreweave)}%, ecosystem reach ${coreweave.ecosystemReach}. Full-year guidance of $12-13B implies aggressive growth assumptions. CIOs should treat CoreWeave as supplementary GPU capacity with strong contractual protections, not a primary infrastructure partner.`
+        : "CoreWeave revenue doubles but debt load and customer concentration raise sustainability questions.",
       impact: "negative",
-      source: "CoreWeave S-1 / Market Data",
+      source: "Yahoo Finance / 24/7 Wall St",
     },
     {
-      date: "2026-05-15",
-      headline: "Apple Intelligence 2.0 ships on-device reasoning engine; enterprise MDM integration enables private AI deployment",
+      date: "2026-06-08",
+      headline: "WWDC 2026: Apple relaunches Siri with Gemini backbone, standalone AI app to rival ChatGPT; paid Siri subscription planned",
       entities: ["Apple"],
       analystTake: apple
-        ? `Apple ranks #${rankOf("apple")} overall (leadership ${apple.leadershipScore}, momentum ${apple.momentum}) — mid-table, but this ranking understates the on-device AI proposition. Readiness score of ${apple.readiness} and ecosystem reach of ${apple.ecosystemReach} reflect deep device-fleet penetration that no cloud provider can match. Usage share at ${shareOf(apple)}% in the AI universe is modest, but the MDM integration lets IT teams deploy AI through existing device management. Innovation at ${apple.innovation} with ${apple.confidence}% confidence. For healthcare, legal, and defence CIOs where data residency is non-negotiable, Apple's on-device path is uniquely compelling.`
-        : "Apple's on-device AI creates a differentiated enterprise path for privacy-sensitive industries.",
+        ? `Apple ranks #${rankOf("apple")} overall (leadership ${apple.leadershipScore}, momentum ${apple.momentum}) — mid-table in the AI leaderboard, but WWDC 2026 signals a strategic reset. The Gemini-powered Siri relaunch with cross-app task execution and a standalone AI app positions Apple as a distribution channel for Google's models — a dependency that cuts both ways. Readiness ${apple.readiness}, ecosystem reach ${apple.ecosystemReach} — deep device-fleet penetration that no cloud provider matches. The paid Siri subscription signals Apple is treating AI as a services-revenue driver, not just a feature. Usage share ${shareOf(apple)}% in the AI universe is modest but understates the 2B+ device install base. Innovation ${apple.innovation}, ${apple.confidence}% confidence. For CIOs, the on-device processing promise remains the key enterprise differentiator — but the Gemini dependency adds a new counterparty risk to evaluate.`
+        : "Apple's WWDC 2026 reveals Gemini-powered Siri relaunch and standalone AI app.",
       impact: "watch",
-      source: "WWDC 2026",
+      source: "Bloomberg / TechCrunch / Yahoo Finance",
     },
   ];
 
