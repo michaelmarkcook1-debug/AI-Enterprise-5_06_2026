@@ -36,6 +36,7 @@ import { fetchLiveGitHubSignals, mergeGitHubIntoReputation } from "@/lib/reputat
 import VendorUptakeExplorer from "@/components/demonstrate/VendorUptakeExplorer";
 import TokenPricingTable from "@/components/demonstrate/TokenPricingTable";
 import RestoreShortlistBanner from "@/components/demonstrate/RestoreShortlistBanner";
+import BoardPackExporter from "@/components/demonstrate/BoardPackExporter";
 import { pricingForVendorIds } from "@/lib/model-inventory/token-pricing";
 
 export const dynamic = "force-dynamic";
@@ -318,13 +319,29 @@ export default async function DemonstratePage({ searchParams }: PageProps) {
       {/* Board Pack Generator */}
       <section className="mt-6 mb-2">
         <Panel title="Board pack generator">
-          <p className="mb-3 text-xs text-[#5f685a]">Export the board defence case in the format your audience needs.</p>
-          <div className="flex flex-wrap gap-2">
-            {["Executive Summary", "Board Pack", "Procurement Pack", "Risk Review"].map((t) => (
-              <button key={t} className="rounded-full border border-[#cfd7c8] bg-white px-4 py-2 text-xs font-semibold text-[#18201b] hover:bg-[#eef2e8] dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800">Export {t}</button>
-            ))}
-          </div>
-          <p className="mt-2 text-[10px] text-[#697362]">Export functionality coming soon.</p>
+          <BoardPackExporter
+            boardDefenceScore={boardDefenceScore}
+            cioConfidenceScore={hasShortlist ? cioConfidence : 0}
+            recommendation={hasShortlist ? decisionStatus : "No shortlist selected"}
+            businessCase={SEED_BUSINESS_CASE}
+            vendors={shortlistVendors.map((v) => {
+              const mom = momentumByVendor.get(v.id);
+              const pills = (pillarsByVendor.get(v.id) ?? []).slice().sort((a, b) => b.capabilityScore - a.capabilityScore).slice(0, 3);
+              return {
+                name: v.name,
+                role: v.category ?? "Enterprise AI",
+                score: v.overallScore,
+                confidence: mom?.confidence ?? v.confidenceScore,
+                topPillars: pills.map((p) => p.pillar),
+                risks: (v.riskProfile ?? []).slice(0, 2),
+              };
+            })}
+            competitors={SEED_COMPETITOR_PROFILES}
+            risks={SEED_ENTERPRISE_RISKS}
+            mitigations={SEED_RISK_MITIGATIONS}
+            assumptions={SEED_BOARD_ASSUMPTIONS}
+            kpis={SEED_KPIS}
+          />
         </Panel>
       </section>
 

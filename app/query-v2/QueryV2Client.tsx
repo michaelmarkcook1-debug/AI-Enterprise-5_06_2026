@@ -10,6 +10,7 @@ import {
   type InfraBand,
   rolesFor,
 } from "@/lib/intelligence/entities";
+import ExecutiveBrief from "@/components/query/ExecutiveBrief";
 
 type WinningLayer = { title: string; names: string[]; note: string };
 
@@ -220,6 +221,8 @@ export default function QueryV2Client({ entities, winningByLayer }: { entities: 
       </aside>
 
       <div className="min-w-0">
+        <ExecutiveBrief entities={entities} winningByLayer={winningByLayer} />
+
         <section id="role-overview" className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-4 xl:grid-cols-7">
           {kpis.map((kpi) => <Metric key={kpi.label} {...kpi} />)}
         </section>
