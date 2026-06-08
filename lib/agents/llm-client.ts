@@ -3,7 +3,10 @@
 
 import Anthropic from "@anthropic-ai/sdk";
 
-const DEFAULT_MODEL = process.env.ANTHROPIC_MODEL ?? "claude-sonnet-4-6";
+// Structured extraction (sourcing, classification) is a mechanical task that
+// doesn't need a frontier model — default to Haiku for ~3-5x lower cost.
+// Override with ANTHROPIC_EXTRACT_MODEL if a specific extraction needs more.
+const DEFAULT_MODEL = process.env.ANTHROPIC_EXTRACT_MODEL ?? "claude-haiku-4-5";
 
 export interface ExtractParams<T> {
   systemPrompt: string;

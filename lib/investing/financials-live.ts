@@ -23,7 +23,9 @@ import { secConnector, isSecUserAgentValid } from "../connectors/sec";
 import { hasLLM } from "../agents/llm-client";
 import type { FinancialMetric, InvestmentProviderProfile } from "./types";
 
-const DEFAULT_MODEL = process.env.ANTHROPIC_MODEL ?? "claude-sonnet-4-6";
+// IR-page financial extraction is a read-and-extract task — default to Haiku
+// for lower cost (it's only a fallback when SEC XBRL misses). Override via env.
+const DEFAULT_MODEL = process.env.ANTHROPIC_EXTRACT_MODEL ?? "claude-haiku-4-5";
 
 /* ─── CIK + IR URL manifest ─────────────────────────────────────── */
 

@@ -82,6 +82,19 @@ export const COMPETITIVE_TARGETS: CompetitiveTarget[] = [
   { vendorId: "sakana",      name: "Sakana AI",       aliases: ["Sakana"],                                 domain: "sakana.ai" },
 ];
 
+// Core set monitored DAILY (cost control). The full COMPETITIVE_TARGETS list
+// runs weekly. These are the highest-velocity / most-watched vendors where
+// day-to-day news actually moves; the long tail is covered in the weekly sweep.
+const COMPETITIVE_CORE_IDS = new Set([
+  "openai", "anthropic", "google", "microsoft", "aws", "meta", "mistral",
+  "cohere", "deepseek", "perplexity", "nvidia", "databricks", "snowflake",
+  "salesforce", "servicenow", "glean", "harvey", "writer",
+]);
+
+export const COMPETITIVE_CORE: CompetitiveTarget[] = COMPETITIVE_TARGETS.filter((t) =>
+  COMPETITIVE_CORE_IDS.has(t.vendorId),
+);
+
 /**
  * Mapping from a competitive dimension to the schema-level NewsCategory used
  * by IntelligenceNewsItem. Funding + press + hires don't have dedicated

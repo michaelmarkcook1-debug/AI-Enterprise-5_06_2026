@@ -31,6 +31,7 @@ import {
   backfillRankingSnapshots,
 } from "../intelligence/ranking-snapshots";
 import { runCompetitiveIntelMonitor } from "../intelligence/competitive-monitor";
+import { COMPETITIVE_CORE } from "../intelligence/competitive-targets";
 import { fetchFinancialsForProviders } from "../investing/financials-live";
 import { fetchValuationForProviders } from "../investing/valuation-live";
 import { estimateAllIpoForecasts } from "../investing/ipo-estimator";
@@ -90,6 +91,11 @@ export async function runDailyRefresh(now: Date = new Date()): Promise<DailyRefr
   const startedAt = now.toISOString();
   const steps: StepReport[] = [];
   const dbConfigured = hasDatabase();
+  // Cost control (cadence tiering): the expensive web-search steps —
+  // full-universe competitive news, analyst coverage, IPO estimates — run only
+  // on the weekly day (Monday UTC). Daily runs cover the core vendor news plus
+  // all the deterministic/cheap steps (SEC financials, valuations, GitHub, macro).
+  const isWeekly = now.getUTCDay() === 1;
 
   // ── 1. Sourcing ────────────────────────────────────────────
   steps.push(await timed("sourcing", async () => {
@@ -157,8 +163,10 @@ export async function runDailyRefresh(now: Date = new Date()): Promise<DailyRefr
 
   // ── 7. Competitive-intel monitor ───────────────────────────
   steps.push(await timed("competitive_intel", async () => {
-    const r = await runCompetitiveIntelMonitor(now);
+    // Daily: core vendors only. Weekly (Monday): full universe.
+    const r = await runCompetitiveIntelMonitor(now, isWeekly ? {} : { targets: COMPETITIVE_CORE });
     return {
+      cadence: isWeekly ? "weekly_full" : "daily_core",
       vendorsAttempted: r.vendorsAttempted,
       vendorsWithFindings: r.vendorsWithFindings,
       itemsUpserted: r.itemsUpserted,
@@ -190,20 +198,27 @@ export async function runDailyRefresh(now: Date = new Date()): Promise<DailyRefr
     const valOk = val.reports.filter((r) => r.source !== "none").length;
     const valErrors = val.reports.filter((r) => r.error !== null).length;
 
-    // 8c. IPO forecasts — LLM + news, deterministic fallback.
-    const ipo = await estimateAllIpoForecasts();
-    await saveIpoForecasts(ipo.forecasts);
-    const ipoFromLlm = ipo.reports.filter((r) => r.source === "llm").length;
-    const ipoFromDeterministic = ipo.reports.filter((r) => r.source === "deterministic").length;
+    // 8c + 8d are web-search-heavy (LLM + web_search) and don't move daily —
+    // run them only on the weekly day. SEC financials + valuations (8a/8b above)
+    // stay daily because they're deterministic/cheap.
+    let ipoFromLlm = 0, ipoFromDeterministic = 0, acItems = 0, acVendorsWithCoverage = 0, acErrors = 0;
+    if (isWeekly) {
+      // 8c. IPO forecasts — LLM + news, deterministic fallback.
+      const ipo = await estimateAllIpoForecasts();
+      await saveIpoForecasts(ipo.forecasts);
+      ipoFromLlm = ipo.reports.filter((r) => r.source === "llm").length;
+      ipoFromDeterministic = ipo.reports.filter((r) => r.source === "deterministic").length;
 
-    // 8d. Analyst coverage — curated web scrape via Claude.
-    const ac = await fetchAnalystCoverageForAllProviders();
-    await saveAnalystCoverage(ac.items);
-    const acItems = ac.items.length;
-    const acVendorsWithCoverage = new Set(ac.items.map((i) => i.providerId)).size;
-    const acErrors = ac.reports.filter((r) => r.error !== null).length;
+      // 8d. Analyst coverage — curated web scrape via Claude.
+      const ac = await fetchAnalystCoverageForAllProviders();
+      await saveAnalystCoverage(ac.items);
+      acItems = ac.items.length;
+      acVendorsWithCoverage = new Set(ac.items.map((i) => i.providerId)).size;
+      acErrors = ac.reports.filter((r) => r.error !== null).length;
+    }
 
     return {
+      cadence: isWeekly ? "weekly_full" : "daily_financials_only",
       financialsFromSec: finFromSec,
       financialsFromIrFallback: finFromIr,
       financialsErrors: finErrors,

@@ -24,9 +24,11 @@ import {
 
 const DEFAULT_MODEL = process.env.ANTHROPIC_MODEL ?? "claude-sonnet-4-6";
 const WEB_SEARCH_TOOL_TYPE = "web_search_20260209" as const;
-const MAX_SEARCHES_PER_VENDOR = 6;
+const MAX_SEARCHES_PER_VENDOR = 3;
 const LOOKBACK_DAYS = 14;
-const MAX_ITEMS_PER_VENDOR = 6;
+// Cost controls: 4 items + 3 searches per vendor keeps per-run web-search spend
+// roughly half the original 6/6 while still covering the six dimensions.
+const MAX_ITEMS_PER_VENDOR = 4;
 
 let _client: Anthropic | null = null;
 function getClient(): Anthropic | null {
@@ -202,9 +204,13 @@ export interface MonitorRunResult {
  * Run the competitive-intelligence monitor across all targets, persisting
  * new findings into IntelligenceNewsItem. Idempotent.
  */
-export async function runCompetitiveIntelMonitor(now: Date = new Date()): Promise<MonitorRunResult> {
+export async function runCompetitiveIntelMonitor(
+  now: Date = new Date(),
+  opts: { targets?: CompetitiveTarget[] } = {},
+): Promise<MonitorRunResult> {
   const ranAt = now.toISOString();
-  const results = await Promise.all(COMPETITIVE_TARGETS.map((t) => monitorVendor(t, now)));
+  const targets = opts.targets ?? COMPETITIVE_TARGETS;
+  const results = await Promise.all(targets.map((t) => monitorVendor(t, now)));
 
   const errors = results.flatMap((r) => (r.error ? [{ vendorId: r.vendorId, error: r.error }] : []));
   const totalSearches = results.reduce((sum, r) => sum + r.searchesUsed, 0);
@@ -258,7 +264,7 @@ export async function runCompetitiveIntelMonitor(now: Date = new Date()): Promis
 
   return {
     ranAt,
-    vendorsAttempted: COMPETITIVE_TARGETS.length,
+    vendorsAttempted: targets.length,
     vendorsWithFindings,
     itemsUpserted,
     totalSearches,
