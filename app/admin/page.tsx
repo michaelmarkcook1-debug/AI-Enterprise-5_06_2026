@@ -3,6 +3,7 @@ import { hasDatabase, getPrisma } from "@/lib/prisma";
 import { getDataProvenance } from "@/lib/intelligence/provenance";
 import { getQueueHealthSummary, EMPTY_QUEUE_HEALTH } from "@/lib/services/queue-health";
 import { listConnectorHealth, dashboardSummary } from "@/lib/connectors/registry";
+import IngestionTrigger from "@/components/admin/IngestionTrigger";
 
 export const dynamic = "force-dynamic";
 
@@ -52,6 +53,12 @@ export default async function AdminHome() {
               <span aria-hidden>→</span>
             </Link>
           </div>
+        </div>
+
+        {/* Manual ingestion control — automated ingestion is suspended; this
+            is the only path that spends Anthropic credits, gated by a cost card. */}
+        <div className="mt-6">
+          <IngestionTrigger />
         </div>
 
         {/* Snapshot row: 4 numbers operators check daily. */}

@@ -87,7 +87,10 @@ async function timed<T>(step: string, fn: () => Promise<T>): Promise<StepReport>
   }
 }
 
-export async function runDailyRefresh(now: Date = new Date()): Promise<DailyRefreshReport> {
+export async function runDailyRefresh(
+  now: Date = new Date(),
+  opts: { force?: boolean } = {},
+): Promise<DailyRefreshReport> {
   const startedAt = now.toISOString();
   const steps: StepReport[] = [];
   const dbConfigured = hasDatabase();
@@ -95,7 +98,9 @@ export async function runDailyRefresh(now: Date = new Date()): Promise<DailyRefr
   // full-universe competitive news, analyst coverage, IPO estimates — run only
   // on the weekly day (Monday UTC). Daily runs cover the core vendor news plus
   // all the deterministic/cheap steps (SEC financials, valuations, GitHub, macro).
-  const isWeekly = now.getUTCDay() === 1;
+  // A manual/forced run (the admin "Run full ingestion" button) executes
+  // everything regardless of weekday.
+  const isWeekly = opts.force === true || now.getUTCDay() === 1;
 
   // ── 1. Sourcing ────────────────────────────────────────────
   steps.push(await timed("sourcing", async () => {

@@ -25,7 +25,11 @@ async function handle(request: Request): Promise<Response> {
   if (!isCronOrAdminRequest(request)) return cronUnauthorized();
 
   try {
-    const report = await runDailyRefresh();
+    // `?full=1` forces every step (full competitive set + analyst + IPO)
+    // regardless of weekday — used by the admin "Run full ingestion" button.
+    // Scheduled cron invocations omit it and follow the weekly cadence.
+    const force = new URL(request.url).searchParams.get("full") === "1";
+    const report = await runDailyRefresh(new Date(), { force });
     return Response.json(report, {
       status: report.ok ? 200 : 207,
     });
