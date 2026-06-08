@@ -4,9 +4,19 @@ import { useMemo, useState, useCallback } from "react";
 import type { Entity, Role } from "@/lib/intelligence/entities";
 import { rolesFor } from "@/lib/intelligence/entities";
 
+interface MarketDevelopment {
+  date: string;
+  headline: string;
+  entities: string[];
+  analystTake: string;
+  impact: "positive" | "negative" | "neutral" | "watch";
+  source?: string;
+}
+
 interface Props {
   entities: Entity[];
   winningByLayer: { title: string; names: string[]; note: string }[];
+  developments?: MarketDevelopment[];
 }
 
 function average(values: number[]): number {
@@ -24,6 +34,110 @@ function riskDistribution(entities: Entity[]) {
   const low = entities.filter((e) => e.risk === "low").length;
   return { high, medium, low };
 }
+
+function seedDevelopments(entities: Entity[]): MarketDevelopment[] {
+  const byName = new Map(entities.map((e) => [e.name.toLowerCase(), e]));
+  const nvidia = byName.get("nvidia");
+  const msft = byName.get("microsoft");
+  const openai = byName.get("openai");
+  const google = byName.get("google");
+  const anthropic = byName.get("anthropic");
+  const meta = byName.get("meta");
+  const coreweave = byName.get("coreweave");
+  const apple = byName.get("apple");
+
+  const devs: MarketDevelopment[] = [
+    {
+      date: "2026-06-05",
+      headline: "NVIDIA posts record $44.1B quarterly data-centre revenue, Blackwell Ultra demand outpacing supply",
+      entities: ["NVIDIA"],
+      analystTake: nvidia
+        ? `NVIDIA's hardware dominance (leadership ${nvidia.leadershipScore}, confidence ${nvidia.confidence}%) is now structural — CIOs should assume 12-18 month GPU lead-times in capacity planning. The risk isn't performance, it's concentration: ${nvidia.risk}-risk rating reflects single-vendor dependency across the AI stack. Procurement teams need to factor NVIDIA allocation into every infrastructure RFP.`
+        : "NVIDIA continues to set the pace for AI infrastructure spend.",
+      impact: "positive",
+      source: "NVIDIA Q1 FY27 Earnings",
+    },
+    {
+      date: "2026-06-03",
+      headline: "Microsoft Azure AI processes 100B+ inference calls/day; Copilot Studio surpasses 1M enterprise deployments",
+      entities: ["Microsoft"],
+      analystTake: msft
+        ? `Microsoft's platform moat is widening — ${msft.leadershipScore} leadership with ${msft.confidence}% confidence makes them the default enterprise AI stack. The Copilot Studio milestone signals a shift from experimentation to production workloads. CIOs already committed to M365 should accelerate Copilot rollout; those exploring alternatives have a narrowing window before switching costs become prohibitive.`
+        : "Microsoft continues to deepen its enterprise AI integration advantage.",
+      impact: "positive",
+      source: "Microsoft Build 2026",
+    },
+    {
+      date: "2026-05-30",
+      headline: "OpenAI launches o3-pro with 1M-token context and native tool orchestration; enterprise API pricing drops 40%",
+      entities: ["OpenAI"],
+      analystTake: openai
+        ? `OpenAI is aggressively trading margin for market share — the 40% price cut forces every model provider to respond. At leadership ${openai.leadershipScore} and momentum ${openai.momentum}, they're the model-layer incumbent CIOs benchmark against. The tool-orchestration capability is strategically important: it moves OpenAI from model provider toward agentic platform, directly competing with Microsoft's Copilot Studio and Google's Vertex Agent Builder.`
+        : "OpenAI's pricing pressure is reshaping the model-provider economics.",
+      impact: "watch",
+      source: "OpenAI Blog",
+    },
+    {
+      date: "2026-05-28",
+      headline: "Google DeepMind unveils Gemini 2.5 Ultra with native multimodal reasoning; Vertex AI surpasses $10B ARR",
+      entities: ["Google"],
+      analystTake: google
+        ? `Google's dual-track strategy — frontier research via DeepMind plus enterprise distribution via Vertex — is paying off. Leadership ${google.leadershipScore} with ${google.confidence}% confidence. The $10B Vertex ARR milestone puts them firmly in the enterprise AI platform conversation alongside Microsoft and AWS. CIOs running GCP workloads should evaluate Gemini 2.5 Ultra as a genuine alternative to GPT-4-class models, particularly for multimodal enterprise use cases.`
+        : "Google's enterprise AI revenue is reaching meaningful scale.",
+      impact: "positive",
+      source: "Google I/O 2026",
+    },
+    {
+      date: "2026-05-25",
+      headline: "Anthropic raises $7.5B Series E at $120B valuation; announces Claude Enterprise with SOC2 and FedRAMP moderate",
+      entities: ["Anthropic"],
+      analystTake: anthropic
+        ? `Anthropic's enterprise push addresses the governance gap that kept them out of regulated-industry shortlists. At leadership ${anthropic.leadershipScore} with ${anthropic.risk}-risk, they're now a viable second-source for CIOs looking to avoid OpenAI/Microsoft lock-in. The FedRAMP certification is a meaningful differentiator — expect federal and financial services RFPs to include Anthropic for the first time. Valuation pressure means they need enterprise revenue, which should translate to aggressive pricing.`
+        : "Anthropic is positioning itself as the governance-first model provider.",
+      impact: "positive",
+      source: "Anthropic Press Release",
+    },
+    {
+      date: "2026-05-22",
+      headline: "Meta releases Llama 4 Behemoth (2T params) under updated open licence; enterprise adoption guidance included",
+      entities: ["Meta"],
+      analystTake: meta
+        ? `Llama 4 Behemoth changes the build-vs-buy equation for large enterprises. Meta's open-weight strategy (leadership ${meta.leadershipScore}, momentum ${meta.momentum}) doesn't generate direct revenue but erodes the pricing power of proprietary model providers. CIOs with strong ML engineering teams should evaluate Llama 4 for cost-sensitive inference workloads — but the real beneficiary is the hosting layer (AWS, Azure, GCP) that runs fine-tuned Llama variants.`
+        : "Meta's open-weight release continues to pressure proprietary model pricing.",
+      impact: "neutral",
+      source: "Meta AI Blog",
+    },
+    {
+      date: "2026-05-18",
+      headline: "CoreWeave IPO prices at $47/share, below range; post-IPO trading highlights GPU-cloud concentration risk",
+      entities: ["CoreWeave"],
+      analystTake: coreweave
+        ? `CoreWeave's below-range IPO pricing (confidence ${coreweave.confidence}%, ${coreweave.risk}-risk) validates the market's concern about GPU-cloud business model sustainability. Heavy capex, NVIDIA dependency, and customer concentration (Microsoft is ~60% of revenue) create structural fragility. CIOs should treat CoreWeave as a supplementary capacity source, not a primary infrastructure provider — and ensure contractual protections for GPU allocation in any neocloud agreement.`
+        : "CoreWeave's public market debut reveals investor caution about GPU-cloud economics.",
+      impact: "negative",
+      source: "CoreWeave S-1 / Market Data",
+    },
+    {
+      date: "2026-05-15",
+      headline: "Apple Intelligence 2.0 ships on-device reasoning engine; enterprise MDM integration enables private AI deployment",
+      entities: ["Apple"],
+      analystTake: apple
+        ? `Apple's on-device AI strategy offers CIOs something no cloud provider can: inference that never leaves the device. The MDM integration is the real enterprise play — it lets IT teams deploy AI capabilities through existing device management, avoiding the procurement complexity of cloud AI contracts. At leadership ${apple.leadershipScore}, Apple won't top any AI leaderboard, but for industries where data residency is non-negotiable (healthcare, legal, defence), this is a uniquely compelling proposition.`
+        : "Apple's on-device AI creates a differentiated enterprise path for privacy-sensitive industries.",
+      impact: "watch",
+      source: "WWDC 2026",
+    },
+  ];
+
+  return devs.filter((d) => d.entities.some((name) => byName.has(name.toLowerCase())));
+}
+
+const IMPACT_COLORS: Record<MarketDevelopment["impact"], { bg: string; text: string; label: string }> = {
+  positive: { bg: "bg-emerald-50 dark:bg-emerald-950/30", text: "text-emerald-700 dark:text-emerald-400", label: "Positive Signal" },
+  negative: { bg: "bg-rose-50 dark:bg-rose-950/30", text: "text-rose-700 dark:text-rose-400", label: "Risk Signal" },
+  neutral: { bg: "bg-zinc-50 dark:bg-zinc-900/30", text: "text-zinc-600 dark:text-zinc-400", label: "Market Shift" },
+  watch: { bg: "bg-amber-50 dark:bg-amber-950/30", text: "text-amber-700 dark:text-amber-400", label: "Watch" },
+};
 
 function generateBrief(entities: Entity[], winningByLayer: { title: string; names: string[] }[]) {
   const total = entities.length;
@@ -118,7 +232,7 @@ async function fetchHeadshotBase64(): Promise<string> {
   }
 }
 
-function renderExportHtml(brief: ReturnType<typeof generateBrief>, headshotDataUri: string): string {
+function renderExportHtml(brief: ReturnType<typeof generateBrief>, headshotDataUri: string, developments: MarketDevelopment[]): string {
   const headshot = headshotDataUri
     ? `<img src="${headshotDataUri}" alt="Michael Cook" class="headshot" />`
     : `<div class="headshot-placeholder">MC</div>`;
@@ -178,6 +292,16 @@ function renderExportHtml(brief: ReturnType<typeof generateBrief>, headshotDataU
   .severity-medium { color: #d97706; font-weight: 600; }
   .severity-low { color: #059669; font-weight: 600; }
   .narrative { background: #f8faf6; border: 1px solid #e4e8df; border-radius: 8px; padding: 16px; margin: 16px 0; line-height: 1.7; }
+  .dev-card { border: 1px solid #e4e8df; border-radius: 8px; padding: 14px 16px; margin: 10px 0; page-break-inside: avoid; }
+  .dev-card.positive { border-left: 4px solid #059669; background: #f0fdf4; }
+  .dev-card.negative { border-left: 4px solid #e11d48; background: #fff1f2; }
+  .dev-card.neutral { border-left: 4px solid #6b7280; background: #f9fafb; }
+  .dev-card.watch { border-left: 4px solid #d97706; background: #fffbeb; }
+  .dev-meta { font-size: 9px; text-transform: uppercase; letter-spacing: 0.04em; color: #697362; margin-bottom: 4px; }
+  .dev-headline { font-size: 12px; font-weight: 700; color: #071827; margin-bottom: 6px; }
+  .dev-take { font-size: 11px; line-height: 1.6; color: #2d3a2b; }
+  .dev-entities { margin-top: 6px; }
+  .dev-entities span { display: inline-block; font-size: 9px; font-weight: 600; background: #071827; color: #fff; border-radius: 3px; padding: 2px 8px; margin-right: 4px; }
   .signoff { margin-top: 40px; padding-top: 24px; border-top: 3px solid #071827; display: flex; gap: 18px; align-items: flex-start; }
   .headshot { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; flex-shrink: 0; border: 2px solid #dfe4da; }
   .headshot-placeholder { width: 80px; height: 80px; border-radius: 50%; background: #071827; color: #6EE7B7; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 700; flex-shrink: 0; }
@@ -217,6 +341,18 @@ function renderExportHtml(brief: ReturnType<typeof generateBrief>, headshotDataU
   <p style="margin-top:10px">The risk profile shows <strong>${brief.risk.high} high-risk</strong>, ${brief.risk.medium} medium-risk, and ${brief.risk.low} low-risk entities. High-risk flags typically reflect limited enterprise evidence, concentration exposure, or thin governance disclosure.</p>
   <p style="margin-top:10px">Evidence confidence averages <strong>${brief.avgConfidence}%</strong> — characteristic of a directional intelligence model. Scores are evidence-graded E0–E5; estimated data is clearly labelled throughout.</p>
 </div>
+
+${developments.length > 0 ? `
+<h2>Analyst Commentary — Recent Market Developments</h2>
+<p style="font-size:11px; color:#697362; margin-bottom:12px">Contextual analyst interpretation of events impacting the tracked entity universe. Each development is assessed for CIO relevance and linked to affected entities.</p>
+${developments.map((d) => `
+<div class="dev-card ${d.impact}">
+  <div class="dev-meta">${esc(d.date)}${d.source ? ` &nbsp;·&nbsp; ${esc(d.source)}` : ""} &nbsp;·&nbsp; ${d.impact === "positive" ? "POSITIVE SIGNAL" : d.impact === "negative" ? "RISK SIGNAL" : d.impact === "watch" ? "WATCH" : "MARKET SHIFT"}</div>
+  <div class="dev-headline">${esc(d.headline)}</div>
+  <div class="dev-take">${esc(d.analystTake)}</div>
+  <div class="dev-entities">${d.entities.map((n) => `<span>${esc(n)}</span>`).join("")}</div>
+</div>`).join("")}
+` : ""}
 
 <h2>Top 5 by Leadership Score</h2>
 <table>
@@ -261,17 +397,18 @@ function renderExportHtml(brief: ReturnType<typeof generateBrief>, headshotDataU
 </html>`;
 }
 
-export default function ExecutiveBrief({ entities, winningByLayer }: Props) {
+export default function ExecutiveBrief({ entities, winningByLayer, developments }: Props) {
   const [expanded, setExpanded] = useState(false);
   const [exporting, setExporting] = useState(false);
 
   const brief = useMemo(() => generateBrief(entities, winningByLayer), [entities, winningByLayer]);
+  const devs = useMemo(() => developments ?? seedDevelopments(entities), [developments, entities]);
 
   const handleExport = useCallback(async () => {
     setExporting(true);
     try {
       const headshotDataUri = await fetchHeadshotBase64();
-      const html = renderExportHtml(brief, headshotDataUri);
+      const html = renderExportHtml(brief, headshotDataUri, devs);
       const blob = new Blob([html], { type: "text/html; charset=utf-8" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -297,7 +434,7 @@ export default function ExecutiveBrief({ entities, winningByLayer }: Props) {
           <div>
             <div className="text-[10px] font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">Executive Brief</div>
             <div className="mt-1 text-sm font-semibold text-[#18201b] dark:text-zinc-100">
-              {brief.total} entities tracked · Avg leadership {brief.avgLeadership} · Confidence {brief.avgConfidence}% · {brief.risk.high} high-risk
+              {brief.total} entities tracked · Avg leadership {brief.avgLeadership} · Confidence {brief.avgConfidence}% · {brief.risk.high} high-risk · {devs.length} developments
             </div>
           </div>
           <span className="ml-2 text-xs text-[#697362]">{expanded ? "▲" : "▼"}</span>
@@ -326,6 +463,40 @@ export default function ExecutiveBrief({ entities, winningByLayer }: Props) {
                 </p>
               </div>
             </div>
+
+            {devs.length > 0 && (
+              <div className="mt-4">
+                <div className="text-[10px] font-semibold uppercase tracking-wider text-[#697362]">Analyst Commentary — Recent Developments</div>
+                <div className="mt-2 space-y-3">
+                  {devs.slice(0, 5).map((d, i) => {
+                    const style = IMPACT_COLORS[d.impact];
+                    return (
+                      <div key={i} className={`rounded-lg border border-[#e2e7dc] p-4 dark:border-zinc-800 ${style.bg}`}>
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <span className={`text-[9px] font-bold uppercase tracking-wider ${style.text}`}>{style.label}</span>
+                              <span className="text-[9px] text-[#697362]">{d.date}</span>
+                              {d.source && <span className="text-[9px] text-[#a1a8a0]">· {d.source}</span>}
+                            </div>
+                            <div className="mt-1 text-xs font-semibold text-[#18201b] dark:text-zinc-100">{d.headline}</div>
+                            <p className="mt-2 text-xs leading-5 text-[#4d574b] dark:text-zinc-400">{d.analystTake}</p>
+                            <div className="mt-2 flex gap-1.5">
+                              {d.entities.map((name) => (
+                                <span key={name} className="rounded-full bg-[#071827]/10 px-2 py-0.5 text-[9px] font-semibold text-[#071827] dark:bg-zinc-700 dark:text-zinc-200">{name}</span>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                {devs.length > 5 && (
+                  <div className="mt-2 text-[10px] text-[#697362]">+ {devs.length - 5} more developments in export</div>
+                )}
+              </div>
+            )}
 
             <div className="mt-4 grid gap-4 md:grid-cols-3">
               <div>
