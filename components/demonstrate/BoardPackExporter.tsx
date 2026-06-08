@@ -68,7 +68,9 @@ function timestamp() {
 
 async function fetchHeadshotBase64(): Promise<string> {
   try {
-    const res = await fetch("/brand/michael-cook-ceo.jpg");
+    const res = await fetch("/brand/michael-cook-ceo.jpg", {
+      headers: { "ngrok-skip-browser-warning": "true" },
+    });
     if (!res.ok) return "";
     const blob = await res.blob();
     return new Promise((resolve) => {
@@ -504,10 +506,21 @@ function downloadHtml(filename: string, content: string) {
   const a = document.createElement("a");
   a.href = url;
   a.download = filename;
+  a.style.display = "none";
   document.body.appendChild(a);
   a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+  // Fallback: if download attribute is ignored (cross-origin/tunnel), open in new tab
+  const fallbackTimer = setTimeout(() => {
+    window.open(url, "_blank");
+  }, 500);
+  // If the page loses focus, the download likely started — cancel fallback
+  const cancelFallback = () => { clearTimeout(fallbackTimer); window.removeEventListener("blur", cancelFallback); };
+  window.addEventListener("blur", cancelFallback);
+  setTimeout(() => {
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    window.removeEventListener("blur", cancelFallback);
+  }, 3000);
 }
 
 export default function BoardPackExporter(props: BoardPackExporterProps) {

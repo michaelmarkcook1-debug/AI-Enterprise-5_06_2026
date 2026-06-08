@@ -238,7 +238,9 @@ function timestamp() {
 
 async function fetchHeadshotBase64(): Promise<string> {
   try {
-    const res = await fetch("/brand/michael-cook-ceo.jpg");
+    const res = await fetch("/brand/michael-cook-ceo.jpg", {
+      headers: { "ngrok-skip-browser-warning": "true" },
+    });
     if (!res.ok) return "";
     const blob = await res.blob();
     return new Promise((resolve) => {
@@ -433,10 +435,17 @@ export default function ExecutiveBrief({ entities, winningByLayer, developments 
       const a = document.createElement("a");
       a.href = url;
       a.download = `AG-Executive-Brief-${new Date().toISOString().slice(0, 10)}.html`;
+      a.style.display = "none";
       document.body.appendChild(a);
       a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      const fallbackTimer = setTimeout(() => { window.open(url, "_blank"); }, 500);
+      const cancelFallback = () => { clearTimeout(fallbackTimer); window.removeEventListener("blur", cancelFallback); };
+      window.addEventListener("blur", cancelFallback);
+      setTimeout(() => {
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        window.removeEventListener("blur", cancelFallback);
+      }, 3000);
     } finally {
       setTimeout(() => setExporting(false), 800);
     }
