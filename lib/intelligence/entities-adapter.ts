@@ -58,8 +58,10 @@ export async function getEntities(): Promise<Entity[]> {
 
   try {
     return await getEntitiesFromDB();
-  } catch (err) {
-    console.error("[entities-adapter] DB query failed, falling back to static ENTITIES:", err);
+  } catch (err: unknown) {
+    const e = err instanceof Error ? err : new Error(String(err));
+    console.error(`[entities-adapter] FALLBACK name=${e.name} message=${e.message}`);
+    if ("code" in e) console.error(`[entities-adapter] code=${(e as any).code}`);
     return ENTITIES;
   }
 }
