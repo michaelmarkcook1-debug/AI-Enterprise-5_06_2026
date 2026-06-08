@@ -36,10 +36,13 @@ function riskCountFromLevel(risk: string): string[] {
 }
 
 export async function POST(request: Request) {
-  const authHeader = request.headers.get("authorization");
-  const expected = process.env.CRON_SECRET ?? process.env.ADMIN_TOKEN;
-  if (!expected || authHeader !== `Bearer ${expected}`) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const isOpen = process.env.ADMIN_API_OPEN === "1";
+  if (!isOpen) {
+    const authHeader = request.headers.get("authorization");
+    const expected = process.env.CRON_SECRET ?? process.env.ADMIN_API_TOKEN;
+    if (!expected || authHeader !== `Bearer ${expected}`) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
   }
 
   if (!hasDatabase()) {
