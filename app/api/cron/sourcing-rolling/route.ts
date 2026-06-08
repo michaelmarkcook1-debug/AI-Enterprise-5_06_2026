@@ -22,6 +22,7 @@ import { isCronOrAdminRequest, cronUnauthorized } from "@/lib/cron/auth";
 import { runSourcing } from "@/lib/sourcing/runner";
 import { SOURCE_MANIFEST } from "@/lib/sourcing/manifest";
 import { hasDatabase } from "@/lib/prisma";
+import { touchRefreshTimestamp } from "@/lib/system/daily-refresh-store";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -53,6 +54,11 @@ async function handle(request: Request) {
 
   try {
     const result = await runSourcing({ vendorId: vendor, persist: true });
+    await touchRefreshTimestamp("sourcing_rolling", {
+      vendor,
+      proposalsExtracted: result.totals.proposalsExtracted,
+      proposalsPersisted: result.totals.proposalsPersisted,
+    });
     return Response.json({
       ok: true,
       vendor,

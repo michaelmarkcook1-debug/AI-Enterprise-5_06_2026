@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { isAdminRequest, unauthorized } from "@/lib/admin-auth";
 import { runIngestion } from "@/lib/ingestion/ingest-service";
+import { touchRefreshTimestamp } from "@/lib/system/daily-refresh-store";
 
 export const runtime = "nodejs";
 
@@ -27,6 +28,10 @@ export async function POST(request: Request) {
   }
   try {
     const result = await runIngestion(parsed.data);
+    await touchRefreshTimestamp("admin_ingestion", {
+      vendorId: parsed.data.vendorId,
+      sourceId: parsed.data.sourceId ?? null,
+    });
     return Response.json(result);
   } catch (err) {
     console.error("[admin/ingestion/run] failed", err);

@@ -43,6 +43,41 @@ function randomId(): string {
   return `dr_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 10)}`;
 }
 
+/**
+ * Lightweight "touch" that records a refresh-run entry from any
+ * ingestion path (admin single-vendor, sourcing-rolling, etc.)
+ * so the TopNav freshness badge stays accurate even when the full
+ * daily-refresh orchestrator isn't the caller.
+ */
+export async function touchRefreshTimestamp(
+  source: string,
+  summary: Record<string, unknown> = {},
+): Promise<string | null> {
+  if (!hasDatabase()) return null;
+  try {
+    await ensureTable();
+    const id = randomId();
+    const now = new Date();
+    await getPrisma().$executeRaw`
+      INSERT INTO "daily_refresh_runs"
+        ("id", "started_at", "finished_at", "ok", "steps", "errors", "duration_ms")
+      VALUES (
+        ${id},
+        ${now},
+        ${now},
+        ${true},
+        ${JSON.stringify([{ step: source, ok: true, durationMs: 0, summary }])}::jsonb,
+        ${{}}::text[],
+        ${0}
+      )
+    `;
+    return id;
+  } catch (err) {
+    console.error("[daily-refresh] touch failed:", (err as Error).message);
+    return null;
+  }
+}
+
 export async function persistRefreshReport(report: DailyRefreshReport): Promise<string | null> {
   if (!hasDatabase()) return null;
   try {
