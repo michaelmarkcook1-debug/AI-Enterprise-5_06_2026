@@ -626,9 +626,12 @@ model Watchlist {
   categories String[] @default([])
   industries String[] @default([])
   alertRules Json     @map("alert_rules") @db.JsonB
+  email      String?
+  userId     String?  @map("user_id")
   createdAt  DateTime @default(now()) @map("created_at")
 
   @@index([createdAt])
+  @@index([userId])
   @@map("watchlists")
 }
 

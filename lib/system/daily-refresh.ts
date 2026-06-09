@@ -46,6 +46,7 @@ import { INVESTMENT_PROVIDERS } from "../investing/seed";
 import { fetchLiveGitHubSignals } from "../reputation/live-github";
 import { fetchAllMacroSignals } from "../market-signals/live-macro";
 import { deriveVendorScores } from "./derive-scores";
+import { checkAndSendWatchlistAlerts } from "../watchlist/notify";
 import {
   persistRefreshReport,
   getLastRefreshRun,
@@ -304,6 +305,12 @@ export async function runDailyRefresh(
       signalsFetched: signals.length,
       sources: [...new Set(signals.map((s) => s.source))],
     };
+  });
+
+  // ── 11. Watchlist alerts ───────────────────────────────────────
+  await trackedStep("watchlist_alerts", async () => {
+    const r = await checkAndSendWatchlistAlerts(now);
+    return { sent: r.sent, checked: r.checked, errors: r.errors.length };
   });
 
   const errors = steps.flatMap((s) => (s.error ? [`${s.step}: ${s.error}`] : []));
