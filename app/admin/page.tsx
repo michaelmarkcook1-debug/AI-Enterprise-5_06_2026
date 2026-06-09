@@ -5,6 +5,7 @@ import { getQueueHealthSummary, EMPTY_QUEUE_HEALTH } from "@/lib/services/queue-
 import { listConnectorHealth, dashboardSummary } from "@/lib/connectors/registry";
 import { getLastRefreshRun, listRefreshRuns, type StoredRefreshRun } from "@/lib/system/daily-refresh-store";
 import IngestionTrigger from "@/components/admin/IngestionTrigger";
+import BackfillSnapshotsButton from "@/components/admin/BackfillSnapshotsButton";
 
 export const dynamic = "force-dynamic";
 
@@ -62,6 +63,15 @@ export default async function AdminHome() {
             is the only path that spends Anthropic credits, gated by a cost card. */}
         <div className="mt-6">
           <IngestionTrigger />
+        </div>
+
+        {/* Snapshot history — backfill so hover-card sparklines populate immediately. */}
+        <div className="mt-4 flex items-center gap-4">
+          <BackfillSnapshotsButton />
+          <p className="text-xs text-zinc-500 dark:text-zinc-400">
+            Populate score history for the Query page hover-card sparklines.
+            Safe to re-run — only gaps are filled.
+          </p>
         </div>
 
         {/* Ingestion health — % completeness + failures from last run. */}
@@ -205,7 +215,7 @@ function Stat({
 const FULL_PIPELINE_STEPS = [
   "sourcing", "safe_linkage", "triage", "projection", "derive_scores",
   "ranking_snapshot", "competitive_intel", "investor_tools_refresh",
-  "reputation_github", "macro_signals",
+  "reputation_github", "macro_signals", "watchlist_alerts",
 ];
 
 const STEP_FRIENDLY: Record<string, string> = {
@@ -219,6 +229,7 @@ const STEP_FRIENDLY: Record<string, string> = {
   investor_tools_refresh: "Investor tools",
   reputation_github: "GitHub reputation",
   macro_signals: "Macro signals",
+  watchlist_alerts: "Watchlist alerts",
   admin_ingestion: "Admin ingestion",
   sourcing_rolling: "Rolling sourcing",
 };

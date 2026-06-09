@@ -13,7 +13,7 @@ export const dynamic = "force-dynamic";
 const FULL_PIPELINE_STEPS = [
   "sourcing", "safe_linkage", "triage", "projection", "derive_scores",
   "ranking_snapshot", "competitive_intel", "investor_tools_refresh",
-  "reputation_github", "macro_signals",
+  "reputation_github", "macro_signals", "watchlist_alerts",
 ];
 
 interface StepRaw {

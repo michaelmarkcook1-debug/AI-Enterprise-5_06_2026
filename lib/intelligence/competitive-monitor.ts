@@ -22,7 +22,10 @@ import {
   type CompetitiveTarget,
 } from "./competitive-targets";
 
-const DEFAULT_MODEL = process.env.ANTHROPIC_MODEL ?? "claude-sonnet-4-6";
+// ANTHROPIC_INTEL_MODEL overrides the model used for competitive monitoring.
+// Set to "claude-haiku-4-5" to cut cost ~75%; quality difference is minimal
+// for tier-1 vendors but noticeable for tier-2 whyItMatters commentary.
+const DEFAULT_MODEL = process.env.ANTHROPIC_INTEL_MODEL ?? process.env.ANTHROPIC_MODEL ?? "claude-sonnet-4-6";
 const WEB_SEARCH_TOOL_TYPE = "web_search_20260209" as const;
 const MAX_SEARCHES_PER_VENDOR = 3;
 const LOOKBACK_DAYS = 14;
