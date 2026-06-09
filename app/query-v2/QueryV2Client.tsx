@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { Metric, Panel, SeedDataBadge } from "@/components/intelligence-ui";
 import { OwnershipBadge, VendorNameWithOwnership } from "@/components/ownership-indicator";
@@ -8,9 +8,11 @@ import {
   type Role,
   type Entity,
   type InfraBand,
+  type RoleScore,
   rolesFor,
 } from "@/lib/intelligence/entities";
 import ExecutiveBrief from "@/components/query/ExecutiveBrief";
+import WatchButton from "@/components/query/WatchButton";
 
 type WinningLayer = { title: string; names: string[]; note: string };
 
@@ -139,6 +141,47 @@ function matchesCategory(entity: Entity, key: CategoryKey) {
   return option.roles.some((role) => roles.includes(role));
 }
 
+// ── AI-market per-role scoring ─────────────────────────────────────────────
+// When a category lens is active, a multi-role giant should rank by its score
+// IN THAT ROLE, not by its global composite. Resolve the relevant role for the
+// active category (primary role wins ties) and look up its roleScore profile.
+function activeRoleFor(entity: Entity, categoryRoles: Role[]): Role | null {
+  if (!categoryRoles.length) return null; // "All" view → composite
+  return rolesFor(entity).find((r) => categoryRoles.includes(r)) ?? null;
+}
+
+interface EffectiveScore {
+  leadership: number;
+  innovation: number;
+  readiness: number;
+  reach: number;
+  confidence: number;
+  roleScored: Role | null; // non-null when a role-specific profile was used
+}
+
+function effectiveScore(entity: Entity, categoryRoles: Role[]): EffectiveScore {
+  const role = activeRoleFor(entity, categoryRoles);
+  const rs: RoleScore | undefined = role ? entity.roleScores?.[role] : undefined;
+  if (rs) {
+    return {
+      leadership: rs.leadership,
+      innovation: rs.innovation,
+      readiness: rs.readiness,
+      reach: rs.reach,
+      confidence: rs.confidence,
+      roleScored: role,
+    };
+  }
+  return {
+    leadership: entity.leadershipScore,
+    innovation: entity.innovation,
+    readiness: entity.readiness,
+    reach: entity.ecosystemReach,
+    confidence: entity.confidence,
+    roleScored: null,
+  };
+}
+
 function roleBadge(role: Role) {
   const tone = ROLE_TONE[role];
   return (
@@ -163,15 +206,57 @@ function signed(value: number) {
   return `${value > 0 ? "+" : ""}${value}`;
 }
 
+// ── Snapshot cache (never re-fetches the same vendor) ─────────────────────
+interface SnapshotPoint {
+  date: string;
+  overallScore: number;
+  momentumScore: number;
+  rank: number;
+  trackedVendors: number;
+}
+
+const snapshotCache = new Map<string, SnapshotPoint[]>();
+
 export default function QueryV2Client({ entities, winningByLayer }: { entities: Entity[]; winningByLayer: WinningLayer[] }) {
   const [category, setCategory] = useState<CategoryKey>("all");
   const [selectedId, setSelectedId] = useState(entities[0]?.id ?? "");
+  const [hoverState, setHoverState] = useState<{ id: string; y: number; x: number } | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const hoverTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleRowEnter = useCallback((id: string, e: React.MouseEvent<HTMLTableRowElement>) => {
+    if (hoverTimeout.current) clearTimeout(hoverTimeout.current);
+    const rect = e.currentTarget.getBoundingClientRect();
+    hoverTimeout.current = setTimeout(() => {
+      setHoverState({ id, y: rect.top + rect.height / 2, x: rect.right });
+    }, 120);
+  }, []);
+
+  const handleRowLeave = useCallback(() => {
+    if (hoverTimeout.current) clearTimeout(hoverTimeout.current);
+    hoverTimeout.current = setTimeout(() => setHoverState(null), 180);
+  }, []);
+
+  const handleCardEnter = useCallback(() => {
+    if (hoverTimeout.current) clearTimeout(hoverTimeout.current);
+  }, []);
+
+  const handleCardLeave = useCallback(() => {
+    if (hoverTimeout.current) clearTimeout(hoverTimeout.current);
+    hoverTimeout.current = setTimeout(() => setHoverState(null), 180);
+  }, []);
 
   const selectedOption = CATEGORY_OPTIONS.find((option) => option.key === category) ?? CATEGORY_OPTIONS[0];
-  const filtered = useMemo(
-    () => entities.filter((entity) => matchesCategory(entity, category)).sort((a, b) => b.leadershipScore - a.leadershipScore),
-    [category, entities],
-  );
+  const categoryRoles = selectedOption.roles;
+  const filtered = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    return entities
+      .filter((entity) => matchesCategory(entity, category))
+      .filter((entity) => !q || entity.name.toLowerCase().includes(q) || entity.primaryRole.toLowerCase().includes(q))
+      // Rank by the AI-market score IN THE ACTIVE ROLE, so e.g. the Models lens
+      // ranks Microsoft by its first-party model score (56), not its 91 composite.
+      .sort((a, b) => effectiveScore(b, categoryRoles).leadership - effectiveScore(a, categoryRoles).leadership);
+  }, [category, categoryRoles, entities, searchQuery]);
   const selectedEntity = filtered.find((entity) => entity.id === selectedId) ?? filtered[0] ?? entities[0];
   const maxShare = Math.max(...filtered.map((entity) => entity.usageShare), 1);
   const normalizedShare = filtered.map((entity) => ({
@@ -343,46 +428,96 @@ export default function QueryV2Client({ entities, winningByLayer }: { entities: 
 
         <section id="leaderboard" className="mt-6 grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
           <Panel title="Category-aware leaderboard">
+            <div className="mb-3 flex flex-wrap items-center gap-3">
+              <div className="relative flex-1 min-w-[180px]">
+                <span className="pointer-events-none absolute inset-y-0 left-2.5 flex items-center text-[#697362] dark:text-zinc-500">
+                  <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8">
+                    <circle cx="6.5" cy="6.5" r="5" /><path d="M11 11l3 3" strokeLinecap="round" />
+                  </svg>
+                </span>
+                <input
+                  type="search"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Filter by name or role…"
+                  className="w-full rounded-md border border-[#d7ddd1] bg-[#fbfcf8] py-1.5 pl-8 pr-3 text-xs text-[#18201b] placeholder:text-[#697362] focus:outline-none focus:ring-1 focus:ring-[#192319] dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:placeholder:text-zinc-500 dark:focus:ring-zinc-400"
+                />
+              </div>
+              <span className="whitespace-nowrap text-[11px] text-[#697362] dark:text-zinc-500">
+                {filtered.length} vendor{filtered.length !== 1 ? "s" : ""}
+                {searchQuery.trim() ? ` matching "${searchQuery.trim()}"` : ""}
+                {" "}· hover for score history
+              </span>
+            </div>
+            {categoryRoles.length > 0 && (
+              <p className="mb-3 rounded-md border border-sky-200 bg-sky-50/60 px-3 py-1.5 text-[11px] leading-4 text-sky-900/80 dark:border-sky-900/50 dark:bg-sky-950/20 dark:text-sky-200/70">
+                <span className="font-semibold">AI-scoped to the {selectedOption.label} lens.</span> Multi-role giants are ranked by their score <em>in this role</em>, not their global composite — so e.g. Microsoft appears here on its first-party model strength, not its platform score. Rows tagged <span className="rounded bg-sky-100 px-1 py-0.5 text-[9px] font-semibold uppercase text-sky-700 dark:bg-sky-900/50 dark:text-sky-300">role-scoped</span> are showing a role-specific number.
+              </p>
+            )}
             <div className="overflow-x-auto">
-              <table className="min-w-[980px] text-left text-sm">
+              <table className="min-w-[1100px] text-left text-sm">
                 <thead className="border-b border-[#e7ebe2] text-[11px] uppercase tracking-wide text-[#697362] dark:border-zinc-800 dark:text-zinc-500">
                   <tr>
-                    <th className="py-2 pr-3">Rank</th>
+                    <th className="py-2 pr-3">#</th>
                     <th className="py-2 pr-3">Entity</th>
-                    <th className="py-2 pr-3">Primary role</th>
-                    <th className="py-2 pr-3">Secondary roles</th>
-                    <th className="py-2 pr-3 text-right">Leadership</th>
-                    <th className="py-2 pr-3 text-right">Momentum</th>
-                    <th className="py-2 pr-3 text-right">Reach</th>
-                    <th className="py-2 pr-3">Risk</th>
-                    <th className="py-2 text-right">Confidence</th>
+                    <th className="py-2 pr-3">Role</th>
+                    <th className="py-2 pr-3 text-right" title="Composite leadership score — distribution, product, ecosystem, execution">Leadership</th>
+                    <th className="py-2 pr-3 text-right" title="R&D velocity, product launch cadence, differentiation vs peers">Innovation</th>
+                    <th className="py-2 pr-3 text-right" title="Enterprise readiness: compliance, SLAs, integrations, governance posture">Readiness</th>
+                    <th className="py-2 pr-3 text-right" title="Trailing momentum across news, product and partnership signals">Momentum</th>
+                    <th className="py-2 pr-3 text-right" title="Ecosystem reach — integrations, partnerships, platform embeddedness">Reach</th>
+                    <th className="py-2 pr-3 text-right" title="Directional share of named enterprise AI usage">Usage%</th>
+                    <th className="py-2 pr-3" title="Operational risk profile (concentration, lock-in, counterparty)">Risk</th>
+                    <th className="py-2 text-right" title="Analyst confidence in the evidence base">Conf%</th>
+                    <th className="py-2 pl-1">Watch</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#edf0ea] dark:divide-zinc-800">
                   {filtered.map((entity, index) => {
                     const active = entity.id === selectedEntity.id;
+                    const es = effectiveScore(entity, categoryRoles);
                     return (
                       <tr
                         key={entity.id}
                         onClick={() => setSelectedId(entity.id)}
+                        onMouseEnter={(e) => handleRowEnter(entity.id, e)}
+                        onMouseLeave={handleRowLeave}
                         className={`cursor-pointer transition-colors ${active ? "bg-[#eef2e8] dark:bg-zinc-900" : "hover:bg-[#f5f7f2] dark:hover:bg-zinc-900/70"}`}
                       >
-                        <td className="py-3 pr-3 font-mono text-[#697362] dark:text-zinc-500">{index + 1}</td>
-                        <td className="py-3 pr-3 font-semibold text-[#18201b] dark:text-zinc-100">
-                          <VendorNameWithOwnership name={entity.name} ownershipType={entity.ownership} />
+                        <td className="py-2.5 pr-3 font-mono text-xs text-[#697362] dark:text-zinc-500">{index + 1}</td>
+                        <td className="py-2.5 pr-3 font-semibold text-[#18201b] dark:text-zinc-100">
+                          <Link href={`/vendors/${entity.slug}`} onClick={(e) => e.stopPropagation()} className="hover:underline">
+                            <VendorNameWithOwnership name={entity.name} ownershipType={entity.ownership} />
+                          </Link>
+                          {es.roleScored && (
+                            <span
+                              title={`AI-scoped score for the ${es.roleScored} role (differs from this vendor's composite). ${entity.roleScores?.[es.roleScored]?.rationale ?? ""}`}
+                              className="ml-1.5 inline-flex items-center rounded bg-sky-100 px-1 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-sky-700 dark:bg-sky-950/50 dark:text-sky-300"
+                            >
+                              role-scoped
+                            </span>
+                          )}
                         </td>
-                        <td className="py-3 pr-3">{roleBadge(entity.primaryRole)}</td>
-                        <td className="py-3 pr-3">
-                          <div className="flex max-w-[280px] flex-wrap gap-1">
-                            {entity.secondaryRoles.slice(0, 4).map(roleBadge)}
-                            {entity.secondaryRoles.length > 4 && <span className="text-xs text-[#697362] dark:text-zinc-500">+{entity.secondaryRoles.length - 4}</span>}
-                          </div>
+                        <td className="py-2.5 pr-3">{roleBadge(es.roleScored ?? entity.primaryRole)}</td>
+                        <td className="py-2.5 pr-3 text-right">
+                          <ScoreCell value={es.leadership} delta={es.roleScored ? undefined : entity.deltas.leadership} tier={scoreGrade(es.leadership)} />
                         </td>
-                        <td className="py-3 pr-3 text-right font-mono">{entity.leadershipScore}</td>
-                        <td className="py-3 pr-3 text-right font-mono">{entity.momentum}</td>
-                        <td className="py-3 pr-3 text-right font-mono">{entity.ecosystemReach}</td>
-                        <td className={`py-3 pr-3 text-xs font-semibold uppercase ${riskClass(entity.risk)}`}>{entity.risk}</td>
-                        <td className="py-3 text-right font-mono">{entity.confidence}%</td>
+                        <td className="py-2.5 pr-3 text-right">
+                          <ScoreCell value={es.innovation} tier={scoreGrade(es.innovation)} />
+                        </td>
+                        <td className="py-2.5 pr-3 text-right">
+                          <ScoreCell value={es.readiness} tier={scoreGrade(es.readiness)} />
+                        </td>
+                        <td className="py-2.5 pr-3 text-right">
+                          <ScoreCell value={entity.momentum} delta={entity.deltas.leadership} tier={scoreGrade(entity.momentum)} />
+                        </td>
+                        <td className="py-2.5 pr-3 text-right">
+                          <ScoreCell value={es.reach} delta={es.roleScored ? undefined : entity.deltas.reach} tier={scoreGrade(es.reach)} />
+                        </td>
+                        <td className="py-2.5 pr-3 text-right font-mono text-xs text-[#4d574b] dark:text-zinc-400">{entity.usageShare.toFixed(1)}%</td>
+                        <td className={`py-2.5 pr-3 text-xs font-semibold uppercase ${riskClass(entity.risk)}`}>{entity.risk}</td>
+                        <td className="py-2.5 text-right font-mono text-xs text-[#4d574b] dark:text-zinc-400">{es.confidence}%</td>
+                        <td className="py-2.5 pl-1"><WatchButton vendorId={entity.id} vendorName={entity.name} /></td>
                       </tr>
                     );
                   })}
@@ -390,6 +525,17 @@ export default function QueryV2Client({ entities, winningByLayer }: { entities: 
               </table>
             </div>
           </Panel>
+          {/* Hover card — rendered outside the table so it's never clipped */}
+          {hoverState && (
+            <VendorScoreHoverCard
+              vendorId={hoverState.id}
+              entity={filtered.find((e) => e.id === hoverState.id) ?? null}
+              anchorY={hoverState.y}
+              anchorX={hoverState.x}
+              onMouseEnter={handleCardEnter}
+              onMouseLeave={handleCardLeave}
+            />
+          )}
 
           <Panel title="Entity detail">
             <div className="space-y-4">
@@ -405,6 +551,7 @@ export default function QueryV2Client({ entities, winningByLayer }: { entities: 
                 </div>
               </div>
               <p className="text-sm leading-6 text-[#2f392f] dark:text-zinc-300">{selectedEntity.cioInterpretation}</p>
+              {selectedEntity.roleScores && <RoleScoreBreakdown entity={selectedEntity} />}
               <DetailList title="Models/products owned" items={selectedEntity.modelsOwned} empty="No material first-party model disclosed in this view." />
               <DetailList title="Hosted third-party models" items={selectedEntity.hostedThirdParty} />
               <DetailList title="Infrastructure exposure" items={selectedEntity.infrastructureExposure} />
@@ -529,6 +676,40 @@ function DetailList({ title, items, empty = "None disclosed in this view." }: { 
   );
 }
 
+// AI-market role-score breakdown — shows WHY one composite misleads for a
+// multi-role giant. Sorted by role leadership, highest first.
+function RoleScoreBreakdown({ entity }: { entity: Entity }) {
+  const rows = Object.entries(entity.roleScores ?? {}) as Array<[Role, RoleScore]>;
+  if (!rows.length) return null;
+  rows.sort((a, b) => b[1].leadership - a[1].leadership);
+  const tierColour = (v: number) =>
+    v >= 80 ? "text-emerald-700 dark:text-emerald-300" :
+    v >= 60 ? "text-amber-700 dark:text-amber-300" :
+    "text-rose-700 dark:text-rose-300";
+  return (
+    <div className="rounded-md border border-sky-200 bg-sky-50/60 p-3 dark:border-sky-900/50 dark:bg-sky-950/20">
+      <div className="flex items-center gap-2">
+        <span className="text-xs font-semibold uppercase tracking-wide text-sky-800 dark:text-sky-300">AI-market role breakdown</span>
+        <span className="rounded bg-sky-100 px-1.5 py-0.5 text-[10px] font-medium text-sky-700 dark:bg-sky-900/50 dark:text-sky-300">why one score misleads</span>
+      </div>
+      <p className="mt-1.5 text-[11px] leading-4 text-sky-900/70 dark:text-sky-200/60">
+        This entity plays multiple AI roles with genuinely different strength. Each lens below is scored on its own merits — the leaderboard ranks by the relevant role when you filter to a category.
+      </p>
+      <div className="mt-2.5 space-y-2">
+        {rows.map(([role, rs]) => (
+          <div key={role} className="border-l-2 border-sky-300 pl-2.5 dark:border-sky-800">
+            <div className="flex items-baseline justify-between gap-2">
+              <span className="text-xs font-semibold text-[#18201b] dark:text-zinc-100">{role}</span>
+              <span className={`font-mono text-sm font-bold tabular-nums ${tierColour(rs.leadership)}`}>{rs.leadership}</span>
+            </div>
+            <p className="mt-0.5 text-[11px] leading-4 text-[#596151] dark:text-zinc-400">{rs.rationale}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function MoverColumn({ title, entities, pick, tone = "gain" }: { title: string; entities: Entity[]; pick: (entity: Entity) => number; tone?: "gain" | "risk" }) {
   return (
     <div>
@@ -542,6 +723,229 @@ function MoverColumn({ title, entities, pick, tone = "gain" }: { title: string; 
             </div>
           </div>
         )) : <div className="text-xs text-[#697362] dark:text-zinc-500">No material signal.</div>}
+      </div>
+    </div>
+  );
+}
+
+// ── Score helpers ──────────────────────────────────────────────────────────
+
+/** Map a 0-100 score to a tier class for colour-coding. */
+function scoreGrade(value: number): "top" | "mid" | "low" {
+  if (value >= 80) return "top";
+  if (value >= 60) return "mid";
+  return "low";
+}
+
+function ScoreCell({ value, delta, tier }: { value: number; delta?: number; tier: "top" | "mid" | "low" }) {
+  const colour =
+    tier === "top" ? "text-emerald-700 dark:text-emerald-300" :
+    tier === "mid" ? "text-amber-700 dark:text-amber-300" :
+    "text-rose-700 dark:text-rose-300";
+  return (
+    <span className={`inline-flex items-center gap-1 font-mono text-xs tabular-nums ${colour}`}>
+      {value}
+      {delta !== undefined && delta !== 0 && (
+        <span className={`text-[10px] ${delta > 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}`}>
+          {delta > 0 ? `+${delta}` : delta}
+        </span>
+      )}
+    </span>
+  );
+}
+
+// ── Vendor Score Hover Card ────────────────────────────────────────────────
+
+interface VendorScoreHoverCardProps {
+  vendorId: string;
+  entity: Entity | null;
+  anchorY: number;
+  anchorX: number;
+  onMouseEnter: () => void;
+  onMouseLeave: () => void;
+}
+
+function VendorScoreHoverCard({ vendorId, entity, anchorY, anchorX, onMouseEnter, onMouseLeave }: VendorScoreHoverCardProps) {
+  const [snapshots, setSnapshots] = useState<SnapshotPoint[] | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    // Return cached result immediately if available
+    const cached = snapshotCache.get(vendorId);
+    if (cached) { setSnapshots(cached); return; }
+
+    let cancelled = false;
+    setLoading(true);
+    fetch(`/api/vendors/${vendorId}/snapshots`)
+      .then((r) => r.json())
+      .then((d: { snapshots?: SnapshotPoint[] }) => {
+        if (cancelled) return;
+        const pts = d.snapshots ?? [];
+        snapshotCache.set(vendorId, pts);
+        setSnapshots(pts);
+      })
+      .catch(() => { if (!cancelled) setSnapshots([]); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [vendorId]);
+
+  // Card dimensions
+  const CARD_W = 300;
+  const CARD_H = 180;
+  const MARGIN = 12;
+
+  // Clamp to viewport
+  const viewportH = typeof window !== "undefined" ? window.innerHeight : 800;
+  const viewportW = typeof window !== "undefined" ? window.innerWidth : 1400;
+  const cardTop = Math.min(Math.max(MARGIN, anchorY - CARD_H / 2), viewportH - CARD_H - MARGIN);
+  // Prefer right of the anchor; fall back to left if too close to edge
+  const cardLeft = anchorX + 12 + CARD_W > viewportW - MARGIN
+    ? anchorX - CARD_W - 12
+    : anchorX + 12;
+
+  if (!entity) return null;
+
+  return (
+    <div
+      role="tooltip"
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+      style={{ top: cardTop, left: cardLeft, width: CARD_W }}
+      className="fixed z-50 rounded-lg border border-[#d7ddd1] bg-white shadow-xl dark:border-zinc-700 dark:bg-[#0d1f2d] pointer-events-auto"
+    >
+      {/* Header */}
+      <div className="border-b border-[#e7ebe2] px-4 py-2.5 dark:border-zinc-800">
+        <div className="flex items-center justify-between gap-2">
+          <span className="text-sm font-semibold text-[#18201b] dark:text-zinc-100">{entity.name}</span>
+          <span className="rounded border border-[#d8ded0] px-1.5 py-0.5 text-[10px] text-[#495344] dark:border-zinc-700 dark:text-zinc-400">{entity.evidenceGrade}</span>
+        </div>
+        <div className="mt-0.5 text-[11px] text-[#697362] dark:text-zinc-500">{entity.primaryRole}</div>
+      </div>
+
+      {/* Score mini-grid */}
+      <div className="grid grid-cols-3 gap-px border-b border-[#e7ebe2] bg-[#e7ebe2] dark:border-zinc-800 dark:bg-zinc-800">
+        {[
+          { label: "Leadership", value: entity.leadershipScore },
+          { label: "Innovation", value: entity.innovation },
+          { label: "Readiness", value: entity.readiness },
+          { label: "Momentum", value: entity.momentum },
+          { label: "Reach", value: entity.ecosystemReach },
+          { label: "Confidence", value: entity.confidence },
+        ].map(({ label, value }) => (
+          <div key={label} className="flex flex-col items-center bg-white py-2 dark:bg-[#0d1f2d]">
+            <span className={`text-base font-bold tabular-nums ${scoreGrade(value) === "top" ? "text-emerald-700 dark:text-emerald-300" : scoreGrade(value) === "mid" ? "text-amber-700 dark:text-amber-300" : "text-rose-700 dark:text-rose-300"}`}>
+              {value}
+            </span>
+            <span className="text-[9px] uppercase tracking-wide text-[#697362] dark:text-zinc-500">{label}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* Sparkline area */}
+      <div className="px-4 py-3">
+        <div className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-[#697362] dark:text-zinc-500">
+          Overall score history
+        </div>
+        {loading && (
+          <div className="flex h-10 items-center justify-center text-[11px] text-[#697362] dark:text-zinc-500">
+            Loading history…
+          </div>
+        )}
+        {!loading && snapshots !== null && snapshots.length < 2 && (
+          <div className="flex h-10 items-center justify-center text-[11px] text-[#697362] dark:text-zinc-500">
+            {snapshots.length === 0 ? "No snapshot history yet — runs after next pipeline." : "Only 1 snapshot captured so far."}
+          </div>
+        )}
+        {!loading && snapshots && snapshots.length >= 2 && (
+          <ScoreSparkline snapshots={snapshots} />
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── Score sparkline (SVG, no library) ─────────────────────────────────────
+
+function ScoreSparkline({ snapshots }: { snapshots: SnapshotPoint[] }) {
+  const W = 268;
+  const H = 52;
+  const PAD = { top: 6, right: 4, bottom: 16, left: 26 };
+  const innerW = W - PAD.left - PAD.right;
+  const innerH = H - PAD.top - PAD.bottom;
+
+  const scores = snapshots.map((s) => s.overallScore);
+  const minScore = Math.max(0, Math.min(...scores) - 5);
+  const maxScore = Math.min(100, Math.max(...scores) + 5);
+  const scoreRange = maxScore - minScore || 1;
+
+  const xScale = (i: number) => PAD.left + (i / (snapshots.length - 1)) * innerW;
+  const yScale = (v: number) => PAD.top + innerH - ((v - minScore) / scoreRange) * innerH;
+
+  const points = snapshots.map((s, i) => `${xScale(i)},${yScale(s.overallScore)}`).join(" ");
+
+  const first = snapshots[0];
+  const last = snapshots[snapshots.length - 1];
+  const trend = last.overallScore - first.overallScore;
+  const trendColour = trend > 0 ? "#10b981" : trend < 0 ? "#f43f5e" : "#94a3b8";
+
+  return (
+    <div>
+      <svg viewBox={`0 0 ${W} ${H}`} className="w-full overflow-visible">
+        {/* Gridline at mid-point */}
+        {[minScore + scoreRange / 2].map((tick) => (
+          <g key={tick}>
+            <line
+              x1={PAD.left} x2={W - PAD.right}
+              y1={yScale(tick)} y2={yScale(tick)}
+              stroke="#e2e7dc" strokeDasharray="3 4" strokeWidth="0.8"
+              className="dark:stroke-zinc-800"
+            />
+            <text x={PAD.left - 3} y={yScale(tick) + 3.5} textAnchor="end" fontSize="8" fill="#94a3b8">
+              {Math.round(tick)}
+            </text>
+          </g>
+        ))}
+        {/* Y-axis labels */}
+        <text x={PAD.left - 3} y={yScale(maxScore) + 3.5} textAnchor="end" fontSize="8" fill="#94a3b8">{Math.round(maxScore)}</text>
+        <text x={PAD.left - 3} y={yScale(minScore) + 3.5} textAnchor="end" fontSize="8" fill="#94a3b8">{Math.round(minScore)}</text>
+
+        {/* Area fill */}
+        <defs>
+          <linearGradient id={`sparkGrad-${snapshots[0].date}`} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={trendColour} stopOpacity="0.25" />
+            <stop offset="100%" stopColor={trendColour} stopOpacity="0.02" />
+          </linearGradient>
+        </defs>
+        <polygon
+          points={`${xScale(0)},${PAD.top + innerH} ${points} ${xScale(snapshots.length - 1)},${PAD.top + innerH}`}
+          fill={`url(#sparkGrad-${snapshots[0].date})`}
+        />
+
+        {/* Line */}
+        <polyline
+          points={points}
+          fill="none"
+          stroke={trendColour}
+          strokeWidth="1.6"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+
+        {/* First/last dots */}
+        <circle cx={xScale(0)} cy={yScale(first.overallScore)} r="2.5" fill={trendColour} opacity="0.6" />
+        <circle cx={xScale(snapshots.length - 1)} cy={yScale(last.overallScore)} r="3" fill={trendColour} />
+
+        {/* Date labels */}
+        <text x={xScale(0)} y={H - 2} textAnchor="start" fontSize="8" fill="#94a3b8">{first.date.slice(5)}</text>
+        <text x={xScale(snapshots.length - 1)} y={H - 2} textAnchor="end" fontSize="8" fill="#94a3b8">{last.date.slice(5)}</text>
+      </svg>
+
+      {/* Trend summary */}
+      <div className="mt-1 flex items-center justify-between text-[10px]">
+        <span className="text-[#697362] dark:text-zinc-500">{snapshots.length} snapshots</span>
+        <span className={trend > 0 ? "text-emerald-700 dark:text-emerald-400" : trend < 0 ? "text-rose-700 dark:text-rose-400" : "text-zinc-500"}>
+          {trend > 0 ? "▲" : trend < 0 ? "▼" : "—"} {Math.abs(trend).toFixed(1)} pts since {first.date.slice(0, 7)}
+        </span>
       </div>
     </div>
   );
