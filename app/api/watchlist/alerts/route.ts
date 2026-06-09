@@ -59,7 +59,7 @@ export async function PUT(request: Request): Promise<Response> {
   });
 
   const currentRules: AlertRules = existing
-    ? (existing.alertRules as AlertRules)
+    ? (existing.alertRules as unknown as AlertRules)
     : { ...DEFAULT_ALERT_RULES };
 
   const updatedRules: AlertRules = {
