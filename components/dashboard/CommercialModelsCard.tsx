@@ -34,7 +34,7 @@ export default function CommercialModelsCard() {
         />
       }
     >
-      <p className="mb-4 text-xs leading-5 text-[#596151] dark:text-zinc-400">
+      <p className="mb-4 text-xs leading-5 text-[#54647a] dark:text-zinc-400">
         Source-backed model availability, separated by owned models, hosted third-party models, and uncertain entries.
         Hosted third-party models keep the original owner — never reattributed to the host platform.
       </p>
@@ -70,7 +70,7 @@ function SummaryStat({
       ? "border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-900/60 dark:bg-amber-950/40 dark:text-amber-300"
       : tone === "info"
         ? "border-sky-200 bg-sky-50 text-sky-800 dark:border-sky-900/60 dark:bg-sky-950/40 dark:text-sky-300"
-        : "border-[#dfe4da] bg-[#f7f8f5] text-[#4d574b] dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300";
+        : "border-[#e6dcc3] bg-[#faf6ec] text-[#475a72] dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300";
   return (
     <div className={`rounded-md border px-3 py-2 ${toneClass}`}>
       <div className="text-[10px] font-semibold uppercase tracking-wide opacity-80">{label}</div>

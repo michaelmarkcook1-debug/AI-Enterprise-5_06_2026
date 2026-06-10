@@ -67,10 +67,10 @@ export default function ShortlistVendorCards({
   return (
     <section className="mb-6">
       <div className="mb-2 flex items-baseline justify-between">
-        <h2 className="text-xs font-semibold uppercase tracking-wider text-[#697362] dark:text-zinc-500">
+        <h2 className="text-xs font-semibold uppercase tracking-wider text-[#5b6b7f] dark:text-zinc-500">
           Your assessed shortlist
         </h2>
-        <span className="text-[10px] text-[#697362] dark:text-zinc-500">Tap a card to compare against the top 3 in its category</span>
+        <span className="text-[10px] text-[#5b6b7f] dark:text-zinc-500">Tap a card to compare against the top 3 in its category</span>
       </div>
       <div className="grid gap-3 md:grid-cols-3">
         {shortlisted.map((v) => {
@@ -84,29 +84,29 @@ export default function ShortlistVendorCards({
               className={`rounded-xl border bg-white p-4 text-left transition-colors dark:bg-zinc-900 ${
                 isOpen
                   ? "border-emerald-400 dark:border-emerald-600"
-                  : "border-[#dfe4da] hover:border-emerald-300 dark:border-zinc-800 dark:hover:border-emerald-700"
+                  : "border-[#e6dcc3] hover:border-emerald-300 dark:border-zinc-800 dark:hover:border-emerald-700"
               }`}
             >
               <div className="flex items-start justify-between gap-2">
                 <div>
-                  <div className="text-base font-semibold text-[#18201b] dark:text-zinc-100">{v.name}</div>
-                  <div className="mt-0.5 text-[11px] text-[#697362] dark:text-zinc-400">{v.category}</div>
+                  <div className="text-base font-semibold text-[#13294b] dark:text-zinc-100">{v.name}</div>
+                  <div className="mt-0.5 text-[11px] text-[#5b6b7f] dark:text-zinc-400">{v.category}</div>
                 </div>
-                <span aria-hidden className={`mt-1 text-xs text-[#697362] transition-transform ${isOpen ? "rotate-180" : ""}`}>▾</span>
+                <span aria-hidden className={`mt-1 text-xs text-[#5b6b7f] transition-transform ${isOpen ? "rotate-180" : ""}`}>▾</span>
               </div>
               <div className="mt-3 flex items-baseline gap-4 font-mono">
                 <span>
                   <span className="text-xl font-semibold text-emerald-700 dark:text-emerald-400">{v.score}</span>
-                  <span className="ml-1 text-[10px] uppercase text-[#697362]">score</span>
+                  <span className="ml-1 text-[10px] uppercase text-[#5b6b7f]">score</span>
                 </span>
                 <span>
-                  <span className="text-xl font-semibold text-[#18201b] dark:text-zinc-100">{v.confidence}</span>
-                  <span className="ml-1 text-[10px] uppercase text-[#697362]">conf.</span>
+                  <span className="text-xl font-semibold text-[#13294b] dark:text-zinc-100">{v.confidence}</span>
+                  <span className="ml-1 text-[10px] uppercase text-[#5b6b7f]">conf.</span>
                 </span>
               </div>
               {isOpen && (
-                <div className="mt-3 border-t border-[#edf0ea] pt-3 dark:border-zinc-800">
-                  <div className="mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-[#697362] dark:text-zinc-500">
+                <div className="mt-3 border-t border-[#efe9d9] pt-3 dark:border-zinc-800">
+                  <div className="mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-[#5b6b7f] dark:text-zinc-500">
                     Top 3 — {v.category}
                   </div>
                   <ol className="space-y-1">
@@ -116,11 +116,11 @@ export default function ShortlistVendorCards({
                         className={`flex items-center justify-between rounded-md px-2 py-1 text-sm ${
                           t.id === v.id
                             ? "bg-emerald-50 font-semibold text-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-200"
-                            : "text-[#3c463b] dark:text-zinc-300"
+                            : "text-[#3a4a63] dark:text-zinc-300"
                         }`}
                       >
                         <span>
-                          <span className="mr-1.5 font-mono text-[10px] text-[#697362]">{i + 1}.</span>
+                          <span className="mr-1.5 font-mono text-[10px] text-[#5b6b7f]">{i + 1}.</span>
                           {t.name}
                           {t.id === v.id && <span className="ml-1.5 text-[9px] uppercase tracking-wide text-emerald-700 dark:text-emerald-400">shortlisted</span>}
                         </span>

@@ -290,7 +290,7 @@ export default function AssessForm({ industries, useCases, objectives, ecosystem
           <h1 className="mt-4 text-3xl font-semibold tracking-tight">{STEPS[step]}</h1>
         </div>
 
-        <div className="rounded-lg border border-[#dfe4da] bg-white p-8">
+        <div className="rounded-lg border border-[#e6dcc3] bg-white p-8">
           {STEPS[step] === "Context" && (
             <div className="space-y-6">
               <Field label="Industry archetype">

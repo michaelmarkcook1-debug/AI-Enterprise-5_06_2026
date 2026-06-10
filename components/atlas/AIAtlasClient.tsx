@@ -301,7 +301,7 @@ const SIDE_NAV = [
 ];
 
 const TONE_STYLES: Record<EntityTone, { border: string; shadow: string; text: string }> = {
-  platform: { border: "#39d9c8", shadow: "0 0 24px rgba(57,217,200,0.24)", text: "text-emerald-100" },
+  platform: { border: "#d9b662", shadow: "0 0 24px rgba(57,217,200,0.24)", text: "text-emerald-100" },
   model: { border: "#86a6ff", shadow: "0 0 24px rgba(134,166,255,0.22)", text: "text-sky-100" },
   application: { border: "#b58cff", shadow: "0 0 24px rgba(181,140,255,0.22)", text: "text-violet-100" },
   hardware: { border: "#d9b662", shadow: "0 0 24px rgba(217,182,98,0.24)", text: "text-amber-100" },
@@ -312,7 +312,7 @@ const TONE_STYLES: Record<EntityTone, { border: string; shadow: string; text: st
 const RELATIONSHIP_STROKES: Record<RelationshipTone, { color: string; width: number; opacity: number }> = {
   investment: { color: "#d9b662", width: 2.2, opacity: 0.78 },
   hardware: { color: "#ff8b75", width: 1.9, opacity: 0.74 },
-  dependency: { color: "#39d9c8", width: 1.6, opacity: 0.5 },
+  dependency: { color: "#d9b662", width: 1.6, opacity: 0.5 },
   hosting: { color: "#2f7684", width: 1.4, opacity: 0.58 },
 };
 
@@ -355,7 +355,7 @@ function CategoryBars({ entity }: { entity: AtlasEntity }) {
         <div key={label}>
           <div className="mb-1 text-xs font-medium text-[#8aa4b8]">{label}</div>
           <div className="mb-3 h-2.5 overflow-hidden rounded-full bg-[#13263c]">
-            <div className="h-full rounded-full bg-[#39d9c8]" style={{ width: `${value}%` }} />
+            <div className="h-full rounded-full bg-[#d9b662]" style={{ width: `${value}%` }} />
           </div>
         </div>
       ))}
@@ -445,7 +445,7 @@ function AtlasMap({
           })}
         </svg>
 
-        <div className="absolute left-1/2 top-1/2 z-20 flex h-28 w-28 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-[#39d9c8] bg-[radial-gradient(circle,#173d48,#0c1f33)] text-center text-sm font-extrabold leading-5 text-[#eff8ff] shadow-[0_0_60px_rgba(57,217,200,0.4)]">
+        <div className="absolute left-1/2 top-1/2 z-20 flex h-28 w-28 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-[#d9b662] bg-[radial-gradient(circle,#173d48,#0c1f33)] text-center text-sm font-extrabold leading-5 text-[#eff8ff] shadow-[0_0_60px_rgba(57,217,200,0.4)]">
           Enterprise<br />AI
         </div>
 
@@ -509,7 +509,7 @@ export default function AIAtlasClient() {
       <div className="mx-auto grid max-w-[1660px] gap-4 px-4 py-5 lg:grid-cols-[250px_minmax(0,1fr)]">
         <aside className="rounded-lg border border-[#1a3953] bg-[#06101b]/90 p-4 lg:sticky lg:top-20 lg:h-[calc(100vh-6rem)]">
           <Link href="/atlas" className="mb-6 flex items-center gap-3">
-            <span className="h-9 w-9 rounded-full bg-[radial-gradient(circle,#fff,#39d9c8_33%,#0b5b66)] shadow-[0_0_30px_rgba(57,217,200,0.54)]" />
+            <span className="h-9 w-9 rounded-full bg-[radial-gradient(circle,#fff,#d9b662_33%,#0b5b66)] shadow-[0_0_30px_rgba(57,217,200,0.54)]" />
             <span>
               <span className="block font-semibold text-[#eff8ff]">AI Enterprise</span>
               <span className="block text-xs text-[#8aa4b8]">Atlas-first OS</span>
@@ -552,13 +552,13 @@ export default function AIAtlasClient() {
                 value={searchTerm}
                 onChange={(event) => handleSearch(event.target.value)}
                 placeholder="Search AI economy..."
-                className="h-10 min-w-0 rounded-lg border border-[#244a63] bg-[#0d1d30] px-3 text-sm text-white outline-none placeholder:text-[#8aa4b8] focus:border-[#39d9c8] sm:w-64"
+                className="h-10 min-w-0 rounded-lg border border-[#244a63] bg-[#0d1d30] px-3 text-sm text-white outline-none placeholder:text-[#8aa4b8] focus:border-[#d9b662] sm:w-64"
                 aria-label="Search AI economy"
               />
-              <button type="button" onClick={handleFullscreen} className="h-10 rounded-lg border border-[#244a63] bg-[#0d1d30] px-3 text-xs font-semibold text-white hover:border-[#39d9c8]">
+              <button type="button" onClick={handleFullscreen} className="h-10 rounded-lg border border-[#244a63] bg-[#0d1d30] px-3 text-xs font-semibold text-white hover:border-[#d9b662]">
                 Fullscreen
               </button>
-              <button type="button" onClick={handleExport} className="h-10 rounded-lg border border-[#244a63] bg-[#0d1d30] px-3 text-xs font-semibold text-white hover:border-[#39d9c8]">
+              <button type="button" onClick={handleExport} className="h-10 rounded-lg border border-[#244a63] bg-[#0d1d30] px-3 text-xs font-semibold text-white hover:border-[#d9b662]">
                 Export
               </button>
             </div>
@@ -576,7 +576,7 @@ export default function AIAtlasClient() {
               </p>
             </div>
             <div className="text-left lg:text-right">
-              <div className="font-mono text-4xl font-semibold text-[#39d9c8]">{selected.reach}</div>
+              <div className="font-mono text-4xl font-semibold text-[#d9b662]">{selected.reach}</div>
               <div className="text-sm text-[#8aa4b8]">ecosystem influence</div>
             </div>
           </section>
@@ -591,8 +591,8 @@ export default function AIAtlasClient() {
                   onClick={() => setActiveLayer(layer)}
                   className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
                     active
-                      ? "border-[#39d9c8] bg-[#123c47] text-white"
-                      : "border-[#244a63] bg-[#0d1d30] text-[#8aa4b8] hover:border-[#39d9c8] hover:text-white"
+                      ? "border-[#d9b662] bg-[#123c47] text-white"
+                      : "border-[#244a63] bg-[#0d1d30] text-[#8aa4b8] hover:border-[#d9b662] hover:text-white"
                   }`}
                 >
                   {layer}
@@ -605,7 +605,7 @@ export default function AIAtlasClient() {
             <AtlasMap activeLayer={activeLayer} selectedId={selectedId} onSelect={setSelectedId} />
             <aside className="rounded-lg border border-[#1a3953] bg-[linear-gradient(180deg,rgba(11,23,39,0.87),rgba(6,16,28,0.8))] p-4 shadow-2xl shadow-black/30">
               <div className="flex items-center gap-3">
-                <span className="grid h-11 w-11 place-items-center rounded-full border border-[#39d9c8] bg-[#133948] font-bold text-[#eff8ff]">{selected.name[0]}</span>
+                <span className="grid h-11 w-11 place-items-center rounded-full border border-[#d9b662] bg-[#133948] font-bold text-[#eff8ff]">{selected.name[0]}</span>
                 <div>
                   <h2 className="text-xl font-semibold text-[#eff8ff]">{selected.name}</h2>
                   <p className="text-sm text-[#8aa4b8]">{selected.role}</p>
@@ -679,7 +679,7 @@ export default function AIAtlasClient() {
                 { href: "/assess", title: "Assess", copy: "What stack fits us?" },
                 { href: "/demonstrate", title: "Demonstrate", copy: "How do we defend it?" },
               ].map((item) => (
-                <Link key={item.href} href={item.href} className="rounded-lg border border-[#1b3b55] bg-[#081624] p-4 transition hover:border-[#39d9c8]">
+                <Link key={item.href} href={item.href} className="rounded-lg border border-[#1b3b55] bg-[#081624] p-4 transition hover:border-[#d9b662]">
                   <b className="block text-[#eff8ff]">{item.title}</b>
                   <span className="mt-1 block text-sm text-[#8aa4b8]">{item.copy}</span>
                 </Link>

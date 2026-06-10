@@ -21,7 +21,7 @@ export default function IngestionCostPanel({ vendorCount }: { vendorCount: numbe
   const est = useMemo(() => estimateIngestionCost(a), [a]);
 
   const num = (label: string, value: number, set: (n: number) => void, step = 1) => (
-    <label className="flex items-center justify-between gap-3 text-xs text-[#3c463b] dark:text-zinc-300">
+    <label className="flex items-center justify-between gap-3 text-xs text-[#3a4a63] dark:text-zinc-300">
       <span>{label}</span>
       <input
         type="number"
@@ -29,7 +29,7 @@ export default function IngestionCostPanel({ vendorCount }: { vendorCount: numbe
         step={step}
         value={value}
         onChange={(e) => set(Math.max(0, Number(e.target.value)))}
-        className="w-24 rounded-md border border-[#cfd7c8] bg-white px-2 py-1 text-right font-mono text-xs dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
+        className="w-24 rounded-md border border-[#d6c9a8] bg-white px-2 py-1 text-right font-mono text-xs dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
       />
     </label>
   );
@@ -43,7 +43,7 @@ export default function IngestionCostPanel({ vendorCount }: { vendorCount: numbe
             Estimated cost — full ingestion run
           </div>
           <div className="font-mono text-3xl font-semibold text-emerald-900 dark:text-emerald-200">{fmtUsd(est.totalUsd)}</div>
-          <div className="mt-1 text-[11px] text-[#3c463b] dark:text-zinc-400">
+          <div className="mt-1 text-[11px] text-[#3a4a63] dark:text-zinc-400">
             {a.vendorCount} vendors · {fmtTok(est.totalInputTokens)} input / {fmtTok(est.totalOutputTokens)} output tokens ·
             prices verified 10 Jun 2026
           </div>
@@ -60,7 +60,7 @@ export default function IngestionCostPanel({ vendorCount }: { vendorCount: numbe
       <div className="overflow-x-auto">
         <table className="w-full text-left text-xs">
           <thead>
-            <tr className="border-b border-[#dfe4da] text-[10px] uppercase tracking-wider text-[#697362] dark:border-zinc-800 dark:text-zinc-500">
+            <tr className="border-b border-[#e6dcc3] text-[10px] uppercase tracking-wider text-[#5b6b7f] dark:border-zinc-800 dark:text-zinc-500">
               <th className="py-2 pr-3">Stage</th>
               <th className="py-2 pr-3">Tier · Model</th>
               <th className="py-2 pr-3 text-right">Calls</th>
@@ -70,12 +70,12 @@ export default function IngestionCostPanel({ vendorCount }: { vendorCount: numbe
           </thead>
           <tbody>
             {est.stages.map((s) => (
-              <tr key={s.stage} className="border-b border-[#edf0ea]/70 dark:border-zinc-800/70">
-                <td className="py-2 pr-3 font-medium text-[#18201b] dark:text-zinc-100">
+              <tr key={s.stage} className="border-b border-[#efe9d9]/70 dark:border-zinc-800/70">
+                <td className="py-2 pr-3 font-medium text-[#13294b] dark:text-zinc-100">
                   {s.stage}
                   {s.note && <span className="ml-1.5 text-[10px] text-emerald-700 dark:text-emerald-400">{s.note}</span>}
                 </td>
-                <td className="py-2 pr-3 text-[#697362] dark:text-zinc-400">{s.tier} · {s.model}</td>
+                <td className="py-2 pr-3 text-[#5b6b7f] dark:text-zinc-400">{s.tier} · {s.model}</td>
                 <td className="py-2 pr-3 text-right font-mono">{s.calls}</td>
                 <td className="py-2 pr-3 text-right font-mono">{fmtTok(s.inputTokens)} / {fmtTok(s.outputTokens)}</td>
                 <td className="py-2 text-right font-mono font-semibold">{fmtUsd(s.costUsd)}</td>
@@ -86,8 +86,8 @@ export default function IngestionCostPanel({ vendorCount }: { vendorCount: numbe
       </div>
 
       {/* Editable assumptions */}
-      <details className="rounded-lg border border-[#dfe4da] p-3 dark:border-zinc-800">
-        <summary className="cursor-pointer text-xs font-semibold text-[#18201b] dark:text-zinc-100">
+      <details className="rounded-lg border border-[#e6dcc3] p-3 dark:border-zinc-800">
+        <summary className="cursor-pointer text-xs font-semibold text-[#13294b] dark:text-zinc-100">
           Adjust workload assumptions
         </summary>
         <div className="mt-3 grid gap-2 md:grid-cols-2">
@@ -97,7 +97,7 @@ export default function IngestionCostPanel({ vendorCount }: { vendorCount: numbe
           {num("Extraction output tokens / doc", a.extraction.outputTokensPerDoc, (n) => setA({ ...a, extraction: { ...a.extraction, outputTokensPerDoc: n } }), 100)}
           {num("Enrichment input tokens / vendor", a.enrichment.inputTokens, (n) => setA({ ...a, enrichment: { ...a.enrichment, inputTokens: n } }), 500)}
           {num("Narrative input tokens / vendor", a.narrative.inputTokens, (n) => setA({ ...a, narrative: { ...a.narrative, inputTokens: n } }), 500)}
-          <label className="flex items-center justify-between gap-3 text-xs text-[#3c463b] dark:text-zinc-300 md:col-span-2">
+          <label className="flex items-center justify-between gap-3 text-xs text-[#3a4a63] dark:text-zinc-300 md:col-span-2">
             <span>Run analyst narratives via Batch API (−50%, async)</span>
             <input
               type="checkbox"
@@ -110,24 +110,24 @@ export default function IngestionCostPanel({ vendorCount }: { vendorCount: numbe
 
       {/* Staged model strategy */}
       <div>
-        <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-[#697362] dark:text-zinc-500">
+        <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-[#5b6b7f] dark:text-zinc-500">
           Staged model strategy
         </h3>
         <table className="w-full text-left text-xs">
           <thead>
-            <tr className="border-b border-[#dfe4da] text-[10px] uppercase tracking-wider text-[#697362] dark:border-zinc-800 dark:text-zinc-500">
+            <tr className="border-b border-[#e6dcc3] text-[10px] uppercase tracking-wider text-[#5b6b7f] dark:border-zinc-800 dark:text-zinc-500">
               <th className="py-2 pr-3">Tier</th>
               <th className="py-2 pr-3">Model · $/MTok in/out</th>
               <th className="py-2">Use for</th>
             </tr>
           </thead>
-          <tbody className="text-[#3c463b] dark:text-zinc-300">
-            <tr className="border-b border-[#edf0ea]/70 dark:border-zinc-800/70">
+          <tbody className="text-[#3a4a63] dark:text-zinc-300">
+            <tr className="border-b border-[#efe9d9]/70 dark:border-zinc-800/70">
               <td className="py-2 pr-3 font-semibold">T1</td>
               <td className="py-2 pr-3 font-mono">{PRICES.haiku.label} · ${PRICES.haiku.inputPerMTok}/${PRICES.haiku.outputPerMTok}</td>
               <td className="py-2">Bulk collection: classification, dedupe, evidence extraction (env: ANTHROPIC_EXTRACT_MODEL)</td>
             </tr>
-            <tr className="border-b border-[#edf0ea]/70 dark:border-zinc-800/70">
+            <tr className="border-b border-[#efe9d9]/70 dark:border-zinc-800/70">
               <td className="py-2 pr-3 font-semibold">T2</td>
               <td className="py-2 pr-3 font-mono">{PRICES.sonnet.label} · ${PRICES.sonnet.inputPerMTok}/${PRICES.sonnet.outputPerMTok}</td>
               <td className="py-2">Context work: URL discovery, enrichment, summarisation (env: ANTHROPIC_MODEL)</td>

@@ -2,19 +2,22 @@ import type { EvidenceGrade } from "@/lib/types";
 
 export function Metric({ label, value, note }: { label: string; value: string | number; note?: string }) {
   return (
-    <div className="border-l border-[#d6dccf] pl-4 dark:border-zinc-800">
-      <div className="text-2xl font-semibold tabular-nums text-[#121812] dark:text-zinc-50">{value}</div>
-      <div className="mt-1 text-xs font-medium uppercase tracking-wide text-[#697362] dark:text-zinc-500">{label}</div>
-      {note && <div className="mt-1 text-xs text-[#6a725f] dark:text-zinc-500">{note}</div>}
+    <div className="border-l-2 border-[#d4af37] pl-4 dark:border-[#b08d2f]">
+      <div className="text-2xl font-semibold tabular-nums text-[#0f2240] dark:text-[#f6f0e7]">{value}</div>
+      <div className="mt-1 text-xs font-medium uppercase tracking-wide text-[#5b6b7f] dark:text-[#8aa4b8]">{label}</div>
+      {note && <div className="mt-1 text-xs text-[#5e6b7e] dark:text-[#8aa4b8]/80">{note}</div>}
     </div>
   );
 }
 
 export function Panel({ title, children, action }: { title: string; children: React.ReactNode; action?: React.ReactNode }) {
   return (
-    <section className="rounded-lg border border-[#dfe4da] bg-white dark:border-zinc-800 dark:bg-[#071827]">
-      <div className="flex items-center justify-between border-b border-[#e7ebe2] px-4 py-3 dark:border-zinc-800">
-        <h2 className="text-sm font-semibold text-[#18201b] dark:text-zinc-100">{title}</h2>
+    <section className="overflow-hidden rounded-xl border border-[#e6dcc3] bg-[#fffdf7] shadow-[0_1px_3px_rgba(19,41,75,0.06)] dark:border-[#1a3953] dark:bg-[#0a1f38]">
+      <div className="flex items-center justify-between border-b border-[#ece4d0] px-4 py-3 dark:border-[#1a3953]">
+        <h2 className="flex items-center gap-2 text-sm font-semibold text-[#13294b] dark:text-[#f6f0e7]">
+          <span aria-hidden className="h-3.5 w-1 rounded-full bg-[#d4af37]" />
+          {title}
+        </h2>
         {action}
       </div>
       <div className="p-4">{children}</div>
@@ -78,18 +81,18 @@ export function Confidence(_: { value: number }) {
 
 export function EvidenceBadge({ grade }: { grade: EvidenceGrade }) {
   const label = grade === "E5" || grade === "E4" ? "verified" : grade === "E3" ? "tested" : grade === "E2" ? "documented" : "inferred";
-  return <span className="rounded border border-[#d8ded0] px-1.5 py-0.5 text-xs text-[#495344] dark:border-zinc-700 dark:text-zinc-400">{grade} {label}</span>;
+  return <span className="rounded border border-[#e0d6ba] px-1.5 py-0.5 text-xs text-[#4a5a70] dark:border-zinc-700 dark:text-zinc-400">{grade} {label}</span>;
 }
 
 export function ScoreBar({ value, label }: { value: number; label?: string }) {
   return (
     <div>
       <div className="flex items-center justify-between gap-3 text-xs">
-        {label && <span className="text-[#4d574b] dark:text-zinc-400">{label}</span>}
-        <span className="font-mono text-[#18201b] dark:text-zinc-100">{value.toFixed(0)}</span>
+        {label && <span className="text-[#475a72] dark:text-zinc-400">{label}</span>}
+        <span className="font-mono text-[#13294b] dark:text-zinc-100">{value.toFixed(0)}</span>
       </div>
-      <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-[#e8ede2] dark:bg-zinc-800">
-        <div className="h-full rounded-full bg-[#2f5d50] dark:bg-emerald-400" style={{ width: `${Math.max(2, Math.min(100, value))}%` }} />
+      <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-[#ece3cb] dark:bg-[#122c49]">
+        <div className="h-full rounded-full bg-gradient-to-r from-[#b08d2f] to-[#d4af37] dark:from-[#d4af37] dark:to-[#e8c95c]" style={{ width: `${Math.max(2, Math.min(100, value))}%` }} />
       </div>
     </div>
   );
@@ -97,7 +100,7 @@ export function ScoreBar({ value, label }: { value: number; label?: string }) {
 
 export function EstimatedNote() {
   return (
-    <p className="text-xs leading-5 text-[#6a725f] dark:text-zinc-400">
+    <p className="text-xs leading-5 text-[#5e6b7e] dark:text-zinc-400">
       Estimated or inferred values are confidence-labelled seed data. Market share and momentum are directional signals, not proof of vendor quality.
     </p>
   );

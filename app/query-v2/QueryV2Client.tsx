@@ -329,17 +329,17 @@ export default function QueryV2Client({ entities, winningByLayer }: { entities: 
         onClick={() => setSelectedId(entity.id)}
         onMouseEnter={(e) => handleRowEnter(entity.id, e)}
         onMouseLeave={handleRowLeave}
-        className={`cursor-pointer transition-colors ${active ? "bg-[#eef2e8] dark:bg-zinc-900" : "hover:bg-[#f5f7f2] dark:hover:bg-zinc-900/70"}`}
+        className={`cursor-pointer transition-colors ${active ? "bg-[#f3ead2] dark:bg-zinc-900" : "hover:bg-[#faf5e9] dark:hover:bg-zinc-900/70"}`}
       >
-        <td className="py-2.5 pr-3 font-mono text-xs text-[#697362] dark:text-zinc-500">
+        <td className="py-2.5 pr-3 font-mono text-xs text-[#5b6b7f] dark:text-zinc-500">
           <span className="inline-flex items-center gap-0.5">
             {active && (
-              <span className="animate-pulse font-bold text-emerald-500 text-sm leading-none">›</span>
+              <span className="animate-pulse font-bold text-[#d4af37] text-sm leading-none">›</span>
             )}
             {index + 1}
           </span>
         </td>
-        <td className="py-2.5 pr-3 font-semibold text-[#18201b] dark:text-zinc-100">
+        <td className="py-2.5 pr-3 font-semibold text-[#13294b] dark:text-zinc-100">
           <Link href={`/vendors/${entity.slug}`} onClick={(e) => e.stopPropagation()} className="hover:underline">
             <VendorNameWithOwnership name={entity.name} ownershipType={entity.ownership} />
           </Link>
@@ -368,9 +368,9 @@ export default function QueryV2Client({ entities, winningByLayer }: { entities: 
         <td className="py-2.5 pr-3 text-right">
           <ScoreCell value={es.reach} delta={es.roleScored ? undefined : entity.deltas.reach} tier={scoreGrade(es.reach)} />
         </td>
-        <td className="py-2.5 pr-3 text-right font-mono text-xs text-[#4d574b] dark:text-zinc-400">{entity.usageShare.toFixed(1)}%</td>
+        <td className="py-2.5 pr-3 text-right font-mono text-xs text-[#475a72] dark:text-zinc-400">{entity.usageShare.toFixed(1)}%</td>
         <td className={`py-2.5 pr-3 text-xs font-semibold uppercase ${riskClass(entity.risk)}`}>{entity.risk}</td>
-        <td className="py-2.5 text-right font-mono text-xs text-[#4d574b] dark:text-zinc-400">{es.confidence}%</td>
+        <td className="py-2.5 text-right font-mono text-xs text-[#475a72] dark:text-zinc-400">{es.confidence}%</td>
         <td className="py-2.5 pl-1"><WatchButton vendorId={entity.id} vendorName={entity.name} /></td>
       </tr>
     );
@@ -407,8 +407,8 @@ export default function QueryV2Client({ entities, winningByLayer }: { entities: 
                 onClick={() => chooseCategory(option.key)}
                 className={`rounded-md border px-3 py-2 text-xs font-semibold transition-colors ${
                   active
-                    ? "border-[#192319] bg-[#192319] text-white dark:border-white dark:bg-white dark:text-[#071827]"
-                    : "border-[#d7ddd1] bg-[#fbfcf8] text-[#4d574b] hover:bg-[#eef2e8] dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800"
+                    ? "border-[#13294b] bg-[#13294b] text-white dark:border-white dark:bg-white dark:text-[#071827]"
+                    : "border-[#ddd3b6] bg-[#fdfaf1] text-[#475a72] hover:bg-[#f3ead2] dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800"
                 }`}
               >
                 {option.label}
@@ -419,21 +419,21 @@ export default function QueryV2Client({ entities, winningByLayer }: { entities: 
             <button
               type="button"
               onClick={() => chooseCategory("all")}
-              className="rounded-md border border-dashed border-[#d7ddd1] px-3 py-2 text-xs text-[#697362] hover:bg-[#eef2e8] dark:border-zinc-700 dark:text-zinc-500 dark:hover:bg-zinc-800"
+              className="rounded-md border border-dashed border-[#ddd3b6] px-3 py-2 text-xs text-[#5b6b7f] hover:bg-[#f3ead2] dark:border-zinc-700 dark:text-zinc-500 dark:hover:bg-zinc-800"
             >
               ✕ Clear filter
             </button>
           )}
         </div>
         <div className="mt-4 grid gap-4 lg:grid-cols-[0.8fr_1.2fr]">
-          <div className="rounded-md border border-[#e2e7dc] bg-[#fbfcf8] p-3 dark:border-zinc-800 dark:bg-zinc-950/40">
-            <div className="text-xs font-semibold uppercase tracking-wide text-[#697362] dark:text-zinc-500">Category summary</div>
-            <div className="mt-2 text-sm font-semibold text-[#18201b] dark:text-zinc-100">{selectedOption.label}</div>
-            <p className="mt-2 text-xs leading-5 text-[#596151] dark:text-zinc-400">{selectedOption.summary}</p>
+          <div className="rounded-md border border-[#e9e0c8] bg-[#fdfaf1] p-3 dark:border-zinc-800 dark:bg-zinc-950/40">
+            <div className="text-xs font-semibold uppercase tracking-wide text-[#5b6b7f] dark:text-zinc-500">Category summary</div>
+            <div className="mt-2 text-sm font-semibold text-[#13294b] dark:text-zinc-100">{selectedOption.label}</div>
+            <p className="mt-2 text-xs leading-5 text-[#54647a] dark:text-zinc-400">{selectedOption.summary}</p>
           </div>
-          <div className="rounded-md border border-[#e2e7dc] bg-[#fbfcf8] p-3 dark:border-zinc-800 dark:bg-zinc-950/40">
-            <div className="text-xs font-semibold uppercase tracking-wide text-[#697362] dark:text-zinc-500">CIO interpretation</div>
-            <p className="mt-2 text-sm leading-6 text-[#2f392f] dark:text-zinc-300">{selectedOption.interpretation}</p>
+          <div className="rounded-md border border-[#e9e0c8] bg-[#fdfaf1] p-3 dark:border-zinc-800 dark:bg-zinc-950/40">
+            <div className="text-xs font-semibold uppercase tracking-wide text-[#5b6b7f] dark:text-zinc-500">CIO interpretation</div>
+            <p className="mt-2 text-sm leading-6 text-[#2c3b52] dark:text-zinc-300">{selectedOption.interpretation}</p>
           </div>
         </div>
       </Panel>
@@ -441,7 +441,7 @@ export default function QueryV2Client({ entities, winningByLayer }: { entities: 
       {category === "infrastructure" && (
         <section id="infra-bands" className="mt-6">
           <Panel title="Infrastructure by layer">
-            <p className="mb-4 text-xs leading-5 text-[#5f685a] dark:text-zinc-400">
+            <p className="mb-4 text-xs leading-5 text-[#56657b] dark:text-zinc-400">
               Infrastructure is not one shelf — each layer carries a different risk type.
               Silicon is supply-concentration risk, cloud compute is lock-in and pricing-power risk,
               neoclouds are counterparty / viability risk, and data platforms are data-gravity and
@@ -454,9 +454,9 @@ export default function QueryV2Client({ entities, winningByLayer }: { entities: 
                   .filter((e) => e.infraBand === band.key)
                   .sort((a, b) => b.leadershipScore - a.leadershipScore);
                 return (
-                  <div key={band.key} className="rounded-md border border-[#e2e7dc] bg-[#fbfcf8] p-3 dark:border-zinc-800 dark:bg-zinc-950/40">
-                    <h3 className="text-sm font-semibold text-[#18201b] dark:text-zinc-100">{band.label}</h3>
-                    <p className="mt-1 text-xs leading-5 text-[#66705f] dark:text-zinc-500">{band.note}</p>
+                  <div key={band.key} className="rounded-md border border-[#e9e0c8] bg-[#fdfaf1] p-3 dark:border-zinc-800 dark:bg-zinc-950/40">
+                    <h3 className="text-sm font-semibold text-[#13294b] dark:text-zinc-100">{band.label}</h3>
+                    <p className="mt-1 text-xs leading-5 text-[#5d6b80] dark:text-zinc-500">{band.note}</p>
                     <div className="mt-3 space-y-1.5">
                       {members.length ? members.map((e) => (
                         <button
@@ -465,18 +465,18 @@ export default function QueryV2Client({ entities, winningByLayer }: { entities: 
                           onClick={() => setSelectedId(e.id)}
                           className={`flex w-full items-center justify-between gap-2 rounded border px-2 py-1 text-left text-xs transition-colors ${
                             e.id === selectedEntity.id
-                              ? "border-[#192319] bg-[#eef2e8] dark:border-white dark:bg-zinc-900"
-                              : "border-[#dfe4da] hover:bg-[#eef2e8] dark:border-zinc-800 dark:hover:bg-zinc-900"
+                              ? "border-[#13294b] bg-[#f3ead2] dark:border-white dark:bg-zinc-900"
+                              : "border-[#e6dcc3] hover:bg-[#f3ead2] dark:border-zinc-800 dark:hover:bg-zinc-900"
                           }`}
                         >
-                          <span className="font-medium text-[#18201b] dark:text-zinc-100">{e.name}</span>
+                          <span className="font-medium text-[#13294b] dark:text-zinc-100">{e.name}</span>
                           {e.infraBandSecondary && (
-                            <span className="rounded bg-[#e8ede2] px-1.5 py-0.5 text-[10px] text-[#4d574b] dark:bg-zinc-800 dark:text-zinc-400">
+                            <span className="rounded bg-[#ece3cb] px-1.5 py-0.5 text-[10px] text-[#475a72] dark:bg-zinc-800 dark:text-zinc-400">
                               +{INFRA_BAND_LABEL[e.infraBandSecondary]}
                             </span>
                           )}
                         </button>
-                      )) : <span className="text-xs text-[#697362] dark:text-zinc-500">No tracked entity in this layer.</span>}
+                      )) : <span className="text-xs text-[#5b6b7f] dark:text-zinc-500">No tracked entity in this layer.</span>}
                     </div>
                   </div>
                 );
@@ -487,9 +487,9 @@ export default function QueryV2Client({ entities, winningByLayer }: { entities: 
               const other = filtered.filter((e) => !e.infraBand || !banded.has(e.infraBand));
               if (!other.length) return null;
               return (
-                <div className="mt-4 rounded-md border border-dashed border-[#d7ddd1] bg-transparent p-3 dark:border-zinc-700">
-                  <h3 className="text-sm font-semibold text-[#18201b] dark:text-zinc-100">Other / cross-layer exposure</h3>
-                  <p className="mt-1 text-xs leading-5 text-[#66705f] dark:text-zinc-500">
+                <div className="mt-4 rounded-md border border-dashed border-[#ddd3b6] bg-transparent p-3 dark:border-zinc-700">
+                  <h3 className="text-sm font-semibold text-[#13294b] dark:text-zinc-100">Other / cross-layer exposure</h3>
+                  <p className="mt-1 text-xs leading-5 text-[#5d6b80] dark:text-zinc-500">
                     Tracked here for their infrastructure exposure but not owned to a single layer — typically
                     data, application or model players whose infra role is incidental rather than primary.
                   </p>
@@ -501,8 +501,8 @@ export default function QueryV2Client({ entities, winningByLayer }: { entities: 
                         onClick={() => setSelectedId(e.id)}
                         className={`rounded border px-2 py-1 text-xs transition-colors ${
                           e.id === selectedEntity.id
-                            ? "border-[#192319] bg-[#eef2e8] dark:border-white dark:bg-zinc-900"
-                            : "border-[#dfe4da] hover:bg-[#eef2e8] dark:border-zinc-800 dark:hover:bg-zinc-900"
+                            ? "border-[#13294b] bg-[#f3ead2] dark:border-white dark:bg-zinc-900"
+                            : "border-[#e6dcc3] hover:bg-[#f3ead2] dark:border-zinc-800 dark:hover:bg-zinc-900"
                         }`}
                       >
                         {e.name}
@@ -521,7 +521,7 @@ export default function QueryV2Client({ entities, winningByLayer }: { entities: 
         <Panel title="Category-aware leaderboard">
           <div className="mb-3 flex flex-wrap items-center gap-3">
             <div className="relative flex-1 min-w-[180px]">
-              <span className="pointer-events-none absolute inset-y-0 left-2.5 flex items-center text-[#697362] dark:text-zinc-500">
+              <span className="pointer-events-none absolute inset-y-0 left-2.5 flex items-center text-[#5b6b7f] dark:text-zinc-500">
                 <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8">
                   <circle cx="6.5" cy="6.5" r="5" /><path d="M11 11l3 3" strokeLinecap="round" />
                 </svg>
@@ -531,17 +531,17 @@ export default function QueryV2Client({ entities, winningByLayer }: { entities: 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Filter by name or role…"
-                className="w-full rounded-md border border-[#d7ddd1] bg-[#fbfcf8] py-1.5 pl-8 pr-3 text-xs text-[#18201b] placeholder:text-[#697362] focus:outline-none focus:ring-1 focus:ring-[#192319] dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:placeholder:text-zinc-500 dark:focus:ring-zinc-400"
+                className="w-full rounded-md border border-[#ddd3b6] bg-[#fdfaf1] py-1.5 pl-8 pr-3 text-xs text-[#13294b] placeholder:text-[#5b6b7f] focus:outline-none focus:ring-1 focus:ring-[#13294b] dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:placeholder:text-zinc-500 dark:focus:ring-zinc-400"
               />
             </div>
-            <span className="whitespace-nowrap text-[11px] text-[#697362] dark:text-zinc-500">
+            <span className="whitespace-nowrap text-[11px] text-[#5b6b7f] dark:text-zinc-500">
               {filtered.length} vendor{filtered.length !== 1 ? "s" : ""}
               {searchQuery.trim() ? ` matching "${searchQuery.trim()}"` : ""}
               {" "}· hover for score history
             </span>
           </div>
           {category === "all" && (
-            <p className="mb-3 rounded-md border border-emerald-200 bg-emerald-50/60 px-3 py-1.5 text-[11px] leading-4 text-emerald-900/80 dark:border-emerald-900/50 dark:bg-emerald-950/20 dark:text-emerald-200/70">
+            <p className="mb-3 rounded-md border border-[#e3d5ae] bg-[#f8f1dd]/70 px-3 py-1.5 text-[11px] leading-4 text-[#6b5a23] dark:border-[#b08d2f]/40 dark:bg-[#b08d2f]/10 dark:text-[#e8c95c]/80">
               <span className="font-semibold">Grouped by layer.</span> Vendors are ranked only within their own layer — platforms against platforms, models against models. Each section shows the top 2 by default — click <span className="font-semibold">Show all</span> to expand any layer.
             </p>
           )}
@@ -552,7 +552,7 @@ export default function QueryV2Client({ entities, winningByLayer }: { entities: 
           )}
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <thead className="border-b border-[#e7ebe2] text-[11px] uppercase tracking-wide text-[#697362] dark:border-zinc-800 dark:text-zinc-500">
+              <thead className="border-b border-[#ece4d0] text-[11px] uppercase tracking-wide text-[#5b6b7f] dark:border-zinc-800 dark:text-zinc-500">
                 <tr>
                   <th className="py-2 pr-3" title="Rank within the current layer or category lens only">#</th>
                   <th className="py-2 pr-3">Entity</th>
@@ -568,7 +568,7 @@ export default function QueryV2Client({ entities, winningByLayer }: { entities: 
                   <th className="py-2 pl-1">Watch</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#edf0ea] dark:divide-zinc-800">
+              <tbody className="divide-y divide-[#efe9d9] dark:divide-zinc-800">
                 {category === "all"
                   ? groupedSections.map(({ def, members }) => {
                       const isExpanded = expandedSections.has(def.role);
@@ -578,7 +578,7 @@ export default function QueryV2Client({ entities, winningByLayer }: { entities: 
                         <Fragment key={def.role}>
                           <tr>
                             <td colSpan={12} className="bg-[#071827] px-3 py-2.5">
-                              <span className="text-xs font-bold uppercase tracking-wider text-[#6EE7B7]">{def.title}</span>
+                              <span className="text-xs font-bold uppercase tracking-wider text-[#e8c95c]">{def.title}</span>
                               <span className="ml-3 text-[11px] text-zinc-400">{def.note} Ranked within this layer only.</span>
                             </td>
                           </tr>
@@ -589,7 +589,7 @@ export default function QueryV2Client({ entities, winningByLayer }: { entities: 
                                 <button
                                   type="button"
                                   onClick={() => toggleSection(def.role)}
-                                  className="inline-flex items-center gap-1.5 text-[11px] font-medium text-[#596151] hover:text-[#18201b] dark:text-zinc-400 dark:hover:text-zinc-100 transition-colors"
+                                  className="inline-flex items-center gap-1.5 text-[11px] font-medium text-[#54647a] hover:text-[#13294b] dark:text-zinc-400 dark:hover:text-zinc-100 transition-colors"
                                 >
                                   {isExpanded ? (
                                     <>
@@ -635,32 +635,32 @@ export default function QueryV2Client({ entities, winningByLayer }: { entities: 
       <section id="entity-detail" className="mt-5">
         <Panel title="Entity detail">
           {/* Pulsing selection indicator */}
-          <div className="mb-4 flex items-center gap-2 rounded-md border border-emerald-200 bg-emerald-50/60 px-3 py-2 dark:border-emerald-900/50 dark:bg-emerald-950/20">
-            <span className="animate-pulse text-emerald-500 text-base leading-none">▶</span>
-            <span className="text-xs font-semibold text-emerald-800 dark:text-emerald-300">{selectedEntity.name}</span>
-            <span className="text-xs text-emerald-700/60 dark:text-emerald-400/60">— click any row above to change selection</span>
+          <div className="mb-4 flex items-center gap-2 rounded-md border border-[#e3d5ae] bg-[#f8f1dd]/70 px-3 py-2 dark:border-[#b08d2f]/40 dark:bg-[#b08d2f]/10">
+            <span className="animate-pulse text-[#d4af37] text-base leading-none">▶</span>
+            <span className="text-xs font-semibold text-[#6b5a23] dark:text-[#e8c95c]">{selectedEntity.name}</span>
+            <span className="text-xs text-[#6b5a23]/60 dark:text-[#e8c95c]/60">— click any row above to change selection</span>
           </div>
           <div className="space-y-4">
             <div>
               <div className="flex flex-wrap items-center gap-2">
-                <h3 className="text-lg font-semibold text-[#18201b] dark:text-zinc-100">{selectedEntity.name}</h3>
+                <h3 className="text-lg font-semibold text-[#13294b] dark:text-zinc-100">{selectedEntity.name}</h3>
                 <OwnershipBadge ownershipType={selectedEntity.ownership} compact />
-                <span className="rounded border border-[#d8ded0] px-1.5 py-0.5 text-xs text-[#495344] dark:border-zinc-700 dark:text-zinc-400">{selectedEntity.evidenceGrade}</span>
+                <span className="rounded border border-[#e0d6ba] px-1.5 py-0.5 text-xs text-[#4a5a70] dark:border-zinc-700 dark:text-zinc-400">{selectedEntity.evidenceGrade}</span>
               </div>
               <div className="mt-2 flex flex-wrap gap-1">
                 {roleBadge(selectedEntity.primaryRole)}
                 {selectedEntity.secondaryRoles.map(roleBadge)}
               </div>
             </div>
-            <p className="text-sm leading-6 text-[#2f392f] dark:text-zinc-300">{selectedEntity.cioInterpretation}</p>
+            <p className="text-sm leading-6 text-[#2c3b52] dark:text-zinc-300">{selectedEntity.cioInterpretation}</p>
             {selectedEntity.roleScores && <RoleScoreBreakdown entity={selectedEntity} />}
             <DetailList title="Models/products owned" items={selectedEntity.modelsOwned} empty="No material first-party model disclosed in this view." />
             <DetailList title="Hosted third-party models" items={selectedEntity.hostedThirdParty} />
             <DetailList title="Infrastructure exposure" items={selectedEntity.infrastructureExposure} />
             <DetailList title="Investor relationships" items={selectedEntity.investorRelationships} />
             <DetailList title="Hardware dependencies" items={selectedEntity.hardwareDependencies} />
-            <div className="rounded-md border border-[#e2e7dc] bg-[#fbfcf8] p-3 text-xs leading-5 text-[#596151] dark:border-zinc-800 dark:bg-zinc-950/40 dark:text-zinc-400">
-              <span className="font-semibold text-[#18201b] dark:text-zinc-100">Data caveat: </span>
+            <div className="rounded-md border border-[#e9e0c8] bg-[#fdfaf1] p-3 text-xs leading-5 text-[#54647a] dark:border-zinc-800 dark:bg-zinc-950/40 dark:text-zinc-400">
+              <span className="font-semibold text-[#13294b] dark:text-zinc-100">Data caveat: </span>
               {selectedEntity.dataCaveats}
             </div>
           </div>
@@ -669,7 +669,7 @@ export default function QueryV2Client({ entities, winningByLayer }: { entities: 
 
       <section id="usage-share" className="mt-6 grid gap-5 lg:grid-cols-[0.95fr_1.05fr]">
         <Panel title="Share of named enterprise AI usage">
-          <p className="mb-4 text-xs leading-5 text-[#5f685a] dark:text-zinc-400">
+          <p className="mb-4 text-xs leading-5 text-[#56657b] dark:text-zinc-400">
             Directional, evidence-labelled estimate. Not audited global market share.
             The bars below re-weight the original usage-share idea to the selected role category.
           </p>
@@ -680,8 +680,8 @@ export default function QueryV2Client({ entities, winningByLayer }: { entities: 
                   <span className="font-medium"><VendorNameWithOwnership name={entity.name} ownershipType={entity.ownership} /></span>
                   <span className="font-mono">{entity.usageShare.toFixed(1)}%</span>
                 </div>
-                <div className="h-1.5 overflow-hidden rounded-full bg-[#e8ede2] dark:bg-zinc-800">
-                  <div className="h-full rounded-full bg-[#2f5d50] dark:bg-emerald-400" style={{ width: `${Math.max(3, (entity.usageShare / maxShare) * 100)}%` }} />
+                <div className="h-1.5 overflow-hidden rounded-full bg-[#ece3cb] dark:bg-zinc-800">
+                  <div className="h-full rounded-full bg-[#b08d2f] dark:bg-emerald-400" style={{ width: `${Math.max(3, (entity.usageShare / maxShare) * 100)}%` }} />
                 </div>
               </div>
             ))}
@@ -691,10 +691,10 @@ export default function QueryV2Client({ entities, winningByLayer }: { entities: 
         <Panel title="Category share estimate">
           <div className="space-y-3">
             {normalizedShare.slice(0, 8).map(({ entity, share }) => (
-              <div key={entity.id} className="flex items-center justify-between gap-3 border-b border-[#edf0ea] pb-2 text-sm last:border-0 dark:border-zinc-800">
+              <div key={entity.id} className="flex items-center justify-between gap-3 border-b border-[#efe9d9] pb-2 text-sm last:border-0 dark:border-zinc-800">
                 <div>
-                  <div className="font-medium text-[#18201b] dark:text-zinc-100">{entity.name}</div>
-                  <div className="mt-1 text-xs text-[#697362] dark:text-zinc-500">{entity.primaryRole}</div>
+                  <div className="font-medium text-[#13294b] dark:text-zinc-100">{entity.name}</div>
+                  <div className="mt-1 text-xs text-[#5b6b7f] dark:text-zinc-500">{entity.primaryRole}</div>
                 </div>
                 <div className="font-mono text-lg font-semibold">{share.toFixed(1)}%</div>
               </div>
@@ -705,7 +705,7 @@ export default function QueryV2Client({ entities, winningByLayer }: { entities: 
 
       <section id="atlas" className="mt-6">
         <Panel title="Enhance x Innovate role map">
-          <p className="mb-4 text-xs leading-5 text-[#5f685a] dark:text-zinc-400">
+          <p className="mb-4 text-xs leading-5 text-[#56657b] dark:text-zinc-400">
             X-axis is innovation / market momentum. Y-axis is enterprise readiness / execution.
             Bubble size is ecosystem reach; colour is primary category; outline is public/private/subsidiary; arrow shows movement since prior snapshot.
           </p>
@@ -727,14 +727,14 @@ export default function QueryV2Client({ entities, winningByLayer }: { entities: 
 
       <section id="models" className="mt-6">
         <Panel title="Commercial models by vendor">
-          <p className="mb-4 text-xs leading-5 text-[#5f685a] dark:text-zinc-400">
+          <p className="mb-4 text-xs leading-5 text-[#56657b] dark:text-zinc-400">
             Source-backed model availability should be grouped by ownership and hosting route. Hosted third-party models keep the original owner and should not be reattributed to the platform that hosts them.
           </p>
           <div className="grid gap-4 lg:grid-cols-2">
             {MODEL_GROUPS.map((group) => (
-              <div key={group.title} className="rounded-md border border-[#e2e7dc] bg-[#fbfcf8] p-3 dark:border-zinc-800 dark:bg-zinc-950/40">
-                <h3 className="text-sm font-semibold text-[#18201b] dark:text-zinc-100">{group.title}</h3>
-                <ul className="mt-3 space-y-2 text-xs leading-5 text-[#596151] dark:text-zinc-400">
+              <div key={group.title} className="rounded-md border border-[#e9e0c8] bg-[#fdfaf1] p-3 dark:border-zinc-800 dark:bg-zinc-950/40">
+                <h3 className="text-sm font-semibold text-[#13294b] dark:text-zinc-100">{group.title}</h3>
+                <ul className="mt-3 space-y-2 text-xs leading-5 text-[#54647a] dark:text-zinc-400">
                   {group.items.map((item) => <li key={item}>- {item}</li>)}
                 </ul>
               </div>
@@ -749,11 +749,11 @@ export default function QueryV2Client({ entities, winningByLayer }: { entities: 
 function DetailList({ title, items, empty = "None disclosed in this view." }: { title: string; items: string[]; empty?: string }) {
   return (
     <div>
-      <div className="text-xs font-semibold uppercase tracking-wide text-[#697362] dark:text-zinc-500">{title}</div>
+      <div className="text-xs font-semibold uppercase tracking-wide text-[#5b6b7f] dark:text-zinc-500">{title}</div>
       <div className="mt-2 flex flex-wrap gap-1.5">
         {items.length > 0 ? items.map((item) => (
-          <span key={item} className="rounded border border-[#dfe4da] px-2 py-1 text-xs text-[#2f392f] dark:border-zinc-800 dark:text-zinc-300">{item}</span>
-        )) : <span className="text-xs text-[#697362] dark:text-zinc-500">{empty}</span>}
+          <span key={item} className="rounded border border-[#e6dcc3] px-2 py-1 text-xs text-[#2c3b52] dark:border-zinc-800 dark:text-zinc-300">{item}</span>
+        )) : <span className="text-xs text-[#5b6b7f] dark:text-zinc-500">{empty}</span>}
       </div>
     </div>
   );
@@ -780,10 +780,10 @@ function RoleScoreBreakdown({ entity }: { entity: Entity }) {
         {rows.map(([role, rs]) => (
           <div key={role} className="border-l-2 border-sky-300 pl-2.5 dark:border-sky-800">
             <div className="flex items-baseline justify-between gap-2">
-              <span className="text-xs font-semibold text-[#18201b] dark:text-zinc-100">{role}</span>
+              <span className="text-xs font-semibold text-[#13294b] dark:text-zinc-100">{role}</span>
               <span className={`font-mono text-sm font-bold tabular-nums ${tierColour(rs.leadership)}`}>{rs.leadership}</span>
             </div>
-            <p className="mt-0.5 text-[11px] leading-4 text-[#596151] dark:text-zinc-400">{rs.rationale}</p>
+            <p className="mt-0.5 text-[11px] leading-4 text-[#54647a] dark:text-zinc-400">{rs.rationale}</p>
           </div>
         ))}
       </div>
@@ -794,16 +794,16 @@ function RoleScoreBreakdown({ entity }: { entity: Entity }) {
 function MoverColumn({ title, entities, pick, tone = "gain" }: { title: string; entities: Entity[]; pick: (entity: Entity) => number; tone?: "gain" | "risk" }) {
   return (
     <div>
-      <h3 className="text-xs font-semibold uppercase tracking-wide text-[#697362] dark:text-zinc-500">{title}</h3>
+      <h3 className="text-xs font-semibold uppercase tracking-wide text-[#5b6b7f] dark:text-zinc-500">{title}</h3>
       <div className="mt-3 space-y-3">
         {entities.length ? entities.map((entity) => (
-          <div key={entity.id} className="border-l border-[#d6dccf] pl-3 dark:border-zinc-800">
-            <div className="text-sm font-medium text-[#18201b] dark:text-zinc-100">{entity.name}</div>
+          <div key={entity.id} className="border-l border-[#dcd2b5] pl-3 dark:border-zinc-800">
+            <div className="text-sm font-medium text-[#13294b] dark:text-zinc-100">{entity.name}</div>
             <div className={`mt-1 font-mono text-xs ${tone === "risk" ? "text-rose-700 dark:text-rose-300" : "text-emerald-700 dark:text-emerald-300"}`}>
               {signed(pick(entity))}
             </div>
           </div>
-        )) : <div className="text-xs text-[#697362] dark:text-zinc-500">No material signal.</div>}
+        )) : <div className="text-xs text-[#5b6b7f] dark:text-zinc-500">No material signal.</div>}
       </div>
     </div>
   );
@@ -883,17 +883,17 @@ function VendorScoreHoverCard({ vendorId, entity, anchorY, anchorX, onMouseEnter
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
       style={{ top: cardTop, left: cardLeft, width: CARD_W }}
-      className="fixed z-50 rounded-lg border border-[#d7ddd1] bg-white shadow-xl dark:border-zinc-700 dark:bg-[#0d1f2d] pointer-events-auto"
+      className="fixed z-50 rounded-lg border border-[#ddd3b6] bg-white shadow-xl dark:border-zinc-700 dark:bg-[#0d1f2d] pointer-events-auto"
     >
-      <div className="border-b border-[#e7ebe2] px-4 py-2.5 dark:border-zinc-800">
+      <div className="border-b border-[#ece4d0] px-4 py-2.5 dark:border-zinc-800">
         <div className="flex items-center justify-between gap-2">
-          <span className="text-sm font-semibold text-[#18201b] dark:text-zinc-100">{entity.name}</span>
-          <span className="rounded border border-[#d8ded0] px-1.5 py-0.5 text-[10px] text-[#495344] dark:border-zinc-700 dark:text-zinc-400">{entity.evidenceGrade}</span>
+          <span className="text-sm font-semibold text-[#13294b] dark:text-zinc-100">{entity.name}</span>
+          <span className="rounded border border-[#e0d6ba] px-1.5 py-0.5 text-[10px] text-[#4a5a70] dark:border-zinc-700 dark:text-zinc-400">{entity.evidenceGrade}</span>
         </div>
-        <div className="mt-0.5 text-[11px] text-[#697362] dark:text-zinc-500">{entity.primaryRole}</div>
+        <div className="mt-0.5 text-[11px] text-[#5b6b7f] dark:text-zinc-500">{entity.primaryRole}</div>
       </div>
 
-      <div className="grid grid-cols-3 gap-px border-b border-[#e7ebe2] bg-[#e7ebe2] dark:border-zinc-800 dark:bg-zinc-800">
+      <div className="grid grid-cols-3 gap-px border-b border-[#ece4d0] bg-[#ece4d0] dark:border-zinc-800 dark:bg-zinc-800">
         {[
           { label: "Leadership", value: entity.leadershipScore },
           { label: "Innovation", value: entity.innovation },
@@ -906,22 +906,22 @@ function VendorScoreHoverCard({ vendorId, entity, anchorY, anchorX, onMouseEnter
             <span className={`text-base font-bold tabular-nums ${scoreGrade(value) === "top" ? "text-emerald-700 dark:text-emerald-300" : scoreGrade(value) === "mid" ? "text-amber-700 dark:text-amber-300" : "text-rose-700 dark:text-rose-300"}`}>
               {value}
             </span>
-            <span className="text-[9px] uppercase tracking-wide text-[#697362] dark:text-zinc-500">{label}</span>
+            <span className="text-[9px] uppercase tracking-wide text-[#5b6b7f] dark:text-zinc-500">{label}</span>
           </div>
         ))}
       </div>
 
       <div className="px-4 py-3">
-        <div className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-[#697362] dark:text-zinc-500">
+        <div className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-[#5b6b7f] dark:text-zinc-500">
           Score history
         </div>
         {loading && (
-          <div className="flex h-10 items-center justify-center text-[11px] text-[#697362] dark:text-zinc-500">
+          <div className="flex h-10 items-center justify-center text-[11px] text-[#5b6b7f] dark:text-zinc-500">
             Loading history…
           </div>
         )}
         {!loading && snapshots !== null && snapshots.length < 2 && (
-          <div className="flex h-10 items-center justify-center text-[11px] text-[#697362] dark:text-zinc-500">
+          <div className="flex h-10 items-center justify-center text-[11px] text-[#5b6b7f] dark:text-zinc-500">
             {snapshots.length === 0 ? "No snapshot history yet — runs after next pipeline." : "Only 1 snapshot captured so far."}
           </div>
         )}
@@ -963,7 +963,7 @@ function ScoreSparkline({ snapshots }: { snapshots: SnapshotPoint[] }) {
             <line
               x1={PAD.left} x2={W - PAD.right}
               y1={yScale(tick)} y2={yScale(tick)}
-              stroke="#e2e7dc" strokeDasharray="3 4" strokeWidth="0.8"
+              stroke="#e9e0c8" strokeDasharray="3 4" strokeWidth="0.8"
               className="dark:stroke-zinc-800"
             />
             <text x={PAD.left - 3} y={yScale(tick) + 3.5} textAnchor="end" fontSize="8" fill="#94a3b8">
@@ -997,7 +997,7 @@ function ScoreSparkline({ snapshots }: { snapshots: SnapshotPoint[] }) {
         <text x={xScale(snapshots.length - 1)} y={H - 2} textAnchor="end" fontSize="8" fill="#94a3b8">{last.date.slice(5)}</text>
       </svg>
       <div className="mt-1 flex items-center justify-between text-[10px]">
-        <span className="text-[#697362] dark:text-zinc-500">{snapshots.length} snapshots</span>
+        <span className="text-[#5b6b7f] dark:text-zinc-500">{snapshots.length} snapshots</span>
         <span className={trend > 0 ? "text-emerald-700 dark:text-emerald-400" : trend < 0 ? "text-rose-700 dark:text-rose-400" : "text-zinc-500"}>
           {trend > 0 ? "▲" : trend < 0 ? "▼" : "—"} {Math.abs(trend).toFixed(1)} pts since {first.date.slice(0, 7)}
         </span>
@@ -1016,19 +1016,19 @@ function RoleScatter({ entities, selectedId, onSelect }: { entities: Entity[]; s
   return (
     <div className="overflow-x-auto">
       <svg viewBox={`0 0 ${width} ${height}`} className="min-w-[760px]" role="img" aria-label="Enhance by innovate enterprise AI role map">
-        <rect x="0" y="0" width={width} height={height} rx="12" fill="currentColor" className="text-[#fbfcf8] dark:text-zinc-950" />
+        <rect x="0" y="0" width={width} height={height} rx="12" fill="currentColor" className="text-[#fdfaf1] dark:text-zinc-950" />
         <line x1={pad} x2={width - pad} y1={height - pad} y2={height - pad} stroke="#a6b0a0" strokeWidth="1" />
         <line x1={pad} x2={pad} y1={pad} y2={height - pad} stroke="#a6b0a0" strokeWidth="1" />
         {[55, 65, 75, 85].map((tick) => (
           <g key={tick}>
-            <line x1={x(tick)} x2={x(tick)} y1={pad} y2={height - pad} stroke="#dfe4da" strokeDasharray="4 6" />
-            <line x1={pad} x2={width - pad} y1={y(tick)} y2={y(tick)} stroke="#dfe4da" strokeDasharray="4 6" />
-            <text x={x(tick)} y={height - 22} textAnchor="middle" className="fill-[#697362] text-[11px]">{tick}</text>
-            <text x={26} y={y(tick) + 4} className="fill-[#697362] text-[11px]">{tick}</text>
+            <line x1={x(tick)} x2={x(tick)} y1={pad} y2={height - pad} stroke="#e6dcc3" strokeDasharray="4 6" />
+            <line x1={pad} x2={width - pad} y1={y(tick)} y2={y(tick)} stroke="#e6dcc3" strokeDasharray="4 6" />
+            <text x={x(tick)} y={height - 22} textAnchor="middle" className="fill-[#5b6b7f] text-[11px]">{tick}</text>
+            <text x={26} y={y(tick) + 4} className="fill-[#5b6b7f] text-[11px]">{tick}</text>
           </g>
         ))}
-        <text x={width / 2} y={height - 8} textAnchor="middle" className="fill-[#4d574b] text-[12px] font-semibold">Innovation / market momentum</text>
-        <text transform={`translate(14 ${height / 2}) rotate(-90)`} textAnchor="middle" className="fill-[#4d574b] text-[12px] font-semibold">Enterprise readiness / execution</text>
+        <text x={width / 2} y={height - 8} textAnchor="middle" className="fill-[#475a72] text-[12px] font-semibold">Innovation / market momentum</text>
+        <text transform={`translate(14 ${height / 2}) rotate(-90)`} textAnchor="middle" className="fill-[#475a72] text-[12px] font-semibold">Enterprise readiness / execution</text>
         {entities.map((entity) => {
           const cx = x(entity.innovation);
           const cy = y(entity.readiness);
@@ -1040,7 +1040,7 @@ function RoleScatter({ entities, selectedId, onSelect }: { entities: Entity[]; s
             <g key={entity.id} className="cursor-pointer" onClick={() => onSelect(entity.id)}>
               <line x1={cx - entity.movement.dx * 5} y1={cy + entity.movement.dy * 5} x2={cx} y2={cy} stroke={tone.fill} strokeWidth="1.5" markerEnd="url(#arrow)" opacity="0.75" />
               <circle cx={cx} cy={cy} r={r} fill={tone.fill} fillOpacity={selected ? 0.95 : 0.72} stroke={selected ? "#111827" : stroke} strokeWidth={selected ? 3 : 2} />
-              <text x={cx + r + 5} y={cy + 4} className="fill-[#18201b] text-[11px] font-semibold dark:fill-zinc-100">{entity.name}</text>
+              <text x={cx + r + 5} y={cy + 4} className="fill-[#13294b] text-[11px] font-semibold dark:fill-zinc-100">{entity.name}</text>
             </g>
           );
         })}

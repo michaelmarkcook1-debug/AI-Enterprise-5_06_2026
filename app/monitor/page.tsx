@@ -167,20 +167,20 @@ export default async function MonitorPage() {
           title="Recommendation validity & drift"
           action={<SeedDataBadge label="Estimated" provenance="seed" reason="Drift computed from momentum signals against a baseline of 60. Will use real stored recommendations when assessment→monitor pipeline is wired." />}
         >
-          <p className="mb-3 text-xs text-[#5f685a] dark:text-zinc-400">
+          <p className="mb-3 text-xs text-[#56657b] dark:text-zinc-400">
             Active recommendations scored against current market signals, grouped by category — scores compare within a category, never across.
             Negative drift means conditions have moved against the recommendation. Hover a trend line for the window and provenance.
           </p>
           <div className="space-y-5">
             {[...new Set(recommendations.map((r) => r.vendor.category))].map((category) => (
               <div key={category}>
-                <div className="mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-[#697362] dark:text-zinc-500">
+                <div className="mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-[#5b6b7f] dark:text-zinc-500">
                   {category}
                 </div>
                 <div className="overflow-x-auto">
                   <table className="min-w-full text-sm">
                     <thead>
-                      <tr className="border-b border-[#dfe4da] text-left text-xs uppercase tracking-wide text-[#5f685a]">
+                      <tr className="border-b border-[#e6dcc3] text-left text-xs uppercase tracking-wide text-[#56657b]">
                         <th className="py-2 pr-3">Vendor</th>
                         <th className="py-2 pr-3">Score</th>
                         <th className="py-2 pr-3">Trend</th>
@@ -194,7 +194,7 @@ export default async function MonitorPage() {
                         const a = ACTION_LABEL[r.action];
                         const h = histories.get(r.vendor.id);
                         return (
-                          <tr key={r.vendor.id} className="border-b border-[#edf0ea]/60">
+                          <tr key={r.vendor.id} className="border-b border-[#efe9d9]/60">
                             <td className="py-2.5 pr-3">
                               <VendorNameWithOwnership name={r.vendor.name} ownershipType={r.vendor.ownershipType} />
                             </td>
@@ -207,7 +207,7 @@ export default async function MonitorPage() {
                                   provenance={"sourceLabel" in h && (h as { sourceLabel?: string }).sourceLabel === "snapshot" ? "snapshot" : "reconstructed"}
                                 />
                               ) : (
-                                <span className="text-[10px] text-[#8a948a]">accumulating</span>
+                                <span className="text-[10px] text-[#7e8a99]">accumulating</span>
                               )}
                             </td>
                             <td className="py-2.5 pr-3 font-mono">{r.momentum?.momentumScore.toFixed(0) ?? "—"}</td>
@@ -230,22 +230,22 @@ export default async function MonitorPage() {
       {/* 3. Assumption monitor */}
       <section className="mb-6">
         <Panel title="Assumption health">
-          <p className="mb-3 text-xs text-[#5f685a] dark:text-zinc-400">
+          <p className="mb-3 text-xs text-[#56657b] dark:text-zinc-400">
             Key assumptions underpinning the current AI strategy. Each is monitored for signals that could invalidate it.
           </p>
           <div className="space-y-3">
             {assumptions.map((a) => (
-              <div key={a.id} className="rounded-lg border border-[#dfe4da] bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
+              <div key={a.id} className="rounded-lg border border-[#e6dcc3] bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <div className="text-sm font-semibold text-[#18201b] dark:text-zinc-100">{a.title}</div>
-                    <div className="mt-1 text-xs text-[#5f685a] dark:text-zinc-400">
+                    <div className="text-sm font-semibold text-[#13294b] dark:text-zinc-100">{a.title}</div>
+                    <div className="mt-1 text-xs text-[#56657b] dark:text-zinc-400">
                       <strong>Failure trigger:</strong> {a.failureTrigger}
                     </div>
-                    <div className="mt-1 text-xs text-[#5f685a] dark:text-zinc-400">
+                    <div className="mt-1 text-xs text-[#56657b] dark:text-zinc-400">
                       <strong>Current signal:</strong> {a.currentSignal}
                     </div>
-                    <div className="mt-1 text-xs text-[#5f685a] dark:text-zinc-400">
+                    <div className="mt-1 text-xs text-[#56657b] dark:text-zinc-400">
                       <strong>Action:</strong> {a.action}
                     </div>
                   </div>
@@ -268,17 +268,17 @@ export default async function MonitorPage() {
           title="Vendor change signals"
           action={<SeedDataBadge label={provenance.source === "live" ? "Live" : "Seed"} provenance={provenance.source} reason={provenance.reason} />}
         >
-          <div className="divide-y divide-[#edf0ea] dark:divide-zinc-800">
+          <div className="divide-y divide-[#efe9d9] dark:divide-zinc-800">
             {vendorChangeEvents.map((item) => (
               <div key={item.id} className="py-3">
                 <div className="flex items-center justify-between gap-3">
-                  <div className="text-sm font-medium text-[#18201b] dark:text-zinc-100">{item.title}</div>
-                  <span className="font-mono text-xs text-[#697362] dark:text-zinc-500">{item.impactScore}</span>
+                  <div className="text-sm font-medium text-[#13294b] dark:text-zinc-100">{item.title}</div>
+                  <span className="font-mono text-xs text-[#5b6b7f] dark:text-zinc-500">{item.impactScore}</span>
                 </div>
-                <div className="mt-1 text-xs leading-5 text-[#66705f] dark:text-zinc-400">{item.whyItMatters}</div>
+                <div className="mt-1 text-xs leading-5 text-[#5d6b80] dark:text-zinc-400">{item.whyItMatters}</div>
                 <div className="mt-2 flex flex-wrap items-center gap-2">
                   {item.categories.slice(0, 3).map((c) => (
-                    <span key={c} className="rounded bg-[#eef2e8] px-2 py-0.5 text-[10px] text-[#455044] dark:bg-zinc-800 dark:text-zinc-300">{c}</span>
+                    <span key={c} className="rounded bg-[#f3ead2] px-2 py-0.5 text-[10px] text-[#455044] dark:bg-zinc-800 dark:text-zinc-300">{c}</span>
                   ))}
                   <Confidence value={item.confidenceScore} />
                 </div>
@@ -318,9 +318,9 @@ export default async function MonitorPage() {
               </p>
             ) : (
               watchlists.slice(0, 5).map((w) => (
-                <div key={w.id} className="rounded-md border border-[#dfe4da] bg-white px-3 py-2 dark:border-zinc-800 dark:bg-zinc-900">
-                  <div className="text-sm font-medium text-[#18201b] dark:text-zinc-100">{w.name}</div>
-                  <div className="mt-1 text-xs text-[#5f685a] dark:text-zinc-400">
+                <div key={w.id} className="rounded-md border border-[#e6dcc3] bg-white px-3 py-2 dark:border-zinc-800 dark:bg-zinc-900">
+                  <div className="text-sm font-medium text-[#13294b] dark:text-zinc-100">{w.name}</div>
+                  <div className="mt-1 text-xs text-[#56657b] dark:text-zinc-400">
                     {w.vendors?.length ?? 0} vendors · {w.categories?.length ?? 0} categories
                   </div>
                 </div>
@@ -333,7 +333,7 @@ export default async function MonitorPage() {
       {/* 6. Regulation monitor */}
       <section className="mb-6">
         <Panel title="Regulation & compliance watch">
-          <p className="mb-3 text-xs text-[#5f685a] dark:text-zinc-400">
+          <p className="mb-3 text-xs text-[#56657b] dark:text-zinc-400">
             Regulatory developments that could affect your AI strategy. Sourced from classified news with regulation/compliance tags.
           </p>
           <div className="space-y-3">
@@ -341,10 +341,10 @@ export default async function MonitorPage() {
               .filter((n) => n.categories.some((c) => c.toLowerCase().includes("regulat") || c.toLowerCase().includes("compliance") || c.toLowerCase().includes("risk")))
               .slice(0, 4)
               .map((item) => (
-                <div key={item.id} className="rounded-md border border-[#dfe4da] bg-white px-3 py-2 dark:border-zinc-800 dark:bg-zinc-900">
+                <div key={item.id} className="rounded-md border border-[#e6dcc3] bg-white px-3 py-2 dark:border-zinc-800 dark:bg-zinc-900">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-sm font-medium text-[#18201b] dark:text-zinc-100">{item.title}</span>
-                    <span className="font-mono text-[10px] text-[#697362]">{item.impactScore}</span>
+                    <span className="text-sm font-medium text-[#13294b] dark:text-zinc-100">{item.title}</span>
+                    <span className="font-mono text-[10px] text-[#5b6b7f]">{item.impactScore}</span>
                   </div>
                   <div className="mt-1 text-xs leading-5 text-[#5f665a] dark:text-zinc-400">{item.whyItMatters}</div>
                   <div className="mt-1"><Confidence value={item.confidenceScore} /></div>
@@ -361,7 +361,7 @@ export default async function MonitorPage() {
       {/* 7. Reputation shift monitor */}
       <section className="mb-6">
         <Panel title="Reputation shift signals">
-          <p className="mb-3 text-xs text-[#5f685a] dark:text-zinc-400">
+          <p className="mb-3 text-xs text-[#56657b] dark:text-zinc-400">
             Vendor reputation changes that could warrant reassessment. Developer, employee, and customer signal trends.
           </p>
           <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
@@ -369,7 +369,7 @@ export default async function MonitorPage() {
               const mom = momentumByVendor.get(v.id);
               const repDirection = (mom?.momentumScore ?? 50) > 60 ? "improving" : (mom?.momentumScore ?? 50) < 40 ? "declining" : "stable";
               return (
-                <div key={v.id} className="rounded-md border border-[#dfe4da] bg-white px-3 py-2 dark:border-zinc-800 dark:bg-zinc-900">
+                <div key={v.id} className="rounded-md border border-[#e6dcc3] bg-white px-3 py-2 dark:border-zinc-800 dark:bg-zinc-900">
                   <div className="flex items-center justify-between gap-2">
                     <span className="text-sm font-medium"><VendorNameWithOwnership name={v.name} ownershipType={v.ownershipType} /></span>
                     <span className={`text-[10px] font-semibold uppercase ${
@@ -378,7 +378,7 @@ export default async function MonitorPage() {
                       : "text-zinc-500"
                     }`}>{repDirection}</span>
                   </div>
-                  <div className="mt-1 text-xs text-[#5f685a] dark:text-zinc-400">
+                  <div className="mt-1 text-xs text-[#56657b] dark:text-zinc-400">
                     Momentum: {mom?.momentumScore.toFixed(0) ?? "—"} · Confidence: {v.confidenceScore}
                   </div>
                 </div>
@@ -392,7 +392,7 @@ export default async function MonitorPage() {
       {/* 8. Competitor movement */}
       <section className="mb-6">
         <Panel title="Competitor movement signals">
-          <p className="mb-3 text-xs text-[#5f685a] dark:text-zinc-400">
+          <p className="mb-3 text-xs text-[#56657b] dark:text-zinc-400">
             Competitor AI adoption and vendor choices that could affect your positioning.
           </p>
           <div className="space-y-3">
@@ -406,7 +406,7 @@ export default async function MonitorPage() {
                       {item.changePct > 0 ? "+" : ""}{item.changePct}%
                     </span>
                   </div>
-                  <div className="mt-0.5 text-xs text-[#66705f] dark:text-zinc-400">{item.reason}</div>
+                  <div className="mt-0.5 text-xs text-[#5d6b80] dark:text-zinc-400">{item.reason}</div>
                 </div>
               );
             })}
@@ -418,12 +418,12 @@ export default async function MonitorPage() {
       {/* 9. Reassessment queue */}
       <section className="mb-6">
         <Panel title="Reassessment queue">
-          <p className="mb-3 text-xs text-[#5f685a] dark:text-zinc-400">
+          <p className="mb-3 text-xs text-[#56657b] dark:text-zinc-400">
             Prioritised list of recommendations requiring action, ordered by urgency.
           </p>
           <div className="overflow-x-auto">
             <table className="min-w-full text-sm">
-              <thead><tr className="border-b border-[#dfe4da] text-left text-[10px] uppercase tracking-wide text-[#5f685a]">
+              <thead><tr className="border-b border-[#e6dcc3] text-left text-[10px] uppercase tracking-wide text-[#56657b]">
                 <th className="py-2 pr-3">Vendor</th><th className="py-2 pr-3">Drift</th><th className="py-2 pr-3">Urgency</th><th className="py-2">Recommended next step</th>
               </tr></thead>
               <tbody>
@@ -433,11 +433,11 @@ export default async function MonitorPage() {
                   .map((r) => {
                     const a = ACTION_LABEL[r.action];
                     return (
-                      <tr key={r.vendor.id} className="border-b border-[#edf0ea]/60">
+                      <tr key={r.vendor.id} className="border-b border-[#efe9d9]/60">
                         <td className="py-2 pr-3"><VendorNameWithOwnership name={r.vendor.name} ownershipType={r.vendor.ownershipType} /></td>
                         <td className={`py-2 pr-3 font-mono font-semibold ${r.drift < 0 ? "text-rose-700 dark:text-rose-300" : "text-emerald-700 dark:text-emerald-300"}`}>{r.drift > 0 ? "+" : ""}{r.drift}</td>
                         <td className={`py-2 pr-3 text-xs font-semibold ${a.tone}`}>{a.label}</td>
-                        <td className="py-2 text-xs text-[#5f685a]">Review vendor position and update assessment if drift exceeds threshold.</td>
+                        <td className="py-2 text-xs text-[#56657b]">Review vendor position and update assessment if drift exceeds threshold.</td>
                       </tr>
                     );
                   })}
@@ -454,9 +454,9 @@ export default async function MonitorPage() {
       {/* 10. Navigation context */}
       <section className="mb-2">
         <div className="flex flex-wrap gap-2 text-xs">
-          <Link href="/assess" className="rounded-md border border-[#cfd7c8] px-3 py-2 font-semibold hover:bg-[#eef2e8] dark:border-zinc-700 dark:hover:bg-zinc-900">← Run new assessment</Link>
-          <Link href="/demonstrate" className="rounded-md border border-[#cfd7c8] px-3 py-2 font-semibold hover:bg-[#eef2e8] dark:border-zinc-700 dark:hover:bg-zinc-900">Defend decision →</Link>
-          <Link href="/query" className="rounded-md border border-[#cfd7c8] px-3 py-2 font-semibold hover:bg-[#eef2e8] dark:border-zinc-700 dark:hover:bg-zinc-900">Market intelligence →</Link>
+          <Link href="/assess" className="rounded-md border border-[#d6c9a8] px-3 py-2 font-semibold hover:bg-[#f3ead2] dark:border-zinc-700 dark:hover:bg-zinc-900">← Run new assessment</Link>
+          <Link href="/demonstrate" className="rounded-md border border-[#d6c9a8] px-3 py-2 font-semibold hover:bg-[#f3ead2] dark:border-zinc-700 dark:hover:bg-zinc-900">Defend decision →</Link>
+          <Link href="/query" className="rounded-md border border-[#d6c9a8] px-3 py-2 font-semibold hover:bg-[#f3ead2] dark:border-zinc-700 dark:hover:bg-zinc-900">Market intelligence →</Link>
         </div>
       </section>
     </PageFrame>
@@ -464,10 +464,10 @@ export default async function MonitorPage() {
 }
 
 function MonitorCard({ label, value, tone }: { label: string; value: number; tone: "red" | "amber" | "green" | "neutral" }) {
-  const border = tone === "red" ? "border-rose-200 dark:border-rose-900/60" : tone === "amber" ? "border-amber-200 dark:border-amber-900/60" : tone === "green" ? "border-emerald-200 dark:border-emerald-900/60" : "border-[#dfe4da] dark:border-zinc-800";
+  const border = tone === "red" ? "border-rose-200 dark:border-rose-900/60" : tone === "amber" ? "border-amber-200 dark:border-amber-900/60" : tone === "green" ? "border-emerald-200 dark:border-emerald-900/60" : "border-[#e6dcc3] dark:border-zinc-800";
   const bg = tone === "red" ? "bg-rose-50 dark:bg-rose-950/30" : tone === "amber" ? "bg-amber-50 dark:bg-amber-950/30" : tone === "green" ? "bg-emerald-50 dark:bg-emerald-950/30" : "bg-white dark:bg-zinc-900";
-  const text = tone === "red" ? "text-rose-700 dark:text-rose-300" : tone === "amber" ? "text-amber-700 dark:text-amber-300" : tone === "green" ? "text-emerald-700 dark:text-emerald-300" : "text-[#18201b] dark:text-zinc-100";
-  const labelColor = tone === "red" ? "text-rose-800 dark:text-rose-300" : tone === "amber" ? "text-amber-800 dark:text-amber-300" : tone === "green" ? "text-emerald-800 dark:text-emerald-300" : "text-[#697362] dark:text-zinc-500";
+  const text = tone === "red" ? "text-rose-700 dark:text-rose-300" : tone === "amber" ? "text-amber-700 dark:text-amber-300" : tone === "green" ? "text-emerald-700 dark:text-emerald-300" : "text-[#13294b] dark:text-zinc-100";
+  const labelColor = tone === "red" ? "text-rose-800 dark:text-rose-300" : tone === "amber" ? "text-amber-800 dark:text-amber-300" : tone === "green" ? "text-emerald-800 dark:text-emerald-300" : "text-[#5b6b7f] dark:text-zinc-500";
   return (
     <div className={`rounded-xl border ${border} ${bg} p-3`}>
       <div className={`text-[10px] font-semibold uppercase tracking-wider ${labelColor}`}>{label}</div>

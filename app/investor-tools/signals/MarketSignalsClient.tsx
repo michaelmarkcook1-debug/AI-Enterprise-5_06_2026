@@ -68,8 +68,8 @@ export default function MarketSignalsClient({
     <div className="mx-auto max-w-7xl space-y-5 p-5">
       <header className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold text-[#18201b]">Market Signals</h1>
-          <p className="mt-1 max-w-3xl text-sm leading-6 text-[#596151]">
+          <h1 className="text-2xl font-semibold text-[#13294b]">Market Signals</h1>
+          <p className="mt-1 max-w-3xl text-sm leading-6 text-[#54647a]">
             Source-cited macro, political, sector, company, and market-talk signals feeding the
             Investment Intelligence and Simulator. Truthfulness gates: low-confidence chatter cannot
             move centre, stale signals are excluded from regime classification, partisan commentary
@@ -89,10 +89,10 @@ export default function MarketSignalsClient({
         </div>
       </header>
 
-      <section className="rounded-lg border border-[#dfe4da] bg-white p-4">
+      <section className="rounded-lg border border-[#e6dcc3] bg-white p-4">
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-[#18201b]">Current market regime</h2>
-          <span className="text-xs text-[#697362]">
+          <h2 className="text-sm font-semibold text-[#13294b]">Current market regime</h2>
+          <span className="text-xs text-[#5b6b7f]">
             {regime.contributingSignalIds.length} contributing signals
           </span>
         </div>
@@ -108,7 +108,7 @@ export default function MarketSignalsClient({
           <RegimeChip label="Credit" value={regime.creditRegime} tone={regime.creditRegime === "stressed" ? "warn" : "neutral"} />
           <RegimeChip label="Infra constraint" value={regime.infrastructureConstraintRegime} tone={regime.infrastructureConstraintRegime === "shortage" ? "warn" : "neutral"} />
         </div>
-        <p className="mt-3 text-[11px] leading-5 text-[#697362]">{regime.uncertaintyNote}</p>
+        <p className="mt-3 text-[11px] leading-5 text-[#5b6b7f]">{regime.uncertaintyNote}</p>
       </section>
 
       <div className="flex flex-wrap gap-2">
@@ -125,19 +125,19 @@ export default function MarketSignalsClient({
       </div>
 
       <div className="grid gap-5 xl:grid-cols-[1.4fr_1fr]">
-        <section className="rounded-lg border border-[#dfe4da] bg-white p-4">
-          <h2 className="mb-3 text-sm font-semibold text-[#18201b]">Signal timeline</h2>
+        <section className="rounded-lg border border-[#e6dcc3] bg-white p-4">
+          <h2 className="mb-3 text-sm font-semibold text-[#13294b]">Signal timeline</h2>
           <div className="space-y-3">
             {sortedByDate.map(({ signal, score }) => <SignalCard key={signal.id} signal={signal} score={score} />)}
             {sortedByDate.length === 0 && (
-              <div className="rounded-md border border-dashed border-[#dfe4da] p-4 text-sm text-[#697362]">No signals match this filter.</div>
+              <div className="rounded-md border border-dashed border-[#e6dcc3] p-4 text-sm text-[#5b6b7f]">No signals match this filter.</div>
             )}
           </div>
         </section>
 
-        <section className="rounded-lg border border-[#dfe4da] bg-white p-4">
-          <h2 className="mb-3 text-sm font-semibold text-[#18201b]">Sentiment vs evidence</h2>
-          <p className="mb-3 text-[11px] leading-5 text-[#697362]">
+        <section className="rounded-lg border border-[#e6dcc3] bg-white p-4">
+          <h2 className="mb-3 text-sm font-semibold text-[#13294b]">Sentiment vs evidence</h2>
+          <p className="mb-3 text-[11px] leading-5 text-[#5b6b7f]">
             High-sentiment / low-evidence signals (bottom-right) are market chatter — they widen
             bands but do not move centre. High-sentiment / high-evidence signals (top-right) drive
             scoring.
@@ -146,11 +146,11 @@ export default function MarketSignalsClient({
         </section>
       </div>
 
-      <section className="rounded-lg border border-[#dfe4da] bg-white p-4">
-        <h2 className="mb-3 text-sm font-semibold text-[#18201b]">Regulatory events</h2>
+      <section className="rounded-lg border border-[#e6dcc3] bg-white p-4">
+        <h2 className="mb-3 text-sm font-semibold text-[#13294b]">Regulatory events</h2>
         <div className="overflow-x-auto">
           <table className="w-full min-w-[720px] text-left text-sm">
-            <thead className="text-xs uppercase tracking-wide text-[#697362]">
+            <thead className="text-xs uppercase tracking-wide text-[#5b6b7f]">
               <tr>
                 <th className="py-2 pr-4">Event</th>
                 <th className="py-2 pr-4">Jurisdiction</th>
@@ -159,14 +159,14 @@ export default function MarketSignalsClient({
                 <th className="py-2">Top impacts</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#e7ebe2]">
+            <tbody className="divide-y divide-[#ece4d0]">
               {regulatoryEvents.map((evt) => (
                 <tr key={evt.id}>
                   <td className="py-3 pr-4 capitalize">{evt.eventType.replace(/_/g, " ")}</td>
                   <td className="py-3 pr-4 text-xs">{evt.jurisdiction}</td>
                   <td className="py-3 pr-4 text-xs">{evt.effectiveDate ?? "—"}</td>
-                  <td className="py-3 pr-4 text-xs text-[#596151]">{evt.affectedVendorIds.length}</td>
-                  <td className="py-3 text-xs leading-5 text-[#596151]">
+                  <td className="py-3 pr-4 text-xs text-[#54647a]">{evt.affectedVendorIds.length}</td>
+                  <td className="py-3 text-xs leading-5 text-[#54647a]">
                     market-access {evt.impacts.marketAccessRisk}, valuation {evt.impacts.valuationRisk}, supply-chain {evt.impacts.supplyChainRisk}
                   </td>
                 </tr>
@@ -176,21 +176,21 @@ export default function MarketSignalsClient({
         </div>
       </section>
 
-      <section className="rounded-lg border border-[#dfe4da] bg-white p-4">
+      <section className="rounded-lg border border-[#e6dcc3] bg-white p-4">
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-[#18201b]">Market talk watchlist (low confidence)</h2>
+          <h2 className="text-sm font-semibold text-[#13294b]">Market talk watchlist (low confidence)</h2>
           <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-800">band-widener only</span>
         </div>
         <div className="grid gap-2 md:grid-cols-2">
           {marketTalk.map((talk) => (
-            <div key={talk.id} className="rounded-md border border-[#edf0ea] bg-[#f7f8f5] p-3 text-xs">
+            <div key={talk.id} className="rounded-md border border-[#efe9d9] bg-[#faf6ec] p-3 text-xs">
               <div className="flex items-center justify-between gap-2">
-                <span className="font-semibold capitalize text-[#18201b]">{talk.platform}</span>
-                <span className="font-mono text-[#697362]">vol {talk.volumeScore} · sent {talk.sentimentScore}</span>
+                <span className="font-semibold capitalize text-[#13294b]">{talk.platform}</span>
+                <span className="font-mono text-[#5b6b7f]">vol {talk.volumeScore} · sent {talk.sentimentScore}</span>
               </div>
-              <div className="mt-1 text-[#596151]">{talk.query}</div>
-              <div className="mt-1 text-[#697362]">bot-risk {talk.botRiskScore} · repetition {talk.repetitionScore} · confidence {talk.sourceConfidence}/100</div>
-              <div className="mt-1 text-[11px] italic text-[#697362]">{talk.uncertaintyNote}</div>
+              <div className="mt-1 text-[#54647a]">{talk.query}</div>
+              <div className="mt-1 text-[#5b6b7f]">bot-risk {talk.botRiskScore} · repetition {talk.repetitionScore} · confidence {talk.sourceConfidence}/100</div>
+              <div className="mt-1 text-[11px] italic text-[#5b6b7f]">{talk.uncertaintyNote}</div>
             </div>
           ))}
         </div>
@@ -204,7 +204,7 @@ function RegimeChip({ label, value, tone }: { label: string; value: string; tone
     ? "border-emerald-200 bg-emerald-50 text-emerald-800"
     : tone === "warn"
       ? "border-rose-200 bg-rose-50 text-rose-800"
-      : "border-[#dfe4da] bg-[#f7f8f5] text-[#4d574b]";
+      : "border-[#e6dcc3] bg-[#faf6ec] text-[#475a72]";
   return (
     <div className={`rounded-md border px-2.5 py-1.5 ${toneClass}`}>
       <div className="text-[10px] font-semibold uppercase tracking-wide opacity-80">{label}</div>
@@ -220,8 +220,8 @@ function FilterPill({ active, onClick, color, children }: { active: boolean; onC
       onClick={onClick}
       className={`rounded-full border px-3 py-1 text-[11px] font-semibold transition-colors ${
         active
-          ? "border-[#192319] bg-[#192319] text-white"
-          : "border-[#dfe4da] bg-white text-[#4d574b] hover:bg-[#eef2e8]"
+          ? "border-[#13294b] bg-[#13294b] text-white"
+          : "border-[#e6dcc3] bg-white text-[#475a72] hover:bg-[#f3ead2]"
       }`}
       style={!active && color ? { borderLeftColor: color, borderLeftWidth: 3 } : undefined}
     >
@@ -236,7 +236,7 @@ function SignalCard({ signal, score }: { signal: MarketSignal; score: SignalImpa
       : signal.dataStatus === "seed" ? "bg-amber-100 text-amber-800"
         : "bg-zinc-100 text-zinc-700";
   return (
-    <article className="rounded-md border border-[#edf0ea] bg-[#f7f8f5] p-3">
+    <article className="rounded-md border border-[#efe9d9] bg-[#faf6ec] p-3">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2 text-[11px]">
@@ -244,31 +244,31 @@ function SignalCard({ signal, score }: { signal: MarketSignal; score: SignalImpa
               {CATEGORY_LABELS[signal.signalCategory]}
             </span>
             <span className={`rounded-full px-2 py-0.5 font-semibold capitalize ${toneClass}`}>{signal.dataStatus}</span>
-            <span className="text-[#697362]">{signal.evidenceGrade} · {signal.sourceDate}</span>
+            <span className="text-[#5b6b7f]">{signal.evidenceGrade} · {signal.sourceDate}</span>
             {signal.requiresHumanReview && <span className="rounded-full bg-amber-100 px-2 py-0.5 font-semibold text-amber-800">review</span>}
           </div>
-          <h3 className="mt-1.5 text-sm font-semibold text-[#18201b]">{signal.title}</h3>
-          <p className="mt-1 text-xs leading-5 text-[#596151]">{signal.summary}</p>
-          <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px] text-[#697362]">
-            <span>Impact <span className="font-mono tabular-nums text-[#18201b]">{score.impactScore}</span>/100</span>
+          <h3 className="mt-1.5 text-sm font-semibold text-[#13294b]">{signal.title}</h3>
+          <p className="mt-1 text-xs leading-5 text-[#54647a]">{signal.summary}</p>
+          <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px] text-[#5b6b7f]">
+            <span>Impact <span className="font-mono tabular-nums text-[#13294b]">{score.impactScore}</span>/100</span>
             <span>·</span>
-            <span>Confidence <span className="font-mono tabular-nums text-[#18201b]">{score.confidenceScore}</span>/100</span>
+            <span>Confidence <span className="font-mono tabular-nums text-[#13294b]">{score.confidenceScore}</span>/100</span>
             {signal.sourceUrl && (
               <>
                 <span>·</span>
-                <a href={signal.sourceUrl} target="_blank" rel="noopener noreferrer" className="text-[#2f5d50] hover:underline">{signal.sourceName}</a>
+                <a href={signal.sourceUrl} target="_blank" rel="noopener noreferrer" className="text-[#b08d2f] hover:underline">{signal.sourceName}</a>
               </>
             )}
           </div>
-          <p className="mt-1 text-[11px] italic text-[#697362]">{score.explanation}</p>
+          <p className="mt-1 text-[11px] italic text-[#5b6b7f]">{score.explanation}</p>
         </div>
         <div className="shrink-0 text-right">
-          <div className="text-[10px] uppercase tracking-wide text-[#697362]">Direction</div>
+          <div className="text-[10px] uppercase tracking-wide text-[#5b6b7f]">Direction</div>
           <div className={`mt-0.5 text-xs font-semibold ${signal.direction === "positive" ? "text-emerald-700" : signal.direction === "negative" ? "text-rose-700" : "text-amber-700"}`}>
             {signal.direction}
           </div>
-          <div className="mt-2 text-[10px] uppercase tracking-wide text-[#697362]">Horizon</div>
-          <div className="mt-0.5 text-xs capitalize text-[#4d574b]">{signal.timeHorizon.replace(/_/g, " ")}</div>
+          <div className="mt-2 text-[10px] uppercase tracking-wide text-[#5b6b7f]">Horizon</div>
+          <div className="mt-0.5 text-xs capitalize text-[#475a72]">{signal.timeHorizon.replace(/_/g, " ")}</div>
         </div>
       </div>
     </article>
@@ -281,11 +281,11 @@ function SentimentEvidenceScatter({ scored }: { scored: ScoredSignal[] }) {
   const pad = 40;
   return (
     <svg className="h-[320px] w-full" viewBox={`0 0 ${w} ${h}`} role="img" aria-label="Sentiment vs evidence scatter">
-      <rect width={w} height={h} rx="10" fill="#f7f8f5" />
-      <line x1={pad} x2={w - pad} y1={h - pad} y2={h - pad} stroke="#aab4a2" />
-      <line x1={pad} x2={pad} y1={pad} y2={h - pad} stroke="#aab4a2" />
-      <line x1={(pad + w - pad) / 2} x2={(pad + w - pad) / 2} y1={pad} y2={h - pad} stroke="#dfe4da" strokeDasharray="3 3" />
-      <line x1={pad} x2={w - pad} y1={(pad + h - pad) / 2} y2={(pad + h - pad) / 2} stroke="#dfe4da" strokeDasharray="3 3" />
+      <rect width={w} height={h} rx="10" fill="#faf6ec" />
+      <line x1={pad} x2={w - pad} y1={h - pad} y2={h - pad} stroke="#b3a98c" />
+      <line x1={pad} x2={pad} y1={pad} y2={h - pad} stroke="#b3a98c" />
+      <line x1={(pad + w - pad) / 2} x2={(pad + w - pad) / 2} y1={pad} y2={h - pad} stroke="#e6dcc3" strokeDasharray="3 3" />
+      <line x1={pad} x2={w - pad} y1={(pad + h - pad) / 2} y2={(pad + h - pad) / 2} stroke="#e6dcc3" strokeDasharray="3 3" />
       {scored.map(({ signal, score }) => {
         const xPct = (signal.sentiment + 1) / 2;
         const yPct = score.confidenceScore / 100;
@@ -299,8 +299,8 @@ function SentimentEvidenceScatter({ scored }: { scored: ScoredSignal[] }) {
           </g>
         );
       })}
-      <text x={pad} y={h - 6} fontSize="10" fill="#697362">← negative sentiment / positive sentiment →</text>
-      <text x={pad - 4} y={pad - 6} fontSize="10" fill="#697362">↑ evidence confidence</text>
+      <text x={pad} y={h - 6} fontSize="10" fill="#5b6b7f">← negative sentiment / positive sentiment →</text>
+      <text x={pad - 4} y={pad - 6} fontSize="10" fill="#5b6b7f">↑ evidence confidence</text>
     </svg>
   );
 }

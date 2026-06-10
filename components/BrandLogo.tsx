@@ -31,7 +31,7 @@ export default function BrandLogo({ size = 28, showWordmark = true, className }:
         aria-hidden
       />
       {showWordmark && (
-        <span className="font-semibold tracking-tight text-[#18201b] dark:text-zinc-100">
+        <span className="font-semibold tracking-tight text-[#13294b] dark:text-zinc-100">
           AI Enterprise
         </span>
       )}

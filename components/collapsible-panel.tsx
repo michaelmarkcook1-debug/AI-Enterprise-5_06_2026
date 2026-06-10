@@ -25,13 +25,13 @@ export default function CollapsiblePanel({
   return (
     <details
       open={defaultOpen}
-      className="group rounded-xl border border-[#dfe4da] bg-white dark:border-zinc-800 dark:bg-zinc-950"
+      className="group rounded-xl border border-[#e6dcc3] bg-white dark:border-zinc-800 dark:bg-zinc-950"
     >
       <summary className="flex cursor-pointer list-none items-center justify-between gap-3 rounded-xl px-4 py-3 transition-colors hover:bg-[#f6f8f3] dark:hover:bg-zinc-900 [&::-webkit-details-marker]:hidden">
         <span className="flex min-w-0 items-baseline gap-3">
-          <span className="text-sm font-semibold text-[#18201b] dark:text-zinc-100">{title}</span>
+          <span className="text-sm font-semibold text-[#13294b] dark:text-zinc-100">{title}</span>
           {summary && (
-            <span className="truncate font-mono text-[11px] text-[#697362] group-open:hidden dark:text-zinc-500">
+            <span className="truncate font-mono text-[11px] text-[#5b6b7f] group-open:hidden dark:text-zinc-500">
               {summary}
             </span>
           )}
@@ -41,13 +41,13 @@ export default function CollapsiblePanel({
           <svg
             width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
             strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" aria-hidden
-            className="text-[#697362] transition-transform duration-200 group-open:rotate-180 dark:text-zinc-500"
+            className="text-[#5b6b7f] transition-transform duration-200 group-open:rotate-180 dark:text-zinc-500"
           >
             <path d="m6 9 6 6 6-6" />
           </svg>
         </span>
       </summary>
-      <div className="border-t border-[#edf0ea] px-4 py-4 dark:border-zinc-800">{children}</div>
+      <div className="border-t border-[#efe9d9] px-4 py-4 dark:border-zinc-800">{children}</div>
     </details>
   );
 }

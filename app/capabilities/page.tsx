@@ -75,21 +75,21 @@ export default async function CapabilitiesPage() {
         <Panel title="Data sources backing this surface">
           <div className="flex flex-wrap items-center justify-between gap-3 text-sm">
             <div>
-              <p className="text-xs leading-5 text-[#596151] dark:text-zinc-400">
+              <p className="text-xs leading-5 text-[#54647a] dark:text-zinc-400">
                 <strong>{configuredConnectors}/{totalConnectors}</strong> connectors configured ·{" "}
                 <strong>{provenance.evidenceCount}</strong> verified evidence rows ·{" "}
                 <strong>{provenance.approvedProposalCount}</strong> approved proposals
               </p>
-              <p className="mt-1 text-[11px] italic text-[#697362] dark:text-zinc-500">{provenance.reason}</p>
+              <p className="mt-1 text-[11px] italic text-[#5b6b7f] dark:text-zinc-500">{provenance.reason}</p>
             </div>
             <div className="flex flex-wrap gap-2 text-xs">
-              <Link href="/admin/data-sources" className="rounded-full border border-[#dfe4da] bg-white px-3 py-1 font-semibold text-[#18201b] hover:bg-[#eef2e8] dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800">
+              <Link href="/admin/data-sources" className="rounded-full border border-[#e6dcc3] bg-white px-3 py-1 font-semibold text-[#13294b] hover:bg-[#f3ead2] dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800">
                 Connector status →
               </Link>
-              <Link href="/admin/ingestion" className="rounded-full border border-[#dfe4da] bg-white px-3 py-1 font-semibold text-[#18201b] hover:bg-[#eef2e8] dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800">
+              <Link href="/admin/ingestion" className="rounded-full border border-[#e6dcc3] bg-white px-3 py-1 font-semibold text-[#13294b] hover:bg-[#f3ead2] dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800">
                 Run ingestion →
               </Link>
-              <Link href="/admin/evidence" className="rounded-full border border-[#dfe4da] bg-white px-3 py-1 font-semibold text-[#18201b] hover:bg-[#eef2e8] dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800">
+              <Link href="/admin/evidence" className="rounded-full border border-[#e6dcc3] bg-white px-3 py-1 font-semibold text-[#13294b] hover:bg-[#f3ead2] dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800">
                 Approve evidence →
               </Link>
             </div>
@@ -107,7 +107,7 @@ export default async function CapabilitiesPage() {
           <div className="overflow-x-auto">
             <table className="min-w-[1080px] w-full text-left text-sm">
               <thead>
-                <tr className="border-b border-[#dfe4da] text-xs uppercase tracking-wide text-[#697362]">
+                <tr className="border-b border-[#e6dcc3] text-xs uppercase tracking-wide text-[#5b6b7f]">
                   <th className="w-44 py-3 pr-4">Vendor</th>
                   {capabilities.map((capability) => (
                     <th key={capability.id} className="min-w-32 px-3 py-3">{capability.name}</th>
@@ -118,7 +118,7 @@ export default async function CapabilitiesPage() {
                 {vendorsToShow.map((vendor) => {
                   const isInfra = isInfrastructureOnlyVendor(vendor.id);
                   return (
-                    <tr key={vendor.id} className="border-b border-[#edf0ea]">
+                    <tr key={vendor.id} className="border-b border-[#efe9d9]">
                       <td className="py-3 pr-4 font-medium align-top">
                         <VendorNameWithOwnership name={vendor.name} ownershipType={vendor.ownershipType} />
                         {isInfra && (
@@ -160,7 +160,7 @@ function Stat({ label, value, note, tone = "neutral" }: { label: string; value: 
       ? "border-amber-300 bg-amber-50 text-amber-800 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-300"
       : tone === "bad"
         ? "border-rose-300 bg-rose-50 text-rose-800 dark:border-rose-800 dark:bg-rose-950/40 dark:text-rose-300"
-        : "border-[#dfe4da] bg-white text-[#4d574b] dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300";
+        : "border-[#e6dcc3] bg-white text-[#475a72] dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300";
   return (
     <div className={`rounded-md border px-3 py-2 ${toneClass}`}>
       <div className="text-[10px] font-semibold uppercase tracking-wide opacity-80">{label}</div>
@@ -246,13 +246,13 @@ function CapabilityCell({ vc, state }: { vc: VendorCapability | undefined; state
         ) : null}
       </div>
       {state.confidence > 0 && (
-        <div className="text-[10px] text-[#697362] dark:text-zinc-500">
+        <div className="text-[10px] text-[#5b6b7f] dark:text-zinc-500">
           conf {state.confidence.toFixed(0)}/100
           {vc?.sourceDate && <span className="ml-1">· {vc.sourceDate}</span>}
         </div>
       )}
       {(state.mode === "stale" || state.mode === "seed" || state.mode === "disputed") && state.uncertaintyNote && (
-        <div className="text-[10px] italic leading-4 text-[#697362] dark:text-zinc-500" title={state.uncertaintyNote}>
+        <div className="text-[10px] italic leading-4 text-[#5b6b7f] dark:text-zinc-500" title={state.uncertaintyNote}>
           {state.uncertaintyNote.length > 80 ? state.uncertaintyNote.slice(0, 80) + "…" : state.uncertaintyNote}
         </div>
       )}

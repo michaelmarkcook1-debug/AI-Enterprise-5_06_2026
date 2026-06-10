@@ -20,23 +20,23 @@ export default async function VendorsPage() {
         <div className="mb-4">
           <OwnershipLegend />
         </div>
-        <div className="divide-y divide-[#edf0ea]">
+        <div className="divide-y divide-[#efe9d9]">
           {vendors.sort((a, b) => b.overallScore - a.overallScore).map((vendor, index) => (
             <Link key={vendor.id} href={`/vendors/${vendor.slug}`} className="grid gap-4 py-4 md:grid-cols-[36px_1fr_160px_160px] md:items-center">
-              <div className="font-mono text-sm text-[#697362]">{index + 1}</div>
+              <div className="font-mono text-sm text-[#5b6b7f]">{index + 1}</div>
               <div>
-                <div className="text-base font-semibold text-[#18201b] dark:text-zinc-100">
+                <div className="text-base font-semibold text-[#13294b] dark:text-zinc-100">
                   <VendorNameWithOwnership name={vendor.name} ownershipType={vendor.ownershipType} compactBadge={false} />
                 </div>
-                <div className="mt-1 text-sm text-[#596151]">{vendor.category} - {vendor.marketPosition}</div>
-                <div className="mt-2 text-xs leading-5 text-[#66705f]">{vendor.description}</div>
+                <div className="mt-1 text-sm text-[#54647a]">{vendor.category} - {vendor.marketPosition}</div>
+                <div className="mt-2 text-xs leading-5 text-[#5d6b80]">{vendor.description}</div>
               </div>
               <div>
                 <ScoreBar label="Overall" value={vendor.overallScore} />
               </div>
               <div className="md:text-right">
                 <Confidence value={vendor.confidenceScore} />
-                <div className="mt-2 text-xs text-[#66705f]">Momentum {momentumByVendor.get(vendor.id)?.momentumScore ?? 0}/100</div>
+                <div className="mt-2 text-xs text-[#5d6b80]">Momentum {momentumByVendor.get(vendor.id)?.momentumScore ?? 0}/100</div>
               </div>
             </Link>
           ))}

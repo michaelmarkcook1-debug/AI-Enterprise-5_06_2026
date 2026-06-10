@@ -158,8 +158,8 @@ export const CEO_BIO =
 
 const AG_LOGO_SVG = `<svg width="40" height="40" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
   <rect width="64" height="64" rx="12" fill="#071827"/>
-  <circle cx="32" cy="32" r="7" fill="#6EE7B7"/>
-  <ellipse cx="32" cy="32" rx="22" ry="9" stroke="#6EE7B7" stroke-width="3"/>
+  <circle cx="32" cy="32" r="7" fill="#e8c95c"/>
+  <ellipse cx="32" cy="32" rx="22" ry="9" stroke="#e8c95c" stroke-width="3"/>
   <ellipse cx="32" cy="32" rx="22" ry="9" stroke="#F5C451" stroke-width="3" transform="rotate(60 32 32)"/>
   <ellipse cx="32" cy="32" rx="22" ry="9" stroke="#F6F0E7" stroke-width="3" transform="rotate(120 32 32)"/>
   <circle cx="50" cy="25" r="3.5" fill="#F5C451"/>
@@ -229,7 +229,7 @@ function htmlShell(title: string, type: ExportType, body: string, headshotDataUr
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
     font: 13px/1.6 -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    color: #18201b; max-width: 860px; margin: 0 auto; padding: 32px 28px;
+    color: #13294b; max-width: 860px; margin: 0 auto; padding: 32px 28px;
   }
 
   /* ── Header ── */
@@ -240,35 +240,35 @@ function htmlShell(title: string, type: ExportType, body: string, headshotDataUr
   .ag-header .logo { flex-shrink: 0; }
   .ag-header .brand { flex: 1; }
   .ag-header .brand-name { font-size: 20px; font-weight: 700; letter-spacing: -0.02em; color: #071827; }
-  .ag-header .brand-sub { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: #697362; margin-top: 1px; }
+  .ag-header .brand-sub { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: #5b6b7f; margin-top: 1px; }
   .ag-header .confidentiality {
     font-size: 9px; text-transform: uppercase; letter-spacing: 0.06em;
     color: #fff; background: #071827; padding: 4px 12px; border-radius: 4px; font-weight: 600;
   }
 
   .doc-title { font-size: 22px; font-weight: 700; color: #071827; margin: 18px 0 2px; letter-spacing: -0.01em; }
-  .doc-meta { font-size: 11px; color: #697362; margin-bottom: 24px; }
+  .doc-meta { font-size: 11px; color: #5b6b7f; margin-bottom: 24px; }
 
   /* ── Content ── */
-  h2 { font-size: 15px; font-weight: 700; color: #071827; margin: 28px 0 10px; padding-bottom: 4px; border-bottom: 1px solid #e4e8df; letter-spacing: -0.01em; }
+  h2 { font-size: 15px; font-weight: 700; color: #071827; margin: 28px 0 10px; padding-bottom: 4px; border-bottom: 1px solid #eae2cc; letter-spacing: -0.01em; }
   h3 { font-size: 13px; font-weight: 700; color: #2d3a2b; margin: 16px 0 6px; }
   p { margin: 6px 0; }
   ul { padding-left: 20px; margin: 6px 0; }
   li { margin: 3px 0; }
 
   table { width: 100%; border-collapse: collapse; font-size: 12px; margin: 10px 0 16px; }
-  th { text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: 0.04em; color: #697362; padding: 6px 8px; border-bottom: 2px solid #071827; font-weight: 600; }
-  td { padding: 6px 8px; border-bottom: 1px solid #edf0ea; vertical-align: top; }
+  th { text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: 0.04em; color: #5b6b7f; padding: 6px 8px; border-bottom: 2px solid #071827; font-weight: 600; }
+  td { padding: 6px 8px; border-bottom: 1px solid #efe9d9; vertical-align: top; }
   tr:last-child td { border-bottom: none; }
 
   .score-row { display: flex; gap: 16px; margin: 12px 0 20px; }
   .score-card {
-    flex: 1; border: 1px solid #dfe4da; border-radius: 10px; padding: 14px 16px; text-align: center;
+    flex: 1; border: 1px solid #e6dcc3; border-radius: 10px; padding: 14px 16px; text-align: center;
   }
-  .score-card .label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.06em; color: #697362; font-weight: 600; }
+  .score-card .label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.06em; color: #5b6b7f; font-weight: 600; }
   .score-card .value { font-size: 32px; font-weight: 700; color: #071827; margin: 4px 0 2px; font-variant-numeric: tabular-nums; }
-  .score-card .sub { font-size: 10px; color: #697362; }
-  .score-card.green { border-color: #6EE7B7; background: #f0fdf8; }
+  .score-card .sub { font-size: 10px; color: #5b6b7f; }
+  .score-card.green { border-color: #e8c95c; background: #f0fdf8; }
   .score-card.green .value { color: #065f46; }
   .score-card.blue { border-color: #93c5fd; background: #eff6ff; }
   .score-card.blue .value { color: #1e40af; }
@@ -282,29 +282,29 @@ function htmlShell(title: string, type: ExportType, body: string, headshotDataUr
   .status-watch { color: #d97706; font-weight: 600; }
   .status-atrisk { color: #dc2626; font-weight: 600; }
 
-  .assumption-card { border: 1px solid #edf0ea; border-radius: 8px; padding: 12px 14px; margin: 8px 0; }
+  .assumption-card { border: 1px solid #efe9d9; border-radius: 8px; padding: 12px 14px; margin: 8px 0; }
   .assumption-card .title-row { display: flex; justify-content: space-between; align-items: center; }
   .assumption-card .title { font-weight: 700; font-size: 13px; }
-  .assumption-card .detail { font-size: 12px; color: #4d574b; margin-top: 4px; }
+  .assumption-card .detail { font-size: 12px; color: #475a72; margin-top: 4px; }
 
   /* ── Sign-off ── */
   .signoff {
     margin-top: 40px; padding-top: 24px; border-top: 3px solid #071827;
     display: flex; gap: 18px; align-items: flex-start;
   }
-  .headshot { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; flex-shrink: 0; border: 2px solid #dfe4da; }
+  .headshot { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; flex-shrink: 0; border: 2px solid #e6dcc3; }
   .headshot-placeholder {
-    width: 80px; height: 80px; border-radius: 50%; background: #071827; color: #6EE7B7;
+    width: 80px; height: 80px; border-radius: 50%; background: #071827; color: #e8c95c;
     display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 700; flex-shrink: 0;
   }
   .signoff-text { flex: 1; }
   .signoff-name { font-size: 14px; font-weight: 700; color: #071827; }
-  .signoff-title { font-size: 11px; color: #697362; margin: 2px 0 8px; }
-  .signoff-bio { font-size: 11px; color: #4d574b; line-height: 1.5; }
+  .signoff-title { font-size: 11px; color: #5b6b7f; margin: 2px 0 8px; }
+  .signoff-bio { font-size: 11px; color: #475a72; line-height: 1.5; }
 
   /* ── Footer ── */
   .ag-footer {
-    margin-top: 32px; padding-top: 14px; border-top: 1px solid #e4e8df;
+    margin-top: 32px; padding-top: 14px; border-top: 1px solid #eae2cc;
     display: flex; align-items: center; justify-content: space-between;
     font-size: 9px; color: #a1a8a0;
   }
@@ -372,10 +372,10 @@ function severityClass(s: string): string {
 function sectionScope(p: BoardPackExporterProps): string {
   const s = p.scope;
   const row = (label: string, value: string) =>
-    value ? `<tr><td style="width:180px;color:#697362;font-size:11px;text-transform:uppercase;letter-spacing:0.04em">${esc(label)}</td><td><strong>${esc(value)}</strong></td></tr>` : "";
+    value ? `<tr><td style="width:180px;color:#5b6b7f;font-size:11px;text-transform:uppercase;letter-spacing:0.04em">${esc(label)}</td><td><strong>${esc(value)}</strong></td></tr>` : "";
   return `
 <h2>Decision Scope</h2>
-<p style="font-size:11px;color:#697362">This document defends the shortlist produced by the AnalystGenius assessment under the context below. If the context changes, re-run the assessment.</p>
+<p style="font-size:11px;color:#5b6b7f">This document defends the shortlist produced by the AnalystGenius assessment under the context below. If the context changes, re-run the assessment.</p>
 <table>
   <tbody>
     ${row("Shortlisted vendors", p.vendors.map((v) => v.name).join(", "))}
@@ -396,7 +396,7 @@ function sectionReputation(p: BoardPackExporterProps): string {
   ).join("");
   return `
 <h2>Reputation Snapshot — Shortlist</h2>
-<p style="font-size:11px;color:#697362">Three-pillar reputation (0–100): customer (review platforms), developer (GitHub / forums / API reliability), employee (workplace signals). 12-month service uptime where published.</p>
+<p style="font-size:11px;color:#5b6b7f">Three-pillar reputation (0–100): customer (review platforms), developer (GitHub / forums / API reliability), employee (workplace signals). 12-month service uptime where published.</p>
 <table>
   <thead><tr><th>Vendor</th><th>Customer</th><th>Developer</th><th>Employee</th><th>Uptime (12mo)</th></tr></thead>
   <tbody>${rows}</tbody>
@@ -410,7 +410,7 @@ function sectionUptake(p: BoardPackExporterProps): string {
   ).join("");
   return `
 <h2>Market Penetration — Peer Adoption (Modelled)</h2>
-<p style="font-size:11px;color:#697362">Share of named-vendor usage within <strong>${esc(p.uptakeScopeLabel)}</strong>, from the AnalystGenius May 2026 segment-share model (585 cells). <strong>Modelled estimates, not audited market share</strong> — treat as directional peer-adoption context.</p>
+<p style="font-size:11px;color:#5b6b7f">Share of named-vendor usage within <strong>${esc(p.uptakeScopeLabel)}</strong>, from the AnalystGenius May 2026 segment-share model (585 cells). <strong>Modelled estimates, not audited market share</strong> — treat as directional peer-adoption context.</p>
 <table>
   <thead><tr><th>Vendor</th><th>Share of named usage</th><th>Confidence</th></tr></thead>
   <tbody>${rows}</tbody>
@@ -425,7 +425,7 @@ function sectionPricing(p: BoardPackExporterProps): string {
   ).join("");
   return `
 <h2>Token Pricing — Vendor-Published List Prices</h2>
-<p style="font-size:11px;color:#697362">USD per 1M tokens, vendor-published list prices at generation date. Negotiated and committed-use pricing will differ — validate during procurement.</p>
+<p style="font-size:11px;color:#5b6b7f">USD per 1M tokens, vendor-published list prices at generation date. Negotiated and committed-use pricing will differ — validate during procurement.</p>
 <table>
   <thead><tr><th>Vendor</th><th>Model</th><th>Input / 1M</th><th>Output / 1M</th></tr></thead>
   <tbody>${rows}</tbody>
@@ -460,10 +460,10 @@ function bodyMarketOverview(p: BoardPackExporterProps): string {
   const m = p.marketOverview;
   const takeaways = deriveMarketTakeaways(m, p.reputation);
   const takeawayItems = takeaways.map((t, i) =>
-    `<div style="margin:10px 0;padding:10px 12px;border:1px solid #e4e8df;border-radius:8px;page-break-inside:avoid"><strong>${i + 1}. ${esc(t.title)}</strong><br/><span style="font-size:11px;color:#3c463b">${esc(t.body)}</span></div>`,
+    `<div style="margin:10px 0;padding:10px 12px;border:1px solid #eae2cc;border-radius:8px;page-break-inside:avoid"><strong>${i + 1}. ${esc(t.title)}</strong><br/><span style="font-size:11px;color:#3a4a63">${esc(t.body)}</span></div>`,
   ).join("");
   const categoryRows = (m?.categoryLeaders ?? []).map((c) =>
-    `<tr><td><strong>${esc(c.category)}</strong></td><td>${c.vendors.map((v, i) => `${i + 1}. ${esc(v.name)} <span style="color:#697362;font-variant-numeric:tabular-nums">(${v.score})</span>`).join(" &nbsp;·&nbsp; ")}</td></tr>`,
+    `<tr><td><strong>${esc(c.category)}</strong></td><td>${c.vendors.map((v, i) => `${i + 1}. ${esc(v.name)} <span style="color:#5b6b7f;font-variant-numeric:tabular-nums">(${v.score})</span>`).join(" &nbsp;·&nbsp; ")}</td></tr>`,
   ).join("");
   return `
 <div class="score-row">
@@ -472,7 +472,7 @@ function bodyMarketOverview(p: BoardPackExporterProps): string {
   <div class="score-card"><div class="label">Scoring model</div><div class="value" style="font-size:15px;margin-top:14px">Per-category, confidence-rated</div></div>
 </div>
 
-<p style="font-size:11px;color:#697362">No assessment shortlist yet — this summary covers the tracked market. Run an assessment in Assess to generate a shortlist-specific defence pack. Vendors are scored within their categories; composite cross-category rankings are not used.</p>
+<p style="font-size:11px;color:#5b6b7f">No assessment shortlist yet — this summary covers the tracked market. Run an assessment in Assess to generate a shortlist-specific defence pack. Vendors are scored within their categories; composite cross-category rankings are not used.</p>
 
 <h2>Top 5 Takeaways</h2>
 ${takeawayItems}
@@ -517,7 +517,7 @@ function bodyExecutiveSummary(p: BoardPackExporterProps): string {
 ${sectionScope(p)}
 
 <h2>Business Case</h2>
-<p style="font-size:11px;color:#697362"><em>Illustrative template — quantify with your organisation’s figures before board submission.</em></p>
+<p style="font-size:11px;color:#5b6b7f"><em>Illustrative template — quantify with your organisation’s figures before board submission.</em></p>
 <p>${esc(p.businessCase.businessProblem)}</p>
 <h3>Intended Outcomes</h3>
 <ul>${p.businessCase.intendedOutcomes.map((o) => `<li>${esc(o)}</li>`).join("")}</ul>
@@ -552,7 +552,7 @@ function bodyBoardPack(p: BoardPackExporterProps): string {
   `).join("");
 
   const competitorBlocks = p.competitors.map((c) => `
-    <h3>${esc(c.peer)} <span style="font-weight:normal;font-size:11px;color:#697362">(${esc(c.maturity)})</span></h3>
+    <h3>${esc(c.peer)} <span style="font-weight:normal;font-size:11px;color:#5b6b7f">(${esc(c.maturity)})</span></h3>
     <p><strong>Use cases:</strong> ${esc(c.useCases.join(", "))}</p>
     <p><strong>Known vendors:</strong> ${esc(c.knownVendors.join(", "))}</p>
     <p><strong>CIO implication:</strong> ${esc(c.implication)}</p>
@@ -563,7 +563,7 @@ function bodyBoardPack(p: BoardPackExporterProps): string {
   ).join("");
 
   const controlRows = p.mitigations.map((m) =>
-    `<li><strong>${esc(m.control)}</strong> <span style="color:#697362">(${esc(m.status)})</span> — ${esc(m.description)}</li>`
+    `<li><strong>${esc(m.control)}</strong> <span style="color:#5b6b7f">(${esc(m.status)})</span> — ${esc(m.description)}</li>`
   ).join("");
 
   const assumptionBlocks = p.assumptions.map((a) => `
@@ -590,7 +590,7 @@ function bodyBoardPack(p: BoardPackExporterProps): string {
 ${sectionScope(p)}
 
 <h2>1. Why Invest?</h2>
-<p style="font-size:11px;color:#697362"><em>Illustrative template — quantify with your organisation’s figures before board submission.</em></p>
+<p style="font-size:11px;color:#5b6b7f"><em>Illustrative template — quantify with your organisation’s figures before board submission.</em></p>
 <p>${esc(p.businessCase.businessProblem)}</p>
 <h3>Intended Outcomes</h3>
 <ul>${p.businessCase.intendedOutcomes.map((o) => `<li>${esc(o)}</li>`).join("")}</ul>
@@ -605,7 +605,7 @@ ${sectionScope(p)}
 </table>
 
 <h2>2. Why Now?</h2>
-<p style="font-size:11px;color:#697362"><em>Illustrative framing — replace with your organisation's specific drivers before board submission.</em></p>
+<p style="font-size:11px;color:#5b6b7f"><em>Illustrative framing — replace with your organisation's specific drivers before board submission.</em></p>
 <ul>
   <li>Enterprise AI platforms are maturing rapidly — delaying adoption raises future switching and integration cost</li>
   <li>Peer organisations in scope industries are formalising AI vendor stacks (see Market Penetration section)</li>
@@ -658,7 +658,7 @@ function bodyProcurementPack(p: BoardPackExporterProps): string {
   ).join("");
 
   const controlRows = p.mitigations.map((m) =>
-    `<li><strong>${esc(m.control)}</strong> <span style="color:#697362">(${esc(m.status)})</span> — ${esc(m.description)}</li>`
+    `<li><strong>${esc(m.control)}</strong> <span style="color:#5b6b7f">(${esc(m.status)})</span> — ${esc(m.description)}</li>`
   ).join("");
 
   const kpiRows = p.kpis.map((k) =>
@@ -835,13 +835,13 @@ export default function BoardPackExporter(props: BoardPackExporterProps) {
 
   return (
     <div>
-      <p className="mb-3 text-xs text-[#5f685a]">
+      <p className="mb-3 text-xs text-[#56657b]">
         {hasShortlist
           ? "Export the board defence case in the format your audience needs."
           : "No assessment shortlist yet. The Executive Summary exports as a concise AI-market overview; the Board, Procurement and Risk packs unlock once you run an assessment in Assess."}
       </p>
       <div className="mb-3 flex flex-wrap items-center gap-2 text-xs">
-        <span className="font-semibold uppercase tracking-wide text-[10px] text-[#697362]">Format</span>
+        <span className="font-semibold uppercase tracking-wide text-[10px] text-[#5b6b7f]">Format</span>
         {([
           { key: "html", label: "Document (HTML → PDF)" },
           { key: "pptx", label: "PowerPoint (.pptx)" },
@@ -852,7 +852,7 @@ export default function BoardPackExporter(props: BoardPackExporterProps) {
             className={`rounded-full border px-3 py-1 font-semibold transition-colors ${
               format === f.key
                 ? "border-[#071827] bg-[#071827] text-white dark:border-emerald-500 dark:bg-emerald-600"
-                : "border-[#cfd7c8] bg-white text-[#18201b] hover:bg-[#eef2e8] dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
+                : "border-[#d6c9a8] bg-white text-[#13294b] hover:bg-[#f3ead2] dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
             }`}
           >
             {f.label}
@@ -872,8 +872,8 @@ export default function BoardPackExporter(props: BoardPackExporterProps) {
               title={locked ? "Requires a completed assessment shortlist — run Assess first" : undefined}
               className={`rounded-full border px-4 py-2 text-xs font-semibold ${
                 locked
-                  ? "cursor-not-allowed border-dashed border-[#cfd7c8] bg-[#f4f6f1] text-[#a1a8a0] dark:border-zinc-700 dark:bg-zinc-900/60 dark:text-zinc-600"
-                  : "border-[#cfd7c8] bg-white text-[#18201b] hover:bg-[#eef2e8] disabled:opacity-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
+                  ? "cursor-not-allowed border-dashed border-[#d6c9a8] bg-[#f4f6f1] text-[#a1a8a0] dark:border-zinc-700 dark:bg-zinc-900/60 dark:text-zinc-600"
+                  : "border-[#d6c9a8] bg-white text-[#13294b] hover:bg-[#f3ead2] disabled:opacity-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
               }`}
             >
               {exporting === t ? "Exporting…" : locked ? `${t} — requires assessment` : `Export ${t}`}
@@ -882,7 +882,7 @@ export default function BoardPackExporter(props: BoardPackExporterProps) {
         })}
       </div>
       {lastExport && (
-        <p className="mt-2 text-[11px] text-[#5f685a] dark:text-zinc-400">
+        <p className="mt-2 text-[11px] text-[#56657b] dark:text-zinc-400">
           Exported <strong>{lastExport.type}</strong> ({lastExport.filename.endsWith(".pptx") ? "PowerPoint" : "HTML"}).{" "}
           Didn&apos;t download?{" "}
           <a
@@ -897,7 +897,7 @@ export default function BoardPackExporter(props: BoardPackExporterProps) {
           .
         </p>
       )}
-      <p className="mt-2 text-[10px] text-[#697362]">
+      <p className="mt-2 text-[10px] text-[#5b6b7f]">
         Document format: open in browser and print to PDF. PowerPoint format: native, fully editable slides.
       </p>
     </div>

@@ -39,15 +39,15 @@ export default function InvestmentWatchlistPage() {
 
 function Section({ rows }: { rows: ReturnType<typeof listInvestmentProviderScores> }) {
   if (rows.length === 0) {
-    return <p className="text-xs text-[#66705f]">Nothing tracked in this segment yet.</p>;
+    return <p className="text-xs text-[#5d6b80]">Nothing tracked in this segment yet.</p>;
   }
   return (
-    <div className="divide-y divide-[#edf0ea] dark:divide-zinc-800">
+    <div className="divide-y divide-[#efe9d9] dark:divide-zinc-800">
       {rows.sort((a, b) => b.privateIpoInvestmentPotential - a.privateIpoInvestmentPotential).map((row) => (
-        <Link key={row.provider.id} href={`/investor-tools/provider/${row.provider.slug}`} className="grid grid-cols-[1fr_120px_180px] items-center gap-3 py-3 text-sm hover:bg-[#f5f7f2] dark:hover:bg-zinc-900/40">
+        <Link key={row.provider.id} href={`/investor-tools/provider/${row.provider.slug}`} className="grid grid-cols-[1fr_120px_180px] items-center gap-3 py-3 text-sm hover:bg-[#faf5e9] dark:hover:bg-zinc-900/40">
           <span>
             <span className="font-medium">{row.provider.name}</span>
-            <span className="ml-2 text-[11px] text-[#66705f]">{label(row.provider.exposureClass)}</span>
+            <span className="ml-2 text-[11px] text-[#5d6b80]">{label(row.provider.exposureClass)}</span>
             {isWatchlistOnly(row.provider) && <span className="ml-2 rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-900 dark:bg-amber-950/60 dark:text-amber-200">Watchlist only</span>}
           </span>
           <span className="text-right font-mono">{row.privateIpoInvestmentPotential.toFixed(0)} potential</span>

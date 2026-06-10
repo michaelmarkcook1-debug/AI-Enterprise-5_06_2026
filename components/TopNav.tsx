@@ -162,7 +162,7 @@ export default function TopNav() {
   }
 
   return (
-    <header className="sticky top-0 z-30 border-b border-[#dfe4da] bg-[#f7f8f5]/95 backdrop-blur dark:border-zinc-800 dark:bg-[#071827]/95">
+    <header className="sticky top-0 z-30 border-b border-[#e6dcc3] bg-[#faf6ec]/95 backdrop-blur dark:border-zinc-800 dark:bg-[#071827]/95">
       <div className="mx-auto flex h-14 max-w-7xl items-center gap-6 px-5">
         <Link href="/" className="flex items-center" aria-label="AI Enterprise home">
           <BrandLogo size={32} />
@@ -177,8 +177,8 @@ export default function TopNav() {
                 aria-current={active ? "page" : undefined}
                 className={`rounded-md px-3 py-1.5 transition-colors ${
                   active
-                    ? "bg-[#192319] !text-white font-semibold shadow-sm dark:bg-white dark:!text-[#0c1220]"
-                    : "font-medium text-[#4d574b] hover:bg-[#e9ede4] hover:text-[#18201b] dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-100"
+                    ? "bg-[#13294b] !text-white font-semibold shadow-sm dark:bg-[#d4af37] dark:!text-[#0a1f38]"
+                    : "font-medium text-[#475a72] hover:bg-[#f1ead6] hover:text-[#13294b] dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-100"
                 }`}
               >
                 {n.label}
@@ -192,15 +192,15 @@ export default function TopNav() {
               aria-haspopup="menu"
               className={`flex items-center gap-1 rounded-md px-3 py-1.5 transition-colors ${
                 LIBRARY.some((l) => pathname.startsWith(l.href))
-                  ? "bg-[#192319] !text-white font-semibold shadow-sm dark:bg-white dark:!text-[#0c1220]"
-                  : "font-medium text-[#4d574b] hover:bg-[#e9ede4] hover:text-[#18201b] dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-100"
+                  ? "bg-[#13294b] !text-white font-semibold shadow-sm dark:bg-[#d4af37] dark:!text-[#0a1f38]"
+                  : "font-medium text-[#475a72] hover:bg-[#f1ead6] hover:text-[#13294b] dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-100"
               }`}
             >
               Library
               <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="m6 9 6 6 6-6" /></svg>
             </button>
             <div className="invisible absolute left-0 top-full z-40 w-52 pt-1 opacity-0 transition-all duration-150 group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100">
-              <div role="menu" className="grid grid-cols-1 gap-0.5 rounded-lg border border-[#dfe4da] bg-white p-1.5 shadow-xl dark:border-zinc-800 dark:bg-zinc-950">
+              <div role="menu" className="grid grid-cols-1 gap-0.5 rounded-lg border border-[#e6dcc3] bg-white p-1.5 shadow-xl dark:border-zinc-800 dark:bg-zinc-950">
                 {LIBRARY.map((l) => (
                   <Link
                     key={l.href}
@@ -208,8 +208,8 @@ export default function TopNav() {
                     role="menuitem"
                     className={`rounded-md px-2.5 py-1.5 text-xs transition-colors ${
                       pathname.startsWith(l.href)
-                        ? "bg-[#192319] font-semibold !text-white dark:bg-white dark:!text-[#0c1220]"
-                        : "text-[#3c463b] hover:bg-[#e9ede4] dark:text-zinc-300 dark:hover:bg-zinc-900"
+                        ? "bg-[#13294b] font-semibold !text-white dark:bg-[#d4af37] dark:!text-[#0a1f38]"
+                        : "text-[#3a4a63] hover:bg-[#f1ead6] dark:text-zinc-300 dark:hover:bg-zinc-900"
                     }`}
                   >
                     {l.label}
@@ -219,13 +219,13 @@ export default function TopNav() {
             </div>
           </div>
           {/* Investor Tools — visually separated secondary workflow */}
-          <span className="mx-1 h-5 w-px bg-[#dfe4da] dark:bg-zinc-700" aria-hidden />
+          <span className="mx-1 h-5 w-px bg-[#e6dcc3] dark:bg-zinc-700" aria-hidden />
           <Link
             href="/investor-tools"
             aria-current={pathname.startsWith("/investor-tools") || pathname.startsWith("/investing") ? "page" : undefined}
             className={`rounded-md px-3 py-1.5 transition-colors ${
               pathname.startsWith("/investor-tools") || pathname.startsWith("/investing")
-                ? "bg-[#192319] !text-white font-semibold shadow-sm dark:bg-white dark:!text-[#0c1220]"
+                ? "bg-[#13294b] !text-white font-semibold shadow-sm dark:bg-[#d4af37] dark:!text-[#0a1f38]"
                 : "font-medium text-[#8a7a5a] hover:bg-[#f0ebe0] hover:text-[#5a4e36] dark:text-amber-400/80 dark:hover:bg-amber-950/40 dark:hover:text-amber-200"
             }`}
           >
@@ -251,8 +251,8 @@ export default function TopNav() {
             title="Settings — ingestion & spend"
             className={`hidden h-8 w-8 items-center justify-center rounded-md transition-colors md:flex ${
               pathname.startsWith("/settings") || pathname.startsWith("/admin")
-                ? "bg-[#192319] text-white dark:bg-white dark:text-[#0c1220]"
-                : "text-[#4d574b] hover:bg-[#e9ede4] hover:text-[#18201b] dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-100"
+                ? "bg-[#13294b] text-white dark:bg-[#d4af37] dark:text-[#0a1f38]"
+                : "text-[#475a72] hover:bg-[#f1ead6] hover:text-[#13294b] dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-100"
             }`}
           >
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
@@ -263,7 +263,7 @@ export default function TopNav() {
           <button
             type="button"
             onClick={toggleTheme}
-            className="hidden rounded-full border border-[#cfd7c8] bg-white/70 px-3 py-1.5 text-xs font-semibold text-[#273227] transition-colors hover:bg-[#eef2e8] md:inline-block dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
+            className="hidden rounded-full border border-[#d6c9a8] bg-white/70 px-3 py-1.5 text-xs font-semibold text-[#24364f] transition-colors hover:bg-[#f3ead2] md:inline-block dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
             aria-label="Toggle light and dark mode"
             aria-pressed={theme === "dark"}
           >
@@ -277,7 +277,7 @@ export default function TopNav() {
         <button
           type="button"
           onClick={() => setMobileOpen((v) => !v)}
-          className="ml-auto inline-flex h-10 w-10 items-center justify-center rounded-md border border-[#cfd7c8] bg-white/70 text-[#273227] transition-colors hover:bg-[#eef2e8] md:hidden dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
+          className="ml-auto inline-flex h-10 w-10 items-center justify-center rounded-md border border-[#d6c9a8] bg-white/70 text-[#24364f] transition-colors hover:bg-[#f3ead2] md:hidden dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
           aria-label={mobileOpen ? "Close menu" : "Open menu"}
           aria-expanded={mobileOpen}
           aria-controls="mobile-nav-drawer"
@@ -303,7 +303,7 @@ export default function TopNav() {
       {mobileOpen && (
         <nav
           id="mobile-nav-drawer"
-          className="border-t border-[#dfe4da] bg-white/95 px-4 py-3 md:hidden dark:border-zinc-800 dark:bg-[#071827]/95"
+          className="border-t border-[#e6dcc3] bg-white/95 px-4 py-3 md:hidden dark:border-zinc-800 dark:bg-[#071827]/95"
           aria-label="Mobile navigation"
         >
           <ul className="flex flex-col gap-1 text-sm">
@@ -317,8 +317,8 @@ export default function TopNav() {
                     aria-current={active ? "page" : undefined}
                     className={`block rounded-md px-3 py-2.5 transition-colors ${
                       active
-                        ? "bg-[#192319] !text-white font-semibold shadow-sm dark:bg-white dark:!text-[#0c1220]"
-                        : "font-medium text-[#4d574b] hover:bg-[#e9ede4] hover:text-[#18201b] dark:text-zinc-300 dark:hover:bg-zinc-900 dark:hover:text-zinc-100"
+                        ? "bg-[#13294b] !text-white font-semibold shadow-sm dark:bg-[#d4af37] dark:!text-[#0a1f38]"
+                        : "font-medium text-[#475a72] hover:bg-[#f1ead6] hover:text-[#13294b] dark:text-zinc-300 dark:hover:bg-zinc-900 dark:hover:text-zinc-100"
                     }`}
                   >
                     {n.label}
@@ -328,14 +328,14 @@ export default function TopNav() {
             })}
 
             {/* Investor Tools — separated secondary workflow */}
-            <li className="mt-1 border-t border-[#dfe4da] pt-2 dark:border-zinc-800">
+            <li className="mt-1 border-t border-[#e6dcc3] pt-2 dark:border-zinc-800">
               <Link
                 href="/investor-tools"
                 onClick={() => setMobileOpen(false)}
                 aria-current={pathname.startsWith("/investor-tools") || pathname.startsWith("/investing") ? "page" : undefined}
                 className={`block rounded-md px-3 py-2.5 transition-colors ${
                   pathname.startsWith("/investor-tools") || pathname.startsWith("/investing")
-                    ? "bg-[#192319] !text-white font-semibold shadow-sm dark:bg-white dark:!text-[#0c1220]"
+                    ? "bg-[#13294b] !text-white font-semibold shadow-sm dark:bg-[#d4af37] dark:!text-[#0a1f38]"
                     : "font-medium text-[#8a7a5a] hover:bg-[#f0ebe0] hover:text-[#5a4e36] dark:text-amber-400/80 dark:hover:bg-amber-950/40 dark:hover:text-amber-200"
                 }`}
               >
@@ -345,15 +345,15 @@ export default function TopNav() {
           </ul>
 
           {/* Admin utility link — visually separated. */}
-          <div className="mt-1 border-t border-[#dfe4da] pt-2 dark:border-zinc-800">
-            <div className="px-3 pb-1 text-[9px] font-semibold uppercase tracking-wider text-[#8a948a] dark:text-zinc-600">Library</div>
+          <div className="mt-1 border-t border-[#e6dcc3] pt-2 dark:border-zinc-800">
+            <div className="px-3 pb-1 text-[9px] font-semibold uppercase tracking-wider text-[#7e8a99] dark:text-zinc-600">Library</div>
             <div className="grid grid-cols-2 gap-0.5 pb-2">
               {LIBRARY.map((l) => (
                 <Link
                   key={l.href}
                   href={l.href}
                   onClick={() => setMobileOpen(false)}
-                  className="rounded-md px-3 py-1.5 text-xs text-[#697362] hover:bg-[#e9ede4] hover:text-[#18201b] dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-100"
+                  className="rounded-md px-3 py-1.5 text-xs text-[#5b6b7f] hover:bg-[#f1ead6] hover:text-[#13294b] dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-100"
                 >
                   {l.label}
                 </Link>
@@ -364,8 +364,8 @@ export default function TopNav() {
               onClick={() => setMobileOpen(false)}
               className={`flex items-center gap-2 rounded-md px-3 py-2 text-xs font-medium transition-colors ${
                 pathname.startsWith("/admin")
-                  ? "bg-[#192319] text-white dark:bg-white dark:text-[#0c1220]"
-                  : "text-[#697362] hover:bg-[#e9ede4] hover:text-[#18201b] dark:text-zinc-500 dark:hover:bg-zinc-900 dark:hover:text-zinc-100"
+                  ? "bg-[#13294b] text-white dark:bg-[#d4af37] dark:text-[#0a1f38]"
+                  : "text-[#5b6b7f] hover:bg-[#f1ead6] hover:text-[#13294b] dark:text-zinc-500 dark:hover:bg-zinc-900 dark:hover:text-zinc-100"
               }`}
             >
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
@@ -378,7 +378,7 @@ export default function TopNav() {
 
           {/* Mobile theme toggle + freshness badge. Stacked under the
               nav links because the header bar is too cramped on phones. */}
-          <div className="mt-3 flex items-center justify-between gap-2 border-t border-[#dfe4da] pt-3 dark:border-zinc-800">
+          <div className="mt-3 flex items-center justify-between gap-2 border-t border-[#e6dcc3] pt-3 dark:border-zinc-800">
             {lastRefreshedAt ? (
               <Link
                 href="/admin/pipeline-health"
@@ -395,7 +395,7 @@ export default function TopNav() {
             <button
               type="button"
               onClick={toggleTheme}
-              className="rounded-full border border-[#cfd7c8] bg-white/70 px-3 py-1.5 text-xs font-semibold text-[#273227] transition-colors hover:bg-[#eef2e8] dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
+              className="rounded-full border border-[#d6c9a8] bg-white/70 px-3 py-1.5 text-xs font-semibold text-[#24364f] transition-colors hover:bg-[#f3ead2] dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
               aria-label="Toggle light and dark mode"
               aria-pressed={theme === "dark"}
             >

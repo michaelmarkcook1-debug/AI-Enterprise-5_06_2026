@@ -66,7 +66,7 @@ export default async function ProviderInvestmentPage({ params }: { params: Promi
 
       <div className="mt-5 grid gap-5 lg:grid-cols-2">
         <Panel title="AI provider quality" action={<EvidenceBadge grade={provider.evidenceGrade} />}>
-          <div className="mb-3 text-xs text-[#66705f]">{calculateAiProviderQualityScore(provider).toFixed(0)}/100 | separates AI relevance from investment attractiveness.</div>
+          <div className="mb-3 text-xs text-[#5d6b80]">{calculateAiProviderQualityScore(provider).toFixed(0)}/100 | separates AI relevance from investment attractiveness.</div>
           <div className="space-y-3">
             <ScoreBar label="AI revenue exposure" value={provider.aiRevenueExposureScore} />
             <ScoreBar label="Long-term hold" value={provider.longTermHoldScore} />
@@ -77,7 +77,7 @@ export default async function ProviderInvestmentPage({ params }: { params: Promi
         </Panel>
 
         <Panel title="Investment attractiveness" action={<Confidence value={provider.evidenceConfidence} />}>
-          <div className="mb-3 text-xs text-[#66705f]">{calculateInvestmentAttractivenessScore(provider).toFixed(0)}/100 | valuation, liquidity, catalyst, retail access.</div>
+          <div className="mb-3 text-xs text-[#5d6b80]">{calculateInvestmentAttractivenessScore(provider).toFixed(0)}/100 | valuation, liquidity, catalyst, retail access.</div>
           <div className="space-y-3">
             <ScoreBar label="Short-term catalyst" value={provider.shortTermCatalystScore} />
             <ScoreBar label="Speculative upside" value={provider.speculativeUpsideScore} />
@@ -91,16 +91,16 @@ export default async function ProviderInvestmentPage({ params }: { params: Promi
       <div className="mt-5 grid gap-5 lg:grid-cols-2">
         <Panel title="Financial quality">
           {financials.length === 0 ? (
-            <p className="text-xs text-[#66705f]">No structured financial metrics seeded yet.</p>
+            <p className="text-xs text-[#5d6b80]">No structured financial metrics seeded yet.</p>
           ) : (
             <table className="w-full text-xs">
               <tbody>
                 {financials.map((m, i) => (
-                  <tr key={`${m.metricName}-${i}`} className="border-b border-[#edf0ea] dark:border-zinc-900">
+                  <tr key={`${m.metricName}-${i}`} className="border-b border-[#efe9d9] dark:border-zinc-900">
                     <td className="py-1.5 pr-2">{m.metricName}</td>
                     <td className="py-1.5 pr-2 font-mono">{m.value}</td>
-                    <td className="py-1.5 pr-2 text-[#66705f]">{m.period}</td>
-                    <td className="py-1.5 pr-2 text-[#66705f]" title={`${m.sourceName}`}>{m.sourceType}</td>
+                    <td className="py-1.5 pr-2 text-[#5d6b80]">{m.period}</td>
+                    <td className="py-1.5 pr-2 text-[#5d6b80]" title={`${m.sourceName}`}>{m.sourceType}</td>
                   </tr>
                 ))}
               </tbody>
@@ -110,7 +110,7 @@ export default async function ProviderInvestmentPage({ params }: { params: Promi
 
         <Panel title="Valuation snapshot">
           {!valuation ? (
-            <p className="text-xs text-[#66705f]">No public valuation metrics for this provider.</p>
+            <p className="text-xs text-[#5d6b80]">No public valuation metrics for this provider.</p>
           ) : (
             <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
               {[
@@ -127,7 +127,7 @@ export default async function ProviderInvestmentPage({ params }: { params: Promi
                 ["FCF margin %", valuation.fcfMargin],
               ].filter(([, v]) => v !== undefined && v !== null).map(([k, v]) => (
                 <div key={String(k)}>
-                  <dt className="text-[#66705f]">{k}</dt>
+                  <dt className="text-[#5d6b80]">{k}</dt>
                   <dd className="font-mono">{typeof v === "number" ? v.toFixed(2) : String(v)}</dd>
                 </div>
               ))}
@@ -139,17 +139,17 @@ export default async function ProviderInvestmentPage({ params }: { params: Promi
       {ipo && (
         <Panel title="IPO watch">
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 text-xs">
-            <div><div className="text-[#66705f]">Stage</div><div className="font-mono">{ipo.rumourStage}</div></div>
-            <div><div className="text-[#66705f]">Rumour quality</div><div className="font-mono">{ipo.rumourQualityScore}/100</div></div>
-            <div><div className="text-[#66705f]">Readiness</div><div className="font-mono">{ipo.readinessScore}/100</div></div>
-            <div><div className="text-[#66705f]">Pricing risk</div><div className="font-mono text-rose-700 dark:text-rose-400">{ipo.pricingRiskScore}/100</div></div>
-            <div><div className="text-[#66705f]">Lock-up risk</div><div className="font-mono">{ipo.lockupRisk}/100</div></div>
-            <div><div className="text-[#66705f]">Float</div><div className="font-mono">{ipo.expectedFloat}%</div></div>
-            <div><div className="text-[#66705f]">Forecast</div><div>{ipo.postIpoForecast.replace(/_/g, " ")}</div></div>
-            <div><div className="text-[#66705f]">Next watch</div><div>{ipo.nextWatchEvent}</div></div>
+            <div><div className="text-[#5d6b80]">Stage</div><div className="font-mono">{ipo.rumourStage}</div></div>
+            <div><div className="text-[#5d6b80]">Rumour quality</div><div className="font-mono">{ipo.rumourQualityScore}/100</div></div>
+            <div><div className="text-[#5d6b80]">Readiness</div><div className="font-mono">{ipo.readinessScore}/100</div></div>
+            <div><div className="text-[#5d6b80]">Pricing risk</div><div className="font-mono text-rose-700 dark:text-rose-400">{ipo.pricingRiskScore}/100</div></div>
+            <div><div className="text-[#5d6b80]">Lock-up risk</div><div className="font-mono">{ipo.lockupRisk}/100</div></div>
+            <div><div className="text-[#5d6b80]">Float</div><div className="font-mono">{ipo.expectedFloat}%</div></div>
+            <div><div className="text-[#5d6b80]">Forecast</div><div>{ipo.postIpoForecast.replace(/_/g, " ")}</div></div>
+            <div><div className="text-[#5d6b80]">Next watch</div><div>{ipo.nextWatchEvent}</div></div>
           </div>
           {ipo.missingEvidence.length > 0 && (
-            <p className="mt-3 text-[11px] text-[#66705f]">Missing: {ipo.missingEvidence.join(" | ")}</p>
+            <p className="mt-3 text-[11px] text-[#5d6b80]">Missing: {ipo.missingEvidence.join(" | ")}</p>
           )}
         </Panel>
       )}
@@ -158,44 +158,44 @@ export default async function ProviderInvestmentPage({ params }: { params: Promi
         <Panel title="Indirect exposure routes">
           <ul className="space-y-2 text-xs">
             {indirect.map((e) => (
-              <li key={e.publicTicker} className="flex items-center justify-between gap-3 rounded border border-[#edf0ea] px-3 py-2 dark:border-zinc-800">
+              <li key={e.publicTicker} className="flex items-center justify-between gap-3 rounded border border-[#efe9d9] px-3 py-2 dark:border-zinc-800">
                 <span><span className="font-mono">{e.publicTicker}</span> | {e.exposureType}</span>
                 <span className="font-mono">score {(e.indirectExposureScore ?? 0).toFixed(0)} | confidence {e.confidence.toFixed(2)}</span>
               </li>
             ))}
           </ul>
-          <p className="mt-2 text-[11px] text-[#66705f]">Indirect exposure is not the same as direct ownership of the private AI provider.</p>
+          <p className="mt-2 text-[11px] text-[#5d6b80]">Indirect exposure is not the same as direct ownership of the private AI provider.</p>
         </Panel>
       )}
 
       <Panel title="Product scope and evidence">
         <div className="grid gap-3 md:grid-cols-2">
           {productScopes.map((scope) => (
-            <div key={scope.id} className="rounded-md border border-[#edf0ea] p-3 text-xs dark:border-zinc-800">
+            <div key={scope.id} className="rounded-md border border-[#efe9d9] p-3 text-xs dark:border-zinc-800">
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <div className="font-semibold">{scope.productName}</div>
-                  <div className="mt-1 text-[#66705f] dark:text-zinc-500">{label(scope.productCategory)} | {scope.productType}</div>
+                  <div className="mt-1 text-[#5d6b80] dark:text-zinc-500">{label(scope.productCategory)} | {scope.productType}</div>
                 </div>
                 <SeedDataBadge label={label(scope.evidenceStatus)} provenance={scope.evidenceStatus === "verified" || scope.evidenceStatus === "documented" ? "live" : "seed"} />
               </div>
-              <p className="mt-2 leading-5 text-[#596151] dark:text-zinc-400">{scope.uncertaintyNote}</p>
+              <p className="mt-2 leading-5 text-[#54647a] dark:text-zinc-400">{scope.uncertaintyNote}</p>
               <div className="mt-2 flex flex-wrap gap-2">
                 <Confidence value={scope.confidenceScore} />
-                <span className="rounded border border-[#d8ded0] px-1.5 py-0.5 text-[11px] text-[#697362] dark:border-zinc-700 dark:text-zinc-400">
+                <span className="rounded border border-[#e0d6ba] px-1.5 py-0.5 text-[11px] text-[#5b6b7f] dark:border-zinc-700 dark:text-zinc-400">
                   Sources: {scope.sourceIds.join(", ")}
                 </span>
               </div>
             </div>
           ))}
           {productScopes.length === 0 && (
-            <p className="text-xs leading-5 text-[#596151] dark:text-zinc-400">No ProductScope record. This provider should remain hidden from scoped analysis until inventory is added.</p>
+            <p className="text-xs leading-5 text-[#54647a] dark:text-zinc-400">No ProductScope record. This provider should remain hidden from scoped analysis until inventory is added.</p>
           )}
         </div>
       </Panel>
 
       <Panel title="What would change the score">
-        <ul className="list-disc pl-5 text-xs space-y-1 text-[#596151] dark:text-zinc-400">
+        <ul className="list-disc pl-5 text-xs space-y-1 text-[#54647a] dark:text-zinc-400">
           <li>Verified financial filings (10-K / 10-Q / S-1) raising evidence grade beyond E2.</li>
           <li>Disclosure of AI revenue contribution moving aiRevenueExposureScore.</li>
           <li>Material change in valuation multiples vs revenue growth durability.</li>
@@ -205,7 +205,7 @@ export default async function ProviderInvestmentPage({ params }: { params: Promi
       </Panel>
 
       <div className="mt-6">
-        <Link href="/investor-tools" className="text-xs text-[#2f5d50] hover:underline">Back to Investment Intelligence</Link>
+        <Link href="/investor-tools" className="text-xs text-[#b08d2f] hover:underline">Back to Investment Intelligence</Link>
       </div>
     </PageFrame>
   );

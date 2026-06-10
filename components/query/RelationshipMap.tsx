@@ -446,10 +446,10 @@ export default function RelationshipMap() {
   return (
     <section className="mb-8">
       <div className="mb-5">
-        <h2 className="text-xl font-semibold text-[#18201b] dark:text-zinc-100">
+        <h2 className="text-xl font-semibold text-[#13294b] dark:text-zinc-100">
           Who Depends on Whom
         </h2>
-        <p className="mt-1 text-sm text-[#5f685a] dark:text-zinc-400">
+        <p className="mt-1 text-sm text-[#56657b] dark:text-zinc-400">
           The AI market is built on a web of dependencies — money, technology, and infrastructure
           flow between these companies. When one relationship changes, it can affect every vendor
           and customer connected to it.
@@ -468,7 +468,7 @@ export default function RelationshipMap() {
               className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-all ${
                 isActive
                   ? `${meta.color} border-current`
-                  : "border-[#dfe4da] bg-white text-[#9da596] dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-500"
+                  : "border-[#e6dcc3] bg-white text-[#9da596] dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-500"
               }`}
             >
               <span aria-hidden>{meta.icon}</span>
@@ -493,7 +493,7 @@ export default function RelationshipMap() {
               className={`rounded-xl border transition-all ${
                 hasCritical
                   ? "border-rose-200 dark:border-rose-900/60"
-                  : "border-[#dfe4da] dark:border-zinc-800"
+                  : "border-[#e6dcc3] dark:border-zinc-800"
               } bg-white dark:bg-zinc-900`}
             >
               {/* Header — always visible */}
@@ -503,7 +503,7 @@ export default function RelationshipMap() {
                 aria-expanded={isExpanded}
               >
                 <div className="flex items-center gap-3 min-w-0">
-                  <span className="text-sm font-semibold text-[#18201b] dark:text-zinc-100">
+                  <span className="text-sm font-semibold text-[#13294b] dark:text-zinc-100">
                     {vendor}
                   </span>
                   {hasCritical && (
@@ -536,7 +536,7 @@ export default function RelationshipMap() {
 
               {/* Expanded — full dependency detail */}
               {isExpanded && (
-                <div className="border-t border-[#eef2e8] px-5 py-4 dark:border-zinc-800">
+                <div className="border-t border-[#f3ead2] px-5 py-4 dark:border-zinc-800">
                   <div className="space-y-3">
                     {rels.map((r, idx) => {
                       const meta = RELATION_META[r.type];
@@ -554,10 +554,10 @@ export default function RelationshipMap() {
                           {/* Dependency header */}
                           <div className="flex items-center gap-2 mb-2">
                             <span className="text-sm" aria-hidden>{meta.icon}</span>
-                            <span className="text-xs font-semibold uppercase tracking-wider text-[#697362] dark:text-zinc-500">
+                            <span className="text-xs font-semibold uppercase tracking-wider text-[#5b6b7f] dark:text-zinc-500">
                               {meta.label}
                             </span>
-                            <span className="text-[#697362] dark:text-zinc-500">·</span>
+                            <span className="text-[#5b6b7f] dark:text-zinc-500">·</span>
                             <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
                               r.strength === "critical"
                                 ? "bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300"
@@ -571,22 +571,22 @@ export default function RelationshipMap() {
 
                           {/* Arrow connector */}
                           <div className="flex items-center gap-2 mb-2">
-                            <span className="text-sm font-semibold text-[#18201b] dark:text-zinc-100">{r.from}</span>
+                            <span className="text-sm font-semibold text-[#13294b] dark:text-zinc-100">{r.from}</span>
                             <span className="text-xs text-[#9da596]">depends on</span>
-                            <span className="text-sm font-semibold text-[#18201b] dark:text-zinc-100">{r.to}</span>
+                            <span className="text-sm font-semibold text-[#13294b] dark:text-zinc-100">{r.to}</span>
                           </div>
 
                           {/* What it does */}
-                          <p className="text-xs leading-5 text-[#4d574b] dark:text-zinc-300">
+                          <p className="text-xs leading-5 text-[#475a72] dark:text-zinc-300">
                             {r.description}
                           </p>
 
                           {/* What to watch */}
                           <div className="mt-2 rounded-md bg-white/60 px-3 py-2 dark:bg-zinc-800/40">
-                            <div className="text-[10px] font-semibold uppercase tracking-wider text-[#697362] dark:text-zinc-500">
+                            <div className="text-[10px] font-semibold uppercase tracking-wider text-[#5b6b7f] dark:text-zinc-500">
                               What to watch
                             </div>
-                            <p className="mt-0.5 text-xs leading-5 text-[#5f685a] dark:text-zinc-400">
+                            <p className="mt-0.5 text-xs leading-5 text-[#56657b] dark:text-zinc-400">
                               {r.risk}
                             </p>
                           </div>

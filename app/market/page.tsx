@@ -29,7 +29,7 @@ export default async function MarketPage() {
                   <div className="mb-2 flex items-end justify-between gap-4">
                     <div>
                       <div className="text-sm font-semibold">{category.name}</div>
-                      <div className="text-xs text-[#66705f]">{category.description}</div>
+                      <div className="text-xs text-[#5d6b80]">{category.description}</div>
                     </div>
                   </div>
                   <div className="space-y-2">
@@ -62,7 +62,7 @@ export default async function MarketPage() {
                   {vendor ? <VendorNameWithOwnership name={vendor.name} ownershipType={vendor.ownershipType} /> : row.vendorId}
                 </div>
                 <ScoreBar value={row.momentumScore} />
-                <div className="mt-1 grid grid-cols-3 gap-2 text-[11px] text-[#66705f]">
+                <div className="mt-1 grid grid-cols-3 gap-2 text-[11px] text-[#5d6b80]">
                   <span>Product {row.productVelocity}</span>
                   <span>Adoption {row.adoptionSignal}</span>
                   <span>Risk drag {row.riskSignal}</span>
@@ -73,7 +73,7 @@ export default async function MarketPage() {
           </div>
         </Panel>
       </div>
-      <div className="mt-5 rounded-lg border border-[#dfe4da] bg-[#eef2e8] p-4"><EstimatedNote /></div>
+      <div className="mt-5 rounded-lg border border-[#e6dcc3] bg-[#f3ead2] p-4"><EstimatedNote /></div>
     </PageFrame>
   );
 }

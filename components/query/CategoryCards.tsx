@@ -237,7 +237,7 @@ export default function CategoryCards({ vendors, momentum, provenance }: Props) 
               <div className="flex items-start justify-between gap-3 mb-1.5">
                 <div className="flex items-center gap-2.5">
                   <span className={`h-2.5 w-2.5 rounded-full ${cat.color.dot}`} />
-                  <h3 className="text-lg font-semibold text-[#18201b] dark:text-zinc-100">
+                  <h3 className="text-lg font-semibold text-[#13294b] dark:text-zinc-100">
                     {cat.id}
                   </h3>
                 </div>
@@ -250,7 +250,7 @@ export default function CategoryCards({ vendors, momentum, provenance }: Props) 
                     {dataLabel}
                   </span>
                   {avgConf > 0 && (
-                    <span className="rounded-full bg-white/70 px-2 py-0.5 text-[10px] font-semibold text-[#4d574b] dark:bg-zinc-800/60 dark:text-zinc-300">
+                    <span className="rounded-full bg-white/70 px-2 py-0.5 text-[10px] font-semibold text-[#475a72] dark:bg-zinc-800/60 dark:text-zinc-300">
                       Confidence {avgConf}
                     </span>
                   )}
@@ -258,10 +258,10 @@ export default function CategoryCards({ vendors, momentum, provenance }: Props) 
               </div>
 
               {/* Purpose */}
-              <p className="text-sm text-[#5f685a] dark:text-zinc-400 mb-1">
+              <p className="text-sm text-[#56657b] dark:text-zinc-400 mb-1">
                 {cat.purpose}
               </p>
-              <p className="text-xs italic text-[#4d574b] dark:text-zinc-300 mb-3">
+              <p className="text-xs italic text-[#475a72] dark:text-zinc-300 mb-3">
                 Why it matters: {cat.whyItMatters}
               </p>
 
@@ -280,7 +280,7 @@ export default function CategoryCards({ vendors, momentum, provenance }: Props) 
               {/* Tier 1 — always visible */}
               {resolvedTier1.length > 0 && (
                 <div className="mb-2">
-                  <div className="text-[10px] font-semibold uppercase tracking-wider text-[#697362] dark:text-zinc-500 mb-2">
+                  <div className="text-[10px] font-semibold uppercase tracking-wider text-[#5b6b7f] dark:text-zinc-500 mb-2">
                     Major vendors
                   </div>
                   <div className="flex flex-wrap gap-1.5">
@@ -292,7 +292,7 @@ export default function CategoryCards({ vendors, momentum, provenance }: Props) 
                       return (
                         <span
                           key={`${cat.id}-${vendor.id}-${placement.displayName}`}
-                          className="inline-flex items-center gap-1.5 rounded-full border border-white/60 bg-white/80 px-3 py-1 text-[11px] font-semibold text-[#18201b] shadow-sm dark:border-zinc-700 dark:bg-zinc-800/80 dark:text-zinc-100"
+                          className="inline-flex items-center gap-1.5 rounded-full border border-white/60 bg-white/80 px-3 py-1 text-[11px] font-semibold text-[#13294b] shadow-sm dark:border-zinc-700 dark:bg-zinc-800/80 dark:text-zinc-100"
                           title={placement.roleNote ? `${placement.displayName} — ${placement.roleNote}` : placement.displayName}
                         >
                           {placement.displayName}
@@ -320,7 +320,7 @@ export default function CategoryCards({ vendors, momentum, provenance }: Props) 
                 <>
                   <button
                     onClick={() => toggle(cat.id)}
-                    className="mt-2 flex items-center gap-1.5 text-[11px] font-medium text-[#697362] hover:text-[#18201b] dark:text-zinc-500 dark:hover:text-zinc-200 transition-colors"
+                    className="mt-2 flex items-center gap-1.5 text-[11px] font-medium text-[#5b6b7f] hover:text-[#13294b] dark:text-zinc-500 dark:hover:text-zinc-200 transition-colors"
                     aria-expanded={isExpanded}
                     aria-controls={`${cat.id}-tier2`}
                   >
@@ -335,7 +335,7 @@ export default function CategoryCards({ vendors, momentum, provenance }: Props) 
                       {resolvedTier2.map(({ placement, vendor }) => (
                         <span
                           key={`${cat.id}-${vendor.id}-${placement.displayName}`}
-                          className="inline-flex items-center gap-1 rounded-full border border-[#dfe4da]/60 bg-white/50 px-2.5 py-0.5 text-[10px] font-medium text-[#697362] dark:border-zinc-700/60 dark:bg-zinc-800/40 dark:text-zinc-400"
+                          className="inline-flex items-center gap-1 rounded-full border border-[#e6dcc3]/60 bg-white/50 px-2.5 py-0.5 text-[10px] font-medium text-[#5b6b7f] dark:border-zinc-700/60 dark:bg-zinc-800/40 dark:text-zinc-400"
                           title={placement.roleNote ? `${placement.displayName} — ${placement.roleNote}` : placement.displayName}
                         >
                           {placement.displayName}

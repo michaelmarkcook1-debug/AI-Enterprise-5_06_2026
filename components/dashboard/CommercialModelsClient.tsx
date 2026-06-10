@@ -83,16 +83,16 @@ export default function CommercialModelsClient({ vendors, models, sources }: Pro
           const vendorModels = visibleModelsForVendor(v.vendorId);
           const isExpanded = expandedVendor === v.vendorId;
           return (
-            <article key={v.vendorId} className="rounded-md border border-[#dfe4da] bg-white dark:border-zinc-800 dark:bg-[#071827]">
+            <article key={v.vendorId} className="rounded-md border border-[#e6dcc3] bg-white dark:border-zinc-800 dark:bg-[#071827]">
               <button
                 type="button"
                 onClick={() => setExpandedVendor(isExpanded ? null : v.vendorId)}
-                className="flex w-full flex-wrap items-center justify-between gap-3 p-3 text-left hover:bg-[#f7f8f5] dark:hover:bg-zinc-900"
+                className="flex w-full flex-wrap items-center justify-between gap-3 p-3 text-left hover:bg-[#faf6ec] dark:hover:bg-zinc-900"
                 aria-expanded={isExpanded}
               >
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-sm font-semibold text-[#18201b] dark:text-zinc-100">{v.vendorName}</span>
+                    <span className="text-sm font-semibold text-[#13294b] dark:text-zinc-100">{v.vendorName}</span>
                     {v.isInfrastructureOnly && (
                       <span className="rounded-full border border-zinc-300 bg-zinc-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-zinc-700 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300">Infrastructure / investment exposure</span>
                     )}
@@ -102,11 +102,11 @@ export default function CommercialModelsClient({ vendors, models, sources }: Pro
                     {!v.isInfrastructureOnly && !v.refreshRequired && v.uncertaintyBadge && (
                       <span className="rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-800 dark:border-amber-900/60 dark:bg-amber-950/40 dark:text-amber-300">{v.uncertaintyBadge}</span>
                     )}
-                    <span className="rounded-full border border-[#dfe4da] bg-[#f7f8f5] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[#697362] dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400">{labelize(v.dataStatus)}</span>
+                    <span className="rounded-full border border-[#e6dcc3] bg-[#faf6ec] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[#5b6b7f] dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400">{labelize(v.dataStatus)}</span>
                   </div>
-                  <div className="mt-1.5 flex flex-wrap items-center gap-3 text-xs text-[#697362] dark:text-zinc-500">
-                    <span><strong className="text-[#18201b] dark:text-zinc-200 tabular-nums">{v.firstPartyActiveCount}</strong> first-party</span>
-                    <span><strong className="text-[#18201b] dark:text-zinc-200 tabular-nums">{v.hostedThirdPartyCount}</strong> hosted 3P</span>
+                  <div className="mt-1.5 flex flex-wrap items-center gap-3 text-xs text-[#5b6b7f] dark:text-zinc-500">
+                    <span><strong className="text-[#13294b] dark:text-zinc-200 tabular-nums">{v.firstPartyActiveCount}</strong> first-party</span>
+                    <span><strong className="text-[#13294b] dark:text-zinc-200 tabular-nums">{v.hostedThirdPartyCount}</strong> hosted 3P</span>
                     {v.previewBetaCount > 0 && <span>{v.previewBetaCount} preview/beta</span>}
                     {v.deprecatedRetiredCount > 0 && <span className="text-rose-700 dark:text-rose-300">{v.deprecatedRetiredCount} deprecated/retired</span>}
                     {v.primaryModelFamilies.length > 0 && (
@@ -115,17 +115,17 @@ export default function CommercialModelsClient({ vendors, models, sources }: Pro
                     <span>Last verified {v.lastVerifiedAt ?? "—"}</span>
                   </div>
                 </div>
-                <span aria-hidden className="text-xs text-[#697362] dark:text-zinc-500">{isExpanded ? "Hide" : "Expand"} ▾</span>
+                <span aria-hidden className="text-xs text-[#5b6b7f] dark:text-zinc-500">{isExpanded ? "Hide" : "Expand"} ▾</span>
               </button>
 
               {isExpanded && (
-                <div className="border-t border-[#dfe4da] bg-[#f7f8f5] p-3 dark:border-zinc-800 dark:bg-zinc-950/40">
+                <div className="border-t border-[#e6dcc3] bg-[#faf6ec] p-3 dark:border-zinc-800 dark:bg-zinc-950/40">
                   {vendorModels.length === 0 ? (
                     <EmptyVendorState summary={v} />
                   ) : (
                     <div className="overflow-x-auto">
                       <table className="w-full min-w-[1080px] text-left text-xs">
-                        <thead className="text-[10px] uppercase tracking-wide text-[#697362] dark:text-zinc-500">
+                        <thead className="text-[10px] uppercase tracking-wide text-[#5b6b7f] dark:text-zinc-500">
                           <tr>
                             <th className="py-2 pr-3">Model</th>
                             <th className="py-2 pr-3">Model ID</th>
@@ -141,16 +141,16 @@ export default function CommercialModelsClient({ vendors, models, sources }: Pro
                             <th className="py-2">Uncertainty</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-[#e7ebe2] dark:divide-zinc-800">
+                        <tbody className="divide-y divide-[#ece4d0] dark:divide-zinc-800">
                           {vendorModels.map((m) => (
                             <tr key={m.id}>
-                              <td className="py-2 pr-3 font-medium text-[#18201b] dark:text-zinc-100">
+                              <td className="py-2 pr-3 font-medium text-[#13294b] dark:text-zinc-100">
                                 {m.modelName}
                                 {m.ownershipType === "hosted_third_party" && (
                                   <span className="ml-2 rounded-full bg-sky-100 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-sky-800 dark:bg-sky-950/40 dark:text-sky-300">Hosted third-party — not vendor-owned</span>
                                 )}
                               </td>
-                              <td className="py-2 pr-3 font-mono text-[10px] text-[#697362] dark:text-zinc-500">{m.modelId ?? "—"}</td>
+                              <td className="py-2 pr-3 font-mono text-[10px] text-[#5b6b7f] dark:text-zinc-500">{m.modelId ?? "—"}</td>
                               <td className="py-2 pr-3">{m.ownerVendorName}</td>
                               <td className="py-2 pr-3">{m.hostingVendorName ?? "—"}</td>
                               <td className="py-2 pr-3 capitalize">{m.modelCategory.replace(/_/g, " ")}</td>
@@ -161,14 +161,14 @@ export default function CommercialModelsClient({ vendors, models, sources }: Pro
                               <td className="py-2 pr-3 tabular-nums">{m.confidenceScore}/100</td>
                               <td className="py-2 pr-3">
                                 {m.sourceUrls[0] ? (
-                                  <a href={m.sourceUrls[0]} target="_blank" rel="noopener noreferrer" className="text-[#2f5d50] underline hover:text-[#1f3f37] dark:text-emerald-300 dark:hover:text-emerald-200">
+                                  <a href={m.sourceUrls[0]} target="_blank" rel="noopener noreferrer" className="text-[#b08d2f] underline hover:text-[#1f3f37] dark:text-emerald-300 dark:hover:text-emerald-200">
                                     {sourceShortName(m.sourceUrls[0])}
                                   </a>
                                 ) : (
-                                  <span className="text-[#697362] dark:text-zinc-500">—</span>
+                                  <span className="text-[#5b6b7f] dark:text-zinc-500">—</span>
                                 )}
                               </td>
-                              <td className="py-2 text-[#596151] dark:text-zinc-400">{m.uncertaintyNote.slice(0, 110)}{m.uncertaintyNote.length > 110 ? "…" : ""}</td>
+                              <td className="py-2 text-[#54647a] dark:text-zinc-400">{m.uncertaintyNote.slice(0, 110)}{m.uncertaintyNote.length > 110 ? "…" : ""}</td>
                             </tr>
                           ))}
                         </tbody>
@@ -181,19 +181,19 @@ export default function CommercialModelsClient({ vendors, models, sources }: Pro
           );
         })}
         {visibleVendors.length === 0 && (
-          <div className="rounded-md border border-dashed border-[#dfe4da] p-4 text-sm text-[#697362] dark:border-zinc-700 dark:text-zinc-500">
+          <div className="rounded-md border border-dashed border-[#e6dcc3] p-4 text-sm text-[#5b6b7f] dark:border-zinc-700 dark:text-zinc-500">
             No vendors match these filters.
           </div>
         )}
       </div>
 
       {/* Sources footer */}
-      <details className="rounded-md border border-[#dfe4da] bg-[#f7f8f5] p-3 text-xs dark:border-zinc-800 dark:bg-zinc-900">
-        <summary className="cursor-pointer font-semibold text-[#18201b] dark:text-zinc-200">Source registry ({sources.length})</summary>
+      <details className="rounded-md border border-[#e6dcc3] bg-[#faf6ec] p-3 text-xs dark:border-zinc-800 dark:bg-zinc-900">
+        <summary className="cursor-pointer font-semibold text-[#13294b] dark:text-zinc-200">Source registry ({sources.length})</summary>
         <ul className="mt-2 space-y-1">
           {sources.map((s) => (
-            <li key={s.id} className="text-[11px] text-[#596151] dark:text-zinc-400">
-              <a href={s.sourceUrl} target="_blank" rel="noopener noreferrer" className="text-[#2f5d50] underline dark:text-emerald-300">{s.sourceName}</a>
+            <li key={s.id} className="text-[11px] text-[#54647a] dark:text-zinc-400">
+              <a href={s.sourceUrl} target="_blank" rel="noopener noreferrer" className="text-[#b08d2f] underline dark:text-emerald-300">{s.sourceName}</a>
               {" "}· {s.sourceType.replace(/_/g, " ")} · {s.evidenceGrade} · captured {s.sourceDate}
               {s.notes && <span className="ml-1 italic">— {s.notes}</span>}
             </li>
@@ -207,7 +207,7 @@ export default function CommercialModelsClient({ vendors, models, sources }: Pro
 function EmptyVendorState({ summary }: { summary: VendorModelSummary }) {
   if (summary.isInfrastructureOnly) {
     return (
-      <p className="text-xs leading-5 text-[#596151] dark:text-zinc-400">
+      <p className="text-xs leading-5 text-[#54647a] dark:text-zinc-400">
         Infrastructure / investment-exposure vendor. No first-party commercial LLM model is recorded — exposure is via semiconductor, hardware, or platform supply chain.
       </p>
     );
@@ -221,12 +221,12 @@ function EmptyVendorState({ summary }: { summary: VendorModelSummary }) {
   }
   if (!summary.hasSourceBackedFirstParty && summary.hostedThirdPartyCount === 0) {
     return (
-      <p className="text-xs leading-5 text-[#596151] dark:text-zinc-400">
+      <p className="text-xs leading-5 text-[#54647a] dark:text-zinc-400">
         No source-backed first-party commercial LLM model currently recorded.
       </p>
     );
   }
-  return <p className="text-xs leading-5 text-[#596151] dark:text-zinc-400">No models match the active filters.</p>;
+  return <p className="text-xs leading-5 text-[#54647a] dark:text-zinc-400">No models match the active filters.</p>;
 }
 
 function StageBadge({ stage }: { stage: AvailabilityStage }) {
@@ -250,9 +250,9 @@ function FilterSelect({
 }) {
   return (
     <label className="block">
-      <span className="text-[10px] font-semibold uppercase tracking-wide text-[#697362] dark:text-zinc-500">{label}</span>
+      <span className="text-[10px] font-semibold uppercase tracking-wide text-[#5b6b7f] dark:text-zinc-500">{label}</span>
       <select
-        className="mt-1 w-full rounded-md border border-[#d8ded0] bg-white px-2 py-1.5 text-xs dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
+        className="mt-1 w-full rounded-md border border-[#e0d6ba] bg-white px-2 py-1.5 text-xs dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
         value={value}
         onChange={(e) => onChange(e.target.value)}
       >

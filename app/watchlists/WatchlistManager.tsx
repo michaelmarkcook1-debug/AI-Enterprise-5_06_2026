@@ -37,14 +37,14 @@ export function WatchlistManager({ initialWatchlists, vendorOptions }: { initial
 
   return (
     <div className="grid gap-5 lg:grid-cols-[0.8fr_1fr]">
-      <section className="rounded-lg border border-[#dfe4da] bg-white p-4">
+      <section className="rounded-lg border border-[#e6dcc3] bg-white p-4">
         <h2 className="text-sm font-semibold">Create watchlist</h2>
         <div className="mt-3">
           <OwnershipLegend />
         </div>
-        <label className="mt-4 block text-xs font-medium uppercase tracking-wide text-[#697362]">Name</label>
-        <input value={name} onChange={(event) => setName(event.target.value)} className="mt-2 w-full rounded-md border border-[#d8ded0] px-3 py-2 text-sm" />
-        <div className="mt-4 text-xs font-medium uppercase tracking-wide text-[#697362]">Vendors</div>
+        <label className="mt-4 block text-xs font-medium uppercase tracking-wide text-[#5b6b7f]">Name</label>
+        <input value={name} onChange={(event) => setName(event.target.value)} className="mt-2 w-full rounded-md border border-[#e0d6ba] px-3 py-2 text-sm" />
+        <div className="mt-4 text-xs font-medium uppercase tracking-wide text-[#5b6b7f]">Vendors</div>
         <div className="mt-2 flex flex-wrap gap-2">
           {vendorOptions.map((vendor) => {
             const active = selectedVendors.includes(vendor.id);
@@ -55,27 +55,27 @@ export function WatchlistManager({ initialWatchlists, vendorOptions }: { initial
             );
           })}
         </div>
-        <button onClick={save} disabled={saving} className="mt-5 rounded-md bg-[#192319] px-4 py-2 text-sm font-medium text-white disabled:opacity-50">
+        <button onClick={save} disabled={saving} className="mt-5 rounded-md bg-[#13294b] px-4 py-2 text-sm font-medium text-white disabled:opacity-50">
           {saving ? "Saving" : "Save watchlist"}
         </button>
       </section>
-      <section className="rounded-lg border border-[#dfe4da] bg-white p-4">
+      <section className="rounded-lg border border-[#e6dcc3] bg-white p-4">
         <h2 className="text-sm font-semibold">Active watchlists</h2>
-        <div className="mt-3 divide-y divide-[#edf0ea]">
+        <div className="mt-3 divide-y divide-[#efe9d9]">
           {watchlists.map((watchlist) => (
             <div key={watchlist.id} className="py-3">
               <div className="font-medium">{watchlist.name}</div>
-              <div className="mt-2 flex flex-wrap gap-2 text-xs leading-5 text-[#66705f]">
+              <div className="mt-2 flex flex-wrap gap-2 text-xs leading-5 text-[#5d6b80]">
                 {watchlist.vendors.map((id) => {
                   const vendor = vendorById.get(id);
                   return (
-                    <span key={id} className="rounded border border-[#d8ded0] px-2 py-1">
+                    <span key={id} className="rounded border border-[#e0d6ba] px-2 py-1">
                       {vendor ? <VendorNameWithOwnership name={vendor.name} ownershipType={vendor.ownershipType} /> : id}
                     </span>
                   );
                 })}
               </div>
-              <div className="mt-2 text-xs leading-5 text-[#66705f]">
+              <div className="mt-2 text-xs leading-5 text-[#5d6b80]">
                 Categories: {watchlist.categories.join(", ")}
               </div>
             </div>

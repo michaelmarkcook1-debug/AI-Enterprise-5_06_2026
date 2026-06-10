@@ -37,40 +37,40 @@ export default function IpoWatchPage() {
             const evidence = row.evidenceQuality;
             return (
               <Link key={provider.id} href={`/investor-tools/ipo-watch/${provider.slug}`}
-                className="block rounded-lg border border-[#dfe4da] bg-white p-4 hover:border-[#192319] dark:border-zinc-800 dark:bg-[#071827]">
+                className="block rounded-lg border border-[#e6dcc3] bg-white p-4 hover:border-[#13294b] dark:border-zinc-800 dark:bg-[#071827]">
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <div className="font-semibold">{provider.name}</div>
-                    <div className="text-[11px] text-[#66705f]">{label(provider.exposureClass)}</div>
+                    <div className="text-[11px] text-[#5d6b80]">{label(provider.exposureClass)}</div>
                   </div>
-                  <span className="rounded-full border border-[#d8ded0] px-2 py-0.5 font-mono text-[11px] dark:border-zinc-700">
+                  <span className="rounded-full border border-[#e0d6ba] px-2 py-0.5 font-mono text-[11px] dark:border-zinc-700">
                     {profile.rumourQuality}
                   </span>
                 </div>
-                <p className="mt-2 text-xs text-[#596151] dark:text-zinc-400">
+                <p className="mt-2 text-xs text-[#54647a] dark:text-zinc-400">
                   {STAGE_LABEL[baseRumourStage(profile.rumourQuality)] ?? label(profile.rumourQuality)}
                 </p>
                 <dl className="mt-3 grid grid-cols-2 gap-2 text-xs">
                   <div>
-                    <dt className="text-[#66705f]">Forecast window</dt>
+                    <dt className="text-[#5d6b80]">Forecast window</dt>
                     <dd className="font-mono">{formatWindow(profile.credibleWindowStart, profile.credibleWindowEnd)}</dd>
                   </div>
                   <div>
-                    <dt className="text-[#66705f]">Estimated month</dt>
+                    <dt className="text-[#5d6b80]">Estimated month</dt>
                     <dd className="font-mono">{profile.estimatedIpoMonth ?? "No reliable estimate"}</dd>
                   </div>
                   <div>
-                    <dt className="text-[#66705f]">Forecast status</dt>
+                    <dt className="text-[#5d6b80]">Forecast status</dt>
                     <dd className="font-mono text-rose-700 dark:text-rose-400">{profile.forecastStatusLabel}</dd>
                   </div>
                   <div>
-                    <dt className="text-[#66705f]">Bands</dt>
+                    <dt className="text-[#5d6b80]">Bands</dt>
                     <dd className="font-mono">{row.bands.length === 10 ? "M1-M10" : "Disabled"}</dd>
                   </div>
                 </dl>
                 <div className="mt-3 text-[11px]">
                   <span className="font-semibold">{label(profile.behaviourForecast)}</span>
-                  <span className="ml-2 text-[#66705f]">{profile.forecastDisabledReason ?? "Percentage bands are relative to IPO offer price."}</span>
+                  <span className="ml-2 text-[#5d6b80]">{profile.forecastDisabledReason ?? "Percentage bands are relative to IPO offer price."}</span>
                 </div>
                 <div className="mt-2 flex flex-wrap gap-2">
                   <Confidence value={profile.confidenceScore} />
@@ -78,7 +78,7 @@ export default function IpoWatchPage() {
                   <SeedDataBadge label={profile.dataStatus === "estimated" ? "Estimated" : "Disabled"} />
                 </div>
                 {row.missingData.length > 0 && (
-                  <p className="mt-2 text-[11px] leading-4 text-[#66705f]">
+                  <p className="mt-2 text-[11px] leading-4 text-[#5d6b80]">
                     Missing: {row.missingData.slice(0, 3).map((item) => item.missingItem).join(" | ")}
                   </p>
                 )}

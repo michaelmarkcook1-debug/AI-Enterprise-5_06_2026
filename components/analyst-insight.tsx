@@ -13,7 +13,7 @@ export default function AnalystInsight({ paragraph }: { paragraph: string }) {
         <h2 className="text-[10px] font-semibold uppercase tracking-widest text-emerald-800 dark:text-emerald-300">
           Analyst insight
         </h2>
-        <span className="text-[9px] uppercase tracking-wide text-[#8a948a] dark:text-zinc-500">
+        <span className="text-[9px] uppercase tracking-wide text-[#7e8a99] dark:text-zinc-500">
           platform-derived from the data on this page
         </span>
       </div>

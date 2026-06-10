@@ -123,11 +123,11 @@ export default async function UnderstandPage({ searchParams }: PageProps) {
       <section className="mb-6 grid gap-4">
         <Link
           href="/atlas"
-          className="group rounded-xl border border-[#dfe4da] bg-white p-5 transition-colors hover:border-emerald-400 hover:bg-emerald-50/50 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-emerald-600 dark:hover:bg-emerald-950/30"
+          className="group rounded-xl border border-[#e6dcc3] bg-white p-5 transition-colors hover:border-emerald-400 hover:bg-emerald-50/50 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-emerald-600 dark:hover:bg-emerald-950/30"
         >
           <div className="text-[10px] font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">Interactive</div>
-          <div className="mt-1 text-lg font-semibold text-[#18201b] dark:text-zinc-100">AI Ecosystem Navigator</div>
-          <p className="mt-1 text-xs text-[#5f685a] dark:text-zinc-400">
+          <div className="mt-1 text-lg font-semibold text-[#13294b] dark:text-zinc-100">AI Ecosystem Navigator</div>
+          <p className="mt-1 text-xs text-[#56657b] dark:text-zinc-400">
             Full interactive ecosystem map — who backs whom, who hosts whom, where risk concentrates. Click to explore.
           </p>
           <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 transition-colors group-hover:text-emerald-800 dark:text-emerald-400 dark:group-hover:text-emerald-300">
@@ -139,7 +139,7 @@ export default async function UnderstandPage({ searchParams }: PageProps) {
       {/* 0.5 Strategic Sustainability Overview */}
       <section className="mb-6">
         <Panel title="Strategic sustainability overview">
-          <p className="mb-3 text-xs text-[#5f685a] dark:text-zinc-400">
+          <p className="mb-3 text-xs text-[#56657b] dark:text-zinc-400">
             Aggregate view of vendor defensibility across the tracked universe. Identifies which vendors have durable advantages and which face disruption risk.
           </p>
           {(() => {
@@ -154,9 +154,9 @@ export default async function UnderstandPage({ searchParams }: PageProps) {
             const highestRisk = [...scores].sort((a, b) => b.encroachment - a.encroachment)[0];
             return (
               <div className="grid gap-3 md:grid-cols-3">
-                <div className="rounded-md border border-[#dfe4da] p-3 dark:border-zinc-800">
-                  <div className="text-[10px] uppercase tracking-wider text-[#697362]">Avg sustainability</div>
-                  <div className="mt-1 font-mono text-2xl font-semibold text-[#18201b] dark:text-zinc-100">{avgSus}/100</div>
+                <div className="rounded-md border border-[#e6dcc3] p-3 dark:border-zinc-800">
+                  <div className="text-[10px] uppercase tracking-wider text-[#5b6b7f]">Avg sustainability</div>
+                  <div className="mt-1 font-mono text-2xl font-semibold text-[#13294b] dark:text-zinc-100">{avgSus}/100</div>
                 </div>
                 <div className="rounded-md border border-emerald-200 bg-emerald-50/60 p-3 dark:border-emerald-900/60 dark:bg-emerald-950/20">
                   <div className="text-[10px] uppercase tracking-wider text-emerald-700 dark:text-emerald-300">Most durable</div>
@@ -178,7 +178,7 @@ export default async function UnderstandPage({ searchParams }: PageProps) {
       {/* 1. AI Ecosystem Navigator (public→private linkage snapshot) */}
       <section id="exposure" className="mb-8">
         <Panel title="AI Ecosystem Navigator (public → private linkage)">
-          <p className="mb-3 text-xs leading-5 text-[#5f685a] dark:text-zinc-400">
+          <p className="mb-3 text-xs leading-5 text-[#56657b] dark:text-zinc-400">
             Hover a logo to highlight its dependencies. Click to pin (up to 3). Filter by
             relationship type or confidence. Every edge is publicly source-backed — seed-confidence
             edges render dashed and require independent verification.
@@ -210,21 +210,21 @@ export default async function UnderstandPage({ searchParams }: PageProps) {
         <CollapsiblePanel title="Data sources backing this surface" summary={"provenance register"}>
           <div className="flex flex-wrap items-center justify-between gap-3 text-sm">
             <div>
-              <p className="text-xs leading-5 text-[#596151] dark:text-zinc-400">
+              <p className="text-xs leading-5 text-[#54647a] dark:text-zinc-400">
                 <strong>{configuredConnectors}/{totalConnectors}</strong> connectors configured ·{" "}
                 <strong>{provenance.evidenceCount}</strong> verified evidence rows ·{" "}
                 <strong>{provenance.approvedProposalCount}</strong> approved proposals
               </p>
-              <p className="mt-1 text-[11px] italic text-[#697362] dark:text-zinc-500">{provenance.reason}</p>
+              <p className="mt-1 text-[11px] italic text-[#5b6b7f] dark:text-zinc-500">{provenance.reason}</p>
             </div>
             <div className="flex flex-wrap gap-2 text-xs">
-              <Link href="/admin/data-sources" className="rounded-full border border-[#dfe4da] bg-white px-3 py-1 font-semibold text-[#18201b] hover:bg-[#eef2e8] dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800">
+              <Link href="/admin/data-sources" className="rounded-full border border-[#e6dcc3] bg-white px-3 py-1 font-semibold text-[#13294b] hover:bg-[#f3ead2] dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800">
                 Connector status →
               </Link>
-              <Link href="/admin/ingestion" className="rounded-full border border-[#dfe4da] bg-white px-3 py-1 font-semibold text-[#18201b] hover:bg-[#eef2e8] dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800">
+              <Link href="/admin/ingestion" className="rounded-full border border-[#e6dcc3] bg-white px-3 py-1 font-semibold text-[#13294b] hover:bg-[#f3ead2] dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800">
                 Run ingestion →
               </Link>
-              <Link href="/admin/evidence" className="rounded-full border border-[#dfe4da] bg-white px-3 py-1 font-semibold text-[#18201b] hover:bg-[#eef2e8] dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800">
+              <Link href="/admin/evidence" className="rounded-full border border-[#e6dcc3] bg-white px-3 py-1 font-semibold text-[#13294b] hover:bg-[#f3ead2] dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800">
                 Approve evidence →
               </Link>
             </div>
@@ -244,7 +244,7 @@ export default async function UnderstandPage({ searchParams }: PageProps) {
       {/* 5. Strategic Intelligence — new scores from the implementation pack */}
       <section id="strategic" className="mb-8">
         <Panel title="Strategic vendor intelligence">
-          <p className="mb-2 text-xs text-[#5f685a] dark:text-zinc-400">
+          <p className="mb-2 text-xs text-[#56657b] dark:text-zinc-400">
             Strategic sustainability, platform encroachment risk, dependency risk, and optionality
             for the top tracked vendors. These scores are derived from existing pillar scores,
             momentum, market position, and ecosystem data.
@@ -253,7 +253,7 @@ export default async function UnderstandPage({ searchParams }: PageProps) {
           <div className="mt-4 overflow-x-auto">
             <table className="min-w-full text-sm">
               <thead>
-                <tr className="border-b border-[#dfe4da] text-left text-[10px] uppercase tracking-wide text-[#5f685a]">
+                <tr className="border-b border-[#e6dcc3] text-left text-[10px] uppercase tracking-wide text-[#56657b]">
                   <th className="py-2 pr-3">Vendor</th>
                   <th className="py-2 pr-3">Trend</th>
                   <th className="py-2 pr-3 text-right">Sustainability</th>
@@ -275,7 +275,7 @@ export default async function UnderstandPage({ searchParams }: PageProps) {
                   const scoreTone = (v: number) => v >= 70 ? "text-emerald-700 dark:text-emerald-300" : v >= 45 ? "text-amber-700 dark:text-amber-300" : "text-rose-700 dark:text-rose-300";
 
                   return (
-                    <tr key={vendor.id} className="border-b border-[#edf0ea]/60">
+                    <tr key={vendor.id} className="border-b border-[#efe9d9]/60">
                       <td className="py-2.5 pr-3">
                         <VendorNameWithOwnership name={vendor.name} ownershipType={vendor.ownershipType} />
                       </td>
@@ -287,7 +287,7 @@ export default async function UnderstandPage({ searchParams }: PageProps) {
                               label={`${vendor.name} — overall score`}
                               points={h.points.map((pt) => ({ date: pt.date, value: pt.score }))}
                             />
-                          ) : <span className="text-[10px] text-[#8a948a]">accumulating</span>;
+                          ) : <span className="text-[10px] text-[#7e8a99]">accumulating</span>;
                         })()}
                       </td>
                       <td className={`py-2.5 pr-3 text-right font-mono font-semibold ${scoreTone(sustainability)}`}>{sustainability}</td>
@@ -301,7 +301,7 @@ export default async function UnderstandPage({ searchParams }: PageProps) {
               </tbody>
             </table>
           </div>
-          <div className="mt-3 grid gap-3 text-[11px] text-[#5f685a] dark:text-zinc-400 md:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-3 grid gap-3 text-[11px] text-[#56657b] dark:text-zinc-400 md:grid-cols-2 lg:grid-cols-3">
             <div><strong>Sustainability:</strong> Likelihood the vendor&apos;s advantage remains defensible over 6–24 months.</div>
             <div><strong>Encroachment risk:</strong> Risk that a frontier model or hyperscaler absorbs the vendor&apos;s differentiation.</div>
             <div><strong>Dependency risk:</strong> Exposure to model, cloud, GPU, or platform dependencies.</div>
@@ -317,7 +317,7 @@ export default async function UnderstandPage({ searchParams }: PageProps) {
             readability, but vendors are only RANKED within their own category /
             layer — a flat all-market position number would mislead. */}
         <CollapsiblePanel title="Vendor universe" summary={`${rankableVendors.length} vendors`}>
-          <div className="divide-y divide-[#edf0ea] dark:divide-zinc-800">
+          <div className="divide-y divide-[#efe9d9] dark:divide-zinc-800">
             {vendorsRanked.map((vendor) => {
               const mom = momentumByVendor.get(vendor.id);
               return (
@@ -327,18 +327,18 @@ export default async function UnderstandPage({ searchParams }: PageProps) {
                   className="grid gap-4 py-4 md:grid-cols-[1fr_160px_160px] md:items-center"
                 >
                   <div>
-                    <div className="text-base font-semibold text-[#18201b] dark:text-zinc-100">
+                    <div className="text-base font-semibold text-[#13294b] dark:text-zinc-100">
                       <VendorNameWithOwnership name={vendor.name} ownershipType={vendor.ownershipType} compactBadge={false} />
                     </div>
-                    <div className="mt-1 text-sm text-[#596151] dark:text-zinc-400">{vendor.category} · {vendor.marketPosition}</div>
-                    <div className="mt-2 text-xs leading-5 text-[#66705f] dark:text-zinc-500">{vendor.description}</div>
+                    <div className="mt-1 text-sm text-[#54647a] dark:text-zinc-400">{vendor.category} · {vendor.marketPosition}</div>
+                    <div className="mt-2 text-xs leading-5 text-[#5d6b80] dark:text-zinc-500">{vendor.description}</div>
                   </div>
                   <div>
                     <ScoreBar label="Overall" value={vendor.overallScore} />
                   </div>
                   <div className="md:text-right">
                     <Confidence value={vendor.confidenceScore} />
-                    <div className="mt-2 text-xs text-[#66705f] dark:text-zinc-500">Momentum {mom?.momentumScore ?? 0}/100</div>
+                    <div className="mt-2 text-xs text-[#5d6b80] dark:text-zinc-500">Momentum {mom?.momentumScore ?? 0}/100</div>
                   </div>
                 </Link>
               );
@@ -352,7 +352,7 @@ export default async function UnderstandPage({ searchParams }: PageProps) {
         <CollapsiblePanel title="Methodology — Enterprise AI Assessment Framework v2.0" summary={"weights, evidence grades, scoring rubric"}>
           <div className="grid gap-6 lg:grid-cols-2">
             <div>
-              <h3 className="text-sm font-semibold text-[#18201b] dark:text-zinc-100">Six pillars (default weights)</h3>
+              <h3 className="text-sm font-semibold text-[#13294b] dark:text-zinc-100">Six pillars (default weights)</h3>
               <ul className="mt-2 list-disc space-y-1 pl-6 text-sm text-zinc-700 dark:text-zinc-300">
                 <li>Business Fit — 15%</li>
                 <li>Enterprise Control — 25%</li>
@@ -366,7 +366,7 @@ export default async function UnderstandPage({ searchParams }: PageProps) {
                 autonomy appetite and budget sensitivity.
               </p>
 
-              <h3 className="mt-6 text-sm font-semibold text-[#18201b] dark:text-zinc-100">Risk engine</h3>
+              <h3 className="mt-6 text-sm font-semibold text-[#13294b] dark:text-zinc-100">Risk engine</h3>
               <p className="mt-2 text-sm leading-6 text-zinc-700 dark:text-zinc-300">
                 Fatal blockers exclude vendors in incompatible contexts. Severe / moderate risks
                 apply penalties scaled by the user&apos;s risk tolerance. Industry-critical control
@@ -374,7 +374,7 @@ export default async function UnderstandPage({ searchParams }: PageProps) {
               </p>
             </div>
             <div>
-              <h3 className="text-sm font-semibold text-[#18201b] dark:text-zinc-100">Evidence grading (E0–E5)</h3>
+              <h3 className="text-sm font-semibold text-[#13294b] dark:text-zinc-100">Evidence grading (E0–E5)</h3>
               <div className="mt-2 grid grid-cols-1 gap-1 text-sm">
                 {[
                   ["E0", "0.0", "No evidence"],
@@ -392,7 +392,7 @@ export default async function UnderstandPage({ searchParams }: PageProps) {
                 ))}
               </div>
 
-              <h3 className="mt-6 text-sm font-semibold text-[#18201b] dark:text-zinc-100">Final score formula</h3>
+              <h3 className="mt-6 text-sm font-semibold text-[#13294b] dark:text-zinc-100">Final score formula</h3>
               <pre className="mt-2 overflow-x-auto rounded-lg bg-zinc-50 p-3 text-xs dark:bg-zinc-900">{`Final Score =
   Σ(Pillar Score × Dynamic Context Weight × Evidence Confidence)
   + Strategic Fit Bonus
@@ -407,9 +407,9 @@ export default async function UnderstandPage({ searchParams }: PageProps) {
 
       {/* Next actions */}
       <div className="mt-4 flex flex-wrap gap-2 text-xs">
-        <Link href="/query" className="rounded-md border border-[#cfd7c8] px-3 py-2 font-semibold hover:bg-[#eef2e8] dark:border-zinc-700 dark:hover:bg-zinc-900">← Market intelligence</Link>
-        <Link href="/assess" className="rounded-md border border-[#cfd7c8] px-3 py-2 font-semibold hover:bg-[#eef2e8] dark:border-zinc-700 dark:hover:bg-zinc-900">Assess your needs →</Link>
-        <Link href="/atlas" className="rounded-md border border-[#cfd7c8] px-3 py-2 font-semibold hover:bg-[#eef2e8] dark:border-zinc-700 dark:hover:bg-zinc-900">Open AI Atlas →</Link>
+        <Link href="/query" className="rounded-md border border-[#d6c9a8] px-3 py-2 font-semibold hover:bg-[#f3ead2] dark:border-zinc-700 dark:hover:bg-zinc-900">← Market intelligence</Link>
+        <Link href="/assess" className="rounded-md border border-[#d6c9a8] px-3 py-2 font-semibold hover:bg-[#f3ead2] dark:border-zinc-700 dark:hover:bg-zinc-900">Assess your needs →</Link>
+        <Link href="/atlas" className="rounded-md border border-[#d6c9a8] px-3 py-2 font-semibold hover:bg-[#f3ead2] dark:border-zinc-700 dark:hover:bg-zinc-900">Open AI Atlas →</Link>
       </div>
     </PageFrame>
   );
@@ -438,12 +438,12 @@ function Stat({
       ? "text-amber-700 dark:text-amber-300"
       : tone === "bad"
       ? "text-rose-700 dark:text-rose-300"
-      : "text-[#18201b] dark:text-zinc-100";
+      : "text-[#13294b] dark:text-zinc-100";
   return (
-    <div className="rounded-md border border-[#dfe4da] bg-white p-3 dark:border-zinc-800 dark:bg-zinc-900">
-      <div className="text-[10px] font-semibold uppercase tracking-wider text-[#697362] dark:text-zinc-500">{label}</div>
+    <div className="rounded-md border border-[#e6dcc3] bg-white p-3 dark:border-zinc-800 dark:bg-zinc-900">
+      <div className="text-[10px] font-semibold uppercase tracking-wider text-[#5b6b7f] dark:text-zinc-500">{label}</div>
       <div className={`mt-1 font-mono text-2xl font-semibold ${toneClass}`}>{value}</div>
-      {note && <div className="text-[10px] text-[#697362] dark:text-zinc-500">{note}</div>}
+      {note && <div className="text-[10px] text-[#5b6b7f] dark:text-zinc-500">{note}</div>}
     </div>
   );
 }

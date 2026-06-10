@@ -53,26 +53,26 @@ export default async function IpoForecastProviderPage({ params }: { params: Prom
               <SeedDataBadge label="Modelled estimate" />
               <SeedDataBadge label={forecast.sourceRequired ? "Source refresh required" : "Source backed"} provenance={forecast.sourceRequired ? "seed" : "live"} />
             </div>
-            <p className="text-[#596151] dark:text-zinc-400">{forecast.notes}</p>
+            <p className="text-[#54647a] dark:text-zinc-400">{forecast.notes}</p>
             <dl className="grid grid-cols-2 gap-3 text-xs">
               <div>
-                <dt className="text-[#66705f]">Filing status</dt>
+                <dt className="text-[#5d6b80]">Filing status</dt>
                 <dd className="font-mono">{label(evidenceQuality?.filingStatus ?? "unknown")}</dd>
               </div>
               <div>
-                <dt className="text-[#66705f]">Confirmed S-1/F-1</dt>
+                <dt className="text-[#5d6b80]">Confirmed S-1/F-1</dt>
                 <dd className="font-mono">{evidenceQuality?.hasConfirmedS1 ? "Yes" : "No"}</dd>
               </div>
               <div>
-                <dt className="text-[#66705f]">Price range</dt>
+                <dt className="text-[#5d6b80]">Price range</dt>
                 <dd className="font-mono">{evidenceQuality?.hasConfirmedPriceRange ? "Confirmed" : "Unknown"}</dd>
               </div>
               <div>
-                <dt className="text-[#66705f]">Lock-up terms</dt>
+                <dt className="text-[#5d6b80]">Lock-up terms</dt>
                 <dd className="font-mono">{evidenceQuality?.hasConfirmedLockup ? "Confirmed" : "Unknown"}</dd>
               </div>
             </dl>
-            <div className="rounded-md border border-[#e3e8dc] bg-[#f8faf5] p-3 text-xs text-[#596151] dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-400">
+            <div className="rounded-md border border-[#e3e8dc] bg-[#f8faf5] p-3 text-xs text-[#54647a] dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-400">
               Source: {forecast.sourceNames.join(", ")}. Source URL: {forecast.sourceUrls.length ? forecast.sourceUrls.join(", ") : "Not available in seed data; requires validation."}
             </div>
           </div>
@@ -81,11 +81,11 @@ export default async function IpoForecastProviderPage({ params }: { params: Prom
 
       <div className="mt-5 grid gap-5 lg:grid-cols-2">
         <Panel title="Missing data checklist">
-          <div className="divide-y divide-[#edf0ea] dark:divide-zinc-800">
+          <div className="divide-y divide-[#efe9d9] dark:divide-zinc-800">
             {missingData.map((item) => (
               <div key={`${item.providerId}-${item.missingItem}`} className="grid gap-2 py-3 text-sm md:grid-cols-[180px_1fr_160px]">
                 <span className="font-medium">{item.missingItem}</span>
-                <span className="text-xs leading-5 text-[#596151] dark:text-zinc-400">{item.howItChangesForecast}</span>
+                <span className="text-xs leading-5 text-[#54647a] dark:text-zinc-400">{item.howItChangesForecast}</span>
                 <span className="font-mono text-[11px] text-rose-700 dark:text-rose-400">{label(item.blockingStatus)}</span>
               </div>
             ))}
@@ -93,7 +93,7 @@ export default async function IpoForecastProviderPage({ params }: { params: Prom
         </Panel>
 
         <Panel title="Truthfulness guardrails">
-          <ul className="list-disc space-y-2 pl-5 text-sm leading-6 text-[#596151] dark:text-zinc-400">
+          <ul className="list-disc space-y-2 pl-5 text-sm leading-6 text-[#54647a] dark:text-zinc-400">
             <li>No dollar share-price path is shown because no verified offer price is available.</li>
             <li>All post-IPO bands are percentages relative to the IPO offer price.</li>
             <li>Forecasts are disabled when evidence quality is insufficient or standalone IPO modelling is not credible.</li>
@@ -136,18 +136,18 @@ function BandChart({ providerName, bands }: { providerName: string; bands: PostI
   return (
     <div>
       <svg viewBox={`0 0 ${width} ${height}`} width="100%" role="img" aria-label={`${providerName} modelled post-IPO percentage band`}>
-        <rect x="0" y="0" width={width} height={height} rx="10" className="fill-[#f7f8f5] dark:fill-zinc-950" />
+        <rect x="0" y="0" width={width} height={height} rx="10" className="fill-[#faf6ec] dark:fill-zinc-950" />
         <rect x={xFor(5) - 20} y="38" width={xFor(7) - xFor(5) + 40} height="190" className="fill-amber-200/40 dark:fill-amber-900/30" />
         <line x1="36" x2="724" y1={zeroY} y2={zeroY} stroke="#7b8576" strokeDasharray="4 5" />
         {[0, 1, 2, 3].map((tick) => {
           const y = 50 + tick * 45;
-          return <line key={tick} x1="36" x2="724" y1={y} y2={y} stroke="#dfe4da" strokeDasharray="4 6" />;
+          return <line key={tick} x1="36" x2="724" y1={y} y2={y} stroke="#e6dcc3" strokeDasharray="4 6" />;
         })}
-        <path d={areaPath} fill="#2f5d50" fillOpacity="0.18" stroke="#2f5d50" strokeWidth="2" />
+        <path d={areaPath} fill="#b08d2f" fillOpacity="0.18" stroke="#b08d2f" strokeWidth="2" />
         {bands.map((band) => (
           <g key={band.monthNumber}>
             <title>{`${providerName} M${band.monthNumber}: ${signedPct(band.lowPct)} to ${signedPct(band.highPct)} | ${band.confidence.replace(/_/g, " ")} confidence | ${band.uncertaintyNote}`}</title>
-            <line x1={xFor(band.monthNumber)} x2={xFor(band.monthNumber)} y1={yFor(band.lowPct)} y2={yFor(band.highPct)} stroke="#2f5d50" strokeWidth="3" />
+            <line x1={xFor(band.monthNumber)} x2={xFor(band.monthNumber)} y1={yFor(band.lowPct)} y2={yFor(band.highPct)} stroke="#b08d2f" strokeWidth="3" />
             <circle cx={xFor(band.monthNumber)} cy={yFor(band.highPct)} r="4" fill="#0f8b66" />
             <circle cx={xFor(band.monthNumber)} cy={yFor(band.lowPct)} r="4" fill="#c23b2a" />
             <text x={xFor(band.monthNumber)} y="244" textAnchor="middle" className="fill-current text-[11px]">M{band.monthNumber}</text>

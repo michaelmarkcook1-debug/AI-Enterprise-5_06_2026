@@ -38,28 +38,28 @@ export default async function NewsPage() {
         <div className="mb-4">
           <OwnershipLegend />
         </div>
-        <div className="divide-y divide-[#edf0ea]">
+        <div className="divide-y divide-[#efe9d9]">
           {news.map((item) => (
             <article key={item.id} className="grid gap-4 py-5 lg:grid-cols-[1fr_180px]">
               <div>
                 <div className="flex flex-wrap gap-2">
-                  {item.categories.map((category) => <span key={category} className="rounded bg-[#eef2e8] px-2 py-1 text-xs text-[#455044]">{category}</span>)}
+                  {item.categories.map((category) => <span key={category} className="rounded bg-[#f3ead2] px-2 py-1 text-xs text-[#455044]">{category}</span>)}
                 </div>
-                <h2 className="mt-3 text-lg font-semibold text-[#18201b]">{item.title}</h2>
-                <p className="mt-2 text-sm leading-6 text-[#4d574b]">{item.summary}</p>
-                <p className="mt-2 text-sm leading-6 text-[#596151]"><strong>Why it matters:</strong> {item.whyItMatters}</p>
-                <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-[#66705f]">
+                <h2 className="mt-3 text-lg font-semibold text-[#13294b]">{item.title}</h2>
+                <p className="mt-2 text-sm leading-6 text-[#475a72]">{item.summary}</p>
+                <p className="mt-2 text-sm leading-6 text-[#54647a]"><strong>Why it matters:</strong> {item.whyItMatters}</p>
+                <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-[#5d6b80]">
                   <span className="font-semibold uppercase tracking-wide">Vendors</span>
                   {item.vendors.map((id) => {
                     const vendor = vendorById.get(id);
                     return (
-                      <span key={id} className="rounded border border-[#d8ded0] px-2 py-1 dark:border-zinc-700">
+                      <span key={id} className="rounded border border-[#e0d6ba] px-2 py-1 dark:border-zinc-700">
                         {vendor ? <VendorNameWithOwnership name={vendor.name} ownershipType={vendor.ownershipType} /> : id}
                       </span>
                     );
                   })}
                 </div>
-                <div className="mt-2 text-xs text-[#66705f]">
+                <div className="mt-2 text-xs text-[#5d6b80]">
                   Pillars: {item.affectedPillars.map((pillar) => pillar.replace(/_/g, " ")).join(", ")}
                 </div>
               </div>
@@ -75,8 +75,8 @@ export default async function NewsPage() {
                 {/* Strip the noisy "[MOCK]" prefix from rendered source
                     text — the badge above carries the seed signal honestly,
                     no need to shout it twice. */}
-                <div className="text-xs text-[#66705f]">{item.sourceName.replace(/^\[MOCK\]\s*/i, "")}</div>
-                <div className="text-xs text-[#66705f]">{new Date(item.publishedAt).toLocaleDateString("en-GB")}</div>
+                <div className="text-xs text-[#5d6b80]">{item.sourceName.replace(/^\[MOCK\]\s*/i, "")}</div>
+                <div className="text-xs text-[#5d6b80]">{new Date(item.publishedAt).toLocaleDateString("en-GB")}</div>
               </div>
             </article>
           ))}

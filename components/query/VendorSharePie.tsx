@@ -117,14 +117,14 @@ export default function VendorSharePie() {
         {rows.map((row, i) => (
           <li
             key={row.vendor}
-            className="flex items-center justify-between gap-3 rounded-md px-2 py-1 text-sm hover:bg-[#eef2e8] dark:hover:bg-zinc-800"
+            className="flex items-center justify-between gap-3 rounded-md px-2 py-1 text-sm hover:bg-[#f3ead2] dark:hover:bg-zinc-800"
           >
             <span className="flex items-center gap-2 truncate">
-              <span className="w-4 text-right font-mono text-[11px] text-[#697362] dark:text-zinc-500">{i + 1}</span>
+              <span className="w-4 text-right font-mono text-[11px] text-[#5b6b7f] dark:text-zinc-500">{i + 1}</span>
               <span className="h-3 w-3 flex-none rounded-sm" style={{ background: colorFor(row.vendor) }} />
-              <span className="truncate font-medium text-[#18201b] dark:text-zinc-100">{row.vendor}</span>
+              <span className="truncate font-medium text-[#13294b] dark:text-zinc-100">{row.vendor}</span>
             </span>
-            <span className="font-mono font-semibold text-[#18201b] dark:text-zinc-100">{pct(row.share)}</span>
+            <span className="font-mono font-semibold text-[#13294b] dark:text-zinc-100">{pct(row.share)}</span>
           </li>
         ))}
       </ol>

@@ -12,23 +12,23 @@ export default async function BriefingsPage() {
       <div className="grid gap-5 lg:grid-cols-[1fr_0.75fr]">
         <Panel title={brief.title}>
           <div className="space-y-4">
-            {brief.executiveSummary.map((item) => <p key={item} className="text-sm leading-6 text-[#4d574b]">{item}</p>)}
-            <div className="rounded-md bg-[#eef2e8] p-3 text-sm font-medium text-[#18201b]">{brief.boardTakeaway}</div>
+            {brief.executiveSummary.map((item) => <p key={item} className="text-sm leading-6 text-[#475a72]">{item}</p>)}
+            <div className="rounded-md bg-[#f3ead2] p-3 text-sm font-medium text-[#13294b]">{brief.boardTakeaway}</div>
           </div>
         </Panel>
         <Panel title="Confidence note">
-          <p className="text-sm leading-6 text-[#4d574b]">{brief.confidenceNote}</p>
+          <p className="text-sm leading-6 text-[#475a72]">{brief.confidenceNote}</p>
         </Panel>
       </div>
       <div className="mt-5 grid gap-5 lg:grid-cols-3">
         <Panel title="Who is winning">
-          <ul className="space-y-2 text-sm leading-6 text-[#4d574b]">{brief.whoIsWinning.map((item) => <li key={item}>{item}</li>)}</ul>
+          <ul className="space-y-2 text-sm leading-6 text-[#475a72]">{brief.whoIsWinning.map((item) => <li key={item}>{item}</li>)}</ul>
         </Panel>
         <Panel title="Who is losing">
-          <ul className="space-y-2 text-sm leading-6 text-[#4d574b]">{brief.whoIsLosing.map((item) => <li key={item}>{item}</li>)}</ul>
+          <ul className="space-y-2 text-sm leading-6 text-[#475a72]">{brief.whoIsLosing.map((item) => <li key={item}>{item}</li>)}</ul>
         </Panel>
         <Panel title="Watchlist summary">
-          <ul className="space-y-2 text-sm leading-6 text-[#4d574b]">{brief.riskWatch.map((item) => <li key={item}>{item}</li>)}</ul>
+          <ul className="space-y-2 text-sm leading-6 text-[#475a72]">{brief.riskWatch.map((item) => <li key={item}>{item}</li>)}</ul>
         </Panel>
       </div>
     </PageFrame>

@@ -13,7 +13,7 @@ const VENDOR_COLOURS: Record<string, string> = {
 
 export async function GET() {
   const edges = listIndirectExposureScores().map((edge) => {
-    const lineColor = VENDOR_COLOURS[edge.publicTicker] ?? "#2f5d50";
+    const lineColor = VENDOR_COLOURS[edge.publicTicker] ?? "#b08d2f";
     const lineWidth = 1 + edge.exposureStrength * 7;
     const opacity = 0.25 + edge.confidence * 0.7;
     const lineStyle = edge.confidence >= 0.65 ? "solid" : edge.confidence >= 0.45 ? "dashed" : "dotted";

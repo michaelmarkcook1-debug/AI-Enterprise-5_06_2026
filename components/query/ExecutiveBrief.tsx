@@ -207,8 +207,8 @@ function generateBrief(entities: Entity[], winningByLayer: { title: string; name
 
 const AG_LOGO_SVG = `<svg width="40" height="40" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
   <rect width="64" height="64" rx="12" fill="#071827"/>
-  <circle cx="32" cy="32" r="7" fill="#6EE7B7"/>
-  <ellipse cx="32" cy="32" rx="22" ry="9" stroke="#6EE7B7" stroke-width="3"/>
+  <circle cx="32" cy="32" r="7" fill="#e8c95c"/>
+  <ellipse cx="32" cy="32" rx="22" ry="9" stroke="#e8c95c" stroke-width="3"/>
   <ellipse cx="32" cy="32" rx="22" ry="9" stroke="#F5C451" stroke-width="3" transform="rotate(60 32 32)"/>
   <ellipse cx="32" cy="32" rx="22" ry="9" stroke="#F6F0E7" stroke-width="3" transform="rotate(120 32 32)"/>
   <circle cx="50" cy="25" r="3.5" fill="#F5C451"/>
@@ -283,50 +283,50 @@ function renderExportHtml(brief: ReturnType<typeof generateBrief>, headshotDataU
   :root { color-scheme: light; }
   @page { margin: 20mm 18mm; size: A4; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font: 13px/1.6 -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; color: #18201b; max-width: 860px; margin: 0 auto; padding: 32px 28px; }
+  body { font: 13px/1.6 -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; color: #13294b; max-width: 860px; margin: 0 auto; padding: 32px 28px; }
   .ag-header { display: flex; align-items: center; gap: 14px; border-bottom: 3px solid #071827; padding-bottom: 14px; margin-bottom: 6px; }
   .ag-header .logo { flex-shrink: 0; }
   .ag-header .brand { flex: 1; }
   .ag-header .brand-name { font-size: 20px; font-weight: 700; letter-spacing: -0.02em; color: #071827; }
-  .ag-header .brand-sub { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: #697362; margin-top: 1px; }
+  .ag-header .brand-sub { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: #5b6b7f; margin-top: 1px; }
   .ag-header .confidentiality { font-size: 9px; text-transform: uppercase; letter-spacing: 0.06em; color: #fff; background: #071827; padding: 4px 12px; border-radius: 4px; font-weight: 600; }
   .doc-title { font-size: 22px; font-weight: 700; color: #071827; margin: 18px 0 2px; letter-spacing: -0.01em; }
-  .doc-meta { font-size: 11px; color: #697362; margin-bottom: 24px; }
-  h2 { font-size: 15px; font-weight: 700; color: #071827; margin: 28px 0 10px; padding-bottom: 4px; border-bottom: 1px solid #e4e8df; }
+  .doc-meta { font-size: 11px; color: #5b6b7f; margin-bottom: 24px; }
+  h2 { font-size: 15px; font-weight: 700; color: #071827; margin: 28px 0 10px; padding-bottom: 4px; border-bottom: 1px solid #eae2cc; }
   h3 { font-size: 13px; font-weight: 700; color: #2d3a2b; margin: 16px 0 6px; }
   p { margin: 6px 0; }
   ul { padding-left: 20px; margin: 6px 0; }
   li { margin: 3px 0; }
   table { width: 100%; border-collapse: collapse; font-size: 12px; margin: 10px 0 16px; }
-  th { text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: 0.04em; color: #697362; padding: 6px 8px; border-bottom: 2px solid #071827; font-weight: 600; }
-  td { padding: 6px 8px; border-bottom: 1px solid #edf0ea; vertical-align: top; }
+  th { text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: 0.04em; color: #5b6b7f; padding: 6px 8px; border-bottom: 2px solid #071827; font-weight: 600; }
+  td { padding: 6px 8px; border-bottom: 1px solid #efe9d9; vertical-align: top; }
   .score-row { display: flex; gap: 16px; margin: 12px 0 20px; }
-  .score-card { flex: 1; border: 1px solid #dfe4da; border-radius: 10px; padding: 14px 16px; text-align: center; }
-  .score-card .label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.06em; color: #697362; font-weight: 600; }
+  .score-card { flex: 1; border: 1px solid #e6dcc3; border-radius: 10px; padding: 14px 16px; text-align: center; }
+  .score-card .label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.06em; color: #5b6b7f; font-weight: 600; }
   .score-card .value { font-size: 32px; font-weight: 700; color: #071827; margin: 4px 0 2px; }
-  .score-card .sub { font-size: 10px; color: #697362; }
+  .score-card .sub { font-size: 10px; color: #5b6b7f; }
   .severity-high { color: #e11d48; font-weight: 600; }
   .severity-medium { color: #d97706; font-weight: 600; }
   .severity-low { color: #059669; font-weight: 600; }
-  .narrative { background: #f8faf6; border: 1px solid #e4e8df; border-radius: 8px; padding: 16px; margin: 16px 0; line-height: 1.7; }
-  .dev-card { border: 1px solid #e4e8df; border-radius: 8px; padding: 14px 16px; margin: 10px 0; page-break-inside: avoid; }
+  .narrative { background: #f8faf6; border: 1px solid #eae2cc; border-radius: 8px; padding: 16px; margin: 16px 0; line-height: 1.7; }
+  .dev-card { border: 1px solid #eae2cc; border-radius: 8px; padding: 14px 16px; margin: 10px 0; page-break-inside: avoid; }
   .dev-card.positive { border-left: 4px solid #059669; background: #f0fdf4; }
   .dev-card.negative { border-left: 4px solid #e11d48; background: #fff1f2; }
   .dev-card.neutral { border-left: 4px solid #6b7280; background: #f9fafb; }
   .dev-card.watch { border-left: 4px solid #d97706; background: #fffbeb; }
-  .dev-meta { font-size: 9px; text-transform: uppercase; letter-spacing: 0.04em; color: #697362; margin-bottom: 4px; }
+  .dev-meta { font-size: 9px; text-transform: uppercase; letter-spacing: 0.04em; color: #5b6b7f; margin-bottom: 4px; }
   .dev-headline { font-size: 12px; font-weight: 700; color: #071827; margin-bottom: 6px; }
   .dev-take { font-size: 11px; line-height: 1.6; color: #2d3a2b; }
   .dev-entities { margin-top: 6px; }
   .dev-entities span { display: inline-block; font-size: 9px; font-weight: 600; background: #071827; color: #fff; border-radius: 3px; padding: 2px 8px; margin-right: 4px; }
   .signoff { margin-top: 40px; padding-top: 24px; border-top: 3px solid #071827; display: flex; gap: 18px; align-items: flex-start; }
-  .headshot { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; flex-shrink: 0; border: 2px solid #dfe4da; }
-  .headshot-placeholder { width: 80px; height: 80px; border-radius: 50%; background: #071827; color: #6EE7B7; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 700; flex-shrink: 0; }
+  .headshot { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; flex-shrink: 0; border: 2px solid #e6dcc3; }
+  .headshot-placeholder { width: 80px; height: 80px; border-radius: 50%; background: #071827; color: #e8c95c; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 700; flex-shrink: 0; }
   .signoff-text { flex: 1; }
   .signoff-name { font-size: 14px; font-weight: 700; color: #071827; }
-  .signoff-title { font-size: 11px; color: #697362; margin: 2px 0 8px; }
-  .signoff-bio { font-size: 11px; color: #4d574b; line-height: 1.5; }
-  .ag-footer { margin-top: 32px; padding-top: 14px; border-top: 1px solid #e4e8df; display: flex; align-items: center; justify-content: space-between; font-size: 9px; color: #a1a8a0; }
+  .signoff-title { font-size: 11px; color: #5b6b7f; margin: 2px 0 8px; }
+  .signoff-bio { font-size: 11px; color: #475a72; line-height: 1.5; }
+  .ag-footer { margin-top: 32px; padding-top: 14px; border-top: 1px solid #eae2cc; display: flex; align-items: center; justify-content: space-between; font-size: 9px; color: #a1a8a0; }
   @media print { body { padding: 0; } .ag-header, .signoff, .ag-footer { break-inside: avoid; } h2 { break-after: avoid; } table { break-inside: avoid; } }
 </style>
 </head>
@@ -361,7 +361,7 @@ function renderExportHtml(brief: ReturnType<typeof generateBrief>, headshotDataU
 
 ${developments.length > 0 ? `
 <h2>Analyst Commentary — Recent Market Developments</h2>
-<p style="font-size:11px; color:#697362; margin-bottom:12px">Contextual analyst interpretation of events impacting the tracked entity universe. Each development is assessed for CIO relevance and linked to affected entities.</p>
+<p style="font-size:11px; color:#5b6b7f; margin-bottom:12px">Contextual analyst interpretation of events impacting the tracked entity universe. Each development is assessed for CIO relevance and linked to affected entities.</p>
 ${developments.map((d) => `
 <div class="dev-card ${d.impact}">
   <div class="dev-meta">${esc(d.date)}${d.source ? ` &nbsp;·&nbsp; ${esc(d.source)}` : ""} &nbsp;·&nbsp; ${d.impact === "positive" ? "POSITIVE SIGNAL" : d.impact === "negative" ? "RISK SIGNAL" : d.impact === "watch" ? "WATCH" : "MARKET SHIFT"}</div>
@@ -372,7 +372,7 @@ ${developments.map((d) => `
 ` : ""}
 
 <h2>Leaders by Layer</h2>
-<p style="font-size:11px; color:#697362; margin-bottom:8px">Vendors are ranked within their layer only. AnalystGenius does not publish a cross-layer composite ranking — platforms, models, hardware and capital measure different things.</p>
+<p style="font-size:11px; color:#5b6b7f; margin-bottom:8px">Vendors are ranked within their layer only. AnalystGenius does not publish a cross-layer composite ranking — platforms, models, hardware and capital measure different things.</p>
 <table>
   <thead><tr><th>Layer</th><th>Leading Entities</th></tr></thead>
   <tbody>${layerLeaderRows}</tbody>
@@ -450,7 +450,7 @@ export default function ExecutiveBrief({ entities, winningByLayer, developments 
 
   return (
     <section className="mb-6">
-      <div className="rounded-xl border border-[#dfe4da] bg-white dark:border-zinc-800 dark:bg-[#071827]">
+      <div className="rounded-xl border border-[#e6dcc3] bg-white dark:border-zinc-800 dark:bg-[#071827]">
         <button
           type="button"
           onClick={() => setExpanded(!expanded)}
@@ -458,19 +458,19 @@ export default function ExecutiveBrief({ entities, winningByLayer, developments 
         >
           <div>
             <div className="text-[10px] font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">Executive Brief</div>
-            <div className="mt-1 text-sm font-semibold text-[#18201b] dark:text-zinc-100">
+            <div className="mt-1 text-sm font-semibold text-[#13294b] dark:text-zinc-100">
               {brief.total} entities tracked · Avg leadership {brief.avgLeadership} · Confidence {brief.avgConfidence}% · {brief.risk.high} high-risk · {devs.length} developments
             </div>
           </div>
-          <span className="ml-2 text-xs text-[#697362]">{expanded ? "▲" : "▼"}</span>
+          <span className="ml-2 text-xs text-[#5b6b7f]">{expanded ? "▲" : "▼"}</span>
         </button>
 
         {expanded && (
-          <div className="border-t border-[#edf0ea] px-5 py-4 dark:border-zinc-800">
+          <div className="border-t border-[#efe9d9] px-5 py-4 dark:border-zinc-800">
             <div className="grid gap-4 md:grid-cols-2">
-              <div className="rounded-lg border border-[#e2e7dc] bg-[#fbfcf8] p-4 dark:border-zinc-800 dark:bg-zinc-950/40">
-                <div className="text-[10px] font-semibold uppercase tracking-wider text-[#697362]">Market Snapshot</div>
-                <p className="mt-2 text-sm leading-6 text-[#2f392f] dark:text-zinc-300">
+              <div className="rounded-lg border border-[#e9e0c8] bg-[#fdfaf1] p-4 dark:border-zinc-800 dark:bg-zinc-950/40">
+                <div className="text-[10px] font-semibold uppercase tracking-wider text-[#5b6b7f]">Market Snapshot</div>
+                <p className="mt-2 text-sm leading-6 text-[#2c3b52] dark:text-zinc-300">
                   AnalystGenius tracks <strong>{brief.total} entities</strong> across the enterprise AI landscape.
                   Average leadership score is <strong>{brief.avgLeadership}/100</strong> with momentum
                   at <strong>{brief.avgMomentum}</strong>.
@@ -478,9 +478,9 @@ export default function ExecutiveBrief({ entities, winningByLayer, developments 
                   Model provision is led by {brief.modelWinners.join(", ") || "frontier providers"}.
                 </p>
               </div>
-              <div className="rounded-lg border border-[#e2e7dc] bg-[#fbfcf8] p-4 dark:border-zinc-800 dark:bg-zinc-950/40">
-                <div className="text-[10px] font-semibold uppercase tracking-wider text-[#697362]">Risk & Confidence</div>
-                <p className="mt-2 text-sm leading-6 text-[#2f392f] dark:text-zinc-300">
+              <div className="rounded-lg border border-[#e9e0c8] bg-[#fdfaf1] p-4 dark:border-zinc-800 dark:bg-zinc-950/40">
+                <div className="text-[10px] font-semibold uppercase tracking-wider text-[#5b6b7f]">Risk & Confidence</div>
+                <p className="mt-2 text-sm leading-6 text-[#2c3b52] dark:text-zinc-300">
                   <strong>{brief.risk.high}</strong> high-risk, <strong>{brief.risk.medium}</strong> medium,
                   and <strong>{brief.risk.low}</strong> low-risk entities.
                   Average evidence confidence is <strong>{brief.avgConfidence}%</strong> — directional, evidence-labelled intelligence.
@@ -491,21 +491,21 @@ export default function ExecutiveBrief({ entities, winningByLayer, developments 
 
             {devs.length > 0 && (
               <div className="mt-4">
-                <div className="text-[10px] font-semibold uppercase tracking-wider text-[#697362]">Analyst Commentary — Recent Developments</div>
+                <div className="text-[10px] font-semibold uppercase tracking-wider text-[#5b6b7f]">Analyst Commentary — Recent Developments</div>
                 <div className="mt-2 space-y-3">
                   {devs.slice(0, 5).map((d, i) => {
                     const style = IMPACT_COLORS[d.impact];
                     return (
-                      <div key={i} className={`rounded-lg border border-[#e2e7dc] p-4 dark:border-zinc-800 ${style.bg}`}>
+                      <div key={i} className={`rounded-lg border border-[#e9e0c8] p-4 dark:border-zinc-800 ${style.bg}`}>
                         <div className="flex items-start justify-between gap-3">
                           <div className="flex-1">
                             <div className="flex items-center gap-2">
                               <span className={`text-[9px] font-bold uppercase tracking-wider ${style.text}`}>{style.label}</span>
-                              <span className="text-[9px] text-[#697362]">{d.date}</span>
+                              <span className="text-[9px] text-[#5b6b7f]">{d.date}</span>
                               {d.source && <span className="text-[9px] text-[#a1a8a0]">· {d.source}</span>}
                             </div>
-                            <div className="mt-1 text-xs font-semibold text-[#18201b] dark:text-zinc-100">{d.headline}</div>
-                            <p className="mt-2 text-xs leading-5 text-[#4d574b] dark:text-zinc-400">{d.analystTake}</p>
+                            <div className="mt-1 text-xs font-semibold text-[#13294b] dark:text-zinc-100">{d.headline}</div>
+                            <p className="mt-2 text-xs leading-5 text-[#475a72] dark:text-zinc-400">{d.analystTake}</p>
                             <div className="mt-2 flex gap-1.5">
                               {d.entities.map((name) => (
                                 <span key={name} className="rounded-full bg-[#071827]/10 px-2 py-0.5 text-[9px] font-semibold text-[#071827] dark:bg-zinc-700 dark:text-zinc-200">{name}</span>
@@ -518,43 +518,43 @@ export default function ExecutiveBrief({ entities, winningByLayer, developments 
                   })}
                 </div>
                 {devs.length > 5 && (
-                  <div className="mt-2 text-[10px] text-[#697362]">+ {devs.length - 5} more developments in export</div>
+                  <div className="mt-2 text-[10px] text-[#5b6b7f]">+ {devs.length - 5} more developments in export</div>
                 )}
               </div>
             )}
 
             <div className="mt-4 grid gap-4 md:grid-cols-3">
               <div>
-                <div className="text-[10px] font-semibold uppercase tracking-wider text-[#697362]">Leaders by Layer</div>
+                <div className="text-[10px] font-semibold uppercase tracking-wider text-[#5b6b7f]">Leaders by Layer</div>
                 <div className="mt-2 space-y-1.5">
                   {brief.leadersByLayer.map((l) => (
                     <div key={l.title} className="flex items-baseline justify-between gap-2 text-xs">
-                      <span className="shrink-0 text-[#697362] dark:text-zinc-500">{l.title}</span>
-                      <span className="text-right font-medium text-[#18201b] dark:text-zinc-100">{l.names.join(", ") || "—"}</span>
+                      <span className="shrink-0 text-[#5b6b7f] dark:text-zinc-500">{l.title}</span>
+                      <span className="text-right font-medium text-[#13294b] dark:text-zinc-100">{l.names.join(", ") || "—"}</span>
                     </div>
                   ))}
                 </div>
               </div>
               <div>
-                <div className="text-[10px] font-semibold uppercase tracking-wider text-[#697362]">Rising Leadership</div>
+                <div className="text-[10px] font-semibold uppercase tracking-wider text-[#5b6b7f]">Rising Leadership</div>
                 <div className="mt-2 space-y-1.5">
                   {brief.fastestMovers.length > 0 ? brief.fastestMovers.map((e) => (
                     <div key={e.id} className="flex items-center justify-between text-xs">
-                      <span className="font-medium text-[#18201b] dark:text-zinc-100">{e.name}</span>
+                      <span className="font-medium text-[#13294b] dark:text-zinc-100">{e.name}</span>
                       <span className="font-mono font-semibold text-emerald-700 dark:text-emerald-300">+{e.deltas.leadership}</span>
                     </div>
-                  )) : <span className="text-xs text-[#697362]">No material movement.</span>}
+                  )) : <span className="text-xs text-[#5b6b7f]">No material movement.</span>}
                 </div>
               </div>
               <div>
-                <div className="text-[10px] font-semibold uppercase tracking-wider text-[#697362]">High Risk Watch</div>
+                <div className="text-[10px] font-semibold uppercase tracking-wider text-[#5b6b7f]">High Risk Watch</div>
                 <div className="mt-2 space-y-1.5">
                   {brief.highRiskEntities.length > 0 ? brief.highRiskEntities.map((e) => (
                     <div key={e.id} className="flex items-center justify-between text-xs">
-                      <span className="font-medium text-[#18201b] dark:text-zinc-100">{e.name}</span>
+                      <span className="font-medium text-[#13294b] dark:text-zinc-100">{e.name}</span>
                       <span className="font-mono text-rose-700 dark:text-rose-300">{e.confidence}%</span>
                     </div>
-                  )) : <span className="text-xs text-[#697362]">No high-risk entities.</span>}
+                  )) : <span className="text-xs text-[#5b6b7f]">No high-risk entities.</span>}
                 </div>
               </div>
             </div>
@@ -563,11 +563,11 @@ export default function ExecutiveBrief({ entities, winningByLayer, developments 
               <button
                 onClick={handleExport}
                 disabled={exporting}
-                className="rounded-full border border-[#cfd7c8] bg-white px-4 py-2 text-xs font-semibold text-[#18201b] hover:bg-[#eef2e8] disabled:opacity-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
+                className="rounded-full border border-[#d6c9a8] bg-white px-4 py-2 text-xs font-semibold text-[#13294b] hover:bg-[#f3ead2] disabled:opacity-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
               >
                 {exporting ? "Exporting…" : "Export Executive Brief"}
               </button>
-              <span className="text-[10px] text-[#697362]">AG-branded HTML · print to PDF</span>
+              <span className="text-[10px] text-[#5b6b7f]">AG-branded HTML · print to PDF</span>
             </div>
           </div>
         )}

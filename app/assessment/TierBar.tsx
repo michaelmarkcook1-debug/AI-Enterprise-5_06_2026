@@ -90,9 +90,9 @@ export default function TierBar({ current }: Props) {
   );
 
   return (
-    <div className="mb-6 rounded-xl border border-[#dfe4da] bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
+    <div className="mb-6 rounded-xl border border-[#e6dcc3] bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
       {/* Provenance strip — AnalystGenius proprietary methodology */}
-      <div className="-mx-4 -mt-4 mb-4 flex flex-wrap items-center gap-2 rounded-t-xl bg-gradient-to-r from-[#0c1220] via-[#192319] to-[#0c1220] px-4 py-2.5 text-[11px] font-medium text-white">
+      <div className="-mx-4 -mt-4 mb-4 flex flex-wrap items-center gap-2 rounded-t-xl bg-gradient-to-r from-[#0c1220] via-[#13294b] to-[#0c1220] px-4 py-2.5 text-[11px] font-medium text-white">
         <span
           aria-hidden
           className="inline-flex h-5 w-5 items-center justify-center rounded-sm bg-amber-400 text-[10px] font-black text-[#0c1220]"

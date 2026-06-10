@@ -36,7 +36,7 @@ export default async function InvestingDashboardPage() {
         {/* Live overlay strip — pulls from the same data the QUAD tabs use. */}
         <div className="grid gap-4 lg:grid-cols-[1.1fr_0.95fr_1fr]">
           <Panel title="AI Atlas position — top public providers">
-            <p className="mb-2 text-[11px] text-[#5f685a] dark:text-zinc-400">
+            <p className="mb-2 text-[11px] text-[#56657b] dark:text-zinc-400">
               Live Enhance × Innovate quadrant for each tracked public provider, sourced from the
               <Link href="/query" className="ml-1 underline">Query tab</Link>.
             </p>
@@ -56,21 +56,21 @@ export default async function InvestingDashboardPage() {
                         ? "bg-amber-100 text-amber-800 dark:bg-amber-950/50 dark:text-amber-200"
                         : "bg-rose-100 text-rose-800 dark:bg-rose-950/50 dark:text-rose-300"
                     }`}>{e.atlas.quadrant}</span>
-                  ) : <span className="text-[#66705f]">—</span>}
+                  ) : <span className="text-[#5d6b80]">—</span>}
                 </li>
               ))}
             </ul>
           </Panel>
 
           <Panel title="Vendor uptake share — top 5 (May 2026 research)">
-            <p className="mb-2 text-[11px] text-[#5f685a] dark:text-zinc-400">
+            <p className="mb-2 text-[11px] text-[#56657b] dark:text-zinc-400">
               Share-of-named-vendor-usage from the
               <Link href="/demonstrate#uptake" className="ml-1 underline">Demonstrate explorer</Link>.
             </p>
             <ul className="space-y-1.5 text-xs">
               {uptakeTop.map((row, i) => (
                 <li key={row.vendor} className="flex items-center justify-between gap-2">
-                  <span className="truncate"><span className="mr-1.5 inline-block w-3 text-right font-mono text-[10px] text-[#697362]">{i + 1}</span>{row.vendor}</span>
+                  <span className="truncate"><span className="mr-1.5 inline-block w-3 text-right font-mono text-[10px] text-[#5b6b7f]">{i + 1}</span>{row.vendor}</span>
                   <span className="font-mono font-semibold">{(row.share * 100).toFixed(1)}%</span>
                 </li>
               ))}
@@ -78,14 +78,14 @@ export default async function InvestingDashboardPage() {
           </Panel>
 
           <Panel title="Classified news ticker">
-            <p className="mb-2 text-[11px] text-[#5f685a] dark:text-zinc-400">
+            <p className="mb-2 text-[11px] text-[#56657b] dark:text-zinc-400">
               Latest items from the competitive-intel monitor.
             </p>
             <ul className="space-y-1.5 text-xs">
               {newsTickerTop.map((item) => (
-                <li key={item.id} className="border-l-2 border-[#dfe4da] pl-2">
-                  <div className="truncate text-[#18201b] dark:text-zinc-100" title={item.title}>{item.title}</div>
-                  <div className="flex items-center gap-2 text-[10px] text-[#66705f]">
+                <li key={item.id} className="border-l-2 border-[#e6dcc3] pl-2">
+                  <div className="truncate text-[#13294b] dark:text-zinc-100" title={item.title}>{item.title}</div>
+                  <div className="flex items-center gap-2 text-[10px] text-[#5d6b80]">
                     <span>{new Date(item.publishedAt).toLocaleDateString()}</span>
                     <span>impact {item.impactScore}</span>
                     <SeedDataBadge label={item.sourceKind === "real" ? "live" : "seed"} provenance={item.sourceKind === "real" ? "live" : "seed"} />
@@ -124,7 +124,7 @@ export default async function InvestingDashboardPage() {
 
           <Panel title="Risk radar and watchlist alerts">
             <div className="space-y-3">
-              {dashboard.alerts.length === 0 && <p className="text-sm text-[#596151] dark:text-zinc-400">No current seed alerts.</p>}
+              {dashboard.alerts.length === 0 && <p className="text-sm text-[#54647a] dark:text-zinc-400">No current seed alerts.</p>}
               {dashboard.alerts.map((alert) => (
                 <div key={alert} className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs leading-5 text-amber-900 dark:border-amber-900/70 dark:bg-amber-950/40 dark:text-amber-200">
                   {alert}
@@ -157,9 +157,9 @@ export default async function InvestingDashboardPage() {
           <Panel title="IPO rumour monitor">
             <div className="space-y-3">
               {dashboard.ipoRumourMonitor.slice(0, 6).map((row) => (
-                <div key={row.provider.id} className="flex items-center justify-between gap-3 rounded-md border border-[#e7ebe2] px-3 py-2 text-sm dark:border-zinc-800">
+                <div key={row.provider.id} className="flex items-center justify-between gap-3 rounded-md border border-[#ece4d0] px-3 py-2 text-sm dark:border-zinc-800">
                   <span>{row.provider.name}</span>
-                  <span className="text-xs text-[#697362] dark:text-zinc-500">{row.profile.rumourStage} | readiness {row.profile.readinessScore}/100</span>
+                  <span className="text-xs text-[#5b6b7f] dark:text-zinc-500">{row.profile.rumourStage} | readiness {row.profile.readinessScore}/100</span>
                 </div>
               ))}
             </div>
@@ -173,21 +173,21 @@ export default async function InvestingDashboardPage() {
                   <span className="font-mono">{Math.round((edge.indirectExposureScore ?? 0))}</span>
                 </div>
               ))}
-              <p className="text-xs text-[#6a725f] dark:text-zinc-500">Indirect exposure is not the same as direct ownership of the private AI provider.</p>
+              <p className="text-xs text-[#5e6b7e] dark:text-zinc-500">Indirect exposure is not the same as direct ownership of the private AI provider.</p>
             </div>
           </Panel>
         </div>
 
         <Panel title="Recent investment-relevant AI news">
-          <div className="divide-y divide-[#e7ebe2] dark:divide-zinc-800">
+          <div className="divide-y divide-[#ece4d0] dark:divide-zinc-800">
             {investmentNews.map((item) => (
               <div key={item.id} className="grid gap-3 py-3 md:grid-cols-[1fr_110px_130px] md:items-center">
                 <div>
                   <div className="text-sm font-medium">{item.title}</div>
-                  <p className="mt-1 text-xs leading-5 text-[#596151] dark:text-zinc-400">{item.whyItMatters}</p>
+                  <p className="mt-1 text-xs leading-5 text-[#54647a] dark:text-zinc-400">{item.whyItMatters}</p>
                   <div className="mt-2 flex flex-wrap gap-2">
                     {item.categories.slice(0, 3).map((category) => (
-                      <span key={category} className="rounded border border-[#d8ded0] px-1.5 py-0.5 text-[11px] text-[#697362] dark:border-zinc-700 dark:text-zinc-400">
+                      <span key={category} className="rounded border border-[#e0d6ba] px-1.5 py-0.5 text-[11px] text-[#5b6b7f] dark:border-zinc-700 dark:text-zinc-400">
                         {category}
                       </span>
                     ))}
@@ -198,7 +198,7 @@ export default async function InvestingDashboardPage() {
                 <Confidence value={item.confidenceScore} />
               </div>
             ))}
-            {investmentNews.length === 0 && <div className="py-3 text-sm text-[#596151] dark:text-zinc-400">No seeded investment-relevant news items.</div>}
+            {investmentNews.length === 0 && <div className="py-3 text-sm text-[#54647a] dark:text-zinc-400">No seeded investment-relevant news items.</div>}
           </div>
         </Panel>
 
@@ -211,7 +211,7 @@ export default async function InvestingDashboardPage() {
             ["/investor-tools/simulator", "Simulator"],
             ["/investor-tools/watchlist", "Watchlist"],
           ].map(([href, text]) => (
-            <Link key={href} href={href} className="rounded-md border border-[#cfd7c8] px-3 py-2 text-xs font-semibold hover:bg-[#eef2e8] dark:border-zinc-700 dark:hover:bg-zinc-900">
+            <Link key={href} href={href} className="rounded-md border border-[#d6c9a8] px-3 py-2 text-xs font-semibold hover:bg-[#f3ead2] dark:border-zinc-700 dark:hover:bg-zinc-900">
               {text}
             </Link>
           ))}
@@ -233,8 +233,8 @@ function MiniList({ rows, scoreKey }: { rows: InvestmentProviderProfile[]; score
           </Link>
         );
       })}
-      {rows.length === 0 && <div className="text-sm text-[#596151] dark:text-zinc-400">No seed providers in this category.</div>}
-      <div className="pt-1 text-xs uppercase tracking-wide text-[#697362] dark:text-zinc-500">{label(scoreKey)}</div>
+      {rows.length === 0 && <div className="text-sm text-[#54647a] dark:text-zinc-400">No seed providers in this category.</div>}
+      <div className="pt-1 text-xs uppercase tracking-wide text-[#5b6b7f] dark:text-zinc-500">{label(scoreKey)}</div>
     </div>
   );
 }

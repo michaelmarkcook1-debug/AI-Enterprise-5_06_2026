@@ -59,22 +59,22 @@ export default async function AssessPage({ searchParams }: PageProps) {
         <Panel title={brief.title}>
           <div className="space-y-4">
             {brief.executiveSummary.map((item) => (
-              <p key={item} className="text-sm leading-6 text-[#4d574b]">{item}</p>
+              <p key={item} className="text-sm leading-6 text-[#475a72]">{item}</p>
             ))}
-            <div className="rounded-md bg-[#eef2e8] p-3 text-sm font-medium text-[#18201b]">
+            <div className="rounded-md bg-[#f3ead2] p-3 text-sm font-medium text-[#13294b]">
               {brief.boardTakeaway}
             </div>
           </div>
         </Panel>
         <Panel title="Confidence note">
-          <p className="text-sm leading-6 text-[#4d574b]">{brief.confidenceNote}</p>
+          <p className="text-sm leading-6 text-[#475a72]">{brief.confidenceNote}</p>
         </Panel>
       </section>
 
       {/* 1. Assessment form — FIRST so the primary action is immediately reachable */}
       <section id="fit" className="mb-8">
         <Panel title="Choose your assessment">
-          <p className="mb-4 text-sm text-[#4d574b]">
+          <p className="mb-4 text-sm text-[#475a72]">
             Select the assessment that matches your decision stage. Opportunity identifies where
             to start. Strategy recommends what to deploy. Procurement scores whether to buy.
             All three use the AnalystGenius proprietary scoring engine with evidence grading.
@@ -99,26 +99,26 @@ export default async function AssessPage({ searchParams }: PageProps) {
 
       {/* 2. Market context — collapsible so it doesn't block the form on return visits */}
       <details className="group mb-6">
-        <summary className="flex cursor-pointer select-none items-center justify-between rounded-xl border border-[#dfe4da] bg-white px-4 py-3 text-sm font-semibold text-[#18201b] hover:bg-[#f5f7f2] dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800">
+        <summary className="flex cursor-pointer select-none items-center justify-between rounded-xl border border-[#e6dcc3] bg-white px-4 py-3 text-sm font-semibold text-[#13294b] hover:bg-[#faf5e9] dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800">
           <span>Market context — briefing &amp; risk signals</span>
-          <span className="ml-2 font-normal text-[#697362] text-xs group-open:hidden">▼ expand</span>
-          <span className="ml-2 font-normal text-[#697362] text-xs hidden group-open:inline">▲ collapse</span>
+          <span className="ml-2 font-normal text-[#5b6b7f] text-xs group-open:hidden">▼ expand</span>
+          <span className="ml-2 font-normal text-[#5b6b7f] text-xs hidden group-open:inline">▲ collapse</span>
         </summary>
         <div className="mt-2 space-y-5">
           {/* Winning / losing / watchlist */}
           <section className="grid gap-5 lg:grid-cols-3">
             <Panel title="Who is winning">
-              <ul className="space-y-2 text-sm leading-6 text-[#4d574b]">
+              <ul className="space-y-2 text-sm leading-6 text-[#475a72]">
                 {brief.whoIsWinning.map((item) => <li key={item}>{item}</li>)}
               </ul>
             </Panel>
             <Panel title="Who is losing">
-              <ul className="space-y-2 text-sm leading-6 text-[#4d574b]">
+              <ul className="space-y-2 text-sm leading-6 text-[#475a72]">
                 {brief.whoIsLosing.map((item) => <li key={item}>{item}</li>)}
               </ul>
             </Panel>
             <Panel title="Watchlist & risk (briefing)">
-              <ul className="space-y-2 text-sm leading-6 text-[#4d574b]">
+              <ul className="space-y-2 text-sm leading-6 text-[#475a72]">
                 {brief.riskWatch.map((item) => <li key={item}>{item}</li>)}
               </ul>
             </Panel>
@@ -137,7 +137,7 @@ export default async function AssessPage({ searchParams }: PageProps) {
                       <span className="text-sm font-medium">
                         <VendorNameWithOwnership name={item.vendor.name} ownershipType={item.vendor.ownershipType} />
                       </span>
-                      <span className={`text-xs uppercase ${item.severity === "high" ? "text-rose-700 dark:text-rose-300" : item.severity === "medium" ? "text-amber-700 dark:text-amber-300" : "text-[#697362] dark:text-zinc-400"}`}>
+                      <span className={`text-xs uppercase ${item.severity === "high" ? "text-rose-700 dark:text-rose-300" : item.severity === "medium" ? "text-amber-700 dark:text-amber-300" : "text-[#5b6b7f] dark:text-zinc-400"}`}>
                         {item.severity}
                       </span>
                     </div>
@@ -154,7 +154,7 @@ export default async function AssessPage({ searchParams }: PageProps) {
       {/* 3. Watchlists & alerts */}
       <section id="watchlists" className="mb-2">
         <Panel title="Watchlists & alerts (monitoring setup)">
-          <p className="mb-4 text-xs leading-5 text-[#5f685a] dark:text-zinc-400">
+          <p className="mb-4 text-xs leading-5 text-[#56657b] dark:text-zinc-400">
             Create watchlists for vendors, industries, capability areas, risks, news types, market
             share movement, and regulation. Alerts are mock/generated in the MVP.
           </p>
@@ -171,9 +171,9 @@ export default async function AssessPage({ searchParams }: PageProps) {
 
       {/* Next actions */}
       <div className="mt-4 flex flex-wrap gap-2 text-xs">
-        <Link href="/understand" className="rounded-md border border-[#cfd7c8] px-3 py-2 font-semibold hover:bg-[#eef2e8] dark:border-zinc-700 dark:hover:bg-zinc-900">← Research vendors</Link>
-        <Link href="/demonstrate" className="rounded-md border border-[#cfd7c8] px-3 py-2 font-semibold hover:bg-[#eef2e8] dark:border-zinc-700 dark:hover:bg-zinc-900">Defend decision →</Link>
-        <Link href="/monitor" className="rounded-md border border-[#cfd7c8] px-3 py-2 font-semibold hover:bg-[#eef2e8] dark:border-zinc-700 dark:hover:bg-zinc-900">Monitor decisions →</Link>
+        <Link href="/understand" className="rounded-md border border-[#d6c9a8] px-3 py-2 font-semibold hover:bg-[#f3ead2] dark:border-zinc-700 dark:hover:bg-zinc-900">← Research vendors</Link>
+        <Link href="/demonstrate" className="rounded-md border border-[#d6c9a8] px-3 py-2 font-semibold hover:bg-[#f3ead2] dark:border-zinc-700 dark:hover:bg-zinc-900">Defend decision →</Link>
+        <Link href="/monitor" className="rounded-md border border-[#d6c9a8] px-3 py-2 font-semibold hover:bg-[#f3ead2] dark:border-zinc-700 dark:hover:bg-zinc-900">Monitor decisions →</Link>
       </div>
     </PageFrame>
   );

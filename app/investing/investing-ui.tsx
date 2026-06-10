@@ -45,8 +45,8 @@ export function InvestingCard({
   href?: string;
 }) {
   const body = (
-    <div className="rounded-lg border border-[#dfe4da] bg-white p-4 dark:border-zinc-800 dark:bg-[#071827]">
-      <div className="text-xs font-semibold uppercase tracking-wide text-[#697362] dark:text-zinc-500">{title}</div>
+    <div className="rounded-lg border border-[#e6dcc3] bg-white p-4 dark:border-zinc-800 dark:bg-[#071827]">
+      <div className="text-xs font-semibold uppercase tracking-wide text-[#5b6b7f] dark:text-zinc-500">{title}</div>
       {provider ? (
         <>
           <div className="mt-3 flex items-center justify-between gap-3">
@@ -57,11 +57,11 @@ export function InvestingCard({
             <Confidence value={provider.evidenceConfidence} />
             <EvidenceBadge grade={provider.evidenceGrade} />
           </div>
-          <p className="mt-3 text-xs leading-5 text-[#596151] dark:text-zinc-400">{reason ?? provider.keyThesis}</p>
+          <p className="mt-3 text-xs leading-5 text-[#54647a] dark:text-zinc-400">{reason ?? provider.keyThesis}</p>
           <p className="mt-2 text-xs leading-5 text-[#7a5847] dark:text-amber-300">Risk: {risk ?? provider.mainRisk}</p>
         </>
       ) : (
-        <div className="mt-3 text-sm text-[#596151] dark:text-zinc-400">No seed signal available.</div>
+        <div className="mt-3 text-sm text-[#54647a] dark:text-zinc-400">No seed signal available.</div>
       )}
     </div>
   );
@@ -73,7 +73,7 @@ export function ProviderScoreTable({ providers }: { providers: InvestmentProvide
   return (
     <div className="overflow-x-auto">
       <table className="w-full min-w-[980px] text-left text-sm">
-        <thead className="text-xs uppercase tracking-wide text-[#697362] dark:text-zinc-500">
+        <thead className="text-xs uppercase tracking-wide text-[#5b6b7f] dark:text-zinc-500">
           <tr>
             <th className="py-2 pr-4">Provider</th>
             <th className="py-2 pr-4">Exposure class</th>
@@ -86,13 +86,13 @@ export function ProviderScoreTable({ providers }: { providers: InvestmentProvide
             <th className="py-2">Confidence</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-[#e7ebe2] dark:divide-zinc-800">
+        <tbody className="divide-y divide-[#ece4d0] dark:divide-zinc-800">
           {providers.map((provider) => (
             <tr key={provider.id}>
               <td className="py-3 pr-4 font-medium">
                 <Link href={`/investor-tools/provider/${provider.slug}`}>
                   <VendorNameWithOwnership name={provider.name} ownershipType={ownershipFor(provider)} />
-                  {provider.ticker && <span className="ml-2 text-xs text-[#697362] dark:text-zinc-500">{provider.ticker}</span>}
+                  {provider.ticker && <span className="ml-2 text-xs text-[#5b6b7f] dark:text-zinc-500">{provider.ticker}</span>}
                 </Link>
               </td>
               <td className="py-3 pr-4 text-xs">{label(provider.exposureClass)}</td>

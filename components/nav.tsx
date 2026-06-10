@@ -25,7 +25,7 @@ export function Nav() {
             key={item.href}
             href={item.href}
             className={`rounded-md px-3 py-2 text-sm transition-colors ${
-              active ? "bg-[#192319] text-white" : "text-[#4d574b] hover:bg-[#e9ede4] hover:text-[#18201b]"
+              active ? "bg-[#13294b] text-white" : "text-[#475a72] hover:bg-[#f1ead6] hover:text-[#13294b]"
             }`}
           >
             {item.label}

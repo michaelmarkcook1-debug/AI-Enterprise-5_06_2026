@@ -157,7 +157,7 @@ const PRESETS: SimulatorPreset[] = [
 ];
 
 const exposureColors: Record<string, string> = {
-  public_platform: "#2f5d50",
+  public_platform: "#b08d2f",
   ai_infrastructure: "#0f766e",
   enterprise_workflow_ai: "#2563eb",
   data_analytics_ai: "#7c3aed",
@@ -339,11 +339,11 @@ export default function InvestmentSimulatorClient({
         ))}
       </nav>
 
-      <div id="sim-quickstart" className="scroll-mt-20 rounded-lg border border-[#dfe4da] bg-white p-4 dark:border-zinc-800 dark:bg-[#071827]">
+      <div id="sim-quickstart" className="scroll-mt-20 rounded-lg border border-[#e6dcc3] bg-white p-4 dark:border-zinc-800 dark:bg-[#071827]">
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
           <div>
-            <h2 className="text-sm font-semibold text-[#18201b] dark:text-zinc-100">Quick start</h2>
-            <p className="mt-0.5 text-xs text-[#697362] dark:text-zinc-400">Pick a preset to load a sensible starting configuration. The chart updates live as you tune inputs below — no &ldquo;run&rdquo; button required.</p>
+            <h2 className="text-sm font-semibold text-[#13294b] dark:text-zinc-100">Quick start</h2>
+            <p className="mt-0.5 text-xs text-[#5b6b7f] dark:text-zinc-400">Pick a preset to load a sensible starting configuration. The chart updates live as you tune inputs below — no &ldquo;run&rdquo; button required.</p>
           </div>
           <div className="flex items-center gap-2">
             <ShareConfigButton input={input} />
@@ -358,10 +358,10 @@ export default function InvestmentSimulatorClient({
               key={preset.id}
               type="button"
               onClick={() => applyPreset(preset)}
-              className="rounded-md border border-[#dfe4da] bg-[#f7f8f5] p-3 text-left transition-colors hover:border-[#2f5d50] hover:bg-[#eef2e8] dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-emerald-400 dark:hover:bg-zinc-800"
+              className="rounded-md border border-[#e6dcc3] bg-[#faf6ec] p-3 text-left transition-colors hover:border-[#b08d2f] hover:bg-[#f3ead2] dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-emerald-400 dark:hover:bg-zinc-800"
             >
-              <div className="text-sm font-semibold text-[#18201b] dark:text-zinc-100">{preset.label}</div>
-              <div className="mt-1 text-[11px] leading-4 text-[#697362] dark:text-zinc-400">{preset.description}</div>
+              <div className="text-sm font-semibold text-[#13294b] dark:text-zinc-100">{preset.label}</div>
+              <div className="mt-1 text-[11px] leading-4 text-[#5b6b7f] dark:text-zinc-400">{preset.description}</div>
             </button>
           ))}
         </div>
@@ -375,7 +375,7 @@ export default function InvestmentSimulatorClient({
         <SummaryCard label="Evidence weight" value={hasIntegrityError ? "Blocked" : `${result.confidenceScore.toFixed(0)}/100`} note="evidence-weighted score" />
       </div>
 
-      <div className="rounded-lg border border-[#dfe4da] bg-white p-3 text-xs leading-5 text-[#596151] dark:border-zinc-800 dark:bg-[#071827] dark:text-zinc-400">
+      <div className="rounded-lg border border-[#e6dcc3] bg-white p-3 text-xs leading-5 text-[#54647a] dark:border-zinc-800 dark:bg-[#071827] dark:text-zinc-400">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex flex-wrap items-center gap-2">
             <SeedDataBadge label="Live scenario" provenance="live" reason="Scenario engine recomputes deterministically from your inputs." />
@@ -395,9 +395,9 @@ export default function InvestmentSimulatorClient({
             <SectionHeader>Essentials</SectionHeader>
             <Field label="Starting capital" info="Capital base used to calculate holding amounts and scenario paths.">
               <div className="relative">
-                <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-[#697362] dark:text-zinc-500">$</span>
+                <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-[#5b6b7f] dark:text-zinc-500">$</span>
                 <input
-                  className="w-full rounded-md border border-[#d8ded0] bg-white px-3 py-2 pl-7 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+                  className="w-full rounded-md border border-[#e0d6ba] bg-white px-3 py-2 pl-7 text-sm dark:border-zinc-700 dark:bg-zinc-900"
                   min={100}
                   step={500}
                   type="number"
@@ -544,7 +544,7 @@ export default function InvestmentSimulatorClient({
                   shock is active so the operator can undo deliberately. */}
             <div className="grid grid-cols-2 gap-2 pt-2">
               <button
-                className="rounded-md border border-[#cfd7c8] px-3 py-2 text-xs font-semibold hover:bg-[#eef2e8] dark:border-zinc-700 dark:hover:bg-zinc-900"
+                className="rounded-md border border-[#d6c9a8] px-3 py-2 text-xs font-semibold hover:bg-[#f3ead2] dark:border-zinc-700 dark:hover:bg-zinc-900"
                 onClick={() => { setInput(coerceClientInput(initialInput)); setShockEvent(null); }}
                 type="button"
                 aria-label="Reset inputs and clear any active shock"
@@ -552,7 +552,7 @@ export default function InvestmentSimulatorClient({
                 Reset to defaults
               </button>
               <button
-                className="rounded-md bg-[#192319] px-3 py-2 text-xs font-semibold text-white hover:bg-[#2a382c] dark:bg-zinc-100 dark:text-zinc-950 dark:hover:bg-white"
+                className="rounded-md bg-[#13294b] px-3 py-2 text-xs font-semibold text-white hover:bg-[#2a382c] dark:bg-zinc-100 dark:text-zinc-950 dark:hover:bg-white"
                 onClick={applyBoardShock}
                 type="button"
                 title="Generates a random market shock — drawdown severity, timing, and stress amplifier vary each click. The shock effect shows on the fan chart and drawdown panel."
@@ -621,15 +621,15 @@ export default function InvestmentSimulatorClient({
             <>
               <div className="mt-4 grid gap-3 md:grid-cols-4">
                 <ScenarioValue label="Bull" value={result.bullValue} startingCapital={input.startingCapital} tone="text-emerald-700 dark:text-emerald-300" />
-                <ScenarioValue label="Base" value={result.baseValue} startingCapital={input.startingCapital} tone="text-[#2f5d50] dark:text-emerald-300" />
+                <ScenarioValue label="Base" value={result.baseValue} startingCapital={input.startingCapital} tone="text-[#b08d2f] dark:text-emerald-300" />
                 <ScenarioValue label="Bear" value={result.bearValue} startingCapital={input.startingCapital} tone="text-amber-700 dark:text-amber-300" />
                 <ScenarioValue label="Stress" value={result.stressValue} startingCapital={input.startingCapital} tone="text-rose-700 dark:text-rose-300" />
               </div>
-              <details className="mt-4 rounded-md border border-[#dfe4da] bg-[#f7f8f5] p-3 text-xs leading-5 text-[#596151] dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400">
-                <summary className="cursor-pointer font-semibold text-[#18201b] dark:text-zinc-200">What do Bull / Base / Bear / Stress mean?</summary>
+              <details className="mt-4 rounded-md border border-[#e6dcc3] bg-[#faf6ec] p-3 text-xs leading-5 text-[#54647a] dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400">
+                <summary className="cursor-pointer font-semibold text-[#13294b] dark:text-zinc-200">What do Bull / Base / Bear / Stress mean?</summary>
                 <ul className="mt-2 space-y-1 pl-4 [&_strong]:font-semibold">
                   <li><strong className="text-emerald-700 dark:text-emerald-300">Bull</strong> &mdash; favourable AI adoption + healthy macro. Catalysts hit, valuations expand.</li>
-                  <li><strong className="text-[#2f5d50] dark:text-emerald-300">Base</strong> &mdash; central path. Trend growth, no fresh shocks beyond the climate setting.</li>
+                  <li><strong className="text-[#b08d2f] dark:text-emerald-300">Base</strong> &mdash; central path. Trend growth, no fresh shocks beyond the climate setting.</li>
                   <li><strong className="text-amber-700 dark:text-amber-300">Bear</strong> &mdash; growth disappoints, multiples compress, evidence confidence weighs.</li>
                   <li><strong className="text-rose-700 dark:text-rose-300">Stress</strong> &mdash; severe drawdown path with shock penalties amplified by the global risk climate.</li>
                 </ul>
@@ -650,10 +650,10 @@ export default function InvestmentSimulatorClient({
               {/* Confidence chip removed app-wide (May 2026). Evidence
                   weighting still drives the scores above; the strip
                   beneath the chart already mentions evidence-weighting. */}
-              <p className="rounded-md border border-[#dfe4da] bg-[#f7f8f5] p-3 text-xs leading-5 text-[#596151] dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400">
+              <p className="rounded-md border border-[#e6dcc3] bg-[#faf6ec] p-3 text-xs leading-5 text-[#54647a] dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400">
                 The current pack is tilted toward public platform and infrastructure exposure, with IPO-watch upside modelled as scenario sensitivity rather than direct ownership.
               </p>
-              <p className="text-xs leading-5 text-[#6a725f] dark:text-zinc-500">{PRIVATE_WARNING}</p>
+              <p className="text-xs leading-5 text-[#5e6b7e] dark:text-zinc-500">{PRIVATE_WARNING}</p>
             </div>
           )}
         </Panel>
@@ -683,7 +683,7 @@ export default function InvestmentSimulatorClient({
             scenarios; the exposure-map page handles relationship
             inspection with hover, multi-pin, filters, logos. */}
         <Panel title="Indirect exposure">
-          <div className="space-y-3 text-xs leading-5 text-[#596151] dark:text-zinc-400">
+          <div className="space-y-3 text-xs leading-5 text-[#54647a] dark:text-zinc-400">
             <p>
               The dedicated <a href="/investor-tools/exposure-map" className="font-semibold text-emerald-700 underline-offset-2 hover:underline dark:text-emerald-400">indirect exposure map</a> shows who-backs-whom and who-hosts-whom across the full public/private graph, with hover detail, multi-pin compare, and source-backed confidence tiers.
             </p>
@@ -728,7 +728,7 @@ export default function InvestmentSimulatorClient({
         </div>
         {hasIntegrityError ? <IntegrityError errors={state.errors} /> : <div className="overflow-x-auto">
           <table className="w-full min-w-[980px] text-left text-sm">
-            <thead className="text-xs uppercase tracking-wide text-[#697362] dark:text-zinc-500">
+            <thead className="text-xs uppercase tracking-wide text-[#5b6b7f] dark:text-zinc-500">
               <tr>
                 <th className="py-2 pr-4">Provider</th>
                 <th className="py-2 pr-4">Exposure</th>
@@ -741,7 +741,7 @@ export default function InvestmentSimulatorClient({
                 <th className="py-2">Main risk</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#e7ebe2] dark:divide-zinc-800">
+            <tbody className="divide-y divide-[#ece4d0] dark:divide-zinc-800">
               {portfolio.holdings.map((holding) => {
                 const provider = providerById.get(holding.providerId)!;
                 const signalRow = signalOverlay?.perHolding.find((p) => p.providerId === holding.providerId);
@@ -749,7 +749,7 @@ export default function InvestmentSimulatorClient({
                   <tr key={holding.providerId}>
                     <td className="py-3 pr-4 font-medium">
                       <VendorNameWithOwnership name={provider.name} ownershipType={provider.publicStatus === "public" ? "public" : provider.publicStatus === "private" ? "private" : "subsidiary"} />
-                      {provider.ticker && <span className="ml-2 text-xs text-[#697362] dark:text-zinc-500">{provider.ticker}</span>}
+                      {provider.ticker && <span className="ml-2 text-xs text-[#5b6b7f] dark:text-zinc-500">{provider.ticker}</span>}
                     </td>
                     <td className="py-3 pr-4 text-xs">{label(provider.exposureType)}</td>
                     <td className="py-3 pr-4 text-xs">{label(provider.investabilityStatus)}</td>
@@ -759,16 +759,16 @@ export default function InvestmentSimulatorClient({
                     {input.applySignalOverlay && (
                       <td className="py-3 pr-4 tabular-nums text-xs">
                         {signalRow ? (
-                          <span className={signalRow.deltaPp > 0.05 ? "font-semibold text-emerald-700 dark:text-emerald-300" : signalRow.deltaPp < -0.05 ? "font-semibold text-rose-700 dark:text-rose-300" : "text-[#697362] dark:text-zinc-500"} title={`${signalRow.contributingSignalIds.length} contributing signals · confidence ${signalRow.confidenceScore}/100`}>
+                          <span className={signalRow.deltaPp > 0.05 ? "font-semibold text-emerald-700 dark:text-emerald-300" : signalRow.deltaPp < -0.05 ? "font-semibold text-rose-700 dark:text-rose-300" : "text-[#5b6b7f] dark:text-zinc-500"} title={`${signalRow.contributingSignalIds.length} contributing signals · confidence ${signalRow.confidenceScore}/100`}>
                             {signalRow.deltaPp >= 0 ? "+" : ""}{signalRow.deltaPp.toFixed(2)}pp
                           </span>
                         ) : (
-                          <span className="text-[#697362] dark:text-zinc-500">—</span>
+                          <span className="text-[#5b6b7f] dark:text-zinc-500">—</span>
                         )}
                       </td>
                     )}
                     <td className="py-3 pr-4"><EvidenceBadge grade={provider.evidenceGrade} /></td>
-                    <td className="py-3 text-xs leading-5 text-[#596151] dark:text-zinc-400">{provider.mainRisk}</td>
+                    <td className="py-3 text-xs leading-5 text-[#54647a] dark:text-zinc-400">{provider.mainRisk}</td>
                   </tr>
                 );
               })}
@@ -815,10 +815,10 @@ function ShareConfigButton({ input }: { input: SimulationInput }) {
 
 function SummaryCard({ label, value, note }: { label: string; value: string; note: string }) {
   return (
-    <div className="rounded-lg border border-[#dfe4da] bg-white p-4 dark:border-zinc-800 dark:bg-[#071827]">
-      <div className="text-xs font-semibold uppercase tracking-wide text-[#697362] dark:text-zinc-500">{label}</div>
-      <div className="mt-2 text-xl font-semibold text-[#121812] dark:text-zinc-50">{value}</div>
-      <div className="mt-1 text-xs text-[#6a725f] dark:text-zinc-500">{note}</div>
+    <div className="rounded-lg border border-[#e6dcc3] bg-white p-4 dark:border-zinc-800 dark:bg-[#071827]">
+      <div className="text-xs font-semibold uppercase tracking-wide text-[#5b6b7f] dark:text-zinc-500">{label}</div>
+      <div className="mt-2 text-xl font-semibold text-[#0f2240] dark:text-zinc-50">{value}</div>
+      <div className="mt-1 text-xs text-[#5e6b7e] dark:text-zinc-500">{note}</div>
     </div>
   );
 }
@@ -850,7 +850,7 @@ function disabledPrivateExposureOptions(investmentUniverse: SimulationInput["inv
 function Field({ label: labelText, info, children }: { label: string; info?: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-[#697362] dark:text-zinc-500">
+      <span className="flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-[#5b6b7f] dark:text-zinc-500">
         {labelText}
         {info && <InfoButton text={info} />}
       </span>
@@ -861,7 +861,7 @@ function Field({ label: labelText, info, children }: { label: string; info?: str
 
 function GuidanceNote({ children }: { children: React.ReactNode }) {
   return (
-    <div className="mt-2 rounded-md border border-[#dfe4da] bg-[#f7f8f5] px-3 py-2 text-xs leading-5 text-[#596151] dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400">
+    <div className="mt-2 rounded-md border border-[#e6dcc3] bg-[#faf6ec] px-3 py-2 text-xs leading-5 text-[#54647a] dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400">
       {children}
     </div>
   );
@@ -871,7 +871,7 @@ function InfoButton({ text }: { text: string }) {
   return (
     <span
       aria-label={text}
-      className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-[#cfd7c8] text-[10px] font-bold normal-case tracking-normal text-[#596151] dark:border-zinc-700 dark:text-zinc-300"
+      className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-[#d6c9a8] text-[10px] font-bold normal-case tracking-normal text-[#54647a] dark:border-zinc-700 dark:text-zinc-300"
       title={text}
     >
       i
@@ -881,7 +881,7 @@ function InfoButton({ text }: { text: string }) {
 
 function BlockedOutputNote() {
   return (
-    <div className="mt-4 rounded-md border border-[#dfe4da] bg-[#f7f8f5] px-3 py-2 text-xs leading-5 text-[#596151] dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400">
+    <div className="mt-4 rounded-md border border-[#e6dcc3] bg-[#faf6ec] px-3 py-2 text-xs leading-5 text-[#54647a] dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400">
       Scenario values are blocked until the current input combination is valid.
     </div>
   );
@@ -894,7 +894,7 @@ function BlockedOutputNote() {
  */
 function IntegrityError(_: { errors: string[] }) {
   return (
-    <div className="flex h-32 items-center justify-center rounded-md border border-dashed border-[#dfe4da] text-xs text-[#697362] dark:border-zinc-700 dark:text-zinc-500">
+    <div className="flex h-32 items-center justify-center rounded-md border border-dashed border-[#e6dcc3] text-xs text-[#5b6b7f] dark:border-zinc-700 dark:text-zinc-500">
       Awaiting valid configuration — see the panel above the chart for what to fix.
     </div>
   );
@@ -938,40 +938,40 @@ function MacroModelPanel({
     const r = runModelI(MODEL_I_BASELINE, [1.2, 0.9, 1.0, 0.15], horizonYears, 200);
     const yearMarks = [0, 0.33, 0.66, 1].map((f) => Math.floor(f * (r.t.length - 1)));
     return (
-      <div className="mt-5 rounded-lg border-2 border-[#2f5d50] bg-[#f3f7f3] p-4 dark:border-emerald-600 dark:bg-emerald-950/20">
+      <div className="mt-5 rounded-lg border-2 border-[#b08d2f] bg-[#f3f7f3] p-4 dark:border-emerald-600 dark:bg-emerald-950/20">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
           <div>
-            <div className="text-[10px] font-semibold uppercase tracking-wider text-[#2f5d50] dark:text-emerald-400">
+            <div className="text-[10px] font-semibold uppercase tracking-wider text-[#b08d2f] dark:text-emerald-400">
               Forward growth · Model I — MC-SSDF
             </div>
-            <h3 className="mt-0.5 text-base font-semibold text-[#18201b] dark:text-zinc-100">
+            <h3 className="mt-0.5 text-base font-semibold text-[#13294b] dark:text-zinc-100">
               Macro-coupled state-space projection · {horizonYears}-year horizon
             </h3>
           </div>
-          <span className="rounded-full bg-[#2f5d50]/10 px-2 py-0.5 text-[10px] font-medium text-[#2f5d50] dark:bg-emerald-900/40 dark:text-emerald-300">
+          <span className="rounded-full bg-[#b08d2f]/10 px-2 py-0.5 text-[10px] font-medium text-[#b08d2f] dark:bg-emerald-900/40 dark:text-emerald-300">
             Private + IPO only
           </span>
         </div>
-        <p className="mt-1 text-xs leading-5 text-[#596151] dark:text-zinc-400">{choice.reason}</p>
+        <p className="mt-1 text-xs leading-5 text-[#54647a] dark:text-zinc-400">{choice.reason}</p>
         <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
           {yearMarks.map((idx, i) => (
-            <div key={i} className="rounded-md border border-[#dfe4da] bg-white p-2 dark:border-zinc-800 dark:bg-zinc-900">
-              <div className="text-[10px] uppercase tracking-wide text-[#697362] dark:text-zinc-500">
+            <div key={i} className="rounded-md border border-[#e6dcc3] bg-white p-2 dark:border-zinc-800 dark:bg-zinc-900">
+              <div className="text-[10px] uppercase tracking-wide text-[#5b6b7f] dark:text-zinc-500">
                 {i === 0 ? "Now" : `Year ${(r.t[idx]).toFixed(1)}`}
               </div>
-              <div className="mt-0.5 font-mono text-lg font-semibold text-[#18201b] dark:text-zinc-100">
+              <div className="mt-0.5 font-mono text-lg font-semibold text-[#13294b] dark:text-zinc-100">
                 {(r.growth[idx] * 100).toFixed(0)}%
               </div>
             </div>
           ))}
         </div>
-        <div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-1 text-[11px] text-[#596151] dark:text-zinc-400 sm:grid-cols-4">
+        <div className="mt-3 grid grid-cols-2 gap-x-4 gap-y-1 text-[11px] text-[#54647a] dark:text-zinc-400 sm:grid-cols-4">
           <span>Compute/liquidity C: {r.C[r.C.length - 1].toFixed(2)}</span>
           <span>Geo-openness P: {r.P[r.P.length - 1].toFixed(2)}</span>
           <span>Supply-chain W: {r.W[r.W.length - 1].toFixed(2)}</span>
           <span>Social adoption S: {r.S[r.S.length - 1].toFixed(2)}</span>
         </div>
-        <p className="mt-2 text-[10px] leading-4 text-[#6a725f] dark:text-zinc-500">
+        <p className="mt-2 text-[10px] leading-4 text-[#5e6b7e] dark:text-zinc-500">
           4-state ODE (RK4, 200 steps). Cyclical rate environment, regulatory friction,
           supply-chain decay, and logistic social adoption couple into a decaying growth
           core. Discrete world-event shocks applied separately. Deterministic — same
@@ -984,44 +984,44 @@ function MacroModelPanel({
   // Model II — ensemble.
   const ens = runModelIIEnsemble(DEFAULT_REGIMES, DEFAULT_Q, startingCapital, horizonYears, 1500, 60);
   return (
-    <div className="mt-5 rounded-lg border-2 border-[#2f5d50] bg-[#f3f7f3] p-4 dark:border-emerald-600 dark:bg-emerald-950/20">
+    <div className="mt-5 rounded-lg border-2 border-[#b08d2f] bg-[#f3f7f3] p-4 dark:border-emerald-600 dark:bg-emerald-950/20">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <div>
-          <div className="text-[10px] font-semibold uppercase tracking-wider text-[#2f5d50] dark:text-emerald-400">
+          <div className="text-[10px] font-semibold uppercase tracking-wider text-[#b08d2f] dark:text-emerald-400">
             Forward growth · Model II — SRS-MJN
           </div>
-          <h3 className="mt-0.5 text-base font-semibold text-[#18201b] dark:text-zinc-100">
+          <h3 className="mt-0.5 text-base font-semibold text-[#13294b] dark:text-zinc-100">
             Regime-switching jump-diffusion · {horizonYears}-year horizon
           </h3>
         </div>
-        <span className="rounded-full bg-[#2f5d50]/10 px-2 py-0.5 text-[10px] font-medium text-[#2f5d50] dark:bg-emerald-900/40 dark:text-emerald-300">
+        <span className="rounded-full bg-[#b08d2f]/10 px-2 py-0.5 text-[10px] font-medium text-[#b08d2f] dark:bg-emerald-900/40 dark:text-emerald-300">
           Private + IPO only
         </span>
       </div>
-      <p className="mt-1 text-xs leading-5 text-[#596151] dark:text-zinc-400">{choice.reason}</p>
+      <p className="mt-1 text-xs leading-5 text-[#54647a] dark:text-zinc-400">{choice.reason}</p>
       <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
         <MacroStat label="P5 (downside)" value={formatCurrency(ens.p5)} tone="text-rose-700 dark:text-rose-300" />
-        <MacroStat label="P50 (median)" value={formatCurrency(ens.p50)} tone="text-[#2f5d50] dark:text-emerald-300" />
+        <MacroStat label="P50 (median)" value={formatCurrency(ens.p50)} tone="text-[#b08d2f] dark:text-emerald-300" />
         <MacroStat label="P95 (upside)" value={formatCurrency(ens.p95)} tone="text-emerald-700 dark:text-emerald-300" />
-        <MacroStat label="Median CAGR" value={`${(ens.medianCagr * 100).toFixed(0)}%`} tone="text-[#18201b] dark:text-zinc-100" />
+        <MacroStat label="Median CAGR" value={`${(ens.medianCagr * 100).toFixed(0)}%`} tone="text-[#13294b] dark:text-zinc-100" />
       </div>
       <div className="mt-3">
-        <div className="text-[10px] font-semibold uppercase tracking-wide text-[#697362] dark:text-zinc-500">
+        <div className="text-[10px] font-semibold uppercase tracking-wide text-[#5b6b7f] dark:text-zinc-500">
           Regime occupancy across {ens.paths.toLocaleString()} paths
         </div>
         <div className="mt-1.5 space-y-1">
           {ens.regimeOccupancy.map((reg) => (
             <div key={reg.name} className="flex items-center gap-2 text-[11px]">
-              <span className="w-52 shrink-0 text-[#596151] dark:text-zinc-400">{reg.name}</span>
-              <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-[#e8ede2] dark:bg-zinc-800">
-                <div className="h-full rounded-full bg-[#2f5d50] dark:bg-emerald-400" style={{ width: `${reg.fraction * 100}%` }} />
+              <span className="w-52 shrink-0 text-[#54647a] dark:text-zinc-400">{reg.name}</span>
+              <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-[#ece3cb] dark:bg-zinc-800">
+                <div className="h-full rounded-full bg-[#b08d2f] dark:bg-emerald-400" style={{ width: `${reg.fraction * 100}%` }} />
               </div>
-              <span className="w-10 text-right font-mono text-[#18201b] dark:text-zinc-200">{(reg.fraction * 100).toFixed(0)}%</span>
+              <span className="w-10 text-right font-mono text-[#13294b] dark:text-zinc-200">{(reg.fraction * 100).toFixed(0)}%</span>
             </div>
           ))}
         </div>
       </div>
-      <p className="mt-2 text-[10px] leading-4 text-[#6a725f] dark:text-zinc-500">
+      <p className="mt-2 text-[10px] leading-4 text-[#5e6b7e] dark:text-zinc-500">
         Continuous-time Markov regime chain (generator matrix Q) + jump-diffusion per
         regime. {ens.paths.toLocaleString()} seeded paths — a single path is high-variance
         and not decision-grade, so the panel reports the ensemble distribution.
@@ -1034,8 +1034,8 @@ function MacroModelPanel({
 
 function MacroStat({ label, value, tone }: { label: string; value: string; tone: string }) {
   return (
-    <div className="rounded-md border border-[#dfe4da] bg-white p-2 dark:border-zinc-800 dark:bg-zinc-900">
-      <div className="text-[10px] uppercase tracking-wide text-[#697362] dark:text-zinc-500">{label}</div>
+    <div className="rounded-md border border-[#e6dcc3] bg-white p-2 dark:border-zinc-800 dark:bg-zinc-900">
+      <div className="text-[10px] uppercase tracking-wide text-[#5b6b7f] dark:text-zinc-500">{label}</div>
       <div className={`mt-0.5 font-mono text-lg font-semibold ${tone}`}>{value}</div>
     </div>
   );
@@ -1066,21 +1066,21 @@ function UnifiedHybridPanel({ universe }: { universe: SimulationInput["investmen
   };
 
   return (
-    <div className="mt-5 rounded-lg border-2 border-[#2f5d50] bg-[#f3f7f3] p-4 dark:border-emerald-600 dark:bg-emerald-950/20">
+    <div className="mt-5 rounded-lg border-2 border-[#b08d2f] bg-[#f3f7f3] p-4 dark:border-emerald-600 dark:bg-emerald-950/20">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <div>
-          <div className="text-[10px] font-semibold uppercase tracking-wider text-[#2f5d50] dark:text-emerald-400">
+          <div className="text-[10px] font-semibold uppercase tracking-wider text-[#b08d2f] dark:text-emerald-400">
             Forward growth · Unified Hybrid Engine
           </div>
-          <h3 className="mt-0.5 text-base font-semibold text-[#18201b] dark:text-zinc-100">
+          <h3 className="mt-0.5 text-base font-semibold text-[#13294b] dark:text-zinc-100">
             Multi-horizon forecast for public AI equities · 1 / 3 / 5 / 10-year
           </h3>
         </div>
-        <span className="rounded-full bg-[#2f5d50]/10 px-2 py-0.5 text-[10px] font-medium text-[#2f5d50] dark:bg-emerald-900/40 dark:text-emerald-300">
+        <span className="rounded-full bg-[#b08d2f]/10 px-2 py-0.5 text-[10px] font-medium text-[#b08d2f] dark:bg-emerald-900/40 dark:text-emerald-300">
           Public equities only
         </span>
       </div>
-      <p className="mt-1 text-xs leading-5 text-[#596151] dark:text-zinc-400">
+      <p className="mt-1 text-xs leading-5 text-[#54647a] dark:text-zinc-400">
         Model II (stochastic regime-switching) governs years 1-3, blends through 3-5,
         and Model I (macro-coupled state-space) governs the structurally-bounded 5-10y
         horizon. Adjust the timeline shock to stress-test a disruption.
@@ -1089,22 +1089,22 @@ function UnifiedHybridPanel({ universe }: { universe: SimulationInput["investmen
       {/* Timeline shock controls */}
       <div className="mt-3 grid gap-3 sm:grid-cols-2">
         <label className="block">
-          <div className="mb-1 flex items-center justify-between text-[11px] font-medium text-[#596151] dark:text-zinc-400">
+          <div className="mb-1 flex items-center justify-between text-[11px] font-medium text-[#54647a] dark:text-zinc-400">
             <span>Shock onset year</span>
-            <span className="font-mono text-[#18201b] dark:text-zinc-100">Y{tShock.toFixed(1)}</span>
+            <span className="font-mono text-[#13294b] dark:text-zinc-100">Y{tShock.toFixed(1)}</span>
           </div>
           <input
             type="range" min={0} max={10} step={0.5}
             value={tShock}
             onChange={(e) => setTShock(Number(e.target.value))}
-            className="w-full accent-[#2f5d50]"
+            className="w-full accent-[#b08d2f]"
             aria-label="Shock onset year"
           />
         </label>
         <label className="block">
-          <div className="mb-1 flex items-center justify-between text-[11px] font-medium text-[#596151] dark:text-zinc-400">
+          <div className="mb-1 flex items-center justify-between text-[11px] font-medium text-[#54647a] dark:text-zinc-400">
             <span>Shock severity ξ</span>
-            <span className={`font-mono ${xi < 0 ? "text-rose-700 dark:text-rose-300" : xi > 0 ? "text-emerald-700 dark:text-emerald-300" : "text-[#18201b] dark:text-zinc-100"}`}>
+            <span className={`font-mono ${xi < 0 ? "text-rose-700 dark:text-rose-300" : xi > 0 ? "text-emerald-700 dark:text-emerald-300" : "text-[#13294b] dark:text-zinc-100"}`}>
               {xi >= 0 ? "+" : ""}{xi.toFixed(2)}
             </span>
           </div>
@@ -1112,10 +1112,10 @@ function UnifiedHybridPanel({ universe }: { universe: SimulationInput["investmen
             type="range" min={-1} max={1} step={0.05}
             value={xi}
             onChange={(e) => setXi(Number(e.target.value))}
-            className="w-full accent-[#2f5d50]"
+            className="w-full accent-[#b08d2f]"
             aria-label="Shock severity"
           />
-          <div className="mt-0.5 flex justify-between text-[9px] text-[#697362] dark:text-zinc-500">
+          <div className="mt-0.5 flex justify-between text-[9px] text-[#5b6b7f] dark:text-zinc-500">
             <span>−1 destructive</span><span>0 none</span><span>+1 accelerative</span>
           </div>
         </label>
@@ -1124,19 +1124,19 @@ function UnifiedHybridPanel({ universe }: { universe: SimulationInput["investmen
       {/* Milestone forecasts */}
       <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
         {r.milestones.map((m) => (
-          <div key={m.year} className="rounded-md border border-[#dfe4da] bg-white p-2 dark:border-zinc-800 dark:bg-zinc-900">
-            <div className="text-[10px] uppercase tracking-wide text-[#697362] dark:text-zinc-500">
+          <div key={m.year} className="rounded-md border border-[#e6dcc3] bg-white p-2 dark:border-zinc-800 dark:bg-zinc-900">
+            <div className="text-[10px] uppercase tracking-wide text-[#5b6b7f] dark:text-zinc-500">
               Year {m.year}
             </div>
-            <div className={`mt-0.5 font-mono text-lg font-semibold ${m.growth < 0 ? "text-rose-700 dark:text-rose-300" : "text-[#18201b] dark:text-zinc-100"}`}>
+            <div className={`mt-0.5 font-mono text-lg font-semibold ${m.growth < 0 ? "text-rose-700 dark:text-rose-300" : "text-[#13294b] dark:text-zinc-100"}`}>
               {(m.growth * 100).toFixed(1)}%
             </div>
-            <div className="text-[9px] text-[#697362] dark:text-zinc-500">{engineLabel[m.engine]}</div>
+            <div className="text-[9px] text-[#5b6b7f] dark:text-zinc-500">{engineLabel[m.engine]}</div>
           </div>
         ))}
       </div>
 
-      <p className="mt-2 text-[10px] leading-4 text-[#6a725f] dark:text-zinc-500">
+      <p className="mt-2 text-[10px] leading-4 text-[#5e6b7e] dark:text-zinc-500">
         Shock operator S(t) = ξ / (1 + e^−12(t−t_shock)) — a steep sigmoid that fully
         manifests within ~30 days of onset and carries lingering structural damage.
         Deterministic given (t_shock, ξ). Long-horizon values are bounded by the
@@ -1183,9 +1183,9 @@ function SingleStockPicker({
       )
     : tickers;
   return (
-    <div className="rounded-lg border border-[#dfe4da] p-3 dark:border-zinc-800">
+    <div className="rounded-lg border border-[#e6dcc3] p-3 dark:border-zinc-800">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <div className="text-[10px] font-semibold uppercase tracking-wide text-[#697362] dark:text-zinc-500">Single ticker</div>
+        <div className="text-[10px] font-semibold uppercase tracking-wide text-[#5b6b7f] dark:text-zinc-500">Single ticker</div>
         <div className="text-[10px] text-zinc-500">{filtered.length} of {tickers.length}</div>
       </div>
       {tickers.length === 0 ? (
@@ -1199,7 +1199,7 @@ function SingleStockPicker({
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Filter by name, ticker, or category…"
-            className="mt-2 w-full rounded-md border border-[#d8ded0] bg-white px-3 py-1.5 text-xs dark:border-zinc-700 dark:bg-zinc-900"
+            className="mt-2 w-full rounded-md border border-[#e0d6ba] bg-white px-3 py-1.5 text-xs dark:border-zinc-700 dark:bg-zinc-900"
             aria-label="Filter tickers"
           />
         </>
@@ -1218,13 +1218,13 @@ function SingleStockPicker({
                 onClick={() => onSelect(p.id)}
                 className={`flex items-center justify-between rounded-md border px-3 py-2 text-left text-xs transition-colors ${
                   isSelected
-                    ? "border-[#192319] bg-[#192319] text-white dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-950"
-                    : "border-[#dfe4da] bg-white hover:bg-[#eef2e8] dark:border-zinc-800 dark:bg-zinc-900 dark:hover:bg-zinc-800"
+                    ? "border-[#13294b] bg-[#13294b] text-white dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-950"
+                    : "border-[#e6dcc3] bg-white hover:bg-[#f3ead2] dark:border-zinc-800 dark:bg-zinc-900 dark:hover:bg-zinc-800"
                 }`}
               >
                 <span>
                   <span className="font-semibold">{p.name}</span>
-                  <span className={`ml-2 font-mono text-[10px] ${isSelected ? "opacity-80" : "text-[#697362] dark:text-zinc-500"}`}>
+                  <span className={`ml-2 font-mono text-[10px] ${isSelected ? "opacity-80" : "text-[#5b6b7f] dark:text-zinc-500"}`}>
                     {p.ticker ?? "pre-IPO"}
                   </span>
                 </span>
@@ -1238,7 +1238,7 @@ function SingleStockPicker({
                       IPO watch
                     </span>
                   )}
-                  <span className={`text-[10px] uppercase tracking-wide ${isSelected ? "opacity-90" : "text-[#697362] dark:text-zinc-500"}`}>
+                  <span className={`text-[10px] uppercase tracking-wide ${isSelected ? "opacity-90" : "text-[#5b6b7f] dark:text-zinc-500"}`}>
                     {p.exposureClass.replace(/_/g, " ")}
                   </span>
                 </span>
@@ -1256,7 +1256,7 @@ function SingleStockPicker({
           <div className="mt-1 text-[11px] opacity-80">{chosen.mainRisk}</div>
         </div>
       ) : (
-        <div className="mt-3 text-xs leading-5 text-[#697362] dark:text-zinc-500">
+        <div className="mt-3 text-xs leading-5 text-[#5b6b7f] dark:text-zinc-500">
           Pick one ticker to model 100% allocation. Single-stock mode is a focused thesis on one name — no diversification.
         </div>
       )}
@@ -1295,11 +1295,11 @@ function ManualAllocationEditor({
           : "Review the validation messages below.";
 
   return (
-    <div className="rounded-lg border border-[#dfe4da] p-3 dark:border-zinc-800">
+    <div className="rounded-lg border border-[#e6dcc3] p-3 dark:border-zinc-800">
       <Field label="Vendor selection" info="Manual vendor selection is filtered by investment universe. It affects eligibility, holdings, charts, and validation.">
         <div className="grid grid-cols-[1fr_auto] gap-2">
           <select
-            className="rounded-md border border-[#d8ded0] bg-white px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+            className="rounded-md border border-[#e0d6ba] bg-white px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
             defaultValue=""
             onChange={(event) => {
               onAddVendor(event.target.value);
@@ -1322,19 +1322,19 @@ function ManualAllocationEditor({
           if (!provider) return null;
           const allocation = input.manualAllocations?.[providerId] ?? 0;
           return (
-            <div key={providerId} className="rounded-md border border-[#edf0ea] p-2 text-xs dark:border-zinc-800">
+            <div key={providerId} className="rounded-md border border-[#efe9d9] p-2 text-xs dark:border-zinc-800">
               <div className="flex items-start justify-between gap-2">
                 <div>
                   <div className="font-semibold">{provider.name} {provider.ticker ? `(${provider.ticker})` : "(private/watchlist)"}</div>
-                  <div className="mt-1 text-[#66705f] dark:text-zinc-500">{label(provider.exposureType)} | {label(provider.investabilityStatus)} | confidence {provider.evidenceConfidence}/100</div>
+                  <div className="mt-1 text-[#5d6b80] dark:text-zinc-500">{label(provider.exposureType)} | {label(provider.investabilityStatus)} | confidence {provider.evidenceConfidence}/100</div>
                 </div>
-                <button type="button" className="rounded border border-[#d8ded0] px-2 py-1 dark:border-zinc-700" onClick={() => onRemoveVendor(providerId)}>
+                <button type="button" className="rounded border border-[#e0d6ba] px-2 py-1 dark:border-zinc-700" onClick={() => onRemoveVendor(providerId)}>
                   Remove
                 </button>
               </div>
               <Field label="Allocation %" info="Allocation weight controls amount, contribution, risk, donut, scatter, fan chart, drawdown, and confidence heatmap.">
                 <input
-                  className="mt-1 w-full rounded-md border border-[#d8ded0] bg-white px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+                  className="mt-1 w-full rounded-md border border-[#e0d6ba] bg-white px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
                   min={0}
                   max={100}
                   step={0.5}
@@ -1343,12 +1343,12 @@ function ManualAllocationEditor({
                   onChange={(event) => onSetAllocation(providerId, Number(event.target.value))}
                 />
               </Field>
-              <div className="mt-1 text-[#66705f] dark:text-zinc-500">Amount {formatCurrency((input.startingCapital * allocation) / 100)}</div>
+              <div className="mt-1 text-[#5d6b80] dark:text-zinc-500">Amount {formatCurrency((input.startingCapital * allocation) / 100)}</div>
               {!provider.ticker && <div className="mt-1 text-amber-700 dark:text-amber-300">Not directly investable unless IPO/access event occurs.</div>}
             </div>
           );
         })}
-        {selectedIds.length === 0 && <div className="text-xs leading-5 text-[#66705f] dark:text-zinc-500">Select an eligible vendor for the current universe. In manual mode, vendor allocations plus cash reserve must equal 100%.</div>}
+        {selectedIds.length === 0 && <div className="text-xs leading-5 text-[#5d6b80] dark:text-zinc-500">Select an eligible vendor for the current universe. In manual mode, vendor allocations plus cash reserve must equal 100%.</div>}
       </div>
       <div className={`mt-3 rounded-md px-3 py-2 text-xs ${validation.isValid ? "bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300" : "bg-rose-50 text-rose-800 dark:bg-rose-950/40 dark:text-rose-300"}`}>
         Total allocation including cash: {validation.totalAllocationPct.toFixed(1)}%. {allocationMessage}
@@ -1371,7 +1371,7 @@ function Select({
   onChange: (value: string) => void;
 }) {
   return (
-    <select className="w-full rounded-md border border-[#d8ded0] bg-white px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" value={value} onChange={(event) => onChange(event.target.value)}>
+    <select className="w-full rounded-md border border-[#e0d6ba] bg-white px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" value={value} onChange={(event) => onChange(event.target.value)}>
       {options.map((option) => {
         const disabledReason = disabledOptions[option];
         return (
@@ -1388,7 +1388,7 @@ function Segmented({ value, options, onChange }: { value: string; options: strin
   return (
     <div className="grid grid-cols-4 gap-1">
       {options.map((option) => (
-        <button key={option} className={`rounded-md border px-2 py-1.5 text-xs font-semibold ${value === option ? "border-[#192319] bg-[#192319] text-white dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-950" : "border-[#d8ded0] text-[#4d574b] dark:border-zinc-700 dark:text-zinc-400"}`} onClick={() => onChange(option)} type="button">
+        <button key={option} className={`rounded-md border px-2 py-1.5 text-xs font-semibold ${value === option ? "border-[#13294b] bg-[#13294b] text-white dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-950" : "border-[#e0d6ba] text-[#475a72] dark:border-zinc-700 dark:text-zinc-400"}`} onClick={() => onChange(option)} type="button">
           {option}y
         </button>
       ))}
@@ -1403,7 +1403,7 @@ function Segmented({ value, options, onChange }: { value: string; options: strin
  */
 function SectionHeader({ children }: { children: React.ReactNode }) {
   return (
-    <h3 className="mt-1 mb-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-[#697362] dark:text-zinc-500">
+    <h3 className="mt-1 mb-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-[#5b6b7f] dark:text-zinc-500">
       {children}
     </h3>
   );
@@ -1423,8 +1423,8 @@ function CollapsibleSection({
   children: React.ReactNode;
 }) {
   return (
-    <details className="group rounded-md border border-[#dfe4da] bg-[#f7f8f5] px-3 py-2 dark:border-zinc-800 dark:bg-zinc-900/40" open={defaultOpen}>
-      <summary className="flex cursor-pointer list-none items-center justify-between text-[10px] font-semibold uppercase tracking-[0.18em] text-[#697362] hover:text-[#18201b] dark:text-zinc-400 dark:hover:text-zinc-100">
+    <details className="group rounded-md border border-[#e6dcc3] bg-[#faf6ec] px-3 py-2 dark:border-zinc-800 dark:bg-zinc-900/40" open={defaultOpen}>
+      <summary className="flex cursor-pointer list-none items-center justify-between text-[10px] font-semibold uppercase tracking-[0.18em] text-[#5b6b7f] hover:text-[#13294b] dark:text-zinc-400 dark:hover:text-zinc-100">
         {title}
         <span className="text-[10px] transition-transform group-open:rotate-180" aria-hidden>▾</span>
       </summary>
@@ -1461,7 +1461,7 @@ function ClimateSegmented({
             onClick={() => onChange(opt.value)}
             aria-pressed={active}
             className={`rounded-md border px-2 py-1.5 text-[11px] font-semibold transition-colors ${
-              active ? opt.tone + " ring-2 ring-current ring-offset-0" : "border-[#dfe4da] bg-white text-[#697362] hover:border-[#cfd7c8] dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400"
+              active ? opt.tone + " ring-2 ring-current ring-offset-0" : "border-[#e6dcc3] bg-white text-[#5b6b7f] hover:border-[#d6c9a8] dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400"
             }`}
           >
             {opt.label}
@@ -1495,7 +1495,7 @@ function ToggleSwitch({
       className={`flex w-full items-center justify-between rounded-md border px-3 py-2 text-xs font-semibold transition-colors ${
         checked
           ? "border-emerald-300 bg-emerald-50 text-emerald-900 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-200"
-          : "border-[#d8ded0] bg-white text-[#4d574b] hover:bg-[#f7f8f5] dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800"
+          : "border-[#e0d6ba] bg-white text-[#475a72] hover:bg-[#faf6ec] dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800"
       }`}
     >
       <span>{checked ? labelOn : labelOff}</span>
@@ -1520,7 +1520,7 @@ function ScenarioValue({
   const movement = formatMovementPercent(value, startingCapital);
   return (
     <div className="rounded-md border border-[#e1e6dc] p-3 dark:border-zinc-800">
-      <div className="text-xs text-[#697362] dark:text-zinc-500">{labelText}</div>
+      <div className="text-xs text-[#5b6b7f] dark:text-zinc-500">{labelText}</div>
       <div className={`mt-1 text-lg font-semibold tabular-nums ${tone}`}>{formatCurrency(value)}</div>
       <div className={`mt-1 text-xs font-semibold tabular-nums ${movement.isNegative ? "text-rose-700 dark:text-rose-300" : "text-emerald-700 dark:text-emerald-300"}`}>
         {movement.label} vs start
@@ -1532,7 +1532,7 @@ function ScenarioValue({
 function ScenarioFanChart({ result, shockEvent }: { result: SimulationResult; shockEvent?: ShockEvent | null }) {
   const paths = useMemo(() => [
     { name: "Bull", key: "bull" as const, data: result.bullPath, color: "#059669" },
-    { name: "Base", key: "base" as const, data: result.basePath, color: "#2f5d50" },
+    { name: "Base", key: "base" as const, data: result.basePath, color: "#b08d2f" },
     { name: "Bear", key: "bear" as const, data: result.bearPath, color: "#b45309" },
     { name: "Stress", key: "stress" as const, data: result.stressPath, color: "#be123c" },
   ], [result.bullPath, result.basePath, result.bearPath, result.stressPath]);
@@ -1633,19 +1633,19 @@ function ScenarioFanChart({ result, shockEvent }: { result: SimulationResult; sh
         onMouseMove={handleMove}
         onMouseLeave={() => setHover(null)}
       >
-        <rect width={w} height={h} rx="10" fill="currentColor" className="text-[#f7f8f5] dark:text-zinc-950" />
+        <rect width={w} height={h} rx="10" fill="currentColor" className="text-[#faf6ec] dark:text-zinc-950" />
         {/* Y gridlines + labels */}
         {yTicks.map((value, idx) => (
           <g key={`y-${idx}`}>
-            <line x1={padLeft} x2={w - padRight} y1={yFor(value)} y2={yFor(value)} stroke="#dfe4da" strokeDasharray="4 4" className="dark:stroke-zinc-800" />
-            <text x={padLeft - 8} y={yFor(value) + 4} textAnchor="end" fill="#697362" fontSize="10" className="tabular-nums">{formatCompactCurrency(value)}</text>
+            <line x1={padLeft} x2={w - padRight} y1={yFor(value)} y2={yFor(value)} stroke="#e6dcc3" strokeDasharray="4 4" className="dark:stroke-zinc-800" />
+            <text x={padLeft - 8} y={yFor(value) + 4} textAnchor="end" fill="#5b6b7f" fontSize="10" className="tabular-nums">{formatCompactCurrency(value)}</text>
           </g>
         ))}
         {/* X tick labels */}
         {xTicks.map((tick, idx) => (
           <g key={`x-${idx}`}>
-            <line x1={xFor(tick.year)} x2={xFor(tick.year)} y1={padTop + innerH} y2={padTop + innerH + 4} stroke="#aab4a2" />
-            <text x={xFor(tick.year)} y={padTop + innerH + 18} textAnchor="middle" fill="#697362" fontSize="10">{tick.label}</text>
+            <line x1={xFor(tick.year)} x2={xFor(tick.year)} y1={padTop + innerH} y2={padTop + innerH + 4} stroke="#b3a98c" />
+            <text x={xFor(tick.year)} y={padTop + innerH + 18} textAnchor="middle" fill="#5b6b7f" fontSize="10">{tick.label}</text>
           </g>
         ))}
         {/* Shock marker */}
@@ -1673,11 +1673,11 @@ function ScenarioFanChart({ result, shockEvent }: { result: SimulationResult; sh
             ))}
           </g>
         )}
-        <text x={w - padRight} y={h - 10} textAnchor="end" fill="#697362" fontSize="10">Hypothetical seed paths · hover for detail</text>
+        <text x={w - padRight} y={h - 10} textAnchor="end" fill="#5b6b7f" fontSize="10">Hypothetical seed paths · hover for detail</text>
       </svg>
       {hoverNear && hover && (
         <div
-          className="pointer-events-none absolute z-20 -translate-y-2 rounded-md border border-[#dfe4da] bg-white px-2.5 py-2 text-[11px] shadow-md dark:border-zinc-700 dark:bg-zinc-900"
+          className="pointer-events-none absolute z-20 -translate-y-2 rounded-md border border-[#e6dcc3] bg-white px-2.5 py-2 text-[11px] shadow-md dark:border-zinc-700 dark:bg-zinc-900"
           style={{
             left: `${hover.xPct * (innerW / w) * 100 + (padLeft / w) * 100}%`,
             top: 30,
@@ -1685,15 +1685,15 @@ function ScenarioFanChart({ result, shockEvent }: { result: SimulationResult; sh
             minWidth: 160,
           }}
         >
-          <div className="mb-1 font-semibold text-[#18201b] dark:text-zinc-100">{formatYearMonthLabel(hover.year)}</div>
+          <div className="mb-1 font-semibold text-[#13294b] dark:text-zinc-100">{formatYearMonthLabel(hover.year)}</div>
           <div className="space-y-0.5">
             {hoverNear.map((item) => (
               <div key={item.key} className="flex items-center justify-between gap-3">
                 <span className="flex items-center gap-1.5">
                   <span className="h-2 w-2 rounded-sm" style={{ background: item.color }} />
-                  <span className="text-[#4d574b] dark:text-zinc-300">{item.name}</span>
+                  <span className="text-[#475a72] dark:text-zinc-300">{item.name}</span>
                 </span>
-                <span className="font-mono tabular-nums text-[#18201b] dark:text-zinc-50">{formatCurrency(item.point.value)}</span>
+                <span className="font-mono tabular-nums text-[#13294b] dark:text-zinc-50">{formatCurrency(item.point.value)}</span>
               </div>
             ))}
           </div>
@@ -1757,10 +1757,10 @@ function AllocationDonut({ portfolio, providers }: { portfolio: SimulationPortfo
         })}
         <circle cx="130" cy="130" r="60" fill="white" className="dark:fill-[#071827]" />
         <text x="130" y="124" textAnchor="middle" fontSize="22" fontWeight="700" fill="currentColor">{portfolio.holdings.length}</text>
-        <text x="130" y="145" textAnchor="middle" fontSize="11" fill="#697362">holdings</text>
+        <text x="130" y="145" textAnchor="middle" fontSize="11" fill="#5b6b7f">holdings</text>
       </svg>
       <div className="space-y-1.5">
-        <div className="mb-1 flex items-center justify-between text-[10px] font-semibold uppercase tracking-wide text-[#697362] dark:text-zinc-500">
+        <div className="mb-1 flex items-center justify-between text-[10px] font-semibold uppercase tracking-wide text-[#5b6b7f] dark:text-zinc-500">
           <span>Holding</span>
           <span className="flex gap-3"><span>Weight</span><span className="w-20 text-right">Amount</span></span>
         </div>
@@ -1773,13 +1773,13 @@ function AllocationDonut({ portfolio, providers }: { portfolio: SimulationPortfo
                 <span className="truncate">{provider.name}</span>
               </span>
               <span className="flex shrink-0 gap-3">
-                <span className="font-mono tabular-nums text-[#697362] dark:text-zinc-500">{holding.weightPct.toFixed(1)}%</span>
-                <span className="w-20 text-right font-mono tabular-nums text-[#18201b] dark:text-zinc-100">{formatCurrency(holding.amount)}</span>
+                <span className="font-mono tabular-nums text-[#5b6b7f] dark:text-zinc-500">{holding.weightPct.toFixed(1)}%</span>
+                <span className="w-20 text-right font-mono tabular-nums text-[#13294b] dark:text-zinc-100">{formatCurrency(holding.amount)}</span>
               </span>
             </div>
           );
         })}
-        <div className="mt-2 flex items-center justify-between border-t border-[#dfe4da] pt-2 text-xs font-semibold dark:border-zinc-800">
+        <div className="mt-2 flex items-center justify-between border-t border-[#e6dcc3] pt-2 text-xs font-semibold dark:border-zinc-800">
           <span>Total</span>
           <span className="font-mono tabular-nums">{formatCurrency(portfolio.holdings.reduce((sum, h) => sum + h.amount, 0))}</span>
         </div>
@@ -1806,9 +1806,9 @@ function RiskReturnScatter({ portfolio, providers, stateHash }: { portfolio: Sim
   const scale = (value: number, domain: { min: number; max: number }) => (value - domain.min) / Math.max(1, domain.max - domain.min);
   return (
     <svg className="h-[300px] w-full" viewBox={`0 0 ${w} ${h}`} role="img" aria-label="Risk return scatterplot">
-      <rect width={w} height={h} rx="10" fill="currentColor" className="text-[#f7f8f5] dark:text-zinc-950" />
-      <line x1={pad} x2={w - pad} y1={h - pad} y2={h - pad} stroke="#aab4a2" />
-      <line x1={pad} x2={pad} y1={pad} y2={h - pad} stroke="#aab4a2" />
+      <rect width={w} height={h} rx="10" fill="currentColor" className="text-[#faf6ec] dark:text-zinc-950" />
+      <line x1={pad} x2={w - pad} y1={h - pad} y2={h - pad} stroke="#b3a98c" />
+      <line x1={pad} x2={pad} y1={pad} y2={h - pad} stroke="#b3a98c" />
       {points.map((point, index) => {
         const jitter = ((index % 5) - 2) * 3;
         const x = pad + scale(point.x, xDomain) * (w - pad * 2) + jitter;
@@ -1821,8 +1821,8 @@ function RiskReturnScatter({ portfolio, providers, stateHash }: { portfolio: Sim
           </g>
         );
       })}
-      <text x={pad} y={22} fontSize="11" fill="#697362">Attractiveness</text>
-      <text x={w - 92} y={h - 10} fontSize="11" fill="#697362">Risk score</text>
+      <text x={pad} y={22} fontSize="11" fill="#5b6b7f">Attractiveness</text>
+      <text x={w - 92} y={h - 10} fontSize="11" fill="#5b6b7f">Risk score</text>
       {(xDomain.expanded || yDomain.expanded) && <text x={pad} y={h - 10} fontSize="11" fill="#b45309">Scatter plot has insufficient spread. Displaying expanded axis for readability.</text>}
     </svg>
   );
@@ -1837,7 +1837,7 @@ function ExposureNetwork({ exposures, providers }: { exposures: IndirectExposure
   const privateX = (index: number) => 80 + (index / Math.max(1, privateNodes.length - 1)) * 520;
   return (
     <svg className="h-[320px] w-full" viewBox="0 0 680 320" role="img" aria-label="Indirect exposure network graph">
-      <rect width="680" height="320" rx="10" fill="currentColor" className="text-[#f7f8f5] dark:text-zinc-950" />
+      <rect width="680" height="320" rx="10" fill="currentColor" className="text-[#faf6ec] dark:text-zinc-950" />
       {exposures.map((edge, index) => {
         const x1 = publicX(Math.max(0, publicNodes.indexOf(edge.publicTicker)));
         const x2 = privateX(Math.max(0, privateNodes.indexOf(edge.privateProviderId)));
@@ -1846,12 +1846,12 @@ function ExposureNetwork({ exposures, providers }: { exposures: IndirectExposure
         return <line key={`${edge.publicTicker}-${edge.privateProviderId}-${index}`} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#9aa78f" strokeOpacity={edge.confidence} strokeWidth={1 + edge.exposureStrength * 4} />;
       })}
       {publicNodes.map((ticker, index) => (
-        <Node key={ticker} x={publicX(index)} y={82} label={tickerNames.get(ticker) ?? ticker} color="#2f5d50" />
+        <Node key={ticker} x={publicX(index)} y={82} label={tickerNames.get(ticker) ?? ticker} color="#b08d2f" />
       ))}
       {privateNodes.map((id, index) => (
         <Node key={id} x={privateX(index)} y={230} label={providerNames.get(id) ?? id.replace(/_/g, " ")} color={id.includes("infrastructure") ? "#0f766e" : "#be185d"} />
       ))}
-      <text x="24" y="28" fontSize="12" fontWeight="700" fill="#697362">Indirect exposure is not the same as owning the private company</text>
+      <text x="24" y="28" fontSize="12" fontWeight="700" fill="#5b6b7f">Indirect exposure is not the same as owning the private company</text>
     </svg>
   );
 }
@@ -1877,11 +1877,11 @@ function IpoTimeline({ profiles, providers }: { profiles: IPOProfile[]; provider
           <div key={profile.providerId}>
             <div className="mb-2 flex items-center justify-between gap-3 text-sm">
               <span className="font-semibold">{provider?.name ?? profile.providerId}</span>
-              <span className="text-xs text-[#697362] dark:text-zinc-500">{profile.rumourStage} | {label(profile.postIpoForecast)}</span>
+              <span className="text-xs text-[#5b6b7f] dark:text-zinc-500">{profile.rumourStage} | {label(profile.postIpoForecast)}</span>
             </div>
             <div className="grid grid-cols-7 gap-1">
               {stages.map((stage, index) => (
-                <div key={stage} className={`h-2 rounded-full ${index <= current ? "bg-[#2f5d50] dark:bg-emerald-400" : "bg-[#e1e6dc] dark:bg-zinc-800"}`} title={stage} />
+                <div key={stage} className={`h-2 rounded-full ${index <= current ? "bg-[#b08d2f] dark:bg-emerald-400" : "bg-[#e1e6dc] dark:bg-zinc-800"}`} title={stage} />
               ))}
             </div>
           </div>
@@ -1916,19 +1916,19 @@ function DrawdownChart({ path, shockEvent }: { path: ScenarioPoint[]; shockEvent
     : Array.from({ length: Math.round(maxYear) + 1 }, (_, i) => i);
   return (
     <svg className="h-[220px] w-full" viewBox={`0 0 ${w} ${h}`} role="img" aria-label="Drawdown chart">
-      <rect width={w} height={h} rx="10" fill="currentColor" className="text-[#f7f8f5] dark:text-zinc-950" />
-      <line x1={pad} x2={w - pad} y1={pad} y2={pad} stroke="#aab4a2" />
+      <rect width={w} height={h} rx="10" fill="currentColor" className="text-[#faf6ec] dark:text-zinc-950" />
+      <line x1={pad} x2={w - pad} y1={pad} y2={pad} stroke="#b3a98c" />
       {shockX !== null && <line x1={shockX} x2={shockX} y1={pad} y2={h - pad} stroke="#b45309" strokeWidth="2" strokeDasharray="4 4" />}
       {xTicks.map((tick, idx) => (
         <g key={`dx-${idx}`}>
-          <line x1={xFor(tick)} x2={xFor(tick)} y1={h - pad} y2={h - pad + 4} stroke="#aab4a2" />
-          <text x={xFor(tick)} y={h - pad + 16} textAnchor="middle" fontSize="10" fill="#697362">{formatTickLabel(tick)}</text>
+          <line x1={xFor(tick)} x2={xFor(tick)} y1={h - pad} y2={h - pad + 4} stroke="#b3a98c" />
+          <text x={xFor(tick)} y={h - pad + 16} textAnchor="middle" fontSize="10" fill="#5b6b7f">{formatTickLabel(tick)}</text>
         </g>
       ))}
-      <text x={pad} y={pad - 6} fontSize="10" fill="#697362">0%</text>
+      <text x={pad} y={pad - 6} fontSize="10" fill="#5b6b7f">0%</text>
       <text x={pad} y={h - pad - 6} fontSize="10" fill="#be123c">{`${min.toFixed(0)}%`}</text>
       <polyline points={line} fill="none" stroke="#be123c" strokeWidth="2.5" />
-      <text x={w - pad} y={pad - 6} textAnchor="end" fontSize="10" fill="#697362">Stress drawdown path</text>
+      <text x={w - pad} y={pad - 6} textAnchor="end" fontSize="10" fill="#5b6b7f">Stress drawdown path</text>
     </svg>
   );
 }
@@ -1938,7 +1938,7 @@ function StackedExposureBar({ portfolio }: { portfolio: SimulationPortfolio }) {
   portfolio.holdings.forEach((holding) => totals.set(holding.exposureType, (totals.get(holding.exposureType) ?? 0) + holding.weightPct));
   return (
     <div>
-      <div className="flex h-10 overflow-hidden rounded-md border border-[#dfe4da] dark:border-zinc-800">
+      <div className="flex h-10 overflow-hidden rounded-md border border-[#e6dcc3] dark:border-zinc-800">
         {Array.from(totals).map(([type, value]) => (
           <div key={type} className="h-full" style={{ width: `${value}%`, background: exposureColors[type] }} title={`${label(type)} ${value.toFixed(1)}%`} />
         ))}
@@ -1960,7 +1960,7 @@ function ConfidenceHeatmap({ portfolio, providers }: { portfolio: SimulationPort
   return (
     <div className="overflow-x-auto">
       <div className="min-w-[620px]">
-        <div className="grid grid-cols-[120px_repeat(7,1fr)] gap-1 text-[11px] text-[#697362] dark:text-zinc-500">
+        <div className="grid grid-cols-[120px_repeat(7,1fr)] gap-1 text-[11px] text-[#5b6b7f] dark:text-zinc-500">
           <span />
           {cols.map((col) => <span key={col}>{col}</span>)}
         </div>
@@ -2000,8 +2000,8 @@ function ContributionWaterfall({ result, providers }: { result: SimulationResult
               <span>{provider.name}</span>
               <span className="font-mono">{row.contribution.toFixed(2)} pts</span>
             </div>
-            <div className="h-2 rounded-full bg-[#e8ede2] dark:bg-zinc-800">
-              <div className={`h-full rounded-full ${row.contribution >= 0 ? "bg-[#2f5d50] dark:bg-emerald-400" : "bg-rose-600"}`} style={{ width: `${Math.max(2, (Math.abs(row.contribution) / max) * 100)}%` }} />
+            <div className="h-2 rounded-full bg-[#ece3cb] dark:bg-zinc-800">
+              <div className={`h-full rounded-full ${row.contribution >= 0 ? "bg-[#b08d2f] dark:bg-emerald-400" : "bg-rose-600"}`} style={{ width: `${Math.max(2, (Math.abs(row.contribution) / max) * 100)}%` }} />
             </div>
           </div>
         );
@@ -2032,18 +2032,18 @@ function RiskRadar({ result, portfolio, providers }: { result: SimulationResult;
   }).join(" ");
   return (
     <svg className="h-[340px] w-full" viewBox="0 0 560 340" role="img" aria-label="Risk radar">
-      <rect width="560" height="340" rx="10" fill="currentColor" className="text-[#f7f8f5] dark:text-zinc-950" />
-      {[0.25, 0.5, 0.75, 1].map((scale) => <circle key={scale} cx={cx} cy={cy} r={r * scale} fill="none" stroke="#dfe4da" />)}
+      <rect width="560" height="340" rx="10" fill="currentColor" className="text-[#faf6ec] dark:text-zinc-950" />
+      {[0.25, 0.5, 0.75, 1].map((scale) => <circle key={scale} cx={cx} cy={cy} r={r * scale} fill="none" stroke="#e6dcc3" />)}
       {axes.map(([name], index) => {
         const angle = -Math.PI / 2 + (index / axes.length) * Math.PI * 2;
         return (
           <g key={name}>
-            <line x1={cx} y1={cy} x2={cx + Math.cos(angle) * r} y2={cy + Math.sin(angle) * r} stroke="#dfe4da" />
-            <text x={cx + Math.cos(angle) * (r + 32)} y={cy + Math.sin(angle) * (r + 22)} textAnchor="middle" fontSize="11" fill="#697362">{name}</text>
+            <line x1={cx} y1={cy} x2={cx + Math.cos(angle) * r} y2={cy + Math.sin(angle) * r} stroke="#e6dcc3" />
+            <text x={cx + Math.cos(angle) * (r + 32)} y={cy + Math.sin(angle) * (r + 22)} textAnchor="middle" fontSize="11" fill="#5b6b7f">{name}</text>
           </g>
         );
       })}
-      <polygon points={points} fill="#2f5d50" fillOpacity="0.25" stroke="#2f5d50" strokeWidth="3" />
+      <polygon points={points} fill="#b08d2f" fillOpacity="0.25" stroke="#b08d2f" strokeWidth="3" />
     </svg>
   );
 }
