@@ -99,7 +99,7 @@ export default async function AssessPage({ searchParams }: PageProps) {
 
       {/* 2. Market context — collapsible so it doesn't block the form on return visits */}
       <details className="group mb-6">
-        <summary className="flex cursor-pointer select-none items-center justify-between rounded-xl border border-[#e6dcc3] bg-white px-4 py-3 text-sm font-semibold text-[#13294b] hover:bg-[#faf5e9] dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800">
+        <summary className="flex cursor-pointer select-none items-center justify-between rounded-xl border border-[#e6dcc3] bg-white px-4 py-3 text-sm font-semibold text-[#13294b] hover:bg-[#faf5e9] dark:border-[#1d3a57] dark:bg-[#0c2238] dark:text-[#eef3f8] dark:hover:bg-[#143049]">
           <span>Market context — briefing &amp; risk signals</span>
           <span className="ml-2 font-normal text-[#5b6b7f] text-xs group-open:hidden">▼ expand</span>
           <span className="ml-2 font-normal text-[#5b6b7f] text-xs hidden group-open:inline">▲ collapse</span>
@@ -137,11 +137,11 @@ export default async function AssessPage({ searchParams }: PageProps) {
                       <span className="text-sm font-medium">
                         <VendorNameWithOwnership name={item.vendor.name} ownershipType={item.vendor.ownershipType} />
                       </span>
-                      <span className={`text-xs uppercase ${item.severity === "high" ? "text-rose-700 dark:text-rose-300" : item.severity === "medium" ? "text-amber-700 dark:text-amber-300" : "text-[#5b6b7f] dark:text-zinc-400"}`}>
+                      <span className={`text-xs uppercase ${item.severity === "high" ? "text-rose-700 dark:text-rose-300" : item.severity === "medium" ? "text-amber-700 dark:text-amber-300" : "text-[#5b6b7f] dark:text-[#a7bacd]"}`}>
                         {item.severity}
                       </span>
                     </div>
-                    <div className="mt-1 text-xs leading-5 text-[#5f665a] dark:text-zinc-400">{item.alert}</div>
+                    <div className="mt-1 text-xs leading-5 text-[#5f665a] dark:text-[#a7bacd]">{item.alert}</div>
                     <div className="mt-1"><Confidence value={item.confidence} /></div>
                   </div>
                 ))}
@@ -154,7 +154,7 @@ export default async function AssessPage({ searchParams }: PageProps) {
       {/* 3. Watchlists & alerts */}
       <section id="watchlists" className="mb-2">
         <Panel title="Watchlists & alerts (monitoring setup)">
-          <p className="mb-4 text-xs leading-5 text-[#56657b] dark:text-zinc-400">
+          <p className="mb-4 text-xs leading-5 text-[#56657b] dark:text-[#a7bacd]">
             Create watchlists for vendors, industries, capability areas, risks, news types, market
             share movement, and regulation. Alerts are mock/generated in the MVP.
           </p>
@@ -171,9 +171,9 @@ export default async function AssessPage({ searchParams }: PageProps) {
 
       {/* Next actions */}
       <div className="mt-4 flex flex-wrap gap-2 text-xs">
-        <Link href="/understand" className="rounded-md border border-[#d6c9a8] px-3 py-2 font-semibold hover:bg-[#f3ead2] dark:border-zinc-700 dark:hover:bg-zinc-900">← Research vendors</Link>
-        <Link href="/demonstrate" className="rounded-md border border-[#d6c9a8] px-3 py-2 font-semibold hover:bg-[#f3ead2] dark:border-zinc-700 dark:hover:bg-zinc-900">Defend decision →</Link>
-        <Link href="/monitor" className="rounded-md border border-[#d6c9a8] px-3 py-2 font-semibold hover:bg-[#f3ead2] dark:border-zinc-700 dark:hover:bg-zinc-900">Monitor decisions →</Link>
+        <Link href="/understand" className="rounded-md border border-[#d6c9a8] px-3 py-2 font-semibold hover:bg-[#f3ead2] dark:border-[#2a4a6b] dark:hover:bg-[#0c2238]">← Research vendors</Link>
+        <Link href="/demonstrate" className="rounded-md border border-[#d6c9a8] px-3 py-2 font-semibold hover:bg-[#f3ead2] dark:border-[#2a4a6b] dark:hover:bg-[#0c2238]">Defend decision →</Link>
+        <Link href="/monitor" className="rounded-md border border-[#d6c9a8] px-3 py-2 font-semibold hover:bg-[#f3ead2] dark:border-[#2a4a6b] dark:hover:bg-[#0c2238]">Monitor decisions →</Link>
       </div>
     </PageFrame>
   );

@@ -29,9 +29,9 @@ type PatchRow = {
 export default function ManifestPatchesPanel({ patches }: { patches: PatchRow[] }) {
   if (patches.length === 0) {
     return (
-      <section className="mt-8 rounded-2xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
+      <section className="mt-8 rounded-2xl border border-[#e3d9c0] bg-white p-6 dark:border-[#1d3a57] dark:bg-[#0c2238]">
         <h2 className="text-lg font-semibold">Manifest patches (URL-repair agent)</h2>
-        <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
+        <p className="mt-2 text-sm text-[#3f5068] dark:text-[#a7bacd]">
           No pending patches. The URL-repair agent fires automatically when an ingest
           run hits an HTTP 4xx — proposed replacements appear here for review.
         </p>
@@ -40,12 +40,12 @@ export default function ManifestPatchesPanel({ patches }: { patches: PatchRow[] 
   }
 
   return (
-    <section className="mt-8 rounded-2xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
+    <section className="mt-8 rounded-2xl border border-[#e3d9c0] bg-white p-6 dark:border-[#1d3a57] dark:bg-[#0c2238]">
       <div className="flex flex-wrap items-end justify-between gap-2">
         <div>
           <h2 className="text-lg font-semibold">Manifest patches (URL-repair agent)</h2>
-          <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
-            {patches.length} pending replacement{patches.length === 1 ? "" : "s"} found by Claude + web search after ingest 4xx errors. Apply by editing <code className="rounded bg-zinc-100 px-1 py-0.5 text-xs dark:bg-zinc-800">lib/sourcing/manifest.ts</code> with the candidate URL, then re-run ingest.
+          <p className="mt-1 text-sm text-[#3f5068] dark:text-[#a7bacd]">
+            {patches.length} pending replacement{patches.length === 1 ? "" : "s"} found by Claude + web search after ingest 4xx errors. Apply by editing <code className="rounded bg-[#ece3cb] px-1 py-0.5 text-xs dark:bg-[#143049]">lib/sourcing/manifest.ts</code> with the candidate URL, then re-run ingest.
           </p>
         </div>
         <div className="flex flex-wrap gap-2 text-xs">
@@ -72,8 +72,8 @@ export default function ManifestPatchesPanel({ patches }: { patches: PatchRow[] 
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2 text-xs">
-                    <span className="font-semibold text-zinc-900 dark:text-zinc-100">{p.vendorName}</span>
-                    <span className="rounded-full border border-zinc-300 bg-white px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-zinc-700 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300">
+                    <span className="font-semibold text-[#15263c] dark:text-[#eef3f8]">{p.vendorName}</span>
+                    <span className="rounded-full border border-[#d6c9a8] bg-white px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[#2e3f57] dark:border-[#2a4a6b] dark:bg-[#0c2238] dark:text-[#c2d1e0]">
                       {p.category.replace(/_/g, " ")}
                     </span>
                     <span className="rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-semibold text-rose-800 dark:bg-rose-950/40 dark:text-rose-300">
@@ -90,23 +90,23 @@ export default function ManifestPatchesPanel({ patches }: { patches: PatchRow[] 
                       </span>
                     )}
                     {!p.retryAttempted && (
-                      <span className="rounded-full bg-zinc-200 px-2 py-0.5 text-[10px] font-semibold text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
+                      <span className="rounded-full bg-[#e3d9c0] px-2 py-0.5 text-[10px] font-semibold text-[#2e3f57] dark:bg-[#143049] dark:text-[#c2d1e0]">
                         no auto-retry (confidence &lt; 75)
                       </span>
                     )}
                   </div>
-                  <div className="mt-2 grid gap-1 text-xs text-zinc-700 dark:text-zinc-300">
+                  <div className="mt-2 grid gap-1 text-xs text-[#2e3f57] dark:text-[#c2d1e0]">
                     <div className="font-mono break-all line-through opacity-60">{p.deadUrl}</div>
                     <div className="font-mono break-all">↳ <a href={p.candidateUrl} target="_blank" rel="noopener noreferrer" className="text-emerald-700 underline hover:text-emerald-900 dark:text-emerald-300">{p.candidateUrl}</a></div>
                   </div>
-                  <div className="mt-2 text-xs italic text-zinc-600 dark:text-zinc-400">{p.candidateTitle}</div>
-                  <p className="mt-2 text-xs leading-5 text-zinc-700 dark:text-zinc-300">{p.rationale}</p>
+                  <div className="mt-2 text-xs italic text-[#3f5068] dark:text-[#a7bacd]">{p.candidateTitle}</div>
+                  <p className="mt-2 text-xs leading-5 text-[#2e3f57] dark:text-[#c2d1e0]">{p.rationale}</p>
                   {p.citations.length > 0 && (
-                    <div className="mt-2 text-[11px] text-zinc-600 dark:text-zinc-500">
+                    <div className="mt-2 text-[11px] text-[#3f5068] dark:text-[#8fa5bb]">
                       Cited:{" "}
                       {p.citations.map((c, i) => (
                         <span key={c}>
-                          <a href={c} target="_blank" rel="noopener noreferrer" className="underline hover:text-zinc-900 dark:hover:text-zinc-200">{shortHost(c)}</a>
+                          <a href={c} target="_blank" rel="noopener noreferrer" className="underline hover:text-[#15263c] dark:hover:text-[#d8e2ec]">{shortHost(c)}</a>
                           {i < p.citations.length - 1 ? ", " : ""}
                         </span>
                       ))}
@@ -114,9 +114,9 @@ export default function ManifestPatchesPanel({ patches }: { patches: PatchRow[] 
                   )}
                 </div>
                 <div className="text-right text-xs">
-                  <div className="text-[10px] uppercase tracking-wide text-zinc-500">Confidence</div>
-                  <div className="mt-0.5 font-mono text-2xl font-bold tabular-nums text-zinc-900 dark:text-zinc-100">{conf}</div>
-                  <div className="mt-1 text-[10px] text-zinc-500">{p.searchesUsed} web searches</div>
+                  <div className="text-[10px] uppercase tracking-wide text-[#4c5d75]">Confidence</div>
+                  <div className="mt-0.5 font-mono text-2xl font-bold tabular-nums text-[#15263c] dark:text-[#eef3f8]">{conf}</div>
+                  <div className="mt-1 text-[10px] text-[#4c5d75]">{p.searchesUsed} web searches</div>
                 </div>
               </div>
             </article>

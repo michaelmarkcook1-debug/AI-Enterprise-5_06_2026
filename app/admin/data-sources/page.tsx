@@ -22,11 +22,11 @@ export default function DataSourcesPage() {
   }, {});
 
   return (
-    <div className="min-h-screen bg-zinc-50 text-zinc-900 dark:bg-[#071827] dark:text-zinc-100">
+    <div className="min-h-screen bg-[#f6f1e3] text-[#15263c] dark:bg-[#071827] dark:text-[#eef3f8]">
       <main className="mx-auto max-w-7xl px-6 py-12">
-        <Link href="/admin" className="text-sm text-zinc-500 hover:underline">← Admin</Link>
+        <Link href="/admin" className="text-sm text-[#4c5d75] hover:underline">← Admin</Link>
         <h1 className="mt-4 text-3xl font-semibold tracking-tight">Data sources</h1>
-        <p className="mt-2 max-w-3xl text-sm text-zinc-600 dark:text-zinc-400">
+        <p className="mt-2 max-w-3xl text-sm text-[#3f5068] dark:text-[#a7bacd]">
           One row per official-data connector. Configured connectors fetch real data on demand;
           unconfigured ones surface the env vars needed to enable them. No connector ever fakes
           a successful status — &quot;ok&quot; means the env-check passed and the source is reachable.
@@ -45,11 +45,11 @@ export default function DataSourcesPage() {
         {/* Per-group panels */}
         <div className="mt-8 space-y-6">
           {Object.entries(byGroup).map(([group, items]) => (
-            <section key={group} className="rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
+            <section key={group} className="rounded-2xl border border-[#e3d9c0] bg-white p-5 dark:border-[#1d3a57] dark:bg-[#0c2238]">
               <h2 className="text-base font-semibold capitalize">{group.replace(/_/g, " ")}</h2>
               <div className="mt-3 overflow-x-auto">
                 <table className="w-full min-w-[1080px] text-left text-sm">
-                  <thead className="text-xs uppercase tracking-wide text-zinc-500">
+                  <thead className="text-xs uppercase tracking-wide text-[#4c5d75]">
                     <tr>
                       <th className="py-2 pr-4">Connector</th>
                       <th className="py-2 pr-4">Status</th>
@@ -62,12 +62,12 @@ export default function DataSourcesPage() {
                       <th className="py-2">Docs</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
+                  <tbody className="divide-y divide-[#ece4d0] dark:divide-[#1d3a57]">
                     {items.map((c) => (
                       <tr key={c.id}>
                         <td className="py-3 pr-4">
                           <div className="font-semibold">{c.label}</div>
-                          <div className="mt-0.5 text-xs text-zinc-500">{c.description}</div>
+                          <div className="mt-0.5 text-xs text-[#4c5d75]">{c.description}</div>
                         </td>
                         <td className="py-3 pr-4">
                           <StatusBadge status={c.status} />
@@ -79,20 +79,20 @@ export default function DataSourcesPage() {
                             <span className="text-rose-700 dark:text-rose-400">✗ no</span>
                           )}
                         </td>
-                        <td className="py-3 pr-4 font-mono text-[11px] text-zinc-600 dark:text-zinc-400">
-                          {c.envVars.length === 0 ? <span className="text-zinc-400">—</span> : c.envVars.join(", ")}
+                        <td className="py-3 pr-4 font-mono text-[11px] text-[#3f5068] dark:text-[#a7bacd]">
+                          {c.envVars.length === 0 ? <span className="text-[#6b7d93]">—</span> : c.envVars.join(", ")}
                           {c.requiresKey && <span className="ml-1 text-rose-500">*</span>}
                         </td>
                         <td className="py-3 pr-4 text-xs capitalize">{c.tier.replace(/_/g, " ")}</td>
-                        <td className="py-3 pr-4 text-xs text-zinc-600 dark:text-zinc-400">{c.rateLimitNotes ?? "—"}</td>
+                        <td className="py-3 pr-4 text-xs text-[#3f5068] dark:text-[#a7bacd]">{c.rateLimitNotes ?? "—"}</td>
                         <td className="py-3 pr-4 text-xs">
                           {c.lastFetchAt ? (
                             <span className={c.lastFetchOk ? "text-emerald-700 dark:text-emerald-400" : "text-rose-700 dark:text-rose-400"}>
                               {c.lastFetchOk ? "✓" : "✗"} {new Date(c.lastFetchAt).toISOString().slice(0, 16).replace("T", " ")}
-                              {c.lastFetchError && <span className="ml-1 italic text-zinc-500">({c.lastFetchError.slice(0, 60)})</span>}
+                              {c.lastFetchError && <span className="ml-1 italic text-[#4c5d75]">({c.lastFetchError.slice(0, 60)})</span>}
                             </span>
                           ) : (
-                            <span className="text-zinc-400">never</span>
+                            <span className="text-[#6b7d93]">never</span>
                           )}
                         </td>
                         <td className="py-3 pr-4 font-mono tabular-nums text-xs">{c.lastFetchRecordCount ?? "—"}</td>
@@ -135,7 +135,7 @@ function Stat({ label, value, tone = "neutral" }: { label: string; value: number
       ? "border-amber-300 bg-amber-50 text-amber-800 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-300"
       : tone === "bad"
         ? "border-rose-300 bg-rose-50 text-rose-800 dark:border-rose-800 dark:bg-rose-950/40 dark:text-rose-300"
-        : "border-zinc-200 bg-white text-zinc-700 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300";
+        : "border-[#e3d9c0] bg-white text-[#2e3f57] dark:border-[#1d3a57] dark:bg-[#0c2238] dark:text-[#c2d1e0]";
   return (
     <div className={`rounded-md border px-3 py-2 ${toneClass}`}>
       <div className="text-[10px] font-semibold uppercase tracking-wide opacity-80">{label}</div>

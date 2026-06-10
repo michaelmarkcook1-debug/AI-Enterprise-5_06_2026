@@ -95,7 +95,7 @@ export default function ExposureEditClient({
   return (
     <div className="mt-6 space-y-8">
       {/* Form */}
-      <div className="rounded-2xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
+      <div className="rounded-2xl border border-[#e3d9c0] bg-white p-6 dark:border-[#1d3a57] dark:bg-[#0c2238]">
         <h2 className="text-base font-semibold">Draft a proposal</h2>
         <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           <Field label="Action">
@@ -176,22 +176,22 @@ export default function ExposureEditClient({
             className="rounded-full bg-emerald-600 px-6 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 disabled:opacity-40 dark:bg-emerald-500 dark:hover:bg-emerald-400">
             {busy ? "Recording…" : "Record proposal"}
           </button>
-          <span className="text-xs text-zinc-500">
+          <span className="text-xs text-[#4c5d75]">
             Proposals are append-only. The live map only changes once a reviewer folds an approved proposal into the data file.
           </span>
         </div>
       </div>
 
       {/* Existing proposals */}
-      <div className="rounded-2xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
-        <div className="border-b border-zinc-200 px-6 py-4 dark:border-zinc-800">
+      <div className="rounded-2xl border border-[#e3d9c0] bg-white dark:border-[#1d3a57] dark:bg-[#0c2238]">
+        <div className="border-b border-[#e3d9c0] px-6 py-4 dark:border-[#1d3a57]">
           <h2 className="text-base font-semibold">Recorded proposals ({proposals.length})</h2>
-          <p className="mt-1 text-xs text-zinc-500">Sorted newest first. Append-only JSONL — nothing here is auto-applied.</p>
+          <p className="mt-1 text-xs text-[#4c5d75]">Sorted newest first. Append-only JSONL — nothing here is auto-applied.</p>
         </div>
         {proposals.length === 0 ? (
-          <div className="p-8 text-center text-sm text-zinc-500">No proposals recorded yet.</div>
+          <div className="p-8 text-center text-sm text-[#4c5d75]">No proposals recorded yet.</div>
         ) : (
-          <ul className="divide-y divide-zinc-200 dark:divide-zinc-800">
+          <ul className="divide-y divide-[#e3d9c0] dark:divide-[#1d3a57]">
             {[...proposals].reverse().map((p, i) => (
               <li key={`${p.timestamp}-${i}`} className="px-6 py-4">
                 <div className="flex flex-wrap items-baseline gap-2 text-sm">
@@ -203,15 +203,15 @@ export default function ExposureEditClient({
                         : "bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300"
                   }`}>{p.action}</span>
                   <span className="font-mono text-sm font-semibold">{p.edgeId}</span>
-                  <span className="text-zinc-500">{p.sourceId} → {p.targetId}</span>
-                  <span className="ml-auto text-xs text-zinc-500">{new Date(p.timestamp).toLocaleString()}</span>
+                  <span className="text-[#4c5d75]">{p.sourceId} → {p.targetId}</span>
+                  <span className="ml-auto text-xs text-[#4c5d75]">{new Date(p.timestamp).toLocaleString()}</span>
                 </div>
-                <div className="mt-1 text-xs text-zinc-500">
+                <div className="mt-1 text-xs text-[#4c5d75]">
                   {p.relationshipType} · {p.confidence} · strength {p.strengthScore.toFixed(2)}
                   {p.estimatedValue && ` · ${p.estimatedValue}`} · by {p.proposedBy}
                 </div>
-                <p className="mt-2 text-sm text-zinc-800 dark:text-zinc-200">{p.summary}</p>
-                {p.rationale && <p className="mt-1 text-xs italic text-zinc-600 dark:text-zinc-400">Rationale: {p.rationale}</p>}
+                <p className="mt-2 text-sm text-[#20314a] dark:text-[#d8e2ec]">{p.summary}</p>
+                {p.rationale && <p className="mt-1 text-xs italic text-[#3f5068] dark:text-[#a7bacd]">Rationale: {p.rationale}</p>}
                 {p.sourceUrls.length > 0 && (
                   <div className="mt-1 text-[10px] text-emerald-700 dark:text-emerald-400">
                     {p.sourceUrls.map((u) => <span key={u} className="mr-2 truncate">{u}</span>)}
@@ -226,13 +226,13 @@ export default function ExposureEditClient({
   );
 }
 
-const inp = "w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm dark:border-zinc-700 dark:bg-[#071827]";
+const inp = "w-full rounded-lg border border-[#d6c9a8] bg-white px-3 py-2 text-sm dark:border-[#2a4a6b] dark:bg-[#071827]";
 const sel = inp;
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <div className="mb-1 text-xs font-medium text-zinc-500">{label}</div>
+      <div className="mb-1 text-xs font-medium text-[#4c5d75]">{label}</div>
       {children}
     </label>
   );

@@ -117,9 +117,9 @@ export default function ResultsView({ runId, serverData }: { runId: string; serv
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center text-zinc-600">
+      <div className="min-h-screen flex items-center justify-center text-[#3f5068]">
         <div className="text-center">
-          <div className="mb-3 h-6 w-6 mx-auto animate-spin rounded-full border-2 border-zinc-300 border-t-zinc-900 dark:border-zinc-700 dark:border-t-white" />
+          <div className="mb-3 h-6 w-6 mx-auto animate-spin rounded-full border-2 border-[#d6c9a8] border-t-[#13294b] dark:border-[#2a4a6b] dark:border-t-white" />
           <p className="text-sm">Loading assessment results…</p>
         </div>
       </div>
@@ -128,7 +128,7 @@ export default function ResultsView({ runId, serverData }: { runId: string; serv
 
   if (!data) {
     return (
-      <div className="min-h-screen flex items-center justify-center text-zinc-600">
+      <div className="min-h-screen flex items-center justify-center text-[#3f5068]">
         <div className="text-center">
           <p>No result found for run <code className="font-mono text-xs">{runId}</code>.</p>
           <p className="mt-2 text-sm">The assessment may have expired or the link may be incorrect.</p>
@@ -139,17 +139,17 @@ export default function ResultsView({ runId, serverData }: { runId: string; serv
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-[#071827] text-zinc-900 dark:text-zinc-100">
+    <div className="min-h-screen bg-[#f6f1e3] dark:bg-[#071827] text-[#15263c] dark:text-[#eef3f8]">
       <main className="mx-auto max-w-5xl px-6 py-12">
-        <Link href="/assess" className="text-sm text-zinc-500 hover:underline">← Assess</Link>
+        <Link href="/assess" className="text-sm text-[#4c5d75] hover:underline">← Assess</Link>
         <div className="mt-4 flex items-baseline justify-between gap-6">
           <h1 className="text-3xl font-semibold tracking-tight">Ranked shortlist</h1>
-          <div className="text-xs text-zinc-500 font-mono">{data.runId}</div>
+          <div className="text-xs text-[#4c5d75] font-mono">{data.runId}</div>
         </div>
-        <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
+        <p className="mt-2 text-sm text-[#3f5068] dark:text-[#a7bacd]">
           Industry: <strong>{data.inputSummary.industryName}</strong> · Use cases: {data.inputSummary.useCases.join(", ")} · Sensitivity {data.inputSummary.dataSensitivity}/5 · Risk tolerance {data.inputSummary.riskTolerance}/5
         </p>
-        <div className="mt-4 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 px-4 py-3 text-sm">
+        <div className="mt-4 rounded-xl border border-[#e3d9c0] dark:border-[#1d3a57] bg-white dark:bg-[#0c2238] px-4 py-3 text-sm">
           <strong>Why this ranking:</strong> {data.comparisonSummary}
         </div>
 
@@ -244,7 +244,7 @@ function WorkflowTypeResults({
     <div className="mt-8">
       <div className="mb-3 flex items-baseline justify-between gap-4">
         <h2 className="text-lg font-semibold">Best vendor by workflow type</h2>
-        <span className="text-xs text-zinc-500">click a card for the full ranked list</span>
+        <span className="text-xs text-[#4c5d75]">click a card for the full ranked list</span>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
@@ -293,9 +293,9 @@ function WorkflowTypeCard({
 
   return (
     <div
-      className={`relative overflow-hidden rounded-2xl border bg-white dark:bg-zinc-900 ${
+      className={`relative overflow-hidden rounded-2xl border bg-white dark:bg-[#0c2238] ${
         isOpen ? "md:col-span-2" : ""
-      } ${isActive ? "border-zinc-300 dark:border-zinc-700" : "border-zinc-200 dark:border-zinc-800"}`}
+      } ${isActive ? "border-[#d6c9a8] dark:border-[#2a4a6b]" : "border-[#e3d9c0] dark:border-[#1d3a57]"}`}
     >
       {/* Accent bar */}
       <span aria-hidden className={`absolute inset-y-0 left-0 w-1.5 ${type.accent.bar}`} />
@@ -308,13 +308,13 @@ function WorkflowTypeCard({
                 {type.shortLabel}
               </span>
               {isActive && (
-                <span className="rounded-full border border-current/30 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+                <span className="rounded-full border border-current/30 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-[#4c5d75] dark:text-[#a7bacd]">
                   Selected
                 </span>
               )}
             </div>
             <div className="mt-1.5 text-base font-semibold">{type.label}</div>
-            <div className="mt-0.5 text-xs text-zinc-500">{type.tagline}</div>
+            <div className="mt-0.5 text-xs text-[#4c5d75]">{type.tagline}</div>
           </div>
         </div>
 
@@ -329,42 +329,42 @@ function WorkflowTypeCard({
                 <div className="truncate text-sm font-semibold">
                   <VendorNameWithOwnership name={top.vendorName} ownershipType={top.ownership} compactBadge />
                 </div>
-                <div className="text-[11px] text-zinc-500">Best vendor for this type</div>
+                <div className="text-[11px] text-[#4c5d75]">Best vendor for this type</div>
               </div>
             </div>
             <div className="text-right shrink-0">
               <div className={`text-2xl font-semibold tabular-nums ${type.accent.text}`}>{top.typeScore.toFixed(0)}</div>
-              <div className="text-[10px] uppercase tracking-wider text-zinc-400">fit / 100</div>
+              <div className="text-[10px] uppercase tracking-wider text-[#6b7d93]">fit / 100</div>
             </div>
           </div>
         ) : (
-          <div className="mt-4 rounded-xl bg-zinc-50 px-3 py-3 text-xs text-zinc-500 dark:bg-zinc-800/60">
+          <div className="mt-4 rounded-xl bg-[#f6f1e3] px-3 py-3 text-xs text-[#4c5d75] dark:bg-[#143049]/60">
             No eligible vendor for this workflow type in the current shortlist.
           </div>
         )}
 
         <div className="mt-3 flex items-center justify-between text-xs">
-          <span className="text-zinc-400">{eligible.length} ranked vendor{eligible.length === 1 ? "" : "s"}</span>
+          <span className="text-[#6b7d93]">{eligible.length} ranked vendor{eligible.length === 1 ? "" : "s"}</span>
           <span className={`font-medium ${type.accent.text}`}>{isOpen ? "Hide full ranking ▲" : "View full ranking ▼"}</span>
         </div>
       </button>
 
       {/* Full ranked list */}
       {isOpen && (
-        <div className="border-t border-zinc-100 dark:border-zinc-800">
-          <p className="px-6 pt-4 text-xs text-zinc-500">{type.description}</p>
+        <div className="border-t border-[#ece4d0] dark:border-[#1d3a57]">
+          <p className="px-6 pt-4 text-xs text-[#4c5d75]">{type.description}</p>
           <ol className="px-4 py-3">
             {ranked.map((r) => {
               const detail = vendorById.get(r.vendorId);
               const vendorOpen = openVendor === r.vendorId;
               return (
-                <li key={r.vendorId} className="border-b border-zinc-100 last:border-0 dark:border-zinc-800/60">
+                <li key={r.vendorId} className="border-b border-[#ece4d0] last:border-0 dark:border-[#1d3a57]/60">
                   <button
                     onClick={() => onToggleVendor(r.vendorId)}
-                    className="flex w-full items-center justify-between gap-3 px-2 py-2.5 text-left hover:bg-zinc-50 dark:hover:bg-zinc-800/40"
+                    className="flex w-full items-center justify-between gap-3 px-2 py-2.5 text-left hover:bg-[#f6f1e3] dark:hover:bg-[#143049]/40"
                   >
                     <div className="flex items-center gap-3 min-w-0">
-                      <span className={`w-6 text-right font-mono text-xs ${r.excluded ? "text-zinc-300 dark:text-zinc-600" : "text-zinc-500"}`}>
+                      <span className={`w-6 text-right font-mono text-xs ${r.excluded ? "text-[#c2d1e0] dark:text-[#7d93aa]" : "text-[#4c5d75]"}`}>
                         {r.excluded ? "—" : r.rank}
                       </span>
                       <span className="truncate text-sm font-medium">
@@ -377,10 +377,10 @@ function WorkflowTypeCard({
                       )}
                     </div>
                     <div className="flex items-center gap-3 shrink-0">
-                      <span className={`font-mono text-sm tabular-nums ${r.excluded ? "text-zinc-300 dark:text-zinc-600" : type.accent.text}`}>
+                      <span className={`font-mono text-sm tabular-nums ${r.excluded ? "text-[#c2d1e0] dark:text-[#7d93aa]" : type.accent.text}`}>
                         {r.excluded ? "—" : r.typeScore.toFixed(0)}
                       </span>
-                      <span className="text-[10px] text-zinc-400">{vendorOpen ? "▲" : "▼"}</span>
+                      <span className="text-[10px] text-[#6b7d93]">{vendorOpen ? "▲" : "▼"}</span>
                     </div>
                   </button>
                   {vendorOpen && detail && (
@@ -509,12 +509,12 @@ function Stat({
     tone === "ok" ? "text-emerald-700 dark:text-emerald-300"
     : tone === "warn" ? "text-amber-800 dark:text-amber-200"
     : tone === "bad" ? "text-rose-700 dark:text-rose-300"
-    : "text-zinc-900 dark:text-zinc-100";
+    : "text-[#15263c] dark:text-[#eef3f8]";
   return (
-    <div className="rounded-md border border-amber-200/60 bg-white/70 p-2 dark:border-amber-800/40 dark:bg-zinc-900/40">
-      <div className="text-[10px] uppercase tracking-wider text-zinc-500">{label}</div>
+    <div className="rounded-md border border-amber-200/60 bg-white/70 p-2 dark:border-amber-800/40 dark:bg-[#0c2238]/40">
+      <div className="text-[10px] uppercase tracking-wider text-[#4c5d75]">{label}</div>
       <div className={`mt-0.5 text-sm font-semibold ${toneClass}`}>{value}</div>
-      {delta && <div className="text-[10px] text-zinc-500">{delta}</div>}
+      {delta && <div className="text-[10px] text-[#4c5d75]">{delta}</div>}
     </div>
   );
 }
@@ -526,11 +526,11 @@ function VendorCard({ vr, open, onToggle, embedded = false }: { vr: VendorResult
   // vendor name + score — and renders just the detail body.
   if (embedded) {
     return (
-      <div className="rounded-xl border border-zinc-100 bg-zinc-50/60 p-4 dark:border-zinc-800 dark:bg-zinc-800/30">
+      <div className="rounded-xl border border-[#ece4d0] bg-[#f6f1e3]/60 p-4 dark:border-[#1d3a57] dark:bg-[#143049]/30">
         <div className="mb-3 flex items-center justify-between gap-4">
-          <div className="text-xs text-zinc-500">{vr.industryRationale}</div>
+          <div className="text-xs text-[#4c5d75]">{vr.industryRationale}</div>
           <div className="flex items-center gap-3">
-            <span className="text-[10px] uppercase tracking-wider text-zinc-400">Overall</span>
+            <span className="text-[10px] uppercase tracking-wider text-[#6b7d93]">Overall</span>
             <span className="font-mono text-lg font-semibold tabular-nums">{vr.excluded ? "—" : vr.finalScore.toFixed(0)}</span>
             <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${band.tone}`}>{band.label}</span>
           </div>
@@ -547,18 +547,18 @@ function VendorCard({ vr, open, onToggle, embedded = false }: { vr: VendorResult
     );
   }
   return (
-    <div className={`rounded-2xl border bg-white dark:bg-zinc-900 ${vr.excluded ? "border-red-200 dark:border-red-900/50" : "border-zinc-200 dark:border-zinc-800"}`}>
+    <div className={`rounded-2xl border bg-white dark:bg-[#0c2238] ${vr.excluded ? "border-red-200 dark:border-red-900/50" : "border-[#e3d9c0] dark:border-[#1d3a57]"}`}>
       <button onClick={onToggle} className="w-full text-left p-6">
         <div className="flex items-start justify-between gap-6">
           <div className="flex items-start gap-4">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800 text-base font-semibold">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#ece3cb] dark:bg-[#143049] text-base font-semibold">
               {vr.rank}
             </div>
             <div>
               <div className="text-xl font-semibold">
                 <VendorNameWithOwnership name={vr.vendorName} ownershipType={vr.ownership} compactBadge={false} />
               </div>
-              <div className="mt-1 text-xs text-zinc-500">{vr.industryRationale}</div>
+              <div className="mt-1 text-xs text-[#4c5d75]">{vr.industryRationale}</div>
             </div>
           </div>
           <div className="text-right shrink-0">
@@ -576,7 +576,7 @@ function VendorCard({ vr, open, onToggle, embedded = false }: { vr: VendorResult
       </button>
 
       {open && (
-        <div className="border-t border-zinc-100 dark:border-zinc-800 p-6 grid gap-6 md:grid-cols-2">
+        <div className="border-t border-[#ece4d0] dark:border-[#1d3a57] p-6 grid gap-6 md:grid-cols-2">
           <VendorDetailBody vr={vr} />
         </div>
       )}
@@ -604,12 +604,12 @@ function VendorDetailBody({ vr }: { vr: VendorResult }) {
       <Section title="Pillar drill-down">
         <div className="text-xs space-y-2">
           {vr.pillarBreakdown.map((b) => (
-            <div key={b.pillar} className="rounded-lg border border-zinc-100 dark:border-zinc-800 p-2">
+            <div key={b.pillar} className="rounded-lg border border-[#ece4d0] dark:border-[#1d3a57] p-2">
               <div className="flex items-center justify-between">
                 <strong>{PILLARS.find((p) => p.id === b.pillar)!.label}</strong>
                 <span className="font-mono">{b.score.toFixed(0)} × {(b.weight * 100).toFixed(0)}% = {b.weightedContribution.toFixed(1)}</span>
               </div>
-              <div className="mt-1 text-zinc-500">
+              <div className="mt-1 text-[#4c5d75]">
                 {b.contributingDomains.filter((d) => d.evidenceCount > 0).map((d) => `${d.domain}:${d.score.toFixed(0)}`).join(" · ") || "no evidence"}
               </div>
             </div>
@@ -669,17 +669,17 @@ function ExportBar({ runId, result }: { runId: string; result: AssessmentResult 
 
   return (
     <div className="mt-4 flex flex-wrap items-center gap-2 text-sm">
-      <span className="text-xs uppercase tracking-wide text-zinc-500 mr-1">Export:</span>
+      <span className="text-xs uppercase tracking-wide text-[#4c5d75] mr-1">Export:</span>
       <button onClick={() => exportAs("html")} disabled={busy !== null}
-        className="rounded-full border border-zinc-300 dark:border-zinc-700 px-3 py-1 text-xs hover:bg-zinc-100 dark:hover:bg-zinc-800 disabled:opacity-50">
+        className="rounded-full border border-[#d6c9a8] dark:border-[#2a4a6b] px-3 py-1 text-xs hover:bg-[#ece3cb] dark:hover:bg-[#143049] disabled:opacity-50">
         {busy === "html" ? "Generating…" : "Board pack (HTML)"}
       </button>
       <button onClick={() => exportAs("compliance")} disabled={busy !== null}
-        className="rounded-full border border-zinc-300 dark:border-zinc-700 px-3 py-1 text-xs hover:bg-zinc-100 dark:hover:bg-zinc-800 disabled:opacity-50">
+        className="rounded-full border border-[#d6c9a8] dark:border-[#2a4a6b] px-3 py-1 text-xs hover:bg-[#ece3cb] dark:hover:bg-[#143049] disabled:opacity-50">
         {busy === "compliance" ? "Generating…" : "Compliance pack"}
       </button>
       <button onClick={() => exportAs("json")} disabled={busy !== null}
-        className="rounded-full border border-zinc-300 dark:border-zinc-700 px-3 py-1 text-xs hover:bg-zinc-100 dark:hover:bg-zinc-800 disabled:opacity-50">
+        className="rounded-full border border-[#d6c9a8] dark:border-[#2a4a6b] px-3 py-1 text-xs hover:bg-[#ece3cb] dark:hover:bg-[#143049] disabled:opacity-50">
         {busy === "json" ? "Generating…" : "Audit JSON"}
       </button>
     </div>
@@ -689,9 +689,9 @@ function ExportBar({ runId, result }: { runId: string; result: AssessmentResult 
 function PillarBar({ label, score }: { label: string; score: number }) {
   return (
     <div>
-      <div className="text-[10px] uppercase tracking-wide text-zinc-500 truncate">{label}</div>
-      <div className="mt-1 h-1.5 rounded-full bg-zinc-100 dark:bg-zinc-800 overflow-hidden">
-        <div className="h-full bg-zinc-900 dark:bg-white" style={{ width: `${Math.max(2, Math.min(100, score))}%` }} />
+      <div className="text-[10px] uppercase tracking-wide text-[#4c5d75] truncate">{label}</div>
+      <div className="mt-1 h-1.5 rounded-full bg-[#ece3cb] dark:bg-[#143049] overflow-hidden">
+        <div className="h-full bg-[#0c2238] dark:bg-white" style={{ width: `${Math.max(2, Math.min(100, score))}%` }} />
       </div>
       <div className="mt-1 text-xs font-mono">{score.toFixed(0)}</div>
     </div>
@@ -701,12 +701,12 @@ function PillarBar({ label, score }: { label: string; score: number }) {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div>
-      <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-zinc-500">{title}</div>
+      <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-[#4c5d75]">{title}</div>
       {children}
     </div>
   );
 }
 
 function Empty() {
-  return <div className="text-xs text-zinc-400 italic">None</div>;
+  return <div className="text-xs text-[#6b7d93] italic">None</div>;
 }

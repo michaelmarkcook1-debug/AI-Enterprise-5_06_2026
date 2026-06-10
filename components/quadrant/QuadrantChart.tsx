@@ -131,9 +131,9 @@ export default function QuadrantChart({ data }: { data: QuadrantData }) {
   return (
     <div className="space-y-4">
       {/* Controls */}
-      <div className="flex flex-wrap items-center gap-3 rounded-lg border border-[#e6dcc3] bg-white p-3 text-xs dark:border-zinc-800 dark:bg-[#071827]">
+      <div className="flex flex-wrap items-center gap-3 rounded-lg border border-[#e6dcc3] bg-white p-3 text-xs dark:border-[#1d3a57] dark:bg-[#071827]">
         <div className="flex items-center gap-1">
-          <span className="font-semibold uppercase tracking-wide text-[#5e6b7e] dark:text-zinc-500">Timeframe</span>
+          <span className="font-semibold uppercase tracking-wide text-[#5e6b7e] dark:text-[#8fa5bb]">Timeframe</span>
           {TIMEFRAMES.map((t) => (
             <button
               key={t.days}
@@ -142,7 +142,7 @@ export default function QuadrantChart({ data }: { data: QuadrantData }) {
               className={`rounded px-2 py-1 font-medium ${
                 data.windowDays === t.days
                   ? "bg-[#13294b] text-white dark:bg-white dark:text-[#0c1220]"
-                  : "text-[#475a72] hover:bg-[#f1ead6] dark:text-zinc-400 dark:hover:bg-zinc-900"
+                  : "text-[#475a72] hover:bg-[#f1ead6] dark:text-[#a7bacd] dark:hover:bg-[#0c2238]"
               }`}
             >
               {t.label}
@@ -151,26 +151,26 @@ export default function QuadrantChart({ data }: { data: QuadrantData }) {
         </div>
 
         <label className="flex items-center gap-1.5">
-          <span className="font-semibold uppercase tracking-wide text-[#5e6b7e] dark:text-zinc-500">Enhance cut</span>
+          <span className="font-semibold uppercase tracking-wide text-[#5e6b7e] dark:text-[#8fa5bb]">Enhance cut</span>
           <input
             type="number"
             min={1}
             max={99}
             defaultValue={data.executeCut}
             onBlur={(e) => updateParam("executeCut", e.target.value)}
-            className="w-14 rounded border border-[#d6c9a8] bg-white px-1.5 py-0.5 font-mono dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
+            className="w-14 rounded border border-[#d6c9a8] bg-white px-1.5 py-0.5 font-mono dark:border-[#2a4a6b] dark:bg-[#0c2238] dark:text-[#eef3f8]"
           />
         </label>
 
         <label className="flex items-center gap-1.5">
-          <span className="font-semibold uppercase tracking-wide text-[#5e6b7e] dark:text-zinc-500">Innovate cut</span>
+          <span className="font-semibold uppercase tracking-wide text-[#5e6b7e] dark:text-[#8fa5bb]">Innovate cut</span>
           <input
             type="number"
             min={1}
             max={99}
             defaultValue={data.visionCut}
             onBlur={(e) => updateParam("visionCut", e.target.value)}
-            className="w-14 rounded border border-[#d6c9a8] bg-white px-1.5 py-0.5 font-mono dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
+            className="w-14 rounded border border-[#d6c9a8] bg-white px-1.5 py-0.5 font-mono dark:border-[#2a4a6b] dark:bg-[#0c2238] dark:text-[#eef3f8]"
           />
         </label>
 
@@ -181,10 +181,10 @@ export default function QuadrantChart({ data }: { data: QuadrantData }) {
             onChange={(e) => setOnlyCrossings(e.target.checked)}
             className="h-3.5 w-3.5"
           />
-          <span className="text-[#475a72] dark:text-zinc-400">Only show quadrant crossings</span>
+          <span className="text-[#475a72] dark:text-[#a7bacd]">Only show quadrant crossings</span>
         </label>
 
-        <div className="ml-auto flex items-center gap-3 text-[10px] uppercase tracking-wide text-[#5e6b7e] dark:text-zinc-500">
+        <div className="ml-auto flex items-center gap-3 text-[10px] uppercase tracking-wide text-[#5e6b7e] dark:text-[#8fa5bb]">
           <span>Leaders {counts.leaders}</span>
           <span>Challengers {counts.challengers}</span>
           <span>Visionaries {counts.visionaries}</span>
@@ -193,7 +193,7 @@ export default function QuadrantChart({ data }: { data: QuadrantData }) {
       </div>
 
       {/* Chart */}
-      <div className="rounded-lg border border-[#e6dcc3] bg-white p-4 dark:border-zinc-800 dark:bg-[#071827]">
+      <div className="rounded-lg border border-[#e6dcc3] bg-white p-4 dark:border-[#1d3a57] dark:bg-[#071827]">
         <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} className="w-full" role="img" aria-label="AI Atlas: Enhance vs Innovate">
           {/* Quadrant background fills */}
           {(["leaders", "challengers", "visionaries", "niche"] as const).map((q) => {
@@ -233,18 +233,18 @@ export default function QuadrantChart({ data }: { data: QuadrantData }) {
           })}
 
           {/* Axis frame */}
-          <rect x={PAD.left} y={PAD.top} width={INNER_W} height={INNER_H} fill="none" stroke="currentColor" className="text-[#e6dcc3] dark:text-zinc-700" strokeWidth={1} />
+          <rect x={PAD.left} y={PAD.top} width={INNER_W} height={INNER_H} fill="none" stroke="currentColor" className="text-[#e6dcc3] dark:text-[#64798f]" strokeWidth={1} />
           {/* Cut lines */}
-          <line x1={cutX} y1={PAD.top} x2={cutX} y2={PAD.top + INNER_H} stroke="currentColor" strokeWidth={1.5} strokeDasharray="4 3" className="text-[#5b6b7f] dark:text-zinc-500" />
-          <line x1={PAD.left} y1={cutY} x2={PAD.left + INNER_W} y2={cutY} stroke="currentColor" strokeWidth={1.5} strokeDasharray="4 3" className="text-[#5b6b7f] dark:text-zinc-500" />
+          <line x1={cutX} y1={PAD.top} x2={cutX} y2={PAD.top + INNER_H} stroke="currentColor" strokeWidth={1.5} strokeDasharray="4 3" className="text-[#5b6b7f] dark:text-[#8fa5bb]" />
+          <line x1={PAD.left} y1={cutY} x2={PAD.left + INNER_W} y2={cutY} stroke="currentColor" strokeWidth={1.5} strokeDasharray="4 3" className="text-[#5b6b7f] dark:text-[#8fa5bb]" />
 
           {/* Y-axis ticks */}
           {Y_TICKS.map((t) => {
             const y = pos(AXIS_X_MIN, t).y;
             return (
               <g key={`y${t}`}>
-                <line x1={PAD.left - 4} y1={y} x2={PAD.left} y2={y} stroke="currentColor" className="text-[#9aa691] dark:text-zinc-600" />
-                <text x={PAD.left - 8} y={y + 3} textAnchor="end" fontSize={10} className="fill-[#5e6b7e] dark:fill-zinc-500">{t}</text>
+                <line x1={PAD.left - 4} y1={y} x2={PAD.left} y2={y} stroke="currentColor" className="text-[#9aa691] dark:text-[#7d93aa]" />
+                <text x={PAD.left - 8} y={y + 3} textAnchor="end" fontSize={10} className="fill-[#5e6b7e] dark:fill-[#8fa5bb]">{t}</text>
               </g>
             );
           })}
@@ -253,23 +253,23 @@ export default function QuadrantChart({ data }: { data: QuadrantData }) {
             const x = pos(t, AXIS_Y_MIN).x;
             return (
               <g key={`x${t}`}>
-                <line x1={x} y1={PAD.top + INNER_H} x2={x} y2={PAD.top + INNER_H + 4} stroke="currentColor" className="text-[#9aa691] dark:text-zinc-600" />
-                <text x={x} y={PAD.top + INNER_H + 16} textAnchor="middle" fontSize={10} className="fill-[#5e6b7e] dark:fill-zinc-500">{t}</text>
+                <line x1={x} y1={PAD.top + INNER_H} x2={x} y2={PAD.top + INNER_H + 4} stroke="currentColor" className="text-[#9aa691] dark:text-[#7d93aa]" />
+                <text x={x} y={PAD.top + INNER_H + 16} textAnchor="middle" fontSize={10} className="fill-[#5e6b7e] dark:fill-[#8fa5bb]">{t}</text>
               </g>
             );
           })}
           {/* Axis labels */}
-          <text x={PAD.left + INNER_W / 2} y={HEIGHT - 8} textAnchor="middle" fontSize={11} fontWeight={600} className="fill-[#475a72] dark:fill-zinc-300">
+          <text x={PAD.left + INNER_W / 2} y={HEIGHT - 8} textAnchor="middle" fontSize={11} fontWeight={600} className="fill-[#475a72] dark:fill-[#c2d1e0]">
             Innovate →
           </text>
-          <text x={16} y={PAD.top + INNER_H / 2} textAnchor="middle" fontSize={11} fontWeight={600} transform={`rotate(-90, 16, ${PAD.top + INNER_H / 2})`} className="fill-[#475a72] dark:fill-zinc-300">
+          <text x={16} y={PAD.top + INNER_H / 2} textAnchor="middle" fontSize={11} fontWeight={600} transform={`rotate(-90, 16, ${PAD.top + INNER_H / 2})`} className="fill-[#475a72] dark:fill-[#c2d1e0]">
             Enhance →
           </text>
 
           {/* Arrow marker definition */}
           <defs>
             <marker id="qarrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-              <path d="M0,0 L10,5 L0,10 Z" className="fill-[#13294b] dark:fill-zinc-100" />
+              <path d="M0,0 L10,5 L0,10 Z" className="fill-[#13294b] dark:fill-[#eef3f8]" />
             </marker>
           </defs>
 
@@ -310,7 +310,7 @@ export default function QuadrantChart({ data }: { data: QuadrantData }) {
                   r={isHovered ? radius + 1.5 : radius}
                   fill={colour.label}
                   stroke="white" strokeWidth={1.5}
-                  className="dark:stroke-zinc-900"
+                  className="dark:stroke-[#0a1f38]"
                 />
                 {p.crossedQuadrant && (
                   <circle cx={nowPos.x} cy={nowPos.y} r={9} fill="none" stroke={colour.label} strokeWidth={1.2} strokeDasharray="2 1.5" />
@@ -318,7 +318,7 @@ export default function QuadrantChart({ data }: { data: QuadrantData }) {
                 <text
                   x={nowPos.x + 8} y={nowPos.y + 3}
                   fontSize={10} fontWeight={isHovered ? 700 : 500}
-                  className="fill-[#13294b] dark:fill-zinc-100"
+                  className="fill-[#13294b] dark:fill-[#eef3f8]"
                   style={{ pointerEvents: "none" }}
                 >
                   {p.vendor.name}
@@ -330,11 +330,11 @@ export default function QuadrantChart({ data }: { data: QuadrantData }) {
 
         {/* Hover detail card */}
         {hoveredPoint && (
-          <div className="mt-3 grid gap-3 rounded-md border border-[#e6dcc3] bg-[#faf6ec] p-3 text-xs dark:border-zinc-700 dark:bg-[#0b1f30] md:grid-cols-[1.3fr_auto_auto_auto_auto]">
+          <div className="mt-3 grid gap-3 rounded-md border border-[#e6dcc3] bg-[#faf6ec] p-3 text-xs dark:border-[#2a4a6b] dark:bg-[#0b1f30] md:grid-cols-[1.3fr_auto_auto_auto_auto]">
             <div>
-              <div className="text-[10px] uppercase tracking-wide text-[#5e6b7e] dark:text-zinc-500">Vendor</div>
-              <div className="font-semibold text-[#13294b] dark:text-zinc-100">{hoveredPoint.vendor.name}</div>
-              <div className="text-[#5b6b7f] dark:text-zinc-400">{hoveredPoint.vendor.category}</div>
+              <div className="text-[10px] uppercase tracking-wide text-[#5e6b7e] dark:text-[#8fa5bb]">Vendor</div>
+              <div className="font-semibold text-[#13294b] dark:text-[#eef3f8]">{hoveredPoint.vendor.name}</div>
+              <div className="text-[#5b6b7f] dark:text-[#a7bacd]">{hoveredPoint.vendor.category}</div>
               {hoveredPoint.isLosing && (
                 <div className="mt-1 inline-block rounded bg-rose-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-rose-800 dark:bg-rose-950/50 dark:text-rose-300">
                   On losing list
@@ -342,14 +342,14 @@ export default function QuadrantChart({ data }: { data: QuadrantData }) {
               )}
             </div>
             <div>
-              <div className="text-[10px] uppercase tracking-wide text-[#5e6b7e] dark:text-zinc-500">Enhance</div>
-              <div className="font-mono font-semibold dark:text-zinc-100">{hoveredPoint.now.execute.toFixed(1)}</div>
+              <div className="text-[10px] uppercase tracking-wide text-[#5e6b7e] dark:text-[#8fa5bb]">Enhance</div>
+              <div className="font-mono font-semibold dark:text-[#eef3f8]">{hoveredPoint.now.execute.toFixed(1)}</div>
               {hoveredPoint.delta && (
                 <div className={`text-[10px] font-medium ${hoveredPoint.delta.execute >= 0 ? "text-emerald-700 dark:text-emerald-400" : "text-rose-700 dark:text-rose-400"}`}>
                   {hoveredPoint.delta.execute >= 0 ? "▲ +" : "▼ "}{hoveredPoint.delta.execute}
                 </div>
               )}
-              <div className="mt-1 text-[10px] leading-tight text-[#5b6b7f] dark:text-zinc-500">
+              <div className="mt-1 text-[10px] leading-tight text-[#5b6b7f] dark:text-[#8fa5bb]">
                 conf {hoveredPoint.components.execute.confidence}<br />
                 rel  {hoveredPoint.components.execute.reliability}<br />
                 ind  {hoveredPoint.components.execute.breadth}<br />
@@ -357,14 +357,14 @@ export default function QuadrantChart({ data }: { data: QuadrantData }) {
               </div>
             </div>
             <div>
-              <div className="text-[10px] uppercase tracking-wide text-[#5e6b7e] dark:text-zinc-500">Innovate</div>
-              <div className="font-mono font-semibold dark:text-zinc-100">{hoveredPoint.now.vision.toFixed(1)}</div>
+              <div className="text-[10px] uppercase tracking-wide text-[#5e6b7e] dark:text-[#8fa5bb]">Innovate</div>
+              <div className="font-mono font-semibold dark:text-[#eef3f8]">{hoveredPoint.now.vision.toFixed(1)}</div>
               {hoveredPoint.delta && (
                 <div className={`text-[10px] font-medium ${hoveredPoint.delta.vision >= 0 ? "text-emerald-700 dark:text-emerald-400" : "text-rose-700 dark:text-rose-400"}`}>
                   {hoveredPoint.delta.vision >= 0 ? "▲ +" : "▼ "}{hoveredPoint.delta.vision}
                 </div>
               )}
-              <div className="mt-1 text-[10px] leading-tight text-[#5b6b7f] dark:text-zinc-500">
+              <div className="mt-1 text-[10px] leading-tight text-[#5b6b7f] dark:text-[#8fa5bb]">
                 mom  {hoveredPoint.components.vision.momentum}<br />
                 prod {hoveredPoint.components.vision.product}<br />
                 use  {hoveredPoint.components.vision.useCases}<br />
@@ -372,12 +372,12 @@ export default function QuadrantChart({ data }: { data: QuadrantData }) {
               </div>
             </div>
             <div>
-              <div className="text-[10px] uppercase tracking-wide text-[#5e6b7e] dark:text-zinc-500">Quadrant</div>
-              <div className="font-semibold dark:text-zinc-100">
+              <div className="text-[10px] uppercase tracking-wide text-[#5e6b7e] dark:text-[#8fa5bb]">Quadrant</div>
+              <div className="font-semibold dark:text-[#eef3f8]">
                 {QUADRANT_LABELS[quadrantOf(hoveredPoint.now.execute, hoveredPoint.now.vision, data.executeCut, data.visionCut)]}
                 {hoveredPoint.crossedQuadrant && <span className="ml-1 text-amber-700 dark:text-amber-400">(crossed)</span>}
               </div>
-              <div className="mt-1 text-[10px] text-[#5b6b7f] dark:text-zinc-500">
+              <div className="mt-1 text-[10px] text-[#5b6b7f] dark:text-[#8fa5bb]">
                 score {hoveredPoint.now.score.toFixed(0)} · mom {hoveredPoint.now.momentum.toFixed(0)}
               </div>
             </div>
@@ -391,7 +391,7 @@ export default function QuadrantChart({ data }: { data: QuadrantData }) {
         )}
       </div>
 
-      <div className="text-[11px] leading-5 text-[#5e6b7e] dark:text-zinc-500">
+      <div className="text-[11px] leading-5 text-[#5e6b7e] dark:text-[#8fa5bb]">
         Cuts at Enhance = {data.executeCut}, Innovate = {data.visionCut}. Enhance = 0.40·confidence + 0.30·(enterprise-control + reliability-safety + vendor-resilience) + 0.20·industry breadth − 7·risk count. Innovate = 0.40·momentum + 0.30·(business-fit + market-strength + integration-ops) + 0.20·use-case breadth − 1.5·negative share drift. Vendors on the &quot;Who&apos;s losing&quot; list are guaranteed to fall outside the Leaders quadrant. Arrows show movement since {movementSinceLabel}.
       </div>
     </div>

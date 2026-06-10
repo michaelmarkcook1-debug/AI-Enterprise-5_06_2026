@@ -275,15 +275,15 @@ export default function AssessForm({ industries, useCases, objectives, ecosystem
   })();
 
   return (
-    <div className="text-zinc-900">
+    <div className="text-[#15263c]">
       <main className="mx-auto max-w-3xl">
         <div className="mb-8">
-          <div className="flex items-center gap-2 text-sm text-zinc-500">
+          <div className="flex items-center gap-2 text-sm text-[#4c5d75]">
             {STEPS.map((s, i) => (
               <div key={s} className="flex items-center gap-2">
-                <span className={`inline-block h-2 w-2 rounded-full ${i <= step ? "bg-zinc-900 dark:bg-white" : "bg-zinc-300 dark:bg-zinc-700"}`} />
-                <span className={i === step ? "font-medium text-zinc-900 dark:text-white" : ""}>{s}</span>
-                {i < STEPS.length - 1 && <span className="text-zinc-300 dark:text-zinc-700">→</span>}
+                <span className={`inline-block h-2 w-2 rounded-full ${i <= step ? "bg-[#0c2238] dark:bg-white" : "bg-[#d6c9a8] dark:bg-[#1c3d5c]"}`} />
+                <span className={i === step ? "font-medium text-[#15263c] dark:text-white" : ""}>{s}</span>
+                {i < STEPS.length - 1 && <span className="text-[#c2d1e0] dark:text-[#64798f]">→</span>}
               </div>
             ))}
           </div>
@@ -371,7 +371,7 @@ export default function AssessForm({ industries, useCases, objectives, ecosystem
 
           {STEPS[step] === "Vendors" && (
             <div className="space-y-4">
-              <p className="text-sm text-zinc-600">
+              <p className="text-sm text-[#3f5068]">
                 Select vendors to compare, or leave empty to score the full universe.
               </p>
               <OwnershipLegend />
@@ -442,7 +442,7 @@ export default function AssessForm({ industries, useCases, objectives, ecosystem
                   ]}
                 />
               </Field>
-              <p className="text-[11px] text-zinc-500">
+              <p className="text-[11px] text-[#4c5d75]">
                 These five inputs adjust pillar weights and apply vendor-by-vendor penalties.
                 Sovereignty + missing certifications can escalate to exclusion on Advanced.
               </p>
@@ -556,7 +556,7 @@ export default function AssessForm({ industries, useCases, objectives, ecosystem
                   ]}
                 />
               </Field>
-              <p className="text-[11px] text-zinc-500">
+              <p className="text-[11px] text-[#4c5d75]">
                 These inputs feed the procurement-grade overlay in scoring engine v1.2.
                 Hard sovereignty + missing required certifications can exclude vendors;
                 lock-in / concentration preferences tilt vendor-resilience weight.
@@ -570,19 +570,19 @@ export default function AssessForm({ industries, useCases, objectives, ecosystem
             <button
               disabled={step === 0 || submitting}
               onClick={() => setStep((s) => Math.max(0, s - 1))}
-              className="rounded-full px-5 py-2 text-sm font-medium text-zinc-700 disabled:opacity-40"
+              className="rounded-full px-5 py-2 text-sm font-medium text-[#2e3f57] disabled:opacity-40"
             >Back</button>
             {step < STEPS.length - 1 ? (
               <button
                 disabled={!canAdvance}
                 onClick={() => setStep((s) => s + 1)}
-                className="rounded-full bg-zinc-900 px-6 py-2.5 text-sm font-medium text-white disabled:opacity-40"
+                className="rounded-full bg-[#0c2238] px-6 py-2.5 text-sm font-medium text-white disabled:opacity-40"
               >Continue</button>
             ) : (
               <button
                 disabled={submitting}
                 onClick={submit}
-                className="rounded-full bg-zinc-900 px-6 py-2.5 text-sm font-medium text-white disabled:opacity-40"
+                className="rounded-full bg-[#0c2238] px-6 py-2.5 text-sm font-medium text-white disabled:opacity-40"
               >{submitting ? "Scoring…" : "Run assessment"}</button>
             )}
           </div>
@@ -604,12 +604,12 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 function Select({ value, onChange, options }: { value: string; onChange: (v: string) => void; options: { value: string; label: string }[] }) {
   // Form card is always bg-white (regardless of theme), so the select must
   // stay light too — dark: variants here would clash with the white surround
-  // and inherit the parent's text-zinc-900, producing invisible dark-on-dark.
+  // and inherit the parent's text-[#15263c], producing invisible dark-on-dark.
   return (
     <select
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900"
+      className="w-full rounded-lg border border-[#d6c9a8] bg-white px-3 py-2 text-sm text-[#15263c]"
     >
       {options.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
     </select>
@@ -627,8 +627,8 @@ function ChipGroup({ options, selected, onToggle }: { options: Option[]; selecte
             type="button"
             onClick={() => onToggle(o.id)}
             className={`rounded-full border px-3 py-1.5 text-xs ${on
-              ? "border-zinc-900 bg-zinc-900 text-white"
-              : "border-zinc-300 text-zinc-700 hover:bg-zinc-100"}`}
+              ? "border-[#0a1f38] bg-[#0c2238] text-white"
+              : "border-[#d6c9a8] text-[#2e3f57] hover:bg-[#ece3cb]"}`}
           >{o.label ?? o.name}</button>
         );
       })}
@@ -759,13 +759,13 @@ function WorkflowPicker({
         placeholder={`Search ${workflows.length} workflows by name, category, or description…`}
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        className="w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm placeholder:text-zinc-400 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100"
+        className="w-full rounded-md border border-[#e3d9c0] bg-white px-3 py-2 text-sm placeholder:text-[#6b7d93] focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 dark:border-[#2a4a6b] dark:bg-[#0c2238] dark:text-[#eef3f8]"
         aria-label="Filter workflows"
       />
 
       {/* Category accordions */}
       {grouped.size === 0 ? (
-        <p className="text-sm italic text-zinc-500">No workflows match &ldquo;{query}&rdquo;.</p>
+        <p className="text-sm italic text-[#4c5d75]">No workflows match &ldquo;{query}&rdquo;.</p>
       ) : (
         <div className="space-y-1.5">
           {Array.from(grouped.entries()).map(([cat, rows]) => {
@@ -777,12 +777,12 @@ function WorkflowPicker({
               <details
                 key={cat}
                 open={open}
-                className="rounded-lg border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900"
+                className="rounded-lg border border-[#e3d9c0] bg-white dark:border-[#1d3a57] dark:bg-[#0c2238]"
               >
-                <summary className="cursor-pointer select-none px-3 py-2 text-sm font-semibold text-zinc-800 marker:text-zinc-400 dark:text-zinc-100">
+                <summary className="cursor-pointer select-none px-3 py-2 text-sm font-semibold text-[#20314a] marker:text-[#6b7d93] dark:text-[#eef3f8]">
                   <span className="inline-flex items-center gap-2">
                     <span>{cat}</span>
-                    <span className="rounded-full bg-zinc-100 px-1.5 py-0.5 text-[10px] font-medium text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300">
+                    <span className="rounded-full bg-[#ece3cb] px-1.5 py-0.5 text-[10px] font-medium text-[#3f5068] dark:bg-[#143049] dark:text-[#c2d1e0]">
                       {rows.length}
                     </span>
                     {selCount > 0 && (
@@ -792,7 +792,7 @@ function WorkflowPicker({
                     )}
                   </span>
                 </summary>
-                <div className="border-t border-zinc-100 px-3 py-2 dark:border-zinc-800">
+                <div className="border-t border-[#ece4d0] px-3 py-2 dark:border-[#1d3a57]">
                   <div className="flex flex-wrap gap-1.5">
                     {rows.map((w) => {
                       const isSel = selectedSet.has(w.id);
@@ -805,8 +805,8 @@ function WorkflowPicker({
                           title={w.description}
                           className={`rounded-full px-3 py-1 text-xs transition-colors ${
                             isSel
-                              ? "bg-zinc-900 text-white dark:bg-white dark:text-zinc-900"
-                              : "bg-zinc-100 text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+                              ? "bg-[#0c2238] text-white dark:bg-white dark:text-[#0a1f38]"
+                              : "bg-[#ece3cb] text-[#2e3f57] hover:bg-[#e3d9c0] dark:bg-[#143049] dark:text-[#c2d1e0] dark:hover:bg-[#1c3d5c]"
                           }`}
                         >
                           {w.label}
@@ -842,7 +842,7 @@ function Slider({ label, value, onChange, hint }: { label: string; value: number
         onChange={(e) => onChange(Number(e.target.value) as 1 | 2 | 3 | 4 | 5)}
         className="w-full"
       />
-      <div className="mt-1 text-xs text-zinc-500">{hint}</div>
+      <div className="mt-1 text-xs text-[#4c5d75]">{hint}</div>
     </div>
   );
 }

@@ -96,7 +96,7 @@ export default async function ProviderInvestmentPage({ params }: { params: Promi
             <table className="w-full text-xs">
               <tbody>
                 {financials.map((m, i) => (
-                  <tr key={`${m.metricName}-${i}`} className="border-b border-[#efe9d9] dark:border-zinc-900">
+                  <tr key={`${m.metricName}-${i}`} className="border-b border-[#efe9d9] dark:border-[#0a1f38]">
                     <td className="py-1.5 pr-2">{m.metricName}</td>
                     <td className="py-1.5 pr-2 font-mono">{m.value}</td>
                     <td className="py-1.5 pr-2 text-[#5d6b80]">{m.period}</td>
@@ -158,7 +158,7 @@ export default async function ProviderInvestmentPage({ params }: { params: Promi
         <Panel title="Indirect exposure routes">
           <ul className="space-y-2 text-xs">
             {indirect.map((e) => (
-              <li key={e.publicTicker} className="flex items-center justify-between gap-3 rounded border border-[#efe9d9] px-3 py-2 dark:border-zinc-800">
+              <li key={e.publicTicker} className="flex items-center justify-between gap-3 rounded border border-[#efe9d9] px-3 py-2 dark:border-[#1d3a57]">
                 <span><span className="font-mono">{e.publicTicker}</span> | {e.exposureType}</span>
                 <span className="font-mono">score {(e.indirectExposureScore ?? 0).toFixed(0)} | confidence {e.confidence.toFixed(2)}</span>
               </li>
@@ -171,31 +171,31 @@ export default async function ProviderInvestmentPage({ params }: { params: Promi
       <Panel title="Product scope and evidence">
         <div className="grid gap-3 md:grid-cols-2">
           {productScopes.map((scope) => (
-            <div key={scope.id} className="rounded-md border border-[#efe9d9] p-3 text-xs dark:border-zinc-800">
+            <div key={scope.id} className="rounded-md border border-[#efe9d9] p-3 text-xs dark:border-[#1d3a57]">
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <div className="font-semibold">{scope.productName}</div>
-                  <div className="mt-1 text-[#5d6b80] dark:text-zinc-500">{label(scope.productCategory)} | {scope.productType}</div>
+                  <div className="mt-1 text-[#5d6b80] dark:text-[#8fa5bb]">{label(scope.productCategory)} | {scope.productType}</div>
                 </div>
                 <SeedDataBadge label={label(scope.evidenceStatus)} provenance={scope.evidenceStatus === "verified" || scope.evidenceStatus === "documented" ? "live" : "seed"} />
               </div>
-              <p className="mt-2 leading-5 text-[#54647a] dark:text-zinc-400">{scope.uncertaintyNote}</p>
+              <p className="mt-2 leading-5 text-[#54647a] dark:text-[#a7bacd]">{scope.uncertaintyNote}</p>
               <div className="mt-2 flex flex-wrap gap-2">
                 <Confidence value={scope.confidenceScore} />
-                <span className="rounded border border-[#e0d6ba] px-1.5 py-0.5 text-[11px] text-[#5b6b7f] dark:border-zinc-700 dark:text-zinc-400">
+                <span className="rounded border border-[#e0d6ba] px-1.5 py-0.5 text-[11px] text-[#5b6b7f] dark:border-[#2a4a6b] dark:text-[#a7bacd]">
                   Sources: {scope.sourceIds.join(", ")}
                 </span>
               </div>
             </div>
           ))}
           {productScopes.length === 0 && (
-            <p className="text-xs leading-5 text-[#54647a] dark:text-zinc-400">No ProductScope record. This provider should remain hidden from scoped analysis until inventory is added.</p>
+            <p className="text-xs leading-5 text-[#54647a] dark:text-[#a7bacd]">No ProductScope record. This provider should remain hidden from scoped analysis until inventory is added.</p>
           )}
         </div>
       </Panel>
 
       <Panel title="What would change the score">
-        <ul className="list-disc pl-5 text-xs space-y-1 text-[#54647a] dark:text-zinc-400">
+        <ul className="list-disc pl-5 text-xs space-y-1 text-[#54647a] dark:text-[#a7bacd]">
           <li>Verified financial filings (10-K / 10-Q / S-1) raising evidence grade beyond E2.</li>
           <li>Disclosure of AI revenue contribution moving aiRevenueExposureScore.</li>
           <li>Material change in valuation multiples vs revenue growth durability.</li>

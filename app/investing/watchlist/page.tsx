@@ -42,9 +42,9 @@ function Section({ rows }: { rows: ReturnType<typeof listInvestmentProviderScore
     return <p className="text-xs text-[#5d6b80]">Nothing tracked in this segment yet.</p>;
   }
   return (
-    <div className="divide-y divide-[#efe9d9] dark:divide-zinc-800">
+    <div className="divide-y divide-[#efe9d9] dark:divide-[#1d3a57]">
       {rows.sort((a, b) => b.privateIpoInvestmentPotential - a.privateIpoInvestmentPotential).map((row) => (
-        <Link key={row.provider.id} href={`/investor-tools/provider/${row.provider.slug}`} className="grid grid-cols-[1fr_120px_180px] items-center gap-3 py-3 text-sm hover:bg-[#faf5e9] dark:hover:bg-zinc-900/40">
+        <Link key={row.provider.id} href={`/investor-tools/provider/${row.provider.slug}`} className="grid grid-cols-[1fr_120px_180px] items-center gap-3 py-3 text-sm hover:bg-[#faf5e9] dark:hover:bg-[#0c2238]/40">
           <span>
             <span className="font-medium">{row.provider.name}</span>
             <span className="ml-2 text-[11px] text-[#5d6b80]">{label(row.provider.exposureClass)}</span>

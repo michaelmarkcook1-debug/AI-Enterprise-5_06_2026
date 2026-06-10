@@ -124,7 +124,7 @@ export default function WatchButton({ vendorId, vendorName }: WatchButtonProps) 
         type="button"
         disabled
         aria-label={`Loading watchlist state for ${vendorName}`}
-        className="rounded-full p-1 text-sm text-zinc-300 opacity-50"
+        className="rounded-full p-1 text-sm text-[#c2d1e0] opacity-50"
       >
         ☆
       </button>
@@ -144,7 +144,7 @@ export default function WatchButton({ vendorId, vendorName }: WatchButtonProps) 
         } ${
           watched
             ? "text-amber-500 hover:text-amber-600"
-            : "text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
+            : "text-[#6b7d93] hover:text-[#3f5068] dark:hover:text-[#c2d1e0]"
         }`}
       >
         {watched ? "★" : "☆"}
@@ -155,7 +155,7 @@ export default function WatchButton({ vendorId, vendorName }: WatchButtonProps) 
         <form
           onSubmit={handleSaveEmail}
           onClick={(e) => e.stopPropagation()}
-          className="absolute left-0 top-8 z-50 flex flex-col gap-1.5 rounded-lg border border-zinc-700 bg-[#0d1f2d] p-3 shadow-xl"
+          className="absolute left-0 top-8 z-50 flex flex-col gap-1.5 rounded-lg border border-[#2a4a6b] bg-[#0d1f2d] p-3 shadow-xl"
           style={{ minWidth: "220px" }}
         >
           <span className="text-[11px] font-semibold text-emerald-400 whitespace-nowrap">
@@ -167,7 +167,7 @@ export default function WatchButton({ vendorId, vendorName }: WatchButtonProps) 
             value={emailInput}
             onChange={(e) => setEmailInput(e.target.value)}
             placeholder="you@company.com"
-            className="rounded border border-zinc-600 bg-[#071827] px-2 py-1 text-xs text-zinc-100 placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+            className="rounded border border-[#38587a] bg-[#071827] px-2 py-1 text-xs text-[#eef3f8] placeholder:text-[#4c5d75] focus:outline-none focus:ring-1 focus:ring-emerald-500"
           />
           {emailError && (
             <span className="text-[10px] text-rose-400">{emailError}</span>
@@ -183,7 +183,7 @@ export default function WatchButton({ vendorId, vendorName }: WatchButtonProps) 
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); setShowEmailPrompt(false); }}
-              className="rounded border border-zinc-600 px-2 py-1 text-[11px] text-zinc-400 hover:text-zinc-200"
+              className="rounded border border-[#38587a] px-2 py-1 text-[11px] text-[#6b7d93] hover:text-[#d8e2ec]"
             >
               Skip
             </button>

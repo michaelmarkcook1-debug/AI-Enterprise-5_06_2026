@@ -49,6 +49,12 @@ a {
   color: inherit;
 }
 
+/* Editorial display face — Cormorant Garamond, loaded in app/layout.tsx.
+   Used for page mastheads and hero numerals only; UI text stays sans. */
+.font-display {
+  font-family: var(--font-cormorant), Georgia, "Times New Roman", serif;
+}
+
 /* Text selection carries the gold brand */
 ::selection {
   background: #d4af37;

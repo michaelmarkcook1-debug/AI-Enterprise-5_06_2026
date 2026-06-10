@@ -52,13 +52,13 @@ const ROLE_TONE: Record<Role, { bg: string; text: string }> = {
   "Data & Services Provider": { bg: "bg-cyan-50 dark:bg-cyan-950/40",      text: "text-cyan-900 dark:text-cyan-300"        },
   "Cloud / Hosting Provider": { bg: "bg-teal-50 dark:bg-teal-950/40",      text: "text-teal-900 dark:text-teal-300"        },
   "Sovereign / Regional AI":  { bg: "bg-rose-50 dark:bg-rose-950/40",      text: "text-rose-900 dark:text-rose-300"        },
-  "Regulator / Policy Actor": { bg: "bg-zinc-100 dark:bg-zinc-800",        text: "text-zinc-700 dark:text-zinc-300"        },
+  "Regulator / Policy Actor": { bg: "bg-[#ece3cb] dark:bg-[#143049]",        text: "text-[#2e3f57] dark:text-[#c2d1e0]"        },
   "Open-Source Ecosystem":  { bg: "bg-indigo-50 dark:bg-indigo-950/40",    text: "text-indigo-900 dark:text-indigo-300"    },
   "Vertical Specialist":    { bg: "bg-fuchsia-50 dark:bg-fuchsia-950/40",  text: "text-fuchsia-900 dark:text-fuchsia-300"  },
 };
 
 function RoleBadge({ role }: { role: Role }) {
-  const tone = ROLE_TONE[role] ?? { bg: "bg-zinc-100 dark:bg-zinc-800", text: "text-zinc-600 dark:text-zinc-300" };
+  const tone = ROLE_TONE[role] ?? { bg: "bg-[#ece3cb] dark:bg-[#143049]", text: "text-[#3f5068] dark:text-[#c2d1e0]" };
   return (
     <span className={`inline-flex rounded border border-current/20 px-1.5 py-0.5 text-[11px] font-semibold ${tone.bg} ${tone.text}`}>
       {role}
@@ -94,8 +94,8 @@ function ScoreTile({
 }) {
   const { num, bar } = scoreTone(value);
   return (
-    <div className="rounded-xl border border-[#e9e0c8] bg-white dark:border-zinc-800 dark:bg-zinc-900/50 p-5 flex flex-col gap-2">
-      <div className="text-xs font-semibold uppercase tracking-wide text-[#5b6b7f] dark:text-zinc-500">{label}</div>
+    <div className="rounded-xl border border-[#e9e0c8] bg-white dark:border-[#1d3a57] dark:bg-[#0c2238]/50 p-5 flex flex-col gap-2">
+      <div className="text-xs font-semibold uppercase tracking-wide text-[#5b6b7f] dark:text-[#8fa5bb]">{label}</div>
       <div className={`text-3xl font-semibold tabular-nums ${num}`}>{value}</div>
       <div className={`h-1 rounded-full ${bar}`} style={{ width: `${value}%` }} />
       {delta !== undefined && delta !== 0 && (
@@ -113,7 +113,7 @@ function SentimentBadge({ sentiment }: { sentiment: string }) {
   const map: Record<string, string> = {
     positive: "border-emerald-300 bg-emerald-50 text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300",
     negative: "border-rose-300 bg-rose-50 text-rose-800 dark:border-rose-800 dark:bg-rose-950/60 dark:text-rose-300",
-    neutral:  "border-zinc-300 bg-zinc-50 text-zinc-700 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300",
+    neutral:  "border-[#d6c9a8] bg-[#f6f1e3] text-[#2e3f57] dark:border-[#2a4a6b] dark:bg-[#0c2238] dark:text-[#c2d1e0]",
     mixed:    "border-amber-300 bg-amber-50 text-amber-800 dark:border-amber-800 dark:bg-amber-950/60 dark:text-amber-300",
   };
   return (
@@ -127,14 +127,14 @@ function SentimentBadge({ sentiment }: { sentiment: string }) {
 
 function ChipList({ items, emptyLabel }: { items: string[]; emptyLabel?: string }) {
   if (!items.length) {
-    return <span className="text-xs text-[#5b6b7f] dark:text-zinc-500">{emptyLabel ?? "None recorded"}</span>;
+    return <span className="text-xs text-[#5b6b7f] dark:text-[#8fa5bb]">{emptyLabel ?? "None recorded"}</span>;
   }
   return (
     <div className="flex flex-wrap gap-1.5">
       {items.map((item) => (
         <span
           key={item}
-          className="rounded border border-[#e0d6ba] bg-[#faf6ec] px-2 py-0.5 text-xs text-[#475a72] dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300"
+          className="rounded border border-[#e0d6ba] bg-[#faf6ec] px-2 py-0.5 text-xs text-[#475a72] dark:border-[#2a4a6b] dark:bg-[#143049] dark:text-[#c2d1e0]"
         >
           {item}
         </span>
@@ -176,8 +176,8 @@ function EvidenceGradeChip({ grade }: { grade: Entity["evidenceGrade"] }) {
 function ScoreHistoryChart({ snapshots }: { snapshots: SnapshotPoint[] }) {
   if (snapshots.length < 2) {
     return (
-      <div className="flex h-[200px] items-center justify-center rounded-lg border border-dashed border-[#e0d6ba] bg-[#fdfaf1] dark:border-zinc-700 dark:bg-zinc-950/30">
-        <p className="text-sm text-[#5b6b7f] dark:text-zinc-500">
+      <div className="flex h-[200px] items-center justify-center rounded-lg border border-dashed border-[#e0d6ba] bg-[#fdfaf1] dark:border-[#2a4a6b] dark:bg-[#081c30]/30">
+        <p className="text-sm text-[#5b6b7f] dark:text-[#8fa5bb]">
           Fewer than 2 snapshots — backfill score history from the admin panel.
         </p>
       </div>
@@ -448,16 +448,16 @@ export default async function VendorDeepDivePage({
       <main className="mx-auto max-w-7xl px-5 py-8">
 
         {/* ── Header band ──────────────────────────────────────────────── */}
-        <div className="mb-7 border-b border-[#e9e0c8] pb-6 dark:border-zinc-800">
+        <div className="mb-7 border-b border-[#e9e0c8] pb-6 dark:border-[#1d3a57]">
           <Link
             href="/query-v2"
-            className="inline-flex items-center gap-1 text-xs font-medium text-[#54647a] hover:text-[#13294b] dark:text-zinc-400 dark:hover:text-zinc-100"
+            className="inline-flex items-center gap-1 text-xs font-medium text-[#54647a] hover:text-[#13294b] dark:text-[#a7bacd] dark:hover:text-[#eef3f8]"
           >
             ← Back to Query leaderboard
           </Link>
 
           <div className="mt-4 flex flex-wrap items-start gap-3">
-            <h1 className="text-3xl font-semibold tracking-tight text-[#13294b] dark:text-zinc-50 md:text-4xl">
+            <h1 className="text-3xl font-semibold tracking-tight text-[#13294b] dark:text-[#f6f9fc] md:text-4xl">
               {entity.name}
             </h1>
             <div className="mt-1 flex flex-wrap items-center gap-2">
@@ -487,7 +487,7 @@ export default async function VendorDeepDivePage({
         {entity.roleScores && Object.keys(entity.roleScores).length > 0 && (
           <section className="mb-6">
             <Panel title="AI-market role breakdown">
-              <p className="mb-3 text-xs leading-5 text-[#54647a] dark:text-zinc-400">
+              <p className="mb-3 text-xs leading-5 text-[#54647a] dark:text-[#a7bacd]">
                 This entity plays multiple AI roles with genuinely different strength — a single composite would mislead.
                 Each lens is scored on its own AI-market merits. The category leaderboard ranks this vendor by the relevant
                 role score, not the composite above.
@@ -500,18 +500,18 @@ export default async function VendorDeepDivePage({
                     const v = rs!.leadership;
                     const colour = v >= 80 ? "text-emerald-700 dark:text-emerald-300" : v >= 60 ? "text-amber-700 dark:text-amber-300" : "text-rose-700 dark:text-rose-300";
                     return (
-                      <div key={role} className="rounded-lg border border-[#e9e0c8] bg-white p-3 dark:border-zinc-800 dark:bg-zinc-900/50">
+                      <div key={role} className="rounded-lg border border-[#e9e0c8] bg-white p-3 dark:border-[#1d3a57] dark:bg-[#0c2238]/50">
                         <div className="flex items-baseline justify-between gap-2">
-                          <span className="text-sm font-semibold text-[#13294b] dark:text-zinc-100">{role}</span>
+                          <span className="text-sm font-semibold text-[#13294b] dark:text-[#eef3f8]">{role}</span>
                           <span className={`font-mono text-lg font-bold tabular-nums ${colour}`}>{v}</span>
                         </div>
-                        <div className="mt-1 flex gap-3 text-[10px] uppercase tracking-wide text-[#5b6b7f] dark:text-zinc-500">
+                        <div className="mt-1 flex gap-3 text-[10px] uppercase tracking-wide text-[#5b6b7f] dark:text-[#8fa5bb]">
                           <span>Innov {rs!.innovation}</span>
                           <span>Ready {rs!.readiness}</span>
                           <span>Reach {rs!.reach}</span>
                           <span>{rs!.evidenceGrade}</span>
                         </div>
-                        <p className="mt-2 text-[11px] leading-4 text-[#54647a] dark:text-zinc-400">{rs!.rationale}</p>
+                        <p className="mt-2 text-[11px] leading-4 text-[#54647a] dark:text-[#a7bacd]">{rs!.rationale}</p>
                       </div>
                     );
                   })}
@@ -533,40 +533,40 @@ export default async function VendorDeepDivePage({
           <Panel title="Standing within layer">
             <div className="flex flex-col gap-3">
               <div className="flex items-baseline gap-3">
-                <span className="text-4xl font-bold tabular-nums text-[#13294b] dark:text-zinc-50">
+                <span className="text-4xl font-bold tabular-nums text-[#13294b] dark:text-[#f6f9fc]">
                   #{layerRank.rank}
                 </span>
-                <span className="text-sm text-[#54647a] dark:text-zinc-400">
+                <span className="text-sm text-[#54647a] dark:text-[#a7bacd]">
                   of {layerRank.peers} {layerRank.layerLabel}
                 </span>
               </div>
-              <p className="text-xs leading-5 text-[#5b6b7f] dark:text-zinc-500">
+              <p className="text-xs leading-5 text-[#5b6b7f] dark:text-[#8fa5bb]">
                 Ranked by {entity.primaryRole} leadership score, within this layer only.
                 Cross-layer composite rankings are not used — layers measure different things.
               </p>
               {lastSnapshot ? (
                 <div className="flex gap-6 text-sm">
                   <div>
-                    <span className="text-xs uppercase tracking-wide text-[#5b6b7f] dark:text-zinc-500">Latest score</span>
+                    <span className="text-xs uppercase tracking-wide text-[#5b6b7f] dark:text-[#8fa5bb]">Latest score</span>
                     <div className="mt-1 text-xl font-semibold tabular-nums text-emerald-700 dark:text-emerald-300">
                       {lastSnapshot.overallScore.toFixed(1)}
                     </div>
                   </div>
                   <div>
-                    <span className="text-xs uppercase tracking-wide text-[#5b6b7f] dark:text-zinc-500">Momentum</span>
+                    <span className="text-xs uppercase tracking-wide text-[#5b6b7f] dark:text-[#8fa5bb]">Momentum</span>
                     <div className="mt-1 text-xl font-semibold tabular-nums text-amber-700 dark:text-amber-300">
                       {lastSnapshot.momentumScore.toFixed(1)}
                     </div>
                   </div>
                   <div>
-                    <span className="text-xs uppercase tracking-wide text-[#5b6b7f] dark:text-zinc-500">Last snapshot</span>
-                    <div className="mt-1 text-sm font-medium text-[#13294b] dark:text-zinc-100">
+                    <span className="text-xs uppercase tracking-wide text-[#5b6b7f] dark:text-[#8fa5bb]">Last snapshot</span>
+                    <div className="mt-1 text-sm font-medium text-[#13294b] dark:text-[#eef3f8]">
                       {lastSnapshot.date}
                     </div>
                   </div>
                 </div>
               ) : (
-                <p className="text-sm text-[#5b6b7f] dark:text-zinc-500">
+                <p className="text-sm text-[#5b6b7f] dark:text-[#8fa5bb]">
                   {hasDatabase()
                     ? "No score snapshots recorded yet. Run the snapshot job from the admin panel."
                     : "— Database not connected. Score history unavailable."}
@@ -577,7 +577,7 @@ export default async function VendorDeepDivePage({
 
           {/* ── Analyst interpretation ────────────────────────────────────── */}
           <Panel title="Analyst interpretation">
-            <p className="text-sm leading-6 text-[#475a72] dark:text-zinc-300">
+            <p className="text-sm leading-6 text-[#475a72] dark:text-[#c2d1e0]">
               {entity.cioInterpretation}
             </p>
           </Panel>
@@ -587,9 +587,9 @@ export default async function VendorDeepDivePage({
         <section className="mb-6">
           <Panel title="Recent intelligence">
             {vendorNews.length === 0 ? (
-              <p className="text-sm text-[#5b6b7f] dark:text-zinc-500">No news tracked yet for this vendor.</p>
+              <p className="text-sm text-[#5b6b7f] dark:text-[#8fa5bb]">No news tracked yet for this vendor.</p>
             ) : (
-              <div className="divide-y divide-[#efe9d9] dark:divide-zinc-800">
+              <div className="divide-y divide-[#efe9d9] dark:divide-[#1d3a57]">
                 {vendorNews.map((item) => (
                   <div key={item.id} className="py-4">
                     <div className="flex flex-wrap items-start justify-between gap-3">
@@ -599,30 +599,30 @@ export default async function VendorDeepDivePage({
                             href={item.sourceUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="font-medium text-[#13294b] hover:underline dark:text-zinc-100"
+                            className="font-medium text-[#13294b] hover:underline dark:text-[#eef3f8]"
                           >
                             {item.title}
                           </a>
                         ) : (
-                          <span className="font-medium text-[#13294b] dark:text-zinc-100">{item.title}</span>
+                          <span className="font-medium text-[#13294b] dark:text-[#eef3f8]">{item.title}</span>
                         )}
-                        <div className="mt-1 text-xs text-[#54647a] dark:text-zinc-400 leading-5">{item.summary}</div>
+                        <div className="mt-1 text-xs text-[#54647a] dark:text-[#a7bacd] leading-5">{item.summary}</div>
                       </div>
                       <div className="flex shrink-0 flex-col items-end gap-1.5">
                         <SentimentBadge sentiment={item.sentiment} />
-                        <span className="rounded border border-[#e0d6ba] bg-[#faf6ec] px-1.5 py-0.5 text-[10px] font-medium text-[#54647a] dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-400">
+                        <span className="rounded border border-[#e0d6ba] bg-[#faf6ec] px-1.5 py-0.5 text-[10px] font-medium text-[#54647a] dark:border-[#2a4a6b] dark:bg-[#143049] dark:text-[#a7bacd]">
                           {item.sourceName}
                         </span>
                       </div>
                     </div>
                     {item.whyItMatters && (
-                      <div className="mt-2 rounded-md bg-[#faf6ec] px-3 py-2 text-xs leading-5 text-[#475a72] dark:bg-zinc-800/60 dark:text-zinc-400">
-                        <span className="font-semibold text-[#13294b] dark:text-zinc-200">Why it matters: </span>
+                      <div className="mt-2 rounded-md bg-[#faf6ec] px-3 py-2 text-xs leading-5 text-[#475a72] dark:bg-[#143049]/60 dark:text-[#a7bacd]">
+                        <span className="font-semibold text-[#13294b] dark:text-[#d8e2ec]">Why it matters: </span>
                         {item.whyItMatters}
                       </div>
                     )}
                     <div className="mt-2 flex items-center gap-3">
-                      <span className="text-[10px] text-[#9ca3af] dark:text-zinc-600">
+                      <span className="text-[10px] text-[#9ca3af] dark:text-[#7d93aa]">
                         {new Date(item.publishedAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
                       </span>
                       {item.impactScore >= 7 && (
@@ -643,37 +643,37 @@ export default async function VendorDeepDivePage({
           <Panel title="Entity data breadcrumb">
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               <div>
-                <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-[#5b6b7f] dark:text-zinc-500">
+                <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-[#5b6b7f] dark:text-[#8fa5bb]">
                   Models owned
                 </div>
                 <ChipList items={entity.modelsOwned} emptyLabel="No first-party models" />
               </div>
               <div>
-                <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-[#5b6b7f] dark:text-zinc-500">
+                <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-[#5b6b7f] dark:text-[#8fa5bb]">
                   Hosted third-party
                 </div>
                 <ChipList items={entity.hostedThirdParty} emptyLabel="None recorded" />
               </div>
               <div>
-                <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-[#5b6b7f] dark:text-zinc-500">
+                <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-[#5b6b7f] dark:text-[#8fa5bb]">
                   Infrastructure exposure
                 </div>
                 <ChipList items={entity.infrastructureExposure} emptyLabel="None recorded" />
               </div>
               <div>
-                <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-[#5b6b7f] dark:text-zinc-500">
+                <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-[#5b6b7f] dark:text-[#8fa5bb]">
                   Investor relationships
                 </div>
                 <ChipList items={entity.investorRelationships} emptyLabel="None recorded" />
               </div>
               <div>
-                <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-[#5b6b7f] dark:text-zinc-500">
+                <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-[#5b6b7f] dark:text-[#8fa5bb]">
                   Hardware dependencies
                 </div>
                 <ChipList items={entity.hardwareDependencies} emptyLabel="None recorded" />
               </div>
               <div>
-                <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-[#5b6b7f] dark:text-zinc-500">
+                <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-[#5b6b7f] dark:text-[#8fa5bb]">
                   Risk level
                 </div>
                 <span
@@ -694,16 +694,16 @@ export default async function VendorDeepDivePage({
 
         {/* ── Data quality footer ───────────────────────────────────────── */}
         <section className="mb-8">
-          <div className="rounded-xl border border-[#e9e0c8] bg-[#fdfaf1] p-5 dark:border-zinc-800 dark:bg-zinc-900/30">
+          <div className="rounded-xl border border-[#e9e0c8] bg-[#fdfaf1] p-5 dark:border-[#1d3a57] dark:bg-[#0c2238]/30">
             <div className="flex flex-wrap items-center gap-3">
               <EvidenceGradeChip grade={entity.evidenceGrade} />
-              <span className="text-xs font-medium text-[#13294b] dark:text-zinc-100">
+              <span className="text-xs font-medium text-[#13294b] dark:text-[#eef3f8]">
                 {EVIDENCE_GRADE_DESCRIPTIONS[entity.evidenceGrade]}
               </span>
             </div>
             {entity.dataCaveats && (
-              <p className="mt-3 text-xs leading-6 text-[#54647a] dark:text-zinc-400">
-                <span className="font-semibold text-[#13294b] dark:text-zinc-200">Data caveats: </span>
+              <p className="mt-3 text-xs leading-6 text-[#54647a] dark:text-[#a7bacd]">
+                <span className="font-semibold text-[#13294b] dark:text-[#d8e2ec]">Data caveats: </span>
                 {entity.dataCaveats}
               </p>
             )}

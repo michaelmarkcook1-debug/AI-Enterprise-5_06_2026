@@ -237,7 +237,7 @@ export default function CategoryCards({ vendors, momentum, provenance }: Props) 
               <div className="flex items-start justify-between gap-3 mb-1.5">
                 <div className="flex items-center gap-2.5">
                   <span className={`h-2.5 w-2.5 rounded-full ${cat.color.dot}`} />
-                  <h3 className="text-lg font-semibold text-[#13294b] dark:text-zinc-100">
+                  <h3 className="text-lg font-semibold text-[#13294b] dark:text-[#eef3f8]">
                     {cat.id}
                   </h3>
                 </div>
@@ -250,7 +250,7 @@ export default function CategoryCards({ vendors, momentum, provenance }: Props) 
                     {dataLabel}
                   </span>
                   {avgConf > 0 && (
-                    <span className="rounded-full bg-white/70 px-2 py-0.5 text-[10px] font-semibold text-[#475a72] dark:bg-zinc-800/60 dark:text-zinc-300">
+                    <span className="rounded-full bg-white/70 px-2 py-0.5 text-[10px] font-semibold text-[#475a72] dark:bg-[#143049]/60 dark:text-[#c2d1e0]">
                       Confidence {avgConf}
                     </span>
                   )}
@@ -258,10 +258,10 @@ export default function CategoryCards({ vendors, momentum, provenance }: Props) 
               </div>
 
               {/* Purpose */}
-              <p className="text-sm text-[#56657b] dark:text-zinc-400 mb-1">
+              <p className="text-sm text-[#56657b] dark:text-[#a7bacd] mb-1">
                 {cat.purpose}
               </p>
-              <p className="text-xs italic text-[#475a72] dark:text-zinc-300 mb-3">
+              <p className="text-xs italic text-[#475a72] dark:text-[#c2d1e0] mb-3">
                 Why it matters: {cat.whyItMatters}
               </p>
 
@@ -280,7 +280,7 @@ export default function CategoryCards({ vendors, momentum, provenance }: Props) 
               {/* Tier 1 — always visible */}
               {resolvedTier1.length > 0 && (
                 <div className="mb-2">
-                  <div className="text-[10px] font-semibold uppercase tracking-wider text-[#5b6b7f] dark:text-zinc-500 mb-2">
+                  <div className="text-[10px] font-semibold uppercase tracking-wider text-[#5b6b7f] dark:text-[#8fa5bb] mb-2">
                     Major vendors
                   </div>
                   <div className="flex flex-wrap gap-1.5">
@@ -292,21 +292,21 @@ export default function CategoryCards({ vendors, momentum, provenance }: Props) 
                       return (
                         <span
                           key={`${cat.id}-${vendor.id}-${placement.displayName}`}
-                          className="inline-flex items-center gap-1.5 rounded-full border border-white/60 bg-white/80 px-3 py-1 text-[11px] font-semibold text-[#13294b] shadow-sm dark:border-zinc-700 dark:bg-zinc-800/80 dark:text-zinc-100"
+                          className="inline-flex items-center gap-1.5 rounded-full border border-white/60 bg-white/80 px-3 py-1 text-[11px] font-semibold text-[#13294b] shadow-sm dark:border-[#2a4a6b] dark:bg-[#143049]/80 dark:text-[#eef3f8]"
                           title={placement.roleNote ? `${placement.displayName} — ${placement.roleNote}` : placement.displayName}
                         >
                           {placement.displayName}
                           <span className={`text-[9px] font-bold ${
                             direction === "up" ? "text-emerald-600 dark:text-emerald-400"
                             : direction === "down" ? "text-rose-600 dark:text-rose-400"
-                            : "text-zinc-400"
+                            : "text-[#6b7d93]"
                           }`}>
                             {direction === "up" ? "↑" : direction === "down" ? "↓" : "→"}
                           </span>
                           <span className={`h-1.5 w-1.5 rounded-full ${
                             vendor.confidenceScore >= 75 ? "bg-emerald-500"
                             : vendor.confidenceScore >= 55 ? "bg-amber-500"
-                            : "bg-zinc-400"
+                            : "bg-[#6b7d93]"
                           }`} />
                         </span>
                       );
@@ -320,7 +320,7 @@ export default function CategoryCards({ vendors, momentum, provenance }: Props) 
                 <>
                   <button
                     onClick={() => toggle(cat.id)}
-                    className="mt-2 flex items-center gap-1.5 text-[11px] font-medium text-[#5b6b7f] hover:text-[#13294b] dark:text-zinc-500 dark:hover:text-zinc-200 transition-colors"
+                    className="mt-2 flex items-center gap-1.5 text-[11px] font-medium text-[#5b6b7f] hover:text-[#13294b] dark:text-[#8fa5bb] dark:hover:text-[#d8e2ec] transition-colors"
                     aria-expanded={isExpanded}
                     aria-controls={`${cat.id}-tier2`}
                   >
@@ -335,14 +335,14 @@ export default function CategoryCards({ vendors, momentum, provenance }: Props) 
                       {resolvedTier2.map(({ placement, vendor }) => (
                         <span
                           key={`${cat.id}-${vendor.id}-${placement.displayName}`}
-                          className="inline-flex items-center gap-1 rounded-full border border-[#e6dcc3]/60 bg-white/50 px-2.5 py-0.5 text-[10px] font-medium text-[#5b6b7f] dark:border-zinc-700/60 dark:bg-zinc-800/40 dark:text-zinc-400"
+                          className="inline-flex items-center gap-1 rounded-full border border-[#e6dcc3]/60 bg-white/50 px-2.5 py-0.5 text-[10px] font-medium text-[#5b6b7f] dark:border-[#2a4a6b]/60 dark:bg-[#143049]/40 dark:text-[#a7bacd]"
                           title={placement.roleNote ? `${placement.displayName} — ${placement.roleNote}` : placement.displayName}
                         >
                           {placement.displayName}
                           <span className={`h-1 w-1 rounded-full ${
                             vendor.confidenceScore >= 75 ? "bg-emerald-500"
                             : vendor.confidenceScore >= 55 ? "bg-amber-500"
-                            : "bg-zinc-400"
+                            : "bg-[#6b7d93]"
                           }`} />
                         </span>
                       ))}
@@ -356,14 +356,14 @@ export default function CategoryCards({ vendors, momentum, provenance }: Props) 
       })}
 
       {/* Legend */}
-      <div className="flex flex-wrap items-center gap-4 text-[10px] text-[#9da596] dark:text-zinc-500 pt-1">
+      <div className="flex flex-wrap items-center gap-4 text-[10px] text-[#9da596] dark:text-[#8fa5bb] pt-1">
         <span className="flex items-center gap-1"><span className="text-emerald-600">{"↑"}</span> Improving</span>
-        <span className="flex items-center gap-1"><span className="text-zinc-400">{"→"}</span> Steady</span>
+        <span className="flex items-center gap-1"><span className="text-[#6b7d93]">{"→"}</span> Steady</span>
         <span className="flex items-center gap-1"><span className="text-rose-600">{"↓"}</span> Declining</span>
         <span className="mx-1">|</span>
         <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> High confidence</span>
         <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-amber-500" /> Medium</span>
-        <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-zinc-400" /> Low</span>
+        <span className="flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full bg-[#6b7d93]" /> Low</span>
       </div>
     </div>
   );

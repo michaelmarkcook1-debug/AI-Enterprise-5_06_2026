@@ -166,27 +166,27 @@ export default async function PipelineHealthPage() {
                       <td className="py-3 pr-3">
                         <StatusPill ok={s.ok} />
                       </td>
-                      <td className="py-3 pr-3 font-semibold text-[#13294b] dark:text-zinc-100">{meta.title}</td>
-                      <td className="py-3 pr-3 text-xs text-[#475a72] dark:text-zinc-400">{meta.what}</td>
+                      <td className="py-3 pr-3 font-semibold text-[#13294b] dark:text-[#eef3f8]">{meta.title}</td>
+                      <td className="py-3 pr-3 text-xs text-[#475a72] dark:text-[#a7bacd]">{meta.what}</td>
                       <td className="py-3 pr-3 font-mono text-xs text-[#56657b]">{formatDuration(s.durationMs)}</td>
                       <td className="py-3 pr-3 text-xs">
                         {stepCost > 0 ? (
                           <div>
                             <span className="font-mono font-semibold text-amber-700 dark:text-amber-300">${stepCost.toFixed(3)}</span>
-                            <div className="mt-0.5 text-[10px] text-[#5b6b7f] dark:text-zinc-500">
+                            <div className="mt-0.5 text-[10px] text-[#5b6b7f] dark:text-[#8fa5bb]">
                               {(stepTokIn / 1000).toFixed(0)}k↑ {(stepTokOut / 1000).toFixed(0)}k↓
                             </div>
                             {stepModel && (
-                              <div className="mt-0.5 font-mono text-[9px] text-[#5b6b7f] dark:text-zinc-500 truncate max-w-[80px]" title={stepModel}>
+                              <div className="mt-0.5 font-mono text-[9px] text-[#5b6b7f] dark:text-[#8fa5bb] truncate max-w-[80px]" title={stepModel}>
                                 {stepModel.replace("claude-", "").replace("-latest", "")}
                               </div>
                             )}
                           </div>
                         ) : (
-                          <span className="text-[#5b6b7f] dark:text-zinc-500">—</span>
+                          <span className="text-[#5b6b7f] dark:text-[#8fa5bb]">—</span>
                         )}
                       </td>
-                      <td className="py-3 text-xs text-[#475a72] dark:text-zinc-400">
+                      <td className="py-3 text-xs text-[#475a72] dark:text-[#a7bacd]">
                         {s.error ? (
                           <span className="text-rose-700 dark:text-rose-300">{truncate(s.error, 240)}</span>
                         ) : (
@@ -269,7 +269,7 @@ function AnthropicDependentCard({ steps }: { steps: StepSummary[] }) {
       <p className="text-sm font-semibold text-rose-700 dark:text-rose-300">
         Two pipeline steps depend on the Anthropic API and both are returning zero data this run.
       </p>
-      <p className="mt-2 text-xs text-[#475a72] dark:text-zinc-400">
+      <p className="mt-2 text-xs text-[#475a72] dark:text-[#a7bacd]">
         This is the most likely explanation for &quot;no fresh ingestion today&quot; — sourcing extracts new
         evidence from the manifest via Claude, then triage / projection / news / capabilities all
         depend on that evidence flowing through. When the LLM call fails or is gated, the rest of the
@@ -278,7 +278,7 @@ function AnthropicDependentCard({ steps }: { steps: StepSummary[] }) {
       <div className="mt-4 grid gap-3 md:grid-cols-2">
         <div className="rounded-md border border-amber-200 bg-amber-50 p-3 dark:border-amber-900/60 dark:bg-amber-950/20">
           <div className="text-[10px] font-semibold uppercase tracking-wider text-amber-900 dark:text-amber-200">Sourcing extractor</div>
-          <div className="mt-1 font-mono text-xs text-[#475a72] dark:text-zinc-300">
+          <div className="mt-1 font-mono text-xs text-[#475a72] dark:text-[#c2d1e0]">
             llmSource: <strong>{llmSource}</strong> · proposalsExtracted: <strong>{proposalsExtracted}</strong> · proposalsPersisted: <strong>{proposalsPersisted}</strong>
           </div>
           <div className="mt-1 text-[11px] italic text-amber-900/80 dark:text-amber-200/80">
@@ -289,7 +289,7 @@ function AnthropicDependentCard({ steps }: { steps: StepSummary[] }) {
         </div>
         <div className="rounded-md border border-amber-200 bg-amber-50 p-3 dark:border-amber-900/60 dark:bg-amber-950/20">
           <div className="text-[10px] font-semibold uppercase tracking-wider text-amber-900 dark:text-amber-200">Competitive intel monitor</div>
-          <div className="mt-1 font-mono text-xs text-[#475a72] dark:text-zinc-300">
+          <div className="mt-1 font-mono text-xs text-[#475a72] dark:text-[#c2d1e0]">
             vendorsAttempted: <strong>{compAttempted}</strong> · vendorsWithFindings: <strong>{compFindings}</strong>
           </div>
           <div className="mt-1 text-[11px] italic text-amber-900/80 dark:text-amber-200/80">
@@ -328,7 +328,7 @@ function CompetitiveIntelCard({ step }: { step: StepSummary }) {
               ? "Healthy — fresh findings flowing into /query and /demonstrate."
               : "Partial failure — some vendors returned, others errored."}
           </p>
-          <p className="mt-2 text-xs text-[#475a72] dark:text-zinc-400">
+          <p className="mt-2 text-xs text-[#475a72] dark:text-[#a7bacd]">
             Source: <code className="font-mono">{source}</code> · Attempted {vendorsAttempted} vendors,
             got findings for {vendorsWithFindings} of them, upserted {itemsUpserted} items, recorded {errorCount} errors.
           </p>
@@ -360,12 +360,12 @@ function StatusCard({ label, value, tone, note }: { label: string; value: string
       ? "text-amber-700 dark:text-amber-300"
       : tone === "bad"
       ? "text-rose-700 dark:text-rose-300"
-      : "text-[#13294b] dark:text-zinc-100";
+      : "text-[#13294b] dark:text-[#eef3f8]";
   return (
-    <div className="rounded-lg border border-[#e6dcc3] bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
-      <div className="text-[10px] font-semibold uppercase tracking-wider text-[#5b6b7f] dark:text-zinc-500">{label}</div>
+    <div className="rounded-lg border border-[#e6dcc3] bg-white p-4 dark:border-[#1d3a57] dark:bg-[#0c2238]">
+      <div className="text-[10px] font-semibold uppercase tracking-wider text-[#5b6b7f] dark:text-[#8fa5bb]">{label}</div>
       <div className={`mt-1 font-mono text-2xl font-semibold ${colorClass}`}>{value}</div>
-      {note && <div className="mt-1 text-[10px] text-[#5b6b7f] dark:text-zinc-500">{note}</div>}
+      {note && <div className="mt-1 text-[10px] text-[#5b6b7f] dark:text-[#8fa5bb]">{note}</div>}
     </div>
   );
 }
@@ -376,10 +376,10 @@ function MiniStat({ label, value, tone = "neutral" }: { label: string; value: nu
       ? "text-emerald-700 dark:text-emerald-300"
       : tone === "bad"
       ? "text-rose-700 dark:text-rose-300"
-      : "text-[#13294b] dark:text-zinc-100";
+      : "text-[#13294b] dark:text-[#eef3f8]";
   return (
-    <div className="rounded-md border border-[#e6dcc3] bg-[#fafbf8] px-3 py-2 dark:border-zinc-800 dark:bg-zinc-900/60">
-      <div className="text-[10px] uppercase tracking-wider text-[#5b6b7f] dark:text-zinc-500">{label}</div>
+    <div className="rounded-md border border-[#e6dcc3] bg-[#fafbf8] px-3 py-2 dark:border-[#1d3a57] dark:bg-[#0c2238]/60">
+      <div className="text-[10px] uppercase tracking-wider text-[#5b6b7f] dark:text-[#8fa5bb]">{label}</div>
       <div className={`font-mono text-base font-semibold ${colorClass}`}>{value}</div>
     </div>
   );

@@ -75,21 +75,21 @@ export default async function CapabilitiesPage() {
         <Panel title="Data sources backing this surface">
           <div className="flex flex-wrap items-center justify-between gap-3 text-sm">
             <div>
-              <p className="text-xs leading-5 text-[#54647a] dark:text-zinc-400">
+              <p className="text-xs leading-5 text-[#54647a] dark:text-[#a7bacd]">
                 <strong>{configuredConnectors}/{totalConnectors}</strong> connectors configured ·{" "}
                 <strong>{provenance.evidenceCount}</strong> verified evidence rows ·{" "}
                 <strong>{provenance.approvedProposalCount}</strong> approved proposals
               </p>
-              <p className="mt-1 text-[11px] italic text-[#5b6b7f] dark:text-zinc-500">{provenance.reason}</p>
+              <p className="mt-1 text-[11px] italic text-[#5b6b7f] dark:text-[#8fa5bb]">{provenance.reason}</p>
             </div>
             <div className="flex flex-wrap gap-2 text-xs">
-              <Link href="/admin/data-sources" className="rounded-full border border-[#e6dcc3] bg-white px-3 py-1 font-semibold text-[#13294b] hover:bg-[#f3ead2] dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800">
+              <Link href="/admin/data-sources" className="rounded-full border border-[#e6dcc3] bg-white px-3 py-1 font-semibold text-[#13294b] hover:bg-[#f3ead2] dark:border-[#2a4a6b] dark:bg-[#0c2238] dark:text-[#eef3f8] dark:hover:bg-[#143049]">
                 Connector status →
               </Link>
-              <Link href="/admin/ingestion" className="rounded-full border border-[#e6dcc3] bg-white px-3 py-1 font-semibold text-[#13294b] hover:bg-[#f3ead2] dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800">
+              <Link href="/admin/ingestion" className="rounded-full border border-[#e6dcc3] bg-white px-3 py-1 font-semibold text-[#13294b] hover:bg-[#f3ead2] dark:border-[#2a4a6b] dark:bg-[#0c2238] dark:text-[#eef3f8] dark:hover:bg-[#143049]">
                 Run ingestion →
               </Link>
-              <Link href="/admin/evidence" className="rounded-full border border-[#e6dcc3] bg-white px-3 py-1 font-semibold text-[#13294b] hover:bg-[#f3ead2] dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800">
+              <Link href="/admin/evidence" className="rounded-full border border-[#e6dcc3] bg-white px-3 py-1 font-semibold text-[#13294b] hover:bg-[#f3ead2] dark:border-[#2a4a6b] dark:bg-[#0c2238] dark:text-[#eef3f8] dark:hover:bg-[#143049]">
                 Approve evidence →
               </Link>
             </div>
@@ -122,7 +122,7 @@ export default async function CapabilitiesPage() {
                       <td className="py-3 pr-4 font-medium align-top">
                         <VendorNameWithOwnership name={vendor.name} ownershipType={vendor.ownershipType} />
                         {isInfra && (
-                          <div className="mt-1 inline-flex rounded-full border border-zinc-300 bg-zinc-50 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-zinc-700 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-300">
+                          <div className="mt-1 inline-flex rounded-full border border-[#d6c9a8] bg-[#f6f1e3] px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-[#2e3f57] dark:border-[#2a4a6b] dark:bg-[#0c2238] dark:text-[#c2d1e0]">
                             Infra-only
                           </div>
                         )}
@@ -160,7 +160,7 @@ function Stat({ label, value, note, tone = "neutral" }: { label: string; value: 
       ? "border-amber-300 bg-amber-50 text-amber-800 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-300"
       : tone === "bad"
         ? "border-rose-300 bg-rose-50 text-rose-800 dark:border-rose-800 dark:bg-rose-950/40 dark:text-rose-300"
-        : "border-[#e6dcc3] bg-white text-[#475a72] dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300";
+        : "border-[#e6dcc3] bg-white text-[#475a72] dark:border-[#1d3a57] dark:bg-[#0c2238] dark:text-[#c2d1e0]";
   return (
     <div className={`rounded-md border px-3 py-2 ${toneClass}`}>
       <div className="text-[10px] font-semibold uppercase tracking-wide opacity-80">{label}</div>
@@ -190,8 +190,8 @@ const MODE_TONE: Record<CapabilityRenderMode, string> = {
   stale: "border-orange-400 bg-orange-50 text-orange-900 dark:border-orange-700 dark:bg-orange-950/40 dark:text-orange-200",
   disputed: "border-rose-500 bg-rose-50 text-rose-900 dark:border-rose-700 dark:bg-rose-950/40 dark:text-rose-200",
   validation_required: "border-rose-500 bg-rose-50 text-rose-900 dark:border-rose-700 dark:bg-rose-950/40 dark:text-rose-200",
-  unknown: "border-zinc-400 bg-zinc-50 text-zinc-700 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-300",
-  infrastructure_only: "border-zinc-300 bg-zinc-50 text-zinc-600 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400",
+  unknown: "border-[#9fb0c4] bg-[#f6f1e3] text-[#2e3f57] dark:border-[#38587a] dark:bg-[#0c2238] dark:text-[#c2d1e0]",
+  infrastructure_only: "border-[#d6c9a8] bg-[#f6f1e3] text-[#3f5068] dark:border-[#2a4a6b] dark:bg-[#0c2238] dark:text-[#a7bacd]",
 };
 
 function ModeLegend() {
@@ -208,7 +208,7 @@ function ModeLegend() {
 
 function CapabilityCell({ vc, state }: { vc: VendorCapability | undefined; state: CapabilityRenderState }) {
   if (state.mode === "infrastructure_only") {
-    return <span className="text-[11px] italic text-zinc-500" title={state.reason}>n/a — infra exposure</span>;
+    return <span className="text-[11px] italic text-[#4c5d75]" title={state.reason}>n/a — infra exposure</span>;
   }
   if (state.mode === "unknown") {
     return <span className="text-xs text-[#9aa193]" title={state.reason}>No signal</span>;
@@ -246,13 +246,13 @@ function CapabilityCell({ vc, state }: { vc: VendorCapability | undefined; state
         ) : null}
       </div>
       {state.confidence > 0 && (
-        <div className="text-[10px] text-[#5b6b7f] dark:text-zinc-500">
+        <div className="text-[10px] text-[#5b6b7f] dark:text-[#8fa5bb]">
           conf {state.confidence.toFixed(0)}/100
           {vc?.sourceDate && <span className="ml-1">· {vc.sourceDate}</span>}
         </div>
       )}
       {(state.mode === "stale" || state.mode === "seed" || state.mode === "disputed") && state.uncertaintyNote && (
-        <div className="text-[10px] italic leading-4 text-[#5b6b7f] dark:text-zinc-500" title={state.uncertaintyNote}>
+        <div className="text-[10px] italic leading-4 text-[#5b6b7f] dark:text-[#8fa5bb]" title={state.uncertaintyNote}>
           {state.uncertaintyNote.length > 80 ? state.uncertaintyNote.slice(0, 80) + "…" : state.uncertaintyNote}
         </div>
       )}

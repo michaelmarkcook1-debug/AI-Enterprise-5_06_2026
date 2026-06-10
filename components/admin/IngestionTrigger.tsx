@@ -57,14 +57,14 @@ export default function IngestionTrigger() {
   }
 
   return (
-    <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+    <div className="rounded-2xl border border-[#e3d9c0] bg-white p-6 shadow-sm dark:border-[#1d3a57] dark:bg-[#0c2238]">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <div className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+          <div className="text-[10px] font-semibold uppercase tracking-wider text-[#4c5d75] dark:text-[#a7bacd]">
             Data ingestion
           </div>
           <h2 className="mt-1 text-xl font-semibold">Run ingestion manually</h2>
-          <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
+          <p className="mt-1 text-sm text-[#3f5068] dark:text-[#a7bacd]">
             Automated daily ingestion is <strong className="text-amber-700 dark:text-amber-400">suspended</strong>.
             The pipeline now runs only when you trigger it here and confirm the cost.
           </p>
@@ -80,7 +80,7 @@ export default function IngestionTrigger() {
           <button
             type="button"
             onClick={() => setPhase("confirming")}
-            className="inline-flex items-center gap-2 rounded-full bg-zinc-900 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-zinc-700 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200"
+            className="inline-flex items-center gap-2 rounded-full bg-[#0c2238] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#1c3d5c] dark:bg-white dark:text-[#0a1f38] dark:hover:bg-[#e3d9c0]"
           >
             Run full ingestion now
             <span aria-hidden>→</span>
@@ -148,7 +148,7 @@ export default function IngestionTrigger() {
               value={token}
               onChange={(e) => setToken(e.target.value)}
               type="password"
-              className="w-full rounded-lg border border-red-300 bg-white px-3 py-2 text-sm dark:border-red-800 dark:bg-zinc-900"
+              className="w-full rounded-lg border border-red-300 bg-white px-3 py-2 text-sm dark:border-red-800 dark:bg-[#0c2238]"
             />
           </label>
 
@@ -163,7 +163,7 @@ export default function IngestionTrigger() {
             <button
               type="button"
               onClick={() => setPhase("idle")}
-              className="rounded-full border border-zinc-300 px-5 py-2.5 text-sm font-semibold text-zinc-700 transition-colors hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-800"
+              className="rounded-full border border-[#d6c9a8] px-5 py-2.5 text-sm font-semibold text-[#2e3f57] transition-colors hover:bg-[#ece3cb] dark:border-[#2a4a6b] dark:text-[#d8e2ec] dark:hover:bg-[#143049]"
             >
               Cancel
             </button>
@@ -173,8 +173,8 @@ export default function IngestionTrigger() {
 
       {/* Running */}
       {phase === "running" && (
-        <div className="mt-4 flex items-center gap-3 rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm text-zinc-700 dark:border-zinc-800 dark:bg-zinc-950/40 dark:text-zinc-300">
-          <span className="h-3 w-3 animate-spin rounded-full border-2 border-zinc-400 border-t-transparent" aria-hidden />
+        <div className="mt-4 flex items-center gap-3 rounded-xl border border-[#e3d9c0] bg-[#f6f1e3] px-4 py-3 text-sm text-[#2e3f57] dark:border-[#1d3a57] dark:bg-[#081c30]/40 dark:text-[#c2d1e0]">
+          <span className="h-3 w-3 animate-spin rounded-full border-2 border-[#9fb0c4] border-t-transparent" aria-hidden />
           Running the full pipeline… this can take several minutes. Keep this tab open.
         </div>
       )}

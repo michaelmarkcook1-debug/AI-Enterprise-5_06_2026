@@ -446,10 +446,10 @@ export default function RelationshipMap() {
   return (
     <section className="mb-8">
       <div className="mb-5">
-        <h2 className="text-xl font-semibold text-[#13294b] dark:text-zinc-100">
+        <h2 className="text-xl font-semibold text-[#13294b] dark:text-[#eef3f8]">
           Who Depends on Whom
         </h2>
-        <p className="mt-1 text-sm text-[#56657b] dark:text-zinc-400">
+        <p className="mt-1 text-sm text-[#56657b] dark:text-[#a7bacd]">
           The AI market is built on a web of dependencies — money, technology, and infrastructure
           flow between these companies. When one relationship changes, it can affect every vendor
           and customer connected to it.
@@ -468,12 +468,12 @@ export default function RelationshipMap() {
               className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-all ${
                 isActive
                   ? `${meta.color} border-current`
-                  : "border-[#e6dcc3] bg-white text-[#9da596] dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-500"
+                  : "border-[#e6dcc3] bg-white text-[#9da596] dark:border-[#2a4a6b] dark:bg-[#0c2238] dark:text-[#8fa5bb]"
               }`}
             >
               <span aria-hidden>{meta.icon}</span>
               {meta.label}
-              <span className="ml-1 rounded-full bg-white/60 px-1.5 py-0.5 text-[10px] font-bold dark:bg-zinc-800/60">
+              <span className="ml-1 rounded-full bg-white/60 px-1.5 py-0.5 text-[10px] font-bold dark:bg-[#143049]/60">
                 {RELATIONSHIPS.filter((r) => r.type === t).length}
               </span>
             </button>
@@ -493,8 +493,8 @@ export default function RelationshipMap() {
               className={`rounded-xl border transition-all ${
                 hasCritical
                   ? "border-rose-200 dark:border-rose-900/60"
-                  : "border-[#e6dcc3] dark:border-zinc-800"
-              } bg-white dark:bg-zinc-900`}
+                  : "border-[#e6dcc3] dark:border-[#1d3a57]"
+              } bg-white dark:bg-[#0c2238]`}
             >
               {/* Header — always visible */}
               <button
@@ -503,7 +503,7 @@ export default function RelationshipMap() {
                 aria-expanded={isExpanded}
               >
                 <div className="flex items-center gap-3 min-w-0">
-                  <span className="text-sm font-semibold text-[#13294b] dark:text-zinc-100">
+                  <span className="text-sm font-semibold text-[#13294b] dark:text-[#eef3f8]">
                     {vendor}
                   </span>
                   {hasCritical && (
@@ -524,7 +524,7 @@ export default function RelationshipMap() {
                     ))}
                   </div>
                   {/* Arrow connectors preview */}
-                  <span className="text-xs text-[#9da596] dark:text-zinc-500">
+                  <span className="text-xs text-[#9da596] dark:text-[#8fa5bb]">
                     → {rels.map((r) => r.to).filter((v, i, a) => a.indexOf(v) === i).slice(0, 3).join(", ")}
                     {rels.map((r) => r.to).filter((v, i, a) => a.indexOf(v) === i).length > 3 && " ..."}
                   </span>
@@ -536,7 +536,7 @@ export default function RelationshipMap() {
 
               {/* Expanded — full dependency detail */}
               {isExpanded && (
-                <div className="border-t border-[#f3ead2] px-5 py-4 dark:border-zinc-800">
+                <div className="border-t border-[#f3ead2] px-5 py-4 dark:border-[#1d3a57]">
                   <div className="space-y-3">
                     {rels.map((r, idx) => {
                       const meta = RELATION_META[r.type];
@@ -548,22 +548,22 @@ export default function RelationshipMap() {
                               ? "border-l-rose-500 bg-rose-50/40 dark:bg-rose-950/10"
                               : r.strength === "strong"
                               ? "border-l-amber-400 bg-amber-50/30 dark:bg-amber-950/10"
-                              : "border-l-zinc-300 bg-zinc-50/40 dark:border-l-zinc-600 dark:bg-zinc-800/30"
+                              : "border-l-[#d6c9a8] bg-[#f6f1e3]/40 dark:border-l-[#38587a] dark:bg-[#143049]/30"
                           }`}
                         >
                           {/* Dependency header */}
                           <div className="flex items-center gap-2 mb-2">
                             <span className="text-sm" aria-hidden>{meta.icon}</span>
-                            <span className="text-xs font-semibold uppercase tracking-wider text-[#5b6b7f] dark:text-zinc-500">
+                            <span className="text-xs font-semibold uppercase tracking-wider text-[#5b6b7f] dark:text-[#8fa5bb]">
                               {meta.label}
                             </span>
-                            <span className="text-[#5b6b7f] dark:text-zinc-500">·</span>
+                            <span className="text-[#5b6b7f] dark:text-[#8fa5bb]">·</span>
                             <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
                               r.strength === "critical"
                                 ? "bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300"
                                 : r.strength === "strong"
                                 ? "bg-amber-100 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300"
-                                : "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400"
+                                : "bg-[#ece3cb] text-[#3f5068] dark:bg-[#143049] dark:text-[#a7bacd]"
                             }`}>
                               {r.strength === "critical" ? "No alternative" : r.strength === "strong" ? "Primary supplier" : "One of several"}
                             </span>
@@ -571,22 +571,22 @@ export default function RelationshipMap() {
 
                           {/* Arrow connector */}
                           <div className="flex items-center gap-2 mb-2">
-                            <span className="text-sm font-semibold text-[#13294b] dark:text-zinc-100">{r.from}</span>
+                            <span className="text-sm font-semibold text-[#13294b] dark:text-[#eef3f8]">{r.from}</span>
                             <span className="text-xs text-[#9da596]">depends on</span>
-                            <span className="text-sm font-semibold text-[#13294b] dark:text-zinc-100">{r.to}</span>
+                            <span className="text-sm font-semibold text-[#13294b] dark:text-[#eef3f8]">{r.to}</span>
                           </div>
 
                           {/* What it does */}
-                          <p className="text-xs leading-5 text-[#475a72] dark:text-zinc-300">
+                          <p className="text-xs leading-5 text-[#475a72] dark:text-[#c2d1e0]">
                             {r.description}
                           </p>
 
                           {/* What to watch */}
-                          <div className="mt-2 rounded-md bg-white/60 px-3 py-2 dark:bg-zinc-800/40">
-                            <div className="text-[10px] font-semibold uppercase tracking-wider text-[#5b6b7f] dark:text-zinc-500">
+                          <div className="mt-2 rounded-md bg-white/60 px-3 py-2 dark:bg-[#143049]/40">
+                            <div className="text-[10px] font-semibold uppercase tracking-wider text-[#5b6b7f] dark:text-[#8fa5bb]">
                               What to watch
                             </div>
-                            <p className="mt-0.5 text-xs leading-5 text-[#56657b] dark:text-zinc-400">
+                            <p className="mt-0.5 text-xs leading-5 text-[#56657b] dark:text-[#a7bacd]">
                               {r.risk}
                             </p>
                           </div>
@@ -602,7 +602,7 @@ export default function RelationshipMap() {
       </div>
 
       {/* Provenance */}
-      <div className="mt-4 flex items-center gap-2 text-[10px] text-[#9da596] dark:text-zinc-500">
+      <div className="mt-4 flex items-center gap-2 text-[10px] text-[#9da596] dark:text-[#8fa5bb]">
         <span className="rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 font-semibold text-amber-700 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-300">
           Seed
         </span>

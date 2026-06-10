@@ -74,7 +74,7 @@ export default function BackfillSnapshotsButton() {
             placeholder="Admin token (x-admin-token)"
             value={token}
             onChange={(e) => setToken(e.target.value)}
-            className="mt-3 w-full rounded border border-amber-300 bg-white px-3 py-1.5 text-xs font-mono dark:border-amber-700 dark:bg-zinc-900"
+            className="mt-3 w-full rounded border border-amber-300 bg-white px-3 py-1.5 text-xs font-mono dark:border-amber-700 dark:bg-[#0c2238]"
           />
         )}
         <div className="mt-3 flex gap-2">
@@ -97,7 +97,7 @@ export default function BackfillSnapshotsButton() {
 
   if (phase === "running") {
     return (
-      <div className="flex items-center gap-2 text-sm text-zinc-500 dark:text-zinc-400">
+      <div className="flex items-center gap-2 text-sm text-[#4c5d75] dark:text-[#a7bacd]">
         <span className="inline-block h-3.5 w-3.5 animate-spin rounded-full border-2 border-current border-t-transparent" />
         Backfilling snapshot history…
       </div>
@@ -107,7 +107,7 @@ export default function BackfillSnapshotsButton() {
   return (
     <button
       onClick={() => setPhase("confirming")}
-      className="inline-flex items-center gap-2 rounded-lg border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-700 shadow-sm hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700"
+      className="inline-flex items-center gap-2 rounded-lg border border-[#d6c9a8] bg-white px-4 py-2 text-sm font-medium text-[#2e3f57] shadow-sm hover:bg-[#f6f1e3] dark:border-[#2a4a6b] dark:bg-[#143049] dark:text-[#d8e2ec] dark:hover:bg-[#1c3d5c]"
     >
       <span className="text-base leading-none">📈</span>
       Backfill score history

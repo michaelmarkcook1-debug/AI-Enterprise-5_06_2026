@@ -53,11 +53,11 @@ export default async function InvestmentSimulatorPage() {
     >
       {/* News climate strip — portfolio-weighted tilt over the horizon. */}
       {live && (
-        <div className="mb-5 rounded-xl border border-[#e6dcc3] bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
+        <div className="mb-5 rounded-xl border border-[#e6dcc3] bg-white p-4 dark:border-[#1d3a57] dark:bg-[#0c2238]">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-[#5b6b7f] dark:text-zinc-500">
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-[#5b6b7f] dark:text-[#8fa5bb]">
                   Portfolio news climate
                 </span>
                 <SeedDataBadge
@@ -65,8 +65,8 @@ export default async function InvestmentSimulatorPage() {
                   provenance={live.holdings.some((h) => h.enriched.news.some((n) => n.isLive)) ? "live" : "seed"}
                 />
               </div>
-              <p className="mt-1 text-sm text-[#13294b] dark:text-zinc-100">{live.summary}</p>
-              <p className="mt-1 text-[11px] text-[#5b6b7f] dark:text-zinc-500">
+              <p className="mt-1 text-sm text-[#13294b] dark:text-[#eef3f8]">{live.summary}</p>
+              <p className="mt-1 text-[11px] text-[#5b6b7f] dark:text-[#8fa5bb]">
                 Multipliers applied to scenario terminal values (over {portfolio.horizonYears}y):
                 Bull ×{live.scenarios.bull.multiplier.toFixed(3)} ·
                 Base ×{live.scenarios.base.multiplier.toFixed(3)} ·
@@ -75,13 +75,13 @@ export default async function InvestmentSimulatorPage() {
               </p>
             </div>
             <div className="text-right">
-              <div className="text-[10px] uppercase tracking-wider text-[#5b6b7f] dark:text-zinc-500">Annualised tilt</div>
+              <div className="text-[10px] uppercase tracking-wider text-[#5b6b7f] dark:text-[#8fa5bb]">Annualised tilt</div>
               <div className={`font-mono text-2xl font-semibold ${
                 live.portfolioAnnualTilt > 0.0005
                   ? "text-emerald-700 dark:text-emerald-300"
                   : live.portfolioAnnualTilt < -0.0005
                   ? "text-rose-700 dark:text-rose-300"
-                  : "text-[#13294b] dark:text-zinc-100"
+                  : "text-[#13294b] dark:text-[#eef3f8]"
               }`}>
                 {live.portfolioAnnualTilt >= 0 ? "+" : ""}{(live.portfolioAnnualTilt * 100).toFixed(2)}pp
               </div>
@@ -94,7 +94,7 @@ export default async function InvestmentSimulatorPage() {
       {live && live.holdings.length > 0 && (
         <div className="mb-6">
           <Panel title="Live news + AI Atlas context for the seed portfolio holdings">
-            <p className="mb-3 text-xs leading-5 text-[#56657b] dark:text-zinc-400">
+            <p className="mb-3 text-xs leading-5 text-[#56657b] dark:text-[#a7bacd]">
               Each holding shows its AI Atlas quadrant, vendor-uptake share from the May 2026
               research, and the most recent classified news that contributed to its tilt. Toggle
               the news overlay off inside the simulator inputs below to see the deterministic
@@ -109,18 +109,18 @@ export default async function InvestmentSimulatorPage() {
                 const uptake = h.enriched.uptakeShare;
                 const news = h.enriched.news;
                 return (
-                  <div key={h.providerId} className="rounded-md border border-[#e6dcc3] bg-[#fafbf8] p-3 dark:border-zinc-800 dark:bg-zinc-900/60">
+                  <div key={h.providerId} className="rounded-md border border-[#e6dcc3] bg-[#fafbf8] p-3 dark:border-[#1d3a57] dark:bg-[#0c2238]/60">
                     <div className="flex items-center justify-between gap-2">
                       <Link
                         href={`/investor-tools/provider/${h.providerId}`}
-                        className="font-semibold text-[#13294b] hover:underline dark:text-zinc-100"
+                        className="font-semibold text-[#13294b] hover:underline dark:text-[#eef3f8]"
                       >
                         {h.providerName}
                       </Link>
                       <span className={`font-mono text-xs font-semibold ${
                         tone === "ok" ? "text-emerald-700 dark:text-emerald-300"
                         : tone === "bad" ? "text-rose-700 dark:text-rose-300"
-                        : "text-[#5b6b7f] dark:text-zinc-500"
+                        : "text-[#5b6b7f] dark:text-[#8fa5bb]"
                       }`}>
                         {h.tilt.tilt >= 0 ? "+" : ""}{tiltPp}pp
                       </span>
@@ -140,7 +140,7 @@ export default async function InvestmentSimulatorPage() {
                         </span>
                       ) : <span className="italic">No Atlas</span>}
                       {uptake !== null && (
-                        <span className="rounded-full bg-[#f3ead2] px-1.5 py-0.5 font-semibold text-[#455044] dark:bg-zinc-800 dark:text-zinc-300">
+                        <span className="rounded-full bg-[#f3ead2] px-1.5 py-0.5 font-semibold text-[#455044] dark:bg-[#143049] dark:text-[#c2d1e0]">
                           Uptake {(uptake * 100).toFixed(1)}%
                         </span>
                       )}
@@ -152,7 +152,7 @@ export default async function InvestmentSimulatorPage() {
                       <ul className="mt-2 space-y-1.5">
                         {news.slice(0, 2).map((n) => (
                           <li key={n.id} className="text-[11px] leading-4">
-                            <div className="font-medium text-[#13294b] dark:text-zinc-200">{n.title}</div>
+                            <div className="font-medium text-[#13294b] dark:text-[#d8e2ec]">{n.title}</div>
                             <div className="text-[10px] text-[#5d6b80]">{new Date(n.publishedAt).toLocaleDateString()} · impact {n.impactScore}</div>
                           </li>
                         ))}

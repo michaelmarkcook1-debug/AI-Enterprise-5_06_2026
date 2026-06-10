@@ -106,7 +106,7 @@ export default function MarketMovement({ news, provenance }: Props) {
     return (
       <section className="mb-8">
         <Panel title="Market Movement">
-          <p className="text-sm text-[#56657b] dark:text-zinc-400">
+          <p className="text-sm text-[#56657b] dark:text-[#a7bacd]">
             No significant market developments in the current period. Check back after the next update.
           </p>
           <SeedDataBadge label={provenance.source === "live" ? "Live" : "Seed"} provenance={provenance.source} reason={provenance.reason} />
@@ -118,8 +118,8 @@ export default function MarketMovement({ news, provenance }: Props) {
   return (
     <section className="mb-8">
       <div className="mb-5">
-        <h2 className="text-xl font-semibold text-[#13294b] dark:text-zinc-100">What Changed</h2>
-        <p className="mt-1 text-sm text-[#56657b] dark:text-zinc-400">
+        <h2 className="text-xl font-semibold text-[#13294b] dark:text-[#eef3f8]">What Changed</h2>
+        <p className="mt-1 text-sm text-[#56657b] dark:text-[#a7bacd]">
           The most important developments in the AI market right now.
           Only significant events are shown — routine announcements are filtered out.
         </p>
@@ -131,10 +131,10 @@ export default function MarketMovement({ news, provenance }: Props) {
             {/* Movement type header */}
             <div className="flex items-center gap-2 mb-3">
               <span className="text-lg" aria-hidden>{type.icon}</span>
-              <h3 className="text-sm font-semibold uppercase tracking-wide text-[#13294b] dark:text-zinc-100">
+              <h3 className="text-sm font-semibold uppercase tracking-wide text-[#13294b] dark:text-[#eef3f8]">
                 {type.label}
               </h3>
-              <span className="rounded-full bg-[#f3ead2] px-2 py-0.5 text-[10px] font-semibold text-[#455044] dark:bg-zinc-800 dark:text-zinc-300">
+              <span className="rounded-full bg-[#f3ead2] px-2 py-0.5 text-[10px] font-semibold text-[#455044] dark:bg-[#143049] dark:text-[#c2d1e0]">
                 {items.length}
               </span>
             </div>
@@ -144,18 +144,18 @@ export default function MarketMovement({ news, provenance }: Props) {
               {items.map((item) => (
                 <div
                   key={item.id}
-                  className={`rounded-xl border-l-4 ${type.color} border border-[#e6dcc3] bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900`}
+                  className={`rounded-xl border-l-4 ${type.color} border border-[#e6dcc3] bg-white p-4 dark:border-[#1d3a57] dark:bg-[#0c2238]`}
                 >
                   {/* Title + impact */}
                   <div className="flex items-start justify-between gap-3">
-                    <h4 className="text-sm font-semibold leading-5 text-[#13294b] dark:text-zinc-100">
+                    <h4 className="text-sm font-semibold leading-5 text-[#13294b] dark:text-[#eef3f8]">
                       {item.title}
                     </h4>
                     <div className="flex shrink-0 items-center gap-2">
                       <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
                         item.impactScore >= 70 ? "bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300"
                         : item.impactScore >= 50 ? "bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-200"
-                        : "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400"
+                        : "bg-[#ece3cb] text-[#3f5068] dark:bg-[#143049] dark:text-[#a7bacd]"
                       }`}>
                         Significance {item.impactScore >= 70 ? "High" : item.impactScore >= 50 ? "Medium" : "Low"}
                       </span>
@@ -163,23 +163,23 @@ export default function MarketMovement({ news, provenance }: Props) {
                   </div>
 
                   {/* Why does this matter? — the required question */}
-                  <div className="mt-3 rounded-lg bg-[#faf5e9] px-3 py-2.5 dark:bg-zinc-800/60">
-                    <div className="text-[10px] font-semibold uppercase tracking-wider text-[#5b6b7f] dark:text-zinc-500">
+                  <div className="mt-3 rounded-lg bg-[#faf5e9] px-3 py-2.5 dark:bg-[#143049]/60">
+                    <div className="text-[10px] font-semibold uppercase tracking-wider text-[#5b6b7f] dark:text-[#8fa5bb]">
                       Why it matters
                     </div>
-                    <p className="mt-1 text-sm leading-5 text-[#13294b] dark:text-zinc-100">
+                    <p className="mt-1 text-sm leading-5 text-[#13294b] dark:text-[#eef3f8]">
                       {item.whyItMatters}
                     </p>
                   </div>
 
                   {/* Metadata */}
-                  <div className="mt-3 flex flex-wrap items-center gap-3 text-[10px] text-[#5b6b7f] dark:text-zinc-500">
+                  <div className="mt-3 flex flex-wrap items-center gap-3 text-[10px] text-[#5b6b7f] dark:text-[#8fa5bb]">
                     <Confidence value={item.confidenceScore} />
                     {item.publishedAt && (
                       <span>{new Date(item.publishedAt).toLocaleDateString()}</span>
                     )}
                     {item.categories.slice(0, 2).map((c) => (
-                      <span key={c} className="rounded bg-[#f3ead2] px-1.5 py-0.5 text-[10px] dark:bg-zinc-800">{c}</span>
+                      <span key={c} className="rounded bg-[#f3ead2] px-1.5 py-0.5 text-[10px] dark:bg-[#143049]">{c}</span>
                     ))}
                   </div>
                 </div>

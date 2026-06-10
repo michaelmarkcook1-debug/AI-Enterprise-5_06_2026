@@ -8,11 +8,11 @@ export const dynamic = "force-dynamic";
 export default async function ExposureEditsPage() {
   const proposals = await listExposureEditProposals();
   return (
-    <div className="min-h-screen bg-zinc-50 text-zinc-900 dark:bg-[#071827] dark:text-zinc-100">
+    <div className="min-h-screen bg-[#f6f1e3] text-[#15263c] dark:bg-[#071827] dark:text-[#eef3f8]">
       <main className="mx-auto max-w-6xl px-6 py-10">
-        <Link href="/admin" className="text-sm text-zinc-500 hover:underline">← Admin</Link>
+        <Link href="/admin" className="text-sm text-[#4c5d75] hover:underline">← Admin</Link>
         <h1 className="mt-4 text-3xl font-semibold tracking-tight">Exposure-map edit proposals</h1>
-        <p className="mt-2 max-w-3xl text-sm text-zinc-600 dark:text-zinc-400">
+        <p className="mt-2 max-w-3xl text-sm text-[#3f5068] dark:text-[#a7bacd]">
           Propose adds, updates, or removals to the indirect-exposure graph. Proposals are recorded
           to an append-only JSONL audit log; an approved proposal is folded into{" "}
           <code className="font-mono text-xs">lib/investing/exposure-map-data.ts</code> on a follow-up commit. The

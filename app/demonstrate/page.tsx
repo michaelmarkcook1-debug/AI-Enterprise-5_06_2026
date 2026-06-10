@@ -140,13 +140,13 @@ export default async function DemonstratePage({ searchParams }: PageProps) {
       <section className="mb-6 grid gap-4 md:grid-cols-4">
         <ScoreCard label="Board Defence Score" value={boardDefenceScoreValue} sub="quality-weighted: vendors · evidence · momentum · reputation · context" tone="sky" />
         <ScoreCard label="CIO Confidence Score" value={hasShortlist ? cioConfidence : null} sub="Vendor quality + evidence + momentum" tone="emerald" />
-        <div className="rounded-xl border border-[#e6dcc3] bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
+        <div className="rounded-xl border border-[#e6dcc3] bg-white p-4 dark:border-[#1d3a57] dark:bg-[#0c2238]">
           <div className="text-[10px] font-semibold uppercase tracking-wider text-[#5b6b7f]">Recommendation</div>
           <div className={`mt-1 text-lg font-semibold ${statusColor(decisionStatus)}`}>{hasShortlist ? decisionStatus : "—"}</div>
         </div>
-        <div className="rounded-xl border border-[#e6dcc3] bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
+        <div className="rounded-xl border border-[#e6dcc3] bg-white p-4 dark:border-[#1d3a57] dark:bg-[#0c2238]">
           <div className="text-[10px] font-semibold uppercase tracking-wider text-[#5b6b7f]">Shortlist</div>
-          <div className="mt-1 text-sm font-semibold text-[#13294b] dark:text-zinc-100">{hasShortlist ? shortlistVendors.map((v) => v.name).join(", ") : "Not set"}</div>
+          <div className="mt-1 text-sm font-semibold text-[#13294b] dark:text-[#eef3f8]">{hasShortlist ? shortlistVendors.map((v) => v.name).join(", ") : "Not set"}</div>
           <div className="mt-1 text-[10px] text-[#5b6b7f]">{industries.join(", ") || "All industries"} · {region || "Global"}</div>
         </div>
       </section>
@@ -161,10 +161,10 @@ export default async function DemonstratePage({ searchParams }: PageProps) {
               <div><div className="text-[10px] uppercase tracking-wider text-[#5b6b7f]">Intended outcomes</div><ul className="mt-1 space-y-1 text-sm text-[#475a72]">{SEED_BUSINESS_CASE.intendedOutcomes.map((o) => <li key={o} className="flex gap-2"><span className="text-emerald-600">·</span>{o}</li>)}</ul></div>
             </div>
             <div className="mt-4 grid gap-3 md:grid-cols-4 text-xs">
-              <div className="rounded-md border border-[#e6dcc3] p-3 dark:border-zinc-800"><strong>Productivity:</strong> {SEED_BUSINESS_CASE.productivityImpact}</div>
-              <div className="rounded-md border border-[#e6dcc3] p-3 dark:border-zinc-800"><strong>Cost reduction:</strong> {SEED_BUSINESS_CASE.costReductionPotential}</div>
-              <div className="rounded-md border border-[#e6dcc3] p-3 dark:border-zinc-800"><strong>Revenue:</strong> {SEED_BUSINESS_CASE.revenuePotential}</div>
-              <div className="rounded-md border border-[#e6dcc3] p-3 dark:border-zinc-800"><strong>CX/EX:</strong> {SEED_BUSINESS_CASE.cxExImpact}</div>
+              <div className="rounded-md border border-[#e6dcc3] p-3 dark:border-[#1d3a57]"><strong>Productivity:</strong> {SEED_BUSINESS_CASE.productivityImpact}</div>
+              <div className="rounded-md border border-[#e6dcc3] p-3 dark:border-[#1d3a57]"><strong>Cost reduction:</strong> {SEED_BUSINESS_CASE.costReductionPotential}</div>
+              <div className="rounded-md border border-[#e6dcc3] p-3 dark:border-[#1d3a57]"><strong>Revenue:</strong> {SEED_BUSINESS_CASE.revenuePotential}</div>
+              <div className="rounded-md border border-[#e6dcc3] p-3 dark:border-[#1d3a57]"><strong>CX/EX:</strong> {SEED_BUSINESS_CASE.cxExImpact}</div>
             </div>
             <SeedDataBadge label="Estimated" provenance="seed" reason="Business case is a template. Customise with organisation-specific data." />
           </Panel>
@@ -174,9 +174,9 @@ export default async function DemonstratePage({ searchParams }: PageProps) {
         <BS title="Why now?">
           <Panel title="Cost of inaction">
             <div className="grid gap-3 md:grid-cols-3 text-xs">
-              <div className="rounded-md border border-[#e6dcc3] p-3 dark:border-zinc-800"><strong>Competitive gap:</strong> Peers adopting AI see 15–30% productivity gains within 12 months.</div>
-              <div className="rounded-md border border-[#e6dcc3] p-3 dark:border-zinc-800"><strong>Technology timing:</strong> Enterprise AI platforms maturing rapidly — delaying increases switching cost.</div>
-              <div className="rounded-md border border-[#e6dcc3] p-3 dark:border-zinc-800"><strong>Talent window:</strong> AI-skilled workforce increasingly scarce — early movers secure better talent.</div>
+              <div className="rounded-md border border-[#e6dcc3] p-3 dark:border-[#1d3a57]"><strong>Competitive gap:</strong> Peers adopting AI see 15–30% productivity gains within 12 months.</div>
+              <div className="rounded-md border border-[#e6dcc3] p-3 dark:border-[#1d3a57]"><strong>Technology timing:</strong> Enterprise AI platforms maturing rapidly — delaying increases switching cost.</div>
+              <div className="rounded-md border border-[#e6dcc3] p-3 dark:border-[#1d3a57]"><strong>Talent window:</strong> AI-skilled workforce increasingly scarce — early movers secure better talent.</div>
             </div>
             <SeedDataBadge label="Estimated" provenance="seed" reason="Industry benchmark estimates, not client-specific." />
           </Panel>
@@ -212,14 +212,14 @@ export default async function DemonstratePage({ searchParams }: PageProps) {
           <Panel title="Competitor adoption intelligence">
             <div className="space-y-3">
               {SEED_COMPETITOR_PROFILES.map((c) => (
-                <div key={c.peer} className="rounded-lg border border-[#e6dcc3] bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
+                <div key={c.peer} className="rounded-lg border border-[#e6dcc3] bg-white p-4 dark:border-[#1d3a57] dark:bg-[#0c2238]">
                   <div className="flex items-center justify-between gap-3">
-                    <span className="text-sm font-semibold text-[#13294b] dark:text-zinc-100">{c.peer}</span>
+                    <span className="text-sm font-semibold text-[#13294b] dark:text-[#eef3f8]">{c.peer}</span>
                     <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase ${c.maturity === "Advanced" ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300" : c.maturity === "Scaling" ? "bg-sky-100 text-sky-800 dark:bg-sky-950/60 dark:text-sky-300" : "bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-200"}`}>{c.maturity}</span>
                   </div>
                   <div className="mt-2 text-xs text-[#56657b]"><strong>Use cases:</strong> {c.useCases.join(", ")}</div>
                   <div className="mt-1 text-xs text-[#56657b]"><strong>Known vendors:</strong> {c.knownVendors.join(", ")}</div>
-                  <div className="mt-2 text-xs font-medium text-[#13294b] dark:text-zinc-100"><strong>CIO implication:</strong> {c.implication}</div>
+                  <div className="mt-2 text-xs font-medium text-[#13294b] dark:text-[#eef3f8]"><strong>CIO implication:</strong> {c.implication}</div>
                 </div>
               ))}
             </div>
@@ -262,12 +262,12 @@ export default async function DemonstratePage({ searchParams }: PageProps) {
           <Panel title="Risk mitigation controls">
             <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
               {SEED_RISK_MITIGATIONS.map((m) => (
-                <div key={m.control} className="rounded-md border border-[#e6dcc3] bg-white p-3 dark:border-zinc-800 dark:bg-zinc-900">
+                <div key={m.control} className="rounded-md border border-[#e6dcc3] bg-white p-3 dark:border-[#1d3a57] dark:bg-[#0c2238]">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-sm font-semibold text-[#13294b] dark:text-zinc-100">{m.control}</span>
+                    <span className="text-sm font-semibold text-[#13294b] dark:text-[#eef3f8]">{m.control}</span>
                     <span className={`text-[10px] font-semibold uppercase ${m.status === "Recommended" ? "text-emerald-700 dark:text-emerald-300" : "text-amber-700 dark:text-amber-300"}`}>{m.status}</span>
                   </div>
-                  <p className="mt-1 text-xs text-[#56657b] dark:text-zinc-400">{m.description}</p>
+                  <p className="mt-1 text-xs text-[#56657b] dark:text-[#a7bacd]">{m.description}</p>
                 </div>
               ))}
             </div>
@@ -310,8 +310,8 @@ export default async function DemonstratePage({ searchParams }: PageProps) {
           <Panel title="Decision sustainability">
             <p className="mb-3 text-sm text-[#475a72]">Track whether this recommendation holds over time via the <Link href="/monitor" className="font-semibold underline">Monitor tab</Link>.</p>
             <div className="grid gap-3 md:grid-cols-2 text-xs">
-              <div className="rounded-md border border-[#e6dcc3] p-3 dark:border-zinc-800"><strong>Assumption monitoring:</strong> {SEED_BOARD_ASSUMPTIONS.length} assumptions tracked. {SEED_BOARD_ASSUMPTIONS.filter((a) => a.status === "Watch" || a.status === "At Risk").length} require attention.</div>
-              <div className="rounded-md border border-[#e6dcc3] p-3 dark:border-zinc-800"><strong>Reassessment triggers:</strong> Automatic alerts when vendor momentum drops, regulation emerges, or assumptions weaken.</div>
+              <div className="rounded-md border border-[#e6dcc3] p-3 dark:border-[#1d3a57]"><strong>Assumption monitoring:</strong> {SEED_BOARD_ASSUMPTIONS.length} assumptions tracked. {SEED_BOARD_ASSUMPTIONS.filter((a) => a.status === "Watch" || a.status === "At Risk").length} require attention.</div>
+              <div className="rounded-md border border-[#e6dcc3] p-3 dark:border-[#1d3a57]"><strong>Reassessment triggers:</strong> Automatic alerts when vendor momentum drops, regulation emerges, or assumptions weaken.</div>
             </div>
           </Panel>
         </BS>
@@ -321,9 +321,9 @@ export default async function DemonstratePage({ searchParams }: PageProps) {
           <Panel title="Assumption monitor">
             <div className="space-y-3">
               {SEED_BOARD_ASSUMPTIONS.map((a) => (
-                <div key={a.id} className="rounded-lg border border-[#e6dcc3] bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
+                <div key={a.id} className="rounded-lg border border-[#e6dcc3] bg-white p-4 dark:border-[#1d3a57] dark:bg-[#0c2238]">
                   <div className="flex items-start justify-between gap-3">
-                    <div><div className="text-sm font-semibold text-[#13294b] dark:text-zinc-100">{a.title}</div>
+                    <div><div className="text-sm font-semibold text-[#13294b] dark:text-[#eef3f8]">{a.title}</div>
                       <div className="mt-1 text-xs text-[#56657b]"><strong>Failure trigger:</strong> {a.failureTrigger}</div>
                       <div className="mt-1 text-xs text-[#56657b]"><strong>Current signal:</strong> {a.currentSignal}</div>
                       <div className="mt-1 text-xs text-[#56657b]"><strong>Action:</strong> {a.recommendedAction}</div>
@@ -460,8 +460,8 @@ export default async function DemonstratePage({ searchParams }: PageProps) {
       </section>
 
       <div className="mt-4 flex flex-wrap gap-2 text-xs">
-        <Link href="/assess" className="rounded-md border border-[#d6c9a8] px-3 py-2 font-semibold hover:bg-[#f3ead2] dark:border-zinc-700 dark:hover:bg-zinc-900">← Run new assessment</Link>
-        <Link href="/monitor" className="rounded-md border border-[#d6c9a8] px-3 py-2 font-semibold hover:bg-[#f3ead2] dark:border-zinc-700 dark:hover:bg-zinc-900">Monitor decisions →</Link>
+        <Link href="/assess" className="rounded-md border border-[#d6c9a8] px-3 py-2 font-semibold hover:bg-[#f3ead2] dark:border-[#2a4a6b] dark:hover:bg-[#0c2238]">← Run new assessment</Link>
+        <Link href="/monitor" className="rounded-md border border-[#d6c9a8] px-3 py-2 font-semibold hover:bg-[#f3ead2] dark:border-[#2a4a6b] dark:hover:bg-[#0c2238]">Monitor decisions →</Link>
       </div>
     </PageFrame>
   );
@@ -470,7 +470,7 @@ export default async function DemonstratePage({ searchParams }: PageProps) {
 function BS({ title, open, children }: { title: string; open?: boolean; children: React.ReactNode }) {
   return (
     <details className="group" open={open}>
-      <summary className="flex cursor-pointer select-none items-center justify-between rounded-xl border border-[#e6dcc3] bg-white px-4 py-3 text-sm font-semibold text-[#13294b] hover:bg-[#faf5e9] dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800">
+      <summary className="flex cursor-pointer select-none items-center justify-between rounded-xl border border-[#e6dcc3] bg-white px-4 py-3 text-sm font-semibold text-[#13294b] hover:bg-[#faf5e9] dark:border-[#1d3a57] dark:bg-[#0c2238] dark:text-[#eef3f8] dark:hover:bg-[#143049]">
         <span>{title}</span>
         <span className="ml-2 font-normal text-[#5b6b7f] text-xs group-open:hidden">▼</span>
         <span className="ml-2 font-normal text-[#5b6b7f] text-xs hidden group-open:inline">▲</span>

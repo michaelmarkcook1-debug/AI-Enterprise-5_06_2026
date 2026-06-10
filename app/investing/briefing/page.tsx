@@ -18,7 +18,7 @@ export default function InvestmentBriefingPage() {
       <div className="text-xs text-[#5d6b80]">Generated {new Date(brief.generatedAt).toLocaleString()}</div>
 
       <Panel title="Executive summary">
-        <ul className="list-disc pl-5 text-sm space-y-1 leading-6 text-[#13294b] dark:text-zinc-100">
+        <ul className="list-disc pl-5 text-sm space-y-1 leading-6 text-[#13294b] dark:text-[#eef3f8]">
           {brief.executiveSummary.map((line, i) => <li key={i}>{line}</li>)}
         </ul>
       </Panel>
@@ -49,7 +49,7 @@ export default function InvestmentBriefingPage() {
       </div>
 
       <Panel title="Confidence + access notes">
-        <ul className="list-disc pl-5 text-xs space-y-1 leading-5 text-[#54647a] dark:text-zinc-400">
+        <ul className="list-disc pl-5 text-xs space-y-1 leading-5 text-[#54647a] dark:text-[#a7bacd]">
           {brief.confidenceNotes.map((l, i) => <li key={i}>{l}</li>)}
         </ul>
       </Panel>

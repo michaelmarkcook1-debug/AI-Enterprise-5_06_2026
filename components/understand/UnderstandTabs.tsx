@@ -91,11 +91,11 @@ export default function UnderstandTabs({
           <CapabilityMatrix vendorFilter={filterVendor} pillarFilter={filterPillar} />
         )}
         {activeView !== "matrix" && (
-          <div className="rounded-lg border border-dashed border-slate-300 bg-slate-50 p-8 text-center dark:border-zinc-700 dark:bg-zinc-900/50">
-            <p className="text-sm font-semibold text-slate-700 dark:text-zinc-200">
+          <div className="rounded-lg border border-dashed border-slate-300 bg-slate-50 p-8 text-center dark:border-[#2a4a6b] dark:bg-[#0c2238]/50">
+            <p className="text-sm font-semibold text-slate-700 dark:text-[#d8e2ec]">
               {tabs.find((t) => t.id === activeView)?.label ?? "View"} — coming soon
             </p>
-            <p className="mt-2 text-xs text-slate-500 dark:text-zinc-400">
+            <p className="mt-2 text-xs text-slate-500 dark:text-[#a7bacd]">
               The data layer for this view is wired (see <code className="font-mono">/lib/intelligence/repository</code>),
               but the component still needs to be built. Use the Capability Matrix tab in the meantime.
             </p>

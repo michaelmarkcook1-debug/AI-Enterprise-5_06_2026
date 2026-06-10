@@ -83,7 +83,7 @@ export default function MarketSignalsClient({
           <span className="rounded-full bg-amber-50 px-2.5 py-1 font-semibold text-amber-800">
             {seedCount} seed
           </span>
-          <span className="rounded-full bg-zinc-100 px-2.5 py-1 font-semibold text-zinc-700">
+          <span className="rounded-full bg-[#ece3cb] px-2.5 py-1 font-semibold text-[#2e3f57]">
             {marketTalk.length} market-talk items
           </span>
         </div>
@@ -234,7 +234,7 @@ function SignalCard({ signal, score }: { signal: MarketSignal; score: SignalImpa
   const toneClass = signal.dataStatus === "verified" ? "bg-emerald-100 text-emerald-800"
     : signal.dataStatus === "documented" ? "bg-sky-100 text-sky-800"
       : signal.dataStatus === "seed" ? "bg-amber-100 text-amber-800"
-        : "bg-zinc-100 text-zinc-700";
+        : "bg-[#ece3cb] text-[#2e3f57]";
   return (
     <article className="rounded-md border border-[#efe9d9] bg-[#faf6ec] p-3">
       <div className="flex flex-wrap items-start justify-between gap-3">

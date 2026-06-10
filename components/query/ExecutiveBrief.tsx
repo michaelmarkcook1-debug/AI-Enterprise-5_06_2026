@@ -147,7 +147,7 @@ function seedDevelopments(entities: Entity[]): MarketDevelopment[] {
 const IMPACT_COLORS: Record<MarketDevelopment["impact"], { bg: string; text: string; label: string }> = {
   positive: { bg: "bg-emerald-50 dark:bg-emerald-950/30", text: "text-emerald-700 dark:text-emerald-400", label: "Positive Signal" },
   negative: { bg: "bg-rose-50 dark:bg-rose-950/30", text: "text-rose-700 dark:text-rose-400", label: "Risk Signal" },
-  neutral: { bg: "bg-zinc-50 dark:bg-zinc-900/30", text: "text-zinc-600 dark:text-zinc-400", label: "Market Shift" },
+  neutral: { bg: "bg-[#f6f1e3] dark:bg-[#0c2238]/30", text: "text-[#3f5068] dark:text-[#a7bacd]", label: "Market Shift" },
   watch: { bg: "bg-amber-50 dark:bg-amber-950/30", text: "text-amber-700 dark:text-amber-400", label: "Watch" },
 };
 
@@ -450,15 +450,15 @@ export default function ExecutiveBrief({ entities, winningByLayer, developments 
 
   return (
     <section className="mb-6">
-      <div className="rounded-xl border border-[#e6dcc3] bg-white dark:border-zinc-800 dark:bg-[#071827]">
+      <div className="rounded-xl border border-[#e6dcc3] bg-white dark:border-[#1d3a57] dark:bg-[#071827]">
         <button
           type="button"
           onClick={() => setExpanded(!expanded)}
           className="flex w-full items-center justify-between px-5 py-4 text-left"
         >
           <div>
-            <div className="text-[10px] font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">Executive Brief</div>
-            <div className="mt-1 text-sm font-semibold text-[#13294b] dark:text-zinc-100">
+            <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#a07f1f] dark:text-[#d4af37]">Executive Brief</div>
+            <div className="mt-1 text-sm font-semibold text-[#13294b] dark:text-[#eef3f8]">
               {brief.total} entities tracked · Avg leadership {brief.avgLeadership} · Confidence {brief.avgConfidence}% · {brief.risk.high} high-risk · {devs.length} developments
             </div>
           </div>
@@ -466,11 +466,11 @@ export default function ExecutiveBrief({ entities, winningByLayer, developments 
         </button>
 
         {expanded && (
-          <div className="border-t border-[#efe9d9] px-5 py-4 dark:border-zinc-800">
+          <div className="border-t border-[#efe9d9] px-5 py-4 dark:border-[#1d3a57]">
             <div className="grid gap-4 md:grid-cols-2">
-              <div className="rounded-lg border border-[#e9e0c8] bg-[#fdfaf1] p-4 dark:border-zinc-800 dark:bg-zinc-950/40">
+              <div className="rounded-lg border border-[#e9e0c8] bg-[#fdfaf1] p-4 dark:border-[#1d3a57] dark:bg-[#081c30]/40">
                 <div className="text-[10px] font-semibold uppercase tracking-wider text-[#5b6b7f]">Market Snapshot</div>
-                <p className="mt-2 text-sm leading-6 text-[#2c3b52] dark:text-zinc-300">
+                <p className="mt-2 text-sm leading-6 text-[#2c3b52] dark:text-[#c2d1e0]">
                   AnalystGenius tracks <strong>{brief.total} entities</strong> across the enterprise AI landscape.
                   Average leadership score is <strong>{brief.avgLeadership}/100</strong> with momentum
                   at <strong>{brief.avgMomentum}</strong>.
@@ -478,9 +478,9 @@ export default function ExecutiveBrief({ entities, winningByLayer, developments 
                   Model provision is led by {brief.modelWinners.join(", ") || "frontier providers"}.
                 </p>
               </div>
-              <div className="rounded-lg border border-[#e9e0c8] bg-[#fdfaf1] p-4 dark:border-zinc-800 dark:bg-zinc-950/40">
+              <div className="rounded-lg border border-[#e9e0c8] bg-[#fdfaf1] p-4 dark:border-[#1d3a57] dark:bg-[#081c30]/40">
                 <div className="text-[10px] font-semibold uppercase tracking-wider text-[#5b6b7f]">Risk & Confidence</div>
-                <p className="mt-2 text-sm leading-6 text-[#2c3b52] dark:text-zinc-300">
+                <p className="mt-2 text-sm leading-6 text-[#2c3b52] dark:text-[#c2d1e0]">
                   <strong>{brief.risk.high}</strong> high-risk, <strong>{brief.risk.medium}</strong> medium,
                   and <strong>{brief.risk.low}</strong> low-risk entities.
                   Average evidence confidence is <strong>{brief.avgConfidence}%</strong> — directional, evidence-labelled intelligence.
@@ -496,7 +496,7 @@ export default function ExecutiveBrief({ entities, winningByLayer, developments 
                   {devs.slice(0, 5).map((d, i) => {
                     const style = IMPACT_COLORS[d.impact];
                     return (
-                      <div key={i} className={`rounded-lg border border-[#e9e0c8] p-4 dark:border-zinc-800 ${style.bg}`}>
+                      <div key={i} className={`rounded-lg border border-[#e9e0c8] p-4 dark:border-[#1d3a57] ${style.bg}`}>
                         <div className="flex items-start justify-between gap-3">
                           <div className="flex-1">
                             <div className="flex items-center gap-2">
@@ -504,11 +504,11 @@ export default function ExecutiveBrief({ entities, winningByLayer, developments 
                               <span className="text-[9px] text-[#5b6b7f]">{d.date}</span>
                               {d.source && <span className="text-[9px] text-[#a1a8a0]">· {d.source}</span>}
                             </div>
-                            <div className="mt-1 text-xs font-semibold text-[#13294b] dark:text-zinc-100">{d.headline}</div>
-                            <p className="mt-2 text-xs leading-5 text-[#475a72] dark:text-zinc-400">{d.analystTake}</p>
+                            <div className="mt-1 text-xs font-semibold text-[#13294b] dark:text-[#eef3f8]">{d.headline}</div>
+                            <p className="mt-2 text-xs leading-5 text-[#475a72] dark:text-[#a7bacd]">{d.analystTake}</p>
                             <div className="mt-2 flex gap-1.5">
                               {d.entities.map((name) => (
-                                <span key={name} className="rounded-full bg-[#071827]/10 px-2 py-0.5 text-[9px] font-semibold text-[#071827] dark:bg-zinc-700 dark:text-zinc-200">{name}</span>
+                                <span key={name} className="rounded-full bg-[#071827]/10 px-2 py-0.5 text-[9px] font-semibold text-[#071827] dark:bg-[#1c3d5c] dark:text-[#d8e2ec]">{name}</span>
                               ))}
                             </div>
                           </div>
@@ -529,8 +529,8 @@ export default function ExecutiveBrief({ entities, winningByLayer, developments 
                 <div className="mt-2 space-y-1.5">
                   {brief.leadersByLayer.map((l) => (
                     <div key={l.title} className="flex items-baseline justify-between gap-2 text-xs">
-                      <span className="shrink-0 text-[#5b6b7f] dark:text-zinc-500">{l.title}</span>
-                      <span className="text-right font-medium text-[#13294b] dark:text-zinc-100">{l.names.join(", ") || "—"}</span>
+                      <span className="shrink-0 text-[#5b6b7f] dark:text-[#8fa5bb]">{l.title}</span>
+                      <span className="text-right font-medium text-[#13294b] dark:text-[#eef3f8]">{l.names.join(", ") || "—"}</span>
                     </div>
                   ))}
                 </div>
@@ -540,7 +540,7 @@ export default function ExecutiveBrief({ entities, winningByLayer, developments 
                 <div className="mt-2 space-y-1.5">
                   {brief.fastestMovers.length > 0 ? brief.fastestMovers.map((e) => (
                     <div key={e.id} className="flex items-center justify-between text-xs">
-                      <span className="font-medium text-[#13294b] dark:text-zinc-100">{e.name}</span>
+                      <span className="font-medium text-[#13294b] dark:text-[#eef3f8]">{e.name}</span>
                       <span className="font-mono font-semibold text-emerald-700 dark:text-emerald-300">+{e.deltas.leadership}</span>
                     </div>
                   )) : <span className="text-xs text-[#5b6b7f]">No material movement.</span>}
@@ -551,7 +551,7 @@ export default function ExecutiveBrief({ entities, winningByLayer, developments 
                 <div className="mt-2 space-y-1.5">
                   {brief.highRiskEntities.length > 0 ? brief.highRiskEntities.map((e) => (
                     <div key={e.id} className="flex items-center justify-between text-xs">
-                      <span className="font-medium text-[#13294b] dark:text-zinc-100">{e.name}</span>
+                      <span className="font-medium text-[#13294b] dark:text-[#eef3f8]">{e.name}</span>
                       <span className="font-mono text-rose-700 dark:text-rose-300">{e.confidence}%</span>
                     </div>
                   )) : <span className="text-xs text-[#5b6b7f]">No high-risk entities.</span>}
@@ -563,7 +563,7 @@ export default function ExecutiveBrief({ entities, winningByLayer, developments 
               <button
                 onClick={handleExport}
                 disabled={exporting}
-                className="rounded-full border border-[#d6c9a8] bg-white px-4 py-2 text-xs font-semibold text-[#13294b] hover:bg-[#f3ead2] disabled:opacity-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
+                className="rounded-full border border-[#d6c9a8] bg-white px-4 py-2 text-xs font-semibold text-[#13294b] hover:bg-[#f3ead2] disabled:opacity-50 dark:border-[#2a4a6b] dark:bg-[#0c2238] dark:text-[#eef3f8] dark:hover:bg-[#143049]"
               >
                 {exporting ? "Exporting…" : "Export Executive Brief"}
               </button>

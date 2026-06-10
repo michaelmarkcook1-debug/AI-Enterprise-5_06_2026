@@ -56,7 +56,7 @@ export default function RootLayout({
       <head>
         <script dangerouslySetInnerHTML={{ __html: NO_FLASH_THEME_SCRIPT }} />
       </head>
-      <body className="min-h-full flex flex-col bg-zinc-50 dark:bg-[#071827] text-zinc-900 dark:text-zinc-100">
+      <body className="min-h-full flex flex-col bg-[#faf6ec] dark:bg-[#071827] text-[#15263c] dark:text-[#eef3f8]">
         <AmbientHeroBackdrop />
         <div className="relative z-10 flex flex-1 flex-col">
           <TopNav />

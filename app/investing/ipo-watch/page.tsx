@@ -37,17 +37,17 @@ export default function IpoWatchPage() {
             const evidence = row.evidenceQuality;
             return (
               <Link key={provider.id} href={`/investor-tools/ipo-watch/${provider.slug}`}
-                className="block rounded-lg border border-[#e6dcc3] bg-white p-4 hover:border-[#13294b] dark:border-zinc-800 dark:bg-[#071827]">
+                className="block rounded-lg border border-[#e6dcc3] bg-white p-4 hover:border-[#13294b] dark:border-[#1d3a57] dark:bg-[#071827]">
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <div className="font-semibold">{provider.name}</div>
                     <div className="text-[11px] text-[#5d6b80]">{label(provider.exposureClass)}</div>
                   </div>
-                  <span className="rounded-full border border-[#e0d6ba] px-2 py-0.5 font-mono text-[11px] dark:border-zinc-700">
+                  <span className="rounded-full border border-[#e0d6ba] px-2 py-0.5 font-mono text-[11px] dark:border-[#2a4a6b]">
                     {profile.rumourQuality}
                   </span>
                 </div>
-                <p className="mt-2 text-xs text-[#54647a] dark:text-zinc-400">
+                <p className="mt-2 text-xs text-[#54647a] dark:text-[#a7bacd]">
                   {STAGE_LABEL[baseRumourStage(profile.rumourQuality)] ?? label(profile.rumourQuality)}
                 </p>
                 <dl className="mt-3 grid grid-cols-2 gap-2 text-xs">

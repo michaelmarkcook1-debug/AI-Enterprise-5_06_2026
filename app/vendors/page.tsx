@@ -25,7 +25,7 @@ export default async function VendorsPage() {
             <Link key={vendor.id} href={`/vendors/${vendor.slug}`} className="grid gap-4 py-4 md:grid-cols-[36px_1fr_160px_160px] md:items-center">
               <div className="font-mono text-sm text-[#5b6b7f]">{index + 1}</div>
               <div>
-                <div className="text-base font-semibold text-[#13294b] dark:text-zinc-100">
+                <div className="text-base font-semibold text-[#13294b] dark:text-[#eef3f8]">
                   <VendorNameWithOwnership name={vendor.name} ownershipType={vendor.ownershipType} compactBadge={false} />
                 </div>
                 <div className="mt-1 text-sm text-[#54647a]">{vendor.category} - {vendor.marketPosition}</div>

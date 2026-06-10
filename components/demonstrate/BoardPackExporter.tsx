@@ -852,7 +852,7 @@ export default function BoardPackExporter(props: BoardPackExporterProps) {
             className={`rounded-full border px-3 py-1 font-semibold transition-colors ${
               format === f.key
                 ? "border-[#071827] bg-[#071827] text-white dark:border-emerald-500 dark:bg-emerald-600"
-                : "border-[#d6c9a8] bg-white text-[#13294b] hover:bg-[#f3ead2] dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
+                : "border-[#d6c9a8] bg-white text-[#13294b] hover:bg-[#f3ead2] dark:border-[#2a4a6b] dark:bg-[#0c2238] dark:text-[#eef3f8] dark:hover:bg-[#143049]"
             }`}
           >
             {f.label}
@@ -872,8 +872,8 @@ export default function BoardPackExporter(props: BoardPackExporterProps) {
               title={locked ? "Requires a completed assessment shortlist — run Assess first" : undefined}
               className={`rounded-full border px-4 py-2 text-xs font-semibold ${
                 locked
-                  ? "cursor-not-allowed border-dashed border-[#d6c9a8] bg-[#f4f6f1] text-[#a1a8a0] dark:border-zinc-700 dark:bg-zinc-900/60 dark:text-zinc-600"
-                  : "border-[#d6c9a8] bg-white text-[#13294b] hover:bg-[#f3ead2] disabled:opacity-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
+                  ? "cursor-not-allowed border-dashed border-[#d6c9a8] bg-[#f4f6f1] text-[#a1a8a0] dark:border-[#2a4a6b] dark:bg-[#0c2238]/60 dark:text-[#7d93aa]"
+                  : "border-[#d6c9a8] bg-white text-[#13294b] hover:bg-[#f3ead2] disabled:opacity-50 dark:border-[#2a4a6b] dark:bg-[#0c2238] dark:text-[#eef3f8] dark:hover:bg-[#143049]"
               }`}
             >
               {exporting === t ? "Exporting…" : locked ? `${t} — requires assessment` : `Export ${t}`}
@@ -882,7 +882,7 @@ export default function BoardPackExporter(props: BoardPackExporterProps) {
         })}
       </div>
       {lastExport && (
-        <p className="mt-2 text-[11px] text-[#56657b] dark:text-zinc-400">
+        <p className="mt-2 text-[11px] text-[#56657b] dark:text-[#a7bacd]">
           Exported <strong>{lastExport.type}</strong> ({lastExport.filename.endsWith(".pptx") ? "PowerPoint" : "HTML"}).{" "}
           Didn&apos;t download?{" "}
           <a

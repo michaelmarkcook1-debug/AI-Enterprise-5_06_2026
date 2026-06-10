@@ -136,11 +136,11 @@ export default function EvidenceReview({
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-[#071827] text-zinc-900 dark:text-zinc-100">
+    <div className="min-h-screen bg-[#f6f1e3] dark:bg-[#071827] text-[#15263c] dark:text-[#eef3f8]">
       <main className="mx-auto max-w-5xl px-6 py-10">
-        <Link href="/admin" className="text-sm text-zinc-500 hover:underline">← Admin</Link>
+        <Link href="/admin" className="text-sm text-[#4c5d75] hover:underline">← Admin</Link>
         <h1 className="mt-4 text-3xl font-semibold tracking-tight">Evidence review</h1>
-        <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
+        <p className="mt-2 text-sm text-[#3f5068] dark:text-[#a7bacd]">
           Review extractor + classifier output before it can affect production scoring.
         </p>
         <div className="mt-4 text-sm">
@@ -192,14 +192,14 @@ export default function EvidenceReview({
 
         <div className="mt-6 grid gap-3 sm:grid-cols-2">
           <label className="block">
-            <div className="mb-1 text-xs font-medium text-zinc-500">Reviewer ID</div>
+            <div className="mb-1 text-xs font-medium text-[#4c5d75]">Reviewer ID</div>
             <input value={reviewerId} onChange={(e) => setReviewerId(e.target.value)}
-              className="w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-[#071827] px-3 py-2 text-sm" />
+              className="w-full rounded-lg border border-[#d6c9a8] dark:border-[#2a4a6b] bg-white dark:bg-[#071827] px-3 py-2 text-sm" />
           </label>
           <label className="block">
-            <div className="mb-1 text-xs font-medium text-zinc-500">x-admin-token (if not in dev mode)</div>
+            <div className="mb-1 text-xs font-medium text-[#4c5d75]">x-admin-token (if not in dev mode)</div>
             <input value={token} onChange={(e) => setToken(e.target.value)} type="password"
-              className="w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-[#071827] px-3 py-2 text-sm" />
+              className="w-full rounded-lg border border-[#d6c9a8] dark:border-[#2a4a6b] bg-white dark:bg-[#071827] px-3 py-2 text-sm" />
           </label>
         </div>
 
@@ -207,20 +207,20 @@ export default function EvidenceReview({
 
         <div className="mt-8 space-y-3">
           {proposals.length === 0 && (
-            <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-8 text-center text-sm text-zinc-500">
+            <div className="rounded-xl border border-[#e3d9c0] dark:border-[#1d3a57] bg-white dark:bg-[#0c2238] p-8 text-center text-sm text-[#4c5d75]">
               No pending proposals.
             </div>
           )}
           {proposals.map((p) => (
-            <div key={p.id} className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5">
+            <div key={p.id} className="rounded-xl border border-[#e3d9c0] dark:border-[#1d3a57] bg-white dark:bg-[#0c2238] p-5">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <div className="text-xs font-mono text-zinc-500">{p.id} · {p.vendorId}</div>
-                  <div className="mt-1 font-semibold">{p.subfactor} <span className="text-xs font-normal text-zinc-500">· {p.domain}</span></div>
+                  <div className="text-xs font-mono text-[#4c5d75]">{p.id} · {p.vendorId}</div>
+                  <div className="mt-1 font-semibold">{p.subfactor} <span className="text-xs font-normal text-[#4c5d75]">· {p.domain}</span></div>
                 </div>
                 <div className="text-right shrink-0">
                   <div className="font-mono text-sm">{p.proposedGrade} · raw {p.proposedRawScore.toFixed(0)}</div>
-                  <div className="text-xs text-zinc-500">classifier conf {(p.classifierConfidence * 100).toFixed(0)}%</div>
+                  <div className="text-xs text-[#4c5d75]">classifier conf {(p.classifierConfidence * 100).toFixed(0)}%</div>
                 </div>
               </div>
               {p.triageLane && (
@@ -251,14 +251,14 @@ export default function EvidenceReview({
                   Reclassify before approving.
                 </div>
               )}
-              <blockquote className="mt-3 rounded-lg bg-zinc-50 dark:bg-[#071827] px-3 py-2 text-sm border-l-2 border-zinc-300 dark:border-zinc-700">
+              <blockquote className="mt-3 rounded-lg bg-[#f6f1e3] dark:bg-[#071827] px-3 py-2 text-sm border-l-2 border-[#d6c9a8] dark:border-[#2a4a6b]">
                 {p.excerpt}
               </blockquote>
               {p.classifierRationale && (
-                <div className="mt-2 text-xs text-zinc-500"><strong>Rationale:</strong> {p.classifierRationale}</div>
+                <div className="mt-2 text-xs text-[#4c5d75]"><strong>Rationale:</strong> {p.classifierRationale}</div>
               )}
               {p.sourceUrl && (
-                <div className="mt-1 text-xs text-zinc-500 truncate">
+                <div className="mt-1 text-xs text-[#4c5d75] truncate">
                   <strong>Source:</strong> {p.sourceUrl}
                 </div>
               )}
@@ -307,7 +307,7 @@ export default function EvidenceReview({
                 <button
                   disabled={busy === p.id}
                   onClick={() => act(p.id, "reject")}
-                  className="rounded-full border border-zinc-300 dark:border-zinc-700 px-4 py-1.5 text-xs font-medium disabled:opacity-50"
+                  className="rounded-full border border-[#d6c9a8] dark:border-[#2a4a6b] px-4 py-1.5 text-xs font-medium disabled:opacity-50"
                 >Reject</button>
               </div>
             </div>
@@ -320,7 +320,7 @@ export default function EvidenceReview({
 
 const STAT_TONE: Record<"neutral" | "green" | "amber" | "red", string> = {
   neutral:
-    "border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900",
+    "border-[#e3d9c0] bg-white dark:border-[#1d3a57] dark:bg-[#0c2238]",
   green:
     "border-emerald-200 bg-emerald-50 dark:border-emerald-900/60 dark:bg-emerald-950/30",
   amber:
@@ -330,7 +330,7 @@ const STAT_TONE: Record<"neutral" | "green" | "amber" | "red", string> = {
 };
 
 const STAT_TEXT_TONE: Record<"neutral" | "green" | "amber" | "red", string> = {
-  neutral: "text-zinc-900 dark:text-zinc-100",
+  neutral: "text-[#15263c] dark:text-[#eef3f8]",
   green: "text-emerald-900 dark:text-emerald-200",
   amber: "text-amber-900 dark:text-amber-200",
   red: "text-red-900 dark:text-red-200",
@@ -351,9 +351,9 @@ function QueueStat({
 }) {
   const body = (
     <div className={`rounded-xl border px-4 py-3 ${STAT_TONE[tone]} ${href ? "transition-colors hover:brightness-95" : ""}`} title={hint}>
-      <div className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">{label}</div>
+      <div className="text-[10px] font-semibold uppercase tracking-wider text-[#4c5d75] dark:text-[#a7bacd]">{label}</div>
       <div className={`mt-1 text-2xl font-semibold tabular-nums ${STAT_TEXT_TONE[tone]}`}>{value.toLocaleString()}</div>
-      {hint && <div className="mt-1 text-[10px] leading-snug text-zinc-500 dark:text-zinc-400">{hint}</div>}
+      {hint && <div className="mt-1 text-[10px] leading-snug text-[#4c5d75] dark:text-[#a7bacd]">{hint}</div>}
     </div>
   );
   return href ? <Link href={href} className="block no-underline">{body}</Link> : body;
@@ -506,7 +506,7 @@ function ProductLinkagePicker({
             <button
               type="button"
               onClick={() => toggleAll(false)}
-              className="rounded-full border border-zinc-300 px-2 py-0.5 text-[11px] text-zinc-700 hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-900"
+              className="rounded-full border border-[#d6c9a8] px-2 py-0.5 text-[11px] text-[#2e3f57] hover:bg-[#ece3cb] dark:border-[#2a4a6b] dark:text-[#c2d1e0] dark:hover:bg-[#0c2238]"
             >Clear</button>
             {suggestions.length > 0 && (
               <button
@@ -520,7 +520,7 @@ function ProductLinkagePicker({
             )}
           </div>
 
-          <ul className="mt-2 max-h-48 space-y-0.5 overflow-y-auto rounded border border-sky-200 bg-white p-2 dark:border-sky-900/60 dark:bg-zinc-900">
+          <ul className="mt-2 max-h-48 space-y-0.5 overflow-y-auto rounded border border-sky-200 bg-white p-2 dark:border-sky-900/60 dark:bg-[#0c2238]">
             {ordered.map((p) => {
               const suggestion = suggestions.find((s) => s.productScopeId === p.id);
               return (
@@ -532,8 +532,8 @@ function ProductLinkagePicker({
                       onChange={() => toggle(p.id)}
                       className="accent-sky-600"
                     />
-                    <span className="font-medium text-zinc-900 dark:text-zinc-100">{p.name}</span>
-                    <span className="text-[10px] text-zinc-500">· {p.category}</span>
+                    <span className="font-medium text-[#15263c] dark:text-[#eef3f8]">{p.name}</span>
+                    <span className="text-[10px] text-[#4c5d75]">· {p.category}</span>
                     {suggestion && (
                       <span className="ml-auto flex items-center gap-1 text-[10px] text-emerald-700 dark:text-emerald-400">
                         <span className="font-mono">{(suggestion.confidence * 100).toFixed(0)}%</span>
@@ -559,7 +559,7 @@ function ProductLinkagePicker({
             </button>
             {savedAt && <span className="text-[11px] text-emerald-700 dark:text-emerald-400">✓ saved {savedAt}</span>}
             {!dirty && initialScopeIds.length > 0 && (
-              <span className="text-[11px] text-zinc-500">{initialScopeIds.length} product{initialScopeIds.length === 1 ? "" : "s"} currently linked</span>
+              <span className="text-[11px] text-[#4c5d75]">{initialScopeIds.length} product{initialScopeIds.length === 1 ? "" : "s"} currently linked</span>
             )}
           </div>
         </>

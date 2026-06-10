@@ -248,25 +248,25 @@ export default function ExposureMapHero(_: { edges?: unknown } = {}) {
   // ──────────────── Render ────────────────
 
   return (
-    <div ref={containerRef} className="relative rounded-2xl border border-zinc-200 bg-gradient-to-br from-white to-zinc-50 p-6 shadow-sm dark:border-zinc-800 dark:from-[#0a1521] dark:to-[#071827]">
+    <div ref={containerRef} className="relative rounded-2xl border border-[#e3d9c0] bg-gradient-to-br from-white to-[#f6f1e3] p-6 shadow-sm dark:border-[#1d3a57] dark:from-[#0a1521] dark:to-[#071827]">
       {/* Header */}
       <div className="mb-5">
         <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-700 dark:text-emerald-400">
           AI Ecosystem Navigator
         </div>
-        <h2 className="mt-1 text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50 md:text-3xl">
+        <h2 className="mt-1 text-2xl font-semibold tracking-tight text-[#15263c] dark:text-[#f6f9fc] md:text-3xl">
           Understand the AI Market at a Glance
         </h2>
-        <p className="mt-1.5 max-w-3xl text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+        <p className="mt-1.5 max-w-3xl text-sm leading-relaxed text-[#3f5068] dark:text-[#a7bacd]">
           Who backs whom, who hosts whom, and where enterprise AI risk concentrates.
         </p>
       </div>
 
       {/* Controls */}
-      <div className="mb-4 flex flex-wrap items-center gap-3 border-b border-zinc-200 pb-4 dark:border-zinc-800">
+      <div className="mb-4 flex flex-wrap items-center gap-3 border-b border-[#e3d9c0] pb-4 dark:border-[#1d3a57]">
         {/* Relationship-type filter chips */}
         <div className="flex flex-wrap items-center gap-1.5">
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-500">Relationship</span>
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-[#4c5d75] dark:text-[#8fa5bb]">Relationship</span>
           {ALL_REL_TYPES.map((rt) => {
             const active = activeRelTypes.has(rt);
             return (
@@ -283,8 +283,8 @@ export default function ExposureMapHero(_: { edges?: unknown } = {}) {
                 }
                 className={`rounded-full border px-2.5 py-0.5 text-[11px] font-medium transition-colors ${
                   active
-                    ? "border-zinc-900 bg-zinc-900 text-white dark:border-zinc-100 dark:bg-zinc-100 dark:text-zinc-900"
-                    : "border-zinc-300 bg-white text-zinc-600 hover:border-zinc-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400 dark:hover:border-zinc-500"
+                    ? "border-[#0a1f38] bg-[#0c2238] text-white dark:border-[#ece4d0] dark:bg-[#ece3cb] dark:text-[#0a1f38]"
+                    : "border-[#d6c9a8] bg-white text-[#3f5068] hover:border-[#6b87a3] dark:border-[#2a4a6b] dark:bg-[#0c2238] dark:text-[#a7bacd] dark:hover:border-[#6b87a3]"
                 }`}
                 style={active ? undefined : { borderLeftColor: REL_COLOR[rt], borderLeftWidth: 3 }}
               >
@@ -296,7 +296,7 @@ export default function ExposureMapHero(_: { edges?: unknown } = {}) {
 
         {/* Confidence filter */}
         <div className="ml-1 flex flex-wrap items-center gap-1.5">
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-500">Confidence</span>
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-[#4c5d75] dark:text-[#8fa5bb]">Confidence</span>
           {ALL_CONF_TIERS.map((ct) => {
             const active = activeConfTiers.has(ct);
             return (
@@ -314,7 +314,7 @@ export default function ExposureMapHero(_: { edges?: unknown } = {}) {
                 className={`rounded-full border px-2.5 py-0.5 text-[11px] font-medium transition-colors ${
                   active
                     ? "border-emerald-600 bg-emerald-600 text-white"
-                    : "border-zinc-300 bg-white text-zinc-600 hover:border-emerald-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400"
+                    : "border-[#d6c9a8] bg-white text-[#3f5068] hover:border-emerald-500 dark:border-[#2a4a6b] dark:bg-[#0c2238] dark:text-[#a7bacd]"
                 }`}
               >
                 {CONF_LABEL[ct]}
@@ -334,7 +334,7 @@ export default function ExposureMapHero(_: { edges?: unknown } = {}) {
           <button
             type="button"
             onClick={() => setPinned(new Set())}
-            className="ml-auto rounded-full border border-zinc-300 px-3 py-0.5 text-[11px] font-medium text-zinc-700 hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
+            className="ml-auto rounded-full border border-[#d6c9a8] px-3 py-0.5 text-[11px] font-medium text-[#2e3f57] hover:bg-[#ece3cb] dark:border-[#2a4a6b] dark:text-[#c2d1e0] dark:hover:bg-[#143049]"
           >
             Clear {pinned.size} pin{pinned.size === 1 ? "" : "s"}
           </button>
@@ -345,14 +345,14 @@ export default function ExposureMapHero(_: { edges?: unknown } = {}) {
           don't have to guess what an edge means. Investment / subsidiary
           imply ownership-or-control exposure; cloud / hosting / supply
           chain / partnership imply dependency or distribution exposure. */}
-      <div className="mb-3 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-[11px] leading-relaxed text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900/50 dark:text-zinc-400">
-        <span className="font-semibold text-zinc-700 dark:text-zinc-300">Direction:</span>{" "}
+      <div className="mb-3 rounded-lg border border-[#e3d9c0] bg-[#f6f1e3] px-3 py-2 text-[11px] leading-relaxed text-[#3f5068] dark:border-[#1d3a57] dark:bg-[#0c2238]/50 dark:text-[#a7bacd]">
+        <span className="font-semibold text-[#2e3f57] dark:text-[#c2d1e0]">Direction:</span>{" "}
         edges run <span className="font-semibold">left → right</span>, from exposure owner to model/API provider.{" "}
         <span className="font-semibold text-amber-700 dark:text-amber-400">Investment</span> and{" "}
         <span className="font-semibold text-violet-700 dark:text-violet-400">subsidiary</span>{" "}
         indicate ownership / control exposure; <span className="font-semibold text-cyan-700 dark:text-cyan-400">cloud</span>,{" "}
         <span className="font-semibold text-teal-700 dark:text-teal-400">hosting</span>,{" "}
-        <span className="font-semibold text-zinc-500 dark:text-zinc-400">supply chain</span>, and{" "}
+        <span className="font-semibold text-[#4c5d75] dark:text-[#a7bacd]">supply chain</span>, and{" "}
         <span className="font-semibold text-lime-700 dark:text-lime-400">partnership</span>{" "}
         indicate dependency or distribution exposure.
       </div>
@@ -360,8 +360,8 @@ export default function ExposureMapHero(_: { edges?: unknown } = {}) {
       {/* Inline legend strip — always visible. Same content as the
           legend at the bottom of the panel, but anchored near the
           map so colour decoding doesn't require scrolling. */}
-      <div className="mb-3 hidden flex-wrap items-center gap-3 rounded-lg border border-zinc-200 bg-white px-3 py-2 text-[10px] text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-400 md:flex">
-        <span className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">Legend</span>
+      <div className="mb-3 hidden flex-wrap items-center gap-3 rounded-lg border border-[#e3d9c0] bg-white px-3 py-2 text-[10px] text-[#3f5068] dark:border-[#1d3a57] dark:bg-[#0c2238] dark:text-[#a7bacd] md:flex">
+        <span className="text-[10px] font-semibold uppercase tracking-wider text-[#4c5d75]">Legend</span>
         {ALL_REL_TYPES.map((rt) => (
           <span key={rt} className="inline-flex items-center gap-1.5">
             <svg width={22} height={6} aria-hidden>
@@ -386,7 +386,7 @@ export default function ExposureMapHero(_: { edges?: unknown } = {}) {
           viewBox={`0 0 ${W} ${height}`}
           width="100%"
           preserveAspectRatio="xMidYMid meet"
-          className="min-h-[460px] cursor-default text-zinc-900 dark:text-zinc-100"
+          className="min-h-[460px] cursor-default text-[#15263c] dark:text-[#eef3f8]"
           role="img"
           aria-label="Indirect AI market exposure map"
         >
@@ -537,8 +537,8 @@ export default function ExposureMapHero(_: { edges?: unknown } = {}) {
       )}
 
       {/* Legend */}
-      <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-zinc-200 pt-3 text-[11px] text-zinc-600 dark:border-zinc-800 dark:text-zinc-400">
-        <span className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">Legend</span>
+      <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-[#e3d9c0] pt-3 text-[11px] text-[#3f5068] dark:border-[#1d3a57] dark:text-[#a7bacd]">
+        <span className="text-[10px] font-semibold uppercase tracking-wider text-[#4c5d75]">Legend</span>
         {ALL_REL_TYPES.map((rt) => (
           <span key={rt} className="inline-flex items-center gap-1.5">
             <span className="inline-block h-1 w-6 rounded-sm" style={{ backgroundColor: REL_COLOR[rt] }} />
@@ -551,7 +551,7 @@ export default function ExposureMapHero(_: { edges?: unknown } = {}) {
           </svg>
           Seed / unverified
         </span>
-        <span className="ml-auto text-zinc-500">Hover for detail · click to pin (max {MAX_PINS})</span>
+        <span className="ml-auto text-[#4c5d75]">Hover for detail · click to pin (max {MAX_PINS})</span>
       </div>
     </div>
   );
@@ -687,19 +687,19 @@ function MapTooltip({
   if (content.kind === "edge") {
     const e = content.edge;
     return (
-      <div style={style} className="rounded-xl border border-zinc-200 bg-white p-3 text-xs shadow-lg dark:border-zinc-700 dark:bg-zinc-900">
+      <div style={style} className="rounded-xl border border-[#e3d9c0] bg-white p-3 text-xs shadow-lg dark:border-[#2a4a6b] dark:bg-[#0c2238]">
         <div className="mb-1 flex items-center gap-2">
           <span className="inline-block h-2 w-2 rounded-full" style={{ backgroundColor: REL_COLOR[e.relationshipType] }} />
-          <span className="font-semibold text-zinc-900 dark:text-zinc-100">
+          <span className="font-semibold text-[#15263c] dark:text-[#eef3f8]">
             {content.sourceNode.label} → {content.targetNode.label}
           </span>
         </div>
-        <div className="mb-1.5 text-[10px] uppercase tracking-wider text-zinc-500">
+        <div className="mb-1.5 text-[10px] uppercase tracking-wider text-[#4c5d75]">
           {REL_LABEL[e.relationshipType]} · confidence {CONF_LABEL[e.confidence]}
           {e.estimatedValue && ` · ${e.estimatedValue}`}
         </div>
-        <p className="leading-relaxed text-zinc-700 dark:text-zinc-300">{e.summary}</p>
-        <div className="mt-2 text-[10px] text-zinc-500">Updated {e.dateUpdated}</div>
+        <p className="leading-relaxed text-[#2e3f57] dark:text-[#c2d1e0]">{e.summary}</p>
+        <div className="mt-2 text-[10px] text-[#4c5d75]">Updated {e.dateUpdated}</div>
         {e.sourceUrls.length > 0 && (
           <ul className="mt-1 space-y-0.5 text-[10px]">
             {e.sourceUrls.slice(0, 2).map((u) => (
@@ -711,13 +711,13 @@ function MapTooltip({
     );
   }
   return (
-    <div style={style} className="rounded-xl border border-zinc-200 bg-white p-3 text-xs shadow-lg dark:border-zinc-700 dark:bg-zinc-900">
-      <div className="mb-1 font-semibold text-zinc-900 dark:text-zinc-100">{content.node.label}</div>
-      <div className="mb-2 text-[10px] uppercase tracking-wider text-zinc-500">
+    <div style={style} className="rounded-xl border border-[#e3d9c0] bg-white p-3 text-xs shadow-lg dark:border-[#2a4a6b] dark:bg-[#0c2238]">
+      <div className="mb-1 font-semibold text-[#15263c] dark:text-[#eef3f8]">{content.node.label}</div>
+      <div className="mb-2 text-[10px] uppercase tracking-wider text-[#4c5d75]">
         {content.node.ticker ? `${content.node.ticker} · ` : ""}{content.node.category}
       </div>
       {content.edges.length === 0 ? (
-        <div className="text-[11px] italic text-zinc-500">No edges match current filters.</div>
+        <div className="text-[11px] italic text-[#4c5d75]">No edges match current filters.</div>
       ) : (
         <ul className="space-y-1 text-[11px]">
           {content.edges.slice(0, 5).map((e) => {
@@ -726,14 +726,14 @@ function MapTooltip({
             return (
               <li key={e.id} className="flex items-center gap-1.5">
                 <span className="inline-block h-1.5 w-1.5 rounded-full" style={{ backgroundColor: REL_COLOR[e.relationshipType] }} />
-                <span className="font-medium text-zinc-800 dark:text-zinc-200">{other?.label ?? otherId}</span>
-                <span className="text-zinc-500">· {REL_LABEL[e.relationshipType]}</span>
-                <span className="ml-auto text-[9px] uppercase tracking-wider text-zinc-400">{CONF_LABEL[e.confidence]}</span>
+                <span className="font-medium text-[#20314a] dark:text-[#d8e2ec]">{other?.label ?? otherId}</span>
+                <span className="text-[#4c5d75]">· {REL_LABEL[e.relationshipType]}</span>
+                <span className="ml-auto text-[9px] uppercase tracking-wider text-[#6b7d93]">{CONF_LABEL[e.confidence]}</span>
               </li>
             );
           })}
           {content.edges.length > 5 && (
-            <li className="text-[10px] italic text-zinc-500">+{content.edges.length - 5} more</li>
+            <li className="text-[10px] italic text-[#4c5d75]">+{content.edges.length - 5} more</li>
           )}
         </ul>
       )}
@@ -763,7 +763,7 @@ function MobileStackedView({
   }
   if (grouped.size === 0) {
     return (
-      <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-4 text-center text-xs text-zinc-500 dark:border-zinc-800 dark:bg-zinc-900/40">
+      <div className="rounded-lg border border-[#e3d9c0] bg-[#f6f1e3] p-4 text-center text-xs text-[#4c5d75] dark:border-[#1d3a57] dark:bg-[#0c2238]/40">
         No relationships match the current filters.
       </div>
     );
@@ -773,7 +773,7 @@ function MobileStackedView({
       {[...grouped.entries()].map(([sourceId, sourceEdges]) => {
         const src = getNode(sourceId);
         return (
-          <details key={sourceId} open className="rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
+          <details key={sourceId} open className="rounded-xl border border-[#e3d9c0] bg-white dark:border-[#1d3a57] dark:bg-[#0c2238]">
             <summary className="flex cursor-pointer list-none items-center gap-3 p-3">
               <span
                 className="inline-flex h-9 w-9 items-center justify-center rounded-full text-[12px] font-bold text-white"
@@ -783,31 +783,31 @@ function MobileStackedView({
                 {src.monogram}
               </span>
               <div className="flex-1">
-                <div className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">{src.label}</div>
-                <div className="text-[10px] uppercase tracking-wider text-zinc-500">
+                <div className="text-sm font-semibold text-[#15263c] dark:text-[#eef3f8]">{src.label}</div>
+                <div className="text-[10px] uppercase tracking-wider text-[#4c5d75]">
                   {src.ticker ?? src.category} · {sourceEdges.length} relationship{sourceEdges.length === 1 ? "" : "s"}
                 </div>
               </div>
-              <span aria-hidden className="text-zinc-400">▾</span>
+              <span aria-hidden className="text-[#6b7d93]">▾</span>
             </summary>
-            <ul className="divide-y divide-zinc-200 border-t border-zinc-200 dark:divide-zinc-800 dark:border-zinc-800">
+            <ul className="divide-y divide-[#e3d9c0] border-t border-[#e3d9c0] dark:divide-[#1d3a57] dark:border-[#1d3a57]">
               {sourceEdges.map((e) => {
                 const tgt = getNode(e.targetId);
                 return (
                   <li key={e.id} className="space-y-1.5 p-3 text-xs">
                     <div className="flex items-center gap-2">
                       <span className="inline-block h-2 w-2 rounded-full" style={{ backgroundColor: REL_COLOR[e.relationshipType] }} />
-                      <span className="font-semibold text-zinc-900 dark:text-zinc-100">{tgt.label}</span>
-                      <span className="ml-auto rounded-full bg-zinc-100 px-2 py-0.5 text-[9px] uppercase tracking-wider text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">
+                      <span className="font-semibold text-[#15263c] dark:text-[#eef3f8]">{tgt.label}</span>
+                      <span className="ml-auto rounded-full bg-[#ece3cb] px-2 py-0.5 text-[9px] uppercase tracking-wider text-[#3f5068] dark:bg-[#143049] dark:text-[#a7bacd]">
                         {CONF_LABEL[e.confidence]}
                       </span>
                     </div>
-                    <div className="text-[10px] uppercase tracking-wider text-zinc-500">
+                    <div className="text-[10px] uppercase tracking-wider text-[#4c5d75]">
                       {REL_LABEL[e.relationshipType]}
                       {e.estimatedValue && ` · ${e.estimatedValue}`}
                       {` · updated ${e.dateUpdated}`}
                     </div>
-                    <p className="leading-relaxed text-zinc-700 dark:text-zinc-300">{e.summary}</p>
+                    <p className="leading-relaxed text-[#2e3f57] dark:text-[#c2d1e0]">{e.summary}</p>
                     {e.sourceUrls.length > 0 && (
                       <div className="text-[10px] text-emerald-700 dark:text-emerald-400">
                         {e.sourceUrls.slice(0, 2).map((u) => {
@@ -866,15 +866,15 @@ function ActiveReadout({
             <div key={id} className="rounded-xl border border-emerald-300 bg-emerald-50/40 p-3 text-sm dark:border-emerald-900/60 dark:bg-emerald-950/20">
               <div className="flex items-baseline justify-between gap-2">
                 <div>
-                  <div className="font-semibold text-zinc-900 dark:text-zinc-100">{node.label}</div>
-                  <div className="text-[10px] uppercase tracking-wider text-zinc-500">
+                  <div className="font-semibold text-[#15263c] dark:text-[#eef3f8]">{node.label}</div>
+                  <div className="text-[10px] uppercase tracking-wider text-[#4c5d75]">
                     {node.ticker ? `${node.ticker} · ` : ""}{node.category}
                   </div>
                 </div>
                 {profileSlug && (
                   <a
                     href={`/vendors/${profileSlug}`}
-                    className="rounded-full border border-emerald-500 bg-white px-2.5 py-0.5 text-[11px] font-medium text-emerald-800 hover:bg-emerald-100 dark:border-emerald-700 dark:bg-zinc-900 dark:text-emerald-300 dark:hover:bg-emerald-950/60"
+                    className="rounded-full border border-emerald-500 bg-white px-2.5 py-0.5 text-[11px] font-medium text-emerald-800 hover:bg-emerald-100 dark:border-emerald-700 dark:bg-[#0c2238] dark:text-emerald-300 dark:hover:bg-emerald-950/60"
                   >
                     View vendor profile →
                   </a>
@@ -882,27 +882,27 @@ function ActiveReadout({
               </div>
               <ul className="mt-3 space-y-2">
                 {incident.length === 0 && (
-                  <li className="text-xs italic text-zinc-500">No relationships match the current filters.</li>
+                  <li className="text-xs italic text-[#4c5d75]">No relationships match the current filters.</li>
                 )}
                 {incident.map((e) => {
                   const isOutgoing = e.sourceId === id;
                   const counterparty = getNode(isOutgoing ? e.targetId : e.sourceId);
                   return (
-                    <li key={e.id} className="rounded-md border border-zinc-200 bg-white/70 p-2 text-xs dark:border-zinc-800 dark:bg-zinc-900/70">
+                    <li key={e.id} className="rounded-md border border-[#e3d9c0] bg-white/70 p-2 text-xs dark:border-[#1d3a57] dark:bg-[#0c2238]/70">
                       <div className="flex flex-wrap items-center gap-1.5">
                         <span className="inline-block h-2 w-2 rounded-full" style={{ backgroundColor: REL_COLOR[e.relationshipType] }} />
-                        <span className="font-semibold text-zinc-800 dark:text-zinc-200">
+                        <span className="font-semibold text-[#20314a] dark:text-[#d8e2ec]">
                           {isOutgoing ? "→" : "←"} {counterparty.label}
                         </span>
-                        <span className="text-zinc-500">· {REL_LABEL[e.relationshipType]}</span>
-                        <span className="ml-auto rounded bg-zinc-100 px-1.5 py-0.5 text-[9px] uppercase tracking-wider text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">
+                        <span className="text-[#4c5d75]">· {REL_LABEL[e.relationshipType]}</span>
+                        <span className="ml-auto rounded bg-[#ece3cb] px-1.5 py-0.5 text-[9px] uppercase tracking-wider text-[#3f5068] dark:bg-[#143049] dark:text-[#a7bacd]">
                           {CONF_LABEL[e.confidence]}
                         </span>
                       </div>
                       {e.summary && (
-                        <p className="mt-1 leading-relaxed text-zinc-700 dark:text-zinc-300">{e.summary}</p>
+                        <p className="mt-1 leading-relaxed text-[#2e3f57] dark:text-[#c2d1e0]">{e.summary}</p>
                       )}
-                      <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] text-zinc-500">
+                      <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] text-[#4c5d75]">
                         {e.estimatedValue && <span>{e.estimatedValue}</span>}
                         <span>Updated {e.dateUpdated}</span>
                       </div>
@@ -910,10 +910,10 @@ function ActiveReadout({
                           safe-attribute rel. Falls back to a "Evidence
                           pending" line when sourceUrls is empty so the
                           operator never sees a silent gap. */}
-                      <div className="mt-2 border-t border-zinc-200 pt-1.5 dark:border-zinc-800">
-                        <div className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">View evidence</div>
+                      <div className="mt-2 border-t border-[#e3d9c0] pt-1.5 dark:border-[#1d3a57]">
+                        <div className="text-[10px] font-semibold uppercase tracking-wider text-[#4c5d75]">View evidence</div>
                         {e.sourceUrls.length === 0 ? (
-                          <div className="mt-0.5 text-[11px] italic text-zinc-500">Evidence pending — relationship classified from public reporting; primary source not yet attached.</div>
+                          <div className="mt-0.5 text-[11px] italic text-[#4c5d75]">Evidence pending — relationship classified from public reporting; primary source not yet attached.</div>
                         ) : (
                           <ul className="mt-0.5 space-y-0.5">
                             {e.sourceUrls.slice(0, 3).map((url) => {

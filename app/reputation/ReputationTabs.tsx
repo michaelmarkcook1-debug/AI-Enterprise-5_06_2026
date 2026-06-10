@@ -38,7 +38,7 @@ export default function ReputationTabs({
   return (
     <div>
       {/* Pillar tabs */}
-      <div className="mb-4 flex flex-wrap items-center gap-1 border-b border-zinc-200 dark:border-zinc-800">
+      <div className="mb-4 flex flex-wrap items-center gap-1 border-b border-[#e3d9c0] dark:border-[#1d3a57]">
         {PILLARS.map((p) => {
           const isActive = p.id === active;
           return (
@@ -49,14 +49,14 @@ export default function ReputationTabs({
               className={`relative -mb-px px-4 py-2 text-sm font-medium transition-colors ${
                 isActive
                   ? "border-b-2 border-emerald-600 text-emerald-700 dark:border-emerald-400 dark:text-emerald-300"
-                  : "text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100"
+                  : "text-[#4c5d75] hover:text-[#15263c] dark:hover:text-[#eef3f8]"
               }`}
             >
               {p.label}
             </button>
           );
         })}
-        <span className="ml-auto text-[11px] text-zinc-500">{activeHint}</span>
+        <span className="ml-auto text-[11px] text-[#4c5d75]">{activeHint}</span>
       </div>
 
       {active === "developer" && (
@@ -114,9 +114,9 @@ function ScoreCell({ value, suffix }: { value: number; suffix?: string }) {
 }
 
 function VendorCell({ vendor, slug }: { vendor: string; slug?: string }) {
-  if (!slug) return <span className="font-semibold text-zinc-900 dark:text-zinc-100">{vendor}</span>;
+  if (!slug) return <span className="font-semibold text-[#15263c] dark:text-[#eef3f8]">{vendor}</span>;
   return (
-    <a href={`/vendors/${slug}`} className="font-semibold text-zinc-900 hover:underline dark:text-zinc-100">
+    <a href={`/vendors/${slug}`} className="font-semibold text-[#15263c] hover:underline dark:text-[#eef3f8]">
       {vendor}
     </a>
   );
@@ -129,10 +129,10 @@ function RankBadge({ rank }: { rank: number }) {
     rank === 1
       ? "bg-amber-100 text-amber-900 dark:bg-amber-900/50 dark:text-amber-200"
       : rank === 2
-        ? "bg-zinc-200 text-zinc-800 dark:bg-zinc-700 dark:text-zinc-100"
+        ? "bg-[#e3d9c0] text-[#20314a] dark:bg-[#1c3d5c] dark:text-[#eef3f8]"
         : rank === 3
           ? "bg-orange-100 text-orange-900 dark:bg-orange-900/50 dark:text-orange-200"
-          : "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400";
+          : "bg-[#ece3cb] text-[#3f5068] dark:bg-[#143049] dark:text-[#a7bacd]";
   return (
     <span
       className={`inline-flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-bold tabular-nums ${tone}`}
@@ -152,7 +152,7 @@ function rankMap<T extends { vendorId: string; overall: number }>(rows: T[]): Ma
 
 function ThemesCell({ themes }: { themes: string[] }) {
   return (
-    <ul className="space-y-0.5 text-[11px] leading-snug text-zinc-600 dark:text-zinc-400">
+    <ul className="space-y-0.5 text-[11px] leading-snug text-[#3f5068] dark:text-[#a7bacd]">
       {themes.map((t) => <li key={t}>· {t}</li>)}
     </ul>
   );
@@ -160,7 +160,7 @@ function ThemesCell({ themes }: { themes: string[] }) {
 
 function SourcesCell({ sources }: { sources: string[] }) {
   return (
-    <ul className="space-y-0.5 text-[10px] text-zinc-500">
+    <ul className="space-y-0.5 text-[10px] text-[#4c5d75]">
       {sources.slice(0, 3).map((s) => <li key={s} className="truncate">{s.replace(/^https?:\/\//, "").replace(/\/$/, "")}</li>)}
     </ul>
   );
@@ -172,7 +172,7 @@ function SortHeader({ label, active, desc, onClick, align = "right" }: { label: 
       <button
         type="button"
         onClick={onClick}
-        className={`inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider ${active ? "text-emerald-700 dark:text-emerald-400" : "text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100"}`}
+        className={`inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider ${active ? "text-emerald-700 dark:text-emerald-400" : "text-[#4c5d75] hover:text-[#15263c] dark:hover:text-[#eef3f8]"}`}
       >
         {label}
         {active && <span aria-hidden>{desc ? "↓" : "↑"}</span>}
@@ -208,9 +208,9 @@ function DeveloperTable({
     return 0;
   });
   return (
-    <div className="overflow-x-auto rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
+    <div className="overflow-x-auto rounded-xl border border-[#e3d9c0] bg-white dark:border-[#1d3a57] dark:bg-[#0c2238]">
       <table className="w-full min-w-[920px] text-left text-xs">
-        <thead className="border-b border-zinc-200 bg-zinc-50/60 text-zinc-500 dark:border-zinc-800 dark:bg-zinc-900/60">
+        <thead className="border-b border-[#e3d9c0] bg-[#f6f1e3]/60 text-[#4c5d75] dark:border-[#1d3a57] dark:bg-[#0c2238]/60">
           <tr>
             <th className="whitespace-nowrap px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider">#</th>
             <th className="whitespace-nowrap px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider">Vendor</th>
@@ -224,7 +224,7 @@ function DeveloperTable({
             <th className="whitespace-nowrap px-2 py-2 text-left text-[10px] font-semibold uppercase tracking-wider">Sources</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
+        <tbody className="divide-y divide-[#ece4d0] dark:divide-[#1d3a57]">
           {sorted.map((r) => (
             <tr key={r.id}>
               <td className="px-3 py-2.5 align-top"><RankBadge rank={ranks.get(r.vendorId) ?? 0} /></td>
@@ -241,7 +241,7 @@ function DeveloperTable({
                     </span>
                   )}
                   {r.cellStatus?.github === "seed" && !r.githubRepo && (
-                    <span className="text-[9px] italic text-zinc-500" title="No public flagship repo">no repo</span>
+                    <span className="text-[9px] italic text-[#4c5d75]" title="No public flagship repo">no repo</span>
                   )}
                 </div>
               </td>
@@ -323,9 +323,9 @@ function EmployeeTable({
     return 0;
   });
   return (
-    <div className="overflow-x-auto rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
+    <div className="overflow-x-auto rounded-xl border border-[#e3d9c0] bg-white dark:border-[#1d3a57] dark:bg-[#0c2238]">
       <table className="w-full min-w-[1000px] text-left text-xs">
-        <thead className="border-b border-zinc-200 bg-zinc-50/60 text-zinc-500 dark:border-zinc-800 dark:bg-zinc-900/60">
+        <thead className="border-b border-[#e3d9c0] bg-[#f6f1e3]/60 text-[#4c5d75] dark:border-[#1d3a57] dark:bg-[#0c2238]/60">
           <tr>
             <th className="whitespace-nowrap px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider">#</th>
             <th className="whitespace-nowrap px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider">Vendor</th>
@@ -340,7 +340,7 @@ function EmployeeTable({
             <th className="whitespace-nowrap px-2 py-2 text-left text-[10px] font-semibold uppercase tracking-wider">Sources</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
+        <tbody className="divide-y divide-[#ece4d0] dark:divide-[#1d3a57]">
           {sorted.map((r) => (
             <tr key={r.id}>
               <td className="px-3 py-2.5 align-top"><RankBadge rank={ranks.get(r.vendorId) ?? 0} /></td>
@@ -368,7 +368,7 @@ function EmployeeTable({
                   )}
                   {r.litigationPerThousand !== undefined && r.approxHeadcount !== undefined && (
                     <span
-                      className="text-[9px] font-semibold tabular-nums text-zinc-600 dark:text-zinc-400"
+                      className="text-[9px] font-semibold tabular-nums text-[#3f5068] dark:text-[#a7bacd]"
                       title={`Score basis: ${r.litigationFootprint?.toLocaleString()} records (last 24 months) ÷ ~${r.approxHeadcount.toLocaleString()} employees × 1000 = ${r.litigationPerThousand} per 1,000. Headcount is a current estimate — directional, not exact.`}
                     >
                       {r.litigationPerThousand}/1k emp
@@ -380,7 +380,7 @@ function EmployeeTable({
                 <div className="inline-flex flex-col items-end gap-0.5">
                   <ScoreCell value={r.missionAlignment} />
                   <span
-                    className="text-[9px] font-medium uppercase tracking-wider text-zinc-400 dark:text-zinc-600"
+                    className="text-[9px] font-medium uppercase tracking-wider text-[#6b7d93] dark:text-[#7d93aa]"
                     title="Alignment between stated mission and lived employee experience. Curated seed — no free API exists for this metric."
                   >
                     seed
@@ -427,9 +427,9 @@ function CustomerTable({
     return 0;
   });
   return (
-    <div className="overflow-x-auto rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
+    <div className="overflow-x-auto rounded-xl border border-[#e3d9c0] bg-white dark:border-[#1d3a57] dark:bg-[#0c2238]">
       <table className="w-full min-w-[1000px] text-left text-xs">
-        <thead className="border-b border-zinc-200 bg-zinc-50/60 text-zinc-500 dark:border-zinc-800 dark:bg-zinc-900/60">
+        <thead className="border-b border-[#e3d9c0] bg-[#f6f1e3]/60 text-[#4c5d75] dark:border-[#1d3a57] dark:bg-[#0c2238]/60">
           <tr>
             <th className="whitespace-nowrap px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider">#</th>
             <th className="whitespace-nowrap px-3 py-2 text-left text-[10px] font-semibold uppercase tracking-wider">Vendor</th>
@@ -443,7 +443,7 @@ function CustomerTable({
             <th className="whitespace-nowrap px-2 py-2 text-left text-[10px] font-semibold uppercase tracking-wider">Sources</th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
+        <tbody className="divide-y divide-[#ece4d0] dark:divide-[#1d3a57]">
           {sorted.map((r) => (
             <tr key={r.id}>
               <td className="px-3 py-2.5 align-top"><RankBadge rank={ranks.get(r.vendorId) ?? 0} /></td>

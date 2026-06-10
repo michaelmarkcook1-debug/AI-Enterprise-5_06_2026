@@ -32,11 +32,11 @@ export default async function AdminHome() {
   });
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-[#071827] text-zinc-900 dark:text-zinc-100">
+    <div className="min-h-screen bg-[#f6f1e3] dark:bg-[#071827] text-[#15263c] dark:text-[#eef3f8]">
       <main className="mx-auto max-w-5xl px-6 py-12">
-        <Link href="/" className="text-sm text-zinc-500 hover:underline">← Home</Link>
+        <Link href="/" className="text-sm text-[#4c5d75] hover:underline">← Home</Link>
         <h1 className="mt-4 text-3xl font-semibold tracking-tight">Admin console</h1>
-        <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
+        <p className="mt-2 text-sm text-[#3f5068] dark:text-[#a7bacd]">
           Operate the data pipeline that feeds the scoring engine.
         </p>
 
@@ -68,7 +68,7 @@ export default async function AdminHome() {
         {/* Snapshot history — backfill so hover-card sparklines populate immediately. */}
         <div className="mt-4 flex items-center gap-4">
           <BackfillSnapshotsButton />
-          <p className="text-xs text-zinc-500 dark:text-zinc-400">
+          <p className="text-xs text-[#4c5d75] dark:text-[#a7bacd]">
             Populate score history for the Query page hover-card sparklines.
             Safe to re-run — only gaps are filled.
           </p>
@@ -189,7 +189,7 @@ function pickHeadline(args: {
 }
 
 const STAT_TONE: Record<"neutral" | "green" | "amber" | "red", { card: string; value: string }> = {
-  neutral: { card: "border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900",                                 value: "text-zinc-900 dark:text-zinc-100" },
+  neutral: { card: "border-[#e3d9c0] bg-white dark:border-[#1d3a57] dark:bg-[#0c2238]",                                 value: "text-[#15263c] dark:text-[#eef3f8]" },
   green:   { card: "border-emerald-200 bg-emerald-50 dark:border-emerald-900/60 dark:bg-emerald-950/30",             value: "text-emerald-900 dark:text-emerald-200" },
   amber:   { card: "border-amber-200 bg-amber-50 dark:border-amber-900/60 dark:bg-amber-950/30",                     value: "text-amber-900 dark:text-amber-200" },
   red:     { card: "border-red-300 bg-red-50 dark:border-red-900/60 dark:bg-red-950/30",                             value: "text-red-900 dark:text-red-200" },
@@ -200,9 +200,9 @@ function Stat({
 }: { label: string; value: string | number; tone: keyof typeof STAT_TONE; hint?: string; href?: string }) {
   const inner = (
     <div className={`rounded-xl border px-4 py-3 ${STAT_TONE[tone].card} ${href ? "transition-colors hover:brightness-95" : ""}`} title={hint}>
-      <div className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">{label}</div>
+      <div className="text-[10px] font-semibold uppercase tracking-wider text-[#4c5d75] dark:text-[#a7bacd]">{label}</div>
       <div className={`mt-1 text-2xl font-semibold tabular-nums ${STAT_TONE[tone].value}`}>{typeof value === "number" ? value.toLocaleString() : value}</div>
-      {hint && <div className="mt-1 line-clamp-2 text-[10px] leading-snug text-zinc-500 dark:text-zinc-400">{hint}</div>}
+      {hint && <div className="mt-1 line-clamp-2 text-[10px] leading-snug text-[#4c5d75] dark:text-[#a7bacd]">{hint}</div>}
     </div>
   );
   return href ? <Link href={href} className="block no-underline">{inner}</Link> : inner;
@@ -286,9 +286,9 @@ function IngestionHealthPanel({
 }) {
   if (!lastRun) {
     return (
-      <div className="mt-6 rounded-2xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
-        <div className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">Ingestion health</div>
-        <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">No pipeline runs recorded yet.</p>
+      <div className="mt-6 rounded-2xl border border-[#e3d9c0] bg-white p-6 dark:border-[#1d3a57] dark:bg-[#0c2238]">
+        <div className="text-[10px] font-semibold uppercase tracking-wider text-[#4c5d75]">Ingestion health</div>
+        <p className="mt-2 text-sm text-[#3f5068] dark:text-[#a7bacd]">No pipeline runs recorded yet.</p>
       </div>
     );
   }
@@ -312,7 +312,7 @@ function IngestionHealthPanel({
     : isDegraded
     ? "text-amber-500 dark:text-amber-400"
     : "text-rose-500 dark:text-rose-400";
-  const ringTrack = "text-zinc-200 dark:text-zinc-700";
+  const ringTrack = "text-[#d8e2ec] dark:text-[#64798f]";
 
   // SVG circular progress — 100px diameter, 8px stroke.
   const radius = 42;
@@ -331,13 +331,13 @@ function IngestionHealthPanel({
     }`}>
       <div className="flex items-start justify-between">
         <div>
-          <div className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+          <div className="text-[10px] font-semibold uppercase tracking-wider text-[#4c5d75] dark:text-[#a7bacd]">
             Ingestion health
           </div>
-          <h2 className="mt-1 text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+          <h2 className="mt-1 text-lg font-semibold text-[#15263c] dark:text-[#eef3f8]">
             Last refresh: {timeAgo(lastRun.finishedAt)}
           </h2>
-          <p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
+          <p className="mt-0.5 text-xs text-[#4c5d75] dark:text-[#a7bacd]">
             {new Date(lastRun.finishedAt).toLocaleString()} · {runType} · {formatDuration(lastRun.durationMs)}
           </p>
         </div>
@@ -422,7 +422,7 @@ function IngestionHealthPanel({
       {/* Step breakdown bar — visual indication of which steps passed/failed */}
       {steps.length > 1 && (
         <div className="mt-4">
-          <div className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 mb-1.5">
+          <div className="text-[10px] font-semibold uppercase tracking-wider text-[#4c5d75] dark:text-[#a7bacd] mb-1.5">
             Step breakdown ({okSteps.length}/{steps.length} OK)
           </div>
           <div className="flex gap-0.5 rounded overflow-hidden">
@@ -438,7 +438,7 @@ function IngestionHealthPanel({
               />
             ))}
           </div>
-          <div className="mt-1 flex justify-between text-[9px] text-zinc-400 dark:text-zinc-500">
+          <div className="mt-1 flex justify-between text-[9px] text-[#6b7d93] dark:text-[#8fa5bb]">
             {steps.map((s) => (
               <span key={s.step} className="flex-1 truncate text-center" title={STEP_FRIENDLY[s.step] ?? s.step}>
                 {(STEP_FRIENDLY[s.step] ?? s.step).slice(0, 6)}
@@ -450,9 +450,9 @@ function IngestionHealthPanel({
 
       {/* Mini run history */}
       {recentRuns.length > 1 && (
-        <div className="mt-4 border-t border-zinc-200/60 pt-3 dark:border-zinc-700/40">
+        <div className="mt-4 border-t border-[#e3d9c0]/60 pt-3 dark:border-[#2a4a6b]/40">
           <div className="flex items-center justify-between">
-            <div className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">
+            <div className="text-[10px] font-semibold uppercase tracking-wider text-[#4c5d75] dark:text-[#a7bacd]">
               Recent runs
             </div>
             <Link href="/admin/pipeline-health" className="text-[10px] font-medium text-emerald-700 hover:underline dark:text-emerald-400">
@@ -472,12 +472,12 @@ function IngestionHealthPanel({
               return (
                 <div
                   key={run.id}
-                  className="flex flex-col items-center gap-0.5 rounded-md border border-zinc-200 bg-white px-2 py-1.5 dark:border-zinc-700 dark:bg-zinc-800"
+                  className="flex flex-col items-center gap-0.5 rounded-md border border-[#e3d9c0] bg-white px-2 py-1.5 dark:border-[#2a4a6b] dark:bg-[#143049]"
                   title={`${timeAgo(run.finishedAt)} · ${runPct}% · ${runOk}/${runSteps.length} steps OK`}
                 >
                   <span className={`h-2 w-2 rounded-full ${dot}`} />
-                  <span className="text-[9px] font-mono tabular-nums text-zinc-500 dark:text-zinc-400">{runPct}%</span>
-                  <span className="text-[8px] text-zinc-400 dark:text-zinc-500">{timeAgo(run.finishedAt)}</span>
+                  <span className="text-[9px] font-mono tabular-nums text-[#4c5d75] dark:text-[#a7bacd]">{runPct}%</span>
+                  <span className="text-[8px] text-[#6b7d93] dark:text-[#8fa5bb]">{timeAgo(run.finishedAt)}</span>
                 </div>
               );
             })}
@@ -497,14 +497,14 @@ function AdminCard({
       className={`block rounded-2xl border p-5 transition-colors ${
         primary
           ? "border-emerald-300 bg-emerald-50 hover:border-emerald-500 dark:border-emerald-700 dark:bg-emerald-950/30 dark:hover:border-emerald-400"
-          : "border-zinc-200 bg-white hover:border-zinc-400 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-600"
+          : "border-[#e3d9c0] bg-white hover:border-[#9fb0c4] dark:border-[#1d3a57] dark:bg-[#0c2238] dark:hover:border-[#38587a]"
       }`}
     >
       <div className="flex items-baseline justify-between gap-2">
         <div className={`text-base font-semibold ${primary ? "text-emerald-900 dark:text-emerald-100" : ""}`}>{title}</div>
-        {stat && <span className={`font-mono text-[10px] ${primary ? "text-emerald-700 dark:text-emerald-300" : "text-zinc-500"}`}>{stat}</span>}
+        {stat && <span className={`font-mono text-[10px] ${primary ? "text-emerald-700 dark:text-emerald-300" : "text-[#4c5d75]"}`}>{stat}</span>}
       </div>
-      <p className={`mt-1 text-sm ${primary ? "text-emerald-900/80 dark:text-emerald-200/80" : "text-zinc-600 dark:text-zinc-400"}`}>{body}</p>
+      <p className={`mt-1 text-sm ${primary ? "text-emerald-900/80 dark:text-emerald-200/80" : "text-[#3f5068] dark:text-[#a7bacd]"}`}>{body}</p>
     </Link>
   );
 }

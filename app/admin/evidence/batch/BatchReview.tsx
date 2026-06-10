@@ -118,13 +118,13 @@ export default function BatchReview({ result, filters, paging, hasDatabase }: Pr
   const hasPrev = paging.offset > 0;
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-[#071827] text-zinc-900 dark:text-zinc-100">
+    <div className="min-h-screen bg-[#f6f1e3] dark:bg-[#071827] text-[#15263c] dark:text-[#eef3f8]">
       <main className="mx-auto max-w-7xl px-6 py-10">
-        <Link href="/admin/evidence" className="text-sm text-zinc-500 hover:underline">← Single review</Link>
+        <Link href="/admin/evidence" className="text-sm text-[#4c5d75] hover:underline">← Single review</Link>
         <h1 className="mt-4 text-3xl font-semibold tracking-tight">
           Batch review — {filters.lane ?? "recommend_approve"}
         </h1>
-        <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
+        <p className="mt-2 text-sm text-[#3f5068] dark:text-[#a7bacd]">
           {totalAfterFilter} of {total} pending proposals after filters. Showing rows {totalAfterFilter === 0 ? 0 : paging.offset + 1}–
           {Math.min(paging.offset + paging.limit, totalAfterFilter)}.
         </p>
@@ -134,7 +134,7 @@ export default function BatchReview({ result, filters, paging, hasDatabase }: Pr
             recommend_approve, but if it's empty the operator needs to
             see human_review_required (where unsafe-category rows sit). */}
         <div className="mt-4 flex flex-wrap items-center gap-2">
-          <span className="text-xs font-semibold uppercase tracking-wider text-zinc-500">Lane:</span>
+          <span className="text-xs font-semibold uppercase tracking-wider text-[#4c5d75]">Lane:</span>
           {(["recommend_approve", "human_review_required", "recommend_reject", "all"] as const).map((laneKey) => {
             const active = (filters.lane ?? "recommend_approve") === laneKey;
             const count =
@@ -149,7 +149,7 @@ export default function BatchReview({ result, filters, paging, hasDatabase }: Pr
                 className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
                   active
                     ? "border-emerald-500 bg-emerald-600 text-white"
-                    : "border-zinc-300 bg-white text-zinc-700 hover:border-emerald-400 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200"
+                    : "border-[#d6c9a8] bg-white text-[#2e3f57] hover:border-emerald-400 dark:border-[#2a4a6b] dark:bg-[#0c2238] dark:text-[#d8e2ec]"
                 }`}
               >
                 {laneKey} ({count})
@@ -167,20 +167,20 @@ export default function BatchReview({ result, filters, paging, hasDatabase }: Pr
         {/* Reviewer + token row */}
         <div className="mt-6 grid gap-3 sm:grid-cols-2">
           <label className="block">
-            <div className="mb-1 text-xs font-medium text-zinc-500">Reviewer ID</div>
+            <div className="mb-1 text-xs font-medium text-[#4c5d75]">Reviewer ID</div>
             <input value={reviewerId} onChange={(e) => setReviewerId(e.target.value)}
-              className="w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-[#071827] px-3 py-2 text-sm" />
+              className="w-full rounded-lg border border-[#d6c9a8] dark:border-[#2a4a6b] bg-white dark:bg-[#071827] px-3 py-2 text-sm" />
           </label>
           <label className="block">
-            <div className="mb-1 text-xs font-medium text-zinc-500">x-admin-token (if not in dev mode)</div>
+            <div className="mb-1 text-xs font-medium text-[#4c5d75]">x-admin-token (if not in dev mode)</div>
             <input value={token} onChange={(e) => setToken(e.target.value)} type="password"
-              className="w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-[#071827] px-3 py-2 text-sm" />
+              className="w-full rounded-lg border border-[#d6c9a8] dark:border-[#2a4a6b] bg-white dark:bg-[#071827] px-3 py-2 text-sm" />
           </label>
         </div>
 
         {/* Filter bar */}
-        <div className="mt-6 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-4">
-          <div className="text-xs font-semibold uppercase tracking-wider text-zinc-500">Filters</div>
+        <div className="mt-6 rounded-xl border border-[#e3d9c0] dark:border-[#1d3a57] bg-white dark:bg-[#0c2238] p-4">
+          <div className="text-xs font-semibold uppercase tracking-wider text-[#4c5d75]">Filters</div>
           <div className="mt-3 grid gap-3 md:grid-cols-3 lg:grid-cols-5">
             <FilterSelect
               label="Vendor"
@@ -211,12 +211,12 @@ export default function BatchReview({ result, filters, paging, hasDatabase }: Pr
                 ...facets.byLinkageStatus.map((l) => ({ value: l.status, label: `${l.status} (${l.count})` }))]}
             />
             <label className="block">
-              <div className="mb-1 text-xs font-medium text-zinc-500">Source URL contains</div>
+              <div className="mb-1 text-xs font-medium text-[#4c5d75]">Source URL contains</div>
               <input
                 defaultValue={filters.sourceUrlContains ?? ""}
                 onBlur={(e) => updateFilter("source", e.target.value || undefined)}
                 placeholder="e.g. trust.openai.com"
-                className="w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-[#071827] px-3 py-2 text-sm"
+                className="w-full rounded-lg border border-[#d6c9a8] dark:border-[#2a4a6b] bg-white dark:bg-[#071827] px-3 py-2 text-sm"
               />
             </label>
           </div>
@@ -227,7 +227,7 @@ export default function BatchReview({ result, filters, paging, hasDatabase }: Pr
               defaultChecked={Boolean(filters.includeDeferred)}
               onChange={(e) => updateFilter("includeDeferred", e.target.checked ? "1" : undefined)}
             />
-            <label htmlFor="includeDeferred" className="text-zinc-500">
+            <label htmlFor="includeDeferred" className="text-[#4c5d75]">
               Include deferred rows ({facets.deferredCount} deferred)
             </label>
           </div>
@@ -295,23 +295,23 @@ export default function BatchReview({ result, filters, paging, hasDatabase }: Pr
         {/* Row cards */}
         <div className="mt-6 space-y-3">
           {page.length === 0 && (
-            <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-8 text-center text-sm text-zinc-500">
+            <div className="rounded-xl border border-[#e3d9c0] dark:border-[#1d3a57] bg-white dark:bg-[#0c2238] p-8 text-center text-sm text-[#4c5d75]">
               No rows match the current filters.
             </div>
           )}
           {page.map((p) => (
-            <div key={p.proposalId} className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5">
+            <div key={p.proposalId} className="rounded-xl border border-[#e3d9c0] dark:border-[#1d3a57] bg-white dark:bg-[#0c2238] p-5">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <div className="text-xs font-mono text-zinc-500">{p.proposalId} · {p.vendorId}</div>
+                  <div className="text-xs font-mono text-[#4c5d75]">{p.proposalId} · {p.vendorId}</div>
                   <div className="mt-1 font-semibold">
-                    {p.subfactor} <span className="text-xs font-normal text-zinc-500">· {p.domain}</span>
+                    {p.subfactor} <span className="text-xs font-normal text-[#4c5d75]">· {p.domain}</span>
                   </div>
                 </div>
                 <div className="text-right shrink-0">
                   <div className="font-mono text-sm">{p.proposedGrade}</div>
-                  <div className="text-xs text-zinc-500">conf {(p.classifierConfidence * 100).toFixed(0)}%</div>
-                  <div className="text-[10px] uppercase tracking-wider text-zinc-400">{p.dataStatus}</div>
+                  <div className="text-xs text-[#4c5d75]">conf {(p.classifierConfidence * 100).toFixed(0)}%</div>
+                  <div className="text-[10px] uppercase tracking-wider text-[#6b7d93]">{p.dataStatus}</div>
                 </div>
               </div>
 
@@ -325,12 +325,12 @@ export default function BatchReview({ result, filters, paging, hasDatabase }: Pr
                 </div>
               )}
 
-              <blockquote className="mt-3 rounded-lg bg-zinc-50 dark:bg-[#071827] px-3 py-2 text-sm border-l-2 border-zinc-300 dark:border-zinc-700">
+              <blockquote className="mt-3 rounded-lg bg-[#f6f1e3] dark:bg-[#071827] px-3 py-2 text-sm border-l-2 border-[#d6c9a8] dark:border-[#2a4a6b]">
                 {p.excerpt}
               </blockquote>
 
               {p.sourceUrl && (
-                <div className="mt-2 text-xs text-zinc-500 truncate">
+                <div className="mt-2 text-xs text-[#4c5d75] truncate">
                   <strong>Source:</strong> {p.sourceUrl}
                 </div>
               )}
@@ -364,7 +364,7 @@ export default function BatchReview({ result, filters, paging, hasDatabase }: Pr
                 <button
                   disabled={busy === p.proposalId}
                   onClick={() => act(p.proposalId, "reject")}
-                  className="rounded-full border border-zinc-300 dark:border-zinc-700 px-4 py-1.5 text-xs font-medium disabled:opacity-50"
+                  className="rounded-full border border-[#d6c9a8] dark:border-[#2a4a6b] px-4 py-1.5 text-xs font-medium disabled:opacity-50"
                 >Reject</button>
               </div>
             </div>
@@ -377,15 +377,15 @@ export default function BatchReview({ result, filters, paging, hasDatabase }: Pr
             <button
               disabled={!hasPrev}
               onClick={() => setOffset(paging.offset - paging.limit)}
-              className="rounded-full border border-zinc-300 dark:border-zinc-700 px-4 py-1.5 disabled:opacity-40"
+              className="rounded-full border border-[#d6c9a8] dark:border-[#2a4a6b] px-4 py-1.5 disabled:opacity-40"
             >← Prev 20</button>
-            <span className="text-zinc-500">
+            <span className="text-[#4c5d75]">
               {paging.offset + 1}–{Math.min(paging.offset + paging.limit, totalAfterFilter)} of {totalAfterFilter}
             </span>
             <button
               disabled={!hasNext}
               onClick={() => setOffset(paging.offset + paging.limit)}
-              className="rounded-full border border-zinc-300 dark:border-zinc-700 px-4 py-1.5 disabled:opacity-40"
+              className="rounded-full border border-[#d6c9a8] dark:border-[#2a4a6b] px-4 py-1.5 disabled:opacity-40"
             >Next 20 →</button>
           </div>
         )}
@@ -402,11 +402,11 @@ function FilterSelect({ label, value, onChange, options }: {
 }) {
   return (
     <label className="block">
-      <div className="mb-1 text-xs font-medium text-zinc-500">{label}</div>
+      <div className="mb-1 text-xs font-medium text-[#4c5d75]">{label}</div>
       <select
         value={value ?? ""}
         onChange={(e) => onChange(e.target.value || undefined)}
-        className="w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-[#071827] px-3 py-2 text-sm"
+        className="w-full rounded-lg border border-[#d6c9a8] dark:border-[#2a4a6b] bg-white dark:bg-[#071827] px-3 py-2 text-sm"
       >
         {options.map((o) => (
           <option key={o.value} value={o.value}>{o.label}</option>
@@ -598,7 +598,7 @@ function BatchRowLinkagePicker({
               Select all (vendor-wide)
             </button>
             <button type="button" onClick={() => toggleAll(false)}
-              className="rounded-full border border-zinc-300 px-2 py-0.5 text-[11px] text-zinc-700 hover:bg-zinc-100 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-900">
+              className="rounded-full border border-[#d6c9a8] px-2 py-0.5 text-[11px] text-[#2e3f57] hover:bg-[#ece3cb] dark:border-[#2a4a6b] dark:text-[#c2d1e0] dark:hover:bg-[#0c2238]">
               Clear
             </button>
             {suggestions.length > 0 && (
@@ -610,15 +610,15 @@ function BatchRowLinkagePicker({
               </button>
             )}
           </div>
-          <ul className="mt-2 max-h-48 space-y-0.5 overflow-y-auto rounded border border-sky-200 bg-white p-2 dark:border-sky-900/60 dark:bg-zinc-900">
+          <ul className="mt-2 max-h-48 space-y-0.5 overflow-y-auto rounded border border-sky-200 bg-white p-2 dark:border-sky-900/60 dark:bg-[#0c2238]">
             {ordered.map((prod) => {
               const sug = suggestions.find((s) => s.productScopeId === prod.id);
               return (
                 <li key={prod.id}>
                   <label className="flex cursor-pointer items-center gap-2 rounded px-1 py-0.5 hover:bg-sky-50 dark:hover:bg-sky-950/40">
                     <input type="checkbox" checked={selected.has(prod.id)} onChange={() => toggle(prod.id)} className="accent-sky-600" />
-                    <span className="font-medium text-zinc-900 dark:text-zinc-100">{prod.name}</span>
-                    <span className="text-[10px] text-zinc-500">· {prod.category}</span>
+                    <span className="font-medium text-[#15263c] dark:text-[#eef3f8]">{prod.name}</span>
+                    <span className="text-[10px] text-[#4c5d75]">· {prod.category}</span>
                     {sug && (
                       <span className="ml-auto flex items-center gap-1 text-[10px] text-emerald-700 dark:text-emerald-400">
                         <span className="font-mono">{(sug.confidence * 100).toFixed(0)}%</span>

@@ -53,7 +53,7 @@ export default async function NewsPage() {
                   {item.vendors.map((id) => {
                     const vendor = vendorById.get(id);
                     return (
-                      <span key={id} className="rounded border border-[#e0d6ba] px-2 py-1 dark:border-zinc-700">
+                      <span key={id} className="rounded border border-[#e0d6ba] px-2 py-1 dark:border-[#2a4a6b]">
                         {vendor ? <VendorNameWithOwnership name={vendor.name} ownershipType={vendor.ownershipType} /> : id}
                       </span>
                     );

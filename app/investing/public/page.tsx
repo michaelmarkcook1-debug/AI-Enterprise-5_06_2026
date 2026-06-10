@@ -43,7 +43,7 @@ function pctClass(pct: number | null): string {
   if (pct === null) return "text-[#5d6b80]";
   if (pct > 0.05) return "text-emerald-700 dark:text-emerald-300";
   if (pct < -0.05) return "text-rose-700 dark:text-rose-300";
-  return "text-[#5d6b80] dark:text-zinc-400";
+  return "text-[#5d6b80] dark:text-[#a7bacd]";
 }
 
 export default async function PublicAiStocksPage() {
@@ -93,7 +93,7 @@ export default async function PublicAiStocksPage() {
       <Panel title="Public AI provider universe — live overlay">
         <div className="overflow-x-auto">
           <table className="w-full text-xs">
-            <thead className="border-b border-[#e6dcc3] dark:border-zinc-800 text-left uppercase tracking-wide text-[10px] text-[#5b6b7f] dark:text-zinc-500">
+            <thead className="border-b border-[#e6dcc3] dark:border-[#1d3a57] text-left uppercase tracking-wide text-[10px] text-[#5b6b7f] dark:text-[#8fa5bb]">
               <tr>
                 <th className="py-2 pr-2">Provider</th>
                 <th className="py-2 pr-2">Ticker</th>
@@ -120,7 +120,7 @@ export default async function PublicAiStocksPage() {
                 const news = enriched?.news ?? [];
                 const headline = news[0]?.title ?? "No recent classified news.";
                 return (
-                  <tr key={row.provider.id} className="border-b border-[#efe9d9] dark:border-zinc-900 hover:bg-[#faf5e9] dark:hover:bg-zinc-900/40">
+                  <tr key={row.provider.id} className="border-b border-[#efe9d9] dark:border-[#0a1f38] hover:bg-[#faf5e9] dark:hover:bg-[#0c2238]/40">
                     <td className="py-2 pr-2">
                       <Link href={`/investor-tools/provider/${row.provider.slug}`} className="font-medium hover:underline">
                         {row.provider.name}
@@ -184,23 +184,23 @@ export default async function PublicAiStocksPage() {
               const news = enriched?.news ?? [];
               if (news.length === 0) {
                 return (
-                  <div key={row.provider.id} className="rounded-md border border-[#e6dcc3] bg-white p-3 text-xs dark:border-zinc-800 dark:bg-zinc-900">
-                    <div className="font-semibold text-[#13294b] dark:text-zinc-100">{row.provider.name}</div>
+                  <div key={row.provider.id} className="rounded-md border border-[#e6dcc3] bg-white p-3 text-xs dark:border-[#1d3a57] dark:bg-[#0c2238]">
+                    <div className="font-semibold text-[#13294b] dark:text-[#eef3f8]">{row.provider.name}</div>
                     <p className="mt-2 italic text-[#5d6b80]">No recent classified news.</p>
                   </div>
                 );
               }
               return (
-                <div key={row.provider.id} className="rounded-md border border-[#e6dcc3] bg-white p-3 dark:border-zinc-800 dark:bg-zinc-900">
+                <div key={row.provider.id} className="rounded-md border border-[#e6dcc3] bg-white p-3 dark:border-[#1d3a57] dark:bg-[#0c2238]">
                   <div className="mb-2 flex items-center justify-between gap-2">
-                    <span className="font-semibold text-[#13294b] dark:text-zinc-100">{row.provider.name}</span>
+                    <span className="font-semibold text-[#13294b] dark:text-[#eef3f8]">{row.provider.name}</span>
                     <SeedDataBadge label={news[0].isLive ? "live" : "seed"} provenance={news[0].isLive ? "live" : "seed"} />
                   </div>
                   <ul className="space-y-2">
                     {news.slice(0, 3).map((n) => (
                       <li key={n.id}>
-                        <div className="text-xs font-medium text-[#13294b] dark:text-zinc-100">{n.title}</div>
-                        <div className="mt-0.5 text-[11px] leading-4 text-[#475a72] dark:text-zinc-400">{n.whyItMatters}</div>
+                        <div className="text-xs font-medium text-[#13294b] dark:text-[#eef3f8]">{n.title}</div>
+                        <div className="mt-0.5 text-[11px] leading-4 text-[#475a72] dark:text-[#a7bacd]">{n.whyItMatters}</div>
                         <div className="mt-1 flex items-center gap-2 text-[10px] text-[#5d6b80]">
                           <span>{new Date(n.publishedAt).toLocaleDateString()}</span>
                           <span>impact {n.impactScore}</span>
@@ -236,12 +236,12 @@ function Stat({
       ? "text-amber-700 dark:text-amber-300"
       : tone === "bad"
       ? "text-rose-700 dark:text-rose-300"
-      : "text-[#13294b] dark:text-zinc-100";
+      : "text-[#13294b] dark:text-[#eef3f8]";
   return (
-    <div className="rounded-md border border-[#e6dcc3] bg-white p-2.5 dark:border-zinc-800 dark:bg-zinc-900">
-      <div className="text-[10px] font-semibold uppercase tracking-wider text-[#5b6b7f] dark:text-zinc-500">{label}</div>
+    <div className="rounded-md border border-[#e6dcc3] bg-white p-2.5 dark:border-[#1d3a57] dark:bg-[#0c2238]">
+      <div className="text-[10px] font-semibold uppercase tracking-wider text-[#5b6b7f] dark:text-[#8fa5bb]">{label}</div>
       <div className={`mt-0.5 font-mono text-base font-semibold ${colorClass}`}>{value}</div>
-      {note && <div className="text-[10px] text-[#5b6b7f] dark:text-zinc-500">{note}</div>}
+      {note && <div className="text-[10px] text-[#5b6b7f] dark:text-[#8fa5bb]">{note}</div>}
     </div>
   );
 }

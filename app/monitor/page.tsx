@@ -167,14 +167,14 @@ export default async function MonitorPage() {
           title="Recommendation validity & drift"
           action={<SeedDataBadge label="Estimated" provenance="seed" reason="Drift computed from momentum signals against a baseline of 60. Will use real stored recommendations when assessment→monitor pipeline is wired." />}
         >
-          <p className="mb-3 text-xs text-[#56657b] dark:text-zinc-400">
+          <p className="mb-3 text-xs text-[#56657b] dark:text-[#a7bacd]">
             Active recommendations scored against current market signals, grouped by category — scores compare within a category, never across.
             Negative drift means conditions have moved against the recommendation. Hover a trend line for the window and provenance.
           </p>
           <div className="space-y-5">
             {[...new Set(recommendations.map((r) => r.vendor.category))].map((category) => (
               <div key={category}>
-                <div className="mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-[#5b6b7f] dark:text-zinc-500">
+                <div className="mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-[#5b6b7f] dark:text-[#8fa5bb]">
                   {category}
                 </div>
                 <div className="overflow-x-auto">
@@ -211,7 +211,7 @@ export default async function MonitorPage() {
                               )}
                             </td>
                             <td className="py-2.5 pr-3 font-mono">{r.momentum?.momentumScore.toFixed(0) ?? "—"}</td>
-                            <td className={`py-2.5 pr-3 font-mono font-semibold ${r.drift > 0 ? "text-emerald-700 dark:text-emerald-300" : r.drift < 0 ? "text-rose-700 dark:text-rose-300" : "text-zinc-500"}`}>
+                            <td className={`py-2.5 pr-3 font-mono font-semibold ${r.drift > 0 ? "text-emerald-700 dark:text-emerald-300" : r.drift < 0 ? "text-rose-700 dark:text-rose-300" : "text-[#4c5d75]"}`}>
                               {r.drift > 0 ? "+" : ""}{r.drift}
                             </td>
                             <td className={`py-2.5 font-semibold text-xs ${a.tone}`}>{a.label}</td>
@@ -230,22 +230,22 @@ export default async function MonitorPage() {
       {/* 3. Assumption monitor */}
       <section className="mb-6">
         <Panel title="Assumption health">
-          <p className="mb-3 text-xs text-[#56657b] dark:text-zinc-400">
+          <p className="mb-3 text-xs text-[#56657b] dark:text-[#a7bacd]">
             Key assumptions underpinning the current AI strategy. Each is monitored for signals that could invalidate it.
           </p>
           <div className="space-y-3">
             {assumptions.map((a) => (
-              <div key={a.id} className="rounded-lg border border-[#e6dcc3] bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
+              <div key={a.id} className="rounded-lg border border-[#e6dcc3] bg-white p-4 dark:border-[#1d3a57] dark:bg-[#0c2238]">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <div className="text-sm font-semibold text-[#13294b] dark:text-zinc-100">{a.title}</div>
-                    <div className="mt-1 text-xs text-[#56657b] dark:text-zinc-400">
+                    <div className="text-sm font-semibold text-[#13294b] dark:text-[#eef3f8]">{a.title}</div>
+                    <div className="mt-1 text-xs text-[#56657b] dark:text-[#a7bacd]">
                       <strong>Failure trigger:</strong> {a.failureTrigger}
                     </div>
-                    <div className="mt-1 text-xs text-[#56657b] dark:text-zinc-400">
+                    <div className="mt-1 text-xs text-[#56657b] dark:text-[#a7bacd]">
                       <strong>Current signal:</strong> {a.currentSignal}
                     </div>
-                    <div className="mt-1 text-xs text-[#56657b] dark:text-zinc-400">
+                    <div className="mt-1 text-xs text-[#56657b] dark:text-[#a7bacd]">
                       <strong>Action:</strong> {a.action}
                     </div>
                   </div>
@@ -268,23 +268,23 @@ export default async function MonitorPage() {
           title="Vendor change signals"
           action={<SeedDataBadge label={provenance.source === "live" ? "Live" : "Seed"} provenance={provenance.source} reason={provenance.reason} />}
         >
-          <div className="divide-y divide-[#efe9d9] dark:divide-zinc-800">
+          <div className="divide-y divide-[#efe9d9] dark:divide-[#1d3a57]">
             {vendorChangeEvents.map((item) => (
               <div key={item.id} className="py-3">
                 <div className="flex items-center justify-between gap-3">
-                  <div className="text-sm font-medium text-[#13294b] dark:text-zinc-100">{item.title}</div>
-                  <span className="font-mono text-xs text-[#5b6b7f] dark:text-zinc-500">{item.impactScore}</span>
+                  <div className="text-sm font-medium text-[#13294b] dark:text-[#eef3f8]">{item.title}</div>
+                  <span className="font-mono text-xs text-[#5b6b7f] dark:text-[#8fa5bb]">{item.impactScore}</span>
                 </div>
-                <div className="mt-1 text-xs leading-5 text-[#5d6b80] dark:text-zinc-400">{item.whyItMatters}</div>
+                <div className="mt-1 text-xs leading-5 text-[#5d6b80] dark:text-[#a7bacd]">{item.whyItMatters}</div>
                 <div className="mt-2 flex flex-wrap items-center gap-2">
                   {item.categories.slice(0, 3).map((c) => (
-                    <span key={c} className="rounded bg-[#f3ead2] px-2 py-0.5 text-[10px] text-[#455044] dark:bg-zinc-800 dark:text-zinc-300">{c}</span>
+                    <span key={c} className="rounded bg-[#f3ead2] px-2 py-0.5 text-[10px] text-[#455044] dark:bg-[#143049] dark:text-[#c2d1e0]">{c}</span>
                   ))}
                   <Confidence value={item.confidenceScore} />
                 </div>
               </div>
             ))}
-            {vendorChangeEvents.length === 0 && <div className="py-3 text-sm text-zinc-500">No recent change signals.</div>}
+            {vendorChangeEvents.length === 0 && <div className="py-3 text-sm text-[#4c5d75]">No recent change signals.</div>}
           </div>
         </Panel>
       </section>
@@ -304,7 +304,7 @@ export default async function MonitorPage() {
                   </span>
                   <span className="text-xs uppercase text-[#8a5b2d] dark:text-amber-300">{item.severity}</span>
                 </div>
-                <div className="mt-1 text-xs leading-5 text-[#5f665a] dark:text-zinc-400">{item.alert}</div>
+                <div className="mt-1 text-xs leading-5 text-[#5f665a] dark:text-[#a7bacd]">{item.alert}</div>
               </div>
             ))}
           </div>
@@ -313,14 +313,14 @@ export default async function MonitorPage() {
         <Panel title="Active watchlists">
           <div className="space-y-3">
             {watchlists.length === 0 ? (
-              <p className="text-sm text-zinc-500">
+              <p className="text-sm text-[#4c5d75]">
                 No watchlists configured. Set one up in <Link href="/assess#watchlists" className="underline font-semibold">Assess</Link>.
               </p>
             ) : (
               watchlists.slice(0, 5).map((w) => (
-                <div key={w.id} className="rounded-md border border-[#e6dcc3] bg-white px-3 py-2 dark:border-zinc-800 dark:bg-zinc-900">
-                  <div className="text-sm font-medium text-[#13294b] dark:text-zinc-100">{w.name}</div>
-                  <div className="mt-1 text-xs text-[#56657b] dark:text-zinc-400">
+                <div key={w.id} className="rounded-md border border-[#e6dcc3] bg-white px-3 py-2 dark:border-[#1d3a57] dark:bg-[#0c2238]">
+                  <div className="text-sm font-medium text-[#13294b] dark:text-[#eef3f8]">{w.name}</div>
+                  <div className="mt-1 text-xs text-[#56657b] dark:text-[#a7bacd]">
                     {w.vendors?.length ?? 0} vendors · {w.categories?.length ?? 0} categories
                   </div>
                 </div>
@@ -333,7 +333,7 @@ export default async function MonitorPage() {
       {/* 6. Regulation monitor */}
       <section className="mb-6">
         <Panel title="Regulation & compliance watch">
-          <p className="mb-3 text-xs text-[#56657b] dark:text-zinc-400">
+          <p className="mb-3 text-xs text-[#56657b] dark:text-[#a7bacd]">
             Regulatory developments that could affect your AI strategy. Sourced from classified news with regulation/compliance tags.
           </p>
           <div className="space-y-3">
@@ -341,17 +341,17 @@ export default async function MonitorPage() {
               .filter((n) => n.categories.some((c) => c.toLowerCase().includes("regulat") || c.toLowerCase().includes("compliance") || c.toLowerCase().includes("risk")))
               .slice(0, 4)
               .map((item) => (
-                <div key={item.id} className="rounded-md border border-[#e6dcc3] bg-white px-3 py-2 dark:border-zinc-800 dark:bg-zinc-900">
+                <div key={item.id} className="rounded-md border border-[#e6dcc3] bg-white px-3 py-2 dark:border-[#1d3a57] dark:bg-[#0c2238]">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-sm font-medium text-[#13294b] dark:text-zinc-100">{item.title}</span>
+                    <span className="text-sm font-medium text-[#13294b] dark:text-[#eef3f8]">{item.title}</span>
                     <span className="font-mono text-[10px] text-[#5b6b7f]">{item.impactScore}</span>
                   </div>
-                  <div className="mt-1 text-xs leading-5 text-[#5f665a] dark:text-zinc-400">{item.whyItMatters}</div>
+                  <div className="mt-1 text-xs leading-5 text-[#5f665a] dark:text-[#a7bacd]">{item.whyItMatters}</div>
                   <div className="mt-1"><Confidence value={item.confidenceScore} /></div>
                 </div>
               ))}
             {news.filter((n) => n.categories.some((c) => c.toLowerCase().includes("regulat") || c.toLowerCase().includes("compliance"))).length === 0 && (
-              <p className="text-xs text-zinc-500 italic">No regulation-specific signals in the current news window.</p>
+              <p className="text-xs text-[#4c5d75] italic">No regulation-specific signals in the current news window.</p>
             )}
           </div>
           <SeedDataBadge label={provenance.source === "live" ? "Live" : "Seed"} provenance={provenance.source} reason={provenance.reason} />
@@ -361,7 +361,7 @@ export default async function MonitorPage() {
       {/* 7. Reputation shift monitor */}
       <section className="mb-6">
         <Panel title="Reputation shift signals">
-          <p className="mb-3 text-xs text-[#56657b] dark:text-zinc-400">
+          <p className="mb-3 text-xs text-[#56657b] dark:text-[#a7bacd]">
             Vendor reputation changes that could warrant reassessment. Developer, employee, and customer signal trends.
           </p>
           <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
@@ -369,16 +369,16 @@ export default async function MonitorPage() {
               const mom = momentumByVendor.get(v.id);
               const repDirection = (mom?.momentumScore ?? 50) > 60 ? "improving" : (mom?.momentumScore ?? 50) < 40 ? "declining" : "stable";
               return (
-                <div key={v.id} className="rounded-md border border-[#e6dcc3] bg-white px-3 py-2 dark:border-zinc-800 dark:bg-zinc-900">
+                <div key={v.id} className="rounded-md border border-[#e6dcc3] bg-white px-3 py-2 dark:border-[#1d3a57] dark:bg-[#0c2238]">
                   <div className="flex items-center justify-between gap-2">
                     <span className="text-sm font-medium"><VendorNameWithOwnership name={v.name} ownershipType={v.ownershipType} /></span>
                     <span className={`text-[10px] font-semibold uppercase ${
                       repDirection === "improving" ? "text-emerald-700 dark:text-emerald-300"
                       : repDirection === "declining" ? "text-rose-700 dark:text-rose-300"
-                      : "text-zinc-500"
+                      : "text-[#4c5d75]"
                     }`}>{repDirection}</span>
                   </div>
-                  <div className="mt-1 text-xs text-[#56657b] dark:text-zinc-400">
+                  <div className="mt-1 text-xs text-[#56657b] dark:text-[#a7bacd]">
                     Momentum: {mom?.momentumScore.toFixed(0) ?? "—"} · Confidence: {v.confidenceScore}
                   </div>
                 </div>
@@ -392,21 +392,21 @@ export default async function MonitorPage() {
       {/* 8. Competitor movement */}
       <section className="mb-6">
         <Panel title="Competitor movement signals">
-          <p className="mb-3 text-xs text-[#56657b] dark:text-zinc-400">
+          <p className="mb-3 text-xs text-[#56657b] dark:text-[#a7bacd]">
             Competitor AI adoption and vendor choices that could affect your positioning.
           </p>
           <div className="space-y-3">
             {dashboard.weeklyMovers?.slice(0, 4).map((item) => {
               const status = item.changePct > 0 ? "gaining" : item.changePct < 0 ? "declining" : "stable";
               return (
-                <div key={`${item.vendor.id}_${item.reason}`} className={`border-l-2 pl-3 ${status === "gaining" ? "border-emerald-500" : status === "declining" ? "border-rose-500" : "border-zinc-300"}`}>
+                <div key={`${item.vendor.id}_${item.reason}`} className={`border-l-2 pl-3 ${status === "gaining" ? "border-emerald-500" : status === "declining" ? "border-rose-500" : "border-[#d6c9a8]"}`}>
                   <div className="flex items-center justify-between gap-2">
                     <span className="text-sm font-medium">{item.vendor.name}</span>
                     <span className={`font-mono text-xs ${status === "gaining" ? "text-emerald-700 dark:text-emerald-300" : "text-rose-700 dark:text-rose-300"}`}>
                       {item.changePct > 0 ? "+" : ""}{item.changePct}%
                     </span>
                   </div>
-                  <div className="mt-0.5 text-xs text-[#5d6b80] dark:text-zinc-400">{item.reason}</div>
+                  <div className="mt-0.5 text-xs text-[#5d6b80] dark:text-[#a7bacd]">{item.reason}</div>
                 </div>
               );
             })}
@@ -418,7 +418,7 @@ export default async function MonitorPage() {
       {/* 9. Reassessment queue */}
       <section className="mb-6">
         <Panel title="Reassessment queue">
-          <p className="mb-3 text-xs text-[#56657b] dark:text-zinc-400">
+          <p className="mb-3 text-xs text-[#56657b] dark:text-[#a7bacd]">
             Prioritised list of recommendations requiring action, ordered by urgency.
           </p>
           <div className="overflow-x-auto">
@@ -454,9 +454,9 @@ export default async function MonitorPage() {
       {/* 10. Navigation context */}
       <section className="mb-2">
         <div className="flex flex-wrap gap-2 text-xs">
-          <Link href="/assess" className="rounded-md border border-[#d6c9a8] px-3 py-2 font-semibold hover:bg-[#f3ead2] dark:border-zinc-700 dark:hover:bg-zinc-900">← Run new assessment</Link>
-          <Link href="/demonstrate" className="rounded-md border border-[#d6c9a8] px-3 py-2 font-semibold hover:bg-[#f3ead2] dark:border-zinc-700 dark:hover:bg-zinc-900">Defend decision →</Link>
-          <Link href="/query" className="rounded-md border border-[#d6c9a8] px-3 py-2 font-semibold hover:bg-[#f3ead2] dark:border-zinc-700 dark:hover:bg-zinc-900">Market intelligence →</Link>
+          <Link href="/assess" className="rounded-md border border-[#d6c9a8] px-3 py-2 font-semibold hover:bg-[#f3ead2] dark:border-[#2a4a6b] dark:hover:bg-[#0c2238]">← Run new assessment</Link>
+          <Link href="/demonstrate" className="rounded-md border border-[#d6c9a8] px-3 py-2 font-semibold hover:bg-[#f3ead2] dark:border-[#2a4a6b] dark:hover:bg-[#0c2238]">Defend decision →</Link>
+          <Link href="/query" className="rounded-md border border-[#d6c9a8] px-3 py-2 font-semibold hover:bg-[#f3ead2] dark:border-[#2a4a6b] dark:hover:bg-[#0c2238]">Market intelligence →</Link>
         </div>
       </section>
     </PageFrame>
@@ -464,10 +464,10 @@ export default async function MonitorPage() {
 }
 
 function MonitorCard({ label, value, tone }: { label: string; value: number; tone: "red" | "amber" | "green" | "neutral" }) {
-  const border = tone === "red" ? "border-rose-200 dark:border-rose-900/60" : tone === "amber" ? "border-amber-200 dark:border-amber-900/60" : tone === "green" ? "border-emerald-200 dark:border-emerald-900/60" : "border-[#e6dcc3] dark:border-zinc-800";
-  const bg = tone === "red" ? "bg-rose-50 dark:bg-rose-950/30" : tone === "amber" ? "bg-amber-50 dark:bg-amber-950/30" : tone === "green" ? "bg-emerald-50 dark:bg-emerald-950/30" : "bg-white dark:bg-zinc-900";
-  const text = tone === "red" ? "text-rose-700 dark:text-rose-300" : tone === "amber" ? "text-amber-700 dark:text-amber-300" : tone === "green" ? "text-emerald-700 dark:text-emerald-300" : "text-[#13294b] dark:text-zinc-100";
-  const labelColor = tone === "red" ? "text-rose-800 dark:text-rose-300" : tone === "amber" ? "text-amber-800 dark:text-amber-300" : tone === "green" ? "text-emerald-800 dark:text-emerald-300" : "text-[#5b6b7f] dark:text-zinc-500";
+  const border = tone === "red" ? "border-rose-200 dark:border-rose-900/60" : tone === "amber" ? "border-amber-200 dark:border-amber-900/60" : tone === "green" ? "border-emerald-200 dark:border-emerald-900/60" : "border-[#e6dcc3] dark:border-[#1d3a57]";
+  const bg = tone === "red" ? "bg-rose-50 dark:bg-rose-950/30" : tone === "amber" ? "bg-amber-50 dark:bg-amber-950/30" : tone === "green" ? "bg-emerald-50 dark:bg-emerald-950/30" : "bg-white dark:bg-[#0c2238]";
+  const text = tone === "red" ? "text-rose-700 dark:text-rose-300" : tone === "amber" ? "text-amber-700 dark:text-amber-300" : tone === "green" ? "text-emerald-700 dark:text-emerald-300" : "text-[#13294b] dark:text-[#eef3f8]";
+  const labelColor = tone === "red" ? "text-rose-800 dark:text-rose-300" : tone === "amber" ? "text-amber-800 dark:text-amber-300" : tone === "green" ? "text-emerald-800 dark:text-emerald-300" : "text-[#5b6b7f] dark:text-[#8fa5bb]";
   return (
     <div className={`rounded-xl border ${border} ${bg} p-3`}>
       <div className={`text-[10px] font-semibold uppercase tracking-wider ${labelColor}`}>{label}</div>

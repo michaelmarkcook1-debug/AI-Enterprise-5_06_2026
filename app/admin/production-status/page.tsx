@@ -93,10 +93,10 @@ export default async function ProductionStatusPage() {
   const ready = requiredFails.length === 0;
 
   return (
-    <main className="mx-auto max-w-4xl px-6 py-12 text-zinc-900 dark:text-zinc-100">
-      <Link href="/admin" className="text-sm text-zinc-500 hover:underline">← Admin</Link>
+    <main className="mx-auto max-w-4xl px-6 py-12 text-[#15263c] dark:text-[#eef3f8]">
+      <Link href="/admin" className="text-sm text-[#4c5d75] hover:underline">← Admin</Link>
       <h1 className="mt-4 text-3xl font-semibold tracking-tight">Production readiness</h1>
-      <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
+      <p className="mt-2 text-sm text-[#3f5068] dark:text-[#a7bacd]">
         Live gate status. The same checks run from the CLI via <code className="font-mono text-xs">npm run prod:check</code>.
       </p>
 
@@ -112,7 +112,7 @@ export default async function ProductionStatusPage() {
         </div>
       </div>
 
-      <ul className="mt-6 divide-y divide-zinc-200 dark:divide-zinc-800 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#0e2435]">
+      <ul className="mt-6 divide-y divide-[#e3d9c0] dark:divide-[#1d3a57] rounded-xl border border-[#e3d9c0] dark:border-[#1d3a57] bg-white dark:bg-[#0e2435]">
         {gates.map((g) => (
           <li key={g.label} className="flex items-start gap-3 px-5 py-3 text-sm">
             <span className={`mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
@@ -122,9 +122,9 @@ export default async function ProductionStatusPage() {
             }`}>{g.ok ? "✓" : g.severity === "required" ? "✗" : "·"}</span>
             <div className="flex-1">
               <div className="font-mono text-xs font-semibold">{g.label}</div>
-              <div className="text-xs text-zinc-600 dark:text-zinc-400">{g.detail}</div>
+              <div className="text-xs text-[#3f5068] dark:text-[#a7bacd]">{g.detail}</div>
               {!g.ok && g.remediation && (
-                <div className="mt-1 text-[11px] text-zinc-500 dark:text-zinc-500">→ {g.remediation}</div>
+                <div className="mt-1 text-[11px] text-[#4c5d75] dark:text-[#8fa5bb]">→ {g.remediation}</div>
               )}
             </div>
             <span className={`text-[10px] uppercase tracking-wider ${
@@ -141,7 +141,7 @@ export default async function ProductionStatusPage() {
       </ul>
 
       <h2 className="mt-10 text-lg font-semibold">Environment contract</h2>
-      <p className="mt-1 text-xs text-zinc-600 dark:text-zinc-400">
+      <p className="mt-1 text-xs text-[#3f5068] dark:text-[#a7bacd]">
         Single source of truth at <code className="font-mono">lib/env.ts</code>. Every gate reads from this contract.
       </p>
       <div className="mt-3 grid gap-2">
@@ -158,7 +158,7 @@ export default async function ProductionStatusPage() {
               : "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300";
           const borderClass = isSet
             ? "border-emerald-200 dark:border-emerald-900/50"
-            : "border-zinc-200 dark:border-zinc-800";
+            : "border-[#e3d9c0] dark:border-[#1d3a57]";
           return (
             <div key={s.key} className={`rounded-lg border ${borderClass} p-3 text-xs`}>
               <div className="flex items-baseline gap-2">
@@ -170,8 +170,8 @@ export default async function ProductionStatusPage() {
                   <span className="text-[10px] text-rose-700 dark:text-rose-400">not set in this environment</span>
                 )}
               </div>
-              <p className="mt-1 text-zinc-600 dark:text-zinc-400">{s.description}</p>
-              <ul className="mt-1 list-disc pl-4 text-[11px] text-zinc-500">
+              <p className="mt-1 text-[#3f5068] dark:text-[#a7bacd]">{s.description}</p>
+              <ul className="mt-1 list-disc pl-4 text-[11px] text-[#4c5d75]">
                 {s.enables.map((e) => <li key={e}>{e}</li>)}
               </ul>
             </div>
@@ -179,7 +179,7 @@ export default async function ProductionStatusPage() {
         })}
       </div>
 
-      <div className="mt-8 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-[#071827] p-4 text-xs">
+      <div className="mt-8 rounded-lg border border-[#e3d9c0] dark:border-[#1d3a57] bg-[#f6f1e3] dark:bg-[#071827] p-4 text-xs">
         <strong>Quick start to flip to LIVE:</strong>
         <ol className="mt-2 list-decimal pl-5 space-y-1">
           <li>Provision Postgres → set <code>DATABASE_URL</code></li>

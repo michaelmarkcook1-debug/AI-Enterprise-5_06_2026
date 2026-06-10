@@ -67,10 +67,10 @@ export default function ShortlistVendorCards({
   return (
     <section className="mb-6">
       <div className="mb-2 flex items-baseline justify-between">
-        <h2 className="text-xs font-semibold uppercase tracking-wider text-[#5b6b7f] dark:text-zinc-500">
+        <h2 className="text-xs font-semibold uppercase tracking-wider text-[#5b6b7f] dark:text-[#8fa5bb]">
           Your assessed shortlist
         </h2>
-        <span className="text-[10px] text-[#5b6b7f] dark:text-zinc-500">Tap a card to compare against the top 3 in its category</span>
+        <span className="text-[10px] text-[#5b6b7f] dark:text-[#8fa5bb]">Tap a card to compare against the top 3 in its category</span>
       </div>
       <div className="grid gap-3 md:grid-cols-3">
         {shortlisted.map((v) => {
@@ -81,16 +81,16 @@ export default function ShortlistVendorCards({
               key={v.id}
               onClick={() => setExpanded(isOpen ? null : v.id)}
               aria-expanded={isOpen}
-              className={`rounded-xl border bg-white p-4 text-left transition-colors dark:bg-zinc-900 ${
+              className={`rounded-xl border bg-white p-4 text-left transition-colors dark:bg-[#0c2238] ${
                 isOpen
                   ? "border-emerald-400 dark:border-emerald-600"
-                  : "border-[#e6dcc3] hover:border-emerald-300 dark:border-zinc-800 dark:hover:border-emerald-700"
+                  : "border-[#e6dcc3] hover:border-emerald-300 dark:border-[#1d3a57] dark:hover:border-emerald-700"
               }`}
             >
               <div className="flex items-start justify-between gap-2">
                 <div>
-                  <div className="text-base font-semibold text-[#13294b] dark:text-zinc-100">{v.name}</div>
-                  <div className="mt-0.5 text-[11px] text-[#5b6b7f] dark:text-zinc-400">{v.category}</div>
+                  <div className="text-base font-semibold text-[#13294b] dark:text-[#eef3f8]">{v.name}</div>
+                  <div className="mt-0.5 text-[11px] text-[#5b6b7f] dark:text-[#a7bacd]">{v.category}</div>
                 </div>
                 <span aria-hidden className={`mt-1 text-xs text-[#5b6b7f] transition-transform ${isOpen ? "rotate-180" : ""}`}>▾</span>
               </div>
@@ -100,13 +100,13 @@ export default function ShortlistVendorCards({
                   <span className="ml-1 text-[10px] uppercase text-[#5b6b7f]">score</span>
                 </span>
                 <span>
-                  <span className="text-xl font-semibold text-[#13294b] dark:text-zinc-100">{v.confidence}</span>
+                  <span className="text-xl font-semibold text-[#13294b] dark:text-[#eef3f8]">{v.confidence}</span>
                   <span className="ml-1 text-[10px] uppercase text-[#5b6b7f]">conf.</span>
                 </span>
               </div>
               {isOpen && (
-                <div className="mt-3 border-t border-[#efe9d9] pt-3 dark:border-zinc-800">
-                  <div className="mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-[#5b6b7f] dark:text-zinc-500">
+                <div className="mt-3 border-t border-[#efe9d9] pt-3 dark:border-[#1d3a57]">
+                  <div className="mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-[#5b6b7f] dark:text-[#8fa5bb]">
                     Top 3 — {v.category}
                   </div>
                   <ol className="space-y-1">
@@ -116,7 +116,7 @@ export default function ShortlistVendorCards({
                         className={`flex items-center justify-between rounded-md px-2 py-1 text-sm ${
                           t.id === v.id
                             ? "bg-emerald-50 font-semibold text-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-200"
-                            : "text-[#3a4a63] dark:text-zinc-300"
+                            : "text-[#3a4a63] dark:text-[#c2d1e0]"
                         }`}
                       >
                         <span>

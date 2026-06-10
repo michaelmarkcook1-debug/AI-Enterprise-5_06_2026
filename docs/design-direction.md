@@ -7,14 +7,22 @@ real differentiator, which is visible honesty about data provenance.
 evidence, not a dashboard product. Every design decision flows from that:
 the interface's signature is that *truth-state is always visible*.
 
-**Tokens (existing, now codified).**
-- Ink `#18201b` · Paper `#ffffff` / Night `#0c1220–#071827` · Hairline
-  `#dfe4da` / `zinc-800` · Moss-muted `#697362` · Emerald `#059669/#6EE7B7`
-  (positive/identity) · Rose `#dc2626` (risk) · Gold `#F5C451` (confidential
-  / investor surfaces only).
-- Type: current sans for UI; **mono for every numeral** (already a motif —
-  enforce everywhere); 10px uppercase wide-tracked micro-labels for
-  structure. Numerals are the protagonist; labels whisper.
+**Tokens (navy / gold / cream rebrand, 10 June 2026).**
+- Ink `#13294b` (`#0f2240` display) · Paper `#faf6ec` page / `#fffdf7` panel ·
+  Night `#071827` page / `#0c2238` panel / `#081c30` recessed · Hairline
+  `#e3d9c0` light / `#1d3a57` dark · Muted ink `#3f5068` (light) / `#a7bacd`
+  (dark) — never lower-contrast than these for body-size text · Gold
+  `#b08d2f` base, `#d4af37` bright, `#e8c95c` on-dark — THE accent: masthead
+  rules, active states, key numerals, layer-band titles · Emerald/rose/amber
+  reserved for data semantics (positive / risk / caution) only.
+- The TopNav masthead is brand navy `#0a1f38` in BOTH themes; active tab =
+  gold underline. Role/category colour appears only in charts (scatter
+  fills, dots) — table chips are neutral outline + colour dot.
+- Type: **Cormorant Garamond (`--font-cormorant`, `.font-display`) for page
+  mastheads only**; sans for UI; **mono for every numeral**; 10–11px
+  uppercase wide-tracked micro-labels for structure (gold for kickers,
+  muted ink for panel titles). Numerals are the protagonist; labels whisper.
+- Notices/banners: no tinted boxes — quiet `border-l-2` gold-rule notes.
 
 **Signature element: TrendSpark** (`components/trend-spark.tsx`).
 A quiet 64×20 sparkline that on hover/focus raises a card showing window,

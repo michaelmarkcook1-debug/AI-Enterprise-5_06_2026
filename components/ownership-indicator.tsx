@@ -110,7 +110,7 @@ export function ownershipChipClassName(ownershipType: OwnershipType | undefined,
 
 export function OwnershipLegend() {
   return (
-    <div className="flex flex-wrap items-center gap-2 text-xs text-[#5d6b80] dark:text-zinc-500" aria-label="Provider ownership color legend">
+    <div className="flex flex-wrap items-center gap-2 text-xs text-[#5d6b80] dark:text-[#8fa5bb]" aria-label="Provider ownership color legend">
       <span className="font-semibold uppercase tracking-wide">Ownership key</span>
       <OwnershipBadge ownershipType="public" compact />
       <OwnershipBadge ownershipType="private" compact />

@@ -62,37 +62,38 @@ function useRefreshData(enabled = true): RefreshData {
   return data;
 }
 
-/** Dot colour based on ingestion completeness. */
+/** Dot colour based on ingestion completeness. The badge always sits on the
+ * navy masthead, so all tints are dark-surface tints regardless of theme. */
 function healthDotClass(health: IngestionHealth | null): string {
-  if (!health) return "bg-emerald-500 dark:bg-emerald-300";
-  if (health.crashed) return "bg-rose-500 dark:bg-rose-300";
-  if (health.percentComplete === 100) return "bg-emerald-500 dark:bg-emerald-300";
-  if (health.percentComplete >= 70) return "bg-amber-500 dark:bg-amber-300";
-  return "bg-rose-500 dark:bg-rose-300";
+  if (!health) return "bg-emerald-300";
+  if (health.crashed) return "bg-rose-300";
+  if (health.percentComplete === 100) return "bg-emerald-300";
+  if (health.percentComplete >= 70) return "bg-amber-300";
+  return "bg-rose-300";
 }
 
 function healthBorderClass(health: IngestionHealth | null): string {
-  if (!health) return "border-emerald-300 dark:border-emerald-800";
-  if (health.crashed) return "border-rose-300 dark:border-rose-800";
-  if (health.percentComplete === 100) return "border-emerald-300 dark:border-emerald-800";
-  if (health.percentComplete >= 70) return "border-amber-300 dark:border-amber-800";
-  return "border-rose-300 dark:border-rose-800";
+  if (!health) return "border-emerald-300/30";
+  if (health.crashed) return "border-rose-300/40";
+  if (health.percentComplete === 100) return "border-emerald-300/30";
+  if (health.percentComplete >= 70) return "border-amber-300/40";
+  return "border-rose-300/40";
 }
 
 function healthBgClass(health: IngestionHealth | null): string {
-  if (!health) return "bg-emerald-50 dark:bg-emerald-950/40";
-  if (health.crashed) return "bg-rose-50 dark:bg-rose-950/40";
-  if (health.percentComplete === 100) return "bg-emerald-50 dark:bg-emerald-950/40";
-  if (health.percentComplete >= 70) return "bg-amber-50 dark:bg-amber-950/40";
-  return "bg-rose-50 dark:bg-rose-950/40";
+  if (!health) return "bg-emerald-400/10";
+  if (health.crashed) return "bg-rose-400/10";
+  if (health.percentComplete === 100) return "bg-emerald-400/10";
+  if (health.percentComplete >= 70) return "bg-amber-400/10";
+  return "bg-rose-400/10";
 }
 
 function healthTextClass(health: IngestionHealth | null): string {
-  if (!health) return "text-emerald-900 dark:text-emerald-200";
-  if (health.crashed) return "text-rose-900 dark:text-rose-200";
-  if (health.percentComplete === 100) return "text-emerald-900 dark:text-emerald-200";
-  if (health.percentComplete >= 70) return "text-amber-900 dark:text-amber-200";
-  return "text-rose-900 dark:text-rose-200";
+  if (!health) return "text-emerald-200";
+  if (health.crashed) return "text-rose-200";
+  if (health.percentComplete === 100) return "text-emerald-200";
+  if (health.percentComplete >= 70) return "text-amber-200";
+  return "text-rose-200";
 }
 
 function healthTitle(health: IngestionHealth | null, iso: string): string {
@@ -162,12 +163,12 @@ export default function TopNav() {
   }
 
   return (
-    <header className="sticky top-0 z-30 border-b border-[#e6dcc3] bg-[#faf6ec]/95 backdrop-blur dark:border-zinc-800 dark:bg-[#071827]/95">
+    <header className="sticky top-0 z-30 border-b border-[#d4af37]/30 bg-[#0a1f38]/[0.97] backdrop-blur dark:border-[#d4af37]/20 dark:bg-[#071827]/[0.97]">
       <div className="mx-auto flex h-14 max-w-7xl items-center gap-6 px-5">
         <Link href="/" className="flex items-center" aria-label="AI Enterprise home">
-          <BrandLogo size={32} />
+          <BrandLogo size={32} onDark />
         </Link>
-        <nav className="hidden flex-1 items-center gap-1 text-sm md:flex">
+        <nav className="hidden h-full flex-1 items-stretch gap-0.5 text-sm md:flex">
           {NAV.map((n) => {
             const active = isActiveNavItem(pathname, n.href);
             return (
@@ -175,10 +176,10 @@ export default function TopNav() {
                 key={n.href}
                 href={n.href}
                 aria-current={active ? "page" : undefined}
-                className={`rounded-md px-3 py-1.5 transition-colors ${
+                className={`flex items-center border-b-2 px-3.5 transition-colors ${
                   active
-                    ? "bg-[#13294b] !text-white font-semibold shadow-sm dark:bg-[#d4af37] dark:!text-[#0a1f38]"
-                    : "font-medium text-[#475a72] hover:bg-[#f1ead6] hover:text-[#13294b] dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-100"
+                    ? "border-[#d4af37] font-semibold text-white"
+                    : "border-transparent font-medium text-[#9db1c7] hover:border-[#d4af37]/40 hover:text-[#e8effa]"
                 }`}
               >
                 {n.label}
@@ -186,30 +187,30 @@ export default function TopNav() {
             );
           })}
           {/* Library — reference surfaces pruned from primary nav */}
-          <div className="group relative">
+          <div className="group relative flex items-stretch">
             <button
               type="button"
               aria-haspopup="menu"
-              className={`flex items-center gap-1 rounded-md px-3 py-1.5 transition-colors ${
+              className={`flex items-center gap-1 border-b-2 px-3.5 transition-colors ${
                 LIBRARY.some((l) => pathname.startsWith(l.href))
-                  ? "bg-[#13294b] !text-white font-semibold shadow-sm dark:bg-[#d4af37] dark:!text-[#0a1f38]"
-                  : "font-medium text-[#475a72] hover:bg-[#f1ead6] hover:text-[#13294b] dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-100"
+                  ? "border-[#d4af37] font-semibold text-white"
+                  : "border-transparent font-medium text-[#9db1c7] hover:border-[#d4af37]/40 hover:text-[#e8effa]"
               }`}
             >
               Library
               <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="m6 9 6 6 6-6" /></svg>
             </button>
             <div className="invisible absolute left-0 top-full z-40 w-52 pt-1 opacity-0 transition-all duration-150 group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100">
-              <div role="menu" className="grid grid-cols-1 gap-0.5 rounded-lg border border-[#e6dcc3] bg-white p-1.5 shadow-xl dark:border-zinc-800 dark:bg-zinc-950">
+              <div role="menu" className="grid grid-cols-1 gap-0.5 rounded-md border border-[#2a4a6b] bg-[#0c2238] p-1.5 shadow-[0_12px_32px_rgba(2,10,20,0.55)]">
                 {LIBRARY.map((l) => (
                   <Link
                     key={l.href}
                     href={l.href}
                     role="menuitem"
-                    className={`rounded-md px-2.5 py-1.5 text-xs transition-colors ${
+                    className={`rounded px-2.5 py-1.5 text-xs transition-colors ${
                       pathname.startsWith(l.href)
-                        ? "bg-[#13294b] font-semibold !text-white dark:bg-[#d4af37] dark:!text-[#0a1f38]"
-                        : "text-[#3a4a63] hover:bg-[#f1ead6] dark:text-zinc-300 dark:hover:bg-zinc-900"
+                        ? "bg-[#d4af37] font-semibold !text-[#0a1f38]"
+                        : "text-[#c2d1e0] hover:bg-white/[0.06] hover:text-white"
                     }`}
                   >
                     {l.label}
@@ -219,14 +220,14 @@ export default function TopNav() {
             </div>
           </div>
           {/* Investor Tools — visually separated secondary workflow */}
-          <span className="mx-1 h-5 w-px bg-[#e6dcc3] dark:bg-zinc-700" aria-hidden />
+          <span className="mx-2 my-auto h-5 w-px bg-white/15" aria-hidden />
           <Link
             href="/investor-tools"
             aria-current={pathname.startsWith("/investor-tools") || pathname.startsWith("/investing") ? "page" : undefined}
-            className={`rounded-md px-3 py-1.5 transition-colors ${
+            className={`flex items-center border-b-2 px-3.5 transition-colors ${
               pathname.startsWith("/investor-tools") || pathname.startsWith("/investing")
-                ? "bg-[#13294b] !text-white font-semibold shadow-sm dark:bg-[#d4af37] dark:!text-[#0a1f38]"
-                : "font-medium text-[#8a7a5a] hover:bg-[#f0ebe0] hover:text-[#5a4e36] dark:text-amber-400/80 dark:hover:bg-amber-950/40 dark:hover:text-amber-200"
+                ? "border-[#d4af37] font-semibold text-[#e8c95c]"
+                : "border-transparent font-medium text-[#c3a558] hover:border-[#d4af37]/40 hover:text-[#e8c95c]"
             }`}
           >
             Investor Tools
@@ -251,8 +252,8 @@ export default function TopNav() {
             title="Settings — ingestion & spend"
             className={`hidden h-8 w-8 items-center justify-center rounded-md transition-colors md:flex ${
               pathname.startsWith("/settings") || pathname.startsWith("/admin")
-                ? "bg-[#13294b] text-white dark:bg-[#d4af37] dark:text-[#0a1f38]"
-                : "text-[#475a72] hover:bg-[#f1ead6] hover:text-[#13294b] dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-100"
+                ? "bg-[#d4af37] text-[#0a1f38]"
+                : "text-[#9db1c7] hover:bg-white/[0.07] hover:text-white"
             }`}
           >
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
@@ -263,7 +264,7 @@ export default function TopNav() {
           <button
             type="button"
             onClick={toggleTheme}
-            className="hidden rounded-full border border-[#d6c9a8] bg-white/70 px-3 py-1.5 text-xs font-semibold text-[#24364f] transition-colors hover:bg-[#f3ead2] md:inline-block dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
+            className="hidden rounded-full border border-white/20 px-3 py-1.5 text-xs font-semibold text-[#d8e2ec] transition-colors hover:border-[#d4af37]/50 hover:text-white md:inline-block"
             aria-label="Toggle light and dark mode"
             aria-pressed={theme === "dark"}
           >
@@ -277,7 +278,7 @@ export default function TopNav() {
         <button
           type="button"
           onClick={() => setMobileOpen((v) => !v)}
-          className="ml-auto inline-flex h-10 w-10 items-center justify-center rounded-md border border-[#d6c9a8] bg-white/70 text-[#24364f] transition-colors hover:bg-[#f3ead2] md:hidden dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
+          className="ml-auto inline-flex h-10 w-10 items-center justify-center rounded-md border border-white/20 text-[#d8e2ec] transition-colors hover:bg-white/[0.07] md:hidden"
           aria-label={mobileOpen ? "Close menu" : "Open menu"}
           aria-expanded={mobileOpen}
           aria-controls="mobile-nav-drawer"
@@ -303,7 +304,7 @@ export default function TopNav() {
       {mobileOpen && (
         <nav
           id="mobile-nav-drawer"
-          className="border-t border-[#e6dcc3] bg-white/95 px-4 py-3 md:hidden dark:border-zinc-800 dark:bg-[#071827]/95"
+          className="border-t border-white/10 bg-[#0a1f38] px-4 py-3 md:hidden"
           aria-label="Mobile navigation"
         >
           <ul className="flex flex-col gap-1 text-sm">
@@ -317,8 +318,8 @@ export default function TopNav() {
                     aria-current={active ? "page" : undefined}
                     className={`block rounded-md px-3 py-2.5 transition-colors ${
                       active
-                        ? "bg-[#13294b] !text-white font-semibold shadow-sm dark:bg-[#d4af37] dark:!text-[#0a1f38]"
-                        : "font-medium text-[#475a72] hover:bg-[#f1ead6] hover:text-[#13294b] dark:text-zinc-300 dark:hover:bg-zinc-900 dark:hover:text-zinc-100"
+                        ? "bg-[#d4af37] font-semibold !text-[#0a1f38]"
+                        : "font-medium text-[#c2d1e0] hover:bg-white/[0.06] hover:text-white"
                     }`}
                   >
                     {n.label}
@@ -328,15 +329,15 @@ export default function TopNav() {
             })}
 
             {/* Investor Tools — separated secondary workflow */}
-            <li className="mt-1 border-t border-[#e6dcc3] pt-2 dark:border-zinc-800">
+            <li className="mt-1 border-t border-white/10 pt-2">
               <Link
                 href="/investor-tools"
                 onClick={() => setMobileOpen(false)}
                 aria-current={pathname.startsWith("/investor-tools") || pathname.startsWith("/investing") ? "page" : undefined}
                 className={`block rounded-md px-3 py-2.5 transition-colors ${
                   pathname.startsWith("/investor-tools") || pathname.startsWith("/investing")
-                    ? "bg-[#13294b] !text-white font-semibold shadow-sm dark:bg-[#d4af37] dark:!text-[#0a1f38]"
-                    : "font-medium text-[#8a7a5a] hover:bg-[#f0ebe0] hover:text-[#5a4e36] dark:text-amber-400/80 dark:hover:bg-amber-950/40 dark:hover:text-amber-200"
+                    ? "bg-[#d4af37] font-semibold !text-[#0a1f38]"
+                    : "font-medium text-[#c3a558] hover:bg-white/[0.06] hover:text-[#e8c95c]"
                 }`}
               >
                 Investor Tools
@@ -345,15 +346,15 @@ export default function TopNav() {
           </ul>
 
           {/* Admin utility link — visually separated. */}
-          <div className="mt-1 border-t border-[#e6dcc3] pt-2 dark:border-zinc-800">
-            <div className="px-3 pb-1 text-[9px] font-semibold uppercase tracking-wider text-[#7e8a99] dark:text-zinc-600">Library</div>
+          <div className="mt-1 border-t border-white/10 pt-2">
+            <div className="px-3 pb-1 text-[9px] font-semibold uppercase tracking-wider text-[#7d93aa]">Library</div>
             <div className="grid grid-cols-2 gap-0.5 pb-2">
               {LIBRARY.map((l) => (
                 <Link
                   key={l.href}
                   href={l.href}
                   onClick={() => setMobileOpen(false)}
-                  className="rounded-md px-3 py-1.5 text-xs text-[#5b6b7f] hover:bg-[#f1ead6] hover:text-[#13294b] dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-100"
+                  className="rounded-md px-3 py-1.5 text-xs text-[#a7bacd] hover:bg-white/[0.06] hover:text-white"
                 >
                   {l.label}
                 </Link>
@@ -364,8 +365,8 @@ export default function TopNav() {
               onClick={() => setMobileOpen(false)}
               className={`flex items-center gap-2 rounded-md px-3 py-2 text-xs font-medium transition-colors ${
                 pathname.startsWith("/admin")
-                  ? "bg-[#13294b] text-white dark:bg-[#d4af37] dark:text-[#0a1f38]"
-                  : "text-[#5b6b7f] hover:bg-[#f1ead6] hover:text-[#13294b] dark:text-zinc-500 dark:hover:bg-zinc-900 dark:hover:text-zinc-100"
+                  ? "bg-[#d4af37] text-[#0a1f38]"
+                  : "text-[#8fa5bb] hover:bg-white/[0.06] hover:text-white"
               }`}
             >
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
@@ -378,7 +379,7 @@ export default function TopNav() {
 
           {/* Mobile theme toggle + freshness badge. Stacked under the
               nav links because the header bar is too cramped on phones. */}
-          <div className="mt-3 flex items-center justify-between gap-2 border-t border-[#e6dcc3] pt-3 dark:border-zinc-800">
+          <div className="mt-3 flex items-center justify-between gap-2 border-t border-white/10 pt-3">
             {lastRefreshedAt ? (
               <Link
                 href="/admin/pipeline-health"
@@ -395,7 +396,7 @@ export default function TopNav() {
             <button
               type="button"
               onClick={toggleTheme}
-              className="rounded-full border border-[#d6c9a8] bg-white/70 px-3 py-1.5 text-xs font-semibold text-[#24364f] transition-colors hover:bg-[#f3ead2] dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
+              className="rounded-full border border-white/20 px-3 py-1.5 text-xs font-semibold text-[#d8e2ec] transition-colors hover:border-[#d4af37]/50 hover:text-white"
               aria-label="Toggle light and dark mode"
               aria-pressed={theme === "dark"}
             >

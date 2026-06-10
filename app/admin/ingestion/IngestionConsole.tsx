@@ -112,11 +112,11 @@ export default function IngestionConsole({
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-[#071827] text-zinc-900 dark:text-zinc-100">
+    <div className="min-h-screen bg-[#f6f1e3] dark:bg-[#071827] text-[#15263c] dark:text-[#eef3f8]">
       <main className="mx-auto max-w-5xl px-6 py-10">
-        <Link href="/admin" className="text-sm text-zinc-500 hover:underline">← Admin</Link>
+        <Link href="/admin" className="text-sm text-[#4c5d75] hover:underline">← Admin</Link>
         <h1 className="mt-4 text-3xl font-semibold tracking-tight">Ingestion</h1>
-        <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
+        <p className="mt-2 text-sm text-[#3f5068] dark:text-[#a7bacd]">
           Fire the public-data ingestion pipeline against today&apos;s rotation vendor (or pick one). New proposals land in /admin/evidence.
         </p>
 
@@ -164,7 +164,7 @@ export default function IngestionConsole({
                 e.target.value = "";
               }}
               disabled={busyAll}
-              className="rounded-full border border-emerald-300 bg-white px-3 py-1.5 text-xs dark:border-emerald-700 dark:bg-zinc-900"
+              className="rounded-full border border-emerald-300 bg-white px-3 py-1.5 text-xs dark:border-emerald-700 dark:bg-[#0c2238]"
             >
               <option value="">Run for specific vendor…</option>
               {vendors.map((v) => <option key={v.id} value={v.id}>{v.name}</option>)}
@@ -178,18 +178,18 @@ export default function IngestionConsole({
         {/* ── Token (only needed if ADMIN_API_OPEN is off) ─────────────── */}
         <div className="mt-4 grid gap-3 sm:grid-cols-[1fr_auto]">
           <label className="block">
-            <div className="mb-1 text-xs font-medium text-zinc-500">x-admin-token (only required when ADMIN_API_OPEN is off)</div>
+            <div className="mb-1 text-xs font-medium text-[#4c5d75]">x-admin-token (only required when ADMIN_API_OPEN is off)</div>
             <input value={token} onChange={(e) => setToken(e.target.value)} type="password"
-              className="w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-[#071827] px-3 py-2 text-sm" />
+              className="w-full rounded-lg border border-[#d6c9a8] dark:border-[#2a4a6b] bg-white dark:bg-[#071827] px-3 py-2 text-sm" />
           </label>
         </div>
 
         {/* ── Recent jobs ──────────────────────────────────────────────── */}
         <h2 className="mt-10 text-xl font-semibold">Recent jobs</h2>
-        <div className="mt-3 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
+        <div className="mt-3 rounded-xl border border-[#e3d9c0] dark:border-[#1d3a57] bg-white dark:bg-[#0c2238] overflow-hidden">
           <table className="w-full text-sm">
-            <thead className="bg-zinc-50 dark:bg-[#071827]">
-              <tr className="text-left text-xs uppercase text-zinc-500">
+            <thead className="bg-[#f6f1e3] dark:bg-[#071827]">
+              <tr className="text-left text-xs uppercase text-[#4c5d75]">
                 <th className="px-4 py-2 font-medium">Job</th>
                 <th className="px-4 py-2 font-medium">Vendor</th>
                 <th className="px-4 py-2 font-medium">Status</th>
@@ -199,15 +199,15 @@ export default function IngestionConsole({
             </thead>
             <tbody>
               {jobs.length === 0 && (
-                <tr><td colSpan={5} className="px-4 py-6 text-center text-zinc-500">No jobs yet.</td></tr>
+                <tr><td colSpan={5} className="px-4 py-6 text-center text-[#4c5d75]">No jobs yet.</td></tr>
               )}
               {jobs.map((j) => (
-                <tr key={j.id} className="border-t border-zinc-100 dark:border-zinc-800">
+                <tr key={j.id} className="border-t border-[#ece4d0] dark:border-[#1d3a57]">
                   <td className="px-4 py-2 font-mono text-xs">{j.id}</td>
                   <td className="px-4 py-2">{j.vendorId}</td>
                   <td className="px-4 py-2"><StatusPill status={j.status} /></td>
                   <td className="px-4 py-2 tabular-nums">{j.proposalsCount}</td>
-                  <td className="px-4 py-2 text-xs text-zinc-500">{new Date(j.createdAt).toLocaleString()}</td>
+                  <td className="px-4 py-2 text-xs text-[#4c5d75]">{new Date(j.createdAt).toLocaleString()}</td>
                 </tr>
               ))}
             </tbody>
@@ -219,41 +219,41 @@ export default function IngestionConsole({
           <button
             type="button"
             onClick={() => setShowAdvanced((s) => !s)}
-            className="text-sm text-zinc-500 hover:underline"
+            className="text-sm text-[#4c5d75] hover:underline"
           >
             {showAdvanced ? "▾" : "▸"} Advanced — paste a single source manually
           </button>
           {showAdvanced && (
-            <div className="mt-3 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6 space-y-4">
-              <p className="text-xs text-zinc-500">
+            <div className="mt-3 rounded-2xl border border-[#e3d9c0] dark:border-[#1d3a57] bg-white dark:bg-[#0c2238] p-6 space-y-4">
+              <p className="text-xs text-[#4c5d75]">
                 Use this when you want to run the extractor against arbitrary fetched text — e.g. a vendor blog post the manifest doesn&apos;t cover. The auto-ingest above is the normal path.
               </p>
               <div className="grid gap-3 sm:grid-cols-2">
                 <Field label="Vendor">
-                  <select value={vendorId} onChange={(e) => setVendorId(e.target.value)} className="w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-[#071827] px-3 py-2 text-sm">
+                  <select value={vendorId} onChange={(e) => setVendorId(e.target.value)} className="w-full rounded-lg border border-[#d6c9a8] dark:border-[#2a4a6b] bg-white dark:bg-[#071827] px-3 py-2 text-sm">
                     {vendors.map((v) => <option key={v.id} value={v.id}>{v.name}</option>)}
                   </select>
                 </Field>
                 <Field label="Source category">
-                  <select value={sourceCategory} onChange={(e) => setSourceCategory(e.target.value as typeof SOURCE_CATEGORIES[number])} className="w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-[#071827] px-3 py-2 text-sm">
+                  <select value={sourceCategory} onChange={(e) => setSourceCategory(e.target.value as typeof SOURCE_CATEGORIES[number])} className="w-full rounded-lg border border-[#d6c9a8] dark:border-[#2a4a6b] bg-white dark:bg-[#071827] px-3 py-2 text-sm">
                     {SOURCE_CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
                   </select>
                 </Field>
               </div>
               <Field label="Source URL">
                 <input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://vendor.com/trust"
-                  className="w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-[#071827] px-3 py-2 text-sm" />
+                  className="w-full rounded-lg border border-[#d6c9a8] dark:border-[#2a4a6b] bg-white dark:bg-[#071827] px-3 py-2 text-sm" />
               </Field>
               <Field label="Raw text content">
                 <textarea value={rawText} onChange={(e) => setRawText(e.target.value)} rows={10}
                   placeholder="Paste fetched text…"
-                  className="w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-[#071827] px-3 py-2 text-sm font-mono" />
+                  className="w-full rounded-lg border border-[#d6c9a8] dark:border-[#2a4a6b] bg-white dark:bg-[#071827] px-3 py-2 text-sm font-mono" />
               </Field>
               <div className="flex items-center justify-between">
                 <button
                   disabled={busyManual || !rawText || !url || !vendorId}
                   onClick={triggerManual}
-                  className="rounded-full bg-zinc-900 dark:bg-white px-6 py-2 text-sm font-medium text-white dark:text-zinc-900 disabled:opacity-40"
+                  className="rounded-full bg-[#0c2238] dark:bg-white px-6 py-2 text-sm font-medium text-white dark:text-[#0a1f38] disabled:opacity-40"
                 >{busyManual ? "Running…" : "Run manual extraction"}</button>
                 {manualResult && <div className="text-xs text-emerald-700 dark:text-emerald-400">{manualResult}</div>}
               </div>
@@ -269,7 +269,7 @@ export default function IngestionConsole({
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <div className="mb-1 text-xs font-medium text-zinc-500">{label}</div>
+      <div className="mb-1 text-xs font-medium text-[#4c5d75]">{label}</div>
       {children}
     </label>
   );
@@ -279,6 +279,6 @@ function StatusPill({ status }: { status: string }) {
   const tone =
     status === "completed" || status === "ready_for_review" ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
     : status === "failed" ? "bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300"
-    : "bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300";
+    : "bg-[#ece3cb] text-[#2e3f57] dark:bg-[#143049] dark:text-[#c2d1e0]";
   return <span className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${tone}`}>{status}</span>;
 }
