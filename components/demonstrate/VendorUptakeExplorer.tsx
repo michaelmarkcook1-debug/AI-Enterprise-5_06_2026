@@ -11,6 +11,7 @@
 // the SSR bundle ships it once and every filter change is instant.
 
 import { useMemo, useState } from "react";
+import { SeedDataBadge } from "@/components/intelligence-ui";
 import {
   REGIONS,
   INDUSTRIES,
@@ -159,8 +160,15 @@ export default function VendorUptakeExplorer() {
       )}
 
       {/* Data note */}
+      <div className="flex flex-wrap items-center gap-2">
+        <SeedDataBadge
+          label="Modelled estimate"
+          provenance="seed"
+          reason="These shares are modelled estimates built in a May 2026 spreadsheet model from the cited research, not measured market data. Treat as directional; per-cell confidence dots show evidence strength."
+        />
+      </div>
       <p className="text-[11px] leading-5 text-[#697362] dark:text-zinc-500">
-        Source: aggregated from 585 segment-share rows (5 regions × 9 industries × 13 vendors)
+        Modelled estimates, aggregated from 585 segment-share rows (5 regions × 9 industries × 13 vendors)
         and per-vendor large-enterprise / SME propensity, normalised within each slice. May 2026
         research basis: Menlo Ventures State of Enterprise GenAI, Ramp AI Index, Enlyft / Similarweb /
         Apptopia measured signals. Confidence dot reflects average evidence strength of the

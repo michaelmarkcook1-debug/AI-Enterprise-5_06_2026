@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { estimateIngestionCost } from "@/lib/ingestion/cost-model";
 
 interface Job {
   id: string;
@@ -135,6 +136,11 @@ export default function IngestionConsole({
           </h2>
           <p className="mt-1 text-sm text-emerald-900/80 dark:text-emerald-200/80">
             Same pipeline the daily cron runs — fetches every source in the manifest for today&apos;s rotation vendor, LLM-extracts, and writes proposals to review.
+          </p>
+          <p className="mt-2 text-xs font-semibold text-emerald-900 dark:text-emerald-200">
+            Estimated cost — full 42-vendor run: ${estimateIngestionCost().totalUsd.toFixed(2)} · single-vendor rotation: ~$
+            {(estimateIngestionCost().totalUsd / 42).toFixed(2)}{" "}
+            <Link href="/settings" className="font-normal underline">adjust assumptions in Settings →</Link>
           </p>
           <div className="mt-4 flex flex-wrap items-center gap-3">
             <button

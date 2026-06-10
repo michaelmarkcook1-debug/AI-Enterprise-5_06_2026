@@ -38,6 +38,12 @@ import TokenPricingTable from "@/components/demonstrate/TokenPricingTable";
 import RestoreShortlistBanner from "@/components/demonstrate/RestoreShortlistBanner";
 import BoardPackExporter from "@/components/demonstrate/BoardPackExporter";
 import { pricingForVendorIds } from "@/lib/model-inventory/token-pricing";
+import { aggregateUptake, INDUSTRIES, REGIONS, type Industry, type Region } from "@/lib/intelligence/vendor-uptake-seed";
+import ShortlistVendorCards from "@/components/shortlist-vendor-cards";
+import { boardDefenceScore } from "@/lib/decision-intelligence/board-defence-score";
+import AnalystInsight from "@/components/analyst-insight";
+import { demonstrateInsight } from "@/lib/insights/tab-insights";
+import { isRankable } from "@/lib/intelligence/roles";
 
 export const dynamic = "force-dynamic";
 
@@ -76,6 +82,7 @@ export default async function DemonstratePage({ searchParams }: PageProps) {
   const pillarsByVendor = new Map<string, typeof pillarScores>();
   for (const p of pillarScores) { const l = pillarsByVendor.get(p.vendorId) ?? []; l.push(p); pillarsByVendor.set(p.vendorId, l); }
 
+  const rankableUniverse = vendors.filter(isRankable);
   const reputationUniverse = new Set(REPUTATION_VENDOR_IDS);
   const reputationIds = shortlistVendors.length > 0 ? shortlistVendors.map((v) => v.id).filter((id) => reputationUniverse.has(id)) : REPUTATION_VENDOR_IDS;
   const reputationRows = reputationIds.map((id) => ({ id, name: byId.get(id)?.name ?? id, slug: byId.get(id)?.slug ?? id, ownershipType: byId.get(id)?.ownershipType }));
@@ -86,8 +93,24 @@ export default async function DemonstratePage({ searchParams }: PageProps) {
   // Scores
   const hasShortlist = shortlistVendors.length > 0;
   const cioConfidence = hasShortlist ? Math.round(shortlistVendors.reduce((s, v) => s + v.overallScore * 0.4 + v.confidenceScore * 0.3 + (momentumByVendor.get(v.id)?.momentumScore ?? 50) * 0.3, 0) / shortlistVendors.length) : 0;
-  const defenceDimensions = [hasShortlist, industries.length > 0, useCases.length > 0, reputationRows.length > 0, filteredNews.length > 0, true].filter(Boolean).length;
-  const boardDefenceScore = Math.round((defenceDimensions / 6) * 100);
+  // Board Defence Score — quality-weighted (replaces the old 6/6
+  // completeness meter, which read as a quality score but wasn't one).
+  const defence = boardDefenceScore({
+    vendors: shortlistVendors.map((v) => ({
+      overallScore: v.overallScore,
+      confidenceScore: v.confidenceScore,
+      momentumScore: momentumByVendor.get(v.id)?.momentumScore,
+      hasReputation: reputationUniverse.has(v.id),
+    })),
+    scope: {
+      industries: industries.length,
+      useCases: useCases.length,
+      hasRegion: Boolean(region),
+      hasDataSensitivity: Boolean(dataSensitivity),
+      hasCostSensitivity: Boolean(costSensitivity),
+    },
+  });
+  const boardDefenceScoreValue = defence.score;
   const decisionStatus: DecisionStatus = cioConfidence >= 70 ? "Defensible" : cioConfidence >= 55 ? "Defensible with Conditions" : cioConfidence >= 40 ? "Pilot First" : cioConfidence > 0 ? "Reassess" : "Reassess";
 
   return (
@@ -98,9 +121,24 @@ export default async function DemonstratePage({ searchParams }: PageProps) {
     >
       <RestoreShortlistBanner hasUrlShortlist={hasShortlist} />
 
+      <AnalystInsight paragraph={demonstrateInsight({
+        hasShortlist,
+        shortlistNames: shortlistVendors.map((v) => v.name),
+        boardDefence: boardDefenceScoreValue,
+        cioConfidence,
+        recommendation: decisionStatus,
+        criticalRisks: SEED_ENTERPRISE_RISKS.filter((r) => r.severity === "Critical").length,
+      })} />
+
+      {/* Assessed shortlist cards — click to compare vs top 3 in category */}
+      <ShortlistVendorCards
+        universe={vendors.filter(isRankable).map((v) => ({ id: v.id, name: v.name, category: v.category, score: v.overallScore, confidence: v.confidenceScore, ownershipType: v.ownershipType }))}
+        initialShortlistIds={shortlistVendors.map((v) => v.id)}
+      />
+
       {/* Executive Defence Summary */}
       <section className="mb-6 grid gap-4 md:grid-cols-4">
-        <ScoreCard label="Board Defence Score" value={boardDefenceScore} sub={`${defenceDimensions}/6 dimensions`} tone="sky" />
+        <ScoreCard label="Board Defence Score" value={boardDefenceScoreValue} sub="quality-weighted: vendors · evidence · momentum · reputation · context" tone="sky" />
         <ScoreCard label="CIO Confidence Score" value={hasShortlist ? cioConfidence : null} sub="Vendor quality + evidence + momentum" tone="emerald" />
         <div className="rounded-xl border border-[#dfe4da] bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
           <div className="text-[10px] font-semibold uppercase tracking-wider text-[#697362]">Recommendation</div>
@@ -319,29 +357,105 @@ export default async function DemonstratePage({ searchParams }: PageProps) {
       {/* Board Pack Generator */}
       <section className="mt-6 mb-2">
         <Panel title="Board pack generator">
-          <BoardPackExporter
-            boardDefenceScore={boardDefenceScore}
-            cioConfidenceScore={hasShortlist ? cioConfidence : 0}
-            recommendation={hasShortlist ? decisionStatus : "No shortlist selected"}
-            businessCase={SEED_BUSINESS_CASE}
-            vendors={shortlistVendors.map((v) => {
-              const mom = momentumByVendor.get(v.id);
-              const pills = (pillarsByVendor.get(v.id) ?? []).slice().sort((a, b) => b.capabilityScore - a.capabilityScore).slice(0, 3);
-              return {
-                name: v.name,
-                role: v.category ?? "Enterprise AI",
-                score: v.overallScore,
-                confidence: mom?.confidence ?? v.confidenceScore,
-                topPillars: pills.map((p) => p.pillar),
-                risks: (v.riskProfile ?? []).slice(0, 2),
-              };
-            })}
-            competitors={SEED_COMPETITOR_PROFILES}
-            risks={SEED_ENTERPRISE_RISKS}
-            mitigations={SEED_RISK_MITIGATIONS}
-            assumptions={SEED_BOARD_ASSUMPTIONS}
-            kpis={SEED_KPIS}
-          />
+          {(() => {
+            // ── Shortlist-aligned pack data ──────────────────────────
+            // Scope: the assessment context this pack defends.
+            const packScope = {
+              industries,
+              useCases,
+              region,
+              dataSensitivity,
+              costSensitivity,
+            };
+
+            // Reputation snapshot for shortlisted vendors only.
+            const custById = new Map(CUSTOMER_REPUTATION.map((r) => [r.vendorId, r]));
+            const devById = new Map(liveDeveloperReputation.map((r) => [r.vendorId, r]));
+            const empById = new Map(EMPLOYEE_REPUTATION.map((r) => [r.vendorId, r]));
+            // Shortlist-filtered when a shortlist exists; otherwise the full
+            // reputation universe (feeds the no-shortlist market overview).
+            const reputationBasis = shortlistVendors.length > 0
+              ? shortlistVendors.filter((v) => reputationUniverse.has(v.id))
+              : REPUTATION_VENDOR_IDS.map((id) => byId.get(id)).filter((v): v is NonNullable<typeof v> => Boolean(v));
+            const packReputation = reputationBasis
+              .map((v) => ({
+                vendor: v.name,
+                customer: custById.get(v.id)?.overall ?? null,
+                developer: devById.get(v.id)?.overall ?? null,
+                employee: empById.get(v.id)?.overall ?? null,
+                uptimePct: custById.get(v.id)?.averageUptimePct ?? null,
+              }));
+
+            // Modelled peer adoption within the assessment scope,
+            // filtered to shortlisted vendors (name-matched against the
+            // uptake model's vendor labels).
+            const scopeIndustries = industries.filter((i): i is Industry => (INDUSTRIES as string[]).includes(i));
+            const scopeRegions = (REGIONS as string[]).includes(region) ? [region as Region] : [];
+            const uptakeAll = aggregateUptake({ regions: scopeRegions, industries: scopeIndustries });
+            const shortlistNamesLc = shortlistVendors.map((v) => v.name.toLowerCase());
+            const packUptake = uptakeAll
+              .filter((u) => shortlistNamesLc.some((n) => u.vendor.toLowerCase().includes(n) || n.includes(u.vendor.toLowerCase())))
+              .map((u) => ({ vendor: u.vendor, sharePct: u.share * 100, confidence: u.confidence }));
+            const uptakeScopeLabel = [
+              scopeIndustries.length > 0 ? scopeIndustries.join(", ") : "All industries",
+              scopeRegions.length > 0 ? scopeRegions.join(", ") : "All regions",
+            ].join(" · ");
+
+            // Vendor-published token list prices for the shortlist.
+            const packPricing = (shortlistIds.size > 0 ? pricingForVendorIds([...shortlistIds]) : [])
+              .map((r) => ({ vendorName: r.vendorName, modelName: r.modelName, inputPerM: r.inputPerM, outputPerM: r.outputPerM }));
+
+            return (
+              <BoardPackExporter
+                boardDefenceScore={boardDefenceScoreValue}
+                cioConfidenceScore={hasShortlist ? cioConfidence : 0}
+                recommendation={hasShortlist ? decisionStatus : "No shortlist selected"}
+                businessCase={SEED_BUSINESS_CASE}
+                vendors={shortlistVendors.map((v) => {
+                  const mom = momentumByVendor.get(v.id);
+                  const pills = (pillarsByVendor.get(v.id) ?? []).slice().sort((a, b) => b.capabilityScore - a.capabilityScore).slice(0, 3);
+                  return {
+                    name: v.name,
+                    role: v.category ?? "Enterprise AI",
+                    score: v.overallScore,
+                    confidence: mom?.confidence ?? v.confidenceScore,
+                    topPillars: pills.map((p) => p.pillar),
+                    risks: (v.riskProfile ?? []).slice(0, 2),
+                  };
+                })}
+                competitors={SEED_COMPETITOR_PROFILES}
+                risks={SEED_ENTERPRISE_RISKS}
+                mitigations={SEED_RISK_MITIGATIONS}
+                assumptions={SEED_BOARD_ASSUMPTIONS}
+                kpis={SEED_KPIS}
+                scope={packScope}
+                reputation={packReputation}
+                uptake={packUptake}
+                uptakeScopeLabel={uptakeScopeLabel}
+                pricing={packPricing}
+                marketOverview={{
+                  totalVendors: rankableUniverse.length,
+                  totalCategories: new Set(rankableUniverse.map((v) => v.category)).size,
+                  topVendors: [...rankableUniverse].sort((a, b) => b.overallScore - a.overallScore).slice(0, 8)
+                    .map((v) => ({ name: v.name, category: v.category, score: v.overallScore, confidence: v.confidenceScore, ownershipType: v.ownershipType })),
+                  categoryLeaders: [...new Set(rankableUniverse.map((v) => v.category))]
+                    .map((category) => ({
+                      category,
+                      vendors: rankableUniverse.filter((v) => v.category === category)
+                        .sort((a, b) => b.overallScore - a.overallScore).slice(0, 3)
+                        .map((v) => ({ name: v.name, score: v.overallScore })),
+                    }))
+                    .sort((a, b) => (b.vendors[0]?.score ?? 0) - (a.vendors[0]?.score ?? 0))
+                    .slice(0, 6),
+                  momentumLeaders: [...rankableUniverse]
+                    .map((v) => ({ name: v.name, momentumScore: momentumByVendor.get(v.id)?.momentumScore ?? 0 }))
+                    .filter((v) => v.momentumScore >= 55)
+                    .sort((a, b) => b.momentumScore - a.momentumScore)
+                    .slice(0, 3),
+                }}
+              />
+            );
+          })()}
         </Panel>
       </section>
 

@@ -33,6 +33,12 @@ import {
 } from "@/lib/intelligence/capabilities-truthfulness";
 import { listConnectorHealth } from "@/lib/connectors/registry";
 import { getDataProvenance } from "@/lib/intelligence/provenance";
+import { strategicScores } from "@/lib/intelligence/strategic-scores";
+import AnalystInsight from "@/components/analyst-insight";
+import CollapsiblePanel from "@/components/collapsible-panel";
+import TrendSpark from "@/components/trend-spark";
+import { getRankingHistories } from "@/lib/intelligence/ranking-snapshots";
+import { understandInsight } from "@/lib/insights/tab-insights";
 import { SeedDataBadge } from "@/components/intelligence-ui";
 import { isRankable } from "@/lib/intelligence/roles";
 
@@ -79,18 +85,42 @@ export default async function UnderstandPage({ searchParams }: PageProps) {
   const configuredConnectors = connectors.filter((c) => c.configured).length;
   const totalConnectors = connectors.length;
 
+  const histories = await getRankingHistories(vendors, momentum);
+
+  // Analyst insight — computed from the same strategic scores the page renders
+  const insightScores = rankableVendors.slice(0, 12).map((v) => {
+    const mom = momentumByVendor.get(v.id);
+    const { sustainability, encroachment } = strategicScores(v, mom?.momentumScore ?? 50);
+    return { vendor: v, sustainability, encroachment };
+  });
+  const insightAvg = insightScores.length > 0 ? Math.round(insightScores.reduce((s, x) => s + x.sustainability, 0) / insightScores.length) : 0;
+  const insightDurable = [...insightScores].sort((a, b) => b.sustainability - a.sustainability)[0];
+  const insightRisk = [...insightScores].sort((a, b) => b.encroachment - a.encroachment)[0];
+  const insightSpread = insightScores.length > 0 ? Math.max(...insightScores.map((x) => x.sustainability)) - Math.min(...insightScores.map((x) => x.sustainability)) : 0;
+  const insightParagraph = understandInsight({
+    vendorCount: insightScores.length,
+    avgSustainability: insightAvg,
+    mostDurable: insightDurable ? { name: insightDurable.vendor.name, sustainability: insightDurable.sustainability } : null,
+    highestRisk: insightRisk ? { name: insightRisk.vendor.name, encroachment: insightRisk.encroachment } : null,
+    spread: insightSpread,
+  });
+
   return (
     <PageFrame
       title="Understand"
       kicker="What is this vendor and where does it fit?"
       description="The definitive AI vendor intelligence layer — capability matrix, strategic sustainability, platform encroachment risk, dependency analysis, vendor viability, and the methodology backbone. Understand every vendor's position, defensibility, and risk profile before you assess."
     >
+      <AnalystInsight paragraph={insightParagraph} />
+
       <div className="mb-5">
         <OwnershipLegend />
       </div>
 
-      {/* 0. Quick access — AI Atlas + Leadership Matrix (removed from top nav, accessible here) */}
-      <section className="mb-6 grid gap-4 md:grid-cols-2">
+      {/* 0. Quick access — AI Atlas. (The former "Vendor Leadership Matrix" 2×2 was
+          retired 10 Jun 2026: composite scoring for multi-category vendors must not
+          render as a rank or quadrant.) */}
+      <section className="mb-6 grid gap-4">
         <Link
           href="/atlas"
           className="group rounded-xl border border-[#dfe4da] bg-white p-5 transition-colors hover:border-emerald-400 hover:bg-emerald-50/50 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-emerald-600 dark:hover:bg-emerald-950/30"
@@ -102,19 +132,6 @@ export default async function UnderstandPage({ searchParams }: PageProps) {
           </p>
           <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 transition-colors group-hover:text-emerald-800 dark:text-emerald-400 dark:group-hover:text-emerald-300">
             Open Atlas →
-          </span>
-        </Link>
-        <Link
-          href="/quadrant"
-          className="group rounded-xl border border-[#dfe4da] bg-white p-5 transition-colors hover:border-sky-400 hover:bg-sky-50/50 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-sky-600 dark:hover:bg-sky-950/30"
-        >
-          <div className="text-[10px] font-semibold uppercase tracking-wider text-sky-700 dark:text-sky-400">Interactive</div>
-          <div className="mt-1 text-lg font-semibold text-[#18201b] dark:text-zinc-100">Vendor Leadership Matrix</div>
-          <p className="mt-1 text-xs text-[#5f685a] dark:text-zinc-400">
-            Enhance × Innovate positioning for every tracked vendor. Arrows show movement since the prior snapshot.
-          </p>
-          <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-sky-700 transition-colors group-hover:text-sky-800 dark:text-sky-400 dark:group-hover:text-sky-300">
-            Open Leadership Matrix →
           </span>
         </Link>
       </section>
@@ -129,14 +146,12 @@ export default async function UnderstandPage({ searchParams }: PageProps) {
             const top12 = rankableVendors.slice(0, 12);
             const scores = top12.map((v) => {
               const mom = momentumByVendor.get(v.id);
-              const momScore = mom?.momentumScore ?? 50;
-              const sustainability = Math.min(100, Math.round(v.overallScore * 0.3 + momScore * 0.25 + v.confidenceScore * 0.2 + (v.marketPosition === "Leader" ? 20 : v.marketPosition === "Strong performer" ? 12 : 5) + 5));
-              const encroachment = Math.min(100, Math.max(0, Math.round(100 - v.overallScore * 0.4 - momScore * 0.2 + (v.category.includes("vertical") || v.category.includes("Legal") ? 25 : 0) - (v.category.includes("Platform") || v.category.includes("Cloud") ? 15 : 0))));
+              const { sustainability, encroachment } = strategicScores(v, mom?.momentumScore ?? 50);
               return { vendor: v, sustainability, encroachment };
             });
             const avgSus = scores.length > 0 ? Math.round(scores.reduce((s, x) => s + x.sustainability, 0) / scores.length) : 0;
-            const highestSus = scores.sort((a, b) => b.sustainability - a.sustainability)[0];
-            const highestRisk = scores.sort((a, b) => b.encroachment - a.encroachment)[0];
+            const highestSus = [...scores].sort((a, b) => b.sustainability - a.sustainability)[0];
+            const highestRisk = [...scores].sort((a, b) => b.encroachment - a.encroachment)[0];
             return (
               <div className="grid gap-3 md:grid-cols-3">
                 <div className="rounded-md border border-[#dfe4da] p-3 dark:border-zinc-800">
@@ -174,7 +189,7 @@ export default async function UnderstandPage({ searchParams }: PageProps) {
 
       {/* 2. Coverage overview */}
       <section className="mb-6">
-        <Panel title="Capability coverage overview">
+        <CollapsiblePanel title="Capability coverage overview" summary={`${capabilities.length} capabilities tracked`}>
           <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
             <Stat label="Vendors" value={overview.totalVendors} note="tracked" />
             <Stat label="Capabilities" value={overview.capabilitiesTracked} note="tracked" />
@@ -187,12 +202,12 @@ export default async function UnderstandPage({ searchParams }: PageProps) {
             <Stat label="Unknown" value={overview.cellsUnknown} tone="bad" />
             <Stat label="Infrastructure-only" value={overview.cellsInfrastructureOnly} tone="neutral" />
           </div>
-        </Panel>
+        </CollapsiblePanel>
       </section>
 
       {/* 3. Data sources / connector health */}
       <section className="mb-6">
-        <Panel title="Data sources backing this surface">
+        <CollapsiblePanel title="Data sources backing this surface" summary={"provenance register"}>
           <div className="flex flex-wrap items-center justify-between gap-3 text-sm">
             <div>
               <p className="text-xs leading-5 text-[#596151] dark:text-zinc-400">
@@ -214,7 +229,7 @@ export default async function UnderstandPage({ searchParams }: PageProps) {
               </Link>
             </div>
           </div>
-        </Panel>
+        </CollapsiblePanel>
       </section>
 
       {/* 4. Capability matrix + sub-tabs */}
@@ -240,6 +255,7 @@ export default async function UnderstandPage({ searchParams }: PageProps) {
               <thead>
                 <tr className="border-b border-[#dfe4da] text-left text-[10px] uppercase tracking-wide text-[#5f685a]">
                   <th className="py-2 pr-3">Vendor</th>
+                  <th className="py-2 pr-3">Trend</th>
                   <th className="py-2 pr-3 text-right">Sustainability</th>
                   <th className="py-2 pr-3 text-right">Encroachment risk</th>
                   <th className="py-2 pr-3 text-right">Dependency risk</th>
@@ -250,37 +266,10 @@ export default async function UnderstandPage({ searchParams }: PageProps) {
               <tbody>
                 {rankableVendors.slice(0, 12).map((vendor) => {
                   const mom = momentumByVendor.get(vendor.id);
-                  const momScore = mom?.momentumScore ?? 50;
-                  // Strategic Sustainability: moat + market position + momentum
-                  const sustainability = Math.min(100, Math.round(
-                    vendor.overallScore * 0.3 + momScore * 0.25 + vendor.confidenceScore * 0.2
-                    + (vendor.marketPosition === "Leader" ? 20 : vendor.marketPosition === "Strong performer" ? 12 : 5)
-                    + 5 // base
-                  ));
-                  // Encroachment risk: higher for niche/vertical, lower for platforms
-                  const encroachment = Math.min(100, Math.max(0, Math.round(
-                    100 - vendor.overallScore * 0.4 - momScore * 0.2
-                    + (vendor.category.includes("vertical") || vendor.category.includes("Legal") || vendor.category.includes("Financial") ? 25 : 0)
-                    - (vendor.category.includes("Platform") || vendor.category.includes("Cloud") ? 15 : 0)
-                  )));
-                  // Dependency risk: infrastructure vendors low, app vendors high
-                  const dependency = Math.min(100, Math.max(0, Math.round(
-                    60 - vendor.overallScore * 0.15
-                    + (vendor.ownershipType === "private" ? 15 : 0)
-                    - (vendor.category.includes("Infrastructure") || vendor.category.includes("Cloud") ? 20 : 0)
-                    + (vendor.category.includes("Workflow") || vendor.category.includes("vertical") ? 20 : 0)
-                  )));
-                  // Optionality: high for open/multi-cloud, low for proprietary
-                  const optionality = Math.min(100, Math.max(0, Math.round(
-                    vendor.overallScore * 0.3 + vendor.confidenceScore * 0.2
-                    + (vendor.ownershipType === "public" ? 10 : 0)
-                    + (vendor.category.includes("Platform") ? 15 : 5)
-                    + 10 // base
-                  )));
-                  // Viability: overall + momentum + confidence
-                  const viability = Math.min(100, Math.round(
-                    vendor.overallScore * 0.4 + momScore * 0.3 + vendor.confidenceScore * 0.3
-                  ));
+                  // All five scores from the single canonical module —
+                  // formulas live in lib/intelligence/strategic-scores.ts
+                  const { sustainability, encroachment, dependency, optionality, viability } =
+                    strategicScores(vendor, mom?.momentumScore ?? 50);
 
                   const riskTone = (v: number) => v >= 60 ? "text-rose-700 dark:text-rose-300" : v >= 35 ? "text-amber-700 dark:text-amber-300" : "text-emerald-700 dark:text-emerald-300";
                   const scoreTone = (v: number) => v >= 70 ? "text-emerald-700 dark:text-emerald-300" : v >= 45 ? "text-amber-700 dark:text-amber-300" : "text-rose-700 dark:text-rose-300";
@@ -289,6 +278,17 @@ export default async function UnderstandPage({ searchParams }: PageProps) {
                     <tr key={vendor.id} className="border-b border-[#edf0ea]/60">
                       <td className="py-2.5 pr-3">
                         <VendorNameWithOwnership name={vendor.name} ownershipType={vendor.ownershipType} />
+                      </td>
+                      <td className="py-2.5 pr-3">
+                        {(() => {
+                          const h = histories.get(vendor.id);
+                          return h && h.points.length >= 2 ? (
+                            <TrendSpark
+                              label={`${vendor.name} — overall score`}
+                              points={h.points.map((pt) => ({ date: pt.date, value: pt.score }))}
+                            />
+                          ) : <span className="text-[10px] text-[#8a948a]">accumulating</span>;
+                        })()}
                       </td>
                       <td className={`py-2.5 pr-3 text-right font-mono font-semibold ${scoreTone(sustainability)}`}>{sustainability}</td>
                       <td className={`py-2.5 pr-3 text-right font-mono font-semibold ${riskTone(encroachment)}`}>{encroachment}</td>
@@ -313,7 +313,7 @@ export default async function UnderstandPage({ searchParams }: PageProps) {
 
       {/* 6. Vendor universe */}
       <section id="vendors" className="mb-8">
-        <Panel title="Vendor universe — ranked by overall score">
+        <CollapsiblePanel title="Vendor universe — ranked by overall score" summary={`${rankableVendors.length} vendors`}>
           <div className="divide-y divide-[#edf0ea] dark:divide-zinc-800">
             {vendorsRanked.map((vendor, index) => {
               const mom = momentumByVendor.get(vendor.id);
@@ -342,12 +342,12 @@ export default async function UnderstandPage({ searchParams }: PageProps) {
               );
             })}
           </div>
-        </Panel>
+        </CollapsiblePanel>
       </section>
 
       {/* 7. Methodology */}
       <section id="methodology" className="mb-2">
-        <Panel title="Methodology — Enterprise AI Assessment Framework v2.0">
+        <CollapsiblePanel title="Methodology — Enterprise AI Assessment Framework v2.0" summary={"weights, evidence grades, scoring rubric"}>
           <div className="grid gap-6 lg:grid-cols-2">
             <div>
               <h3 className="text-sm font-semibold text-[#18201b] dark:text-zinc-100">Six pillars (default weights)</h3>
@@ -400,7 +400,7 @@ export default async function UnderstandPage({ searchParams }: PageProps) {
   − Adoption Friction Penalty`}</pre>
             </div>
           </div>
-        </Panel>
+        </CollapsiblePanel>
       </section>
 
       {/* Next actions */}

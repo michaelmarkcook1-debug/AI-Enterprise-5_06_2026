@@ -119,8 +119,23 @@ function badgeLabel(health: IngestionHealth | null, iso: string): string {
 // CIO Decision Lifecycle — five primary tabs.
 // Atlas and Leadership are accessible from Understand, not top nav.
 // Investor Tools is visually separated as a secondary workflow.
+const LIBRARY: { href: string; label: string }[] = [
+  { href: "/atlas", label: "AI Ecosystem Atlas" },
+  { href: "/market", label: "Market" },
+  { href: "/news", label: "News" },
+  { href: "/reputation", label: "Reputation" },
+  { href: "/capabilities", label: "Capabilities" },
+  { href: "/vendors", label: "Vendors" },
+  { href: "/watchlists", label: "Watchlists" },
+  { href: "/briefings", label: "Briefings" },
+  { href: "/evolution", label: "Evolution" },
+  { href: "/exposure-map", label: "Exposure Map" },
+  { href: "/dashboard", label: "Dashboard" },
+  { href: "/methodology", label: "Methodology" },
+];
+
 const NAV: { href: string; label: string }[] = [
-  { href: "/query", label: "Query" },
+  { href: "/query-v2", label: "Query" },
   { href: "/understand", label: "Understand" },
   { href: "/assess", label: "Assess" },
   { href: "/demonstrate", label: "Demonstrate" },
@@ -170,6 +185,39 @@ export default function TopNav() {
               </Link>
             );
           })}
+          {/* Library — reference surfaces pruned from primary nav */}
+          <div className="group relative">
+            <button
+              type="button"
+              aria-haspopup="menu"
+              className={`flex items-center gap-1 rounded-md px-3 py-1.5 transition-colors ${
+                LIBRARY.some((l) => pathname.startsWith(l.href))
+                  ? "bg-[#192319] !text-white font-semibold shadow-sm dark:bg-white dark:!text-[#0c1220]"
+                  : "font-medium text-[#4d574b] hover:bg-[#e9ede4] hover:text-[#18201b] dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-100"
+              }`}
+            >
+              Library
+              <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="m6 9 6 6 6-6" /></svg>
+            </button>
+            <div className="invisible absolute left-0 top-full z-40 w-52 pt-1 opacity-0 transition-all duration-150 group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100">
+              <div role="menu" className="grid grid-cols-1 gap-0.5 rounded-lg border border-[#dfe4da] bg-white p-1.5 shadow-xl dark:border-zinc-800 dark:bg-zinc-950">
+                {LIBRARY.map((l) => (
+                  <Link
+                    key={l.href}
+                    href={l.href}
+                    role="menuitem"
+                    className={`rounded-md px-2.5 py-1.5 text-xs transition-colors ${
+                      pathname.startsWith(l.href)
+                        ? "bg-[#192319] font-semibold !text-white dark:bg-white dark:!text-[#0c1220]"
+                        : "text-[#3c463b] hover:bg-[#e9ede4] dark:text-zinc-300 dark:hover:bg-zinc-900"
+                    }`}
+                  >
+                    {l.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </div>
           {/* Investor Tools — visually separated secondary workflow */}
           <span className="mx-1 h-5 w-px bg-[#dfe4da] dark:bg-zinc-700" aria-hidden />
           <Link
@@ -196,13 +244,13 @@ export default function TopNav() {
               {badgeLabel(ingestionHealth, lastRefreshedAt)}
             </Link>
           )}
-          {/* Admin — gear icon, utility not primary nav */}
+          {/* Settings — gear icon, utility not primary nav */}
           <Link
-            href="/admin"
-            aria-label="Admin console"
-            title="Admin console"
+            href="/settings"
+            aria-label="Settings — ingestion & spend"
+            title="Settings — ingestion & spend"
             className={`hidden h-8 w-8 items-center justify-center rounded-md transition-colors md:flex ${
-              pathname.startsWith("/admin")
+              pathname.startsWith("/settings") || pathname.startsWith("/admin")
                 ? "bg-[#192319] text-white dark:bg-white dark:text-[#0c1220]"
                 : "text-[#4d574b] hover:bg-[#e9ede4] hover:text-[#18201b] dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-100"
             }`}
@@ -298,6 +346,19 @@ export default function TopNav() {
 
           {/* Admin utility link — visually separated. */}
           <div className="mt-1 border-t border-[#dfe4da] pt-2 dark:border-zinc-800">
+            <div className="px-3 pb-1 text-[9px] font-semibold uppercase tracking-wider text-[#8a948a] dark:text-zinc-600">Library</div>
+            <div className="grid grid-cols-2 gap-0.5 pb-2">
+              {LIBRARY.map((l) => (
+                <Link
+                  key={l.href}
+                  href={l.href}
+                  onClick={() => setMobileOpen(false)}
+                  className="rounded-md px-3 py-1.5 text-xs text-[#697362] hover:bg-[#e9ede4] hover:text-[#18201b] dark:text-zinc-400 dark:hover:bg-zinc-900 dark:hover:text-zinc-100"
+                >
+                  {l.label}
+                </Link>
+              ))}
+            </div>
             <Link
               href="/admin"
               onClick={() => setMobileOpen(false)}

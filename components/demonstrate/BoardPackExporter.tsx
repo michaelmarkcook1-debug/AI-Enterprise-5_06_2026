@@ -24,6 +24,39 @@ interface MitigationControl {
   status: string;
 }
 
+/** Assessment context the shortlist was generated under (from Assess → URL params). */
+export interface DecisionScope {
+  industries: string[];
+  useCases: string[];
+  region: string;
+  dataSensitivity: string;
+  costSensitivity: string;
+}
+
+/** Three-pillar reputation snapshot for a shortlisted vendor. */
+export interface ReputationRow {
+  vendor: string;
+  customer: number | null;
+  developer: number | null;
+  employee: number | null;
+  uptimePct: number | null;
+}
+
+/** Modelled peer-adoption share for a shortlisted vendor within the decision scope. */
+export interface UptakeRow {
+  vendor: string;
+  sharePct: number;
+  confidence: string;
+}
+
+/** Vendor-published token list price for a shortlisted vendor's model. */
+export interface PricingRow {
+  vendorName: string;
+  modelName: string;
+  inputPerM: number | null;
+  outputPerM: number | null;
+}
+
 export interface BoardPackExporterProps {
   boardDefenceScore: number;
   cioConfidenceScore: number;
@@ -35,11 +68,87 @@ export interface BoardPackExporterProps {
   mitigations: MitigationControl[];
   assumptions: BoardAssumption[];
   kpis: KPI[];
+  /** Assessment context — packs must state the scope they defend. */
+  scope: DecisionScope;
+  /** Reputation snapshot, shortlist-aligned. Empty when no shortlist. */
+  reputation: ReputationRow[];
+  /** Modelled peer adoption within scope, shortlist-aligned. */
+  uptake: UptakeRow[];
+  /** Human-readable description of the uptake slice (e.g. "Financial services · Europe & UK"). */
+  uptakeScopeLabel: string;
+  /** Vendor-published token list prices for the shortlist. */
+  pricing: PricingRow[];
+  /** Market snapshot used by the no-shortlist Executive Summary. */
+  marketOverview?: MarketOverview;
 }
 
-type ExportType = "Executive Summary" | "Board Pack" | "Procurement Pack" | "Risk Review";
+/** Compact market snapshot for the shortlist-free Executive Summary. */
+export interface MarketOverview {
+  totalVendors: number;
+  totalCategories: number;
+  topVendors: { name: string; category: string; score: number; confidence: number; ownershipType?: string }[];
+  /** Top vendors grouped per category — leadership is category-specific by design. */
+  categoryLeaders: { category: string; vendors: { name: string; score: number }[] }[];
+  /** Vendors with the strongest momentum signals. */
+  momentumLeaders: { name: string; momentumScore: number }[];
+}
 
-const CEO_BIO =
+/** The five takeaways a business leader should leave with — each derived
+ *  from the data passed in, never invented. Shared by HTML and PPTX. */
+export function deriveMarketTakeaways(m: MarketOverview | undefined, reputation: ReputationRow[]): { title: string; body: string }[] {
+  if (!m) return [];
+  const takeaways: { title: string; body: string }[] = [];
+
+  const namedLeaders = m.categoryLeaders.slice(0, 3)
+    .filter((c) => c.vendors.length > 0)
+    .map((c) => `${c.vendors[0].name} (${c.category})`).join(", ");
+  takeaways.push({
+    title: "Leadership is category-specific — there is no single \u201cbest AI vendor\u201d",
+    body: `${m.totalVendors} vendors tracked across ${m.totalCategories} categories. Current category leaders: ${namedLeaders || "—"}. AnalystGenius scores within categories by design; cross-category composite ranks are not used.`,
+  });
+
+  const contested = m.categoryLeaders
+    .filter((c) => c.vendors.length >= 2)
+    .map((c) => ({ c, gap: c.vendors[0].score - c.vendors[1].score }))
+    .sort((a, b) => a.gap - b.gap)[0];
+  if (contested) {
+    takeaways.push({
+      title: `Tightest race: ${contested.c.category}`,
+      body: `${contested.c.vendors[0].name} leads ${contested.c.vendors[1].name} by ${contested.gap} point${contested.gap === 1 ? "" : "s"} — close enough that procurement leverage and momentum, not capability, should drive selection here.`,
+    });
+  }
+
+  if (m.momentumLeaders.length > 0) {
+    const ml = m.momentumLeaders.slice(0, 3).map((v) => `${v.name} (${v.momentumScore.toFixed(0)})`).join(", ");
+    takeaways.push({
+      title: "Momentum favours the challengers",
+      body: `Strongest momentum signals: ${ml}. Momentum (deals, releases, hiring, funding) is a leading indicator — today's scores understate vendors on this list.`,
+    });
+  }
+
+  const withUptime = reputation.filter((r) => r.uptimePct !== null).sort((a, b) => (b.uptimePct ?? 0) - (a.uptimePct ?? 0));
+  const devLeader = [...reputation].sort((a, b) => (b.developer ?? 0) - (a.developer ?? 0))[0];
+  if (withUptime.length > 0 || devLeader) {
+    const parts: string[] = [];
+    if (withUptime[0]) parts.push(`${withUptime[0].vendor} publishes the strongest 12-month uptime (${withUptime[0].uptimePct}%)`);
+    if (devLeader) parts.push(`${devLeader.vendor} leads developer trust (${devLeader.developer}/100)`);
+    takeaways.push({
+      title: "Reliability and developer trust diverge from headline scores",
+      body: `${parts.join("; ")}. Use published uptime to anchor SLA negotiation; developer sentiment predicts integration friction.`,
+    });
+  }
+
+  takeaways.push({
+    title: "Evidence quality varies — read the confidence column, not just the score",
+    body: "Every AnalystGenius score carries a confidence rating reflecting evidence strength. A high score on thin evidence deserves a pilot, not a commitment. Estimated and modelled data is explicitly labelled throughout.",
+  });
+
+  return takeaways.slice(0, 5);
+}
+
+export type ExportType = "Executive Summary" | "Board Pack" | "Procurement Pack" | "Risk Review";
+
+export const CEO_BIO =
   "Michael Cook is CEO of AnalystGenius. With over a decade of experience spanning " +
   "analyst research, advisory, and go-to-market strategy across the IT and BPO services " +
   "landscape, Michael has held senior positions at NelsonHall, HfS Research, Cognizant's " +
@@ -66,6 +175,12 @@ function timestamp() {
   return new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "long", year: "numeric" });
 }
 
+/** "vendor_resilience" → "Vendor resilience" — board documents don't speak snake_case. */
+function humanisePillar(s: string): string {
+  const t = s.replace(/_/g, " ").trim();
+  return t.charAt(0).toUpperCase() + t.slice(1);
+}
+
 async function fetchHeadshotBase64(): Promise<string> {
   try {
     const res = await fetch("/brand/michael-cook-ceo.jpg", {
@@ -83,21 +198,21 @@ async function fetchHeadshotBase64(): Promise<string> {
   }
 }
 
-const CONFIDENTIALITY: Record<ExportType, string> = {
+export const CONFIDENTIALITY: Record<ExportType, string> = {
   "Executive Summary": "Board / C-Suite Only",
   "Board Pack": "Board / C-Suite Only",
   "Procurement Pack": "Procurement / Vendor Management",
   "Risk Review": "Risk Committee / CISO",
 };
 
-const SUBTITLES: Record<ExportType, string> = {
+export const SUBTITLES: Record<ExportType, string> = {
   "Executive Summary": "AI Investment — Executive Summary",
   "Board Pack": "AI Investment — Board Defence Pack",
   "Procurement Pack": "AI Vendor Selection — Procurement Pack",
   "Risk Review": "AI Investment — Risk Review",
 };
 
-function htmlShell(title: string, type: ExportType, body: string, headshotDataUri: string): string {
+function htmlShell(title: string, type: ExportType, body: string, headshotDataUri: string, shortlistLabel: string): string {
   const confidentiality = CONFIDENTIALITY[type];
   const headshot = headshotDataUri
     ? `<img src="${headshotDataUri}" alt="Michael Cook" class="headshot" />`
@@ -198,6 +313,7 @@ function htmlShell(title: string, type: ExportType, body: string, headshotDataUr
   @media print {
     body { padding: 0; }
     .ag-header, .signoff, .ag-footer { break-inside: avoid; }
+    .closing { break-inside: avoid; }
     h2 { break-after: avoid; }
     table { break-inside: avoid; }
   }
@@ -215,10 +331,11 @@ function htmlShell(title: string, type: ExportType, body: string, headshotDataUr
 </header>
 
 <div class="doc-title">${esc(title)}</div>
-<div class="doc-meta">Generated ${timestamp()} &nbsp;·&nbsp; AnalystGenius Proprietary Methodology</div>
+<div class="doc-meta">Generated ${timestamp()} &nbsp;·&nbsp; ${shortlistLabel ? `Shortlist: ${esc(shortlistLabel)} &nbsp;·&nbsp; ` : ""}AnalystGenius Proprietary Methodology</div>
 
 ${body}
 
+<div class="closing">
 <section class="signoff">
   ${headshot}
   <div class="signoff-text">
@@ -236,6 +353,7 @@ ${body}
   </div>
   <div>${AG_LOGO_SVG.replace('width="40" height="40"', 'width="24" height="24"')}</div>
 </footer>
+</div>
 
 </body>
 </html>`;
@@ -248,13 +366,138 @@ function severityClass(s: string): string {
   return "severity-low";
 }
 
+// ── Shared, shortlist-aligned sections ───────────────────────────────
+
+/** Every pack opens by stating exactly what decision it defends. */
+function sectionScope(p: BoardPackExporterProps): string {
+  const s = p.scope;
+  const row = (label: string, value: string) =>
+    value ? `<tr><td style="width:180px;color:#697362;font-size:11px;text-transform:uppercase;letter-spacing:0.04em">${esc(label)}</td><td><strong>${esc(value)}</strong></td></tr>` : "";
+  return `
+<h2>Decision Scope</h2>
+<p style="font-size:11px;color:#697362">This document defends the shortlist produced by the AnalystGenius assessment under the context below. If the context changes, re-run the assessment.</p>
+<table>
+  <tbody>
+    ${row("Shortlisted vendors", p.vendors.map((v) => v.name).join(", "))}
+    ${row("Industries", s.industries.join(", "))}
+    ${row("Use cases", s.useCases.join(", "))}
+    ${row("Region", s.region)}
+    ${row("Data sensitivity", s.dataSensitivity)}
+    ${row("Cost sensitivity", s.costSensitivity)}
+  </tbody>
+</table>`;
+}
+
+function sectionReputation(p: BoardPackExporterProps): string {
+  if (p.reputation.length === 0) return "";
+  const fmt = (n: number | null) => (n === null ? "—" : String(n));
+  const rows = p.reputation.map((r) =>
+    `<tr><td><strong>${esc(r.vendor)}</strong></td><td>${fmt(r.customer)}</td><td>${fmt(r.developer)}</td><td>${fmt(r.employee)}</td><td>${r.uptimePct === null ? "—" : `${r.uptimePct}%`}</td></tr>`,
+  ).join("");
+  return `
+<h2>Reputation Snapshot — Shortlist</h2>
+<p style="font-size:11px;color:#697362">Three-pillar reputation (0–100): customer (review platforms), developer (GitHub / forums / API reliability), employee (workplace signals). 12-month service uptime where published.</p>
+<table>
+  <thead><tr><th>Vendor</th><th>Customer</th><th>Developer</th><th>Employee</th><th>Uptime (12mo)</th></tr></thead>
+  <tbody>${rows}</tbody>
+</table>`;
+}
+
+function sectionUptake(p: BoardPackExporterProps): string {
+  if (p.uptake.length === 0) return "";
+  const rows = p.uptake.map((u) =>
+    `<tr><td><strong>${esc(u.vendor)}</strong></td><td style="font-variant-numeric:tabular-nums">${u.sharePct.toFixed(1)}%</td><td>${esc(u.confidence)}</td></tr>`,
+  ).join("");
+  return `
+<h2>Market Penetration — Peer Adoption (Modelled)</h2>
+<p style="font-size:11px;color:#697362">Share of named-vendor usage within <strong>${esc(p.uptakeScopeLabel)}</strong>, from the AnalystGenius May 2026 segment-share model (585 cells). <strong>Modelled estimates, not audited market share</strong> — treat as directional peer-adoption context.</p>
+<table>
+  <thead><tr><th>Vendor</th><th>Share of named usage</th><th>Confidence</th></tr></thead>
+  <tbody>${rows}</tbody>
+</table>`;
+}
+
+function sectionPricing(p: BoardPackExporterProps): string {
+  if (p.pricing.length === 0) return "";
+  const fmt = (n: number | null) => (n === null ? "Unverified" : `$${n.toFixed(2)}`);
+  const rows = p.pricing.map((r) =>
+    `<tr><td><strong>${esc(r.vendorName)}</strong></td><td>${esc(r.modelName)}</td><td style="font-variant-numeric:tabular-nums">${fmt(r.inputPerM)}</td><td style="font-variant-numeric:tabular-nums">${fmt(r.outputPerM)}</td></tr>`,
+  ).join("");
+  return `
+<h2>Token Pricing — Vendor-Published List Prices</h2>
+<p style="font-size:11px;color:#697362">USD per 1M tokens, vendor-published list prices at generation date. Negotiated and committed-use pricing will differ — validate during procurement.</p>
+<table>
+  <thead><tr><th>Vendor</th><th>Model</th><th>Input / 1M</th><th>Output / 1M</th></tr></thead>
+  <tbody>${rows}</tbody>
+</table>`;
+}
+
+/** Honest data-basis block — the footer promises "estimated data is clearly marked"; this is where it's marked. */
+function sectionProvenance(p: BoardPackExporterProps): string {
+  return `
+<h2>Data Basis &amp; Provenance</h2>
+<table>
+  <thead><tr><th>Section</th><th>Basis</th></tr></thead>
+  <tbody>
+    <tr><td>Vendor shortlist, scores, confidence, pillars</td><td>Platform-derived from your AnalystGenius assessment run</td></tr>
+    ${p.reputation.length > 0 ? `<tr><td>Reputation snapshot</td><td>Curated from public review, developer and workplace sources; seed-confidence pending live refresh</td></tr>` : ""}
+    ${p.uptake.length > 0 ? `<tr><td>Market penetration</td><td><strong>Modelled estimate</strong> (May 2026 segment-share model) — directional, not audited market share</td></tr>` : ""}
+    ${p.pricing.length > 0 ? `<tr><td>Token pricing</td><td>Vendor-published list prices; "Unverified" where no clean published line exists</td></tr>` : ""}
+    <tr><td>Business case, competitor profiles, risk register, KPIs, assumptions</td><td><strong>Illustrative templates</strong> — tailor to your organisation before board submission</td></tr>
+  </tbody>
+</table>`;
+}
+
 function statusClass(s: string): string {
   if (s === "At Risk" || s === "Broken") return "status-atrisk";
   if (s === "Watch") return "status-watch";
   return "status-stable";
 }
 
+/** Shortlist-free Executive Summary: a concise AI-market overview. */
+/** Shortlist-free Executive Summary: a concise AI-market overview. */
+function bodyMarketOverview(p: BoardPackExporterProps): string {
+  const m = p.marketOverview;
+  const takeaways = deriveMarketTakeaways(m, p.reputation);
+  const takeawayItems = takeaways.map((t, i) =>
+    `<div style="margin:10px 0;padding:10px 12px;border:1px solid #e4e8df;border-radius:8px;page-break-inside:avoid"><strong>${i + 1}. ${esc(t.title)}</strong><br/><span style="font-size:11px;color:#3c463b">${esc(t.body)}</span></div>`,
+  ).join("");
+  const categoryRows = (m?.categoryLeaders ?? []).map((c) =>
+    `<tr><td><strong>${esc(c.category)}</strong></td><td>${c.vendors.map((v, i) => `${i + 1}. ${esc(v.name)} <span style="color:#697362;font-variant-numeric:tabular-nums">(${v.score})</span>`).join(" &nbsp;·&nbsp; ")}</td></tr>`,
+  ).join("");
+  return `
+<div class="score-row">
+  <div class="score-card blue"><div class="label">Vendors tracked</div><div class="value">${m?.totalVendors ?? "—"}</div></div>
+  <div class="score-card green"><div class="label">Market categories</div><div class="value">${m?.totalCategories ?? "—"}</div></div>
+  <div class="score-card"><div class="label">Scoring model</div><div class="value" style="font-size:15px;margin-top:14px">Per-category, confidence-rated</div></div>
+</div>
+
+<p style="font-size:11px;color:#697362">No assessment shortlist yet — this summary covers the tracked market. Run an assessment in Assess to generate a shortlist-specific defence pack. Vendors are scored within their categories; composite cross-category rankings are not used.</p>
+
+<h2>Top 5 Takeaways</h2>
+${takeawayItems}
+
+<h2>Category Leaders — Top 3 Within Each Category</h2>
+<table>
+  <thead><tr><th>Category</th><th>Leaders (score)</th></tr></thead>
+  <tbody>${categoryRows}</tbody>
+</table>
+
+${sectionReputation(p)}
+
+<h2>Data Basis &amp; Provenance</h2>
+<table>
+  <thead><tr><th>Section</th><th>Basis</th></tr></thead>
+  <tbody>
+    <tr><td>Vendor scores, confidence, categories, momentum</td><td>AnalystGenius platform scoring — seed-confidence where live evidence is pending</td></tr>
+    <tr><td>Takeaways</td><td>Derived deterministically from the tracked dataset above — no editorial additions</td></tr>
+    <tr><td>Reputation snapshot</td><td>Curated from public review, developer and workplace sources</td></tr>
+  </tbody>
+</table>`;
+}
+
 function bodyExecutiveSummary(p: BoardPackExporterProps): string {
+  if (p.vendors.length === 0) return bodyMarketOverview(p);
   const vendorRows = p.vendors.map((v) =>
     `<tr><td><strong>${esc(v.name)}</strong></td><td>${esc(v.role)}</td><td>${v.score}</td><td>${v.confidence}</td></tr>`
   ).join("");
@@ -271,7 +514,10 @@ function bodyExecutiveSummary(p: BoardPackExporterProps): string {
   <div class="score-card"><div class="label">Recommendation</div><div class="value" style="font-size:18px;margin-top:12px">${esc(p.recommendation)}</div></div>
 </div>
 
+${sectionScope(p)}
+
 <h2>Business Case</h2>
+<p style="font-size:11px;color:#697362"><em>Illustrative template — quantify with your organisation’s figures before board submission.</em></p>
 <p>${esc(p.businessCase.businessProblem)}</p>
 <h3>Intended Outcomes</h3>
 <ul>${p.businessCase.intendedOutcomes.map((o) => `<li>${esc(o)}</li>`).join("")}</ul>
@@ -291,14 +537,17 @@ ${p.vendors.length > 0
     : `<p><em>No vendors selected. Run an assessment to populate.</em></p>`}
 
 <h2>Key Risks</h2>
-${riskRows ? `<ul>${riskRows}</ul>` : `<p>No critical or high risks identified.</p>`}`;
+${riskRows ? `<ul>${riskRows}</ul>` : `<p>No critical or high risks identified.</p>`}
+
+${sectionReputation(p)}
+${sectionProvenance(p)}`;
 }
 
 function bodyBoardPack(p: BoardPackExporterProps): string {
   const vendorBlocks = p.vendors.map((v) => `
     <h3>${esc(v.name)}</h3>
     <p><strong>Role:</strong> ${esc(v.role)} &nbsp;·&nbsp; <strong>Score:</strong> ${v.score} &nbsp;·&nbsp; <strong>Confidence:</strong> ${v.confidence}</p>
-    <p><strong>Top pillars:</strong> ${esc(v.topPillars.join(", ") || "—")}</p>
+    <p><strong>Top pillars:</strong> ${esc(v.topPillars.map(humanisePillar).join(", ") || "—")}</p>
     ${v.risks.length > 0 ? `<p><strong>Risks:</strong> ${esc(v.risks.join(", "))}</p>` : ""}
   `).join("");
 
@@ -338,7 +587,10 @@ function bodyBoardPack(p: BoardPackExporterProps): string {
   <div class="score-card"><div class="label">Recommendation</div><div class="value" style="font-size:18px;margin-top:12px">${esc(p.recommendation)}</div></div>
 </div>
 
+${sectionScope(p)}
+
 <h2>1. Why Invest?</h2>
+<p style="font-size:11px;color:#697362"><em>Illustrative template — quantify with your organisation’s figures before board submission.</em></p>
 <p>${esc(p.businessCase.businessProblem)}</p>
 <h3>Intended Outcomes</h3>
 <ul>${p.businessCase.intendedOutcomes.map((o) => `<li>${esc(o)}</li>`).join("")}</ul>
@@ -353,10 +605,11 @@ function bodyBoardPack(p: BoardPackExporterProps): string {
 </table>
 
 <h2>2. Why Now?</h2>
+<p style="font-size:11px;color:#697362"><em>Illustrative framing — replace with your organisation's specific drivers before board submission.</em></p>
 <ul>
-  <li>Peers adopting AI see 15–30% productivity gains within 12 months</li>
-  <li>Enterprise AI platforms maturing rapidly — delaying increases switching cost</li>
-  <li>AI-skilled workforce increasingly scarce — early movers secure better talent</li>
+  <li>Enterprise AI platforms are maturing rapidly — delaying adoption raises future switching and integration cost</li>
+  <li>Peer organisations in scope industries are formalising AI vendor stacks (see Market Penetration section)</li>
+  <li>AI-skilled talent is scarce — early movers secure implementation capability ahead of competitors</li>
 </ul>
 
 <h2>3. Recommended Vendor Shortlist</h2>
@@ -365,28 +618,34 @@ ${p.vendors.length > 0 ? vendorBlocks : `<p><em>No vendors selected. Run an asse
 <h2>4. Competitive Position</h2>
 ${competitorBlocks}
 
-<h2>5. Risk Register</h2>
+${sectionUptake(p).replace("<h2>Market Penetration", "<h2>5. Market Penetration")}
+${sectionReputation(p).replace("<h2>Reputation Snapshot", "<h2>6. Reputation Snapshot")}
+${sectionPricing(p).replace("<h2>Token Pricing", "<h2>7. Indicative Cost — Token Pricing")}
+
+<h2>8. Risk Register</h2>
 <table>
   <thead><tr><th>Risk</th><th>Category</th><th>Severity</th><th>Likelihood</th><th>Mitigation</th><th>Owner</th></tr></thead>
   <tbody>${riskRows}</tbody>
 </table>
 
-<h2>6. Controls &amp; Governance</h2>
+<h2>9. Controls &amp; Governance</h2>
 <ul>${controlRows}</ul>
 
-<h2>7. Assumptions</h2>
+<h2>10. Assumptions</h2>
 ${assumptionBlocks}
 
-<h2>8. Value Realisation KPIs</h2>
+<h2>11. Value Realisation KPIs</h2>
 <table>
   <thead><tr><th>Metric</th><th>Baseline</th><th>Target</th><th>Owner</th><th>Cadence</th></tr></thead>
   <tbody>${kpiRows}</tbody>
-</table>`;
+</table>
+
+${sectionProvenance(p)}`;
 }
 
 function bodyProcurementPack(p: BoardPackExporterProps): string {
   const vendorRows = p.vendors.map((v) =>
-    `<tr><td><strong>${esc(v.name)}</strong></td><td>${esc(v.role)}</td><td>${v.score}</td><td>${v.confidence}</td><td>${esc(v.topPillars.join(", ") || "—")}</td><td>${esc(v.risks.join(", ") || "—")}</td></tr>`
+    `<tr><td><strong>${esc(v.name)}</strong></td><td>${esc(v.role)}</td><td>${v.score}</td><td>${v.confidence}</td><td>${esc(v.topPillars.map(humanisePillar).join(", ") || "—")}</td><td>${esc(v.risks.join(", ") || "—")}</td></tr>`
   ).join("");
 
   const vendorRisks = p.risks.filter((r) => r.category === "Vendor Risk" || r.category === "Concentration" || r.category === "Cost");
@@ -407,15 +666,26 @@ function bodyProcurementPack(p: BoardPackExporterProps): string {
   ).join("");
 
   return `
+${sectionScope(p)}
+
 <h2>Vendor Shortlist</h2>
 ${p.vendors.length > 0
     ? `<table><thead><tr><th>Vendor</th><th>Role</th><th>Score</th><th>Confidence</th><th>Top Pillars</th><th>Risks</th></tr></thead><tbody>${vendorRows}</tbody></table>`
     : `<p><em>No vendors selected. Run an assessment to populate.</em></p>`}
 
+${sectionPricing(p)}
+
+${sectionReputation(p).replace(
+    "Three-pillar reputation (0–100): customer (review platforms), developer (GitHub / forums / API reliability), employee (workplace signals). 12-month service uptime where published.",
+    "Three-pillar reputation (0–100) and 12-month published uptime — use uptime history to anchor SLA and service-credit negotiation.",
+  )}
+
 <h2>Vendor Risk Considerations</h2>
 ${vendorRiskRows
     ? `<table><thead><tr><th>Risk</th><th>Severity</th><th>Likelihood</th><th>Mitigation</th><th>Owner</th></tr></thead><tbody>${vendorRiskRows}</tbody></table>`
     : `<p>No vendor-specific risks identified.</p>`}
+
+${sectionUptake(p)}
 
 <h2>Competitive Landscape</h2>
 <ul>${competitorRows}</ul>
@@ -427,7 +697,9 @@ ${vendorRiskRows
 <table>
   <thead><tr><th>Metric</th><th>Baseline</th><th>Target</th><th>Owner</th></tr></thead>
   <tbody>${kpiRows}</tbody>
-</table>`;
+</table>
+
+${sectionProvenance(p)}`;
 }
 
 function bodyRiskReview(p: BoardPackExporterProps): string {
@@ -459,6 +731,8 @@ function bodyRiskReview(p: BoardPackExporterProps): string {
   ).join("");
 
   return `
+${sectionScope(p)}
+
 <h2>Risk Summary</h2>
 <div class="score-row">
   <div class="score-card" style="border-color:#dc2626;background:#fef2f2"><div class="label">Critical</div><div class="value" style="color:#dc2626">${critical}</div></div>
@@ -483,7 +757,9 @@ function bodyRiskReview(p: BoardPackExporterProps): string {
 ${atRisk.length > 0 ? assumptionBlocks : `<p>All assumptions currently stable.</p>`}
 
 <h2>Vendor Risk Profile</h2>
-${p.vendors.length > 0 ? `<ul>${vendorRiskRows}</ul>` : `<p><em>No vendors selected.</em></p>`}`;
+${p.vendors.length > 0 ? `<ul>${vendorRiskRows}</ul>` : `<p><em>No vendors selected.</em></p>`}
+
+${sectionProvenance(p)}`;
 }
 
 const BODY_RENDERERS: Record<ExportType, (p: BoardPackExporterProps) => string> = {
@@ -493,15 +769,14 @@ const BODY_RENDERERS: Record<ExportType, (p: BoardPackExporterProps) => string> 
   "Risk Review": bodyRiskReview,
 };
 
-const FILENAMES: Record<ExportType, string> = {
+export const FILENAMES: Record<ExportType, string> = {
   "Executive Summary": "AG-Executive-Summary",
   "Board Pack": "AG-Board-Defence-Pack",
   "Procurement Pack": "AG-Procurement-Pack",
   "Risk Review": "AG-Risk-Review",
 };
 
-function downloadHtml(filename: string, content: string) {
-  const blob = new Blob([content], { type: "text/html; charset=utf-8" });
+function downloadBlob(filename: string, blob: Blob): string {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
@@ -509,56 +784,121 @@ function downloadHtml(filename: string, content: string) {
   a.style.display = "none";
   document.body.appendChild(a);
   a.click();
-  // Fallback: if download attribute is ignored (cross-origin/tunnel), open in new tab
-  const fallbackTimer = setTimeout(() => {
-    window.open(url, "_blank");
-  }, 500);
-  // If the page loses focus, the download likely started — cancel fallback
-  const cancelFallback = () => { clearTimeout(fallbackTimer); window.removeEventListener("blur", cancelFallback); };
-  window.addEventListener("blur", cancelFallback);
-  setTimeout(() => {
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    window.removeEventListener("blur", cancelFallback);
-  }, 3000);
+  document.body.removeChild(a);
+  // Deliberately NOT revoked immediately and NOT auto-opened in a new tab:
+  // auto window.open after a timer either gets popup-blocked (silent failure)
+  // or opens a duplicate tab next to a successful download. Instead the URL
+  // is returned so the UI can render an explicit "open in new tab" fallback
+  // link, and revoked when the next export replaces it.
+  return url;
+}
+
+/** Pure pack renderer — single source for the in-app export and for tests. */
+export function renderPackHtml(type: ExportType, props: BoardPackExporterProps, headshotDataUri = ""): string {
+  const body = BODY_RENDERERS[type](props);
+  const shortlistLabel = props.vendors.map((v) => v.name).join(", ");
+  return htmlShell(SUBTITLES[type], type, body, headshotDataUri, shortlistLabel);
 }
 
 export default function BoardPackExporter(props: BoardPackExporterProps) {
   const [exporting, setExporting] = useState<ExportType | null>(null);
+  const [format, setFormat] = useState<"html" | "pptx">("html");
+  const [lastExport, setLastExport] = useState<{ type: ExportType; url: string; filename: string } | null>(null);
+  const hasShortlist = props.vendors.length > 0;
 
   const handleExport = useCallback(async (type: ExportType) => {
     setExporting(type);
     try {
       const headshotDataUri = await fetchHeadshotBase64();
-      const body = BODY_RENDERERS[type](props);
-      const title = SUBTITLES[type];
-      const html = htmlShell(title, type, body, headshotDataUri);
       const date = new Date().toISOString().slice(0, 10);
-      downloadHtml(`${FILENAMES[type]}-${date}.html`, html);
+      let url: string;
+      let filename: string;
+      if (format === "pptx") {
+        // Lazy-loaded so the page bundle stays lean.
+        const { generatePackPptx } = await import("./board-pack-pptx");
+        const blob = await generatePackPptx(type, props, headshotDataUri);
+        filename = `${FILENAMES[type]}-${date}.pptx`;
+        url = downloadBlob(filename, blob);
+      } else {
+        const html = renderPackHtml(type, props, headshotDataUri);
+        filename = `${FILENAMES[type]}-${date}.html`;
+        url = downloadBlob(filename, new Blob([html], { type: "text/html; charset=utf-8" }));
+      }
+      setLastExport((prev) => {
+        if (prev) URL.revokeObjectURL(prev.url); // free the previous blob
+        return { type, url, filename };
+      });
     } finally {
       setTimeout(() => setExporting(null), 800);
     }
-  }, [props]);
+  }, [props, format]);
 
   return (
     <div>
       <p className="mb-3 text-xs text-[#5f685a]">
-        Export the board defence case in the format your audience needs. Print to PDF from your browser.
+        {hasShortlist
+          ? "Export the board defence case in the format your audience needs."
+          : "No assessment shortlist yet. The Executive Summary exports as a concise AI-market overview; the Board, Procurement and Risk packs unlock once you run an assessment in Assess."}
       </p>
-      <div className="flex flex-wrap gap-2">
-        {(["Executive Summary", "Board Pack", "Procurement Pack", "Risk Review"] as ExportType[]).map((t) => (
+      <div className="mb-3 flex flex-wrap items-center gap-2 text-xs">
+        <span className="font-semibold uppercase tracking-wide text-[10px] text-[#697362]">Format</span>
+        {([
+          { key: "html", label: "Document (HTML → PDF)" },
+          { key: "pptx", label: "PowerPoint (.pptx)" },
+        ] as const).map((f) => (
           <button
-            key={t}
-            onClick={() => handleExport(t)}
-            disabled={exporting !== null}
-            className="rounded-full border border-[#cfd7c8] bg-white px-4 py-2 text-xs font-semibold text-[#18201b] hover:bg-[#eef2e8] disabled:opacity-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
+            key={f.key}
+            onClick={() => setFormat(f.key)}
+            className={`rounded-full border px-3 py-1 font-semibold transition-colors ${
+              format === f.key
+                ? "border-[#071827] bg-[#071827] text-white dark:border-emerald-500 dark:bg-emerald-600"
+                : "border-[#cfd7c8] bg-white text-[#18201b] hover:bg-[#eef2e8] dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
+            }`}
           >
-            {exporting === t ? "Exporting…" : `Export ${t}`}
+            {f.label}
           </button>
         ))}
       </div>
+      <div className="flex flex-wrap gap-2">
+        {(["Executive Summary", "Board Pack", "Procurement Pack", "Risk Review"] as ExportType[]).map((t) => {
+          const needsShortlist = t !== "Executive Summary";
+          const locked = needsShortlist && !hasShortlist;
+          return (
+            <button
+              key={t}
+              onClick={() => handleExport(t)}
+              disabled={exporting !== null || locked}
+              aria-disabled={locked}
+              title={locked ? "Requires a completed assessment shortlist — run Assess first" : undefined}
+              className={`rounded-full border px-4 py-2 text-xs font-semibold ${
+                locked
+                  ? "cursor-not-allowed border-dashed border-[#cfd7c8] bg-[#f4f6f1] text-[#a1a8a0] dark:border-zinc-700 dark:bg-zinc-900/60 dark:text-zinc-600"
+                  : "border-[#cfd7c8] bg-white text-[#18201b] hover:bg-[#eef2e8] disabled:opacity-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
+              }`}
+            >
+              {exporting === t ? "Exporting…" : locked ? `${t} — requires assessment` : `Export ${t}`}
+            </button>
+          );
+        })}
+      </div>
+      {lastExport && (
+        <p className="mt-2 text-[11px] text-[#5f685a] dark:text-zinc-400">
+          Exported <strong>{lastExport.type}</strong> ({lastExport.filename.endsWith(".pptx") ? "PowerPoint" : "HTML"}).{" "}
+          Didn&apos;t download?{" "}
+          <a
+            href={lastExport.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-semibold underline"
+            download={lastExport.filename}
+          >
+            Open it here
+          </a>
+          .
+        </p>
+      )}
       <p className="mt-2 text-[10px] text-[#697362]">
-        HTML export — open in browser and print to PDF. PowerPoint format coming soon.
+        Document format: open in browser and print to PDF. PowerPoint format: native, fully editable slides.
       </p>
     </div>
   );

@@ -26,6 +26,11 @@ import {
 } from "@/lib/intelligence/repository";
 import { getDataProvenance } from "@/lib/intelligence/provenance";
 import { isRankable } from "@/lib/intelligence/roles";
+import ShortlistVendorCards from "@/components/shortlist-vendor-cards";
+import AnalystInsight from "@/components/analyst-insight";
+import TrendSpark from "@/components/trend-spark";
+import { getRankingHistories } from "@/lib/intelligence/ranking-snapshots";
+import { monitorInsight } from "@/lib/insights/tab-insights";
 
 export const dynamic = "force-dynamic";
 
@@ -48,6 +53,10 @@ export default async function MonitorPage() {
   // Role-aware: recommendations track assessable AI products only (exclude
   // investors and pure hardware/fabs).
   const topVendors = [...vendors].filter(isRankable).sort((a, b) => b.overallScore - a.overallScore).slice(0, 8);
+  // Score histories for hover trend lines — real snapshots merged over
+  // reconstructed series (provenance carried through to the tooltip).
+  const histories = await getRankingHistories(vendors, momentum);
+
   const recommendations = topVendors.map((v) => {
     const mom = momentumByVendor.get(v.id);
     const drift = mom ? Math.round((mom.momentumScore - 60) * 0.4) : 0;
@@ -125,6 +134,23 @@ export default async function MonitorPage() {
       kicker="Is the AI decision still valid?"
       description="Track whether prior AI recommendations remain defensible. Monitors recommendation drift, assumption health, vendor change signals, regulation, and reputation shifts. Surfaces reassessment triggers before decisions degrade."
     >
+      <AnalystInsight paragraph={monitorInsight({
+        activeRecommendations: recommendations.length,
+        reassessNow,
+        reassessQuarter,
+        brokenAssumptions: assumptions.filter((a) => a.status === "at_risk").length,
+        vendorSignals: vendorChangeEvents.length,
+        largestDrift: (() => {
+          const sorted = [...recommendations].sort((a, b) => Math.abs(b.drift) - Math.abs(a.drift));
+          return sorted[0] ? { name: sorted[0].vendor.name, drift: sorted[0].drift } : null;
+        })(),
+      })} />
+
+      {/* 0. Assessed shortlist cards — restored from the assessment session */}
+      <ShortlistVendorCards
+        universe={vendors.filter(isRankable).map((v) => ({ id: v.id, name: v.name, category: v.category, score: v.overallScore, confidence: v.confidenceScore, ownershipType: v.ownershipType }))}
+      />
+
       {/* 1. Monitor executive summary — 6 top cards */}
       <section className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
         <MonitorCard label="Active recommendations" value={recommendations.length} tone="neutral" />
@@ -142,38 +168,61 @@ export default async function MonitorPage() {
           action={<SeedDataBadge label="Estimated" provenance="seed" reason="Drift computed from momentum signals against a baseline of 60. Will use real stored recommendations when assessment→monitor pipeline is wired." />}
         >
           <p className="mb-3 text-xs text-[#5f685a] dark:text-zinc-400">
-            Active recommendations scored against current market signals. Negative drift means conditions have moved against the recommendation.
+            Active recommendations scored against current market signals, grouped by category — scores compare within a category, never across.
+            Negative drift means conditions have moved against the recommendation. Hover a trend line for the window and provenance.
           </p>
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-sm">
-              <thead>
-                <tr className="border-b border-[#dfe4da] text-left text-xs uppercase tracking-wide text-[#5f685a]">
-                  <th className="py-2 pr-3">Vendor</th>
-                  <th className="py-2 pr-3">Score</th>
-                  <th className="py-2 pr-3">Momentum</th>
-                  <th className="py-2 pr-3">Drift</th>
-                  <th className="py-2">Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {recommendations.map((r) => {
-                  const a = ACTION_LABEL[r.action];
-                  return (
-                    <tr key={r.vendor.id} className="border-b border-[#edf0ea]/60">
-                      <td className="py-2.5 pr-3">
-                        <VendorNameWithOwnership name={r.vendor.name} ownershipType={r.vendor.ownershipType} />
-                      </td>
-                      <td className="py-2.5 pr-3 font-mono">{r.vendor.overallScore}</td>
-                      <td className="py-2.5 pr-3 font-mono">{r.momentum?.momentumScore.toFixed(0) ?? "—"}</td>
-                      <td className={`py-2.5 pr-3 font-mono font-semibold ${r.drift > 0 ? "text-emerald-700 dark:text-emerald-300" : r.drift < 0 ? "text-rose-700 dark:text-rose-300" : "text-zinc-500"}`}>
-                        {r.drift > 0 ? "+" : ""}{r.drift}
-                      </td>
-                      <td className={`py-2.5 font-semibold text-xs ${a.tone}`}>{a.label}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+          <div className="space-y-5">
+            {[...new Set(recommendations.map((r) => r.vendor.category))].map((category) => (
+              <div key={category}>
+                <div className="mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-[#697362] dark:text-zinc-500">
+                  {category}
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="min-w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-[#dfe4da] text-left text-xs uppercase tracking-wide text-[#5f685a]">
+                        <th className="py-2 pr-3">Vendor</th>
+                        <th className="py-2 pr-3">Score</th>
+                        <th className="py-2 pr-3">Trend</th>
+                        <th className="py-2 pr-3">Momentum</th>
+                        <th className="py-2 pr-3">Drift</th>
+                        <th className="py-2">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {recommendations.filter((r) => r.vendor.category === category).map((r) => {
+                        const a = ACTION_LABEL[r.action];
+                        const h = histories.get(r.vendor.id);
+                        return (
+                          <tr key={r.vendor.id} className="border-b border-[#edf0ea]/60">
+                            <td className="py-2.5 pr-3">
+                              <VendorNameWithOwnership name={r.vendor.name} ownershipType={r.vendor.ownershipType} />
+                            </td>
+                            <td className="py-2.5 pr-3 font-mono">{r.vendor.overallScore}</td>
+                            <td className="py-2.5 pr-3">
+                              {h && h.points.length >= 2 ? (
+                                <TrendSpark
+                                  label={`${r.vendor.name} — overall score`}
+                                  points={h.points.map((pt) => ({ date: pt.date, value: pt.score }))}
+                                  provenance={"sourceLabel" in h && (h as { sourceLabel?: string }).sourceLabel === "snapshot" ? "snapshot" : "reconstructed"}
+                                />
+                              ) : (
+                                <span className="text-[10px] text-[#8a948a]">accumulating</span>
+                              )}
+                            </td>
+                            <td className="py-2.5 pr-3 font-mono">{r.momentum?.momentumScore.toFixed(0) ?? "—"}</td>
+                            <td className={`py-2.5 pr-3 font-mono font-semibold ${r.drift > 0 ? "text-emerald-700 dark:text-emerald-300" : r.drift < 0 ? "text-rose-700 dark:text-rose-300" : "text-zinc-500"}`}>
+                              {r.drift > 0 ? "+" : ""}{r.drift}
+                            </td>
+                            <td className={`py-2.5 font-semibold text-xs ${a.tone}`}>{a.label}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            ))}
           </div>
         </Panel>
       </section>
