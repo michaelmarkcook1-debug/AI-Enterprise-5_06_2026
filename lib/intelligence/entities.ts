@@ -283,7 +283,7 @@ export function rolesFor(e: Entity): Role[] {
   return [e.primaryRole, ...e.secondaryRoles];
 }
 
-const LAYER_DEFS: Array<{ title: string; role: Role; note: string; max: number }> = [
+export const LAYER_DEFS: Array<{ title: string; role: Role; note: string; max: number }> = [
   { title: "Platform Vendors", role: "Platform Vendor", note: "Distribution, cloud control and enterprise-governance depth.", max: 5 },
   { title: "Model Providers", role: "Model Provider", note: "Quality, cadence, deployment paths and model economics.", max: 8 },
   { title: "Application Vendors", role: "Application Vendor", note: "Workflow conversion, domain fit and business-user adoption.", max: 6 },

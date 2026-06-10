@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useCallback } from "react";
 import type { Entity, Role } from "@/lib/intelligence/entities";
-import { rolesFor } from "@/lib/intelligence/entities";
+import { rolesFor, roleLeadership } from "@/lib/intelligence/entities";
 
 interface MarketDevelopment {
   date: string;
@@ -24,10 +24,6 @@ function average(values: number[]): number {
   return values.reduce((a, b) => a + b, 0) / values.length;
 }
 
-function topN<T>(items: T[], key: (item: T) => number, n: number): T[] {
-  return [...items].sort((a, b) => key(b) - key(a)).slice(0, n);
-}
-
 function riskDistribution(entities: Entity[]) {
   const high = entities.filter((e) => e.risk === "high").length;
   const medium = entities.filter((e) => e.risk === "medium").length;
@@ -37,19 +33,16 @@ function riskDistribution(entities: Entity[]) {
 
 function seedDevelopments(entities: Entity[]): MarketDevelopment[] {
   const byName = new Map(entities.map((e) => [e.name.toLowerCase(), e]));
-  const ranked = [...entities].sort((a, b) => b.leadershipScore - a.leadershipScore);
-  const rankOf = (name: string) => {
-    const idx = ranked.findIndex((e) => e.name.toLowerCase() === name.toLowerCase());
-    return idx >= 0 ? idx + 1 : null;
-  };
-  const totalEntities = entities.length;
   const totalUsageShare = entities.reduce((s, e) => s + e.usageShare, 0);
   const shareOf = (e: Entity) => totalUsageShare > 0 ? ((e.usageShare / totalUsageShare) * 100).toFixed(1) : "n/a";
 
-  const modelProviders = entities.filter((e) => rolesFor(e).includes("Model Provider")).sort((a, b) => b.leadershipScore - a.leadershipScore);
-  const platformVendors = entities.filter((e) => rolesFor(e).includes("Platform Vendor")).sort((a, b) => b.leadershipScore - a.leadershipScore);
-  const hardwareProviders = entities.filter((e) => rolesFor(e).includes("Hardware Provider")).sort((a, b) => b.leadershipScore - a.leadershipScore);
-  const infraPlayers = entities.filter((e) => rolesFor(e).includes("Infrastructure Player")).sort((a, b) => b.leadershipScore - a.leadershipScore);
+  // Layer rosters ranked by the role-specific leadership score — vendors are
+  // only compared within their layer (no cross-layer composite ranking).
+  const byRoleLeadership = (role: Role) => (a: Entity, b: Entity) => roleLeadership(b, role) - roleLeadership(a, role);
+  const modelProviders = entities.filter((e) => rolesFor(e).includes("Model Provider")).sort(byRoleLeadership("Model Provider"));
+  const platformVendors = entities.filter((e) => rolesFor(e).includes("Platform Vendor")).sort(byRoleLeadership("Platform Vendor"));
+  const hardwareProviders = entities.filter((e) => rolesFor(e).includes("Hardware Provider")).sort(byRoleLeadership("Hardware Provider"));
+  const infraPlayers = entities.filter((e) => rolesFor(e).includes("Infrastructure Player")).sort(byRoleLeadership("Infrastructure Player"));
 
   const layerRankOf = (name: string, layer: Entity[]) => {
     const idx = layer.findIndex((e) => e.name.toLowerCase() === name.toLowerCase());
@@ -71,7 +64,7 @@ function seedDevelopments(entities: Entity[]): MarketDevelopment[] {
       headline: "NVIDIA Q1 FY27: Record $81.6B revenue (+85% YoY), data-centre revenue hits $75.2B with Blackwell 300 ramp",
       entities: ["NVIDIA"],
       analystTake: nvidia
-        ? `NVIDIA ranks #${rankOf("nvidia")} of ${totalEntities} in the overall leaderboard (leadership ${nvidia.leadershipScore}, momentum ${nvidia.momentum}) and #${layerRankOf("nvidia", hardwareProviders)} among ${hardwareProviders.length} hardware providers. Data-centre compute revenue of $60.4B and networking revenue of $14.8B (+199% YoY) confirm structural dominance. Usage share sits at ${shareOf(nvidia)}% of the tracked universe. Hyperscale is ~50% of DC revenue, with the other 50% diversifying into AI clouds, enterprise, and sovereign customers — widening the moat. Ecosystem reach of ${nvidia.ecosystemReach} underscores CUDA lock-in. ${nvidia.risk}-risk at ${nvidia.confidence}% confidence reflects concentration dependency. CIOs should assume extended GPU lead-times and factor NVIDIA allocation into every infrastructure RFP.`
+        ? `NVIDIA ranks #${layerRankOf("nvidia", hardwareProviders)} of ${hardwareProviders.length} hardware providers (leadership ${nvidia.leadershipScore}, momentum ${nvidia.momentum}). Data-centre compute revenue of $60.4B and networking revenue of $14.8B (+199% YoY) confirm structural dominance. Usage share sits at ${shareOf(nvidia)}% of the tracked universe. Hyperscale is ~50% of DC revenue, with the other 50% diversifying into AI clouds, enterprise, and sovereign customers — widening the moat. Ecosystem reach of ${nvidia.ecosystemReach} underscores CUDA lock-in. ${nvidia.risk}-risk at ${nvidia.confidence}% confidence reflects concentration dependency. CIOs should assume extended GPU lead-times and factor NVIDIA allocation into every infrastructure RFP.`
         : "NVIDIA posts record results driven by data-centre AI demand.",
       impact: "positive",
       source: "NVIDIA Q1 FY27 Earnings / CNBC",
@@ -81,7 +74,7 @@ function seedDevelopments(entities: Entity[]): MarketDevelopment[] {
       headline: "Microsoft Build 2026: Copilot Studio gets computer-using agents (GA), A2A protocol, and 6x MAU growth to 20M+ users",
       entities: ["Microsoft"],
       analystTake: msft
-        ? `Microsoft holds #${rankOf("microsoft")} overall (leadership ${msft.leadershipScore}) and #${layerRankOf("microsoft", platformVendors)} among ${platformVendors.length} platform vendors — reinforced by ${shareOf(msft)}% usage share and ecosystem reach of ${msft.ecosystemReach}. Build 2026 signals production maturity: computer-using agents are now GA, agent-to-agent (A2A) communication enables cross-system orchestration, and the new orchestrator cuts token consumption 50% while improving evaluation 20%. The 6x MAU surge to 20M+ Copilot users confirms enterprise rollout is accelerating. New M365 Business SKUs with Copilot built-in (launching July 1) will push adoption into SMB. Innovation at ${msft.innovation}, readiness at ${msft.readiness}. CIOs on M365 face a narrowing window before switching costs become prohibitive.`
+        ? `Microsoft holds #${layerRankOf("microsoft", platformVendors)} among ${platformVendors.length} platform vendors (leadership ${msft.leadershipScore}) — reinforced by ${shareOf(msft)}% usage share and ecosystem reach of ${msft.ecosystemReach}. Build 2026 signals production maturity: computer-using agents are now GA, agent-to-agent (A2A) communication enables cross-system orchestration, and the new orchestrator cuts token consumption 50% while improving evaluation 20%. The 6x MAU surge to 20M+ Copilot users confirms enterprise rollout is accelerating. New M365 Business SKUs with Copilot built-in (launching July 1) will push adoption into SMB. Innovation at ${msft.innovation}, readiness at ${msft.readiness}. CIOs on M365 face a narrowing window before switching costs become prohibitive.`
         : "Microsoft deepens enterprise AI integration with agentic capabilities.",
       impact: "positive",
       source: "Microsoft Build 2026 / VentureBeat",
@@ -91,7 +84,7 @@ function seedDevelopments(entities: Entity[]): MarketDevelopment[] {
       headline: "OpenAI launches Codex enterprise plugins, ChatGPT Lockdown Mode, and GPT-Rosalind for life sciences; workspace agents extended",
       entities: ["OpenAI"],
       analystTake: openai
-        ? `OpenAI is #${rankOf("openai")} overall and #${layerRankOf("openai", modelProviders)} of ${modelProviders.length} model providers (leadership ${openai.leadershipScore}, momentum ${openai.momentum}). The six new Codex business plugins (sales, analytics, creative, design, equity research, investment banking) signal aggressive vertical enterprise expansion — moving beyond horizontal AI into workflow-specific tooling. Lockdown Mode for prompt-injection protection addresses a key enterprise security concern. Usage share at ${shareOf(openai)}% with innovation at ${openai.innovation}. The workspace-agents free-tier extension to July 6 suggests adoption is below target. ${openai.risk}-risk with ${openai.confidence}% confidence. CIOs should evaluate Codex plugins for specific workflows but avoid single-vendor lock-in across the agentic stack.`
+        ? `OpenAI is #${layerRankOf("openai", modelProviders)} of ${modelProviders.length} model providers (leadership ${openai.leadershipScore}, momentum ${openai.momentum}). The six new Codex business plugins (sales, analytics, creative, design, equity research, investment banking) signal aggressive vertical enterprise expansion — moving beyond horizontal AI into workflow-specific tooling. Lockdown Mode for prompt-injection protection addresses a key enterprise security concern. Usage share at ${shareOf(openai)}% with innovation at ${openai.innovation}. The workspace-agents free-tier extension to July 6 suggests adoption is below target. ${openai.risk}-risk with ${openai.confidence}% confidence. CIOs should evaluate Codex plugins for specific workflows but avoid single-vendor lock-in across the agentic stack.`
         : "OpenAI expands enterprise tooling with vertical plugins and security features.",
       impact: "watch",
       source: "OpenAI Newsroom / Build Fast with AI",
@@ -101,7 +94,7 @@ function seedDevelopments(entities: Entity[]): MarketDevelopment[] {
       headline: "Google I/O 2026: Gemini 3.5 Flash launched, Ultra price cut to $200/mo, Gemini Omni for multimodal generation, 900M MAU",
       entities: ["Google"],
       analystTake: google
-        ? `Google ranks #${rankOf("google")} overall, #${layerRankOf("google", platformVendors)} among platforms and #${layerRankOf("google", modelProviders)} among model providers — uniquely competitive across both layers. Gemini 3.5 Flash with aggressive pricing signals a volume play; the Enterprise Agent Platform (evolution of Vertex AI) now provides access to 200+ models including third-party. 900M monthly users (up from 400M in May 2025) is consumer-driven but creates enterprise pipeline. Gemini Spark as a 24/7 personal AI agent for Workspace customers competes directly with Microsoft Copilot. Leadership ${google.leadershipScore}, ecosystem reach ${google.ecosystemReach}, usage share ${shareOf(google)}%. ${google.confidence}% confidence — strong observability.`
+        ? `Google ranks #${layerRankOf("google", platformVendors)} among ${platformVendors.length} platform vendors and #${layerRankOf("google", modelProviders)} among ${modelProviders.length} model providers — uniquely competitive across both layers. Gemini 3.5 Flash with aggressive pricing signals a volume play; the Enterprise Agent Platform (evolution of Vertex AI) now provides access to 200+ models including third-party. 900M monthly users (up from 400M in May 2025) is consumer-driven but creates enterprise pipeline. Gemini Spark as a 24/7 personal AI agent for Workspace customers competes directly with Microsoft Copilot. Leadership ${google.leadershipScore}, ecosystem reach ${google.ecosystemReach}, usage share ${shareOf(google)}%. ${google.confidence}% confidence — strong observability.`
         : "Google accelerates enterprise AI with cheaper Gemini models and agentic platform.",
       impact: "positive",
       source: "Google I/O 2026 / Google Cloud Blog",
@@ -111,7 +104,7 @@ function seedDevelopments(entities: Entity[]): MarketDevelopment[] {
       headline: "Anthropic files for IPO; Bristol Myers Squibb deploys Claude Enterprise across global operations; SAP integration announced",
       entities: ["Anthropic"],
       analystTake: anthropic
-        ? `Anthropic sits at #${rankOf("anthropic")} overall and #${layerRankOf("anthropic", modelProviders)} of ${modelProviders.length} model providers (leadership ${anthropic.leadershipScore}, momentum ${anthropic.momentum}). Three converging signals: the IPO filing positions Anthropic as a potential trillion-dollar debut; the BMS deal makes Claude the shared intelligence platform across pharma R&D, manufacturing, and commercial functions; the SAP integration puts Claude into S/4HANA, SuccessFactors, and Ariba workflows. Innovation at ${anthropic.innovation}, ecosystem reach ${anthropic.ecosystemReach} — the SAP and BMS deals should materially improve this. Usage share at ${shareOf(anthropic)}%. Managed Agents with enterprise-boundary MCP servers address the governance gap. CIOs in regulated industries should now include Anthropic in every RFP.`
+        ? `Anthropic sits at #${layerRankOf("anthropic", modelProviders)} of ${modelProviders.length} model providers (leadership ${anthropic.leadershipScore}, momentum ${anthropic.momentum}). Three converging signals: the IPO filing positions Anthropic as a potential trillion-dollar debut; the BMS deal makes Claude the shared intelligence platform across pharma R&D, manufacturing, and commercial functions; the SAP integration puts Claude into S/4HANA, SuccessFactors, and Ariba workflows. Innovation at ${anthropic.innovation}, ecosystem reach ${anthropic.ecosystemReach} — the SAP and BMS deals should materially improve this. Usage share at ${shareOf(anthropic)}%. Managed Agents with enterprise-boundary MCP servers address the governance gap. CIOs in regulated industries should now include Anthropic in every RFP.`
         : "Anthropic files for IPO while landing major enterprise platform deals.",
       impact: "positive",
       source: "Washington Post / BMS / SAP News",
@@ -121,7 +114,7 @@ function seedDevelopments(entities: Entity[]): MarketDevelopment[] {
       headline: "Meta launches Llama 4 Scout and Maverick (multimodal MoE architecture); developing proprietary Avocado and Mango models",
       entities: ["Meta"],
       analystTake: meta
-        ? `Meta is #${rankOf("meta")} overall and #${layerRankOf("meta", modelProviders)} among model providers (leadership ${meta.leadershipScore}). Llama 4 Scout and Maverick introduce mixture-of-experts architecture with native multimodality — available on Hugging Face and deployed across WhatsApp, Messenger, and Instagram. The parallel development of proprietary models (Avocado for LLM, Mango for multimedia) signals a strategic hedge: open-weight for ecosystem control, proprietary for premium capability. Usage share (${shareOf(meta)}%) understates actual deployment — Llama derivatives run across hyperscalers without attribution. Ecosystem reach ${meta.ecosystemReach}, innovation ${meta.innovation}. ${meta.risk}-risk at ${meta.confidence}% confidence. CIOs should benchmark Llama 4 MoE for cost-sensitive inference but monitor the open-vs-proprietary trajectory.`
+        ? `Meta is #${layerRankOf("meta", modelProviders)} among ${modelProviders.length} model providers (leadership ${meta.leadershipScore}). Llama 4 Scout and Maverick introduce mixture-of-experts architecture with native multimodality — available on Hugging Face and deployed across WhatsApp, Messenger, and Instagram. The parallel development of proprietary models (Avocado for LLM, Mango for multimedia) signals a strategic hedge: open-weight for ecosystem control, proprietary for premium capability. Usage share (${shareOf(meta)}%) understates actual deployment — Llama derivatives run across hyperscalers without attribution. Ecosystem reach ${meta.ecosystemReach}, innovation ${meta.innovation}. ${meta.risk}-risk at ${meta.confidence}% confidence. CIOs should benchmark Llama 4 MoE for cost-sensitive inference but monitor the open-vs-proprietary trajectory.`
         : "Meta's Llama 4 introduces multimodal MoE while developing proprietary alternatives.",
       impact: "neutral",
       source: "Meta AI Blog / SiliconANGLE",
@@ -131,7 +124,7 @@ function seedDevelopments(entities: Entity[]): MarketDevelopment[] {
       headline: "CoreWeave Q1 2026: Revenue $2.08B (+112% YoY), backlog surges to $99.4B including $21B Meta commitment; stock down 51% from peak",
       entities: ["CoreWeave"],
       analystTake: coreweave
-        ? `CoreWeave ranks #${rankOf("coreweave")} of ${totalEntities} overall and #${layerRankOf("coreweave", infraPlayers)} among ${infraPlayers.length} infrastructure players (leadership ${coreweave.leadershipScore}). The $99.4B backlog headline is impressive but masks structural risk: $50.8B in liabilities against volatile revenue, 51% stock decline from peak, and heavy customer concentration (the $21B Meta commitment is a double-edged sword). ${coreweave.risk}-risk at ${coreweave.confidence}% confidence — one of the thinnest evidence profiles in the infrastructure layer. Usage share ${shareOf(coreweave)}%, ecosystem reach ${coreweave.ecosystemReach}. Full-year guidance of $12-13B implies aggressive growth assumptions. CIOs should treat CoreWeave as supplementary GPU capacity with strong contractual protections, not a primary infrastructure partner.`
+        ? `CoreWeave ranks #${layerRankOf("coreweave", infraPlayers)} among ${infraPlayers.length} infrastructure players (leadership ${coreweave.leadershipScore}). The $99.4B backlog headline is impressive but masks structural risk: $50.8B in liabilities against volatile revenue, 51% stock decline from peak, and heavy customer concentration (the $21B Meta commitment is a double-edged sword). ${coreweave.risk}-risk at ${coreweave.confidence}% confidence — one of the thinnest evidence profiles in the infrastructure layer. Usage share ${shareOf(coreweave)}%, ecosystem reach ${coreweave.ecosystemReach}. Full-year guidance of $12-13B implies aggressive growth assumptions. CIOs should treat CoreWeave as supplementary GPU capacity with strong contractual protections, not a primary infrastructure partner.`
         : "CoreWeave revenue doubles but debt load and customer concentration raise sustainability questions.",
       impact: "negative",
       source: "Yahoo Finance / 24/7 Wall St",
@@ -141,7 +134,7 @@ function seedDevelopments(entities: Entity[]): MarketDevelopment[] {
       headline: "WWDC 2026: Apple relaunches Siri with Gemini backbone, standalone AI app to rival ChatGPT; paid Siri subscription planned",
       entities: ["Apple"],
       analystTake: apple
-        ? `Apple ranks #${rankOf("apple")} overall (leadership ${apple.leadershipScore}, momentum ${apple.momentum}) — mid-table in the AI leaderboard, but WWDC 2026 signals a strategic reset. The Gemini-powered Siri relaunch with cross-app task execution and a standalone AI app positions Apple as a distribution channel for Google's models — a dependency that cuts both ways. Readiness ${apple.readiness}, ecosystem reach ${apple.ecosystemReach} — deep device-fleet penetration that no cloud provider matches. The paid Siri subscription signals Apple is treating AI as a services-revenue driver, not just a feature. Usage share ${shareOf(apple)}% in the AI universe is modest but understates the 2B+ device install base. Innovation ${apple.innovation}, ${apple.confidence}% confidence. For CIOs, the on-device processing promise remains the key enterprise differentiator — but the Gemini dependency adds a new counterparty risk to evaluate.`
+        ? `Apple (leadership ${apple.leadershipScore}, momentum ${apple.momentum}) sits mid-table within its layer, but WWDC 2026 signals a strategic reset. The Gemini-powered Siri relaunch with cross-app task execution and a standalone AI app positions Apple as a distribution channel for Google's models — a dependency that cuts both ways. Readiness ${apple.readiness}, ecosystem reach ${apple.ecosystemReach} — deep device-fleet penetration that no cloud provider matches. The paid Siri subscription signals Apple is treating AI as a services-revenue driver, not just a feature. Usage share ${shareOf(apple)}% in the AI universe is modest but understates the 2B+ device install base. Innovation ${apple.innovation}, ${apple.confidence}% confidence. For CIOs, the on-device processing promise remains the key enterprise differentiator — but the Gemini dependency adds a new counterparty risk to evaluate.`
         : "Apple's WWDC 2026 reveals Gemini-powered Siri relaunch and standalone AI app.",
       impact: "watch",
       source: "Bloomberg / TechCrunch / Yahoo Finance",
@@ -165,7 +158,10 @@ function generateBrief(entities: Entity[], winningByLayer: { title: string; name
   const avgMomentum = Math.round(average(entities.map((e) => e.momentum)));
   const risk = riskDistribution(entities);
 
-  const top5 = topN(entities, (e) => e.leadershipScore, 5);
+  // Leaders BY LAYER (top 1-2 per layer) — replaces the old flat composite
+  // top-5: there is no honest single ranking across platforms / models /
+  // hardware / investors, so leadership is only reported within a layer.
+  const leadersByLayer = winningByLayer.map((l) => ({ title: l.title, names: l.names.slice(0, 2) }));
   const fastestMovers = entities
     .filter((e) => e.deltas.leadership > 0)
     .sort((a, b) => b.deltas.leadership - a.deltas.leadership)
@@ -199,7 +195,7 @@ function generateBrief(entities: Entity[], winningByLayer: { title: string; name
     avgLeadership,
     avgMomentum,
     risk,
-    top5,
+    leadersByLayer,
     fastestMovers,
     risingAdoption,
     highRiskEntities,
@@ -258,8 +254,8 @@ function renderExportHtml(brief: ReturnType<typeof generateBrief>, headshotDataU
     ? `<img src="${headshotDataUri}" alt="Michael Cook" class="headshot" />`
     : `<div class="headshot-placeholder">MC</div>`;
 
-  const top5Rows = brief.top5.map((e) =>
-    `<tr><td><strong>${esc(e.name)}</strong></td><td>${esc(e.primaryRole)}</td><td>${e.leadershipScore}</td><td>${e.momentum}</td><td>${e.confidence}%</td><td class="${e.risk === 'high' ? 'severity-high' : e.risk === 'medium' ? 'severity-medium' : 'severity-low'}">${e.risk}</td></tr>`
+  const layerLeaderRows = brief.leadersByLayer.map((l) =>
+    `<tr><td><strong>${esc(l.title)}</strong></td><td>${l.names.map(esc).join(", ") || "—"}</td></tr>`
   ).join("");
 
   const moversList = brief.fastestMovers.map((e) =>
@@ -375,10 +371,11 @@ ${developments.map((d) => `
 </div>`).join("")}
 ` : ""}
 
-<h2>Top 5 by Leadership Score</h2>
+<h2>Leaders by Layer</h2>
+<p style="font-size:11px; color:#697362; margin-bottom:8px">Vendors are ranked within their layer only. AnalystGenius does not publish a cross-layer composite ranking — platforms, models, hardware and capital measure different things.</p>
 <table>
-  <thead><tr><th>Entity</th><th>Primary Role</th><th>Leadership</th><th>Momentum</th><th>Confidence</th><th>Risk</th></tr></thead>
-  <tbody>${top5Rows}</tbody>
+  <thead><tr><th>Layer</th><th>Leading Entities</th></tr></thead>
+  <tbody>${layerLeaderRows}</tbody>
 </table>
 
 <h2>Market Movers</h2>
@@ -528,14 +525,12 @@ export default function ExecutiveBrief({ entities, winningByLayer, developments 
 
             <div className="mt-4 grid gap-4 md:grid-cols-3">
               <div>
-                <div className="text-[10px] font-semibold uppercase tracking-wider text-[#697362]">Top 5 by Leadership</div>
+                <div className="text-[10px] font-semibold uppercase tracking-wider text-[#697362]">Leaders by Layer</div>
                 <div className="mt-2 space-y-1.5">
-                  {brief.top5.map((e, i) => (
-                    <div key={e.id} className="flex items-center justify-between text-xs">
-                      <span className="font-medium text-[#18201b] dark:text-zinc-100">
-                        <span className="mr-1.5 font-mono text-[#697362]">{i + 1}.</span>{e.name}
-                      </span>
-                      <span className="font-mono font-semibold">{e.leadershipScore}</span>
+                  {brief.leadersByLayer.map((l) => (
+                    <div key={l.title} className="flex items-baseline justify-between gap-2 text-xs">
+                      <span className="shrink-0 text-[#697362] dark:text-zinc-500">{l.title}</span>
+                      <span className="text-right font-medium text-[#18201b] dark:text-zinc-100">{l.names.join(", ") || "—"}</span>
                     </div>
                   ))}
                 </div>

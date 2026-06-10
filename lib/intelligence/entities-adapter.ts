@@ -20,6 +20,7 @@ import {
   type InfraBand,
   ENTITIES,
   rolesFor,
+  roleLeadership,
 } from "./entities";
 
 const KNOWN_ROLES: Role[] = [
@@ -187,7 +188,10 @@ export function computeWinningByLayer(entities: Entity[]): Array<{ title: string
     note: def.note,
     names: entities
       .filter((e) => rolesFor(e).includes(def.role))
-      .sort((a, b) => b.leadershipScore - a.leadershipScore)
+      // Rank by the role-specific leadership score (falls back to the entity
+      // score when no role profile exists) so a multi-role giant only "wins"
+      // a layer where it is genuinely strong — same rule as entities.ts.
+      .sort((a, b) => roleLeadership(b, def.role) - roleLeadership(a, def.role))
       .slice(0, def.max)
       .map((e) => e.name),
   }));

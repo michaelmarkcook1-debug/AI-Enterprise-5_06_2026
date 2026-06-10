@@ -10,7 +10,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 
-import { ENTITIES, type Entity, type Role } from "@/lib/intelligence/entities";
+import { ENTITIES, roleLeadership, type Entity, type Role } from "@/lib/intelligence/entities";
 import { listNewsItems } from "@/lib/intelligence/repository";
 import { getPrisma, hasDatabase } from "@/lib/prisma";
 import { Panel } from "@/components/intelligence-ui";
@@ -247,9 +247,6 @@ function ScoreHistoryChart({ snapshots }: { snapshots: SnapshotPoint[] }) {
     }
   }
 
-  // Rank dots (only when >3 snapshots)
-  const showRankDots = snapshots.length > 3;
-
   return (
     <svg
       viewBox={`0 0 ${W} ${H}`}
@@ -348,33 +345,37 @@ function ScoreHistoryChart({ snapshots }: { snapshots: SnapshotPoint[] }) {
   );
 }
 
-// ── Rank history row (only when >3 snapshots) ─────────────────────────────────
+// ── Within-layer ranking ──────────────────────────────────────────────────────
+// Vendors are ranked ONLY among entities sharing their primary role, by the
+// role-specific leadership score. There is deliberately no all-market rank:
+// platforms, models, hardware and capital measure different things.
 
-function RankRow({ snapshots }: { snapshots: SnapshotPoint[] }) {
-  if (snapshots.length <= 3) return null;
+const ROLE_PLURAL: Record<Role, string> = {
+  "Platform Vendor": "Platform Vendors",
+  "Model Provider": "Model Providers",
+  "Application Vendor": "Application Vendors",
+  "Infrastructure Player": "Infrastructure Players",
+  "Investor": "Investors",
+  "Hardware Provider": "Hardware Providers",
+  "Data & Services Provider": "Data & Services Providers",
+  "Cloud / Hosting Provider": "Cloud / Hosting Providers",
+  "Sovereign / Regional AI": "Sovereign / Regional AI players",
+  "Regulator / Policy Actor": "Regulators / Policy Actors",
+  "Open-Source Ecosystem": "Open-Source Ecosystem players",
+  "Vertical Specialist": "Vertical Specialists",
+};
 
-  const W = 800;
-  const H = 32;
-  const PAD_LEFT = 36;
-  const PAD_RIGHT = 12;
-  const chartW = W - PAD_LEFT - PAD_RIGHT;
-
-  function xOf(index: number) {
-    return PAD_LEFT + (index / (snapshots.length - 1)) * chartW;
-  }
-
-  return (
-    <svg viewBox={`0 0 ${W} ${H}`} className="w-full" aria-label="Rank over time">
-      {snapshots.map((s, i) => (
-        <g key={s.date}>
-          <circle cx={xOf(i)} cy={H / 2} r="10" fill="#1e293b" stroke="#6EE7B7" strokeWidth="1.2" />
-          <text x={xOf(i)} y={H / 2 + 4} textAnchor="middle" fontSize="9" fill="#6EE7B7" fontWeight="600">
-            #{s.rank}
-          </text>
-        </g>
-      ))}
-    </svg>
-  );
+function layerRankFor(entity: Entity): { rank: number; peers: number; layerLabel: string } {
+  const role = entity.primaryRole;
+  const peers = ENTITIES
+    .filter((e) => e.primaryRole === role)
+    .sort((a, b) => roleLeadership(b, role) - roleLeadership(a, role));
+  const idx = peers.findIndex((e) => e.id === entity.id);
+  return {
+    rank: idx >= 0 ? idx + 1 : peers.length,
+    peers: peers.length,
+    layerLabel: ROLE_PLURAL[role] ?? `${role}s`,
+  };
 }
 
 // ── Data fetching helpers ─────────────────────────────────────────────────────
@@ -438,6 +439,9 @@ export default async function VendorDeepDivePage({
 
   // All roles (primary + secondary)
   const allRoles: Role[] = [entity.primaryRole, ...entity.secondaryRoles];
+
+  // Within-layer standing — computed from the tracked roster at render time.
+  const layerRank = layerRankFor(entity);
 
   return (
     <div className="min-h-screen bg-white dark:bg-[#071827]">
@@ -520,33 +524,30 @@ export default async function VendorDeepDivePage({
         <section className="mb-6">
           <Panel title="Score history">
             <ScoreHistoryChart snapshots={snapshots} />
-            {snapshots.length > 3 && (
-              <div className="mt-3">
-                <div className="mb-1 text-xs font-semibold uppercase tracking-wide text-[#697362] dark:text-zinc-500">
-                  Rank over time
-                </div>
-                <RankRow snapshots={snapshots} />
-              </div>
-            )}
           </Panel>
         </section>
 
         <div className="mb-6 grid gap-5 lg:grid-cols-[1fr_0.55fr]">
-          {/* ── Current ranking card ──────────────────────────────────────── */}
-          <Panel title="Current ranking">
-            {lastSnapshot ? (
-              <div className="flex flex-col gap-3">
-                <div className="flex items-baseline gap-3">
-                  <span className="text-4xl font-bold tabular-nums text-[#18201b] dark:text-zinc-50">
-                    #{lastSnapshot.rank}
-                  </span>
-                  <span className="text-sm text-[#596151] dark:text-zinc-400">
-                    of {lastSnapshot.trackedVendors} tracked vendors
-                  </span>
-                </div>
+          {/* ── Within-layer standing card — vendors are only ranked against
+                 peers in their own layer; no all-market composite rank. ───── */}
+          <Panel title="Standing within layer">
+            <div className="flex flex-col gap-3">
+              <div className="flex items-baseline gap-3">
+                <span className="text-4xl font-bold tabular-nums text-[#18201b] dark:text-zinc-50">
+                  #{layerRank.rank}
+                </span>
+                <span className="text-sm text-[#596151] dark:text-zinc-400">
+                  of {layerRank.peers} {layerRank.layerLabel}
+                </span>
+              </div>
+              <p className="text-xs leading-5 text-[#697362] dark:text-zinc-500">
+                Ranked by {entity.primaryRole} leadership score, within this layer only.
+                Cross-layer composite rankings are not used — layers measure different things.
+              </p>
+              {lastSnapshot ? (
                 <div className="flex gap-6 text-sm">
                   <div>
-                    <span className="text-xs uppercase tracking-wide text-[#697362] dark:text-zinc-500">Overall score</span>
+                    <span className="text-xs uppercase tracking-wide text-[#697362] dark:text-zinc-500">Latest score</span>
                     <div className="mt-1 text-xl font-semibold tabular-nums text-emerald-700 dark:text-emerald-300">
                       {lastSnapshot.overallScore.toFixed(1)}
                     </div>
@@ -564,14 +565,14 @@ export default async function VendorDeepDivePage({
                     </div>
                   </div>
                 </div>
-              </div>
-            ) : (
-              <p className="text-sm text-[#697362] dark:text-zinc-500">
-                {hasDatabase()
-                  ? "No ranking snapshots recorded yet. Run the snapshot job from the admin panel."
-                  : "— Database not connected. Ranking history unavailable."}
-              </p>
-            )}
+              ) : (
+                <p className="text-sm text-[#697362] dark:text-zinc-500">
+                  {hasDatabase()
+                    ? "No score snapshots recorded yet. Run the snapshot job from the admin panel."
+                    : "— Database not connected. Score history unavailable."}
+                </p>
+              )}
+            </div>
           </Panel>
 
           {/* ── Analyst interpretation ────────────────────────────────────── */}

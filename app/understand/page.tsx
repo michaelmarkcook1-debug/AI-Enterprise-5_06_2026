@@ -313,17 +313,19 @@ export default async function UnderstandPage({ searchParams }: PageProps) {
 
       {/* 6. Vendor universe */}
       <section id="vendors" className="mb-8">
-        <CollapsiblePanel title="Vendor universe — ranked by overall score" summary={`${rankableVendors.length} vendors`}>
+        {/* No displayed rank numbers: the order is a deterministic score sort for
+            readability, but vendors are only RANKED within their own category /
+            layer — a flat all-market position number would mislead. */}
+        <CollapsiblePanel title="Vendor universe" summary={`${rankableVendors.length} vendors`}>
           <div className="divide-y divide-[#edf0ea] dark:divide-zinc-800">
-            {vendorsRanked.map((vendor, index) => {
+            {vendorsRanked.map((vendor) => {
               const mom = momentumByVendor.get(vendor.id);
               return (
                 <Link
                   key={vendor.id}
                   href={`/vendors/${vendor.slug}`}
-                  className="grid gap-4 py-4 md:grid-cols-[36px_1fr_160px_160px] md:items-center"
+                  className="grid gap-4 py-4 md:grid-cols-[1fr_160px_160px] md:items-center"
                 >
-                  <div className="font-mono text-sm text-[#697362]">{index + 1}</div>
                   <div>
                     <div className="text-base font-semibold text-[#18201b] dark:text-zinc-100">
                       <VendorNameWithOwnership name={vendor.name} ownershipType={vendor.ownershipType} compactBadge={false} />

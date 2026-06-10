@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { Metric, Panel, SeedDataBadge } from "@/components/intelligence-ui";
 import { OwnershipBadge, VendorNameWithOwnership } from "@/components/ownership-indicator";
@@ -10,6 +10,8 @@ import {
   type InfraBand,
   type RoleScore,
   rolesFor,
+  roleLeadership,
+  LAYER_DEFS,
 } from "@/lib/intelligence/entities";
 import ExecutiveBrief from "@/components/query/ExecutiveBrief";
 import WatchButton from "@/components/query/WatchButton";
@@ -44,6 +46,21 @@ type CategoryKey =
   | "hardware"
   | "sovereign"
   | "vertical";
+
+// ── "All" view sections — one section per layer, every entity appears ONCE
+// under its PRIMARY role. There is deliberately NO flat all-market ranking:
+// the layers measure different things (platforms vs models vs hardware vs
+// capital), so a single cross-layer ordering would mislead. LAYER_DEFS covers
+// the canonical layers; the catch-all defs below guarantee every primaryRole
+// in the roster lands in exactly one section.
+const ALL_VIEW_SECTIONS: Array<{ title: string; role: Role; note: string }> = [
+  ...LAYER_DEFS.map(({ title, role, note }) => ({ title, role, note })),
+  { title: "Data & Services Providers", role: "Data & Services Provider", note: "Governed data platforms and AI services layers." },
+  { title: "Cloud / Hosting Providers", role: "Cloud / Hosting Provider", note: "Cloud and hosting capacity behind AI deployment." },
+  { title: "Vertical Specialists", role: "Vertical Specialist", note: "Domain-specific AI for legal, finance and regulated workflows." },
+  { title: "Open-Source Ecosystem", role: "Open-Source Ecosystem", note: "Open-weight model and tooling ecosystems." },
+  { title: "Regulators / Policy Actors", role: "Regulator / Policy Actor", note: "Policy and regulatory actors shaping enterprise AI adoption." },
+];
 
 const CATEGORY_OPTIONS: Array<{ key: CategoryKey; label: string; roles: Role[]; summary: string; interpretation: string }> = [
   {
@@ -257,6 +274,20 @@ export default function QueryV2Client({ entities, winningByLayer }: { entities: 
       // ranks Microsoft by its first-party model score (56), not its 91 composite.
       .sort((a, b) => effectiveScore(b, categoryRoles).leadership - effectiveScore(a, categoryRoles).leadership);
   }, [category, categoryRoles, entities, searchQuery]);
+  // "All" view: group by primaryRole layer; each entity appears once, ranked
+  // by its role-specific leadership WITHIN the section only. Empty sections
+  // (including search-filtered-empty) are hidden.
+  const groupedSections = useMemo(() => {
+    if (category !== "all") return [];
+    return ALL_VIEW_SECTIONS
+      .map((def) => ({
+        def,
+        members: filtered
+          .filter((entity) => entity.primaryRole === def.role)
+          .sort((a, b) => roleLeadership(b, def.role) - roleLeadership(a, def.role)),
+      }))
+      .filter((section) => section.members.length > 0);
+  }, [category, filtered]);
   const selectedEntity = filtered.find((entity) => entity.id === selectedId) ?? filtered[0] ?? entities[0];
   const maxShare = Math.max(...filtered.map((entity) => entity.usageShare), 1);
   const normalizedShare = filtered.map((entity) => ({
@@ -281,6 +312,59 @@ export default function QueryV2Client({ entities, winningByLayer }: { entities: 
     { label: "Investor-linked", value: entities.filter((entity) => rolesFor(entity).includes("Investor") || entity.investorRelationships.length > 0).length, note: "capital influence" },
     { label: "Evidence confidence", value: `${average(entities.map((entity) => entity.confidence)).toFixed(0)}%`, note: "directional model" },
   ];
+
+  // Shared leaderboard row renderer. `scopeRoles` is the role context the row
+  // is scored in: the active category roles for a lens view, or the single
+  // section layer role in the grouped "All" view. The index is the rank WITHIN
+  // that scope only — never an all-market position.
+  const renderEntityRow = (entity: Entity, index: number, scopeRoles: Role[]) => {
+    const active = entity.id === selectedEntity.id;
+    const es = effectiveScore(entity, scopeRoles);
+    return (
+      <tr
+        key={entity.id}
+        onClick={() => setSelectedId(entity.id)}
+        onMouseEnter={(e) => handleRowEnter(entity.id, e)}
+        onMouseLeave={handleRowLeave}
+        className={`cursor-pointer transition-colors ${active ? "bg-[#eef2e8] dark:bg-zinc-900" : "hover:bg-[#f5f7f2] dark:hover:bg-zinc-900/70"}`}
+      >
+        <td className="py-2.5 pr-3 font-mono text-xs text-[#697362] dark:text-zinc-500">{index + 1}</td>
+        <td className="py-2.5 pr-3 font-semibold text-[#18201b] dark:text-zinc-100">
+          <Link href={`/vendors/${entity.slug}`} onClick={(e) => e.stopPropagation()} className="hover:underline">
+            <VendorNameWithOwnership name={entity.name} ownershipType={entity.ownership} />
+          </Link>
+          {es.roleScored && (
+            <span
+              title={`AI-scoped score for the ${es.roleScored} role (differs from this vendor's composite). ${entity.roleScores?.[es.roleScored]?.rationale ?? ""}`}
+              className="ml-1.5 inline-flex items-center rounded bg-sky-100 px-1 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-sky-700 dark:bg-sky-950/50 dark:text-sky-300"
+            >
+              role-scoped
+            </span>
+          )}
+        </td>
+        <td className="py-2.5 pr-3">{roleBadge(es.roleScored ?? entity.primaryRole)}</td>
+        <td className="py-2.5 pr-3 text-right">
+          <ScoreCell value={es.leadership} delta={es.roleScored ? undefined : entity.deltas.leadership} tier={scoreGrade(es.leadership)} />
+        </td>
+        <td className="py-2.5 pr-3 text-right">
+          <ScoreCell value={es.innovation} tier={scoreGrade(es.innovation)} />
+        </td>
+        <td className="py-2.5 pr-3 text-right">
+          <ScoreCell value={es.readiness} tier={scoreGrade(es.readiness)} />
+        </td>
+        <td className="py-2.5 pr-3 text-right">
+          <ScoreCell value={entity.momentum} delta={entity.deltas.leadership} tier={scoreGrade(entity.momentum)} />
+        </td>
+        <td className="py-2.5 pr-3 text-right">
+          <ScoreCell value={es.reach} delta={es.roleScored ? undefined : entity.deltas.reach} tier={scoreGrade(es.reach)} />
+        </td>
+        <td className="py-2.5 pr-3 text-right font-mono text-xs text-[#4d574b] dark:text-zinc-400">{entity.usageShare.toFixed(1)}%</td>
+        <td className={`py-2.5 pr-3 text-xs font-semibold uppercase ${riskClass(entity.risk)}`}>{entity.risk}</td>
+        <td className="py-2.5 text-right font-mono text-xs text-[#4d574b] dark:text-zinc-400">{es.confidence}%</td>
+        <td className="py-2.5 pl-1"><WatchButton vendorId={entity.id} vendorName={entity.name} /></td>
+      </tr>
+    );
+  };
 
   const movers = {
     leadership: filtered.filter((entity) => entity.deltas.leadership > 0).sort((a, b) => b.deltas.leadership - a.deltas.leadership).slice(0, 4),
@@ -449,6 +533,11 @@ export default function QueryV2Client({ entities, winningByLayer }: { entities: 
                 {" "}· hover for score history
               </span>
             </div>
+            {category === "all" && (
+              <p className="mb-3 rounded-md border border-emerald-200 bg-emerald-50/60 px-3 py-1.5 text-[11px] leading-4 text-emerald-900/80 dark:border-emerald-900/50 dark:bg-emerald-950/20 dark:text-emerald-200/70">
+                <span className="font-semibold">Grouped by layer.</span> Vendors are ranked only within their own layer — platforms against platforms, models against models. No cross-layer composite ranking is shown: the layers measure different things, so a single all-market ordering would mislead.
+              </p>
+            )}
             {categoryRoles.length > 0 && (
               <p className="mb-3 rounded-md border border-sky-200 bg-sky-50/60 px-3 py-1.5 text-[11px] leading-4 text-sky-900/80 dark:border-sky-900/50 dark:bg-sky-950/20 dark:text-sky-200/70">
                 <span className="font-semibold">AI-scoped to the {selectedOption.label} lens.</span> Multi-role giants are ranked by their score <em>in this role</em>, not their global composite — so e.g. Microsoft appears here on its first-party model strength, not its platform score. Rows tagged <span className="rounded bg-sky-100 px-1 py-0.5 text-[9px] font-semibold uppercase text-sky-700 dark:bg-sky-900/50 dark:text-sky-300">role-scoped</span> are showing a role-specific number.
@@ -458,10 +547,10 @@ export default function QueryV2Client({ entities, winningByLayer }: { entities: 
               <table className="min-w-[1100px] text-left text-sm">
                 <thead className="border-b border-[#e7ebe2] text-[11px] uppercase tracking-wide text-[#697362] dark:border-zinc-800 dark:text-zinc-500">
                   <tr>
-                    <th className="py-2 pr-3">#</th>
+                    <th className="py-2 pr-3" title="Rank within the current layer or category lens only — not an all-market position">#</th>
                     <th className="py-2 pr-3">Entity</th>
                     <th className="py-2 pr-3">Role</th>
-                    <th className="py-2 pr-3 text-right" title="Composite leadership score — distribution, product, ecosystem, execution">Leadership</th>
+                    <th className="py-2 pr-3 text-right" title="Leadership score in the active role context — distribution, product, ecosystem, execution">Leadership</th>
                     <th className="py-2 pr-3 text-right" title="R&D velocity, product launch cadence, differentiation vs peers">Innovation</th>
                     <th className="py-2 pr-3 text-right" title="Enterprise readiness: compliance, SLAs, integrations, governance posture">Readiness</th>
                     <th className="py-2 pr-3 text-right" title="Trailing momentum across news, product and partnership signals">Momentum</th>
@@ -473,54 +562,19 @@ export default function QueryV2Client({ entities, winningByLayer }: { entities: 
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#edf0ea] dark:divide-zinc-800">
-                  {filtered.map((entity, index) => {
-                    const active = entity.id === selectedEntity.id;
-                    const es = effectiveScore(entity, categoryRoles);
-                    return (
-                      <tr
-                        key={entity.id}
-                        onClick={() => setSelectedId(entity.id)}
-                        onMouseEnter={(e) => handleRowEnter(entity.id, e)}
-                        onMouseLeave={handleRowLeave}
-                        className={`cursor-pointer transition-colors ${active ? "bg-[#eef2e8] dark:bg-zinc-900" : "hover:bg-[#f5f7f2] dark:hover:bg-zinc-900/70"}`}
-                      >
-                        <td className="py-2.5 pr-3 font-mono text-xs text-[#697362] dark:text-zinc-500">{index + 1}</td>
-                        <td className="py-2.5 pr-3 font-semibold text-[#18201b] dark:text-zinc-100">
-                          <Link href={`/vendors/${entity.slug}`} onClick={(e) => e.stopPropagation()} className="hover:underline">
-                            <VendorNameWithOwnership name={entity.name} ownershipType={entity.ownership} />
-                          </Link>
-                          {es.roleScored && (
-                            <span
-                              title={`AI-scoped score for the ${es.roleScored} role (differs from this vendor's composite). ${entity.roleScores?.[es.roleScored]?.rationale ?? ""}`}
-                              className="ml-1.5 inline-flex items-center rounded bg-sky-100 px-1 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-sky-700 dark:bg-sky-950/50 dark:text-sky-300"
-                            >
-                              role-scoped
-                            </span>
-                          )}
-                        </td>
-                        <td className="py-2.5 pr-3">{roleBadge(es.roleScored ?? entity.primaryRole)}</td>
-                        <td className="py-2.5 pr-3 text-right">
-                          <ScoreCell value={es.leadership} delta={es.roleScored ? undefined : entity.deltas.leadership} tier={scoreGrade(es.leadership)} />
-                        </td>
-                        <td className="py-2.5 pr-3 text-right">
-                          <ScoreCell value={es.innovation} tier={scoreGrade(es.innovation)} />
-                        </td>
-                        <td className="py-2.5 pr-3 text-right">
-                          <ScoreCell value={es.readiness} tier={scoreGrade(es.readiness)} />
-                        </td>
-                        <td className="py-2.5 pr-3 text-right">
-                          <ScoreCell value={entity.momentum} delta={entity.deltas.leadership} tier={scoreGrade(entity.momentum)} />
-                        </td>
-                        <td className="py-2.5 pr-3 text-right">
-                          <ScoreCell value={es.reach} delta={es.roleScored ? undefined : entity.deltas.reach} tier={scoreGrade(es.reach)} />
-                        </td>
-                        <td className="py-2.5 pr-3 text-right font-mono text-xs text-[#4d574b] dark:text-zinc-400">{entity.usageShare.toFixed(1)}%</td>
-                        <td className={`py-2.5 pr-3 text-xs font-semibold uppercase ${riskClass(entity.risk)}`}>{entity.risk}</td>
-                        <td className="py-2.5 text-right font-mono text-xs text-[#4d574b] dark:text-zinc-400">{es.confidence}%</td>
-                        <td className="py-2.5 pl-1"><WatchButton vendorId={entity.id} vendorName={entity.name} /></td>
-                      </tr>
-                    );
-                  })}
+                  {category === "all"
+                    ? groupedSections.map(({ def, members }) => (
+                        <Fragment key={def.role}>
+                          <tr>
+                            <td colSpan={12} className="bg-[#071827] px-3 py-2.5">
+                              <span className="text-xs font-bold uppercase tracking-wider text-[#6EE7B7]">{def.title}</span>
+                              <span className="ml-3 text-[11px] text-zinc-400">{def.note} Ranked within this layer only.</span>
+                            </td>
+                          </tr>
+                          {members.map((entity, index) => renderEntityRow(entity, index, [def.role]))}
+                        </Fragment>
+                      ))
+                    : filtered.map((entity, index) => renderEntityRow(entity, index, categoryRoles))}
                 </tbody>
               </table>
             </div>
@@ -844,7 +898,7 @@ function VendorScoreHoverCard({ vendorId, entity, anchorY, anchorX, onMouseEnter
       {/* Sparkline area */}
       <div className="px-4 py-3">
         <div className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-[#697362] dark:text-zinc-500">
-          Overall score history
+          Score history
         </div>
         {loading && (
           <div className="flex h-10 items-center justify-center text-[11px] text-[#697362] dark:text-zinc-500">
