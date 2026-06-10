@@ -18,9 +18,6 @@ import WatchButton from "@/components/query/WatchButton";
 
 type WinningLayer = { title: string; names: string[]; note: string };
 
-// Infrastructure sub-bands (Silicon / Cloud Compute / Neocloud / Data Platforms).
-// Each band represents a DIFFERENT risk type, which is why Infrastructure is the
-// one category that earns sub-structure where the others stay flat.
 const INFRA_BANDS: Array<{ key: InfraBand; label: string; note: string }> = [
   { key: "silicon", label: "Silicon", note: "Chips, accelerators, networking and fabrication. Risk type: supply concentration." },
   { key: "cloud_compute", label: "Cloud Compute", note: "Hyperscaler and sovereign cloud capacity. Risk type: lock-in and pricing power." },
@@ -47,21 +44,20 @@ type CategoryKey =
   | "sovereign"
   | "vertical";
 
-// ── "All" view sections — one section per layer, every entity appears ONCE
-// under its PRIMARY role. There is deliberately NO flat all-market ranking:
-// the layers measure different things (platforms vs models vs hardware vs
-// capital), so a single cross-layer ordering would mislead. LAYER_DEFS covers
-// the canonical layers; the catch-all defs below guarantee every primaryRole
-// in the roster lands in exactly one section.
+// Models first, then Platforms, then remaining LAYER_DEFS order, then catch-all roles.
 const ALL_VIEW_SECTIONS: Array<{ title: string; role: Role; note: string }> = [
-  ...LAYER_DEFS.map(({ title, role, note }) => ({ title, role, note })),
-  { title: "Data & Services Providers", role: "Data & Services Provider", note: "Governed data platforms and AI services layers." },
-  { title: "Cloud / Hosting Providers", role: "Cloud / Hosting Provider", note: "Cloud and hosting capacity behind AI deployment." },
-  { title: "Vertical Specialists", role: "Vertical Specialist", note: "Domain-specific AI for legal, finance and regulated workflows." },
-  { title: "Open-Source Ecosystem", role: "Open-Source Ecosystem", note: "Open-weight model and tooling ecosystems." },
-  { title: "Regulators / Policy Actors", role: "Regulator / Policy Actor", note: "Policy and regulatory actors shaping enterprise AI adoption." },
+  ...LAYER_DEFS.filter((d) => d.role === "Model Provider").map(({ title, role, note }) => ({ title, role, note })),
+  ...LAYER_DEFS.filter((d) => d.role === "Platform Vendor").map(({ title, role, note }) => ({ title, role, note })),
+  ...LAYER_DEFS.filter((d) => d.role !== "Model Provider" && d.role !== "Platform Vendor").map(({ title, role, note }) => ({ title, role, note })),
+  { title: "Data & Services Providers", role: "Data & Services Provider" as Role, note: "Governed data platforms and AI services layers." },
+  { title: "Cloud / Hosting Providers", role: "Cloud / Hosting Provider" as Role, note: "Cloud and hosting capacity behind AI deployment." },
+  { title: "Vertical Specialists", role: "Vertical Specialist" as Role, note: "Domain-specific AI for legal, finance and regulated workflows." },
+  { title: "Open-Source Ecosystem", role: "Open-Source Ecosystem" as Role, note: "Open-weight model and tooling ecosystems." },
+  { title: "Regulators / Policy Actors", role: "Regulator / Policy Actor" as Role, note: "Policy and regulatory actors shaping enterprise AI adoption." },
 ];
 
+// "all" is kept as an internal state key but its button is NOT rendered.
+// Clicking any active category deselects it and returns to the grouped "all" view.
 const CATEGORY_OPTIONS: Array<{ key: CategoryKey; label: string; roles: Role[]; summary: string; interpretation: string }> = [
   {
     key: "all",
@@ -158,12 +154,8 @@ function matchesCategory(entity: Entity, key: CategoryKey) {
   return option.roles.some((role) => roles.includes(role));
 }
 
-// ── AI-market per-role scoring ─────────────────────────────────────────────
-// When a category lens is active, a multi-role giant should rank by its score
-// IN THAT ROLE, not by its global composite. Resolve the relevant role for the
-// active category (primary role wins ties) and look up its roleScore profile.
 function activeRoleFor(entity: Entity, categoryRoles: Role[]): Role | null {
-  if (!categoryRoles.length) return null; // "All" view → composite
+  if (!categoryRoles.length) return null;
   return rolesFor(entity).find((r) => categoryRoles.includes(r)) ?? null;
 }
 
@@ -173,7 +165,7 @@ interface EffectiveScore {
   readiness: number;
   reach: number;
   confidence: number;
-  roleScored: Role | null; // non-null when a role-specific profile was used
+  roleScored: Role | null;
 }
 
 function effectiveScore(entity: Entity, categoryRoles: Role[]): EffectiveScore {
@@ -223,7 +215,6 @@ function signed(value: number) {
   return `${value > 0 ? "+" : ""}${value}`;
 }
 
-// ── Snapshot cache (never re-fetches the same vendor) ─────────────────────
 interface SnapshotPoint {
   date: string;
   overallScore: number;
@@ -239,6 +230,7 @@ export default function QueryV2Client({ entities, winningByLayer }: { entities: 
   const [selectedId, setSelectedId] = useState(entities[0]?.id ?? "");
   const [hoverState, setHoverState] = useState<{ id: string; y: number; x: number } | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
   const hoverTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleRowEnter = useCallback((id: string, e: React.MouseEvent<HTMLTableRowElement>) => {
@@ -263,20 +255,26 @@ export default function QueryV2Client({ entities, winningByLayer }: { entities: 
     hoverTimeout.current = setTimeout(() => setHoverState(null), 180);
   }, []);
 
+  const toggleSection = useCallback((role: string) => {
+    setExpandedSections((prev) => {
+      const next = new Set(prev);
+      if (next.has(role)) next.delete(role);
+      else next.add(role);
+      return next;
+    });
+  }, []);
+
   const selectedOption = CATEGORY_OPTIONS.find((option) => option.key === category) ?? CATEGORY_OPTIONS[0];
   const categoryRoles = selectedOption.roles;
+
   const filtered = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
     return entities
       .filter((entity) => matchesCategory(entity, category))
       .filter((entity) => !q || entity.name.toLowerCase().includes(q) || entity.primaryRole.toLowerCase().includes(q))
-      // Rank by the AI-market score IN THE ACTIVE ROLE, so e.g. the Models lens
-      // ranks Microsoft by its first-party model score (56), not its 91 composite.
       .sort((a, b) => effectiveScore(b, categoryRoles).leadership - effectiveScore(a, categoryRoles).leadership);
   }, [category, categoryRoles, entities, searchQuery]);
-  // "All" view: group by primaryRole layer; each entity appears once, ranked
-  // by its role-specific leadership WITHIN the section only. Empty sections
-  // (including search-filtered-empty) are hidden.
+
   const groupedSections = useMemo(() => {
     if (category !== "all") return [];
     return ALL_VIEW_SECTIONS
@@ -288,6 +286,7 @@ export default function QueryV2Client({ entities, winningByLayer }: { entities: 
       }))
       .filter((section) => section.members.length > 0);
   }, [category, filtered]);
+
   const selectedEntity = filtered.find((entity) => entity.id === selectedId) ?? filtered[0] ?? entities[0];
   const maxShare = Math.max(...filtered.map((entity) => entity.usageShare), 1);
   const normalizedShare = filtered.map((entity) => ({
@@ -296,9 +295,17 @@ export default function QueryV2Client({ entities, winningByLayer }: { entities: 
   }));
 
   function chooseCategory(nextCategory: CategoryKey) {
+    // Clicking the active category deselects it → returns to grouped "all" view
+    if (nextCategory === category) {
+      setCategory("all");
+      setSelectedId(entities[0]?.id ?? "");
+      return;
+    }
+    const nextOption = CATEGORY_OPTIONS.find((o) => o.key === nextCategory);
+    const nextRoles = nextOption?.roles ?? [];
     const nextFiltered = entities
       .filter((entity) => matchesCategory(entity, nextCategory))
-      .sort((a, b) => b.leadershipScore - a.leadershipScore);
+      .sort((a, b) => effectiveScore(b, nextRoles).leadership - effectiveScore(a, nextRoles).leadership);
     setCategory(nextCategory);
     setSelectedId(nextFiltered[0]?.id ?? entities[0]?.id ?? "");
   }
@@ -313,10 +320,6 @@ export default function QueryV2Client({ entities, winningByLayer }: { entities: 
     { label: "Evidence confidence", value: `${average(entities.map((entity) => entity.confidence)).toFixed(0)}%`, note: "directional model" },
   ];
 
-  // Shared leaderboard row renderer. `scopeRoles` is the role context the row
-  // is scored in: the active category roles for a lens view, or the single
-  // section layer role in the grouped "All" view. The index is the rank WITHIN
-  // that scope only — never an all-market position.
   const renderEntityRow = (entity: Entity, index: number, scopeRoles: Role[]) => {
     const active = entity.id === selectedEntity.id;
     const es = effectiveScore(entity, scopeRoles);
@@ -328,7 +331,14 @@ export default function QueryV2Client({ entities, winningByLayer }: { entities: 
         onMouseLeave={handleRowLeave}
         className={`cursor-pointer transition-colors ${active ? "bg-[#eef2e8] dark:bg-zinc-900" : "hover:bg-[#f5f7f2] dark:hover:bg-zinc-900/70"}`}
       >
-        <td className="py-2.5 pr-3 font-mono text-xs text-[#697362] dark:text-zinc-500">{index + 1}</td>
+        <td className="py-2.5 pr-3 font-mono text-xs text-[#697362] dark:text-zinc-500">
+          <span className="inline-flex items-center gap-0.5">
+            {active && (
+              <span className="animate-pulse font-bold text-emerald-500 text-sm leading-none">›</span>
+            )}
+            {index + 1}
+          </span>
+        </td>
         <td className="py-2.5 pr-3 font-semibold text-[#18201b] dark:text-zinc-100">
           <Link href={`/vendors/${entity.slug}`} onClick={(e) => e.stopPropagation()} className="hover:underline">
             <VendorNameWithOwnership name={entity.name} ownershipType={entity.ownership} />
@@ -375,195 +385,196 @@ export default function QueryV2Client({ entities, winningByLayer }: { entities: 
   };
 
   return (
-    <div className="grid gap-5 lg:grid-cols-[220px_minmax(0,1fr)]">
-      <aside className="hidden lg:block">
-        <div className="sticky top-20 rounded-lg border border-[#dfe4da] bg-white p-3 dark:border-zinc-800 dark:bg-[#071827]">
-          <Link href="/query" className="block rounded-md px-3 py-2 text-sm font-semibold text-[#18201b] hover:bg-[#eef2e8] dark:text-zinc-100 dark:hover:bg-zinc-900">
-            Query classic
-          </Link>
-          {["Role overview", "Leaderboard", "Layer winners", "Usage share", "Atlas", "Movers", "Models"].map((item) => (
-            <a key={item} href={`#${item.toLowerCase().replaceAll(" ", "-")}`} className="mt-1 block rounded-md px-3 py-2 text-xs font-medium text-[#596151] hover:bg-[#eef2e8] dark:text-zinc-400 dark:hover:bg-zinc-900">
-              {item}
-            </a>
-          ))}
+    <div className="min-w-0">
+      <ExecutiveBrief entities={entities} winningByLayer={winningByLayer} />
+
+      <section id="role-overview" className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-4 xl:grid-cols-7">
+        {kpis.map((kpi) => <Metric key={kpi.label} {...kpi} />)}
+      </section>
+
+      <Panel
+        title="Entity role selector"
+        action={<SeedDataBadge label="Directional estimate" provenance="seed" reason="Category roles and market signals are evidence-labelled directional intelligence for route /query-v2." />}
+      >
+        <div className="flex flex-wrap gap-2">
+          {/* "all" key is intentionally excluded — grouped view is the default state */}
+          {CATEGORY_OPTIONS.filter((option) => option.key !== "all").map((option) => {
+            const active = option.key === category;
+            return (
+              <button
+                key={option.key}
+                type="button"
+                onClick={() => chooseCategory(option.key)}
+                className={`rounded-md border px-3 py-2 text-xs font-semibold transition-colors ${
+                  active
+                    ? "border-[#192319] bg-[#192319] text-white dark:border-white dark:bg-white dark:text-[#071827]"
+                    : "border-[#d7ddd1] bg-[#fbfcf8] text-[#4d574b] hover:bg-[#eef2e8] dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800"
+                }`}
+              >
+                {option.label}
+              </button>
+            );
+          })}
+          {category !== "all" && (
+            <button
+              type="button"
+              onClick={() => chooseCategory("all")}
+              className="rounded-md border border-dashed border-[#d7ddd1] px-3 py-2 text-xs text-[#697362] hover:bg-[#eef2e8] dark:border-zinc-700 dark:text-zinc-500 dark:hover:bg-zinc-800"
+            >
+              ✕ Clear filter
+            </button>
+          )}
         </div>
-      </aside>
-
-      <div className="min-w-0">
-        <ExecutiveBrief entities={entities} winningByLayer={winningByLayer} />
-
-        <section id="role-overview" className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-4 xl:grid-cols-7">
-          {kpis.map((kpi) => <Metric key={kpi.label} {...kpi} />)}
-        </section>
-
-        <Panel
-          title="Entity role selector"
-          action={<SeedDataBadge label="Directional estimate" provenance="seed" reason="Category roles and market signals are evidence-labelled directional intelligence for route /query-v2." />}
-        >
-          <div className="flex flex-wrap gap-2">
-            {CATEGORY_OPTIONS.map((option) => {
-              const active = option.key === category;
-              return (
-                <button
-                  key={option.key}
-                  type="button"
-                  onClick={() => chooseCategory(option.key)}
-                  className={`rounded-md border px-3 py-2 text-xs font-semibold transition-colors ${
-                    active
-                      ? "border-[#192319] bg-[#192319] text-white dark:border-white dark:bg-white dark:text-[#071827]"
-                      : "border-[#d7ddd1] bg-[#fbfcf8] text-[#4d574b] hover:bg-[#eef2e8] dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800"
-                  }`}
-                >
-                  {option.label}
-                </button>
-              );
-            })}
+        <div className="mt-4 grid gap-4 lg:grid-cols-[0.8fr_1.2fr]">
+          <div className="rounded-md border border-[#e2e7dc] bg-[#fbfcf8] p-3 dark:border-zinc-800 dark:bg-zinc-950/40">
+            <div className="text-xs font-semibold uppercase tracking-wide text-[#697362] dark:text-zinc-500">Category summary</div>
+            <div className="mt-2 text-sm font-semibold text-[#18201b] dark:text-zinc-100">{selectedOption.label}</div>
+            <p className="mt-2 text-xs leading-5 text-[#596151] dark:text-zinc-400">{selectedOption.summary}</p>
           </div>
-          <div className="mt-4 grid gap-4 lg:grid-cols-[0.8fr_1.2fr]">
-            <div className="rounded-md border border-[#e2e7dc] bg-[#fbfcf8] p-3 dark:border-zinc-800 dark:bg-zinc-950/40">
-              <div className="text-xs font-semibold uppercase tracking-wide text-[#697362] dark:text-zinc-500">Category summary</div>
-              <div className="mt-2 text-sm font-semibold text-[#18201b] dark:text-zinc-100">{selectedOption.label}</div>
-              <p className="mt-2 text-xs leading-5 text-[#596151] dark:text-zinc-400">{selectedOption.summary}</p>
-            </div>
-            <div className="rounded-md border border-[#e2e7dc] bg-[#fbfcf8] p-3 dark:border-zinc-800 dark:bg-zinc-950/40">
-              <div className="text-xs font-semibold uppercase tracking-wide text-[#697362] dark:text-zinc-500">CIO interpretation</div>
-              <p className="mt-2 text-sm leading-6 text-[#2f392f] dark:text-zinc-300">{selectedOption.interpretation}</p>
-            </div>
+          <div className="rounded-md border border-[#e2e7dc] bg-[#fbfcf8] p-3 dark:border-zinc-800 dark:bg-zinc-950/40">
+            <div className="text-xs font-semibold uppercase tracking-wide text-[#697362] dark:text-zinc-500">CIO interpretation</div>
+            <p className="mt-2 text-sm leading-6 text-[#2f392f] dark:text-zinc-300">{selectedOption.interpretation}</p>
           </div>
-        </Panel>
+        </div>
+      </Panel>
 
-        {category === "infrastructure" && (
-          <section id="infra-bands" className="mt-6">
-            <Panel title="Infrastructure by layer">
-              <p className="mb-4 text-xs leading-5 text-[#5f685a] dark:text-zinc-400">
-                Infrastructure is not one shelf — each layer carries a different risk type.
-                Silicon is supply-concentration risk, cloud compute is lock-in and pricing-power risk,
-                neoclouds are counterparty / viability risk, and data platforms are data-gravity and
-                governance risk. Entities may carry a secondary band where they straddle layers
-                (e.g. AWS is cloud compute with its own Trainium/Inferentia silicon).
-              </p>
-              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-                {INFRA_BANDS.map((band) => {
-                  const members = filtered
-                    .filter((e) => e.infraBand === band.key)
-                    .sort((a, b) => b.leadershipScore - a.leadershipScore);
-                  return (
-                    <div key={band.key} className="rounded-md border border-[#e2e7dc] bg-[#fbfcf8] p-3 dark:border-zinc-800 dark:bg-zinc-950/40">
-                      <h3 className="text-sm font-semibold text-[#18201b] dark:text-zinc-100">{band.label}</h3>
-                      <p className="mt-1 text-xs leading-5 text-[#66705f] dark:text-zinc-500">{band.note}</p>
-                      <div className="mt-3 space-y-1.5">
-                        {members.length ? members.map((e) => (
-                          <button
-                            key={e.id}
-                            type="button"
-                            onClick={() => setSelectedId(e.id)}
-                            className={`flex w-full items-center justify-between gap-2 rounded border px-2 py-1 text-left text-xs transition-colors ${
-                              e.id === selectedEntity.id
-                                ? "border-[#192319] bg-[#eef2e8] dark:border-white dark:bg-zinc-900"
-                                : "border-[#dfe4da] hover:bg-[#eef2e8] dark:border-zinc-800 dark:hover:bg-zinc-900"
-                            }`}
-                          >
-                            <span className="font-medium text-[#18201b] dark:text-zinc-100">{e.name}</span>
-                            {e.infraBandSecondary && (
-                              <span className="rounded bg-[#e8ede2] px-1.5 py-0.5 text-[10px] text-[#4d574b] dark:bg-zinc-800 dark:text-zinc-400">
-                                +{INFRA_BAND_LABEL[e.infraBandSecondary]}
-                              </span>
-                            )}
-                          </button>
-                        )) : <span className="text-xs text-[#697362] dark:text-zinc-500">No tracked entity in this layer.</span>}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-              {(() => {
-                const banded = new Set(INFRA_BANDS.map((b) => b.key));
-                const other = filtered.filter((e) => !e.infraBand || !banded.has(e.infraBand));
-                if (!other.length) return null;
+      {category === "infrastructure" && (
+        <section id="infra-bands" className="mt-6">
+          <Panel title="Infrastructure by layer">
+            <p className="mb-4 text-xs leading-5 text-[#5f685a] dark:text-zinc-400">
+              Infrastructure is not one shelf — each layer carries a different risk type.
+              Silicon is supply-concentration risk, cloud compute is lock-in and pricing-power risk,
+              neoclouds are counterparty / viability risk, and data platforms are data-gravity and
+              governance risk. Entities may carry a secondary band where they straddle layers
+              (e.g. AWS is cloud compute with its own Trainium/Inferentia silicon).
+            </p>
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+              {INFRA_BANDS.map((band) => {
+                const members = filtered
+                  .filter((e) => e.infraBand === band.key)
+                  .sort((a, b) => b.leadershipScore - a.leadershipScore);
                 return (
-                  <div className="mt-4 rounded-md border border-dashed border-[#d7ddd1] bg-transparent p-3 dark:border-zinc-700">
-                    <h3 className="text-sm font-semibold text-[#18201b] dark:text-zinc-100">Other / cross-layer exposure</h3>
-                    <p className="mt-1 text-xs leading-5 text-[#66705f] dark:text-zinc-500">
-                      Tracked here for their infrastructure exposure but not owned to a single layer — typically
-                      data, application or model players whose infra role is incidental rather than primary.
-                    </p>
-                    <div className="mt-3 flex flex-wrap gap-1.5">
-                      {other.map((e) => (
+                  <div key={band.key} className="rounded-md border border-[#e2e7dc] bg-[#fbfcf8] p-3 dark:border-zinc-800 dark:bg-zinc-950/40">
+                    <h3 className="text-sm font-semibold text-[#18201b] dark:text-zinc-100">{band.label}</h3>
+                    <p className="mt-1 text-xs leading-5 text-[#66705f] dark:text-zinc-500">{band.note}</p>
+                    <div className="mt-3 space-y-1.5">
+                      {members.length ? members.map((e) => (
                         <button
                           key={e.id}
                           type="button"
                           onClick={() => setSelectedId(e.id)}
-                          className={`rounded border px-2 py-1 text-xs transition-colors ${
+                          className={`flex w-full items-center justify-between gap-2 rounded border px-2 py-1 text-left text-xs transition-colors ${
                             e.id === selectedEntity.id
                               ? "border-[#192319] bg-[#eef2e8] dark:border-white dark:bg-zinc-900"
                               : "border-[#dfe4da] hover:bg-[#eef2e8] dark:border-zinc-800 dark:hover:bg-zinc-900"
                           }`}
                         >
-                          {e.name}
+                          <span className="font-medium text-[#18201b] dark:text-zinc-100">{e.name}</span>
+                          {e.infraBandSecondary && (
+                            <span className="rounded bg-[#e8ede2] px-1.5 py-0.5 text-[10px] text-[#4d574b] dark:bg-zinc-800 dark:text-zinc-400">
+                              +{INFRA_BAND_LABEL[e.infraBandSecondary]}
+                            </span>
+                          )}
                         </button>
-                      ))}
+                      )) : <span className="text-xs text-[#697362] dark:text-zinc-500">No tracked entity in this layer.</span>}
                     </div>
                   </div>
                 );
-              })()}
-            </Panel>
-          </section>
-        )}
-
-        <section id="leaderboard" className="mt-6 grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
-          <Panel title="Category-aware leaderboard">
-            <div className="mb-3 flex flex-wrap items-center gap-3">
-              <div className="relative flex-1 min-w-[180px]">
-                <span className="pointer-events-none absolute inset-y-0 left-2.5 flex items-center text-[#697362] dark:text-zinc-500">
-                  <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8">
-                    <circle cx="6.5" cy="6.5" r="5" /><path d="M11 11l3 3" strokeLinecap="round" />
-                  </svg>
-                </span>
-                <input
-                  type="search"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Filter by name or role…"
-                  className="w-full rounded-md border border-[#d7ddd1] bg-[#fbfcf8] py-1.5 pl-8 pr-3 text-xs text-[#18201b] placeholder:text-[#697362] focus:outline-none focus:ring-1 focus:ring-[#192319] dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:placeholder:text-zinc-500 dark:focus:ring-zinc-400"
-                />
-              </div>
-              <span className="whitespace-nowrap text-[11px] text-[#697362] dark:text-zinc-500">
-                {filtered.length} vendor{filtered.length !== 1 ? "s" : ""}
-                {searchQuery.trim() ? ` matching "${searchQuery.trim()}"` : ""}
-                {" "}· hover for score history
-              </span>
+              })}
             </div>
-            {category === "all" && (
-              <p className="mb-3 rounded-md border border-emerald-200 bg-emerald-50/60 px-3 py-1.5 text-[11px] leading-4 text-emerald-900/80 dark:border-emerald-900/50 dark:bg-emerald-950/20 dark:text-emerald-200/70">
-                <span className="font-semibold">Grouped by layer.</span> Vendors are ranked only within their own layer — platforms against platforms, models against models. No cross-layer composite ranking is shown: the layers measure different things, so a single all-market ordering would mislead.
-              </p>
-            )}
-            {categoryRoles.length > 0 && (
-              <p className="mb-3 rounded-md border border-sky-200 bg-sky-50/60 px-3 py-1.5 text-[11px] leading-4 text-sky-900/80 dark:border-sky-900/50 dark:bg-sky-950/20 dark:text-sky-200/70">
-                <span className="font-semibold">AI-scoped to the {selectedOption.label} lens.</span> Multi-role giants are ranked by their score <em>in this role</em>, not their global composite — so e.g. Microsoft appears here on its first-party model strength, not its platform score. Rows tagged <span className="rounded bg-sky-100 px-1 py-0.5 text-[9px] font-semibold uppercase text-sky-700 dark:bg-sky-900/50 dark:text-sky-300">role-scoped</span> are showing a role-specific number.
-              </p>
-            )}
-            <div className="overflow-x-auto">
-              <table className="min-w-[1100px] text-left text-sm">
-                <thead className="border-b border-[#e7ebe2] text-[11px] uppercase tracking-wide text-[#697362] dark:border-zinc-800 dark:text-zinc-500">
-                  <tr>
-                    <th className="py-2 pr-3" title="Rank within the current layer or category lens only — not an all-market position">#</th>
-                    <th className="py-2 pr-3">Entity</th>
-                    <th className="py-2 pr-3">Role</th>
-                    <th className="py-2 pr-3 text-right" title="Leadership score in the active role context — distribution, product, ecosystem, execution">Leadership</th>
-                    <th className="py-2 pr-3 text-right" title="R&D velocity, product launch cadence, differentiation vs peers">Innovation</th>
-                    <th className="py-2 pr-3 text-right" title="Enterprise readiness: compliance, SLAs, integrations, governance posture">Readiness</th>
-                    <th className="py-2 pr-3 text-right" title="Trailing momentum across news, product and partnership signals">Momentum</th>
-                    <th className="py-2 pr-3 text-right" title="Ecosystem reach — integrations, partnerships, platform embeddedness">Reach</th>
-                    <th className="py-2 pr-3 text-right" title="Directional share of named enterprise AI usage">Usage%</th>
-                    <th className="py-2 pr-3" title="Operational risk profile (concentration, lock-in, counterparty)">Risk</th>
-                    <th className="py-2 text-right" title="Analyst confidence in the evidence base">Conf%</th>
-                    <th className="py-2 pl-1">Watch</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[#edf0ea] dark:divide-zinc-800">
-                  {category === "all"
-                    ? groupedSections.map(({ def, members }) => (
+            {(() => {
+              const banded = new Set(INFRA_BANDS.map((b) => b.key));
+              const other = filtered.filter((e) => !e.infraBand || !banded.has(e.infraBand));
+              if (!other.length) return null;
+              return (
+                <div className="mt-4 rounded-md border border-dashed border-[#d7ddd1] bg-transparent p-3 dark:border-zinc-700">
+                  <h3 className="text-sm font-semibold text-[#18201b] dark:text-zinc-100">Other / cross-layer exposure</h3>
+                  <p className="mt-1 text-xs leading-5 text-[#66705f] dark:text-zinc-500">
+                    Tracked here for their infrastructure exposure but not owned to a single layer — typically
+                    data, application or model players whose infra role is incidental rather than primary.
+                  </p>
+                  <div className="mt-3 flex flex-wrap gap-1.5">
+                    {other.map((e) => (
+                      <button
+                        key={e.id}
+                        type="button"
+                        onClick={() => setSelectedId(e.id)}
+                        className={`rounded border px-2 py-1 text-xs transition-colors ${
+                          e.id === selectedEntity.id
+                            ? "border-[#192319] bg-[#eef2e8] dark:border-white dark:bg-zinc-900"
+                            : "border-[#dfe4da] hover:bg-[#eef2e8] dark:border-zinc-800 dark:hover:bg-zinc-900"
+                        }`}
+                      >
+                        {e.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              );
+            })()}
+          </Panel>
+        </section>
+      )}
+
+      {/* ── Leaderboard — full width, no side panel ──────────────────────────── */}
+      <section id="leaderboard" className="mt-6">
+        <Panel title="Category-aware leaderboard">
+          <div className="mb-3 flex flex-wrap items-center gap-3">
+            <div className="relative flex-1 min-w-[180px]">
+              <span className="pointer-events-none absolute inset-y-0 left-2.5 flex items-center text-[#697362] dark:text-zinc-500">
+                <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8">
+                  <circle cx="6.5" cy="6.5" r="5" /><path d="M11 11l3 3" strokeLinecap="round" />
+                </svg>
+              </span>
+              <input
+                type="search"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Filter by name or role…"
+                className="w-full rounded-md border border-[#d7ddd1] bg-[#fbfcf8] py-1.5 pl-8 pr-3 text-xs text-[#18201b] placeholder:text-[#697362] focus:outline-none focus:ring-1 focus:ring-[#192319] dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:placeholder:text-zinc-500 dark:focus:ring-zinc-400"
+              />
+            </div>
+            <span className="whitespace-nowrap text-[11px] text-[#697362] dark:text-zinc-500">
+              {filtered.length} vendor{filtered.length !== 1 ? "s" : ""}
+              {searchQuery.trim() ? ` matching "${searchQuery.trim()}"` : ""}
+              {" "}· hover for score history
+            </span>
+          </div>
+          {category === "all" && (
+            <p className="mb-3 rounded-md border border-emerald-200 bg-emerald-50/60 px-3 py-1.5 text-[11px] leading-4 text-emerald-900/80 dark:border-emerald-900/50 dark:bg-emerald-950/20 dark:text-emerald-200/70">
+              <span className="font-semibold">Grouped by layer.</span> Vendors are ranked only within their own layer — platforms against platforms, models against models. Each section shows the top 2 by default — click <span className="font-semibold">Show all</span> to expand any layer.
+            </p>
+          )}
+          {categoryRoles.length > 0 && (
+            <p className="mb-3 rounded-md border border-sky-200 bg-sky-50/60 px-3 py-1.5 text-[11px] leading-4 text-sky-900/80 dark:border-sky-900/50 dark:bg-sky-950/20 dark:text-sky-200/70">
+              <span className="font-semibold">AI-scoped to the {selectedOption.label} lens.</span> Multi-role giants are ranked by their score <em>in this role</em>, not their global composite. Rows tagged <span className="rounded bg-sky-100 px-1 py-0.5 text-[9px] font-semibold uppercase text-sky-700 dark:bg-sky-900/50 dark:text-sky-300">role-scoped</span> are showing a role-specific number.
+            </p>
+          )}
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead className="border-b border-[#e7ebe2] text-[11px] uppercase tracking-wide text-[#697362] dark:border-zinc-800 dark:text-zinc-500">
+                <tr>
+                  <th className="py-2 pr-3" title="Rank within the current layer or category lens only">#</th>
+                  <th className="py-2 pr-3">Entity</th>
+                  <th className="py-2 pr-3">Role</th>
+                  <th className="py-2 pr-3 text-right" title="Leadership score in the active role context">Leadership</th>
+                  <th className="py-2 pr-3 text-right" title="R&D velocity, product launch cadence, differentiation vs peers">Innovation</th>
+                  <th className="py-2 pr-3 text-right" title="Enterprise readiness: compliance, SLAs, integrations, governance posture">Readiness</th>
+                  <th className="py-2 pr-3 text-right" title="Trailing momentum across news, product and partnership signals">Momentum</th>
+                  <th className="py-2 pr-3 text-right" title="Ecosystem reach — integrations, partnerships, platform embeddedness">Reach</th>
+                  <th className="py-2 pr-3 text-right" title="Directional share of named enterprise AI usage">Usage%</th>
+                  <th className="py-2 pr-3" title="Operational risk profile (concentration, lock-in, counterparty)">Risk</th>
+                  <th className="py-2 text-right" title="Analyst confidence in the evidence base">Conf%</th>
+                  <th className="py-2 pl-1">Watch</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#edf0ea] dark:divide-zinc-800">
+                {category === "all"
+                  ? groupedSections.map(({ def, members }) => {
+                      const isExpanded = expandedSections.has(def.role);
+                      const hasMore = members.length > 2;
+                      const displayMembers = isExpanded ? members : members.slice(0, 2);
+                      return (
                         <Fragment key={def.role}>
                           <tr>
                             <td colSpan={12} className="bg-[#071827] px-3 py-2.5">
@@ -571,148 +582,166 @@ export default function QueryV2Client({ entities, winningByLayer }: { entities: 
                               <span className="ml-3 text-[11px] text-zinc-400">{def.note} Ranked within this layer only.</span>
                             </td>
                           </tr>
-                          {members.map((entity, index) => renderEntityRow(entity, index, [def.role]))}
+                          {displayMembers.map((entity, index) => renderEntityRow(entity, index, [def.role]))}
+                          {hasMore && (
+                            <tr className="border-none">
+                              <td colSpan={12} className="py-1.5 px-3 bg-[#f8faf6] dark:bg-zinc-900/40">
+                                <button
+                                  type="button"
+                                  onClick={() => toggleSection(def.role)}
+                                  className="inline-flex items-center gap-1.5 text-[11px] font-medium text-[#596151] hover:text-[#18201b] dark:text-zinc-400 dark:hover:text-zinc-100 transition-colors"
+                                >
+                                  {isExpanded ? (
+                                    <>
+                                      <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.8" className="rotate-180">
+                                        <path d="M1 3l4 4 4-4" strokeLinecap="round" strokeLinejoin="round" />
+                                      </svg>
+                                      Collapse
+                                    </>
+                                  ) : (
+                                    <>
+                                      <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.8">
+                                        <path d="M1 3l4 4 4-4" strokeLinecap="round" strokeLinejoin="round" />
+                                      </svg>
+                                      Show all {members.length} — {members.length - 2} more
+                                    </>
+                                  )}
+                                </button>
+                              </td>
+                            </tr>
+                          )}
                         </Fragment>
-                      ))
-                    : filtered.map((entity, index) => renderEntityRow(entity, index, categoryRoles))}
-                </tbody>
-              </table>
-            </div>
-          </Panel>
-          {/* Hover card — rendered outside the table so it's never clipped */}
-          {hoverState && (
-            <VendorScoreHoverCard
-              vendorId={hoverState.id}
-              entity={filtered.find((e) => e.id === hoverState.id) ?? null}
-              anchorY={hoverState.y}
-              anchorX={hoverState.x}
-              onMouseEnter={handleCardEnter}
-              onMouseLeave={handleCardLeave}
-            />
-          )}
+                      );
+                    })
+                  : filtered.map((entity, index) => renderEntityRow(entity, index, categoryRoles))}
+              </tbody>
+            </table>
+          </div>
+        </Panel>
+        {/* Hover card — rendered outside the table so it's never clipped */}
+        {hoverState && (
+          <VendorScoreHoverCard
+            vendorId={hoverState.id}
+            entity={filtered.find((e) => e.id === hoverState.id) ?? null}
+            anchorY={hoverState.y}
+            anchorX={hoverState.x}
+            onMouseEnter={handleCardEnter}
+            onMouseLeave={handleCardLeave}
+          />
+        )}
+      </section>
 
-          <Panel title="Entity detail">
-            <div className="space-y-4">
-              <div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <h3 className="text-lg font-semibold text-[#18201b] dark:text-zinc-100">{selectedEntity.name}</h3>
-                  <OwnershipBadge ownershipType={selectedEntity.ownership} compact />
-                  <span className="rounded border border-[#d8ded0] px-1.5 py-0.5 text-xs text-[#495344] dark:border-zinc-700 dark:text-zinc-400">{selectedEntity.evidenceGrade}</span>
-                </div>
-                <div className="mt-2 flex flex-wrap gap-1">
-                  {roleBadge(selectedEntity.primaryRole)}
-                  {selectedEntity.secondaryRoles.map(roleBadge)}
-                </div>
+      {/* ── Entity detail — below the ranking table ──────────────────────────── */}
+      <section id="entity-detail" className="mt-5">
+        <Panel title="Entity detail">
+          {/* Pulsing selection indicator */}
+          <div className="mb-4 flex items-center gap-2 rounded-md border border-emerald-200 bg-emerald-50/60 px-3 py-2 dark:border-emerald-900/50 dark:bg-emerald-950/20">
+            <span className="animate-pulse text-emerald-500 text-base leading-none">▶</span>
+            <span className="text-xs font-semibold text-emerald-800 dark:text-emerald-300">{selectedEntity.name}</span>
+            <span className="text-xs text-emerald-700/60 dark:text-emerald-400/60">— click any row above to change selection</span>
+          </div>
+          <div className="space-y-4">
+            <div>
+              <div className="flex flex-wrap items-center gap-2">
+                <h3 className="text-lg font-semibold text-[#18201b] dark:text-zinc-100">{selectedEntity.name}</h3>
+                <OwnershipBadge ownershipType={selectedEntity.ownership} compact />
+                <span className="rounded border border-[#d8ded0] px-1.5 py-0.5 text-xs text-[#495344] dark:border-zinc-700 dark:text-zinc-400">{selectedEntity.evidenceGrade}</span>
               </div>
-              <p className="text-sm leading-6 text-[#2f392f] dark:text-zinc-300">{selectedEntity.cioInterpretation}</p>
-              {selectedEntity.roleScores && <RoleScoreBreakdown entity={selectedEntity} />}
-              <DetailList title="Models/products owned" items={selectedEntity.modelsOwned} empty="No material first-party model disclosed in this view." />
-              <DetailList title="Hosted third-party models" items={selectedEntity.hostedThirdParty} />
-              <DetailList title="Infrastructure exposure" items={selectedEntity.infrastructureExposure} />
-              <DetailList title="Investor relationships" items={selectedEntity.investorRelationships} />
-              <DetailList title="Hardware dependencies" items={selectedEntity.hardwareDependencies} />
-              <div className="rounded-md border border-[#e2e7dc] bg-[#fbfcf8] p-3 text-xs leading-5 text-[#596151] dark:border-zinc-800 dark:bg-zinc-950/40 dark:text-zinc-400">
-                <span className="font-semibold text-[#18201b] dark:text-zinc-100">Data caveat: </span>
-                {selectedEntity.dataCaveats}
+              <div className="mt-2 flex flex-wrap gap-1">
+                {roleBadge(selectedEntity.primaryRole)}
+                {selectedEntity.secondaryRoles.map(roleBadge)}
               </div>
             </div>
-          </Panel>
-        </section>
+            <p className="text-sm leading-6 text-[#2f392f] dark:text-zinc-300">{selectedEntity.cioInterpretation}</p>
+            {selectedEntity.roleScores && <RoleScoreBreakdown entity={selectedEntity} />}
+            <DetailList title="Models/products owned" items={selectedEntity.modelsOwned} empty="No material first-party model disclosed in this view." />
+            <DetailList title="Hosted third-party models" items={selectedEntity.hostedThirdParty} />
+            <DetailList title="Infrastructure exposure" items={selectedEntity.infrastructureExposure} />
+            <DetailList title="Investor relationships" items={selectedEntity.investorRelationships} />
+            <DetailList title="Hardware dependencies" items={selectedEntity.hardwareDependencies} />
+            <div className="rounded-md border border-[#e2e7dc] bg-[#fbfcf8] p-3 text-xs leading-5 text-[#596151] dark:border-zinc-800 dark:bg-zinc-950/40 dark:text-zinc-400">
+              <span className="font-semibold text-[#18201b] dark:text-zinc-100">Data caveat: </span>
+              {selectedEntity.dataCaveats}
+            </div>
+          </div>
+        </Panel>
+      </section>
 
-        <section id="layer-winners" className="mt-6">
-          <Panel title="Who is winning by layer">
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-              {winningByLayer.map((layer) => (
-                <div key={layer.title} className="border-l border-[#d6dccf] pl-4 dark:border-zinc-800">
-                  <h3 className="text-sm font-semibold text-[#18201b] dark:text-zinc-100">{layer.title}</h3>
-                  <p className="mt-1 text-xs leading-5 text-[#66705f] dark:text-zinc-500">{layer.note}</p>
-                  <div className="mt-3 flex flex-wrap gap-1.5">
-                    {layer.names.map((name) => (
-                      <span key={name} className="rounded border border-[#dfe4da] px-2 py-1 text-xs dark:border-zinc-800">{name}</span>
-                    ))}
-                  </div>
+      <section id="usage-share" className="mt-6 grid gap-5 lg:grid-cols-[0.95fr_1.05fr]">
+        <Panel title="Share of named enterprise AI usage">
+          <p className="mb-4 text-xs leading-5 text-[#5f685a] dark:text-zinc-400">
+            Directional, evidence-labelled estimate. Not audited global market share.
+            The bars below re-weight the original usage-share idea to the selected role category.
+          </p>
+          <div className="space-y-3">
+            {filtered.slice(0, 10).map((entity) => (
+              <div key={entity.id}>
+                <div className="mb-1 flex items-center justify-between gap-3 text-sm">
+                  <span className="font-medium"><VendorNameWithOwnership name={entity.name} ownershipType={entity.ownership} /></span>
+                  <span className="font-mono">{entity.usageShare.toFixed(1)}%</span>
                 </div>
-              ))}
-            </div>
-          </Panel>
-        </section>
-
-        <section id="usage-share" className="mt-6 grid gap-5 lg:grid-cols-[0.95fr_1.05fr]">
-          <Panel title="Share of named enterprise AI usage">
-            <p className="mb-4 text-xs leading-5 text-[#5f685a] dark:text-zinc-400">
-              Directional, evidence-labelled estimate. Not audited global market share.
-              The bars below re-weight the original usage-share idea to the selected role category.
-            </p>
-            <div className="space-y-3">
-              {filtered.slice(0, 10).map((entity) => (
-                <div key={entity.id}>
-                  <div className="mb-1 flex items-center justify-between gap-3 text-sm">
-                    <span className="font-medium"><VendorNameWithOwnership name={entity.name} ownershipType={entity.ownership} /></span>
-                    <span className="font-mono">{entity.usageShare.toFixed(1)}%</span>
-                  </div>
-                  <div className="h-1.5 overflow-hidden rounded-full bg-[#e8ede2] dark:bg-zinc-800">
-                    <div className="h-full rounded-full bg-[#2f5d50] dark:bg-emerald-400" style={{ width: `${Math.max(3, (entity.usageShare / maxShare) * 100)}%` }} />
-                  </div>
+                <div className="h-1.5 overflow-hidden rounded-full bg-[#e8ede2] dark:bg-zinc-800">
+                  <div className="h-full rounded-full bg-[#2f5d50] dark:bg-emerald-400" style={{ width: `${Math.max(3, (entity.usageShare / maxShare) * 100)}%` }} />
                 </div>
-              ))}
-            </div>
-          </Panel>
+              </div>
+            ))}
+          </div>
+        </Panel>
 
-          <Panel title="Category share estimate">
-            <div className="space-y-3">
-              {normalizedShare.slice(0, 8).map(({ entity, share }) => (
-                <div key={entity.id} className="flex items-center justify-between gap-3 border-b border-[#edf0ea] pb-2 text-sm last:border-0 dark:border-zinc-800">
-                  <div>
-                    <div className="font-medium text-[#18201b] dark:text-zinc-100">{entity.name}</div>
-                    <div className="mt-1 text-xs text-[#697362] dark:text-zinc-500">{entity.primaryRole}</div>
-                  </div>
-                  <div className="font-mono text-lg font-semibold">{share.toFixed(1)}%</div>
+        <Panel title="Category share estimate">
+          <div className="space-y-3">
+            {normalizedShare.slice(0, 8).map(({ entity, share }) => (
+              <div key={entity.id} className="flex items-center justify-between gap-3 border-b border-[#edf0ea] pb-2 text-sm last:border-0 dark:border-zinc-800">
+                <div>
+                  <div className="font-medium text-[#18201b] dark:text-zinc-100">{entity.name}</div>
+                  <div className="mt-1 text-xs text-[#697362] dark:text-zinc-500">{entity.primaryRole}</div>
                 </div>
-              ))}
-            </div>
-          </Panel>
-        </section>
+                <div className="font-mono text-lg font-semibold">{share.toFixed(1)}%</div>
+              </div>
+            ))}
+          </div>
+        </Panel>
+      </section>
 
-        <section id="atlas" className="mt-6">
-          <Panel title="Enhance x Innovate role map">
-            <p className="mb-4 text-xs leading-5 text-[#5f685a] dark:text-zinc-400">
-              X-axis is innovation / market momentum. Y-axis is enterprise readiness / execution.
-              Bubble size is ecosystem reach; colour is primary category; outline is public/private/subsidiary; arrow shows movement since prior snapshot.
-            </p>
-            <RoleScatter entities={filtered} selectedId={selectedEntity.id} onSelect={setSelectedId} />
-          </Panel>
-        </section>
+      <section id="atlas" className="mt-6">
+        <Panel title="Enhance x Innovate role map">
+          <p className="mb-4 text-xs leading-5 text-[#5f685a] dark:text-zinc-400">
+            X-axis is innovation / market momentum. Y-axis is enterprise readiness / execution.
+            Bubble size is ecosystem reach; colour is primary category; outline is public/private/subsidiary; arrow shows movement since prior snapshot.
+          </p>
+          <RoleScatter entities={filtered} selectedId={selectedEntity.id} onSelect={setSelectedId} />
+        </Panel>
+      </section>
 
-        <section id="movers" className="mt-6">
-          <Panel title="Market movers by signal type">
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
-              <MoverColumn title="Rising by leadership score" entities={movers.leadership} pick={(entity) => entity.deltas.leadership} />
-              <MoverColumn title="Rising by ecosystem reach" entities={movers.reach} pick={(entity) => entity.deltas.reach} />
-              <MoverColumn title="Rising by adoption" entities={movers.adoption} pick={(entity) => entity.deltas.adoption} />
-              <MoverColumn title="Rising by infrastructure exposure" entities={movers.infrastructure} pick={(entity) => entity.deltas.infrastructure} />
-              <MoverColumn title="Falling / risk increasing" entities={movers.risk} pick={(entity) => entity.deltas.risk} tone="risk" />
-            </div>
-          </Panel>
-        </section>
+      <section id="movers" className="mt-6">
+        <Panel title="Market movers by signal type">
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+            <MoverColumn title="Rising by leadership score" entities={movers.leadership} pick={(entity) => entity.deltas.leadership} />
+            <MoverColumn title="Rising by ecosystem reach" entities={movers.reach} pick={(entity) => entity.deltas.reach} />
+            <MoverColumn title="Rising by adoption" entities={movers.adoption} pick={(entity) => entity.deltas.adoption} />
+            <MoverColumn title="Rising by infrastructure exposure" entities={movers.infrastructure} pick={(entity) => entity.deltas.infrastructure} />
+            <MoverColumn title="Falling / risk increasing" entities={movers.risk} pick={(entity) => entity.deltas.risk} tone="risk" />
+          </div>
+        </Panel>
+      </section>
 
-        <section id="models" className="mt-6">
-          <Panel title="Commercial models by vendor">
-            <p className="mb-4 text-xs leading-5 text-[#5f685a] dark:text-zinc-400">
-              Source-backed model availability should be grouped by ownership and hosting route. Hosted third-party models keep the original owner and should not be reattributed to the platform that hosts them.
-            </p>
-            <div className="grid gap-4 lg:grid-cols-2">
-              {MODEL_GROUPS.map((group) => (
-                <div key={group.title} className="rounded-md border border-[#e2e7dc] bg-[#fbfcf8] p-3 dark:border-zinc-800 dark:bg-zinc-950/40">
-                  <h3 className="text-sm font-semibold text-[#18201b] dark:text-zinc-100">{group.title}</h3>
-                  <ul className="mt-3 space-y-2 text-xs leading-5 text-[#596151] dark:text-zinc-400">
-                    {group.items.map((item) => <li key={item}>- {item}</li>)}
-                  </ul>
-                </div>
-              ))}
-            </div>
-          </Panel>
-        </section>
-      </div>
+      <section id="models" className="mt-6">
+        <Panel title="Commercial models by vendor">
+          <p className="mb-4 text-xs leading-5 text-[#5f685a] dark:text-zinc-400">
+            Source-backed model availability should be grouped by ownership and hosting route. Hosted third-party models keep the original owner and should not be reattributed to the platform that hosts them.
+          </p>
+          <div className="grid gap-4 lg:grid-cols-2">
+            {MODEL_GROUPS.map((group) => (
+              <div key={group.title} className="rounded-md border border-[#e2e7dc] bg-[#fbfcf8] p-3 dark:border-zinc-800 dark:bg-zinc-950/40">
+                <h3 className="text-sm font-semibold text-[#18201b] dark:text-zinc-100">{group.title}</h3>
+                <ul className="mt-3 space-y-2 text-xs leading-5 text-[#596151] dark:text-zinc-400">
+                  {group.items.map((item) => <li key={item}>- {item}</li>)}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </Panel>
+      </section>
     </div>
   );
 }
@@ -730,8 +759,6 @@ function DetailList({ title, items, empty = "None disclosed in this view." }: { 
   );
 }
 
-// AI-market role-score breakdown — shows WHY one composite misleads for a
-// multi-role giant. Sorted by role leadership, highest first.
 function RoleScoreBreakdown({ entity }: { entity: Entity }) {
   const rows = Object.entries(entity.roleScores ?? {}) as Array<[Role, RoleScore]>;
   if (!rows.length) return null;
@@ -782,9 +809,6 @@ function MoverColumn({ title, entities, pick, tone = "gain" }: { title: string; 
   );
 }
 
-// ── Score helpers ──────────────────────────────────────────────────────────
-
-/** Map a 0-100 score to a tier class for colour-coding. */
 function scoreGrade(value: number): "top" | "mid" | "low" {
   if (value >= 80) return "top";
   if (value >= 60) return "mid";
@@ -808,8 +832,6 @@ function ScoreCell({ value, delta, tier }: { value: number; delta?: number; tier
   );
 }
 
-// ── Vendor Score Hover Card ────────────────────────────────────────────────
-
 interface VendorScoreHoverCardProps {
   vendorId: string;
   entity: Entity | null;
@@ -824,7 +846,6 @@ function VendorScoreHoverCard({ vendorId, entity, anchorY, anchorX, onMouseEnter
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // Return cached result immediately if available
     const cached = snapshotCache.get(vendorId);
     if (cached) { setSnapshots(cached); return; }
 
@@ -843,16 +864,13 @@ function VendorScoreHoverCard({ vendorId, entity, anchorY, anchorX, onMouseEnter
     return () => { cancelled = true; };
   }, [vendorId]);
 
-  // Card dimensions
   const CARD_W = 300;
   const CARD_H = 180;
   const MARGIN = 12;
 
-  // Clamp to viewport
   const viewportH = typeof window !== "undefined" ? window.innerHeight : 800;
   const viewportW = typeof window !== "undefined" ? window.innerWidth : 1400;
   const cardTop = Math.min(Math.max(MARGIN, anchorY - CARD_H / 2), viewportH - CARD_H - MARGIN);
-  // Prefer right of the anchor; fall back to left if too close to edge
   const cardLeft = anchorX + 12 + CARD_W > viewportW - MARGIN
     ? anchorX - CARD_W - 12
     : anchorX + 12;
@@ -867,7 +885,6 @@ function VendorScoreHoverCard({ vendorId, entity, anchorY, anchorX, onMouseEnter
       style={{ top: cardTop, left: cardLeft, width: CARD_W }}
       className="fixed z-50 rounded-lg border border-[#d7ddd1] bg-white shadow-xl dark:border-zinc-700 dark:bg-[#0d1f2d] pointer-events-auto"
     >
-      {/* Header */}
       <div className="border-b border-[#e7ebe2] px-4 py-2.5 dark:border-zinc-800">
         <div className="flex items-center justify-between gap-2">
           <span className="text-sm font-semibold text-[#18201b] dark:text-zinc-100">{entity.name}</span>
@@ -876,7 +893,6 @@ function VendorScoreHoverCard({ vendorId, entity, anchorY, anchorX, onMouseEnter
         <div className="mt-0.5 text-[11px] text-[#697362] dark:text-zinc-500">{entity.primaryRole}</div>
       </div>
 
-      {/* Score mini-grid */}
       <div className="grid grid-cols-3 gap-px border-b border-[#e7ebe2] bg-[#e7ebe2] dark:border-zinc-800 dark:bg-zinc-800">
         {[
           { label: "Leadership", value: entity.leadershipScore },
@@ -895,7 +911,6 @@ function VendorScoreHoverCard({ vendorId, entity, anchorY, anchorX, onMouseEnter
         ))}
       </div>
 
-      {/* Sparkline area */}
       <div className="px-4 py-3">
         <div className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-[#697362] dark:text-zinc-500">
           Score history
@@ -917,8 +932,6 @@ function VendorScoreHoverCard({ vendorId, entity, anchorY, anchorX, onMouseEnter
     </div>
   );
 }
-
-// ── Score sparkline (SVG, no library) ─────────────────────────────────────
 
 function ScoreSparkline({ snapshots }: { snapshots: SnapshotPoint[] }) {
   const W = 268;
@@ -945,7 +958,6 @@ function ScoreSparkline({ snapshots }: { snapshots: SnapshotPoint[] }) {
   return (
     <div>
       <svg viewBox={`0 0 ${W} ${H}`} className="w-full overflow-visible">
-        {/* Gridline at mid-point */}
         {[minScore + scoreRange / 2].map((tick) => (
           <g key={tick}>
             <line
@@ -959,11 +971,8 @@ function ScoreSparkline({ snapshots }: { snapshots: SnapshotPoint[] }) {
             </text>
           </g>
         ))}
-        {/* Y-axis labels */}
         <text x={PAD.left - 3} y={yScale(maxScore) + 3.5} textAnchor="end" fontSize="8" fill="#94a3b8">{Math.round(maxScore)}</text>
         <text x={PAD.left - 3} y={yScale(minScore) + 3.5} textAnchor="end" fontSize="8" fill="#94a3b8">{Math.round(minScore)}</text>
-
-        {/* Area fill */}
         <defs>
           <linearGradient id={`sparkGrad-${snapshots[0].date}`} x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor={trendColour} stopOpacity="0.25" />
@@ -974,8 +983,6 @@ function ScoreSparkline({ snapshots }: { snapshots: SnapshotPoint[] }) {
           points={`${xScale(0)},${PAD.top + innerH} ${points} ${xScale(snapshots.length - 1)},${PAD.top + innerH}`}
           fill={`url(#sparkGrad-${snapshots[0].date})`}
         />
-
-        {/* Line */}
         <polyline
           points={points}
           fill="none"
@@ -984,17 +991,11 @@ function ScoreSparkline({ snapshots }: { snapshots: SnapshotPoint[] }) {
           strokeLinecap="round"
           strokeLinejoin="round"
         />
-
-        {/* First/last dots */}
         <circle cx={xScale(0)} cy={yScale(first.overallScore)} r="2.5" fill={trendColour} opacity="0.6" />
         <circle cx={xScale(snapshots.length - 1)} cy={yScale(last.overallScore)} r="3" fill={trendColour} />
-
-        {/* Date labels */}
         <text x={xScale(0)} y={H - 2} textAnchor="start" fontSize="8" fill="#94a3b8">{first.date.slice(5)}</text>
         <text x={xScale(snapshots.length - 1)} y={H - 2} textAnchor="end" fontSize="8" fill="#94a3b8">{last.date.slice(5)}</text>
       </svg>
-
-      {/* Trend summary */}
       <div className="mt-1 flex items-center justify-between text-[10px]">
         <span className="text-[#697362] dark:text-zinc-500">{snapshots.length} snapshots</span>
         <span className={trend > 0 ? "text-emerald-700 dark:text-emerald-400" : trend < 0 ? "text-rose-700 dark:text-rose-400" : "text-zinc-500"}>
