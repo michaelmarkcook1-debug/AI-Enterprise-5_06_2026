@@ -22,10 +22,12 @@ import {
   type CompetitiveTarget,
 } from "./competitive-targets";
 
-// ANTHROPIC_INTEL_MODEL overrides the model used for competitive monitoring.
-// Set to "claude-haiku-4-5" to cut cost ~75%; quality difference is minimal
-// for tier-1 vendors but noticeable for tier-2 whyItMatters commentary.
-const DEFAULT_MODEL = process.env.ANTHROPIC_INTEL_MODEL ?? process.env.ANTHROPIC_MODEL ?? "claude-sonnet-4-6";
+// News insight runs on the frontier model. The "why it matters" line is the
+// headline analyst voice on /news and the dashboard, so quality outweighs cost
+// here. Defaults to Opus 4.8 and intentionally does NOT fall back to the shared
+// ANTHROPIC_MODEL, so a global Sonnet/Haiku setting can't quietly downgrade news.
+// Override per-surface with ANTHROPIC_INTEL_MODEL to trade quality for cost.
+const DEFAULT_MODEL = process.env.ANTHROPIC_INTEL_MODEL ?? "claude-opus-4-8";
 const WEB_SEARCH_TOOL_TYPE = "web_search_20260209" as const;
 const MAX_SEARCHES_PER_VENDOR = 3;
 const LOOKBACK_DAYS = 14;
@@ -107,6 +109,11 @@ Truth-handling rules (non-negotiable):
 4. If nothing material happened in a dimension, OMIT findings for that dimension. Returning an empty findings array is acceptable.
 5. Use your ${MAX_SEARCHES_PER_VENDOR} web_search budget efficiently — one query per dimension at most.
 
+Analyst voice (this is the product's headline value, so do not phone it in):
+- "whyItMatters" must read like a senior Gartner/Forrester analyst brief, not a press recap. State the SO-WHAT for an enterprise buyer or a competing service provider: who gains leverage, what shifts in vendor selection, pricing power, switching cost or delivery risk, and what a service provider should DO about it next.
+- Be specific and falsifiable. Avoid filler ("this is significant", "could impact the market", "remains to be seen"). If the move is incremental, say so plainly rather than inflating it.
+- "summary" stays neutral and factual; the judgement lives in "whyItMatters".
+
 Always call the report_competitive_findings tool exactly once with your final list.`;
 }
 
@@ -148,16 +155,24 @@ async function monitorVendor(target: CompetitiveTarget, today: Date): Promise<Ve
 
   const todayIso = today.toISOString().slice(0, 10);
   try {
+    // Adaptive thinking + high effort: this is intelligence-sensitive analyst
+    // work and effort is what makes Opus 4.8 reason through the "so what" rather
+    // than summarise. max_tokens is raised to leave headroom for the (hidden)
+    // thinking pass on top of the structured findings. The `as unknown as` cast
+    // mirrors the web_search tool cast below — the pinned SDK types lag these GA
+    // params (thinking adaptive / output_config.effort); the API accepts them.
     const message = await client.messages.create({
       model: DEFAULT_MODEL,
-      max_tokens: 3072,
+      max_tokens: 8000,
+      thinking: { type: "adaptive" },
+      output_config: { effort: "high" },
       system: systemPrompt(),
       tools: [
         { type: WEB_SEARCH_TOOL_TYPE, name: "web_search", max_uses: MAX_SEARCHES_PER_VENDOR } as unknown as Anthropic.Tool,
         REPORT_SCHEMA as unknown as Anthropic.Tool,
       ],
       messages: [{ role: "user", content: userPrompt(target, todayIso) }],
-    });
+    } as unknown as Anthropic.MessageCreateParamsNonStreaming);
 
     const searchesUsed = (message.usage as { server_tool_use?: { web_search_requests?: number } }).server_tool_use?.web_search_requests ?? 0;
     const tokensIn  = message.usage.input_tokens;
@@ -204,6 +219,8 @@ const SONNET_PRICE_IN  = 3.00 / 1_000_000;
 const SONNET_PRICE_OUT = 15.00 / 1_000_000;
 const HAIKU_PRICE_IN   = 0.80 / 1_000_000;
 const HAIKU_PRICE_OUT  = 4.00 / 1_000_000;
+const OPUS_PRICE_IN    = 5.00 / 1_000_000;
+const OPUS_PRICE_OUT   = 25.00 / 1_000_000;
 const WEB_SEARCH_PRICE = 0.01; // per search request
 
 export interface MonitorRunResult {
@@ -238,10 +255,10 @@ export async function runCompetitiveIntelMonitor(
   const totalTokensOut   = results.reduce((sum, r) => sum + r.tokensOut, 0);
   const vendorsWithFindings = results.filter((r) => r.findings.length > 0).length;
 
-  // Estimate cost based on which model was used.
-  const isHaiku = DEFAULT_MODEL.includes("haiku");
-  const priceIn  = isHaiku ? HAIKU_PRICE_IN  : SONNET_PRICE_IN;
-  const priceOut = isHaiku ? HAIKU_PRICE_OUT : SONNET_PRICE_OUT;
+  // Estimate cost based on which model was used (Haiku / Opus / default Sonnet).
+  const m = DEFAULT_MODEL.toLowerCase();
+  const priceIn  = m.includes("haiku") ? HAIKU_PRICE_IN  : m.includes("opus") ? OPUS_PRICE_IN  : SONNET_PRICE_IN;
+  const priceOut = m.includes("haiku") ? HAIKU_PRICE_OUT : m.includes("opus") ? OPUS_PRICE_OUT : SONNET_PRICE_OUT;
   const estimatedCostUsd = parseFloat(
     ((totalTokensIn * priceIn) + (totalTokensOut * priceOut) + (totalSearches * WEB_SEARCH_PRICE)).toFixed(4),
   );

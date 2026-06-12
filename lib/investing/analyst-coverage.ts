@@ -20,7 +20,11 @@ import { hasLLM } from "../agents/llm-client";
 import { INVESTMENT_PROVIDERS } from "./seed";
 import type { InvestmentProviderProfile } from "./types";
 
-const DEFAULT_MODEL = process.env.ANTHROPIC_MODEL ?? "claude-sonnet-4-6";
+// Analyst coverage synthesises how Gartner/Forrester/IDC/HFS/NelsonHall/ISG
+// position a vendor — the core "expert insight" surface — so it runs on the
+// frontier model. Dedicated knob (not the shared ANTHROPIC_MODEL) defaulting to
+// Opus 4.8 so a global Sonnet/Haiku setting can't quietly downgrade it.
+const DEFAULT_MODEL = process.env.ANTHROPIC_ANALYST_MODEL ?? "claude-opus-4-8";
 
 /* ─── Curated analyst-house manifest ────────────────────────────── */
 
@@ -104,9 +108,16 @@ async function fetchCoverageForProvider(
   try {
     const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! });
     const houseList = ANALYST_HOUSES.map((h) => `  - ${h.id}: ${h.name} (${h.publicRoot})`).join("\n");
+    // Adaptive thinking + high effort so Opus 4.8 actually reasons about how each
+    // house positions the vendor rather than skimming the page. max_tokens raised
+    // to leave room for the (hidden) thinking pass plus up to six house items.
+    // `as unknown as ...` cast mirrors the web_search tool cast — the pinned SDK
+    // types lag these GA params; the API accepts them.
     const response = await client.messages.create({
       model: DEFAULT_MODEL,
-      max_tokens: 2500,
+      max_tokens: 8000,
+      thinking: { type: "adaptive" },
+      output_config: { effort: "high" },
       tools: [{ type: "web_search_20260209", name: "web_search", max_uses: 6 } as never],
       messages: [{
         role: "user",
@@ -135,9 +146,10 @@ Return ONLY a JSON array, no markdown, no preamble:
 Critical:
   - Do NOT fabricate or guess. If no public source mentions the vendor, omit the entry.
   - Cite the URL you actually opened via web_search.
-  - Be conservative on confidence: <60 if you only found tangential mentions, 80+ only when you actually fetched a named report page.`,
+  - Be conservative on confidence: <60 if you only found tangential mentions, 80+ only when you actually fetched a named report page.
+  - Write the "summary" in a senior analyst voice: what the house's positioning actually MEANS for an enterprise buyer choosing this vendor — not a restatement of the quadrant label. Make "strengths"/"cautions" decision-useful (capability, delivery, commercial), and quote the house's own language where you can.`,
       }],
-    });
+    } as unknown as Anthropic.MessageCreateParamsNonStreaming);
     const text = response.content
       .filter((c) => c.type === "text")
       .map((c) => (c as { text: string }).text)
