@@ -552,7 +552,7 @@ export default function InvestmentSimulatorClient({
                 Reset to defaults
               </button>
               <button
-                className="rounded-md bg-[#13294b] px-3 py-2 text-xs font-semibold text-white hover:bg-[#2a382c] dark:bg-[#ece3cb] dark:text-[#0a1f38] dark:hover:bg-white"
+                className="rounded-md bg-[#13294b] px-3 py-2 text-xs font-semibold text-white hover:bg-[#2a382c] dark:bg-[#ece3cb] dark:text-[#13294b] dark:hover:bg-white"
                 onClick={applyBoardShock}
                 type="button"
                 title="Generates a random market shock — drawdown severity, timing, and stress amplifier vary each click. The shock effect shows on the fan chart and drawdown panel."
@@ -1218,7 +1218,7 @@ function SingleStockPicker({
                 onClick={() => onSelect(p.id)}
                 className={`flex items-center justify-between rounded-md border px-3 py-2 text-left text-xs transition-colors ${
                   isSelected
-                    ? "border-[#13294b] bg-[#13294b] text-white dark:border-[#ece4d0] dark:bg-[#ece3cb] dark:text-[#0a1f38]"
+                    ? "border-[#13294b] bg-[#13294b] text-white dark:border-[#ece4d0] dark:bg-[#ece3cb] dark:text-[#13294b]"
                     : "border-[#e6dcc3] bg-white hover:bg-[#f3ead2] dark:border-[#1d3a57] dark:bg-[#0c2238] dark:hover:bg-[#143049]"
                 }`}
               >
@@ -1388,7 +1388,7 @@ function Segmented({ value, options, onChange }: { value: string; options: strin
   return (
     <div className="grid grid-cols-4 gap-1">
       {options.map((option) => (
-        <button key={option} className={`rounded-md border px-2 py-1.5 text-xs font-semibold ${value === option ? "border-[#13294b] bg-[#13294b] text-white dark:border-[#ece4d0] dark:bg-[#ece3cb] dark:text-[#0a1f38]" : "border-[#e0d6ba] text-[#475a72] dark:border-[#2a4a6b] dark:text-[#a7bacd]"}`} onClick={() => onChange(option)} type="button">
+        <button key={option} className={`rounded-md border px-2 py-1.5 text-xs font-semibold ${value === option ? "border-[#13294b] bg-[#13294b] text-white dark:border-[#ece4d0] dark:bg-[#ece3cb] dark:text-[#13294b]" : "border-[#e0d6ba] text-[#475a72] dark:border-[#2a4a6b] dark:text-[#a7bacd]"}`} onClick={() => onChange(option)} type="button">
           {option}y
         </button>
       ))}
@@ -1633,7 +1633,7 @@ function ScenarioFanChart({ result, shockEvent }: { result: SimulationResult; sh
         onMouseMove={handleMove}
         onMouseLeave={() => setHover(null)}
       >
-        <rect width={w} height={h} rx="10" fill="currentColor" className="text-[#faf6ec] dark:text-[#0a1f38]" />
+        <rect width={w} height={h} rx="10" fill="currentColor" className="text-[#faf6ec] dark:text-[#13294b]" />
         {/* Y gridlines + labels */}
         {yTicks.map((value, idx) => (
           <g key={`y-${idx}`}>
@@ -1806,7 +1806,7 @@ function RiskReturnScatter({ portfolio, providers, stateHash }: { portfolio: Sim
   const scale = (value: number, domain: { min: number; max: number }) => (value - domain.min) / Math.max(1, domain.max - domain.min);
   return (
     <svg className="h-[300px] w-full" viewBox={`0 0 ${w} ${h}`} role="img" aria-label="Risk return scatterplot">
-      <rect width={w} height={h} rx="10" fill="currentColor" className="text-[#faf6ec] dark:text-[#0a1f38]" />
+      <rect width={w} height={h} rx="10" fill="currentColor" className="text-[#faf6ec] dark:text-[#13294b]" />
       <line x1={pad} x2={w - pad} y1={h - pad} y2={h - pad} stroke="#b3a98c" />
       <line x1={pad} x2={pad} y1={pad} y2={h - pad} stroke="#b3a98c" />
       {points.map((point, index) => {
@@ -1837,7 +1837,7 @@ function ExposureNetwork({ exposures, providers }: { exposures: IndirectExposure
   const privateX = (index: number) => 80 + (index / Math.max(1, privateNodes.length - 1)) * 520;
   return (
     <svg className="h-[320px] w-full" viewBox="0 0 680 320" role="img" aria-label="Indirect exposure network graph">
-      <rect width="680" height="320" rx="10" fill="currentColor" className="text-[#faf6ec] dark:text-[#0a1f38]" />
+      <rect width="680" height="320" rx="10" fill="currentColor" className="text-[#faf6ec] dark:text-[#13294b]" />
       {exposures.map((edge, index) => {
         const x1 = publicX(Math.max(0, publicNodes.indexOf(edge.publicTicker)));
         const x2 = privateX(Math.max(0, privateNodes.indexOf(edge.privateProviderId)));
@@ -1916,7 +1916,7 @@ function DrawdownChart({ path, shockEvent }: { path: ScenarioPoint[]; shockEvent
     : Array.from({ length: Math.round(maxYear) + 1 }, (_, i) => i);
   return (
     <svg className="h-[220px] w-full" viewBox={`0 0 ${w} ${h}`} role="img" aria-label="Drawdown chart">
-      <rect width={w} height={h} rx="10" fill="currentColor" className="text-[#faf6ec] dark:text-[#0a1f38]" />
+      <rect width={w} height={h} rx="10" fill="currentColor" className="text-[#faf6ec] dark:text-[#13294b]" />
       <line x1={pad} x2={w - pad} y1={pad} y2={pad} stroke="#b3a98c" />
       {shockX !== null && <line x1={shockX} x2={shockX} y1={pad} y2={h - pad} stroke="#b45309" strokeWidth="2" strokeDasharray="4 4" />}
       {xTicks.map((tick, idx) => (
@@ -2032,7 +2032,7 @@ function RiskRadar({ result, portfolio, providers }: { result: SimulationResult;
   }).join(" ");
   return (
     <svg className="h-[340px] w-full" viewBox="0 0 560 340" role="img" aria-label="Risk radar">
-      <rect width="560" height="340" rx="10" fill="currentColor" className="text-[#faf6ec] dark:text-[#0a1f38]" />
+      <rect width="560" height="340" rx="10" fill="currentColor" className="text-[#faf6ec] dark:text-[#13294b]" />
       {[0.25, 0.5, 0.75, 1].map((scale) => <circle key={scale} cx={cx} cy={cy} r={r * scale} fill="none" stroke="#e6dcc3" />)}
       {axes.map(([name], index) => {
         const angle = -Math.PI / 2 + (index / axes.length) * Math.PI * 2;

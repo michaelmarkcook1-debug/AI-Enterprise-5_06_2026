@@ -253,7 +253,7 @@ export default function IngestionConsole({
                 <button
                   disabled={busyManual || !rawText || !url || !vendorId}
                   onClick={triggerManual}
-                  className="rounded-full bg-[#0c2238] dark:bg-white px-6 py-2 text-sm font-medium text-white dark:text-[#0a1f38] disabled:opacity-40"
+                  className="rounded-full bg-[#0c2238] dark:bg-white px-6 py-2 text-sm font-medium text-white dark:text-[#13294b] disabled:opacity-40"
                 >{busyManual ? "Running…" : "Run manual extraction"}</button>
                 {manualResult && <div className="text-xs text-emerald-700 dark:text-emerald-400">{manualResult}</div>}
               </div>

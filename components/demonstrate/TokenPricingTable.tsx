@@ -242,7 +242,7 @@ function FilterChip({
       aria-pressed={active}
       className={`rounded-full px-2.5 py-1 text-xs font-medium transition-colors ${
         active
-          ? "bg-[#0c2238] text-white dark:bg-white dark:text-[#0a1f38]"
+          ? "bg-[#0c2238] text-white dark:bg-white dark:text-[#13294b]"
           : "bg-[#ece3cb] text-[#2e3f57] hover:bg-[#e3d9c0] dark:bg-[#143049] dark:text-[#c2d1e0] dark:hover:bg-[#1c3d5c]"
       }`}
     >
