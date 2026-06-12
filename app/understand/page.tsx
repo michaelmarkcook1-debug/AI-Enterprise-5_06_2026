@@ -17,7 +17,7 @@ import Link from "next/link";
 import { PageFrame } from "@/components/app-shell";
 import { Confidence, Panel, ScoreBar } from "@/components/intelligence-ui";
 import { OwnershipLegend, VendorNameWithOwnership } from "@/components/ownership-indicator";
-import UnderstandTabs from "@/components/understand/UnderstandTabs";
+import CapabilityMatrix, { type MatrixCell } from "@/components/understand/CapabilityMatrix";
 import ExposureMapHero from "@/components/dashboard/ExposureMapHero";
 import {
   listCapabilities,
@@ -44,12 +44,7 @@ import { isRankable } from "@/lib/intelligence/roles";
 
 export const dynamic = "force-dynamic";
 
-interface PageProps {
-  searchParams: Promise<{ view?: string; vendor?: string; pillar?: string }>;
-}
-
-export default async function UnderstandPage({ searchParams }: PageProps) {
-  const params = await searchParams;
+export default async function UnderstandPage() {
   const [
     capabilities,
     vendorCapabilities,
@@ -117,26 +112,10 @@ export default async function UnderstandPage({ searchParams }: PageProps) {
         <OwnershipLegend />
       </div>
 
-      {/* 0. Quick access — AI Atlas. (The former "Vendor Leadership Matrix" 2×2 was
-          retired 10 Jun 2026: composite scoring for multi-category vendors must not
-          render as a rank or quadrant.) */}
-      <section className="mb-6 grid gap-4">
-        <Link
-          href="/atlas"
-          className="group rounded-xl border border-[#e6dcc3] bg-white p-5 transition-colors hover:border-emerald-400 hover:bg-emerald-50/50 dark:border-[#1d3a57] dark:bg-[#0c2238] dark:hover:border-emerald-600 dark:hover:bg-emerald-950/30"
-        >
-          <div className="text-[10px] font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">Interactive</div>
-          <div className="mt-1 text-lg font-semibold text-[#13294b] dark:text-[#eef3f8]">AI Ecosystem Navigator</div>
-          <p className="mt-1 text-xs text-[#56657b] dark:text-[#a7bacd]">
-            Full interactive ecosystem map — who backs whom, who hosts whom, where risk concentrates. Click to explore.
-          </p>
-          <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 transition-colors group-hover:text-emerald-800 dark:text-emerald-400 dark:group-hover:text-emerald-300">
-            Open Atlas →
-          </span>
-        </Link>
-      </section>
-
-      {/* 0.5 Strategic Sustainability Overview */}
+      {/* 0. Strategic Sustainability Overview.
+          (The standalone /atlas quick-access card was removed 12 Jun 2026 —
+          the same ecosystem map is embedded right below as ExposureMapHero,
+          so the extra route read as a meaningless duplicate tab.) */}
       <section className="mb-6">
         <Panel title="Strategic sustainability overview">
           <p className="mb-3 text-xs text-[#56657b] dark:text-[#a7bacd]">
@@ -232,13 +211,33 @@ export default async function UnderstandPage({ searchParams }: PageProps) {
         </CollapsiblePanel>
       </section>
 
-      {/* 4. Capability matrix + sub-tabs */}
+      {/* 4. Capability matrix — REAL vendor universe, truthfulness-gated cells */}
       <section id="capabilities" className="mb-8">
-        <UnderstandTabs
-          initialView={params.view || "matrix"}
-          selectedVendor={params.vendor}
-          selectedPillar={params.pillar}
-        />
+        <Panel title="Capability matrix">
+          <p className="mb-3 text-xs leading-5 text-[#56657b] dark:text-[#a7bacd]">
+            Every rankable vendor against every tracked capability. Cells render a maturity
+            score only when the evidence gate allows it — otherwise they state honestly why
+            not (seed, stale, disputed, validation required, or not applicable).
+          </p>
+          {(() => {
+            const matrixVendors = rankableVendors.map((v) => ({ id: v.id, name: v.name, category: v.category }));
+            const matrixCaps = capabilities.map((c) => ({ id: c.id, name: c.name, category: c.category }));
+            const cellMap: Record<string, MatrixCell> = {};
+            for (const vendor of rankableVendors) {
+              for (const cap of capabilities) {
+                const vc = byKey.get(`${vendor.id}_${cap.id}`);
+                const state = capabilityRenderState(vc, { isInfrastructureOnly: isInfrastructureOnlyVendor(vendor.id) });
+                cellMap[`${vendor.id}_${cap.id}`] = {
+                  mode: state.mode,
+                  showScore: state.showScore,
+                  score: Math.round(vc?.maturityScore ?? 0),
+                  confidence: state.confidence,
+                };
+              }
+            }
+            return <CapabilityMatrix vendors={matrixVendors} capabilities={matrixCaps} cells={cellMap} />;
+          })()}
+        </Panel>
       </section>
 
       {/* 5. Strategic Intelligence — new scores from the implementation pack */}
@@ -409,7 +408,6 @@ export default async function UnderstandPage({ searchParams }: PageProps) {
       <div className="mt-4 flex flex-wrap gap-2 text-xs">
         <Link href="/query" className="rounded-md border border-[#d6c9a8] px-3 py-2 font-semibold hover:bg-[#f3ead2] dark:border-[#2a4a6b] dark:hover:bg-[#0c2238]">← Market intelligence</Link>
         <Link href="/assess" className="rounded-md border border-[#d6c9a8] px-3 py-2 font-semibold hover:bg-[#f3ead2] dark:border-[#2a4a6b] dark:hover:bg-[#0c2238]">Assess your needs →</Link>
-        <Link href="/atlas" className="rounded-md border border-[#d6c9a8] px-3 py-2 font-semibold hover:bg-[#f3ead2] dark:border-[#2a4a6b] dark:hover:bg-[#0c2238]">Open AI Atlas →</Link>
       </div>
     </PageFrame>
   );

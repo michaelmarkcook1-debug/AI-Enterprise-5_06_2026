@@ -15,6 +15,9 @@ import {
 } from "@/lib/intelligence/entities";
 import ExecutiveBrief from "@/components/query/ExecutiveBrief";
 import WatchButton from "@/components/query/WatchButton";
+import CollapsiblePanel from "@/components/collapsible-panel";
+import AnalystInsight from "@/components/analyst-insight";
+import { entityInsight } from "@/lib/insights/tab-insights";
 
 type WinningLayer = { title: string; names: string[]; note: string };
 
@@ -642,6 +645,27 @@ export default function QueryV2Client({ entities, winningByLayer }: { entities: 
             <span className="text-xs font-semibold text-[#6b5a23] dark:text-[#e8c95c]">{selectedEntity.name}</span>
             <span className="text-xs text-[#6b5a23]/60 dark:text-[#e8c95c]/60">— click any row above to change selection</span>
           </div>
+          {/* Per-vendor analyst insight — derived from the same scores the row shows */}
+          {(() => {
+            const layerPeers = entities
+              .filter((e) => e.primaryRole === selectedEntity.primaryRole)
+              .sort((a, b) => roleLeadership(b, selectedEntity.primaryRole) - roleLeadership(a, selectedEntity.primaryRole));
+            const rank = Math.max(1, layerPeers.findIndex((e) => e.id === selectedEntity.id) + 1);
+            return (
+              <AnalystInsight paragraph={entityInsight({
+                name: selectedEntity.name,
+                primaryRole: selectedEntity.primaryRole,
+                leadership: roleLeadership(selectedEntity, selectedEntity.primaryRole),
+                momentum: selectedEntity.momentum,
+                readiness: selectedEntity.readiness,
+                confidence: selectedEntity.confidence,
+                risk: selectedEntity.risk,
+                layerRank: rank,
+                layerSize: layerPeers.length,
+                leadershipDelta: selectedEntity.deltas.leadership,
+              })} />
+            );
+          })()}
           <div className="space-y-4">
             <div>
               <div className="flex flex-wrap items-center gap-2">
@@ -669,54 +693,82 @@ export default function QueryV2Client({ entities, winningByLayer }: { entities: 
         </Panel>
       </section>
 
-      <section id="usage-share" className="mt-6 grid gap-5 lg:grid-cols-[0.95fr_1.05fr]">
-        <Panel title="Share of named enterprise AI usage">
+      {/* ── Usage share — ALWAYS within-layer. One panel; the former
+            "Category share estimate" duplicate was deleted (12 Jun 2026). ── */}
+      <section id="usage-share" className="mt-6">
+        <CollapsiblePanel
+          title="Share of named enterprise AI usage"
+          summary={category === "all" ? "grouped by layer — vendors only compared with peers" : `top of the ${selectedOption.label} lens`}
+          defaultOpen
+        >
           <p className="mb-4 text-xs leading-5 text-[#56657b] dark:text-[#a7bacd]">
-            Directional, evidence-labelled estimate. Not audited global market share.
-            The bars below re-weight the original usage-share idea to the selected role category.
+            Directional, evidence-labelled estimate — not audited global market share.
+            Shares are normalised <span className="font-semibold">within each layer</span>, so a platform vendor is never measured against a model provider.
           </p>
-          <div className="space-y-3">
-            {filtered.slice(0, 10).map((entity) => (
-              <div key={entity.id}>
-                <div className="mb-1 flex items-center justify-between gap-3 text-sm">
-                  <span className="font-medium"><VendorNameWithOwnership name={entity.name} ownershipType={entity.ownership} /></span>
-                  <span className="font-mono">{entity.usageShare.toFixed(1)}%</span>
+          {category === "all" ? (
+            <div className="grid gap-5 lg:grid-cols-2">
+              {groupedSections.slice(0, 6).map(({ def, members }) => {
+                const layerTotal = members.reduce((sum, e) => sum + e.usageShare, 0) || 1;
+                const layerMax = Math.max(...members.map((e) => e.usageShare), 1);
+                return (
+                  <div key={def.role} className="rounded-md border border-[#e9e0c8] bg-[#fdfaf1] p-3 dark:border-[#1d3a57] dark:bg-[#081c30]/40">
+                    <h3 className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#a07f1f] dark:text-[#d4af37]">{def.title}</h3>
+                    <div className="mt-3 space-y-2.5">
+                      {members.slice(0, 4).map((entity) => (
+                        <div key={entity.id}>
+                          <div className="mb-1 flex items-center justify-between gap-3 text-xs">
+                            <span className="font-medium text-[#13294b] dark:text-[#eef3f8]">{entity.name}</span>
+                            <span className="font-mono text-[#475a72] dark:text-[#a7bacd]">{((entity.usageShare / layerTotal) * 100).toFixed(1)}% of layer</span>
+                          </div>
+                          <div className="h-1.5 overflow-hidden rounded-full bg-[#ece3cb] dark:bg-[#143049]">
+                            <div className="h-full rounded-full bg-[#b08d2f] dark:bg-[#d4af37]" style={{ width: `${Math.max(3, (entity.usageShare / layerMax) * 100)}%` }} />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {normalizedShare.slice(0, 10).map(({ entity, share }) => (
+                <div key={entity.id}>
+                  <div className="mb-1 flex items-center justify-between gap-3 text-sm">
+                    <span className="font-medium"><VendorNameWithOwnership name={entity.name} ownershipType={entity.ownership} /></span>
+                    <span className="font-mono">{share.toFixed(1)}% of {selectedOption.label.toLowerCase()}</span>
+                  </div>
+                  <div className="h-1.5 overflow-hidden rounded-full bg-[#ece3cb] dark:bg-[#143049]">
+                    <div className="h-full rounded-full bg-[#b08d2f] dark:bg-[#d4af37]" style={{ width: `${Math.max(3, (entity.usageShare / maxShare) * 100)}%` }} />
+                  </div>
                 </div>
-                <div className="h-1.5 overflow-hidden rounded-full bg-[#ece3cb] dark:bg-[#143049]">
-                  <div className="h-full rounded-full bg-[#b08d2f] dark:bg-emerald-400" style={{ width: `${Math.max(3, (entity.usageShare / maxShare) * 100)}%` }} />
-                </div>
-              </div>
-            ))}
-          </div>
-        </Panel>
-
-        <Panel title="Category share estimate">
-          <div className="space-y-3">
-            {normalizedShare.slice(0, 8).map(({ entity, share }) => (
-              <div key={entity.id} className="flex items-center justify-between gap-3 border-b border-[#efe9d9] pb-2 text-sm last:border-0 dark:border-[#1d3a57]">
-                <div>
-                  <div className="font-medium text-[#13294b] dark:text-[#eef3f8]">{entity.name}</div>
-                  <div className="mt-1 text-xs text-[#5b6b7f] dark:text-[#8fa5bb]">{entity.primaryRole}</div>
-                </div>
-                <div className="font-mono text-lg font-semibold">{share.toFixed(1)}%</div>
-              </div>
-            ))}
-          </div>
-        </Panel>
+              ))}
+            </div>
+          )}
+        </CollapsiblePanel>
       </section>
 
-      <section id="atlas" className="mt-6">
-        <Panel title="Enhance x Innovate role map">
+      {/* ── Role map — one layer at a time, never cross-category ── */}
+      <section id="role-map" className="mt-5">
+        <CollapsiblePanel
+          title="Readiness × innovation map"
+          summary="one layer at a time — pick the layer inside"
+          defaultOpen={false}
+        >
           <p className="mb-4 text-xs leading-5 text-[#56657b] dark:text-[#a7bacd]">
-            X-axis is innovation / market momentum. Y-axis is enterprise readiness / execution.
-            Bubble size is ecosystem reach; colour is primary category; outline is public/private/subsidiary; arrow shows movement since prior snapshot.
+            X-axis is innovation / market momentum; Y-axis is enterprise readiness / execution; bubble size is ecosystem reach.
+            The map shows <span className="font-semibold">one layer at a time</span> — positioning is only meaningful between vendors playing the same role.
           </p>
-          <RoleScatter entities={filtered} selectedId={selectedEntity.id} onSelect={setSelectedId} />
-        </Panel>
+          <RoleScatter entities={filtered} selectedId={selectedEntity.id} onSelect={setSelectedId} lockedRoles={categoryRoles} />
+        </CollapsiblePanel>
       </section>
 
-      <section id="movers" className="mt-6">
-        <Panel title="Market movers by signal type">
+      <section id="movers" className="mt-5">
+        <CollapsiblePanel
+          title="Market movers by signal type"
+          summary={`${movers.leadership.length + movers.reach.length + movers.adoption.length} positive signals this period`}
+          defaultOpen={false}
+        >
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
             <MoverColumn title="Rising by leadership score" entities={movers.leadership} pick={(entity) => entity.deltas.leadership} />
             <MoverColumn title="Rising by ecosystem reach" entities={movers.reach} pick={(entity) => entity.deltas.reach} />
@@ -724,11 +776,15 @@ export default function QueryV2Client({ entities, winningByLayer }: { entities: 
             <MoverColumn title="Rising by infrastructure exposure" entities={movers.infrastructure} pick={(entity) => entity.deltas.infrastructure} />
             <MoverColumn title="Falling / risk increasing" entities={movers.risk} pick={(entity) => entity.deltas.risk} tone="risk" />
           </div>
-        </Panel>
+        </CollapsiblePanel>
       </section>
 
-      <section id="models" className="mt-6">
-        <Panel title="Commercial models by vendor">
+      <section id="models" className="mt-5">
+        <CollapsiblePanel
+          title="Commercial models by vendor"
+          summary={`${MODEL_GROUPS.length} ownership groups`}
+          defaultOpen={false}
+        >
           <p className="mb-4 text-xs leading-5 text-[#56657b] dark:text-[#a7bacd]">
             Source-backed model availability should be grouped by ownership and hosting route. Hosted third-party models keep the original owner and should not be reattributed to the platform that hosts them.
           </p>
@@ -742,7 +798,7 @@ export default function QueryV2Client({ entities, winningByLayer }: { entities: 
               </div>
             ))}
           </div>
-        </Panel>
+        </CollapsiblePanel>
       </section>
     </div>
   );
@@ -1008,30 +1064,94 @@ function ScoreSparkline({ snapshots }: { snapshots: SnapshotPoint[] }) {
   );
 }
 
-function RoleScatter({ entities, selectedId, onSelect }: { entities: Entity[]; selectedId: string; onSelect: (id: string) => void }) {
+function RoleScatter({
+  entities,
+  selectedId,
+  onSelect,
+  lockedRoles,
+}: {
+  entities: Entity[];
+  selectedId: string;
+  onSelect: (id: string) => void;
+  /** Roles from the active category lens. Empty = grouped "all" view → an in-panel layer picker appears. */
+  lockedRoles: Role[];
+}) {
   const width = 860;
   const height = 460;
   const pad = 56;
   const x = (value: number) => pad + ((value - 45) / 50) * (width - pad * 2);
   const y = (value: number) => height - pad - ((value - 45) / 50) * (height - pad * 2);
 
+  // Layers present in the current entity set, in canonical order.
+  const presentRoles = useMemo(() => {
+    const present = new Set(entities.map((e) => e.primaryRole));
+    const ordered: Role[] = [
+      "Model Provider", "Platform Vendor", "Application Vendor", "Infrastructure Player",
+      "Hardware Provider", "Data & Services Provider", "Cloud / Hosting Provider",
+      "Vertical Specialist", "Sovereign / Regional AI", "Investor", "Open-Source Ecosystem",
+      "Regulator / Policy Actor",
+    ];
+    return ordered.filter((r) => present.has(r));
+  }, [entities]);
+
+  const [pickedRole, setPickedRole] = useState<Role | null>(null);
+  // Resolve the single layer to draw: a category lens wins; otherwise the picker (default = first present layer).
+  const activeRole: Role | null = lockedRoles.length > 0 ? null : (pickedRole && presentRoles.includes(pickedRole) ? pickedRole : presentRoles[0] ?? null);
+  const scoped = lockedRoles.length > 0
+    ? entities.filter((e) => lockedRoles.includes(e.primaryRole) || rolesFor(e).some((r) => lockedRoles.includes(r)))
+    : entities.filter((e) => e.primaryRole === activeRole);
+
+  // Label only what's readable: every bubble when the layer is small,
+  // otherwise the selected vendor plus the widest-reach names.
+  const labelled = useMemo(() => {
+    if (scoped.length <= 14) return new Set(scoped.map((e) => e.id));
+    const ids = new Set(
+      [...scoped].sort((a, b) => b.ecosystemReach - a.ecosystemReach).slice(0, 12).map((e) => e.id),
+    );
+    ids.add(selectedId);
+    return ids;
+  }, [scoped, selectedId]);
+
   return (
     <div className="overflow-x-auto">
-      <svg viewBox={`0 0 ${width} ${height}`} className="min-w-[760px]" role="img" aria-label="Enhance by innovate enterprise AI role map">
+      {lockedRoles.length === 0 && (
+        <div className="mb-3 flex flex-wrap gap-1.5">
+          {presentRoles.map((role) => {
+            const active = role === activeRole;
+            return (
+              <button
+                key={role}
+                type="button"
+                onClick={() => setPickedRole(role)}
+                className={`rounded-md border px-2.5 py-1.5 text-[11px] font-semibold transition-colors ${
+                  active
+                    ? "border-[#13294b] bg-[#13294b] text-white dark:border-[#d4af37] dark:bg-[#d4af37] dark:text-[#0a1f38]"
+                    : "border-[#ddd3b6] bg-[#fdfaf1] text-[#475a72] hover:bg-[#f3ead2] dark:border-[#1d3a57] dark:bg-[#0c2238] dark:text-[#c2d1e0] dark:hover:bg-[#143049]"
+                }`}
+              >
+                <span aria-hidden className="mr-1.5 inline-block h-1.5 w-1.5 rounded-full align-middle" style={{ backgroundColor: ROLE_TONE[role].fill }} />
+                {role}
+                <span className="ml-1.5 font-mono font-normal opacity-60">{entities.filter((e) => e.primaryRole === role).length}</span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+      <svg viewBox={`0 0 ${width} ${height}`} className="min-w-[760px]" role="img" aria-label="Readiness by innovation map — one layer at a time">
         <rect x="0" y="0" width={width} height={height} rx="12" fill="currentColor" className="text-[#fdfaf1] dark:text-[#0a1f38]" />
-        <line x1={pad} x2={width - pad} y1={height - pad} y2={height - pad} stroke="#a6b0a0" strokeWidth="1" />
-        <line x1={pad} x2={pad} y1={pad} y2={height - pad} stroke="#a6b0a0" strokeWidth="1" />
+        <line x1={pad} x2={width - pad} y1={height - pad} y2={height - pad} stroke="#8fa0b5" strokeWidth="1" />
+        <line x1={pad} x2={pad} y1={pad} y2={height - pad} stroke="#8fa0b5" strokeWidth="1" />
         {[55, 65, 75, 85].map((tick) => (
           <g key={tick}>
-            <line x1={x(tick)} x2={x(tick)} y1={pad} y2={height - pad} stroke="#e6dcc3" strokeDasharray="4 6" />
-            <line x1={pad} x2={width - pad} y1={y(tick)} y2={y(tick)} stroke="#e6dcc3" strokeDasharray="4 6" />
-            <text x={x(tick)} y={height - 22} textAnchor="middle" className="fill-[#5b6b7f] text-[11px]">{tick}</text>
-            <text x={26} y={y(tick) + 4} className="fill-[#5b6b7f] text-[11px]">{tick}</text>
+            <line x1={x(tick)} x2={x(tick)} y1={pad} y2={height - pad} stroke="currentColor" strokeDasharray="4 6" className="text-[#e6dcc3] dark:text-[#1d3a57]" />
+            <line x1={pad} x2={width - pad} y1={y(tick)} y2={y(tick)} stroke="currentColor" strokeDasharray="4 6" className="text-[#e6dcc3] dark:text-[#1d3a57]" />
+            <text x={x(tick)} y={height - 22} textAnchor="middle" className="fill-[#5b6b7f] text-[11px] dark:fill-[#8fa5bb]">{tick}</text>
+            <text x={26} y={y(tick) + 4} className="fill-[#5b6b7f] text-[11px] dark:fill-[#8fa5bb]">{tick}</text>
           </g>
         ))}
-        <text x={width / 2} y={height - 8} textAnchor="middle" className="fill-[#475a72] text-[12px] font-semibold">Innovation / market momentum</text>
-        <text transform={`translate(14 ${height / 2}) rotate(-90)`} textAnchor="middle" className="fill-[#475a72] text-[12px] font-semibold">Enterprise readiness / execution</text>
-        {entities.map((entity) => {
+        <text x={width / 2} y={height - 8} textAnchor="middle" className="fill-[#475a72] text-[12px] font-semibold dark:fill-[#a7bacd]">Innovation / market momentum</text>
+        <text transform={`translate(14 ${height / 2}) rotate(-90)`} textAnchor="middle" className="fill-[#475a72] text-[12px] font-semibold dark:fill-[#a7bacd]">Enterprise readiness / execution</text>
+        {scoped.map((entity) => {
           const cx = x(entity.innovation);
           const cy = y(entity.readiness);
           const r = Math.max(8, Math.min(22, entity.ecosystemReach / 4.4));
@@ -1041,8 +1161,10 @@ function RoleScatter({ entities, selectedId, onSelect }: { entities: Entity[]; s
           return (
             <g key={entity.id} className="cursor-pointer" onClick={() => onSelect(entity.id)}>
               <line x1={cx - entity.movement.dx * 5} y1={cy + entity.movement.dy * 5} x2={cx} y2={cy} stroke={tone.fill} strokeWidth="1.5" markerEnd="url(#arrow)" opacity="0.75" />
-              <circle cx={cx} cy={cy} r={r} fill={tone.fill} fillOpacity={selected ? 0.95 : 0.72} stroke={selected ? "#111827" : stroke} strokeWidth={selected ? 3 : 2} />
-              <text x={cx + r + 5} y={cy + 4} className="fill-[#13294b] text-[11px] font-semibold dark:fill-[#eef3f8]">{entity.name}</text>
+              <circle cx={cx} cy={cy} r={r} fill={tone.fill} fillOpacity={selected ? 0.95 : 0.72} stroke={selected ? "#d4af37" : stroke} strokeWidth={selected ? 3 : 2} />
+              {labelled.has(entity.id) && (
+                <text x={cx + r + 5} y={cy + 4} className="fill-[#13294b] text-[11px] font-semibold dark:fill-[#eef3f8]">{entity.name}</text>
+              )}
             </g>
           );
         })}
@@ -1052,10 +1174,12 @@ function RoleScatter({ entities, selectedId, onSelect }: { entities: Entity[]; s
           </marker>
         </defs>
       </svg>
-      <div className="mt-3 flex flex-wrap gap-2 text-xs">
-        {Array.from(new Set(entities.map((entity) => entity.primaryRole))).map((role) => (
-          <span key={role} className={`rounded border border-current/20 px-2 py-1 ${ROLE_TONE[role].bg} ${ROLE_TONE[role].text}`}>{role}</span>
-        ))}
+      <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-[#5b6b7f] dark:text-[#8fa5bb]">
+        <span><span className="mr-1 inline-block h-2 w-2 rounded-full border-2 border-[#059669] align-middle" /> public</span>
+        <span><span className="mr-1 inline-block h-2 w-2 rounded-full border-2 border-[#7c3aed] align-middle" /> private</span>
+        <span><span className="mr-1 inline-block h-2 w-2 rounded-full border-2 border-[#0284c7] align-middle" /> subsidiary</span>
+        <span><span className="mr-1 inline-block h-2 w-2 rounded-full border-2 border-[#d4af37] align-middle" /> selected</span>
+        {scoped.length > 14 && <span className="italic">labels shown for the {labelled.size} widest-reach vendors to stay readable</span>}
       </div>
     </div>
   );

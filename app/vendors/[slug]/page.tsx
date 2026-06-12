@@ -14,6 +14,8 @@ import { ENTITIES, roleLeadership, type Entity, type Role } from "@/lib/intellig
 import { listNewsItems } from "@/lib/intelligence/repository";
 import { getPrisma, hasDatabase } from "@/lib/prisma";
 import { Panel } from "@/components/intelligence-ui";
+import AnalystInsight from "@/components/analyst-insight";
+import { entityInsight } from "@/lib/insights/tab-insights";
 import { OwnershipBadge } from "@/components/ownership-indicator";
 
 export const dynamic = "force-dynamic";
@@ -472,6 +474,20 @@ export default async function VendorDeepDivePage({
             ))}
           </div>
         </div>
+
+        {/* ── Analyst insight — derived from this vendor's own scores ────── */}
+        <AnalystInsight paragraph={entityInsight({
+          name: entity.name,
+          primaryRole: entity.primaryRole,
+          leadership: roleLeadership(entity, entity.primaryRole),
+          momentum: entity.momentum,
+          readiness: entity.readiness,
+          confidence: entity.confidence,
+          risk: entity.risk,
+          layerRank: layerRank.rank,
+          layerSize: layerRank.peers,
+          leadershipDelta: entity.deltas.leadership,
+        })} />
 
         {/* ── Score grid (6 tiles) ──────────────────────────────────────── */}
         <section className="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">

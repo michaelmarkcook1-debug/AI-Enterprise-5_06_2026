@@ -3,17 +3,20 @@
 // Shortlisted-vendor cards — shared by Demonstrate and Monitor.
 // ─────────────────────────────────────────────────────────────
 // Shows the user's assessed shortlist as prominent cards near the top of
-// the page. Clicking a card expands it to show the top 3 vendors in that
-// vendor's category (by overall score), with the shortlisted vendor
-// highlighted, so the reader can see the pick in its competitive context.
+// the page. Clicking a card opens a FULL-WIDTH comparison strip below the
+// card row (the old in-card expansion stretched its grid row and broke the
+// layout) showing the top 3 vendors in that category with the shortlisted
+// vendor highlighted.
 //
 // Shortlist sources, in priority order:
 //   1. `initialShortlistIds` (server-derived from ?vendors= URL params)
 //   2. sessionStorage "demonstrate_shortlist" written by the Assess
 //      results page (same mechanism RestoreShortlistBanner uses)
-// Renders nothing when no shortlist exists from either source.
+// When no shortlist exists, renders an explicit empty state pointing at
+// Assess — an invisible section read as "broken", so we never render nothing.
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 
 export interface ShortlistUniverseVendor {
   id: string;
@@ -44,7 +47,7 @@ export default function ShortlistVendorCards({
         setShortlistIds(parsed.vendorIds);
       }
     } catch {
-      // private mode / malformed storage — show nothing rather than guess
+      // private mode / malformed storage — fall through to the empty state
     }
   }, [initialShortlistIds]);
 
@@ -62,78 +65,99 @@ export default function ShortlistVendorCards({
     return map;
   }, [universe]);
 
-  if (shortlisted.length === 0) return null;
+  const openVendor = expanded ? byId.get(expanded) ?? null : null;
+  const openTop3 = openVendor ? (topOfCategory.get(openVendor.category) ?? []).slice(0, 3) : [];
+
+  if (shortlisted.length === 0) {
+    return (
+      <section className="mb-6">
+        <div className="rounded-lg border border-dashed border-[#d6c9a8] bg-[#fdfaf1] px-4 py-3.5 dark:border-[#2a4a6b] dark:bg-[#0c2238]/60">
+          <span className="text-xs font-bold uppercase tracking-[0.14em] text-[#a07f1f] dark:text-[#d4af37]">Your assessed shortlist</span>
+          <p className="mt-1 text-sm text-[#475a72] dark:text-[#b9c8d9]">
+            No shortlist loaded yet. Run an assessment in{" "}
+            <Link href="/assess" className="font-semibold text-[#13294b] underline dark:text-[#eef3f8]">Assess</Link>{" "}
+            and your shortlisted vendors will appear here with their competitive context.
+          </p>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="mb-6">
       <div className="mb-2 flex items-baseline justify-between">
-        <h2 className="text-xs font-semibold uppercase tracking-wider text-[#5b6b7f] dark:text-[#8fa5bb]">
+        <h2 className="text-xs font-bold uppercase tracking-[0.14em] text-[#a07f1f] dark:text-[#d4af37]">
           Your assessed shortlist
         </h2>
-        <span className="text-[10px] text-[#5b6b7f] dark:text-[#8fa5bb]">Tap a card to compare against the top 3 in its category</span>
+        <span className="text-[10px] text-[#5b6b7f] dark:text-[#8fa5bb]">Select a card to compare against the top 3 in its category</span>
       </div>
-      <div className="grid gap-3 md:grid-cols-3">
+      <div className="grid items-start gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {shortlisted.map((v) => {
           const isOpen = expanded === v.id;
-          const top3 = (topOfCategory.get(v.category) ?? []).slice(0, 3);
           return (
             <button
               key={v.id}
+              type="button"
               onClick={() => setExpanded(isOpen ? null : v.id)}
               aria-expanded={isOpen}
-              className={`rounded-xl border bg-white p-4 text-left transition-colors dark:bg-[#0c2238] ${
+              className={`rounded-lg border bg-[#fffdf7] p-4 text-left transition-colors dark:bg-[#0c2238] ${
                 isOpen
-                  ? "border-emerald-400 dark:border-emerald-600"
-                  : "border-[#e6dcc3] hover:border-emerald-300 dark:border-[#1d3a57] dark:hover:border-emerald-700"
+                  ? "border-[#b08d2f] shadow-[inset_0_2px_0_#d4af37] dark:border-[#d4af37]"
+                  : "border-[#e3d9c0] hover:border-[#b08d2f]/60 dark:border-[#1d3a57] dark:hover:border-[#d4af37]/60"
               }`}
             >
               <div className="flex items-start justify-between gap-2">
-                <div>
-                  <div className="text-base font-semibold text-[#13294b] dark:text-[#eef3f8]">{v.name}</div>
-                  <div className="mt-0.5 text-[11px] text-[#5b6b7f] dark:text-[#a7bacd]">{v.category}</div>
+                <div className="min-w-0">
+                  <div className="truncate text-base font-semibold text-[#13294b] dark:text-[#eef3f8]">{v.name}</div>
+                  <div className="mt-0.5 truncate text-[11px] text-[#5b6b7f] dark:text-[#a7bacd]">{v.category}</div>
                 </div>
-                <span aria-hidden className={`mt-1 text-xs text-[#5b6b7f] transition-transform ${isOpen ? "rotate-180" : ""}`}>▾</span>
+                <span aria-hidden className={`mt-1 shrink-0 text-xs text-[#a07f1f] transition-transform dark:text-[#d4af37] ${isOpen ? "rotate-180" : ""}`}>▾</span>
               </div>
-              <div className="mt-3 flex items-baseline gap-4 font-mono">
+              <div className="mt-3 flex items-baseline gap-5 font-mono">
                 <span>
-                  <span className="text-xl font-semibold text-emerald-700 dark:text-emerald-400">{v.score}</span>
-                  <span className="ml-1 text-[10px] uppercase text-[#5b6b7f]">score</span>
+                  <span className="text-xl font-semibold text-[#13294b] dark:text-[#eef3f8]">{v.score}</span>
+                  <span className="ml-1 text-[10px] uppercase text-[#5b6b7f] dark:text-[#8fa5bb]">score</span>
                 </span>
                 <span>
-                  <span className="text-xl font-semibold text-[#13294b] dark:text-[#eef3f8]">{v.confidence}</span>
-                  <span className="ml-1 text-[10px] uppercase text-[#5b6b7f]">conf.</span>
+                  <span className="text-xl font-semibold text-[#475a72] dark:text-[#a7bacd]">{v.confidence}</span>
+                  <span className="ml-1 text-[10px] uppercase text-[#5b6b7f] dark:text-[#8fa5bb]">conf.</span>
                 </span>
               </div>
-              {isOpen && (
-                <div className="mt-3 border-t border-[#efe9d9] pt-3 dark:border-[#1d3a57]">
-                  <div className="mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-[#5b6b7f] dark:text-[#8fa5bb]">
-                    Top 3 — {v.category}
-                  </div>
-                  <ol className="space-y-1">
-                    {top3.map((t, i) => (
-                      <li
-                        key={t.id}
-                        className={`flex items-center justify-between rounded-md px-2 py-1 text-sm ${
-                          t.id === v.id
-                            ? "bg-emerald-50 font-semibold text-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-200"
-                            : "text-[#3a4a63] dark:text-[#c2d1e0]"
-                        }`}
-                      >
-                        <span>
-                          <span className="mr-1.5 font-mono text-[10px] text-[#5b6b7f]">{i + 1}.</span>
-                          {t.name}
-                          {t.id === v.id && <span className="ml-1.5 text-[9px] uppercase tracking-wide text-emerald-700 dark:text-emerald-400">shortlisted</span>}
-                        </span>
-                        <span className="font-mono text-xs">{t.score}</span>
-                      </li>
-                    ))}
-                  </ol>
-                </div>
-              )}
             </button>
           );
         })}
       </div>
+
+      {/* Full-width comparison strip — outside the card grid so expanding never distorts the cards */}
+      {openVendor && (
+        <div className="mt-3 rounded-lg border border-[#e3d9c0] bg-[#fffdf7] p-4 dark:border-[#1d3a57] dark:bg-[#0c2238]">
+          <div className="mb-2 text-[10px] font-bold uppercase tracking-[0.14em] text-[#a07f1f] dark:text-[#d4af37]">
+            Top 3 — {openVendor.category}
+          </div>
+          <ol className="grid gap-2 md:grid-cols-3">
+            {openTop3.map((t, i) => {
+              const isPick = t.id === openVendor.id;
+              return (
+                <li
+                  key={t.id}
+                  className={`flex items-center justify-between rounded-md border px-3 py-2 text-sm ${
+                    isPick
+                      ? "border-[#b08d2f] bg-[#f7f0dc] font-semibold text-[#13294b] dark:border-[#d4af37] dark:bg-[#0e2740] dark:text-[#eef3f8]"
+                      : "border-[#efe9d9] text-[#3a4a63] dark:border-[#1d3a57] dark:text-[#c2d1e0]"
+                  }`}
+                >
+                  <span className="min-w-0 truncate">
+                    <span className="mr-1.5 font-mono text-[10px] text-[#5b6b7f] dark:text-[#8fa5bb]">{i + 1}.</span>
+                    {t.name}
+                    {isPick && <span className="ml-1.5 text-[9px] uppercase tracking-wide text-[#a07f1f] dark:text-[#d4af37]">shortlisted</span>}
+                  </span>
+                  <span className="ml-2 shrink-0 font-mono text-xs">{t.score}</span>
+                </li>
+              );
+            })}
+          </ol>
+        </div>
+      )}
     </section>
   );
 }
