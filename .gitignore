@@ -1,12 +1,43 @@
-node_modules
-.next
-.next.*
-out
-dist
-build
-.vercel
-.DS_Store
-.playwright-mcp
-*.log
+# Dependencies
+node_modules/
+
+# Next.js build output
+.next/
+out/
+next-env.d.ts
+tsconfig.tsbuildinfo
+
+# Vercel
+.vercel/
+
+# Prisma generated client (auto-rebuilt by `prisma generate`)
+generated/
+
+# Logs & local data
+logs/
+data/
+
+# Database backups (contain production data — NEVER commit)
+backups/
+
+# Environment files (NEVER commit secrets)
 .env
-.env.local
+.env*.local
+.env.production
+.env.local.bak
+
+# macOS junk
+.DS_Store
+
+# Duplicate-download artifacts (macOS " 2", " 3", timestamped copies)
+* 2.*
+* 3.*
+* 4.*
+* 5.*
+* 2/
+*[0-9].svg
+
+# Editor / tooling
+.vscode/
+.claude/
+.github/workflows/

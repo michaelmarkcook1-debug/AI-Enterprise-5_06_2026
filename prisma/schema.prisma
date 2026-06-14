@@ -1,0 +1,653 @@
+generator client {
+  provider            = "prisma-client"
+  output              = "../generated/prisma"
+  runtime             = "nodejs"
+  moduleFormat        = "esm"
+  importFileExtension = "ts"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Ownership {
+  public
+  private
+  subsidiary
+}
+
+enum DeploymentPreference {
+  saas
+  vpc
+  on_prem
+  sovereign
+  hybrid
+}
+
+enum IndustryArchetype {
+  regulated_financial
+  health_life_sciences
+  legal_professional
+  public_sector_education
+  critical_infrastructure_defence
+  enterprise_software
+  industrial_physical_ops
+  commercial_enterprise
+}
+
+enum DomainId {
+  strategic_value
+  data_security_privacy
+  identity_access
+  model_reliability
+  governance_compliance
+  security_threat
+  integration_architecture
+  agentic_autonomy
+  cost_finops
+  workforce_adoption
+  vendor_maturity_lockin
+  capital_resilience
+  market_position
+}
+
+enum EvidenceGrade {
+  E0
+  E1
+  E2
+  E3
+  E4
+  E5
+}
+
+enum EvidenceReviewStatus {
+  curated
+  agent_extracted
+  analyst_verified
+  rejected
+}
+
+enum RiskSeverity {
+  fatal
+  severe
+  moderate
+  low
+}
+
+enum RecommendationBand {
+  not_recommended
+  pilot_only
+  controlled_deployment
+  enterprise_scale
+}
+
+enum AssessmentRunStatus {
+  created
+  scoring
+  completed
+  failed
+}
+
+model VendorProfile {
+  id                   String                   @id @map("vendor_id")
+  name                 String
+  category             String
+  website              String?
+  hq                   String?
+  ownership            Ownership
+  summary              String
+  supportedDeployments DeploymentPreference[]   @default([]) @map("supported_deployments")
+  ecosystemFit         String[]                 @default([]) @map("ecosystem_fit")
+  useCaseFit           String[]                 @default([]) @map("use_case_fit")
+  active               Boolean                  @default(true)
+  products             VendorProduct[]
+  evidence             EvidenceRecord[]
+  risks                RiskFlagRecord[]
+  industryAdoption     VendorIndustryAdoption[]
+  scoringResults       ScoringResult[]
+  createdAt            DateTime                 @default(now()) @map("created_at")
+  updatedAt            DateTime                 @updatedAt @map("updated_at")
+
+  @@index([category])
+  @@index([active])
+  @@map("vendor_profiles")
+}
+
+model VendorProduct {
+  id                   String                 @id @default(cuid()) @map("product_id")
+  vendorId             String                 @map("vendor_id")
+  productName          String                 @map("product_name")
+  category             String
+  supportedUseCases    String[]               @default([]) @map("supported_use_cases")
+  deploymentModels     DeploymentPreference[] @default([]) @map("deployment_models")
+  createdAt            DateTime               @default(now()) @map("created_at")
+  updatedAt            DateTime               @updatedAt @map("updated_at")
+  vendor               VendorProfile          @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  evidence             EvidenceRecord[]
+
+  @@unique([vendorId, productName])
+  @@index([vendorId])
+  @@map("vendor_products")
+}
+
+model EvidenceRecord {
+  id                String               @id @map("evidence_id")
+  vendorId          String               @map("vendor_id")
+  productId         String?              @map("product_id")
+  sourceUrl         String?              @map("source_url")
+  capturedAt        DateTime             @map("captured_at")
+  sourcePublishedAt DateTime?            @map("source_published_at")
+  excerpt           String
+  domain            DomainId
+  subfactor         String
+  evidenceGrade     EvidenceGrade        @map("evidence_grade")
+  rawScore          Float                @map("raw_score")
+  confidence        Float?
+  freshnessDays     Int?                 @map("freshness_days")
+  reviewStatus      EvidenceReviewStatus @default(curated) @map("review_status")
+  createdAt         DateTime             @default(now()) @map("created_at")
+  updatedAt         DateTime             @updatedAt @map("updated_at")
+  vendor            VendorProfile        @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  product           VendorProduct?       @relation(fields: [productId], references: [id], onDelete: SetNull)
+
+  @@index([vendorId, domain])
+  @@index([domain, evidenceGrade])
+  @@index([capturedAt])
+  @@map("vendor_evidence_items")
+}
+
+model RiskFlagRecord {
+  id                   String              @id @map("risk_id")
+  vendorId             String              @map("vendor_id")
+  contextHash          String?             @map("context_hash")
+  severity             RiskSeverity
+  description          String
+  domain               DomainId
+  isFatalIfTriggered   Boolean             @default(false) @map("is_fatal_if_triggered")
+  fatalInIndustries    IndustryArchetype[] @default([]) @map("fatal_in_industries")
+  evidenceIds          String[]            @default([]) @map("evidence_ids")
+  treatment            String?
+  createdAt            DateTime            @default(now()) @map("created_at")
+  updatedAt            DateTime            @updatedAt @map("updated_at")
+  vendor               VendorProfile       @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+
+  @@index([vendorId, severity])
+  @@index([contextHash])
+  @@map("risk_flags")
+}
+
+model VendorIndustryAdoption {
+  id                       String            @id @default(cuid())
+  vendorId                 String            @map("vendor_id")
+  industry                 IndustryArchetype
+  productionReferenceCount Int               @map("production_reference_count")
+  deploymentDepthScore     Float             @map("deployment_depth_score")
+  confidence               Float
+  createdAt                DateTime          @default(now()) @map("created_at")
+  updatedAt                DateTime          @updatedAt @map("updated_at")
+  vendor                   VendorProfile     @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+
+  @@unique([vendorId, industry])
+  @@index([industry])
+  @@map("vendor_industry_adoption")
+}
+
+model AssessmentRun {
+  id                 String              @id @default(cuid()) @map("run_id")
+  engineRunId        String              @map("engine_run_id")
+  userId             String?             @map("user_id")
+  contextHash        String              @map("context_hash")
+  scoringRuleVersion String              @map("scoring_rule_version")
+  inputsJson         Json                @map("inputs_json") @db.JsonB
+  vendorSet          String[]            @default([]) @map("vendor_set")
+  outputJson         Json?               @map("output_json") @db.JsonB
+  status             AssessmentRunStatus @default(completed)
+  createdAt          DateTime            @default(now()) @map("created_at")
+  completedAt        DateTime?           @map("completed_at")
+  scoringResults     ScoringResult[]
+
+  @@index([engineRunId])
+  @@index([contextHash, scoringRuleVersion])
+  @@index([createdAt])
+  @@map("assessment_runs")
+}
+
+model ScoringResult {
+  id                     String             @id @default(cuid()) @map("score_id")
+  assessmentRunId        String             @map("assessment_run_id")
+  vendorId               String             @map("vendor_id")
+  contextHash            String             @map("context_hash")
+  rank                   Int
+  pillarScoresJson       Json               @map("pillar_scores_json") @db.JsonB
+  pillarBreakdownJson    Json               @map("pillar_breakdown_json") @db.JsonB
+  finalScore             Float              @map("final_score")
+  confidenceScore        Float              @map("confidence_score")
+  recommendationBand     RecommendationBand @map("recommendation_band")
+  topStrengths           String[]           @default([]) @map("top_strengths")
+  topRisks               String[]           @default([]) @map("top_risks")
+  missingEvidence        String[]           @default([]) @map("missing_evidence")
+  validationSteps        String[]           @default([]) @map("validation_steps")
+  industryRationale      String             @map("industry_rationale")
+  evidenceIds            String[]           @default([]) @map("evidence_ids")
+  riskFlagsTriggeredJson Json               @map("risk_flags_triggered_json") @db.JsonB
+  excluded               Boolean            @default(false)
+  excludedReason         String?            @map("excluded_reason")
+  bonusesJson            Json               @map("bonuses_json") @db.JsonB
+  penaltiesJson          Json               @map("penalties_json") @db.JsonB
+  generatedAt            DateTime           @default(now()) @map("generated_at")
+  assessmentRun          AssessmentRun      @relation(fields: [assessmentRunId], references: [id], onDelete: Cascade)
+  vendor                 VendorProfile      @relation(fields: [vendorId], references: [id], onDelete: Restrict)
+
+  @@index([assessmentRunId, rank])
+  @@index([vendorId, contextHash])
+  @@index([generatedAt])
+  @@map("vendor_scores")
+}
+
+model ScoringRule {
+  id               String   @id @default(cuid()) @map("rule_id")
+  version          String   @unique
+  triggerCondition Json?    @map("trigger_condition") @db.JsonB
+  weightChanges    Json?    @map("weight_changes") @db.JsonB
+  penalties        Json?    @db.JsonB
+  blockers         Json?    @db.JsonB
+  active           Boolean  @default(true)
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  @@index([active])
+  @@map("scoring_rules")
+}
+
+// ─── Phase 5: Public-data ingestion ──────────────────────────────────────
+
+enum SourceCategory {
+  vendor_docs
+  trust_center
+  pricing_page
+  status_page
+  changelog
+  public_filing
+  job_posting
+  review_platform
+  marketplace
+  github
+  analyst_report
+  press_release
+}
+
+enum IngestionStatus {
+  queued
+  fetching
+  fetched
+  extracting
+  ready_for_review
+  completed
+  failed
+}
+
+enum ProposalStatus {
+  pending
+  approved
+  rejected
+  superseded
+}
+
+model VendorSource {
+  id              String         @id @default(cuid()) @map("source_id")
+  vendorId        String         @map("vendor_id")
+  category        SourceCategory
+  url             String
+  label           String?
+  active          Boolean        @default(true)
+  lastFetchedAt   DateTime?      @map("last_fetched_at")
+  freshnessHorizonDays Int       @default(60) @map("freshness_horizon_days")
+  createdAt       DateTime       @default(now()) @map("created_at")
+  updatedAt       DateTime       @updatedAt @map("updated_at")
+  jobs            IngestionJob[]
+
+  @@unique([vendorId, url])
+  @@index([vendorId, category])
+  @@index([active, lastFetchedAt])
+  @@map("vendor_sources")
+}
+
+model IngestionJob {
+  id              String          @id @default(cuid()) @map("job_id")
+  vendorId        String          @map("vendor_id")
+  sourceId        String?         @map("source_id")
+  status          IngestionStatus @default(queued)
+  startedAt       DateTime?       @map("started_at")
+  finishedAt      DateTime?       @map("finished_at")
+  rawContent      String?         @map("raw_content") @db.Text
+  rawContentHash  String?         @map("raw_content_hash")
+  error           String?
+  proposalsCount  Int             @default(0) @map("proposals_count")
+  createdAt       DateTime        @default(now()) @map("created_at")
+  source          VendorSource?   @relation(fields: [sourceId], references: [id], onDelete: SetNull)
+  proposals       EvidenceProposal[]
+
+  @@index([vendorId, status])
+  @@index([status, createdAt])
+  @@map("ingestion_jobs")
+}
+
+model EvidenceProposal {
+  id              String         @id @default(cuid()) @map("proposal_id")
+  jobId           String         @map("job_id")
+  vendorId        String         @map("vendor_id")
+  domain          DomainId
+  subfactor       String
+  excerpt         String         @db.Text
+  proposedGrade   EvidenceGrade  @map("proposed_grade")
+  proposedRawScore Float         @map("proposed_raw_score")
+  sourceUrl       String?        @map("source_url")
+  capturedAt      DateTime       @map("captured_at")
+  classifierConfidence Float     @default(0) @map("classifier_confidence")
+  classifierRationale String?    @map("classifier_rationale") @db.Text
+  // Explicit classification-failure metadata. Set by the sourcing runner
+  // when the LLM classifier throws or its output fails schema validation.
+  // confidenceIsFallback flags rows where classifierConfidence is the
+  // runner's missing-value default (legacy: 0.5; current: 0) rather than
+  // a real classifier output.
+  classificationFailed Boolean   @default(false) @map("classification_failed")
+  classificationFailureCode String? @map("classification_failure_code")
+  classificationFailureReason String? @map("classification_failure_reason") @db.Text
+  confidenceIsFallback Boolean   @default(false) @map("confidence_is_fallback")
+  // Product-scope linkage. May be populated by the operator (single
+  // product, picked in /admin/evidence) or by the bulk vendor-wide
+  // gesture (every product the vendor sells). Empty array = unlinked.
+  productScopeIds String[]      @default([]) @map("product_scope_ids")
+  isVendorWide    Boolean       @default(false) @map("is_vendor_wide")
+  status          ProposalStatus @default(pending)
+  reviewerId      String?        @map("reviewer_id")
+  reviewedAt      DateTime?      @map("reviewed_at")
+  reviewNotes     String?        @map("review_notes")
+  promotedEvidenceId String?     @map("promoted_evidence_id")
+  createdAt       DateTime       @default(now()) @map("created_at")
+  job             IngestionJob   @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@index([vendorId, status])
+  @@index([status, createdAt])
+  @@map("evidence_proposals")
+}
+
+/// Proposed replacement for a stale (4xx) source URL in lib/sourcing/manifest.ts.
+/// Created automatically by the URL-finder agent when the runner hits a 404 etc.
+/// Operator approves at /admin/ingestion → manifest entry is rewritten on next ingest.
+model ManifestPatch {
+  id              String        @id @default(cuid()) @map("patch_id")
+  vendorId        String        @map("vendor_id")
+  vendorName      String        @map("vendor_name")
+  category        String
+  deadUrl         String        @map("dead_url")
+  httpStatus      Int           @map("http_status")
+  candidateUrl    String        @map("candidate_url")
+  candidateTitle  String        @map("candidate_title")
+  confidenceScore Int           @map("confidence_score")
+  rationale       String        @db.Text
+  citations       String[]      @default([])
+  llmSource       String        @map("llm_source")
+  searchesUsed    Int           @map("searches_used")
+  status          PatchStatus   @default(pending)
+  reviewerId      String?       @map("reviewer_id")
+  reviewedAt      DateTime?     @map("reviewed_at")
+  reviewNotes     String?       @map("review_notes") @db.Text
+  appliedAt       DateTime?     @map("applied_at")
+  retryAttempted  Boolean       @default(false) @map("retry_attempted")
+  retryOk         Boolean?      @map("retry_ok")
+  createdAt       DateTime      @default(now()) @map("created_at")
+
+  @@index([vendorId, status])
+  @@index([status, createdAt])
+  @@unique([vendorId, deadUrl, status])
+  @@map("manifest_patches")
+}
+
+enum PatchStatus {
+  pending
+  approved
+  rejected
+  applied
+  superseded
+}
+
+// ─── AI Enterpise intelligence portal domain ─────────────────────────────
+
+model IntelligenceVendor {
+  id                  String                  @id
+  name                String
+  slug                String                  @unique
+  category            String
+  description         String                  @db.Text
+  headquarters        String?
+  ownershipType       String                  @map("ownership_type")
+  supportedIndustries String[]                @default([]) @map("supported_industries")
+  supportedUseCases   String[]                @default([]) @map("supported_use_cases")
+  supportedEcosystems String[]                @default([]) @map("supported_ecosystems")
+  deploymentOptions   String[]                @default([]) @map("deployment_options")
+  autonomyLevelMax    String                  @map("autonomy_level_max")
+  overallScore        Float                   @map("overall_score")
+  confidenceScore     Float                   @map("confidence_score")
+  marketPosition      String                  @map("market_position")
+  strategy            String                  @db.Text
+  productCapabilities String[]                @default([]) @map("product_capabilities")
+  enterpriseControls  String[]                @default([]) @map("enterprise_controls")
+  agenticCapability   String                  @map("agentic_capability") @db.Text
+  industryStrength    Json                    @map("industry_strength") @db.JsonB
+  analystInterpretation String                @map("analyst_interpretation") @db.Text
+  riskProfile         String[]                @default([]) @map("risk_profile")
+  lastUpdated         DateTime                @map("last_updated")
+  // ─── Cross-tab enrichment (folds the Query-v2 entity model into the spine) ───
+  // Editorial/structural facts no live signal produces — stored as columns.
+  // Measured scores (leadership, momentum, usage, deltas) are NOT stored here;
+  // they are derived at read-time from overallScore / momentum / pillar / market-
+  // share / ranking-snapshot data so the surfaces stay dynamic on live ingestion.
+  roleTags               String[]              @default([]) @map("role_tags")
+  infraBand              String?               @map("infra_band")
+  infraBandSecondary     String?               @map("infra_band_secondary")
+  modelsOwned            String[]              @default([]) @map("models_owned")
+  hostedThirdParty       String[]              @default([]) @map("hosted_third_party")
+  infrastructureExposure String[]              @default([]) @map("infrastructure_exposure")
+  investorRelationships  String[]              @default([]) @map("investor_relationships")
+  hardwareDependencies   String[]              @default([]) @map("hardware_dependencies")
+  cioInterpretation      String?               @map("cio_interpretation") @db.Text
+  dataCaveats            String?               @map("data_caveats") @db.Text
+  evidenceGrade          String?               @map("evidence_grade")
+  pillarScores        IntelligencePillarScore[]
+  marketShares        MarketShareEstimate[]
+  momentum            VendorMomentum[]
+  capabilities        VendorCapability[]
+  rankingSnapshots    VendorRankingSnapshot[]
+  createdAt           DateTime                @default(now()) @map("created_at")
+  updatedAt           DateTime                @updatedAt @map("updated_at")
+
+  @@index([category])
+  @@index([overallScore])
+  @@index([confidenceScore])
+  @@index([infraBand])
+  @@map("intelligence_vendors")
+}
+
+model IntelligencePillarScore {
+  id              String             @id @default(cuid())
+  vendorId        String             @map("vendor_id")
+  pillar          String
+  capabilityScore Float              @map("capability_score")
+  evidenceGrade   EvidenceGrade      @map("evidence_grade")
+  confidence      Float
+  strengths       String[]           @default([])
+  risks           String[]           @default([])
+  missingEvidence String[]           @default([]) @map("missing_evidence")
+  vendor          IntelligenceVendor @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+
+  @@unique([vendorId, pillar])
+  @@index([pillar])
+  @@map("vendor_pillar_scores")
+}
+
+model MarketCategory {
+  id             String                @id
+  name           String
+  description    String                @db.Text
+  shareEstimates MarketShareEstimate[]
+
+  @@map("market_categories")
+}
+
+model MarketShareEstimate {
+  id               String             @id @default(cuid())
+  vendorId         String             @map("vendor_id")
+  categoryId       String             @map("category_id")
+  reportedShare    Float?             @map("reported_share")
+  estimatedShare   Float              @map("estimated_share")
+  confidence       Float
+  source           String
+  sourceDate       DateTime           @map("source_date")
+  methodology      String             @db.Text
+  previousEstimate Float?             @map("previous_estimate")
+  changePct        Float              @map("change_pct")
+  vendor           IntelligenceVendor @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  category         MarketCategory     @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@unique([vendorId, categoryId])
+  @@index([categoryId, estimatedShare])
+  @@index([vendorId])
+  @@map("market_share_estimates")
+}
+
+model VendorMomentum {
+  id              String             @id @default(cuid())
+  vendorId        String             @map("vendor_id")
+  period          String
+  momentumScore   Float              @map("momentum_score")
+  newsVelocity    Float              @map("news_velocity")
+  productVelocity Float              @map("product_velocity")
+  adoptionSignal  Float              @map("adoption_signal")
+  hiringSignal    Float              @map("hiring_signal")
+  customerSignal  Float              @map("customer_signal")
+  partnerSignal   Float              @default(50) @map("partner_signal")
+  marketShareMovement Float          @default(0) @map("market_share_movement")
+  riskSignal      Float              @map("risk_signal")
+  confidence      Float
+  vendor          IntelligenceVendor @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+
+  @@unique([vendorId, period])
+  @@index([period, momentumScore])
+  @@map("vendor_momentum")
+}
+
+// Daily point-in-time snapshot of a vendor's ranking metrics.
+//
+// One row per (vendor, snapshotDate). Written by the daily
+// /api/cron/ranking-snapshot job and consumed by the dashboard
+// "Who's winning / losing" hover-over trend graphs.
+//
+// `source` distinguishes how the row was produced:
+//   - "snapshot"  — captured live from the intelligence layer that day.
+//   - "backfill"  — deterministically reconstructed for dates that
+//                   predate snapshot capture, so the trend graphs have
+//                   history from day one. Replace freely with real
+//                   snapshots once they accumulate.
+model VendorRankingSnapshot {
+  id              String             @id @default(cuid())
+  vendorId        String             @map("vendor_id")
+  snapshotDate    DateTime           @map("snapshot_date") @db.Date
+  overallScore    Float              @map("overall_score")
+  momentumScore   Float              @map("momentum_score")
+  confidenceScore Float              @map("confidence_score")
+  rank            Int
+  trackedVendors  Int                @map("tracked_vendors")
+  source          String             @default("snapshot")
+  capturedAt      DateTime           @default(now()) @map("captured_at")
+  vendor          IntelligenceVendor @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+
+  @@unique([vendorId, snapshotDate])
+  @@index([snapshotDate])
+  @@index([vendorId, snapshotDate])
+  @@map("vendor_ranking_snapshots")
+}
+
+model IntelligenceNewsItem {
+  id                   String   @id
+  title                String
+  summary              String   @db.Text
+  sourceName           String   @map("source_name")
+  sourceUrl            String?  @map("source_url")
+  publishedAt          DateTime @map("published_at")
+  vendors              String[] @default([])
+  categories           String[] @default([])
+  impactScore          Float    @map("impact_score")
+  confidenceScore      Float    @map("confidence_score")
+  affectedPillars      String[] @default([]) @map("affected_pillars")
+  whyItMatters         String   @map("why_it_matters") @db.Text
+  suggestedScoreImpact Json     @map("suggested_score_impact") @db.JsonB
+  relatedVendors       String[] @default([]) @map("related_vendors")
+  sentiment            String
+  createdAt            DateTime @default(now()) @map("created_at")
+
+  @@index([publishedAt])
+  @@index([impactScore])
+  @@map("intelligence_news_items")
+}
+
+model Capability {
+  id          String             @id
+  name        String
+  category    String
+  description String             @db.Text
+  vendors     VendorCapability[]
+
+  @@index([category])
+  @@map("capabilities")
+}
+
+model VendorCapability {
+  id            String             @id @default(cuid())
+  vendorId      String             @map("vendor_id")
+  capabilityId  String             @map("capability_id")
+  status        String
+  maturityScore Float              @map("maturity_score")
+  evidenceGrade EvidenceGrade      @map("evidence_grade")
+  lastVerified  DateTime           @map("last_verified")
+  notes         String             @db.Text
+  vendor        IntelligenceVendor @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  capability    Capability         @relation(fields: [capabilityId], references: [id], onDelete: Cascade)
+
+  @@unique([vendorId, capabilityId])
+  @@index([capabilityId, maturityScore])
+  @@map("vendor_capabilities")
+}
+
+model Watchlist {
+  id         String   @id @default(cuid())
+  name       String
+  vendors    String[] @default([])
+  categories String[] @default([])
+  industries String[] @default([])
+  alertRules Json     @map("alert_rules") @db.JsonB
+  email      String?
+  userId     String?  @map("user_id")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@index([createdAt])
+  @@index([userId])
+  @@map("watchlists")
+}
+
+model EvidenceSource {
+  id            String        @id
+  entityType    String        @map("entity_type")
+  entityId      String        @map("entity_id")
+  sourceType    String        @map("source_type")
+  sourceName    String        @map("source_name")
+  sourceUrl     String?       @map("source_url")
+  capturedAt    DateTime      @map("captured_at")
+  evidenceGrade EvidenceGrade @map("evidence_grade")
+  confidence    Float
+  notes         String        @db.Text
+
+  @@index([entityType, entityId])
+  @@index([evidenceGrade])
+  @@map("evidence_sources")
+}

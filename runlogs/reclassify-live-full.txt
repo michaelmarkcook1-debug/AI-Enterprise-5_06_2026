@@ -1,0 +1,23 @@
+─── Reclassify failed proposals ───
+mode      : LIVE
+candidates: 303
+  …processed 0/303
+  …processed 25/303
+  …processed 50/303
+  …processed 75/303
+  …processed 100/303
+  …processed 125/303
+  …processed 150/303
+  …processed 175/303
+  …processed 200/303
+  …processed 225/303
+  …processed 250/303
+  …processed 275/303
+  …processed 300/303
+
+─── Result ───
+reclassified ok : 260
+still failing   : 43
+
+residual failures by code:
+    43  schema_validation

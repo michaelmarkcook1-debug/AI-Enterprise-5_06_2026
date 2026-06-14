@@ -1,0 +1,85 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ── Brand palette: navy / gold / cream ─────────────────────────────────────
+   Navy  #13294b (ink) · #0a1f38 (deep) · #071827 (page dark)
+   Gold  #b08d2f (accent) · #d4af37 (bright) · #e8c95c (on-dark)
+   Cream #faf6ec (page) · #fdfaf1 (panel tint) · #e6dcc3 (border)            */
+:root {
+  --background: #faf6ec;
+  --foreground: #13294b;
+  --brand-navy: #13294b;
+  --brand-navy-deep: #0a1f38;
+  --brand-gold: #b08d2f;
+  --brand-gold-bright: #d4af37;
+  --brand-cream: #faf6ec;
+  --brand-border: #e6dcc3;
+  --font-sans: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  --font-mono: var(--font-geist-mono), "SFMono-Regular", Consolas, monospace;
+  color-scheme: light;
+}
+
+html.dark {
+  /* Logo navy from /brand/logo-mark-dark.svg — applied across the portal in dark mode. */
+  --background: #071827;
+  --foreground: #f6f0e7;
+  --brand-border: #1a3953;
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-height: 100%;
+  background: var(--background);
+}
+
+body {
+  min-height: 100%;
+  margin: 0;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+}
+
+a {
+  color: inherit;
+}
+
+/* Editorial display face — Cormorant Garamond, loaded in app/layout.tsx.
+   Used for page mastheads and hero numerals only; UI text stays sans. */
+.font-display {
+  font-family: var(--font-cormorant), Georgia, "Times New Roman", serif;
+}
+
+/* Text selection carries the gold brand */
+::selection {
+  background: #d4af37;
+  color: #0a1f38;
+}
+
+/* Gold focus ring for keyboard navigation */
+:focus-visible {
+  outline: 2px solid #b08d2f;
+  outline-offset: 1px;
+}
+
+/* Slim, palette-matched scrollbars (WebKit) */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: #d6c9a8;
+  border-radius: 5px;
+  border: 2px solid var(--background);
+}
+html.dark ::-webkit-scrollbar-thumb {
+  background: #1a3953;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
