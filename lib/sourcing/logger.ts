@@ -36,15 +36,30 @@ export type SourcingEventName =
   | "sourcing.persist.fail"
   | "sourcing.run.summary"
   | "sourcing.gate.skipped"
-  // URL-repair agent events (fired when a 4xx is detected and the
-  // url-finder agent runs to find a current canonical URL).
+  // URL-repair agent events
   | "sourcing.repair.start"
   | "sourcing.repair.candidate"
   | "sourcing.repair.no_candidate"
   | "sourcing.repair.error"
   | "sourcing.repair.persist_failed"
   | "sourcing.repair.retry_ok"
-  | "sourcing.repair.retry_failed";
+  | "sourcing.repair.retry_failed"
+  // News / press-release pipeline events
+  | "news.run.start"
+  | "news.run.summary"
+  | "news.listing.fetch.start"
+  | "news.listing.fetch.ok"
+  | "news.listing.fetch.fail"
+  | "news.discovery.skipped"
+  | "news.discovery.ok"
+  | "news.dedup.ok"
+  | "news.article.fetch.start"
+  | "news.article.fetch.ok"
+  | "news.article.fetch.fail"
+  | "news.article.extract.ok"
+  | "news.article.extract.fail"
+  | "news.article.persist.ok"
+  | "news.article.persist.fail";
 
 export interface SourcingEvent {
   ts: string;             // ISO timestamp
@@ -52,6 +67,8 @@ export interface SourcingEvent {
   event: SourcingEventName;
   vendorId?: string;
   sourceUrl?: string;
+  listingUrl?: string;    // news pipeline: the listing page URL
+  articleUrl?: string;    // news pipeline: individual article URL
   category?: string;
   // Free-form, JSON-serialisable fields per event type.
   data?: Record<string, unknown>;

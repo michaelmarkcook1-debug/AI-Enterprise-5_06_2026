@@ -213,7 +213,9 @@ async function processOneListing(
       distinct: ["sourceUrl"],
     });
     const knownUrls = new Set(
-      existing.map((e) => e.sourceUrl).filter((u): u is string => Boolean(u)),
+      (existing as { sourceUrl: string | null }[])
+        .map((e) => e.sourceUrl)
+        .filter((u): u is string => Boolean(u)),
     );
     const fresh = discovered.filter((a) => !knownUrls.has(a.url));
     dedupSkipped = discovered.length - fresh.length;
