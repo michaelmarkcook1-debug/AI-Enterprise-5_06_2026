@@ -1,208 +1,192 @@
 "use client";
 
-import { useMemo } from "react";
+// Capability Matrix — REAL DATA version.
+// ────────────────────────────────────────
+// Replaces the former hardcoded sample (Salesforce/Oracle/SAP/Workday…)
+// that never reflected the tracked vendor universe. The server page now
+// passes every rankable vendor, every tracked capability, and the
+// truthfulness-gated render state for each cell. Filters cover the FULL
+// vendor list and capability categories — nothing is sampled.
 
-interface CapabilityMatrixProps {
-  vendorFilter?: string;
-  pillarFilter?: string;
+import { useMemo, useState } from "react";
+
+export interface MatrixVendor {
+  id: string;
+  name: string;
+  category: string;
 }
 
-// Sample vendor capability data
-const VENDOR_CAPABILITIES = [
-  {
-    vendor: "Salesforce",
-    pillars: {
-      "Product Roadmap": 92,
-      "Customer Service": 88,
-      Execute: 85,
-      Vision: 90,
-      Innovation: 87,
-      "Market Breadth": 91,
-    },
-  },
-  {
-    vendor: "Microsoft",
-    pillars: {
-      "Product Roadmap": 89,
-      "Customer Service": 86,
-      Execute: 88,
-      Vision: 92,
-      Innovation: 93,
-      "Market Breadth": 94,
-    },
-  },
-  {
-    vendor: "Oracle",
-    pillars: {
-      "Product Roadmap": 85,
-      "Customer Service": 82,
-      Execute: 90,
-      Vision: 78,
-      Innovation: 75,
-      "Market Breadth": 88,
-    },
-  },
-  {
-    vendor: "SAP",
-    pillars: {
-      "Product Roadmap": 84,
-      "Customer Service": 85,
-      Execute: 89,
-      Vision: 76,
-      Innovation: 72,
-      "Market Breadth": 92,
-    },
-  },
-  {
-    vendor: "Workday",
-    pillars: {
-      "Product Roadmap": 91,
-      "Customer Service": 87,
-      Execute: 83,
-      Vision: 89,
-      Innovation: 88,
-      "Market Breadth": 72,
-    },
-  },
-];
+export interface MatrixCapability {
+  id: string;
+  name: string;
+  category: string;
+}
 
-const PILLAR_COLORS: Record<string, string> = {
-  Execute: "bg-blue-100 text-blue-900",
-  Vision: "bg-purple-100 text-purple-900",
-  "Product Roadmap": "bg-green-100 text-green-900",
-  "Customer Service": "bg-amber-100 text-amber-900",
-  Innovation: "bg-pink-100 text-pink-900",
-  "Market Breadth": "bg-slate-100 text-slate-900",
+export interface MatrixCell {
+  mode:
+    | "verified"
+    | "documented"
+    | "seed"
+    | "stale"
+    | "disputed"
+    | "validation_required"
+    | "unknown"
+    | "infrastructure_only";
+  showScore: boolean;
+  score: number;
+  confidence: number;
+}
+
+const MODE_LABEL: Record<MatrixCell["mode"], string> = {
+  verified: "Verified",
+  documented: "Documented",
+  seed: "Seed",
+  stale: "Stale",
+  disputed: "Disputed",
+  validation_required: "Validate",
+  unknown: "—",
+  infrastructure_only: "Infra-only",
 };
 
-function ScoreBar({ score }: { score: number }) {
-  const getColor = () => {
-    if (score >= 90) return "bg-green-500";
-    if (score >= 80) return "bg-blue-500";
-    if (score >= 70) return "bg-amber-500";
-    return "bg-red-500";
-  };
+const MODE_TONE: Record<MatrixCell["mode"], string> = {
+  verified: "text-emerald-700 dark:text-emerald-300",
+  documented: "text-[#13294b] dark:text-[#d8e2ec]",
+  seed: "text-amber-700 dark:text-amber-300",
+  stale: "text-amber-700 dark:text-amber-300",
+  disputed: "text-rose-700 dark:text-rose-300",
+  validation_required: "text-rose-700 dark:text-rose-300",
+  unknown: "text-[#8a93a3] dark:text-[#4c5d75]",
+  infrastructure_only: "text-[#8a93a3] dark:text-[#6b7d92]",
+};
 
-  return (
-    <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
-      <div
-        className={`h-full ${getColor()} transition-all`}
-        style={{ width: `${score}%` }}
-      />
-    </div>
-  );
+function scoreTone(v: number) {
+  if (v >= 80) return "text-emerald-700 dark:text-emerald-300";
+  if (v >= 60) return "text-amber-700 dark:text-amber-300";
+  return "text-rose-700 dark:text-rose-300";
 }
 
 export default function CapabilityMatrix({
-  vendorFilter,
-  pillarFilter,
-}: CapabilityMatrixProps) {
-  const filteredData = useMemo(() => {
-    return VENDOR_CAPABILITIES.filter(
-      (item) => !vendorFilter || item.vendor === vendorFilter
-    );
-  }, [vendorFilter]);
+  vendors,
+  capabilities,
+  cells,
+}: {
+  vendors: MatrixVendor[];
+  capabilities: MatrixCapability[];
+  /** key `${vendorId}_${capabilityId}` */
+  cells: Record<string, MatrixCell>;
+}) {
+  const [vendorFilter, setVendorFilter] = useState("");
+  const [capCategory, setCapCategory] = useState("");
 
-  const pillars = pillarFilter
-    ? [pillarFilter]
-    : [
-        "Execute",
-        "Vision",
-        "Product Roadmap",
-        "Customer Service",
-        "Innovation",
-        "Market Breadth",
-      ];
+  const capCategories = useMemo(
+    () => Array.from(new Set(capabilities.map((c) => c.category))).sort(),
+    [capabilities],
+  );
+
+  const visibleVendors = useMemo(
+    () => (vendorFilter ? vendors.filter((v) => v.id === vendorFilter) : vendors),
+    [vendors, vendorFilter],
+  );
+  const visibleCaps = useMemo(
+    () => (capCategory ? capabilities.filter((c) => c.category === capCategory) : capabilities),
+    [capabilities, capCategory],
+  );
 
   return (
-    <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-slate-900 to-slate-800 text-white p-6">
-        <h2 className="text-2xl font-bold">Capability Matrix</h2>
-        <p className="text-slate-300 mt-1">
-          Vendor strength across key capability pillars (0-100 scale)
-        </p>
+    <div>
+      {/* Filters — full universe, not a sample */}
+      <div className="mb-4 flex flex-wrap items-center gap-3">
+        <label className="flex items-center gap-2 text-xs font-semibold text-[#475a72] dark:text-[#a7bacd]">
+          Vendor
+          <select
+            value={vendorFilter}
+            onChange={(e) => setVendorFilter(e.target.value)}
+            className="rounded-md border border-[#ddd3b6] bg-[#fdfaf1] px-2.5 py-1.5 text-xs font-normal text-[#13294b] focus:outline-none focus:ring-1 focus:ring-[#b08d2f] dark:border-[#2a4a6b] dark:bg-[#0c2238] dark:text-[#eef3f8]"
+          >
+            <option value="">All {vendors.length} vendors</option>
+            {vendors.map((v) => (
+              <option key={v.id} value={v.id}>{v.name}</option>
+            ))}
+          </select>
+        </label>
+        <label className="flex items-center gap-2 text-xs font-semibold text-[#475a72] dark:text-[#a7bacd]">
+          Capability area
+          <select
+            value={capCategory}
+            onChange={(e) => setCapCategory(e.target.value)}
+            className="rounded-md border border-[#ddd3b6] bg-[#fdfaf1] px-2.5 py-1.5 text-xs font-normal text-[#13294b] focus:outline-none focus:ring-1 focus:ring-[#b08d2f] dark:border-[#2a4a6b] dark:bg-[#0c2238] dark:text-[#eef3f8]"
+          >
+            <option value="">All areas</option>
+            {capCategories.map((c) => (
+              <option key={c} value={c}>{c}</option>
+            ))}
+          </select>
+        </label>
+        {(vendorFilter || capCategory) && (
+          <button
+            type="button"
+            onClick={() => { setVendorFilter(""); setCapCategory(""); }}
+            className="rounded-md border border-dashed border-[#ddd3b6] px-2.5 py-1.5 text-xs text-[#5b6b7f] hover:bg-[#f3ead2] dark:border-[#2a4a6b] dark:text-[#8fa5bb] dark:hover:bg-[#143049]"
+          >
+            ✕ Clear
+          </button>
+        )}
+        <span className="ml-auto text-[11px] text-[#5b6b7f] dark:text-[#8fa5bb]">
+          {visibleVendors.length} vendor{visibleVendors.length !== 1 ? "s" : ""} × {visibleCaps.length} capabilit{visibleCaps.length !== 1 ? "ies" : "y"}
+        </span>
       </div>
 
-      {/* Matrix Table */}
       <div className="overflow-x-auto">
-        <table className="w-full">
+        <table className="w-full min-w-[640px] text-left text-sm">
           <thead>
-            <tr className="bg-slate-100 border-b border-slate-200">
-              <th className="px-6 py-4 text-left font-semibold text-slate-900 w-24">
-                Vendor
-              </th>
-              {pillars.map((pillar) => (
-                <th
-                  key={pillar}
-                  className={`px-4 py-4 text-left font-semibold text-xs uppercase tracking-wider ${
-                    PILLAR_COLORS[pillar]
-                  }`}
-                >
-                  {pillar}
+            <tr className="border-b border-[#ece4d0] text-[10px] uppercase tracking-wide text-[#5b6b7f] dark:border-[#1d3a57] dark:text-[#8fa5bb]">
+              <th className="sticky left-0 z-10 bg-[#fffdf7] py-2 pr-3 dark:bg-[#0c2238]">Vendor</th>
+              {visibleCaps.map((cap) => (
+                <th key={cap.id} className="px-2 py-2 text-center font-semibold" title={cap.category}>
+                  {cap.name}
                 </th>
               ))}
             </tr>
           </thead>
-          <tbody>
-            {filteredData.length === 0 ? (
-              <tr>
-                <td colSpan={pillars.length + 1} className="px-6 py-8 text-center">
-                  <p className="text-slate-600">No vendors match the selected filters</p>
+          <tbody className="divide-y divide-[#efe9d9] dark:divide-[#1d3a57]">
+            {visibleVendors.map((vendor) => (
+              <tr key={vendor.id} className="hover:bg-[#faf5e9] dark:hover:bg-[#0e2740]/60">
+                <td className="sticky left-0 z-10 bg-[#fffdf7] py-2 pr-3 dark:bg-[#0c2238]">
+                  <div className="text-xs font-semibold text-[#13294b] dark:text-[#eef3f8]">{vendor.name}</div>
+                  <div className="text-[10px] text-[#5b6b7f] dark:text-[#8fa5bb]">{vendor.category}</div>
                 </td>
-              </tr>
-            ) : (
-              filteredData.map((vendor, idx) => (
-                <tr
-                  key={vendor.vendor}
-                  className={idx % 2 === 0 ? "bg-white" : "bg-slate-50"}
-                >
-                  <td className="px-6 py-4 font-semibold text-slate-900 whitespace-nowrap">
-                    {vendor.vendor}
-                  </td>
-                  {pillars.map((pillar) => {
-                    const score = vendor.pillars[pillar as keyof typeof vendor.pillars];
-                    return (
-                      <td key={pillar} className="px-4 py-4">
-                        <div className="space-y-1">
-                          <ScoreBar score={score} />
-                          <div className="text-right text-sm font-medium text-slate-900">
-                            {score}
-                          </div>
+                {visibleCaps.map((cap) => {
+                  const cell = cells[`${vendor.id}_${cap.id}`];
+                  if (!cell) {
+                    return <td key={cap.id} className="px-2 py-2 text-center text-xs text-[#8a93a3] dark:text-[#4c5d75]">—</td>;
+                  }
+                  return (
+                    <td key={cap.id} className="px-2 py-2 text-center">
+                      {cell.showScore ? (
+                        <div>
+                          <span className={`font-mono text-sm font-bold tabular-nums ${scoreTone(cell.score)}`}>{cell.score}</span>
+                          <div className={`text-[9px] uppercase tracking-wide ${MODE_TONE[cell.mode]}`}>{MODE_LABEL[cell.mode]}</div>
                         </div>
-                      </td>
-                    );
-                  })}
-                </tr>
-              ))
-            )}
+                      ) : (
+                        <span className={`text-[10px] font-semibold uppercase tracking-wide ${MODE_TONE[cell.mode]}`}>
+                          {MODE_LABEL[cell.mode]}
+                        </span>
+                      )}
+                    </td>
+                  );
+                })}
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>
 
-      {/* Legend */}
-      <div className="px-6 py-4 bg-slate-50 border-t border-slate-200">
-        <p className="text-xs font-semibold text-slate-600 uppercase tracking-wider mb-3">
-          Score Scale
-        </p>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-2 rounded-full bg-green-500" />
-            <span className="text-xs text-slate-600">90–100: Excellent</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-2 rounded-full bg-blue-500" />
-            <span className="text-xs text-slate-600">80–89: Strong</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-2 rounded-full bg-amber-500" />
-            <span className="text-xs text-slate-600">70–79: Adequate</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-2 rounded-full bg-red-500" />
-            <span className="text-xs text-slate-600">Below 70: Weak</span>
-          </div>
-        </div>
+      <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 border-t border-[#efe9d9] pt-3 text-[10px] text-[#5b6b7f] dark:border-[#1d3a57] dark:text-[#8fa5bb]">
+        <span><strong className="text-emerald-700 dark:text-emerald-300">Verified</strong> E3+ evidence with sources</span>
+        <span><strong className="text-[#13294b] dark:text-[#d8e2ec]">Documented</strong> public docs, unverified</span>
+        <span><strong className="text-amber-700 dark:text-amber-300">Seed / Stale</strong> directional only</span>
+        <span><strong className="text-rose-700 dark:text-rose-300">Disputed / Validate</strong> human review needed</span>
+        <span><strong>Infra-only</strong> capability comparison not applicable</span>
       </div>
     </div>
   );

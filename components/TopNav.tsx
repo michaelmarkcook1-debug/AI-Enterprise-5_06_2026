@@ -121,7 +121,6 @@ function badgeLabel(health: IngestionHealth | null, iso: string): string {
 // Atlas and Leadership are accessible from Understand, not top nav.
 // Investor Tools is visually separated as a secondary workflow.
 const LIBRARY: { href: string; label: string }[] = [
-  { href: "/atlas", label: "AI Ecosystem Atlas" },
   { href: "/market", label: "Market" },
   { href: "/news", label: "News" },
   { href: "/reputation", label: "Reputation" },

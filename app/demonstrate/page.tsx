@@ -138,16 +138,16 @@ export default async function DemonstratePage({ searchParams }: PageProps) {
 
       {/* Executive Defence Summary */}
       <section className="mb-6 grid gap-4 md:grid-cols-4">
-        <ScoreCard label="Board Defence Score" value={boardDefenceScoreValue} sub="quality-weighted: vendors · evidence · momentum · reputation · context" tone="sky" />
-        <ScoreCard label="CIO Confidence Score" value={hasShortlist ? cioConfidence : null} sub="Vendor quality + evidence + momentum" tone="emerald" />
+        <ScoreCard label="Board Defence Score" value={boardDefenceScoreValue} sub="quality-weighted: vendors · evidence · momentum · reputation · context" />
+        <ScoreCard label="CIO Confidence Score" value={hasShortlist ? cioConfidence : null} sub="Vendor quality + evidence + momentum" />
         <div className="rounded-xl border border-[#e6dcc3] bg-white p-4 dark:border-[#1d3a57] dark:bg-[#0c2238]">
-          <div className="text-[10px] font-semibold uppercase tracking-wider text-[#5b6b7f]">Recommendation</div>
+          <div className="text-[10px] font-semibold uppercase tracking-wider text-[#5b6b7f] dark:text-[#8fa5bb]">Recommendation</div>
           <div className={`mt-1 text-lg font-semibold ${statusColor(decisionStatus)}`}>{hasShortlist ? decisionStatus : "—"}</div>
         </div>
         <div className="rounded-xl border border-[#e6dcc3] bg-white p-4 dark:border-[#1d3a57] dark:bg-[#0c2238]">
-          <div className="text-[10px] font-semibold uppercase tracking-wider text-[#5b6b7f]">Shortlist</div>
+          <div className="text-[10px] font-semibold uppercase tracking-wider text-[#5b6b7f] dark:text-[#8fa5bb]">Shortlist</div>
           <div className="mt-1 text-sm font-semibold text-[#13294b] dark:text-[#eef3f8]">{hasShortlist ? shortlistVendors.map((v) => v.name).join(", ") : "Not set"}</div>
-          <div className="mt-1 text-[10px] text-[#5b6b7f]">{industries.join(", ") || "All industries"} · {region || "Global"}</div>
+          <div className="mt-1 text-[10px] text-[#5b6b7f] dark:text-[#8fa5bb]">{industries.join(", ") || "All industries"} · {region || "Global"}</div>
         </div>
       </section>
       <SeedDataBadge label="Estimated" provenance="seed" reason="Scores derived from seed data. Board Defence Score measures case completeness." />
@@ -157,8 +157,8 @@ export default async function DemonstratePage({ searchParams }: PageProps) {
         <BS title="Why are we investing?" open>
           <Panel title="Business case">
             <div className="grid gap-4 md:grid-cols-2">
-              <div><div className="text-[10px] uppercase tracking-wider text-[#5b6b7f]">Business problem</div><p className="mt-1 text-sm leading-6 text-[#475a72]">{SEED_BUSINESS_CASE.businessProblem}</p></div>
-              <div><div className="text-[10px] uppercase tracking-wider text-[#5b6b7f]">Intended outcomes</div><ul className="mt-1 space-y-1 text-sm text-[#475a72]">{SEED_BUSINESS_CASE.intendedOutcomes.map((o) => <li key={o} className="flex gap-2"><span className="text-emerald-600">·</span>{o}</li>)}</ul></div>
+              <div><div className="text-[10px] uppercase tracking-wider text-[#5b6b7f] dark:text-[#8fa5bb]">Business problem</div><p className="mt-1 text-sm leading-6 text-[#475a72] dark:text-[#b9c8d9]">{SEED_BUSINESS_CASE.businessProblem}</p></div>
+              <div><div className="text-[10px] uppercase tracking-wider text-[#5b6b7f] dark:text-[#8fa5bb]">Intended outcomes</div><ul className="mt-1 space-y-1 text-sm text-[#475a72] dark:text-[#b9c8d9]">{SEED_BUSINESS_CASE.intendedOutcomes.map((o) => <li key={o} className="flex gap-2"><span className="text-emerald-600">·</span>{o}</li>)}</ul></div>
             </div>
             <div className="mt-4 grid gap-3 md:grid-cols-4 text-xs">
               <div className="rounded-md border border-[#e6dcc3] p-3 dark:border-[#1d3a57]"><strong>Productivity:</strong> {SEED_BUSINESS_CASE.productivityImpact}</div>
@@ -188,7 +188,7 @@ export default async function DemonstratePage({ searchParams }: PageProps) {
             <Panel title="Vendor selection defence">
               <div className="overflow-x-auto">
                 <table className="min-w-full text-sm">
-                  <thead><tr className="border-b border-[#e6dcc3] text-left text-xs uppercase tracking-wide text-[#56657b]">
+                  <thead><tr className="border-b border-[#e6dcc3] text-left text-xs uppercase tracking-wide text-[#56657b] dark:text-[#a7bacd]">
                     <th className="py-2 pr-3">Vendor</th><th className="py-2 pr-3">Momentum</th><th className="py-2 pr-3">Top pillars</th><th className="py-2">Confidence</th>
                   </tr></thead>
                   <tbody>{shortlistVendors.map((v) => {
@@ -197,14 +197,14 @@ export default async function DemonstratePage({ searchParams }: PageProps) {
                     return (<tr key={v.id} className="border-b border-[#efe9d9]/60 align-top">
                       <td className="py-3 pr-3"><VendorNameWithOwnership name={v.name} ownershipType={v.ownershipType} /></td>
                       <td className="py-3 pr-3"><div className="flex items-center gap-2"><div className="w-24"><ScoreBar value={mom?.momentumScore ?? 50} /></div><span className="text-xs font-semibold">{(mom?.momentumScore ?? 50).toFixed(0)}</span></div></td>
-                      <td className="py-3 pr-3"><ul className="space-y-1 text-xs">{pillars.length > 0 ? pillars.map((p) => <li key={p.pillar} className="flex justify-between gap-2"><span>{p.pillar}</span><span className="font-semibold">{p.capabilityScore.toFixed(0)}</span></li>) : <li className="text-[#56657b]">—</li>}</ul></td>
-                      <td className="py-3">{mom ? <Confidence value={mom.confidence} /> : <span className="text-xs text-[#56657b]">—</span>}</td>
+                      <td className="py-3 pr-3"><ul className="space-y-1 text-xs">{pillars.length > 0 ? pillars.map((p) => <li key={p.pillar} className="flex justify-between gap-2"><span>{p.pillar}</span><span className="font-semibold">{p.capabilityScore.toFixed(0)}</span></li>) : <li className="text-[#56657b] dark:text-[#a7bacd]">—</li>}</ul></td>
+                      <td className="py-3">{mom ? <Confidence value={mom.confidence} /> : <span className="text-xs text-[#56657b] dark:text-[#a7bacd]">—</span>}</td>
                     </tr>);
                   })}</tbody>
                 </table>
               </div>
             </Panel>
-          ) : <Panel title="Vendor selection"><p className="text-sm text-[#475a72]">Run an assessment in <Link href="/assess" className="underline font-semibold">Assess</Link> to populate.</p></Panel>}
+          ) : <Panel title="Vendor selection"><p className="text-sm text-[#475a72] dark:text-[#b9c8d9]">Run an assessment in <Link href="/assess" className="underline font-semibold">Assess</Link> to populate.</p></Panel>}
         </BS>
 
         {/* 4. What are competitors doing? */}
@@ -217,8 +217,8 @@ export default async function DemonstratePage({ searchParams }: PageProps) {
                     <span className="text-sm font-semibold text-[#13294b] dark:text-[#eef3f8]">{c.peer}</span>
                     <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase ${c.maturity === "Advanced" ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300" : c.maturity === "Scaling" ? "bg-sky-100 text-sky-800 dark:bg-sky-950/60 dark:text-sky-300" : "bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-200"}`}>{c.maturity}</span>
                   </div>
-                  <div className="mt-2 text-xs text-[#56657b]"><strong>Use cases:</strong> {c.useCases.join(", ")}</div>
-                  <div className="mt-1 text-xs text-[#56657b]"><strong>Known vendors:</strong> {c.knownVendors.join(", ")}</div>
+                  <div className="mt-2 text-xs text-[#56657b] dark:text-[#a7bacd]"><strong>Use cases:</strong> {c.useCases.join(", ")}</div>
+                  <div className="mt-1 text-xs text-[#56657b] dark:text-[#a7bacd]"><strong>Known vendors:</strong> {c.knownVendors.join(", ")}</div>
                   <div className="mt-2 text-xs font-medium text-[#13294b] dark:text-[#eef3f8]"><strong>CIO implication:</strong> {c.implication}</div>
                 </div>
               ))}
@@ -238,17 +238,17 @@ export default async function DemonstratePage({ searchParams }: PageProps) {
           <Panel title="Enterprise risk register">
             <div className="overflow-x-auto">
               <table className="min-w-full text-sm">
-                <thead><tr className="border-b border-[#e6dcc3] text-left text-[10px] uppercase tracking-wide text-[#56657b]">
+                <thead><tr className="border-b border-[#e6dcc3] text-left text-[10px] uppercase tracking-wide text-[#56657b] dark:text-[#a7bacd]">
                   <th className="py-2 pr-3">Risk</th><th className="py-2 pr-3">Category</th><th className="py-2 pr-3">Severity</th><th className="py-2 pr-3">Likelihood</th><th className="py-2 pr-3">Mitigation</th><th className="py-2">Owner</th>
                 </tr></thead>
                 <tbody>{SEED_ENTERPRISE_RISKS.map((r) => (
                   <tr key={r.id} className="border-b border-[#efe9d9]/60 align-top">
                     <td className="py-2 pr-3 text-xs font-medium">{r.risk}</td>
-                    <td className="py-2 pr-3 text-xs text-[#5b6b7f]">{r.category}</td>
+                    <td className="py-2 pr-3 text-xs text-[#5b6b7f] dark:text-[#8fa5bb]">{r.category}</td>
                     <td className={`py-2 pr-3 text-xs font-semibold ${riskColor(r.severity)}`}>{r.severity}</td>
                     <td className={`py-2 pr-3 text-xs font-semibold ${riskColor(r.likelihood)}`}>{r.likelihood}</td>
-                    <td className="py-2 pr-3 text-xs text-[#56657b] max-w-[250px]">{r.mitigation}</td>
-                    <td className="py-2 text-xs text-[#5b6b7f]">{r.owner}</td>
+                    <td className="py-2 pr-3 text-xs text-[#56657b] dark:text-[#a7bacd] max-w-[250px]">{r.mitigation}</td>
+                    <td className="py-2 text-xs text-[#5b6b7f] dark:text-[#8fa5bb]">{r.owner}</td>
                   </tr>
                 ))}</tbody>
               </table>
@@ -286,17 +286,17 @@ export default async function DemonstratePage({ searchParams }: PageProps) {
           <Panel title="Value realisation KPIs">
             <div className="overflow-x-auto">
               <table className="min-w-full text-sm">
-                <thead><tr className="border-b border-[#e6dcc3] text-left text-[10px] uppercase tracking-wide text-[#56657b]">
+                <thead><tr className="border-b border-[#e6dcc3] text-left text-[10px] uppercase tracking-wide text-[#56657b] dark:text-[#a7bacd]">
                   <th className="py-2 pr-3">Metric</th><th className="py-2 pr-3">Baseline</th><th className="py-2 pr-3">Target</th><th className="py-2 pr-3">Owner</th><th className="py-2 pr-3">Cadence</th><th className="py-2">Method</th>
                 </tr></thead>
                 <tbody>{SEED_KPIS.map((k) => (
                   <tr key={k.metric} className="border-b border-[#efe9d9]/60">
                     <td className="py-2 pr-3 text-xs font-medium">{k.metric}</td>
-                    <td className="py-2 pr-3 text-xs text-[#5b6b7f]">{k.baseline}</td>
+                    <td className="py-2 pr-3 text-xs text-[#5b6b7f] dark:text-[#8fa5bb]">{k.baseline}</td>
                     <td className="py-2 pr-3 text-xs font-semibold text-emerald-700 dark:text-emerald-300">{k.target}</td>
-                    <td className="py-2 pr-3 text-xs text-[#5b6b7f]">{k.owner}</td>
-                    <td className="py-2 pr-3 text-xs text-[#5b6b7f]">{k.cadence}</td>
-                    <td className="py-2 text-xs text-[#5b6b7f]">{k.method}</td>
+                    <td className="py-2 pr-3 text-xs text-[#5b6b7f] dark:text-[#8fa5bb]">{k.owner}</td>
+                    <td className="py-2 pr-3 text-xs text-[#5b6b7f] dark:text-[#8fa5bb]">{k.cadence}</td>
+                    <td className="py-2 text-xs text-[#5b6b7f] dark:text-[#8fa5bb]">{k.method}</td>
                   </tr>
                 ))}</tbody>
               </table>
@@ -308,7 +308,7 @@ export default async function DemonstratePage({ searchParams }: PageProps) {
         {/* 10. Will this decision age well? */}
         <BS title="Will this decision age well?">
           <Panel title="Decision sustainability">
-            <p className="mb-3 text-sm text-[#475a72]">Track whether this recommendation holds over time via the <Link href="/monitor" className="font-semibold underline">Monitor tab</Link>.</p>
+            <p className="mb-3 text-sm text-[#475a72] dark:text-[#b9c8d9]">Track whether this recommendation holds over time via the <Link href="/monitor" className="font-semibold underline">Monitor tab</Link>.</p>
             <div className="grid gap-3 md:grid-cols-2 text-xs">
               <div className="rounded-md border border-[#e6dcc3] p-3 dark:border-[#1d3a57]"><strong>Assumption monitoring:</strong> {SEED_BOARD_ASSUMPTIONS.length} assumptions tracked. {SEED_BOARD_ASSUMPTIONS.filter((a) => a.status === "Watch" || a.status === "At Risk").length} require attention.</div>
               <div className="rounded-md border border-[#e6dcc3] p-3 dark:border-[#1d3a57]"><strong>Reassessment triggers:</strong> Automatic alerts when vendor momentum drops, regulation emerges, or assumptions weaken.</div>
@@ -324,9 +324,9 @@ export default async function DemonstratePage({ searchParams }: PageProps) {
                 <div key={a.id} className="rounded-lg border border-[#e6dcc3] bg-white p-4 dark:border-[#1d3a57] dark:bg-[#0c2238]">
                   <div className="flex items-start justify-between gap-3">
                     <div><div className="text-sm font-semibold text-[#13294b] dark:text-[#eef3f8]">{a.title}</div>
-                      <div className="mt-1 text-xs text-[#56657b]"><strong>Failure trigger:</strong> {a.failureTrigger}</div>
-                      <div className="mt-1 text-xs text-[#56657b]"><strong>Current signal:</strong> {a.currentSignal}</div>
-                      <div className="mt-1 text-xs text-[#56657b]"><strong>Action:</strong> {a.recommendedAction}</div>
+                      <div className="mt-1 text-xs text-[#56657b] dark:text-[#a7bacd]"><strong>Failure trigger:</strong> {a.failureTrigger}</div>
+                      <div className="mt-1 text-xs text-[#56657b] dark:text-[#a7bacd]"><strong>Current signal:</strong> {a.currentSignal}</div>
+                      <div className="mt-1 text-xs text-[#56657b] dark:text-[#a7bacd]"><strong>Action:</strong> {a.recommendedAction}</div>
                     </div>
                     <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase ${a.status === "Stable" ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300" : a.status === "Watch" ? "bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-200" : "bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300"}`}>{a.status}</span>
                   </div>
@@ -340,13 +340,13 @@ export default async function DemonstratePage({ searchParams }: PageProps) {
         {/* 12. Latest signals */}
         <BS title="What are the latest signals?">
           <div id="news"><Panel title={shortlistIds.size > 0 ? "Shortlist news" : "Recent intelligence"}>
-            {filteredNews.length === 0 ? <p className="text-sm text-[#56657b]">No recent news.</p> : (
+            {filteredNews.length === 0 ? <p className="text-sm text-[#56657b] dark:text-[#a7bacd]">No recent news.</p> : (
               <div className="divide-y divide-[#efe9d9]">{filteredNews.slice(0, 6).map((item) => (
                 <article key={item.id} className="py-4">
                   <div className="flex flex-wrap gap-2">{item.categories.slice(0, 3).map((c) => <span key={c} className="rounded bg-[#f3ead2] px-2 py-0.5 text-[10px] text-[#455044]">{c}</span>)}</div>
                   <h3 className="mt-2 text-sm font-semibold">{item.title}</h3>
-                  <p className="mt-1 text-xs text-[#475a72]">{item.whyItMatters}</p>
-                  <div className="mt-2 flex gap-3 text-[10px] text-[#5b6b7f]"><Confidence value={item.confidenceScore} /><span>Impact: {item.impactScore}</span></div>
+                  <p className="mt-1 text-xs text-[#475a72] dark:text-[#b9c8d9]">{item.whyItMatters}</p>
+                  <div className="mt-2 flex gap-3 text-[10px] text-[#5b6b7f] dark:text-[#8fa5bb]"><Confidence value={item.confidenceScore} /><span>Impact: {item.impactScore}</span></div>
                 </article>
               ))}</div>
             )}
@@ -472,24 +472,22 @@ function BS({ title, open, children }: { title: string; open?: boolean; children
     <details className="group" open={open}>
       <summary className="flex cursor-pointer select-none items-center justify-between rounded-xl border border-[#e6dcc3] bg-white px-4 py-3 text-sm font-semibold text-[#13294b] hover:bg-[#faf5e9] dark:border-[#1d3a57] dark:bg-[#0c2238] dark:text-[#eef3f8] dark:hover:bg-[#143049]">
         <span>{title}</span>
-        <span className="ml-2 font-normal text-[#5b6b7f] text-xs group-open:hidden">▼</span>
-        <span className="ml-2 font-normal text-[#5b6b7f] text-xs hidden group-open:inline">▲</span>
+        <span className="ml-2 font-normal text-[#5b6b7f] dark:text-[#8fa5bb] text-xs group-open:hidden">▼</span>
+        <span className="ml-2 font-normal text-[#5b6b7f] dark:text-[#8fa5bb] text-xs hidden group-open:inline">▲</span>
       </summary>
       <div className="mt-2">{children}</div>
     </details>
   );
 }
 
-function ScoreCard({ label, value, sub, tone }: { label: string; value: number | null; sub: string; tone: "emerald" | "sky" | "amber" }) {
-  const border = tone === "emerald" ? "border-emerald-200 dark:border-emerald-900/60" : tone === "sky" ? "border-sky-200 dark:border-sky-900/60" : "border-amber-200 dark:border-amber-900/60";
-  const bg = tone === "emerald" ? "bg-emerald-50 dark:bg-emerald-950/30" : tone === "sky" ? "bg-sky-50 dark:bg-sky-950/30" : "bg-amber-50 dark:bg-amber-950/30";
-  const text = tone === "emerald" ? "text-emerald-700 dark:text-emerald-300" : tone === "sky" ? "text-sky-700 dark:text-sky-300" : "text-amber-700 dark:text-amber-300";
-  const textSub = tone === "emerald" ? "text-emerald-800/70 dark:text-emerald-300/70" : tone === "sky" ? "text-sky-800/70 dark:text-sky-300/70" : "text-amber-800/70 dark:text-amber-300/70";
+function ScoreCard({ label, value, sub }: { label: string; value: number | null; sub: string }) {
+  // Editorial stat — gold top rule + mono numeral, matching the Metric
+  // component. The old sky/emerald pastel tiles fought the navy/gold system.
   return (
-    <div className={`rounded-xl border ${border} ${bg} p-4`}>
-      <div className={`text-[10px] font-semibold uppercase tracking-wider ${text}`}>{label}</div>
-      <div className={`mt-1 font-mono text-3xl font-semibold ${text}`}>{value !== null ? value : "—"}</div>
-      <div className={`mt-1 text-[10px] ${textSub}`}>{sub}</div>
+    <div className="rounded-lg border border-[#e3d9c0] border-t-2 border-t-[#d4af37] bg-[#fffdf7] p-4 dark:border-[#1d3a57] dark:border-t-[#d4af37] dark:bg-[#0c2238]">
+      <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#5b6b7f] dark:text-[#8fa5bb]">{label}</div>
+      <div className="mt-1 font-mono text-3xl font-semibold text-[#13294b] dark:text-[#eef3f8]">{value !== null ? value : "—"}</div>
+      <div className="mt-1 text-[10px] text-[#5b6b7f] dark:text-[#8fa5bb]">{sub}</div>
     </div>
   );
 }

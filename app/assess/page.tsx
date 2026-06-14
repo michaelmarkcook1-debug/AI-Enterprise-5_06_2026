@@ -26,6 +26,8 @@ import { getDataProvenance } from "@/lib/intelligence/provenance";
 import { INDUSTRIES } from "@/lib/industries";
 import { PRIMARY_OBJECTIVES, ECOSYSTEMS, workflowsForTier } from "@/lib/use-cases";
 import { parseTier } from "@/lib/assessment/tiers";
+import AnalystInsight from "@/components/analyst-insight";
+import { assessInsight } from "@/lib/insights/tab-insights";
 import AssessForm from "./AssessForm";
 import TierBar from "../assessment/TierBar";
 import { WatchlistManager } from "../watchlists/WatchlistManager";
@@ -54,32 +56,20 @@ export default async function AssessPage({ searchParams }: PageProps) {
       kicker="What should your organisation deploy?"
       description="Three assessment tiers: Opportunity (where should we start?), Strategy (what should we deploy?), and Procurement (should we buy this?). Each tier scores vendors against your industry, workflows, risk profile, governance, and budget — with results flowing directly into Demonstrate for board defence."
     >
-      {/* 1. Executive briefing */}
-      <section className="mb-6 grid gap-5 lg:grid-cols-[1fr_0.75fr]">
-        <Panel title="Market overview">
-          <div className="space-y-4">
-            <ul className="space-y-3 pl-1">
-              {brief.executiveSummary.map((item) => (
-                <li key={item} className="flex gap-2.5 text-sm leading-6 font-semibold text-[#15263c] dark:text-[#eef3f8]">
-                  <span className="mt-1 shrink-0 text-[#a07f1f] dark:text-[#d4af37]">•</span>
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
-            <div className="rounded-md border-l-4 border-[#a07f1f] bg-[#f3ead2] p-3 text-sm font-semibold text-[#13294b] dark:border-[#d4af37] dark:bg-[#1a2e14]/40 dark:text-[#eef3f8]">
-              {brief.boardTakeaway}
-            </div>
-          </div>
-        </Panel>
-        <Panel title="Confidence note">
-          <p className="text-sm leading-6 text-[#475a72]">{brief.confidenceNote}</p>
-        </Panel>
-      </section>
+      {/* The former executive-briefing panel moved to the top of Query as the
+          market overview (12 Jun 2026); the confidence-note panel was deleted.
+          Assess now opens directly on its primary action: the assessment form. */}
+      <AnalystInsight paragraph={assessInsight({
+        vendorCount: vendorProfiles.length,
+        watchlists: watchlists.length,
+        riskAlerts: dashboard.riskAlerts.length,
+        highSeverity: dashboard.riskAlerts.filter((a) => a.severity === "high").length,
+      })} />
 
       {/* 1. Assessment form — FIRST so the primary action is immediately reachable */}
       <section id="fit" className="mb-8">
         <Panel title="Choose your assessment">
-          <p className="mb-4 text-sm text-[#475a72]">
+          <p className="mb-4 text-sm text-[#475a72] dark:text-[#b9c8d9]">
             Select the assessment that matches your decision stage. Opportunity identifies where
             to start. Strategy recommends what to deploy. Procurement scores whether to buy.
             All three use the AnalystGenius proprietary scoring engine with evidence grading.
@@ -106,24 +96,24 @@ export default async function AssessPage({ searchParams }: PageProps) {
       <details className="group mb-6">
         <summary className="flex cursor-pointer select-none items-center justify-between rounded-xl border border-[#e6dcc3] bg-white px-4 py-3 text-sm font-semibold text-[#13294b] hover:bg-[#faf5e9] dark:border-[#1d3a57] dark:bg-[#0c2238] dark:text-[#eef3f8] dark:hover:bg-[#143049]">
           <span>Market context — briefing &amp; risk signals</span>
-          <span className="ml-2 font-normal text-[#5b6b7f] text-xs group-open:hidden">▼ expand</span>
-          <span className="ml-2 font-normal text-[#5b6b7f] text-xs hidden group-open:inline">▲ collapse</span>
+          <span className="ml-2 font-normal text-[#5b6b7f] dark:text-[#8fa5bb] text-xs group-open:hidden">▼ expand</span>
+          <span className="ml-2 font-normal text-[#5b6b7f] dark:text-[#8fa5bb] text-xs hidden group-open:inline">▲ collapse</span>
         </summary>
         <div className="mt-2 space-y-5">
           {/* Winning / losing / watchlist */}
           <section className="grid gap-5 lg:grid-cols-3">
             <Panel title="Who is winning">
-              <ul className="space-y-2 text-sm leading-6 text-[#475a72]">
+              <ul className="space-y-2 text-sm leading-6 text-[#475a72] dark:text-[#b9c8d9]">
                 {brief.whoIsWinning.map((item) => <li key={item}>{item}</li>)}
               </ul>
             </Panel>
             <Panel title="Who is losing">
-              <ul className="space-y-2 text-sm leading-6 text-[#475a72]">
+              <ul className="space-y-2 text-sm leading-6 text-[#475a72] dark:text-[#b9c8d9]">
                 {brief.whoIsLosing.map((item) => <li key={item}>{item}</li>)}
               </ul>
             </Panel>
             <Panel title="Watchlist & risk (briefing)">
-              <ul className="space-y-2 text-sm leading-6 text-[#475a72]">
+              <ul className="space-y-2 text-sm leading-6 text-[#475a72] dark:text-[#b9c8d9]">
                 {brief.riskWatch.map((item) => <li key={item}>{item}</li>)}
               </ul>
             </Panel>

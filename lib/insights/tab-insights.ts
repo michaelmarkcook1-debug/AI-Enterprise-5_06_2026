@@ -71,6 +71,56 @@ export function demonstrateInsight(i: DemonstrateInsightInput): string {
   );
 }
 
+export interface AssessInsightInput {
+  vendorCount: number;
+  watchlists: number;
+  riskAlerts: number;
+  highSeverity: number;
+}
+
+export function assessInsight(i: AssessInsightInput): string {
+  return (
+    `The assessment engine currently scores against ${i.vendorCount} tracked vendors, so a shortlist produced here reflects the live universe rather than a static catalogue. ` +
+    `Pick the tier that matches your decision stage — Opportunity for where to start, Strategy for what to deploy, Procurement for whether to buy — because pillar weights shift with the tier and the answer legitimately changes. ` +
+    `${i.riskAlerts > 0 ? `${i.riskAlerts} vendor risk ${i.riskAlerts === 1 ? "alert is" : "alerts are"} active${i.highSeverity > 0 ? ` (${i.highSeverity} high severity)` : ""} — review them before locking a shortlist.` : "No vendor risk alerts are currently active."} ` +
+    `${i.watchlists > 0 ? `${i.watchlists} ${i.watchlists === 1 ? "watchlist is" : "watchlists are"} already monitoring this space; results here can feed them directly.` : "Set up a watchlist after assessing so the recommendation is monitored rather than filed."}`
+  );
+}
+
+export interface EntityInsightInput {
+  name: string;
+  primaryRole: string;
+  leadership: number;
+  momentum: number;
+  readiness: number;
+  confidence: number;
+  risk: "low" | "medium" | "high";
+  layerRank: number;       // 1-based rank within its primary-role layer
+  layerSize: number;       // peers in that layer
+  leadershipDelta: number;
+}
+
+export function entityInsight(i: EntityInsightInput): string {
+  const posClause =
+    i.layerRank === 1
+      ? `leads its ${i.primaryRole} layer of ${i.layerSize}`
+      : `ranks #${i.layerRank} of ${i.layerSize} in its ${i.primaryRole} layer`;
+  const momentumClause =
+    i.momentum >= 70 ? "momentum is strongly positive" : i.momentum >= 50 ? "momentum is steady" : "momentum is soft";
+  const deltaClause =
+    i.leadershipDelta > 0 ? ` and the leadership score moved +${i.leadershipDelta} since the prior snapshot` :
+    i.leadershipDelta < 0 ? ` and the leadership score slipped ${i.leadershipDelta} since the prior snapshot` : "";
+  const riskClause =
+    i.risk === "high" ? "Risk is flagged high — treat dependency and counterparty exposure as a first-order diligence item." :
+    i.risk === "medium" ? "Risk is moderate; standard contractual protections should suffice." :
+    "Risk is currently low for its layer.";
+  return (
+    `${i.name} ${posClause} on a leadership score of ${i.leadership}; ${momentumClause}${deltaClause}. ` +
+    `Enterprise readiness of ${i.readiness} ${i.readiness >= 75 ? "supports production deployment conversations now" : i.readiness >= 60 ? "supports pilots, with gaps to close before scale" : "argues for proof-of-concept scope only"}. ` +
+    `${riskClause} Evidence confidence is ${i.confidence}% — ${i.confidence >= 75 ? "the picture is well-sourced" : "treat this read as directional until evidence deepens"}.`
+  );
+}
+
 export interface MonitorInsightInput {
   activeRecommendations: number;
   reassessNow: number;

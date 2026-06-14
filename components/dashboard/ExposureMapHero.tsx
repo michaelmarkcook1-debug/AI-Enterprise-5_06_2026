@@ -283,7 +283,7 @@ export default function ExposureMapHero(_: { edges?: unknown } = {}) {
                 }
                 className={`rounded-full border px-2.5 py-0.5 text-[11px] font-medium transition-colors ${
                   active
-                    ? "border-[#0a1f38] bg-[#0c2238] text-white dark:border-[#ece4d0] dark:bg-[#ece3cb] dark:text-[#0a1f38]"
+                    ? "border-[#0a1f38] bg-[#0c2238] text-white dark:border-[#ece4d0] dark:bg-[#ece3cb] dark:text-[#13294b]"
                     : "border-[#d6c9a8] bg-white text-[#3f5068] hover:border-[#6b87a3] dark:border-[#2a4a6b] dark:bg-[#0c2238] dark:text-[#a7bacd] dark:hover:border-[#6b87a3]"
                 }`}
                 style={active ? undefined : { borderLeftColor: REL_COLOR[rt], borderLeftWidth: 3 }}

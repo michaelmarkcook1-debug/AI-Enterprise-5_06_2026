@@ -80,7 +80,7 @@ export default function IngestionTrigger() {
           <button
             type="button"
             onClick={() => setPhase("confirming")}
-            className="inline-flex items-center gap-2 rounded-full bg-[#0c2238] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#1c3d5c] dark:bg-white dark:text-[#0a1f38] dark:hover:bg-[#e3d9c0]"
+            className="inline-flex items-center gap-2 rounded-full bg-[#0c2238] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#1c3d5c] dark:bg-white dark:text-[#13294b] dark:hover:bg-[#e3d9c0]"
           >
             Run full ingestion now
             <span aria-hidden>→</span>
