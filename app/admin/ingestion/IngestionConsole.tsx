@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { estimateIngestionCost } from "@/lib/ingestion/cost-model";
 
 interface Job {
@@ -35,6 +35,26 @@ export default function IngestionConsole({
   const [busyAll, setBusyAll] = useState(false);
   const [ingestResult, setIngestResult] = useState<string | null>(null);
   const [ingestError, setIngestError] = useState<string | null>(null);
+  const [elapsedSec, setElapsedSec] = useState(0);
+  const elapsedRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Tick elapsed time and poll jobs table while ingestion is running.
+  useEffect(() => {
+    if (busyAll) {
+      setElapsedSec(0);
+      elapsedRef.current = setInterval(() => setElapsedSec((s) => s + 1), 1000);
+      pollRef.current = setInterval(() => { void refreshJobs(); }, 5000);
+    } else {
+      if (elapsedRef.current) clearInterval(elapsedRef.current);
+      if (pollRef.current) clearInterval(pollRef.current);
+    }
+    return () => {
+      if (elapsedRef.current) clearInterval(elapsedRef.current);
+      if (pollRef.current) clearInterval(pollRef.current);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [busyAll]);
 
   // Advanced paste-form state
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -149,8 +169,17 @@ export default function IngestionConsole({
               onClick={() => ingestNow("rolling")}
               className="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 disabled:opacity-40 dark:bg-emerald-500 dark:hover:bg-emerald-400"
             >
-              {busyAll ? "Running…" : "Ingest today's vendor"}
-              {!busyAll && <span aria-hidden>→</span>}
+              {busyAll ? (
+                <>
+                  <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" />
+                    <path className="opacity-75" d="M4 12a8 8 0 018-8" strokeLinecap="round" />
+                  </svg>
+                  Running…
+                </>
+              ) : (
+                <>Ingest today&apos;s vendor <span aria-hidden>→</span></>
+              )}
             </button>
 
             <span className="text-xs text-emerald-900/70 dark:text-emerald-300/70">or pick a vendor:</span>
@@ -171,8 +200,29 @@ export default function IngestionConsole({
             </select>
           </div>
 
-          {ingestResult && <div className="mt-3 rounded-lg bg-white/60 px-3 py-2 text-xs text-emerald-900 dark:bg-emerald-950/50 dark:text-emerald-200">{ingestResult}</div>}
-          {ingestError && <div className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-xs text-red-700 dark:bg-red-950/40 dark:text-red-300">Error: {ingestError}</div>}
+          {busyAll && (
+            <div className="mt-4 rounded-xl border border-emerald-300 dark:border-emerald-700 bg-emerald-50/60 dark:bg-emerald-950/40 px-4 py-3">
+              <div className="flex items-center gap-2 text-sm font-medium text-emerald-800 dark:text-emerald-200">
+                <svg className="h-4 w-4 shrink-0 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" />
+                  <path className="opacity-75" d="M4 12a8 8 0 018-8" strokeLinecap="round" />
+                </svg>
+                Ingestion pipeline running — {elapsedSec}s elapsed
+              </div>
+              <p className="mt-1 text-xs text-emerald-700 dark:text-emerald-300">
+                Fetching sources, extracting proposals with the 3-stage AI pipeline (Haiku → Sonnet → Opus), and writing results. This usually takes 1–4 minutes. The jobs table below updates every 5 s.
+              </p>
+            </div>
+          )}
+
+          {ingestResult && !busyAll && (
+            <div className="mt-3 rounded-lg bg-white/60 px-3 py-2 text-xs text-emerald-900 dark:bg-emerald-950/50 dark:text-emerald-200">
+              ✓ {ingestResult}
+            </div>
+          )}
+          {ingestError && (
+            <div className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-xs text-red-700 dark:bg-red-950/40 dark:text-red-300">Error: {ingestError}</div>
+          )}
         </div>
 
         {/* ── Token (only needed if ADMIN_API_OPEN is off) ─────────────── */}
@@ -253,7 +303,7 @@ export default function IngestionConsole({
                 <button
                   disabled={busyManual || !rawText || !url || !vendorId}
                   onClick={triggerManual}
-                  className="rounded-full bg-[#0c2238] dark:bg-white px-6 py-2 text-sm font-medium text-white dark:text-[#13294b] disabled:opacity-40"
+                  className="rounded-full bg-[#0c2238] dark:bg-white px-6 py-2 text-sm font-medium text-white dark:text-[#0a1f38] disabled:opacity-40"
                 >{busyManual ? "Running…" : "Run manual extraction"}</button>
                 {manualResult && <div className="text-xs text-emerald-700 dark:text-emerald-400">{manualResult}</div>}
               </div>

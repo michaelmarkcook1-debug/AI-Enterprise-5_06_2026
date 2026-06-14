@@ -40,15 +40,22 @@ export async function GET(): Promise<Response> {
     return Response.json({ watchlist: null });
   }
 
-  const userId = await getUserId();
-  const prisma = getPrisma();
+  try {
+    const userId = await getUserId();
+    const prisma = getPrisma();
 
-  const watchlist = await prisma.watchlist.findFirst({
-    where: { userId },
-    orderBy: { createdAt: "asc" },
-  });
+    const watchlist = await prisma.watchlist.findFirst({
+      where: { userId },
+      orderBy: { createdAt: "asc" },
+    });
 
-  return Response.json({ watchlist });
+    return Response.json({ watchlist });
+  } catch (err) {
+    const code = (err as { code?: string }).code ?? "unknown";
+    const message = (err as Error).message ?? String(err);
+    console.error(`[watchlist GET] error code=${code}: ${message}`);
+    return Response.json({ watchlist: null }, { status: 500 });
+  }
 }
 
 export async function POST(request: Request): Promise<Response> {
