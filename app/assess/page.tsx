@@ -56,12 +56,17 @@ export default async function AssessPage({ searchParams }: PageProps) {
     >
       {/* 1. Executive briefing */}
       <section className="mb-6 grid gap-5 lg:grid-cols-[1fr_0.75fr]">
-        <Panel title={brief.title}>
+        <Panel title="Market overview">
           <div className="space-y-4">
-            {brief.executiveSummary.map((item) => (
-              <p key={item} className="text-sm leading-6 text-[#475a72]">{item}</p>
-            ))}
-            <div className="rounded-md bg-[#f3ead2] p-3 text-sm font-medium text-[#13294b]">
+            <ul className="space-y-3 pl-1">
+              {brief.executiveSummary.map((item) => (
+                <li key={item} className="flex gap-2.5 text-sm leading-6 font-semibold text-[#15263c] dark:text-[#eef3f8]">
+                  <span className="mt-1 shrink-0 text-[#a07f1f] dark:text-[#d4af37]">•</span>
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+            <div className="rounded-md border-l-4 border-[#a07f1f] bg-[#f3ead2] p-3 text-sm font-semibold text-[#13294b] dark:border-[#d4af37] dark:bg-[#1a2e14]/40 dark:text-[#eef3f8]">
               {brief.boardTakeaway}
             </div>
           </div>
