@@ -29,8 +29,35 @@ import {
 import {
   applyTierWeightDelta,
   deriveTierOverlay,
+  buyerConcentration,
   type TierAdjustment,
 } from "./tier-overlay";
+
+// v1.3 — opportunity-value context. Turns the Opportunity tier from a
+// vendor-fit list into a value-aware view: a rough value-at-stake band × an
+// expected-uplift band yields a coarse priority. Does NOT reorder vendors
+// (value is opportunity-level, not vendor-level) — it contextualises the run.
+const VALUE_AT_STAKE_MIDPOINT: Record<string, number> = {
+  lt_250k: 125_000, "250k_1m": 625_000, "1m_5m": 3_000_000, "5m_25m": 15_000_000, gt_25m: 40_000_000,
+};
+const UPLIFT_MIDPOINT: Record<string, number> = {
+  lt_10: 0.05, "10_25": 0.175, "25_50": 0.375, gt_50: 0.6,
+};
+
+function deriveOpportunityContext(input: AssessmentInput): {
+  valueAtStake?: string;
+  expectedUplift?: string;
+  estimatedAnnualValue?: number;
+  priority: "low" | "medium" | "high" | "flagship";
+} | null {
+  if (input.valueAtStake == null && input.expectedUplift == null) return null;
+  const base = input.valueAtStake ? VALUE_AT_STAKE_MIDPOINT[input.valueAtStake] : undefined;
+  const uplift = input.expectedUplift ? UPLIFT_MIDPOINT[input.expectedUplift] : undefined;
+  const estimatedAnnualValue = base != null && uplift != null ? Math.round(base * uplift) : base;
+  const v = estimatedAnnualValue ?? 0;
+  const priority = v >= 5_000_000 ? "flagship" : v >= 1_000_000 ? "high" : v >= 250_000 ? "medium" : "low";
+  return { valueAtStake: input.valueAtStake, expectedUplift: input.expectedUplift, estimatedAnnualValue, priority };
+}
 
 export const SCORING_RULE_VERSION = "v1.2.0";
 
@@ -124,10 +151,22 @@ function dynamicWeights(
 
 function strategicFitBonus(vendor: Vendor, input: AssessmentInput): number {
   let bonus = 0;
+  // Legacy ecosystem tokens (back-compat).
   const ecoOverlap = vendor.ecosystemFit.filter((e) => input.ecosystem.includes(e)).length;
-  bonus += Math.min(5, ecoOverlap * 1.5);
+  bonus += Math.min(4, ecoOverlap * 1.5);
+  // v1.3 — structured layered-infra native overlap (deterministic set intersection).
+  const native = vendor.ecosystemNative ?? [];
+  const nativeOverlap = native.filter((e) => input.ecosystem.includes(e)).length;
+  bonus += Math.min(3, nativeOverlap * 1.5);
+  // v1.3 — industry systems-of-record fit. A native Epic / Murex / Guidewire
+  // connector is far more discriminating than a generic cloud match, so each
+  // SoR match is worth more (3 pts) — but the overall fit bonus stays capped
+  // at 10 so it tilts rather than vetoes the evidence-driven score.
+  const sorSelected = input.selectedSystemsOfRecord ?? [];
+  const sorOverlap = (vendor.supportedSystemsOfRecord ?? []).filter((s) => sorSelected.includes(s)).length;
+  bonus += Math.min(5, sorOverlap * 3);
   const ucOverlap = vendor.useCaseFit.filter((u) => input.useCases.includes(u)).length;
-  bonus += Math.min(4, ucOverlap * 1.5);
+  bonus += Math.min(3, ucOverlap * 1.5);
   if (vendor.supportedDeployments.includes(input.deploymentPreference)) bonus += 1;
   return Math.min(10, bonus);
 }
@@ -221,7 +260,20 @@ function adoptionFrictionPenalty(industry: IndustryProfile, input: AssessmentInp
   const base = (100 - score) * 0.05;
   const maturityDiscount =
     input.aiMaturity === "scaling" ? 0.5 : input.aiMaturity === "operating" ? 0.3 : input.aiMaturity === "piloting" ? 0.8 : 1.0;
-  return base * maturityDiscount;
+  let friction = base * maturityDiscount;
+  // v1.3 — weak data readiness is the #1 cited cause of pilot failure; weak
+  // change sponsorship is the #2. Both raise adoption friction; strong signals
+  // lower it. These refine the prior reliance on aiMaturity alone.
+  if (input.dataReadiness != null) {
+    friction *= input.dataReadiness <= 2 ? 1.4 : input.dataReadiness >= 4 ? 0.85 : 1.0;
+  }
+  if (input.changeSponsorship != null) {
+    friction *= input.changeSponsorship === "none" ? 1.4
+      : input.changeSponsorship === "mid_level" ? 1.15
+      : input.changeSponsorship === "board" ? 0.8
+      : 0.9; // exec
+  }
+  return friction;
 }
 
 function recommendationBand(finalScore: number, excluded: boolean, fatalRisks: number): RecommendationBand {
@@ -230,6 +282,30 @@ function recommendationBand(finalScore: number, excluded: boolean, fatalRisks: n
   if (finalScore >= 60) return "controlled_deployment";
   if (finalScore >= 45) return "pilot_only";
   return "not_recommended";
+}
+
+// v1.3 — model-quality gate. When the buyer states a strict hallucination
+// tolerance, a vendor with weak model-reliability evidence cannot be cleared
+// for the top deployment bands regardless of overall score — a procurement
+// pass/fail, not just a weight tilt.
+const BAND_RANK: Record<RecommendationBand, number> = {
+  not_recommended: 0, pilot_only: 1, controlled_deployment: 2, enterprise_scale: 3,
+};
+const BAND_BY_RANK: RecommendationBand[] = ["not_recommended", "pilot_only", "controlled_deployment", "enterprise_scale"];
+
+function capBandForQualityBar(
+  band: RecommendationBand,
+  input: AssessmentInput,
+  reliabilityScore: number,
+): RecommendationBand {
+  const tol = input.maxHallucinationTolerance;
+  if (tol !== "zero" && tol !== "low") return band;
+  // zero-tolerance demands strong reliability; low-tolerance demands moderate.
+  const ceilingRank =
+    tol === "zero"
+      ? (reliabilityScore >= 80 ? 3 : reliabilityScore >= 65 ? 2 : 1)
+      : (reliabilityScore >= 60 ? 3 : reliabilityScore >= 45 ? 2 : 1);
+  return BAND_RANK[band] <= ceilingRank ? band : BAND_BY_RANK[ceilingRank];
 }
 
 function buildPillarBreakdown(
@@ -372,7 +448,11 @@ export function scoreVendor(
     rank: 0, // assigned after sort
     finalScore,
     confidenceScore: confidence,
-    recommendationBand: recommendationBand(finalScore, excluded, fatalCount),
+    recommendationBand: capBandForQualityBar(
+      recommendationBand(finalScore, excluded, fatalCount),
+      input,
+      pillarScores.reliability_safety,
+    ),
     pillarScores,
     pillarBreakdown: breakdown,
     topStrengths: topItems(strengthsFromBreakdown(breakdown), 4),
@@ -464,8 +544,13 @@ export function runAssessment(
       weightDelta: tierOverlay.weightDelta,
       rationale: tierOverlay.rationale,
     },
+    // v1.3 — opportunity-value context + buyer-stack concentration caution.
+    opportunity: deriveOpportunityContext(input),
+    buyerConcentration: buyerConcentration(input),
   } as AssessmentResult & {
     workflowRiskProfile: WorkflowRiskProfile;
     tierOverlay: { weightDelta: Partial<Record<PillarId, number>>; rationale: string[] };
+    opportunity: ReturnType<typeof deriveOpportunityContext>;
+    buyerConcentration: { topParent: string | null; share: number };
   };
 }

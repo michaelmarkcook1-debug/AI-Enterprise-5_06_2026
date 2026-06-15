@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { OwnershipLegend, VendorNameWithOwnership, ownershipChipClassName } from "@/components/ownership-indicator";
 import { ASSESSMENT_FORM_STATE_KEY, type AssessmentTier } from "@/lib/assessment/tiers";
+import { layersForTier, systemsForArchetype } from "@/lib/infrastructure";
 
 interface Option { id: string; label?: string; name?: string }
 
@@ -21,6 +22,8 @@ interface Props {
     category?: string;
     subcategory?: string;
     description?: string;
+    /** v1.3 — engine archetypes this workflow belongs to ([] = horizontal). */
+    archetypes?: string[];
   }[];
   objectives: { id: string; label: string }[];
   ecosystems: string[];
@@ -69,6 +72,27 @@ interface PersistedFormState {
   negotiationPower?: string;
   requiredCertifications?: string[];
   outputMode?: string;
+  // ─── v1.3 Opportunity ───
+  valueAtStake?: string;
+  expectedUplift?: string;
+  // ─── v1.3 Strategy ───
+  buildVsBuy?: string;
+  dataReadiness?: number;
+  changeSponsorship?: string;
+  // ─── v1.3 Procurement ───
+  useCaseRiskClass?: string;
+  maxHallucinationTolerance?: string;
+  evalEvidenceRequired?: string[];
+  expectedConsumption?: string;
+  acceptablePricingModels?: string[];
+  costCeiling?: string;
+  ipAndDataRights?: string[];
+  exitRequirements?: string[];
+  incumbentAnnualSpend?: string;
+  renewalWindow?: string;
+  qualifiedAlternatives?: number;
+  // ─── v1.3 Infrastructure ───
+  selectedSystemsOfRecord?: string[];
 }
 
 function loadPersisted(): Partial<PersistedFormState> | null {
@@ -103,7 +127,7 @@ async function loadPersistedFromDb(): Promise<Partial<PersistedFormState> | null
   }
 }
 
-export default function AssessForm({ industries, useCases, objectives, ecosystems, vendors, tier = "quick" }: Props) {
+export default function AssessForm({ industries, useCases, objectives, vendors, tier = "quick" }: Props) {
   const router = useRouter();
   const [step, setStep] = useState(0);
   const [submitting, setSubmitting] = useState(false);
@@ -150,6 +174,31 @@ export default function AssessForm({ industries, useCases, objectives, ecosystem
   const [requiredCertifications, setRequiredCertifications] = useState<string[]>(seed.requiredCertifications ?? []);
   const [outputMode, setOutputMode] = useState<string>(seed.outputMode ?? "buyer");
 
+  // ─── v1.3 Opportunity (Quick) ─────────────────────────────────
+  const [valueAtStake, setValueAtStake] = useState<string>(seed.valueAtStake ?? "");
+  const [expectedUplift, setExpectedUplift] = useState<string>(seed.expectedUplift ?? "");
+
+  // ─── v1.3 Strategy (Guided) ───────────────────────────────────
+  const [buildVsBuy, setBuildVsBuy] = useState<string>(seed.buildVsBuy ?? "undecided");
+  const [dataReadiness, setDataReadiness] = useState<number>(seed.dataReadiness ?? 3);
+  const [changeSponsorship, setChangeSponsorship] = useState<string>(seed.changeSponsorship ?? "mid_level");
+
+  // ─── v1.3 Procurement (Advanced) ──────────────────────────────
+  const [useCaseRiskClass, setUseCaseRiskClass] = useState<string>(seed.useCaseRiskClass ?? "limited");
+  const [maxHallucinationTolerance, setMaxHallucinationTolerance] = useState<string>(seed.maxHallucinationTolerance ?? "moderate");
+  const [evalEvidenceRequired, setEvalEvidenceRequired] = useState<string[]>(seed.evalEvidenceRequired ?? []);
+  const [expectedConsumption, setExpectedConsumption] = useState<string>(seed.expectedConsumption ?? "department");
+  const [acceptablePricingModels, setAcceptablePricingModels] = useState<string[]>(seed.acceptablePricingModels ?? []);
+  const [costCeiling, setCostCeiling] = useState<string>(seed.costCeiling ?? "");
+  const [ipAndDataRights, setIpAndDataRights] = useState<string[]>(seed.ipAndDataRights ?? []);
+  const [exitRequirements, setExitRequirements] = useState<string[]>(seed.exitRequirements ?? []);
+  const [incumbentAnnualSpend, setIncumbentAnnualSpend] = useState<string>(seed.incumbentAnnualSpend ?? "");
+  const [renewalWindow, setRenewalWindow] = useState<string>(seed.renewalWindow ?? "no_incumbent");
+  const [qualifiedAlternatives, setQualifiedAlternatives] = useState<number>(seed.qualifiedAlternatives ?? 2);
+
+  // ─── v1.3 Infrastructure ──────────────────────────────────────
+  const [selectedSystemsOfRecord, setSelectedSystemsOfRecord] = useState<string[]>(seed.selectedSystemsOfRecord ?? []);
+
   // One-time DB hydration when sessionStorage was empty (new device / cleared cache).
   useEffect(() => {
     if (dbLoaded || Object.keys(seed).length > 1) return; // Already have local data
@@ -187,6 +236,14 @@ export default function AssessForm({ industries, useCases, objectives, ecosystem
       switchingCostTolerance, sovereigntyRequirement, rfpCycle,
       stackAppetite, concentrationRiskTolerance, tcoHorizon,
       negotiationPower, requiredCertifications, outputMode,
+      // v1.3
+      valueAtStake, expectedUplift,
+      buildVsBuy, dataReadiness, changeSponsorship,
+      useCaseRiskClass, maxHallucinationTolerance, evalEvidenceRequired,
+      expectedConsumption, acceptablePricingModels, costCeiling,
+      ipAndDataRights, exitRequirements,
+      incumbentAnnualSpend, renewalWindow, qualifiedAlternatives,
+      selectedSystemsOfRecord,
     });
   }, [
     industry, orgSize, aiMaturity, region,
@@ -199,6 +256,13 @@ export default function AssessForm({ industries, useCases, objectives, ecosystem
     switchingCostTolerance, sovereigntyRequirement, rfpCycle,
     stackAppetite, concentrationRiskTolerance, tcoHorizon,
     negotiationPower, requiredCertifications, outputMode,
+    valueAtStake, expectedUplift,
+    buildVsBuy, dataReadiness, changeSponsorship,
+    useCaseRiskClass, maxHallucinationTolerance, evalEvidenceRequired,
+    expectedConsumption, acceptablePricingModels, costCeiling,
+    ipAndDataRights, exitRequirements,
+    incumbentAnnualSpend, renewalWindow, qualifiedAlternatives,
+    selectedSystemsOfRecord,
   ]);
 
   // The active step plan for the user's chosen tier.
@@ -229,6 +293,10 @@ export default function AssessForm({ industries, useCases, objectives, ecosystem
           deploymentPreference,
           budgetSensitivity,
           vendorIds,
+          // v1.3 — Opportunity value block + infra (all tiers; omit empties)
+          ...(valueAtStake ? { valueAtStake } : {}),
+          ...(expectedUplift ? { expectedUplift } : {}),
+          ...(selectedSystemsOfRecord.length > 0 ? { selectedSystemsOfRecord } : {}),
           // v1.2 — Guided fields (only when tier offers them)
           ...(tier !== "quick" ? {
             governanceStrictness,
@@ -236,8 +304,12 @@ export default function AssessForm({ industries, useCases, objectives, ecosystem
             humanReviewModel,
             lockInTolerance,
             dataResidency,
+            // v1.3 — Strategy readiness
+            buildVsBuy,
+            dataReadiness,
+            changeSponsorship,
           } : {}),
-          // v1.2 — Advanced fields (only on advanced tier)
+          // v1.2 + v1.3 — Advanced fields (only on advanced tier)
           ...(tier === "advanced" ? {
             switchingCostTolerance,
             sovereigntyRequirement,
@@ -248,6 +320,17 @@ export default function AssessForm({ industries, useCases, objectives, ecosystem
             negotiationPower,
             requiredCertifications,
             outputMode,
+            useCaseRiskClass,
+            maxHallucinationTolerance,
+            evalEvidenceRequired,
+            expectedConsumption,
+            acceptablePricingModels,
+            exitRequirements,
+            ipAndDataRights,
+            renewalWindow,
+            qualifiedAlternatives,
+            ...(costCeiling ? { costCeiling } : {}),
+            ...(incumbentAnnualSpend ? { incumbentAnnualSpend } : {}),
           } : {}),
         }),
       });
@@ -329,13 +412,42 @@ export default function AssessForm({ industries, useCases, objectives, ecosystem
                   selected={primaryObjectives}
                   onToggle={(id) => toggle(primaryObjectives, setPrimaryObjectives, id)} />
               </Field>
-              <Field label="Use cases">
+              <Field label={`Use cases — tailored to ${industries.find((i) => i.id === industry)?.name ?? "your industry"}`}>
                 <WorkflowPicker
                   workflows={useCases}
+                  industry={industry}
                   selected={selectedUseCases}
                   onToggle={(id) => toggle(selectedUseCases, setSelectedUseCases, id)}
                 />
               </Field>
+
+              {/* v1.3 — Value & ROI block. Turns the Opportunity tier from a
+                  vendor-fit list into a value-ranked opportunity view. */}
+              <div className="rounded-lg border border-[#e3d9c0] bg-[#faf7ef] p-4">
+                <div className="mb-1 text-sm font-semibold text-[#15263c]">Value at stake (optional)</div>
+                <p className="mb-3 text-xs text-[#4c5d75]">Range-based, so it informs prioritisation without false precision.</p>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <Field label="Annual value the use case is worth">
+                    <Select value={valueAtStake} onChange={setValueAtStake} options={[
+                      { value: "", label: "— not sure —" },
+                      { value: "lt_250k", label: "< £250k" },
+                      { value: "250k_1m", label: "£250k – £1M" },
+                      { value: "1m_5m", label: "£1M – £5M" },
+                      { value: "5m_25m", label: "£5M – £25M" },
+                      { value: "gt_25m", label: "> £25M" },
+                    ]} />
+                  </Field>
+                  <Field label="Realistic target uplift on the objective">
+                    <Select value={expectedUplift} onChange={setExpectedUplift} options={[
+                      { value: "", label: "— not sure —" },
+                      { value: "lt_10", label: "< 10%" },
+                      { value: "10_25", label: "10 – 25%" },
+                      { value: "25_50", label: "25 – 50%" },
+                      { value: "gt_50", label: "> 50%" },
+                    ]} />
+                  </Field>
+                </div>
+              </div>
             </div>
           )}
 
@@ -361,10 +473,16 @@ export default function AssessForm({ industries, useCases, objectives, ecosystem
                   { value: "hybrid", label: "Hybrid" },
                 ]} />
               </Field>
-              <Field label="Existing ecosystem">
-                <ChipGroup options={ecosystems.map((e) => ({ id: e, label: e.replace(/_/g, " ") }))}
-                  selected={ecosystem}
-                  onToggle={(id) => toggle(ecosystem, setEcosystem, id)} />
+              <Field label="Existing infrastructure & ecosystem">
+                <InfraPicker
+                  tier={tier}
+                  industry={industry}
+                  industryName={industries.find((i) => i.id === industry)?.name ?? "your industry"}
+                  ecosystem={ecosystem}
+                  onToggleItem={(id) => toggle(ecosystem, setEcosystem, id)}
+                  sors={selectedSystemsOfRecord}
+                  onToggleSor={(id) => toggle(selectedSystemsOfRecord, setSelectedSystemsOfRecord, id)}
+                />
               </Field>
             </div>
           )}
@@ -442,9 +560,34 @@ export default function AssessForm({ industries, useCases, objectives, ecosystem
                   ]}
                 />
               </Field>
+              {/* v1.3 — Strategy readiness: the top predictors of pilot success. */}
+              <Field label="Build vs buy posture">
+                <Select value={buildVsBuy} onChange={setBuildVsBuy} options={[
+                  { value: "undecided", label: "Undecided — help me decide" },
+                  { value: "buy_saas", label: "Buy SaaS — turnkey product" },
+                  { value: "buy_configure", label: "Buy + configure on a platform" },
+                  { value: "build_on_platform", label: "Build on a platform / framework" },
+                  { value: "build_from_scratch", label: "Build from scratch" },
+                ]} />
+              </Field>
+              <Slider
+                label="Data readiness"
+                value={dataReadiness}
+                onChange={setDataReadiness}
+                hint="1 = no usable data · 5 = clean, governed, labelled. Weak data is the #1 cause of pilot failure."
+              />
+              <Field label="Change sponsorship">
+                <Select value={changeSponsorship} onChange={setChangeSponsorship} options={[
+                  { value: "none", label: "None — no named sponsor" },
+                  { value: "mid_level", label: "Mid-level — a manager is driving it" },
+                  { value: "exec", label: "Executive — a named exec owns it" },
+                  { value: "board", label: "Board-level mandate" },
+                ]} />
+              </Field>
               <p className="text-[11px] text-[#4c5d75]">
-                These five inputs adjust pillar weights and apply vendor-by-vendor penalties.
-                Sovereignty + missing certifications can escalate to exclusion on Advanced.
+                These inputs adjust pillar weights and apply vendor-by-vendor penalties. Build posture
+                shifts weight to integration + resilience; weak data readiness and sponsorship raise
+                adoption friction. Sovereignty + missing certifications can escalate to exclusion on Advanced.
               </p>
             </div>
           )}
@@ -556,10 +699,133 @@ export default function AssessForm({ industries, useCases, objectives, ecosystem
                   ]}
                 />
               </Field>
+              {/* v1.3 — EU AI Act risk + model-quality bar */}
+              <Field label="EU AI Act — use-case risk class">
+                <Select value={useCaseRiskClass} onChange={setUseCaseRiskClass} options={[
+                  { value: "minimal", label: "Minimal risk" },
+                  { value: "limited", label: "Limited risk (transparency duties)" },
+                  { value: "high_risk", label: "High-risk (Annex III) — FRIA + oversight" },
+                  { value: "prohibited_adjacent", label: "Prohibited-adjacent — extreme caution" },
+                ]} />
+              </Field>
+              <Field label="Max hallucination tolerance">
+                <Select value={maxHallucinationTolerance} onChange={setMaxHallucinationTolerance} options={[
+                  { value: "zero", label: "Zero — needs E4+ reliability evidence" },
+                  { value: "low", label: "Low — needs strong reliability" },
+                  { value: "moderate", label: "Moderate" },
+                  { value: "best_effort", label: "Best-effort" },
+                ]} />
+              </Field>
+              <Field label="Required evaluation evidence">
+                <ChipGroup
+                  options={[
+                    { id: "independent_eval", label: "Independent eval / benchmark" },
+                    { id: "red_team_report", label: "Red-team report" },
+                    { id: "model_card", label: "Model card" },
+                    { id: "safety_eval", label: "Safety eval" },
+                  ]}
+                  selected={evalEvidenceRequired}
+                  onToggle={(id) => toggle(evalEvidenceRequired, setEvalEvidenceRequired, id)}
+                />
+              </Field>
+
+              {/* v1.3 — Cost & consumption model (makes the TCO horizon usable) */}
+              <Field label="Expected consumption scale">
+                <Select value={expectedConsumption} onChange={setExpectedConsumption} options={[
+                  { value: "pilot", label: "Pilot (< 10 users / low volume)" },
+                  { value: "department", label: "Department" },
+                  { value: "business_unit", label: "Business unit" },
+                  { value: "enterprise_wide", label: "Enterprise-wide" },
+                ]} />
+              </Field>
+              <Field label="Acceptable pricing models">
+                <ChipGroup
+                  options={[
+                    { id: "per_seat", label: "Per seat" },
+                    { id: "per_token", label: "Per token / consumption" },
+                    { id: "committed_use", label: "Committed use" },
+                    { id: "flat_platform", label: "Flat platform" },
+                    { id: "outcome_based", label: "Outcome-based" },
+                  ]}
+                  selected={acceptablePricingModels}
+                  onToggle={(id) => toggle(acceptablePricingModels, setAcceptablePricingModels, id)}
+                />
+              </Field>
+              <Field label="Hard annual cost ceiling (optional)">
+                <Select value={costCeiling} onChange={setCostCeiling} options={[
+                  { value: "", label: "— no ceiling set —" },
+                  { value: "lt_100k", label: "< £100k" },
+                  { value: "100k_500k", label: "£100k – £500k" },
+                  { value: "500k_2m", label: "£500k – £2M" },
+                  { value: "2m_10m", label: "£2M – £10M" },
+                  { value: "gt_10m", label: "> £10M" },
+                ]} />
+              </Field>
+
+              {/* v1.3 — IP & exit */}
+              <Field label="Required IP / data rights">
+                <ChipGroup
+                  options={[
+                    { id: "no_training_on_data", label: "No training on our data" },
+                    { id: "output_ip_owned", label: "Output IP owned by us" },
+                    { id: "ip_indemnification", label: "IP indemnification" },
+                    { id: "audit_rights", label: "Audit rights" },
+                  ]}
+                  selected={ipAndDataRights}
+                  onToggle={(id) => toggle(ipAndDataRights, setIpAndDataRights, id)}
+                />
+              </Field>
+              <Field label="Exit / reversibility requirements">
+                <ChipGroup
+                  options={[
+                    { id: "contractual_offramp", label: "Contractual off-ramp" },
+                    { id: "open_format_export", label: "Open-format data export" },
+                    { id: "model_config_portability", label: "Model + config portability" },
+                    { id: "parallel_run", label: "Parallel-run support" },
+                  ]}
+                  selected={exitRequirements}
+                  onToggle={(id) => toggle(exitRequirements, setExitRequirements, id)}
+                />
+              </Field>
+
+              {/* v1.3 — Fact-derived negotiation leverage (replaces the slider) */}
+              <div className="rounded-lg border border-[#e3d9c0] bg-[#faf7ef] p-4">
+                <div className="mb-1 text-sm font-semibold text-[#15263c]">Negotiation leverage — from facts</div>
+                <p className="mb-3 text-xs text-[#4c5d75]">Derived from objective facts rather than a self-rating.</p>
+                <div className="grid gap-4 sm:grid-cols-3">
+                  <Field label="Incumbent annual spend">
+                    <Select value={incumbentAnnualSpend} onChange={setIncumbentAnnualSpend} options={[
+                      { value: "", label: "— n/a —" },
+                      { value: "none", label: "No incumbent" },
+                      { value: "lt_250k", label: "< £250k" },
+                      { value: "250k_1m", label: "£250k – £1M" },
+                      { value: "1m_5m", label: "£1M – £5M" },
+                      { value: "gt_5m", label: "> £5M" },
+                    ]} />
+                  </Field>
+                  <Field label="Renewal window">
+                    <Select value={renewalWindow} onChange={setRenewalWindow} options={[
+                      { value: "no_incumbent", label: "No incumbent / greenfield" },
+                      { value: "lt_3mo", label: "< 3 months" },
+                      { value: "3_6mo", label: "3 – 6 months" },
+                      { value: "6_12mo", label: "6 – 12 months" },
+                      { value: "gt_12mo", label: "> 12 months" },
+                    ]} />
+                  </Field>
+                  <Field label="Qualified alternatives">
+                    <Select value={String(qualifiedAlternatives)} onChange={(v) => setQualifiedAlternatives(Number(v))} options={[
+                      { value: "0", label: "0" }, { value: "1", label: "1" }, { value: "2", label: "2" },
+                      { value: "3", label: "3" }, { value: "4", label: "4" }, { value: "5", label: "5+" },
+                    ]} />
+                  </Field>
+                </div>
+              </div>
+
               <p className="text-[11px] text-[#4c5d75]">
-                These inputs feed the procurement-grade overlay in scoring engine v1.2.
-                Hard sovereignty + missing required certifications can exclude vendors;
-                lock-in / concentration preferences tilt vendor-resilience weight.
+                These inputs feed the procurement-grade overlay in scoring engine v1.3, matched against
+                structured vendor data (certifications, regions, deployment models, systems-of-record).
+                Hard sovereignty + missing required certifications can exclude vendors; a zero-hallucination
+                bar caps the deployment band for vendors without strong reliability evidence.
               </p>
             </div>
           )}
@@ -682,15 +948,24 @@ function VendorChipGroup({
  *     drilling into deep categories.
  */
 function WorkflowPicker({
-  workflows,
+  workflows: allWorkflows,
+  industry,
   selected,
   onToggle,
 }: {
   workflows: Props["useCases"];
+  industry: string;
   selected: string[];
   onToggle: (id: string) => void;
 }) {
   const [query, setQuery] = useState("");
+
+  // v1.3 — tailor to the selected industry: keep horizontal workflows (no
+  // archetypes) plus industry-specific ones whose archetypes include the
+  // chosen industry. A financial buyer no longer sees factory-floor workflows.
+  const workflows = allWorkflows.filter(
+    (w) => !(w.archetypes && w.archetypes.length > 0) || w.archetypes.includes(industry),
+  );
 
   const selectedSet = new Set(selected);
   const selectedRows = workflows.filter((w) => selectedSet.has(w.id));
@@ -822,6 +1097,98 @@ function WorkflowPicker({
             );
           })}
         </div>
+      )}
+    </div>
+  );
+}
+
+/**
+ * InfraPicker — v1.3 layered, tier-aware, industry-gated infrastructure
+ * selector. Replaces the flat ecosystem ChipGroup. Layers are progressively
+ * disclosed (Quick shows the high-level layers; Advanced surfaces the
+ * gateway / observability / governance rails). The systems-of-record section
+ * is tailored to the selected industry archetype.
+ */
+function InfraPicker({
+  tier,
+  industry,
+  industryName,
+  ecosystem,
+  onToggleItem,
+  sors,
+  onToggleSor,
+}: {
+  tier: AssessmentTier;
+  industry: string;
+  industryName: string;
+  ecosystem: string[];
+  onToggleItem: (id: string) => void;
+  sors: string[];
+  onToggleSor: (id: string) => void;
+}) {
+  const layers = layersForTier(tier);
+  const systems = systemsForArchetype(industry);
+  const ecoSet = new Set(ecosystem);
+  const sorSet = new Set(sors);
+
+  const chip = (on: boolean) =>
+    `rounded-full px-3 py-1 text-xs transition-colors ${
+      on
+        ? "bg-[#0c2238] text-white dark:bg-white dark:text-[#13294b]"
+        : "bg-[#ece3cb] text-[#2e3f57] hover:bg-[#e3d9c0] dark:bg-[#143049] dark:text-[#c2d1e0] dark:hover:bg-[#1c3d5c]"
+    }`;
+
+  return (
+    <div className="space-y-1.5">
+      <p className="text-[11px] text-[#4c5d75]">
+        Select what you already run, by layer. Vendors native to your stack score higher on
+        integration fit; heavy single-vendor concentration surfaces a lock-in caution.
+      </p>
+      {layers.map((layer, i) => {
+        const selCount = layer.items.filter((it) => ecoSet.has(it.id)).length;
+        return (
+          <details key={layer.id} open={i < 2 || selCount > 0} className="rounded-lg border border-[#e3d9c0] bg-white dark:border-[#1d3a57] dark:bg-[#0c2238]">
+            <summary className="cursor-pointer select-none px-3 py-2 text-sm font-semibold text-[#20314a] marker:text-[#6b7d93] dark:text-[#eef3f8]">
+              <span className="inline-flex flex-wrap items-center gap-2">
+                <span>{layer.label}</span>
+                {selCount > 0 && (
+                  <span className="rounded-full bg-emerald-100 px-1.5 py-0.5 text-[10px] font-medium text-emerald-800 dark:bg-emerald-950/70 dark:text-emerald-300">
+                    {selCount} selected
+                  </span>
+                )}
+                <span className="text-[11px] font-normal text-[#6b7d93]">{layer.hint}</span>
+              </span>
+            </summary>
+            <div className="flex flex-wrap gap-1.5 border-t border-[#ece4d0] px-3 py-2 dark:border-[#1d3a57]">
+              {layer.items.map((it) => (
+                <button key={it.id} type="button" onClick={() => onToggleItem(it.id)} aria-pressed={ecoSet.has(it.id)} className={chip(ecoSet.has(it.id))}>
+                  {it.label}{it.open && <span className="ml-1 opacity-60">· open</span>}
+                </button>
+              ))}
+            </div>
+          </details>
+        );
+      })}
+
+      {systems.length > 0 && (
+        <details open className="rounded-lg border border-sky-300 bg-sky-50 dark:border-sky-800 dark:bg-sky-950/30">
+          <summary className="cursor-pointer select-none px-3 py-2 text-sm font-semibold text-[#15263c] marker:text-sky-500 dark:text-[#eef3f8]">
+            <span className="inline-flex flex-wrap items-center gap-2">
+              <span>Systems of record — {industryName}</span>
+              <span className="rounded-full bg-sky-500 px-1.5 py-0.5 text-[9px] font-bold uppercase leading-none text-white">industry</span>
+              {sorSet.size > 0 && (
+                <span className="rounded-full bg-emerald-100 px-1.5 py-0.5 text-[10px] font-medium text-emerald-800 dark:bg-emerald-950/70 dark:text-emerald-300">{sorSet.size} selected</span>
+              )}
+            </span>
+          </summary>
+          <div className="flex flex-wrap gap-1.5 border-t border-sky-200 px-3 py-2 dark:border-sky-900">
+            {systems.map((s) => (
+              <button key={s.id} type="button" onClick={() => onToggleSor(s.id)} aria-pressed={sorSet.has(s.id)} title={`${s.category}${s.standard ? ` · ${s.standard}` : ""}`} className={chip(sorSet.has(s.id))}>
+                {s.label}{s.standard && <span className="ml-1 opacity-60">· {s.standard}</span>}
+              </button>
+            ))}
+          </div>
+        </details>
       )}
     </div>
   );

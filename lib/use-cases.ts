@@ -29,6 +29,8 @@
 //   - `subcategory`: optional finer grouping inside `category` for
 //       the AssessForm collapsible UI.
 
+import type { IndustryArchetype } from "./types";
+
 export type WorkflowTier = "quick" | "guided" | "advanced";
 export type WorkflowComplexity = "simple" | "moderate" | "complex";
 
@@ -46,7 +48,15 @@ export type RegulatoryFlag =
   | "EU_AI_Act"
   | "SOC2"
   | "ISO_27001"
-  | "FDA_21CFR11";
+  | "FDA_21CFR11"
+  // v1.3 — defence / critical-infrastructure regimes (FY2026 NDAA folds an
+  // AI/ML framework into CMMC/DFARS; NERC CIP governs grid OT; IEC 62443
+  // governs industrial control systems; FedRAMP gates US federal cloud).
+  | "CMMC"
+  | "NIST_800_171"
+  | "NERC_CIP"
+  | "IEC_62443"
+  | "FedRAMP";
 
 export type IndustryTag =
   | "financial_services"
@@ -63,7 +73,10 @@ export type IndustryTag =
   | "energy_utilities"
   | "transport_logistics"
   | "insurance"
-  | "real_estate";
+  | "real_estate"
+  // v1.3 — the 15-tag set had no defence tag, so the
+  // critical_infrastructure_defence archetype could not be addressed.
+  | "aerospace_defence";
 
 export interface UseCase {
   id: string;
@@ -79,6 +92,13 @@ export interface UseCase {
   tier?: WorkflowTier;
   subcategory?: string;
   industries?: IndustryTag[];
+  /**
+   * v1.3 — direct engine-archetype targeting. New industry-specific
+   * workflows set this so they surface for the archetype the buyer picks,
+   * without needing the 15-tag taxonomy to carry the signal. Existing
+   * workflows keep using `industries` (resolved via ARCHETYPE_INDUSTRY_TAGS).
+   */
+  archetypes?: IndustryArchetype[];
   commonInputs?: string[];
   regulatoryFlags?: RegulatoryFlag[];
   complexity?: WorkflowComplexity;
@@ -102,6 +122,46 @@ export function workflowsForTier(tier: WorkflowTier): UseCase[] {
   };
   const allowed = new Set(allow[tier]);
   return USE_CASES.filter((u) => allowed.has(workflowTierOf(u)));
+}
+
+/**
+ * v1.3 — does a workflow belong to the buyer's selected engine archetype?
+ *
+ *  - Horizontal workflows (no `industries` AND no `archetypes`) always match.
+ *  - A workflow matches if it directly targets the archetype (`archetypes`),
+ *    or if any of its 15-tag `industries` roll up to that archetype via the
+ *    ARCHETYPE_INDUSTRY_TAGS map in lib/industries.ts.
+ *
+ * The archetype→tags map is passed in (rather than imported) to keep this
+ * module free of a circular dependency with lib/industries.ts.
+ */
+export function workflowMatchesArchetype(
+  uc: UseCase,
+  archetype: string,
+  tagsForArchetype: (a: string) => readonly IndustryTag[],
+): boolean {
+  const hasTagSignal = (uc.industries?.length ?? 0) > 0;
+  const hasArchetypeSignal = (uc.archetypes?.length ?? 0) > 0;
+  if (!hasTagSignal && !hasArchetypeSignal) return true; // horizontal
+  if (uc.archetypes?.includes(archetype as IndustryArchetype)) return true;
+  const tags = new Set(tagsForArchetype(archetype));
+  return (uc.industries ?? []).some((t) => tags.has(t));
+}
+
+/**
+ * Workflows available for a tier AND tailored to the selected industry
+ * archetype. Horizontal workflows always appear; industry-specific ones
+ * appear only for their archetype. This is what the Assess form should call
+ * so a financial-services buyer never sees "Field-Service Dispatch".
+ */
+export function workflowsForTierAndIndustry(
+  tier: WorkflowTier,
+  archetype: string,
+  tagsForArchetype: (a: string) => readonly IndustryTag[],
+): UseCase[] {
+  return workflowsForTier(tier).filter((u) =>
+    workflowMatchesArchetype(u, archetype, tagsForArchetype),
+  );
 }
 
 /**
@@ -479,7 +539,7 @@ export const USE_CASES: UseCase[] = [
     description: "Generate role-specific question banks and synthesise feedback.",
     tier: "advanced", industries: [],
     commonInputs: ["job spec", "interview rubric", "panel notes"],
-    regulatoryFlags: ["GDPR"], complexity: "simple",
+    regulatoryFlags: ["GDPR", "EU_AI_Act"], complexity: "simple",
   },
   {
     id: "onboarding_assistant",
@@ -499,7 +559,7 @@ export const USE_CASES: UseCase[] = [
     description: "Suggest courses and skills gaps from role + performance data.",
     tier: "advanced", industries: [],
     commonInputs: ["LMS history", "performance reviews", "skills taxonomy"],
-    regulatoryFlags: ["GDPR"], complexity: "moderate",
+    regulatoryFlags: ["GDPR", "EU_AI_Act"], complexity: "moderate",
   },
 
   // ─── Legal & Compliance ──────────────────────────────────────
@@ -853,7 +913,7 @@ export const USE_CASES: UseCase[] = [
     description: "Subject-matter tutoring with curriculum alignment.",
     tier: "advanced", industries: ["education"],
     commonInputs: ["curriculum", "lesson plans", "student work"],
-    regulatoryFlags: ["FERPA", "GDPR"], complexity: "moderate",
+    regulatoryFlags: ["FERPA", "GDPR", "EU_AI_Act"], complexity: "moderate",
   },
   {
     id: "research_synthesis",
@@ -896,6 +956,757 @@ export const USE_CASES: UseCase[] = [
     tier: "advanced", industries: ["manufacturing"],
     commonInputs: ["SOPs", "machine state", "shift logs"],
     regulatoryFlags: [], complexity: "moderate",
+  },
+
+  // ═══════════════════════════════════════════════════════════════════
+  // v1.3 ADDITIONS — horizontal (cross-industry) workflows
+  // ═══════════════════════════════════════════════════════════════════
+
+  // ─── AI Platform & Governance (NEW category — maps to Enterprise
+  //     Control + Reliability & Safety pillars; the 2026 buying centers) ──
+  {
+    id: "multi_agent_orchestrator",
+    label: "Multi-Agent Orchestration & Handoff",
+    riskTier: "high", reliabilityRequirement: 5, autonomyDefault: "supervised_agent",
+    category: "AI Platform & Governance", subcategory: "Orchestration",
+    description: "Coordinate teams of specialised agents (A2A/MCP) with planning, hand-offs, and shared memory across a multi-step goal.",
+    tier: "advanced", industries: [],
+    commonInputs: ["agent registry", "tool catalog", "shared memory store"],
+    regulatoryFlags: ["EU_AI_Act", "SOC2"], complexity: "complex",
+  },
+  {
+    id: "deep_research_agent",
+    label: "Autonomous Deep Research Agent",
+    riskTier: "medium", reliabilityRequirement: 4, autonomyDefault: "advisory_only",
+    category: "AI Platform & Governance", subcategory: "Research",
+    description: "Fan-out, recurse, and synthesise across open web plus private data into a cited, decision-ready report.",
+    tier: "guided", industries: [],
+    commonInputs: ["open web", "internal documents", "data-room"],
+    regulatoryFlags: [], complexity: "complex",
+  },
+  {
+    id: "agent_observability",
+    label: "AI Agent & LLM Observability",
+    riskTier: "high", reliabilityRequirement: 5, autonomyDefault: "advisory_only",
+    category: "AI Platform & Governance", subcategory: "Observability",
+    description: "Trace, evaluate, and monitor agent/LLM runs for drift, cost, latency, hallucination, and tool-call failures.",
+    tier: "advanced", industries: [],
+    commonInputs: ["traces", "eval datasets", "production logs"],
+    regulatoryFlags: ["SOC2", "ISO_27001"], complexity: "complex",
+  },
+  {
+    id: "ai_governance_attestation",
+    label: "AI Governance & Model-Risk Attestation",
+    riskTier: "critical", reliabilityRequirement: 5, autonomyDefault: "human_in_loop",
+    category: "AI Platform & Governance", subcategory: "Governance",
+    description: "Maintain a model inventory, map controls to EU AI Act / NIST RMF, and produce audit-ready risk evidence.",
+    tier: "advanced", industries: [],
+    commonInputs: ["model inventory", "control matrix", "risk register"],
+    regulatoryFlags: ["EU_AI_Act", "ISO_27001", "SOC2"], complexity: "complex",
+  },
+  {
+    id: "prompt_red_team",
+    label: "AI Red-Teaming & Safety Evaluation",
+    riskTier: "critical", reliabilityRequirement: 5, autonomyDefault: "advisory_only",
+    category: "AI Platform & Governance", subcategory: "Safety",
+    description: "Adversarially probe models/agents for jailbreaks, prompt injection, data leakage, and unsafe tool use pre-deployment.",
+    tier: "advanced", industries: [],
+    commonInputs: ["attack library", "model endpoints", "safety policies"],
+    regulatoryFlags: ["EU_AI_Act", "SOC2"], complexity: "complex",
+  },
+  {
+    id: "synthetic_data_generation",
+    label: "Synthetic Data Generation",
+    riskTier: "high", reliabilityRequirement: 4, autonomyDefault: "human_in_loop",
+    category: "AI Platform & Governance", subcategory: "Data",
+    description: "Generate statistically faithful, privacy-preserving synthetic datasets for model training, testing, and sharing.",
+    tier: "advanced", industries: [],
+    commonInputs: ["source datasets", "schema", "privacy constraints"],
+    regulatoryFlags: ["GDPR", "HIPAA"], complexity: "complex",
+  },
+
+  // ─── Data (additions) ──────────────────────────────────────────────
+  {
+    id: "knowledge_graph_builder",
+    label: "Knowledge Graph / GraphRAG Construction",
+    riskTier: "medium", reliabilityRequirement: 4, autonomyDefault: "human_in_loop",
+    category: "Data", subcategory: "Engineering",
+    description: "Extract entities and relations to build and maintain an enterprise knowledge graph powering GraphRAG retrieval.",
+    tier: "advanced", industries: [],
+    commonInputs: ["documents", "ontology", "data sources"],
+    regulatoryFlags: [], complexity: "complex",
+  },
+  {
+    id: "data_catalog_steward",
+    label: "Autonomous Data Catalog & Metadata Steward",
+    riskTier: "medium", reliabilityRequirement: 4, autonomyDefault: "supervised_agent",
+    category: "Data", subcategory: "Engineering",
+    description: "Auto-classify, document, tag sensitivity, and maintain lineage across the data estate for governed self-serve.",
+    tier: "advanced", industries: [],
+    commonInputs: ["table metadata", "lineage graph", "sensitivity policies"],
+    regulatoryFlags: ["SOC2", "GDPR"], complexity: "moderate",
+  },
+
+  // ─── Revenue (additions) ───────────────────────────────────────────
+  {
+    id: "sdr_outbound_agent",
+    label: "Autonomous SDR / Outbound Agent",
+    riskTier: "high", reliabilityRequirement: 4, autonomyDefault: "supervised_agent",
+    category: "Revenue", subcategory: "Sales",
+    description: "Prospect, sequence, reply, and book meetings autonomously with sentiment-aware follow-up and human escalation.",
+    tier: "advanced", industries: [],
+    commonInputs: ["CRM", "intent signals", "messaging library"],
+    regulatoryFlags: ["GDPR", "CCPA"], complexity: "complex",
+  },
+  {
+    id: "deal_desk_assistant",
+    label: "Deal Desk & Quote-to-Cash Assistant",
+    riskTier: "high", reliabilityRequirement: 5, autonomyDefault: "human_in_loop",
+    category: "Revenue", subcategory: "Sales",
+    description: "Assemble quotes, apply approval/discount policy, and progress quote-to-cash with guardrailed exceptions.",
+    tier: "advanced", industries: [],
+    commonInputs: ["price book", "approval matrix", "CRM opportunities"],
+    regulatoryFlags: ["SOX"], complexity: "complex",
+  },
+  {
+    id: "crm_hygiene_agent",
+    label: "CRM Hygiene & Activity-Logging Agent",
+    riskTier: "medium", reliabilityRequirement: 3, autonomyDefault: "supervised_agent",
+    category: "Revenue", subcategory: "Sales",
+    description: "Auto-log interactions, enrich records, dedupe, and keep pipeline and contact data continuously accurate.",
+    tier: "guided", industries: [],
+    commonInputs: ["email/calendar", "CRM records", "enrichment sources"],
+    regulatoryFlags: ["GDPR"], complexity: "moderate",
+  },
+  {
+    id: "meeting_prep_agent",
+    label: "Sales Meeting Prep & Briefing Agent",
+    riskTier: "low", reliabilityRequirement: 3, autonomyDefault: "advisory_only",
+    category: "Revenue", subcategory: "Sales",
+    description: "Generate pre-meeting briefs, battlecards, and talking points from CRM, prior calls, and live account signals.",
+    tier: "quick", industries: [],
+    commonInputs: ["CRM", "call recordings", "account news"],
+    regulatoryFlags: [], complexity: "simple",
+  },
+  {
+    id: "rev_forecasting",
+    label: "Revenue / Pipeline Forecasting",
+    riskTier: "medium", reliabilityRequirement: 4, autonomyDefault: "advisory_only",
+    category: "Revenue", subcategory: "Sales",
+    description: "Predict bookings and pipeline conversion with explainable drivers and scenario rollups for RevOps.",
+    tier: "advanced", industries: [],
+    commonInputs: ["pipeline history", "win/loss", "rep activity"],
+    regulatoryFlags: ["SOX"], complexity: "complex",
+  },
+
+  // ─── Finance (additions) ───────────────────────────────────────────
+  {
+    id: "treasury_cash_forecasting",
+    label: "Treasury & Cash-Flow Forecasting Agent",
+    riskTier: "high", reliabilityRequirement: 5, autonomyDefault: "human_in_loop",
+    category: "Finance", subcategory: "Treasury",
+    description: "Produce 13-week and rolling cash forecasts from ERP and bank feeds with liquidity and covenant alerts.",
+    tier: "advanced", industries: [],
+    commonInputs: ["ERP", "bank feeds", "AP/AR aging"],
+    regulatoryFlags: ["SOX"], complexity: "complex",
+  },
+  {
+    id: "spend_analysis_agent",
+    label: "Spend Analytics & Procurement Intelligence",
+    riskTier: "medium", reliabilityRequirement: 4, autonomyDefault: "advisory_only",
+    category: "Finance", subcategory: "Procurement",
+    description: "Classify spend, surface savings and maverick spend, and recommend consolidation across categories and suppliers.",
+    tier: "guided", industries: [],
+    commonInputs: ["AP ledger", "PO data", "supplier master"],
+    regulatoryFlags: ["SOX"], complexity: "moderate",
+  },
+  {
+    id: "due_diligence_agent",
+    label: "M&A / Due-Diligence Document Analysis",
+    riskTier: "high", reliabilityRequirement: 5, autonomyDefault: "human_in_loop",
+    category: "Finance", subcategory: "Corporate Development",
+    description: "Process data-room documents at volume to extract risks, obligations, and red-flags into a diligence summary.",
+    tier: "advanced", industries: [],
+    commonInputs: ["data-room", "contracts", "financial statements"],
+    regulatoryFlags: ["SOX"], complexity: "complex",
+  },
+  {
+    id: "earnings_communications",
+    label: "Earnings & Investor Communications Drafting",
+    riskTier: "high", reliabilityRequirement: 5, autonomyDefault: "human_in_loop",
+    category: "Finance", subcategory: "FP&A",
+    description: "Draft earnings scripts, investor Q&A, and disclosures grounded in financial results with review controls.",
+    tier: "advanced", industries: [],
+    commonInputs: ["financial results", "prior disclosures", "analyst questions"],
+    regulatoryFlags: ["SOX"], complexity: "complex",
+  },
+
+  // ─── HR (additions — EU AI Act high-risk employment) ───────────────
+  {
+    id: "workforce_planning",
+    label: "Strategic Workforce Planning Agent",
+    riskTier: "high", reliabilityRequirement: 4, autonomyDefault: "advisory_only",
+    category: "HR", subcategory: "Planning",
+    description: "Model headcount, skills supply/demand, and a blended employee-contingent-agent workforce against scenarios.",
+    tier: "advanced", industries: [],
+    commonInputs: ["HRIS", "skills taxonomy", "financial plan"],
+    regulatoryFlags: ["GDPR", "EU_AI_Act"], complexity: "complex",
+  },
+  {
+    id: "performance_review_assist",
+    label: "Performance Review Synthesis",
+    riskTier: "high", reliabilityRequirement: 4, autonomyDefault: "human_in_loop",
+    category: "HR", subcategory: "Talent",
+    description: "Synthesise performance evidence and feedback into calibrated, bias-checked draft reviews for manager edit.",
+    tier: "advanced", industries: [],
+    commonInputs: ["performance data", "peer feedback", "goals"],
+    regulatoryFlags: ["GDPR", "EU_AI_Act"], complexity: "complex",
+  },
+  {
+    id: "comp_benchmarking",
+    label: "Compensation Benchmarking & Pay-Equity",
+    riskTier: "high", reliabilityRequirement: 4, autonomyDefault: "advisory_only",
+    category: "HR", subcategory: "Talent",
+    description: "Benchmark pay to market and surface pay-equity gaps with explainable, auditable recommendations.",
+    tier: "advanced", industries: [],
+    commonInputs: ["comp data", "market surveys", "job architecture"],
+    regulatoryFlags: ["GDPR", "EU_AI_Act"], complexity: "complex",
+  },
+  {
+    id: "succession_planning",
+    label: "Succession Planning Agent",
+    riskTier: "high", reliabilityRequirement: 4, autonomyDefault: "advisory_only",
+    category: "HR", subcategory: "Talent",
+    description: "Identify successors and readiness gaps for critical roles from performance, skills, and mobility data.",
+    tier: "advanced", industries: [],
+    commonInputs: ["performance data", "skills graph", "mobility history"],
+    regulatoryFlags: ["GDPR", "EU_AI_Act"], complexity: "complex",
+  },
+  {
+    id: "skills_inference",
+    label: "Skills Inference & Talent Ontology",
+    riskTier: "medium", reliabilityRequirement: 3, autonomyDefault: "advisory_only",
+    category: "HR", subcategory: "L&D",
+    description: "Infer employee skills from work artefacts and maintain a skills graph powering mobility and learning.",
+    tier: "advanced", industries: [],
+    commonInputs: ["work artefacts", "role data", "skills taxonomy"],
+    regulatoryFlags: ["GDPR"], complexity: "moderate",
+  },
+
+  // ─── Engineering (additions) ───────────────────────────────────────
+  {
+    id: "aiops_self_healing",
+    label: "Agentic SRE / AIOps Self-Healing",
+    riskTier: "critical", reliabilityRequirement: 5, autonomyDefault: "supervised_agent",
+    category: "Engineering", subcategory: "Operations",
+    description: "Closed-loop detect-diagnose-remediate of production incidents with verification and controlled autonomy.",
+    tier: "advanced", industries: [],
+    commonInputs: ["alerts", "logs", "runbooks", "deploy history"],
+    regulatoryFlags: ["SOC2", "ISO_27001"], complexity: "complex",
+  },
+  {
+    id: "legacy_code_modernization",
+    label: "Legacy Code Modernization & Migration",
+    riskTier: "high", reliabilityRequirement: 4, autonomyDefault: "human_in_loop",
+    category: "Engineering", subcategory: "Modernization",
+    description: "Translate and refactor legacy codebases to modern languages/frameworks with test parity checks.",
+    tier: "advanced", industries: [],
+    commonInputs: ["legacy source", "tests", "target framework"],
+    regulatoryFlags: ["SOC2"], complexity: "complex",
+  },
+  {
+    id: "api_design_generator",
+    label: "API & Spec Design Generation",
+    riskTier: "medium", reliabilityRequirement: 4, autonomyDefault: "human_in_loop",
+    category: "Engineering", subcategory: "QA",
+    description: "Generate OpenAPI/GraphQL specs, contracts, and stubs from requirements with consistency linting.",
+    tier: "advanced", industries: [],
+    commonInputs: ["requirements", "existing schemas", "style guide"],
+    regulatoryFlags: ["SOC2"], complexity: "moderate",
+  },
+  {
+    id: "devex_onboarding_assistant",
+    label: "Developer Onboarding & Codebase Q&A",
+    riskTier: "low", reliabilityRequirement: 3, autonomyDefault: "advisory_only",
+    category: "Engineering", subcategory: "QA",
+    description: "Answer questions over a codebase, architecture, and runbooks to ramp new engineers fast.",
+    tier: "guided", industries: [],
+    commonInputs: ["source code", "architecture docs", "runbooks"],
+    regulatoryFlags: [], complexity: "simple",
+  },
+
+  // ─── IT / Security (additions) ─────────────────────────────────────
+  {
+    id: "finops_optimizer",
+    label: "FinOps Cloud-Cost Optimization Agent",
+    riskTier: "high", reliabilityRequirement: 4, autonomyDefault: "supervised_agent",
+    category: "IT", subcategory: "FinOps",
+    description: "Autonomously rightsize, schedule, and remediate cloud waste across AWS/Azure/GCP via IaC with guardrails.",
+    tier: "advanced", industries: [],
+    commonInputs: ["cloud billing", "utilization metrics", "IaC"],
+    regulatoryFlags: ["SOC2"], complexity: "complex",
+  },
+  {
+    id: "cloud_security_posture",
+    label: "Cloud Security Posture Management Agent",
+    riskTier: "high", reliabilityRequirement: 5, autonomyDefault: "advisory_only",
+    category: "IT", subcategory: "Security",
+    description: "Continuously assess cloud/identity misconfigurations, prioritise by exploitability, and propose fixes.",
+    tier: "advanced", industries: [],
+    commonInputs: ["cloud config", "identity graph", "threat intel"],
+    regulatoryFlags: ["SOC2", "ISO_27001"], complexity: "complex",
+  },
+
+  // ─── Operations (additions) ────────────────────────────────────────
+  {
+    id: "process_mining_agent",
+    label: "Process Mining & Automation Discovery",
+    riskTier: "medium", reliabilityRequirement: 4, autonomyDefault: "advisory_only",
+    category: "Operations", subcategory: "BPM",
+    description: "Mine system event logs to map as-is processes and rank high-ROI automation and bottleneck candidates.",
+    tier: "guided", industries: [],
+    commonInputs: ["event logs", "system APIs", "process catalog"],
+    regulatoryFlags: [], complexity: "moderate",
+  },
+  {
+    id: "rpa_agent_orchestration",
+    label: "Computer-Use / Agentic RPA Orchestration",
+    riskTier: "high", reliabilityRequirement: 4, autonomyDefault: "supervised_agent",
+    category: "Operations", subcategory: "BPM",
+    description: "Drive legacy UIs and APIs with judgment-and-exception-handling agents replacing brittle rule-based bots.",
+    tier: "advanced", industries: [],
+    commonInputs: ["process specs", "UI flows", "exception logs"],
+    regulatoryFlags: ["SOX"], complexity: "complex",
+  },
+
+  // ─── Productivity (additions) ──────────────────────────────────────
+  {
+    id: "brand_voice_governance",
+    label: "Brand Voice & Content Governance",
+    riskTier: "medium", reliabilityRequirement: 3, autonomyDefault: "human_in_loop",
+    category: "Productivity", subcategory: "Content",
+    description: "Enforce brand voice, claims, and compliance guardrails across AI-generated content at scale before publish.",
+    tier: "guided", industries: [],
+    commonInputs: ["brand guidelines", "claims library", "content drafts"],
+    regulatoryFlags: [], complexity: "moderate",
+  },
+
+  // ═══════════════════════════════════════════════════════════════════
+  // v1.3 ADDITIONS — industry-specific workflows (target archetype directly)
+  // ═══════════════════════════════════════════════════════════════════
+
+  // ─── Regulated Financial ───────────────────────────────────────────
+  {
+    id: "model_risk_validation",
+    label: "Model Risk Validation & Documentation",
+    riskTier: "high", reliabilityRequirement: 5, autonomyDefault: "human_in_loop",
+    category: "Financial Services", subcategory: "Model Risk",
+    description: "Validate, document and monitor predictive/credit/pricing models per SR 26-2 materiality-based MRM with audit-ready evidence.",
+    tier: "advanced", archetypes: ["regulated_financial"], industries: ["financial_services"],
+    commonInputs: ["model inventory", "validation tests", "regulatory guidance"],
+    regulatoryFlags: ["EU_AI_Act", "BASEL_III", "SOX"], complexity: "complex",
+  },
+  {
+    id: "regulatory_reporting_automation",
+    label: "Regulatory & Transaction Reporting",
+    riskTier: "high", reliabilityRequirement: 5, autonomyDefault: "human_in_loop",
+    category: "Financial Services", subcategory: "Compliance",
+    description: "Assemble and validate regulatory filings (call reports, MiFID/EMIR transaction reporting) with reconciliation and exception flags.",
+    tier: "advanced", archetypes: ["regulated_financial"], industries: ["financial_services"],
+    commonInputs: ["source systems", "reporting taxonomy", "reconciliations"],
+    regulatoryFlags: ["MiFID_II", "FINRA", "SOX"], complexity: "complex",
+  },
+  {
+    id: "esg_climate_risk_disclosure",
+    label: "ESG & Climate-Risk Disclosure Analysis",
+    riskTier: "medium", reliabilityRequirement: 4, autonomyDefault: "human_in_loop",
+    category: "Financial Services", subcategory: "Risk",
+    description: "Extract, classify and quality-check ESG/climate exposure data and draft regulator-grade climate-risk disclosures.",
+    tier: "advanced", archetypes: ["regulated_financial"], industries: ["financial_services"],
+    commonInputs: ["exposure data", "disclosure frameworks", "counterparty data"],
+    regulatoryFlags: ["EU_AI_Act", "SOX"], complexity: "complex",
+  },
+  {
+    id: "aml_alert_adjudication",
+    label: "AML Alert Adjudication & SAR Drafting",
+    riskTier: "high", reliabilityRequirement: 5, autonomyDefault: "supervised_agent",
+    category: "Financial Services", subcategory: "Compliance",
+    description: "Triage transaction-monitoring alerts, assemble case evidence and draft Suspicious Activity Reports with full decision trail.",
+    tier: "advanced", archetypes: ["regulated_financial"], industries: ["financial_services"],
+    commonInputs: ["transaction alerts", "KYC data", "watchlists"],
+    regulatoryFlags: ["FINRA", "BASEL_III", "GDPR"], complexity: "complex",
+  },
+  {
+    id: "complaints_conduct_analytics",
+    label: "Complaints & Conduct-Risk Analytics",
+    riskTier: "high", reliabilityRequirement: 4, autonomyDefault: "advisory_only",
+    category: "Financial Services", subcategory: "Conduct",
+    description: "Classify customer complaints and comms for conduct/mis-selling risk and surface systemic issues for compliance review.",
+    tier: "guided", archetypes: ["regulated_financial"], industries: ["financial_services"],
+    commonInputs: ["complaints", "call/chat transcripts", "policy library"],
+    regulatoryFlags: ["MiFID_II", "GDPR", "EU_AI_Act"], complexity: "moderate",
+  },
+
+  // ─── Health & Life Sciences ────────────────────────────────────────
+  {
+    id: "ambient_clinical_documentation",
+    label: "Ambient Clinical Documentation",
+    riskTier: "high", reliabilityRequirement: 5, autonomyDefault: "human_in_loop",
+    category: "Health", subcategory: "Clinical",
+    description: "Generate structured clinical notes from ambient patient-encounter audio for clinician review and EHR write-back.",
+    tier: "quick", archetypes: ["health_life_sciences"], industries: ["healthcare"],
+    commonInputs: ["encounter audio", "EHR context", "note templates"],
+    regulatoryFlags: ["HIPAA", "EU_AI_Act"], complexity: "complex",
+  },
+  {
+    id: "regulatory_submission_authoring",
+    label: "Regulatory Submission & Dossier Authoring",
+    riskTier: "high", reliabilityRequirement: 5, autonomyDefault: "human_in_loop",
+    category: "Health", subcategory: "Pharma",
+    description: "Draft and assemble regulatory submission sections (protocols, CSRs, eCTD modules) under GxP/CSA validation and FDA-EMA GMLP principles.",
+    tier: "advanced", archetypes: ["health_life_sciences"], industries: ["pharma_life_sciences"],
+    commonInputs: ["study data", "templates", "regulatory guidance"],
+    regulatoryFlags: ["FDA_21CFR11", "EU_AI_Act"], complexity: "complex",
+  },
+  {
+    id: "medical_imaging_triage",
+    label: "Medical Imaging Triage & Prioritisation",
+    riskTier: "critical", reliabilityRequirement: 5, autonomyDefault: "human_in_loop",
+    category: "Health", subcategory: "Clinical",
+    description: "Prioritise and pre-read diagnostic imaging studies to flag urgent findings for radiologist confirmation.",
+    tier: "advanced", archetypes: ["health_life_sciences"], industries: ["healthcare"],
+    commonInputs: ["imaging studies", "priors", "clinical context"],
+    regulatoryFlags: ["HIPAA", "FDA_21CFR11", "EU_AI_Act"], complexity: "complex",
+  },
+  {
+    id: "clinical_trial_matching",
+    label: "Clinical Trial Patient Matching",
+    riskTier: "high", reliabilityRequirement: 5, autonomyDefault: "human_in_loop",
+    category: "Health", subcategory: "Pharma",
+    description: "Match patient records to trial eligibility criteria and surface candidates for investigator review.",
+    tier: "advanced", archetypes: ["health_life_sciences"], industries: ["pharma_life_sciences", "healthcare"],
+    commonInputs: ["patient records", "trial criteria", "EHR"],
+    regulatoryFlags: ["HIPAA", "FDA_21CFR11", "GDPR"], complexity: "complex",
+  },
+  {
+    id: "payer_provider_appeals",
+    label: "Claims Denial Appeal Drafting",
+    riskTier: "high", reliabilityRequirement: 4, autonomyDefault: "human_in_loop",
+    category: "Health", subcategory: "RCM",
+    description: "Draft evidence-backed denial appeals from clinical notes, payer policies and precedent for billing-team review.",
+    tier: "advanced", archetypes: ["health_life_sciences"], industries: ["healthcare"],
+    commonInputs: ["clinical notes", "payer policies", "denial codes"],
+    regulatoryFlags: ["HIPAA"], complexity: "complex",
+  },
+
+  // ─── Legal & Professional ──────────────────────────────────────────
+  {
+    id: "legal_matter_intake",
+    label: "Legal Matter Intake & Triage",
+    riskTier: "medium", reliabilityRequirement: 4, autonomyDefault: "supervised_agent",
+    category: "Legal", subcategory: "Operations",
+    description: "Classify and route inbound legal requests (review, redline, drafting) to the right workflow and owner with SLA tracking.",
+    tier: "guided", archetypes: ["legal_professional"], industries: ["legal"],
+    commonInputs: ["intake requests", "matter taxonomy", "SLA matrix"],
+    regulatoryFlags: ["GDPR", "SOC2"], complexity: "moderate",
+  },
+  {
+    id: "high_volume_contract_review",
+    label: "High-Volume Contract Review & Redline",
+    riskTier: "high", reliabilityRequirement: 5, autonomyDefault: "human_in_loop",
+    category: "Legal", subcategory: "Contracts",
+    description: "Extract key terms, detect risky clauses and auto-redline against playbooks across large contract volumes for attorney sign-off.",
+    tier: "guided", archetypes: ["legal_professional"], industries: ["legal"],
+    commonInputs: ["contracts", "clause playbook", "precedent library"],
+    regulatoryFlags: ["GDPR", "EU_AI_Act"], complexity: "complex",
+  },
+  {
+    id: "self_serve_nda",
+    label: "Self-Serve NDA Generation",
+    riskTier: "medium", reliabilityRequirement: 4, autonomyDefault: "supervised_agent",
+    category: "Legal", subcategory: "Contracts",
+    description: "Generate and negotiate standard NDAs from approved templates to cut legal intake, with escalation on non-standard terms.",
+    tier: "guided", archetypes: ["legal_professional"], industries: ["legal"],
+    commonInputs: ["NDA templates", "fallback positions", "counterparty terms"],
+    regulatoryFlags: ["GDPR"], complexity: "moderate",
+  },
+  {
+    id: "litigation_forecasting",
+    label: "Litigation Outcome & Risk Forecasting",
+    riskTier: "high", reliabilityRequirement: 4, autonomyDefault: "advisory_only",
+    category: "Legal", subcategory: "Litigation",
+    description: "Estimate case outcomes, exposure and settlement ranges from matter facts and precedent for litigation strategy.",
+    tier: "advanced", archetypes: ["legal_professional"], industries: ["legal"],
+    commonInputs: ["matter facts", "precedent", "docket data"],
+    regulatoryFlags: ["EU_AI_Act"], complexity: "complex",
+  },
+  {
+    id: "regulatory_obligation_mapping",
+    label: "Regulatory Obligation Mapping",
+    riskTier: "high", reliabilityRequirement: 5, autonomyDefault: "advisory_only",
+    category: "Legal", subcategory: "Compliance",
+    description: "Map regulatory texts to internal obligations and controls and flag gaps as regulations change.",
+    tier: "advanced", archetypes: ["legal_professional"], industries: ["legal"],
+    commonInputs: ["regulatory texts", "obligation register", "control matrix"],
+    regulatoryFlags: ["EU_AI_Act", "GDPR"], complexity: "complex",
+  },
+  {
+    id: "legal_research_memo",
+    label: "Legal Research & Memo Drafting",
+    riskTier: "high", reliabilityRequirement: 5, autonomyDefault: "human_in_loop",
+    category: "Legal", subcategory: "Research",
+    description: "Research authorities and draft cited legal memos grounded in a curated, jurisdiction-aware corpus for attorney review.",
+    tier: "guided", archetypes: ["legal_professional"], industries: ["legal"],
+    commonInputs: ["case law corpus", "matter facts", "jurisdiction"],
+    regulatoryFlags: ["EU_AI_Act"], complexity: "complex",
+  },
+
+  // ─── Public Sector & Education ─────────────────────────────────────
+  {
+    id: "benefits_fraud_detection",
+    label: "Benefits & Payments Fraud Detection",
+    riskTier: "high", reliabilityRequirement: 5, autonomyDefault: "advisory_only",
+    category: "Public Sector", subcategory: "Integrity",
+    description: "Detect improper payments and benefits fraud via anomaly and network analysis across program and identity data.",
+    tier: "advanced", archetypes: ["public_sector_education"], industries: ["public_sector"],
+    commonInputs: ["program data", "identity data", "payment records"],
+    regulatoryFlags: ["GDPR", "EU_AI_Act"], complexity: "complex",
+  },
+  {
+    id: "foia_records_redaction",
+    label: "FOIA / Records Request Processing & Redaction",
+    riskTier: "high", reliabilityRequirement: 4, autonomyDefault: "human_in_loop",
+    category: "Public Sector", subcategory: "Service",
+    description: "Locate responsive records, auto-redact PII/exempt content and assemble FOIA/records-request responses with an audit trail.",
+    tier: "advanced", archetypes: ["public_sector_education"], industries: ["public_sector"],
+    commonInputs: ["records repositories", "exemption rules", "request text"],
+    regulatoryFlags: ["GDPR"], complexity: "moderate",
+  },
+  {
+    id: "procurement_bid_anomaly",
+    label: "Public Procurement Bid Anomaly Detection",
+    riskTier: "high", reliabilityRequirement: 4, autonomyDefault: "advisory_only",
+    category: "Public Sector", subcategory: "Integrity",
+    description: "Detect collusion, conflicts of interest and pricing anomalies across tenders and contract data to support audits.",
+    tier: "advanced", archetypes: ["public_sector_education"], industries: ["public_sector"],
+    commonInputs: ["tender data", "supplier registry", "contract history"],
+    regulatoryFlags: ["GDPR"], complexity: "moderate",
+  },
+  {
+    id: "permit_license_processing",
+    label: "Permit & License Application Processing",
+    riskTier: "medium", reliabilityRequirement: 4, autonomyDefault: "supervised_agent",
+    category: "Public Sector", subcategory: "Service",
+    description: "Validate permit/license applications against eligibility rules and route exceptions with full case-management audit trail.",
+    tier: "guided", archetypes: ["public_sector_education"], industries: ["public_sector"],
+    commonInputs: ["applications", "eligibility rules", "case management"],
+    regulatoryFlags: ["GDPR", "EU_AI_Act"], complexity: "moderate",
+  },
+  {
+    id: "student_early_warning",
+    label: "At-Risk Student Early-Warning",
+    riskTier: "high", reliabilityRequirement: 4, autonomyDefault: "advisory_only",
+    category: "Education", subcategory: "Student Success",
+    description: "Predict students at risk of attrition from engagement and performance signals to trigger advisor intervention.",
+    tier: "guided", archetypes: ["public_sector_education"], industries: ["education"],
+    commonInputs: ["LMS engagement", "grades", "attendance"],
+    regulatoryFlags: ["FERPA", "GDPR", "EU_AI_Act"], complexity: "moderate",
+  },
+  {
+    id: "admissions_screening",
+    label: "Admissions Application Screening",
+    riskTier: "high", reliabilityRequirement: 4, autonomyDefault: "human_in_loop",
+    category: "Education", subcategory: "Enrollment",
+    description: "Score and summarise admissions applications against criteria with bias monitoring and human-decision sign-off.",
+    tier: "advanced", archetypes: ["public_sector_education"], industries: ["education"],
+    commonInputs: ["applications", "rubrics", "historical decisions"],
+    regulatoryFlags: ["FERPA", "GDPR", "EU_AI_Act"], complexity: "complex",
+  },
+
+  // ─── Critical Infrastructure & Defence ─────────────────────────────
+  {
+    id: "ot_ics_anomaly_detection",
+    label: "OT / ICS Anomaly & Threat Detection",
+    riskTier: "critical", reliabilityRequirement: 5, autonomyDefault: "advisory_only",
+    category: "Critical Infrastructure", subcategory: "OT Security",
+    description: "Detect anomalous behaviour and intrusions across SCADA/ICS and OT networks for safety and grid integrity.",
+    tier: "advanced", archetypes: ["critical_infrastructure_defence"], industries: ["energy_utilities"],
+    commonInputs: ["OT network traffic", "historian data", "threat intel"],
+    regulatoryFlags: ["IEC_62443", "NERC_CIP", "ISO_27001"], complexity: "complex",
+  },
+  {
+    id: "grid_load_forecasting",
+    label: "Grid Load & Outage Forecasting",
+    riskTier: "high", reliabilityRequirement: 5, autonomyDefault: "advisory_only",
+    category: "Critical Infrastructure", subcategory: "Grid",
+    description: "Forecast electricity load, DER behaviour and outage risk for grid balancing and reliability.",
+    tier: "advanced", archetypes: ["critical_infrastructure_defence"], industries: ["energy_utilities"],
+    commonInputs: ["smart-meter data", "weather", "DER telemetry"],
+    regulatoryFlags: ["NERC_CIP", "ISO_27001"], complexity: "complex",
+  },
+  {
+    id: "defence_document_handling",
+    label: "CUI Document Handling & Classification",
+    riskTier: "critical", reliabilityRequirement: 5, autonomyDefault: "human_in_loop",
+    category: "Critical Infrastructure", subcategory: "Defence",
+    description: "Classify, control and summarise controlled-unclassified-information documents in air-gapped / CMMC-compliant environments.",
+    tier: "advanced", archetypes: ["critical_infrastructure_defence"], industries: ["aerospace_defence"],
+    commonInputs: ["CUI documents", "classification guides", "access policy"],
+    regulatoryFlags: ["ITAR", "CMMC", "NIST_800_171"], complexity: "complex",
+  },
+  {
+    id: "isr_intel_triage",
+    label: "ISR & Intelligence Report Triage",
+    riskTier: "critical", reliabilityRequirement: 5, autonomyDefault: "human_in_loop",
+    category: "Critical Infrastructure", subcategory: "Defence",
+    description: "Triage, summarise and prioritise multi-source intelligence/ISR feeds for analyst review in mission-support workflows.",
+    tier: "advanced", archetypes: ["critical_infrastructure_defence"], industries: ["aerospace_defence"],
+    commonInputs: ["ISR feeds", "intel reports", "geospatial data"],
+    regulatoryFlags: ["ITAR", "CMMC"], complexity: "complex",
+  },
+  {
+    id: "physical_security_monitoring",
+    label: "Critical-Asset Physical Security Monitoring",
+    riskTier: "high", reliabilityRequirement: 5, autonomyDefault: "supervised_agent",
+    category: "Critical Infrastructure", subcategory: "OT Security",
+    description: "Detect intrusions and safety events from video/sensor feeds at critical facilities with operator confirmation.",
+    tier: "advanced", archetypes: ["critical_infrastructure_defence"], industries: ["energy_utilities"],
+    commonInputs: ["video feeds", "sensor data", "access logs"],
+    regulatoryFlags: ["IEC_62443", "ISO_27001"], complexity: "complex",
+  },
+  {
+    id: "nerc_compliance_evidence",
+    label: "Critical-Infra Compliance Evidence Assembly",
+    riskTier: "high", reliabilityRequirement: 4, autonomyDefault: "human_in_loop",
+    category: "Critical Infrastructure", subcategory: "Compliance",
+    description: "Collect and assemble audit-ready compliance evidence for critical-infrastructure regimes with control-gap flagging.",
+    tier: "advanced", archetypes: ["critical_infrastructure_defence"], industries: ["energy_utilities"],
+    commonInputs: ["control matrix", "system exports", "audit history"],
+    regulatoryFlags: ["NERC_CIP", "IEC_62443", "ISO_27001"], complexity: "moderate",
+  },
+
+  // ─── Enterprise Software & Digital Product ─────────────────────────
+  {
+    id: "autonomous_sre_remediation",
+    label: "Autonomous SRE Remediation",
+    riskTier: "high", reliabilityRequirement: 5, autonomyDefault: "supervised_agent",
+    category: "Enterprise Software", subcategory: "Operations",
+    description: "Diagnose production incidents and execute supervised remediation/runbook actions with rollback and audit logging.",
+    tier: "advanced", archetypes: ["enterprise_software"], industries: ["technology_software"],
+    commonInputs: ["alerts", "runbooks", "deploy history"],
+    regulatoryFlags: ["SOC2", "ISO_27001"], complexity: "complex",
+  },
+  {
+    id: "continuous_compliance_evidence",
+    label: "Continuous Compliance Evidence Collection",
+    riskTier: "medium", reliabilityRequirement: 4, autonomyDefault: "supervised_agent",
+    category: "Enterprise Software", subcategory: "Compliance",
+    description: "Continuously collect control evidence and detect config drift to maintain SOC2/ISO 27001 audit readiness.",
+    tier: "guided", archetypes: ["enterprise_software"], industries: ["technology_software"],
+    commonInputs: ["system exports", "control matrix", "config state"],
+    regulatoryFlags: ["SOC2", "ISO_27001", "GDPR"], complexity: "moderate",
+  },
+  {
+    id: "sbom_secrets_scanning",
+    label: "SBOM & Secrets Leak Detection",
+    riskTier: "high", reliabilityRequirement: 4, autonomyDefault: "advisory_only",
+    category: "Enterprise Software", subcategory: "Security",
+    description: "Scan dependencies, generate SBOMs and detect leaked secrets/vulnerable packages across CI/CD with remediation guidance.",
+    tier: "guided", archetypes: ["enterprise_software"], industries: ["technology_software"],
+    commonInputs: ["dependency manifests", "CI/CD pipelines", "secret scanners"],
+    regulatoryFlags: ["SOC2", "ISO_27001"], complexity: "moderate",
+  },
+  {
+    id: "ai_soc_alert_triage",
+    label: "AI-SOC Alert Triage & Enrichment",
+    riskTier: "high", reliabilityRequirement: 5, autonomyDefault: "advisory_only",
+    category: "Enterprise Software", subcategory: "Security",
+    description: "Triage, correlate and enrich security alerts at machine speed and recommend response actions for SOC analyst sign-off.",
+    tier: "advanced", archetypes: ["enterprise_software"], industries: ["technology_software"],
+    commonInputs: ["SIEM", "threat intel", "asset inventory"],
+    regulatoryFlags: ["SOC2", "ISO_27001"], complexity: "complex",
+  },
+  {
+    id: "ai_agent_governance",
+    label: "AI Agent Governance & Guardrails",
+    riskTier: "high", reliabilityRequirement: 5, autonomyDefault: "human_in_loop",
+    category: "Enterprise Software", subcategory: "Governance",
+    description: "Monitor and constrain autonomous agents (tool use, delegation scope, action approval) and log decisions for audit and AI-Act conformity.",
+    tier: "advanced", archetypes: ["enterprise_software"], industries: ["technology_software"],
+    commonInputs: ["agent logs", "permission policies", "tool catalog"],
+    regulatoryFlags: ["EU_AI_Act", "SOC2", "ISO_27001"], complexity: "complex",
+  },
+  {
+    id: "release_change_risk",
+    label: "Release & Change-Risk Assessment",
+    riskTier: "medium", reliabilityRequirement: 4, autonomyDefault: "advisory_only",
+    category: "Enterprise Software", subcategory: "Operations",
+    description: "Assess code/config changes for blast radius and risk and gate deployments with evidence for change management.",
+    tier: "guided", archetypes: ["enterprise_software"], industries: ["technology_software"],
+    commonInputs: ["change diffs", "dependency graph", "incident history"],
+    regulatoryFlags: ["SOC2"], complexity: "moderate",
+  },
+
+  // ─── Industrial & Physical Operations ──────────────────────────────
+  {
+    id: "supply_chain_digital_twin",
+    label: "Supply-Chain Digital-Twin Simulation",
+    riskTier: "high", reliabilityRequirement: 4, autonomyDefault: "advisory_only",
+    category: "Manufacturing", subcategory: "Supply Chain",
+    description: "Simulate supply-network scenarios and auto-reschedule orders/shipments and rebalance inventory under disruption.",
+    tier: "advanced", archetypes: ["industrial_physical_ops"], industries: ["manufacturing", "transport_logistics"],
+    commonInputs: ["network model", "inventory", "demand signals"],
+    regulatoryFlags: ["ISO_27001"], complexity: "complex",
+  },
+  {
+    id: "route_fleet_optimisation",
+    label: "Route & Fleet Optimisation",
+    riskTier: "medium", reliabilityRequirement: 4, autonomyDefault: "supervised_agent",
+    category: "Manufacturing", subcategory: "Logistics",
+    description: "Optimise delivery routes and fleet allocation in real time against demand, traffic and cost/emissions constraints.",
+    tier: "guided", archetypes: ["industrial_physical_ops"], industries: ["transport_logistics"],
+    commonInputs: ["orders", "GPS/traffic", "fleet capacity"],
+    regulatoryFlags: ["ISO_27001"], complexity: "moderate",
+  },
+  {
+    id: "warehouse_robotics_orchestration",
+    label: "Warehouse Robotics Orchestration",
+    riskTier: "high", reliabilityRequirement: 5, autonomyDefault: "supervised_agent",
+    category: "Manufacturing", subcategory: "Logistics",
+    description: "Coordinate multi-agent robot fleets and respond to incidents for picking, sorting and inventory.",
+    tier: "advanced", archetypes: ["industrial_physical_ops"], industries: ["transport_logistics", "manufacturing"],
+    commonInputs: ["WMS", "robot telemetry", "order flow"],
+    regulatoryFlags: ["IEC_62443", "ISO_27001"], complexity: "complex",
+  },
+  {
+    id: "inbound_logistics_doc_processing",
+    label: "Logistics Document Processing",
+    riskTier: "medium", reliabilityRequirement: 4, autonomyDefault: "supervised_agent",
+    category: "Manufacturing", subcategory: "Logistics",
+    description: "Extract and validate data from bills of lading, customs and freight documents to automate inbound/outbound logistics.",
+    tier: "guided", archetypes: ["industrial_physical_ops"], industries: ["transport_logistics"],
+    commonInputs: ["BoL", "customs forms", "freight invoices"],
+    regulatoryFlags: ["ISO_27001"], complexity: "moderate",
+  },
+  {
+    id: "warranty_returns_analytics",
+    label: "Warranty & Returns Analytics",
+    riskTier: "medium", reliabilityRequirement: 4, autonomyDefault: "advisory_only",
+    category: "Manufacturing", subcategory: "Quality",
+    description: "Detect failure patterns and fraud across warranty claims and returns to inform quality and reverse-logistics decisions.",
+    tier: "guided", archetypes: ["industrial_physical_ops"], industries: ["manufacturing", "retail_consumer"],
+    commonInputs: ["warranty claims", "returns data", "product telemetry"],
+    regulatoryFlags: ["ISO_27001"], complexity: "moderate",
+  },
+  {
+    id: "field_service_copilot",
+    label: "Field-Service Technician Copilot",
+    riskTier: "medium", reliabilityRequirement: 4, autonomyDefault: "advisory_only",
+    category: "Manufacturing", subcategory: "Field Service",
+    description: "Guide technicians with diagnostics, manuals and parts lookup on-site and capture structured service records.",
+    tier: "guided", archetypes: ["industrial_physical_ops"], industries: ["manufacturing", "energy_utilities"],
+    commonInputs: ["equipment manuals", "asset history", "parts catalog"],
+    regulatoryFlags: ["ISO_27001"], complexity: "moderate",
   },
 ];
 

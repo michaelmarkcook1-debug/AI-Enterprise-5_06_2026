@@ -114,8 +114,44 @@ export type RequiredCertification =
   | "soc2_type2" | "iso_27001" | "iso_42001"
   | "hipaa" | "fedramp_moderate" | "fedramp_high"
   | "pci_dss" | "gdpr_eu_dpa"
-  | "eu_ai_act_high_risk" | "uk_gov_g_cloud";
+  | "eu_ai_act_high_risk" | "uk_gov_g_cloud"
+  // v1.3 — defence / critical-infrastructure certification regimes
+  | "cmmc_l2" | "nist_800_171" | "nerc_cip" | "iec_62443" | "fedramp_high_il5";
 export type OutputMode = "executive" | "buyer" | "technical" | "procurement";
+
+/* ─── v1.3 Opportunity (Quick) — value & ROI quantification ─────── */
+
+/** Annual value the buyer believes the use case is worth. */
+export type ValueAtStakeBand = "lt_250k" | "250k_1m" | "1m_5m" | "5m_25m" | "gt_25m";
+/** Realistic target improvement on the primary objective. */
+export type UpliftBand = "lt_10" | "10_25" | "25_50" | "gt_50";
+
+/* ─── v1.3 Strategy (Guided) — build-vs-buy + readiness ─────────── */
+
+export type BuildVsBuy =
+  | "buy_saas" | "buy_configure" | "build_on_platform" | "build_from_scratch" | "undecided";
+/** 1 = no usable data, 5 = clean / governed / labelled. */
+export type DataReadiness = 1 | 2 | 3 | 4 | 5;
+export type ChangeSponsorship = "none" | "mid_level" | "exec" | "board";
+
+/* ─── v1.3 Procurement (Advanced) — model-quality, cost, IP, exit ─ */
+
+/** EU AI Act risk classification of the buyer's own use case. */
+export type UseCaseRiskClass = "minimal" | "limited" | "high_risk" | "prohibited_adjacent";
+export type HallucinationTolerance = "zero" | "low" | "moderate" | "best_effort";
+export type EvalEvidence = "independent_eval" | "red_team_report" | "model_card" | "safety_eval";
+export type ConsumptionBand = "pilot" | "department" | "business_unit" | "enterprise_wide";
+export type PricingModel = "per_seat" | "per_token" | "committed_use" | "flat_platform" | "outcome_based";
+export type CostCeilingBand = "lt_100k" | "100k_500k" | "500k_2m" | "2m_10m" | "gt_10m";
+export type IpDataRight = "no_training_on_data" | "output_ip_owned" | "ip_indemnification" | "audit_rights";
+export type ExitRequirement =
+  | "contractual_offramp" | "open_format_export" | "model_config_portability" | "parallel_run";
+/** Fact-derived negotiation leverage inputs (replace the self-rated slider). */
+export type IncumbentSpendBand = "none" | "lt_250k" | "250k_1m" | "1m_5m" | "gt_5m";
+export type RenewalWindow = "lt_3mo" | "3_6mo" | "6_12mo" | "gt_12mo" | "no_incumbent";
+
+/** Vendor-side deployment topologies the engine can match against residency / exit asks. */
+export type VendorDeploymentModel = "saas" | "vpc" | "on_prem" | "byoc" | "self_host";
 
 export interface AssessmentInput {
   industry: IndustryArchetype;
@@ -165,6 +201,50 @@ export interface AssessmentInput {
   requiredCertifications?: RequiredCertification[];
   /** Output mode the results page should render. */
   outputMode?: OutputMode;
+
+  /* ─── v1.3 Opportunity (Quick) — value & ROI ──────────────────── */
+
+  /** Annual value the buyer believes the use case is worth. */
+  valueAtStake?: ValueAtStakeBand;
+  /** Realistic target improvement on the primary objective. */
+  expectedUplift?: UpliftBand;
+
+  /* ─── v1.3 Strategy (Guided) — build-vs-buy + readiness ───────── */
+
+  buildVsBuy?: BuildVsBuy;
+  /** Availability + quality + governance of data to feed the use case. */
+  dataReadiness?: DataReadiness;
+  changeSponsorship?: ChangeSponsorship;
+
+  /* ─── v1.3 Procurement (Advanced) — model-quality, cost, IP, exit ─ */
+
+  /** EU AI Act risk class of the buyer's use case (cascades to certs + FRIA). */
+  useCaseRiskClass?: UseCaseRiskClass;
+  /** Max acceptable error/hallucination band — parameterises Reliability & Safety. */
+  maxHallucinationTolerance?: HallucinationTolerance;
+  /** Independent evidence the buyer requires before deployment. */
+  evalEvidenceRequired?: EvalEvidence[];
+  /** Usage scale, required so the TCO horizon can actually compute. */
+  expectedConsumption?: ConsumptionBand;
+  /** Pricing models the buyer will accept; others are penalised. */
+  acceptablePricingModels?: PricingModel[];
+  /** Hard annual budget ceiling for this deployment. */
+  costCeiling?: CostCeilingBand;
+  /** IP / data-rights the buyer requires in the contract. */
+  ipAndDataRights?: IpDataRight[];
+  /** Reversibility / exit asks (replace the self-rated switching slider). */
+  exitRequirements?: ExitRequirement[];
+  /** Fact-derived leverage: incumbent annual spend on the system being replaced. */
+  incumbentAnnualSpend?: IncumbentSpendBand;
+  /** Fact-derived leverage: how soon the incumbent contract renews. */
+  renewalWindow?: RenewalWindow;
+  /** Fact-derived leverage: count of qualified alternative vendors. */
+  qualifiedAlternatives?: number;
+
+  /* ─── v1.3 Infrastructure ─────────────────────────────────────── */
+
+  /** Industry systems-of-record the buyer runs (Epic, Guidewire, Murex …). */
+  selectedSystemsOfRecord?: string[];
 }
 
 export interface EvidenceItem {
@@ -215,6 +295,27 @@ export interface Vendor {
   evidence: EvidenceItem[];
   risks: RiskFlag[];
   industryAdoption: VendorIndustryAdoption[];
+
+  /* ─── v1.3 structured signals (replace free-text excerpt scanning) ─
+   * The tier overlay previously scanned synthetic evidence excerpts for
+   * certifications / regions / multi-cloud, which misfired. These typed
+   * fields let the engine match deterministically (set intersection).
+   * All optional so existing data and tests keep working. */
+
+  /** Certifications the vendor holds (ids align with RequiredCertification). */
+  certifications?: string[];
+  /** Deployment topologies the vendor offers. */
+  deploymentModels?: VendorDeploymentModel[];
+  /** Data-residency regions the vendor can demonstrably serve (us/eu/uk/apac). */
+  regions?: string[];
+  /** Layered-infrastructure item ids the vendor is natively integrated with. */
+  ecosystemNative?: string[];
+  /** Industry systems-of-record the vendor has native connectors for. */
+  supportedSystemsOfRecord?: string[];
+  /** Pricing models the vendor offers (ids align with PricingModel). */
+  pricingModels?: string[];
+  /** Independent evaluation evidence the vendor publishes (ids align with EvalEvidence). */
+  evalEvidence?: string[];
 }
 
 export interface IndustryProfile {

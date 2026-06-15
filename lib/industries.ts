@@ -1,6 +1,7 @@
 // 8 industry archetypes (spec §10) + adoption profiles (spec §11)
 
-import type { IndustryProfile, PillarId } from "./types";
+import type { IndustryArchetype, IndustryProfile, PillarId } from "./types";
+import type { IndustryTag } from "./use-cases";
 
 const w = (
   business: number,
@@ -99,6 +100,37 @@ export function getIndustry(id: string): IndustryProfile {
   const p = INDUSTRIES[id];
   if (!p) throw new Error(`Unknown industry: ${id}`);
   return p;
+}
+
+/**
+ * v1.3 — roll-up of the 8 engine archetypes onto the workflow library's
+ * 15-tag taxonomy (+ aerospace_defence). Each of the 16 tags maps to
+ * exactly one archetype, so any tagged workflow is addressable from the
+ * archetype the buyer selects. Used to filter workflows AND industry
+ * systems-of-record by industry. (Reverse lookup via archetypeOf.)
+ */
+export const ARCHETYPE_INDUSTRY_TAGS: Record<IndustryArchetype, IndustryTag[]> = {
+  regulated_financial: ["financial_services", "insurance"],
+  health_life_sciences: ["healthcare", "pharma_life_sciences"],
+  legal_professional: ["legal", "professional_services"],
+  public_sector_education: ["public_sector", "education"],
+  critical_infrastructure_defence: ["energy_utilities", "telecom_media", "aerospace_defence"],
+  enterprise_software: ["technology_software"],
+  industrial_physical_ops: ["manufacturing", "transport_logistics"],
+  commercial_enterprise: ["retail_consumer", "real_estate"],
+};
+
+/** Tags that roll up to a given archetype (empty array for unknown ids). */
+export function tagsForArchetype(archetype: string): readonly IndustryTag[] {
+  return ARCHETYPE_INDUSTRY_TAGS[archetype as IndustryArchetype] ?? [];
+}
+
+/** Reverse lookup — the archetype a workflow tag rolls up to. */
+export function archetypeOf(tag: IndustryTag): IndustryArchetype | null {
+  for (const [archetype, tags] of Object.entries(ARCHETYPE_INDUSTRY_TAGS) as [IndustryArchetype, IndustryTag[]][]) {
+    if (tags.includes(tag)) return archetype;
+  }
+  return null;
 }
 
 // Spec §11: Industry Maturity Modifier

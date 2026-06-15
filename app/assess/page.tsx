@@ -23,7 +23,7 @@ import {
 } from "@/lib/intelligence/repository";
 import { listVendorProfiles } from "@/lib/repositories/vendor-profiles";
 import { getDataProvenance } from "@/lib/intelligence/provenance";
-import { INDUSTRIES } from "@/lib/industries";
+import { INDUSTRIES, archetypeOf } from "@/lib/industries";
 import { PRIMARY_OBJECTIVES, ECOSYSTEMS, workflowsForTier } from "@/lib/use-cases";
 import { parseTier } from "@/lib/assessment/tiers";
 import AnalystInsight from "@/components/analyst-insight";
@@ -78,13 +78,24 @@ export default async function AssessPage({ searchParams }: PageProps) {
           <AssessForm
             tier={tier}
             industries={Object.values(INDUSTRIES).map((i) => ({ id: i.id, name: i.name }))}
-            useCases={workflowsForTier(tier).map((u) => ({
-              id: u.id,
-              label: u.label,
-              category: u.category,
-              subcategory: u.subcategory,
-              description: u.description,
-            }))}
+            useCases={workflowsForTier(tier).map((u) => {
+              // Resolve each workflow's engine archetypes (direct + via 15-tag
+              // roll-up) so the client can tailor the picker to the selected
+              // industry. Empty array = horizontal (shown to everyone).
+              const resolved = new Set<string>(u.archetypes ?? []);
+              for (const t of u.industries ?? []) {
+                const a = archetypeOf(t);
+                if (a) resolved.add(a);
+              }
+              return {
+                id: u.id,
+                label: u.label,
+                category: u.category,
+                subcategory: u.subcategory,
+                description: u.description,
+                archetypes: Array.from(resolved),
+              };
+            })}
             objectives={PRIMARY_OBJECTIVES}
             ecosystems={ECOSYSTEMS}
             vendors={vendorProfiles.map((v) => ({ id: v.id, name: v.name, category: v.category, ownershipType: v.ownership }))}

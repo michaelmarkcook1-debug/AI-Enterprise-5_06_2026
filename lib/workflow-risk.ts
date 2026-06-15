@@ -44,6 +44,12 @@ export const REGULATORY_REQUIRED_DOMAINS: Record<RegulatoryFlag, DomainId[]> = {
   SOC2:         ["data_security_privacy", "identity_access", "security_threat"],
   ISO_27001:    ["data_security_privacy", "identity_access", "security_threat", "governance_compliance"],
   FDA_21CFR11:  ["governance_compliance", "model_reliability", "identity_access"],
+  // v1.3 — defence / critical-infrastructure regimes.
+  CMMC:         ["data_security_privacy", "identity_access", "governance_compliance", "security_threat"],
+  NIST_800_171: ["data_security_privacy", "identity_access", "governance_compliance", "security_threat"],
+  NERC_CIP:     ["security_threat", "identity_access", "governance_compliance", "model_reliability"],
+  IEC_62443:    ["security_threat", "identity_access", "governance_compliance", "model_reliability"],
+  FedRAMP:      ["data_security_privacy", "identity_access", "security_threat", "governance_compliance"],
 };
 
 /* ─── Heuristics ─────────────────────────────────────────────────── */
@@ -173,7 +179,10 @@ export function deriveWorkflowRiskProfile(
   // 3. Effective data sensitivity. Start from the dialled value, then
   //    bump if regulatory regimes imply stricter handling, then bump
   //    again if commonInputs hit a sensitive-keyword.
-  const HIGH_REGIMES: RegulatoryFlag[] = ["HIPAA", "FDA_21CFR11", "EU_AI_Act", "ITAR", "PCI_DSS", "FINRA"];
+  const HIGH_REGIMES: RegulatoryFlag[] = [
+    "HIPAA", "FDA_21CFR11", "EU_AI_Act", "ITAR", "PCI_DSS", "FINRA",
+    "CMMC", "NIST_800_171", "NERC_CIP", "IEC_62443", "FedRAMP",
+  ];
   const touchesHighRegime = regulatoryRegimes.some((r) => HIGH_REGIMES.includes(r));
   const lowerSensitiveRegimes: RegulatoryFlag[] = ["GDPR", "CCPA", "SOX", "SOC2", "ISO_27001", "FERPA"];
   const touchesLowerRegime = regulatoryRegimes.some((r) => lowerSensitiveRegimes.includes(r));
