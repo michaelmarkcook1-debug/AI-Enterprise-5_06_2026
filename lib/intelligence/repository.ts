@@ -388,6 +388,48 @@ export async function listNewsItems(): Promise<NewsItem[]> {
   );
 }
 
+export interface BreakingNews {
+  /** High-impact items published within the window, newest first. */
+  items: NewsItem[];
+  /** The window applied (days). */
+  windowDays: number;
+  /** Newest publishedAt across the ENTIRE feed — used to surface staleness. */
+  latestPublishedAt: string | null;
+  /** How many days old the newest tracked story is (null if feed empty). */
+  latestAgeDays: number | null;
+  /** Of the windowed items, how many are source-backed (sourceKind === "real"). */
+  liveCount: number;
+}
+
+/**
+ * v1.3 — "Breaking news" feed for the Query market-overview card. Filters the
+ * merged news feed to genuinely impactful items in the last `days` days
+ * (impactScore ≥ minImpact), newest first. Also returns the newest publish
+ * date across the whole feed so the UI can honestly flag a stale feed when the
+ * daily ingest hasn't run.
+ */
+export async function getBreakingNews(opts: { days?: number; minImpact?: number; limit?: number } = {}): Promise<BreakingNews> {
+  const days = opts.days ?? 7;
+  const minImpact = opts.minImpact ?? 55;
+  const limit = opts.limit ?? 6;
+  const all = await listNewsItems(); // already sorted newest-first
+  const latestPublishedAt = all[0]?.publishedAt ?? null;
+  const latestAgeDays = latestPublishedAt
+    ? Math.floor((Date.now() - Date.parse(latestPublishedAt)) / 86_400_000)
+    : null;
+  const cutoff = Date.now() - days * 86_400_000;
+  const windowed = all
+    .filter((n) => Date.parse(n.publishedAt) >= cutoff && n.impactScore >= minImpact)
+    .sort((a, b) => (a.publishedAt < b.publishedAt ? 1 : -1));
+  return {
+    items: windowed.slice(0, limit),
+    windowDays: days,
+    latestPublishedAt,
+    latestAgeDays,
+    liveCount: windowed.filter((n) => n.sourceKind === "real").length,
+  };
+}
+
 export async function listCapabilities(): Promise<Capability[]> {
   return databaseOrSeed(
     async (client) => {

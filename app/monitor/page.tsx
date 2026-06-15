@@ -15,6 +15,9 @@
 
 import Link from "next/link";
 import { PageFrame } from "@/components/app-shell";
+import DataSourceRail from "@/components/data-source-rail";
+import AssessmentOutputsPanel from "@/components/assessment-outputs-panel";
+import { getLatestAssessmentResult } from "@/lib/services/assessment-service";
 import { Confidence, Panel, SeedDataBadge } from "@/components/intelligence-ui";
 import { VendorNameWithOwnership } from "@/components/ownership-indicator";
 import {
@@ -35,13 +38,14 @@ import { monitorInsight } from "@/lib/insights/tab-insights";
 export const dynamic = "force-dynamic";
 
 export default async function MonitorPage() {
-  const [dashboard, vendors, momentum, news, watchlists, provenance] = await Promise.all([
+  const [dashboard, vendors, momentum, news, watchlists, provenance, latestAssessment] = await Promise.all([
     getMarketDashboard(),
     listIntelligenceVendors(),
     listVendorMomentum(),
     listNewsItems(),
     listWatchlists(),
     getDataProvenance(),
+    getLatestAssessmentResult(),
   ]);
 
   const momentumByVendor = new Map(momentum.map((m) => [m.vendorId, m]));
@@ -130,6 +134,7 @@ export default async function MonitorPage() {
 
   return (
     <PageFrame
+      aside={<DataSourceRail tab="monitor" />}
       title="Monitor"
       kicker="Is the AI decision still valid?"
       description="Track whether prior AI recommendations remain defensible. Monitors recommendation drift, assumption health, vendor change signals, regulation, and reputation shifts. Surfaces reassessment triggers before decisions degrade."
@@ -145,6 +150,8 @@ export default async function MonitorPage() {
           return sorted[0] ? { name: sorted[0].vendor.name, drift: sorted[0].drift } : null;
         })(),
       })} />
+
+      {latestAssessment && <AssessmentOutputsPanel result={latestAssessment} />}
 
       {/* 0. Assessed shortlist cards — restored from the assessment session */}
       <ShortlistVendorCards

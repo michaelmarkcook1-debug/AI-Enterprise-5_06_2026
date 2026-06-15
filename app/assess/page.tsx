@@ -13,6 +13,7 @@
 
 import Link from "next/link";
 import { PageFrame } from "@/components/app-shell";
+import DataSourceRail from "@/components/data-source-rail";
 import { Confidence, Panel, SeedDataBadge } from "@/components/intelligence-ui";
 import { VendorNameWithOwnership } from "@/components/ownership-indicator";
 import { generateWeeklyBriefing } from "@/lib/intelligence/briefings";
@@ -52,6 +53,7 @@ export default async function AssessPage({ searchParams }: PageProps) {
 
   return (
     <PageFrame
+      aside={<DataSourceRail tab="assess" />}
       title="Assess"
       kicker="What should your organisation deploy?"
       description="Three assessment tiers: Opportunity (where should we start?), Strategy (what should we deploy?), and Procurement (should we buy this?). Each tier scores vendors against your industry, workflows, risk profile, governance, and budget — with results flowing directly into Demonstrate for board defence."

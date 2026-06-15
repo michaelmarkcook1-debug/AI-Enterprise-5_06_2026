@@ -18,6 +18,71 @@ function bandLabel(b: string): string {
   } as Record<string, string>)[b] ?? b;
 }
 
+// Format a band-enum token ("5m_25m", "lt_250k", "25_50", "high_risk") readably.
+function fmtBand(token?: string): string {
+  if (!token) return "—";
+  return token
+    .replace(/_/g, " ")
+    .replace(/\blt /g, "< ")
+    .replace(/\bgt /g, "> ")
+    .replace(/(\d+)m\b/g, "£$1M")
+    .replace(/(\d+)k\b/g, "£$1k");
+}
+function fmtMoney(n?: number): string {
+  if (n == null) return "—";
+  if (n >= 1_000_000) return `£${(n / 1_000_000).toFixed(n >= 10_000_000 ? 0 : 1)}M`;
+  if (n >= 1_000) return `£${Math.round(n / 1_000)}k`;
+  return `£${n}`;
+}
+
+// v1.3 — opportunity value, buyer concentration, and the tier-overlay
+// rationale (the plain-English "why the scoring shifted"). All optional.
+function v13Section(result: AssessmentResult): string {
+  const opp = result.opportunity;
+  const conc = result.buyerConcentration;
+  const rationale = result.tierOverlay?.rationale ?? [];
+  if (!opp && !conc && rationale.length === 0) return "";
+
+  const oppHtml = opp
+    ? `<p style="margin:4px 0 0"><strong>Opportunity value:</strong>
+        priority <span class="band">${esc(opp.priority)}</span>${
+          opp.estimatedAnnualValue != null ? ` · est. annual value ${fmtMoney(opp.estimatedAnnualValue)}` : ""
+        }${opp.valueAtStake ? ` · value at stake ${esc(fmtBand(opp.valueAtStake))}` : ""}${
+          opp.expectedUplift ? ` · target uplift ${esc(fmtBand(opp.expectedUplift))}` : ""
+        }</p>`
+    : "";
+  const concHtml = conc && conc.topParent
+    ? `<p style="margin:4px 0 0"><strong>Stack concentration:</strong> ${Math.round(conc.share * 100)}% of selected infrastructure sits under <strong>${esc(conc.topParent)}</strong>${
+        conc.share >= 0.6 ? " — a lock-in / single-vendor dependency to plan around." : "."
+      }</p>`
+    : "";
+  const rationaleHtml = rationale.length > 0
+    ? `<h3>What shaped the scoring</h3><ul>${rationale.map((r) => `<li>${esc(r)}</li>`).join("")}</ul>`
+    : "";
+
+  return `<section class="summary-box">
+    <h3>Opportunity &amp; decision context</h3>
+    ${oppHtml}${concHtml}
+    ${rationaleHtml}
+  </section>`;
+}
+
+// v1.3 — procurement / EU-AI-Act inputs captured on the run.
+function procurementContext(input: AssessmentResult["inputSummary"]): string {
+  const bits: string[] = [];
+  if (input.useCaseRiskClass) bits.push(`EU AI Act class: <strong>${esc(fmtBand(input.useCaseRiskClass))}</strong>`);
+  if (input.maxHallucinationTolerance) bits.push(`Hallucination tolerance: ${esc(input.maxHallucinationTolerance)}`);
+  if (input.requiredCertifications?.length) bits.push(`Required certs: ${esc(input.requiredCertifications.join(", "))}`);
+  if (input.sovereigntyRequirement && input.sovereigntyRequirement !== "none") bits.push(`Sovereignty: ${esc(input.sovereigntyRequirement)}${input.region ? ` (${esc(input.region)})` : ""}`);
+  if (input.costCeiling) bits.push(`Cost ceiling: ${esc(fmtBand(input.costCeiling))}`);
+  if (input.tcoHorizon) bits.push(`TCO horizon: ${esc(fmtBand(input.tcoHorizon))}`);
+  if (input.exitRequirements?.length) bits.push(`Exit: ${esc(input.exitRequirements.map((r) => r.replace(/_/g, " ")).join(", "))}`);
+  if (input.ipAndDataRights?.length) bits.push(`IP/data rights: ${esc(input.ipAndDataRights.map((r) => r.replace(/_/g, " ")).join(", "))}`);
+  if (input.selectedSystemsOfRecord?.length) bits.push(`Systems of record: ${esc(input.selectedSystemsOfRecord.join(", "))}`);
+  if (bits.length === 0) return "";
+  return `<p style="margin:8px 0 0; font-size:13px; color:#52525b">${bits.join(" · ")}</p>`;
+}
+
 function vendorBlock(vr: VendorResult): string {
   const pillars = PILLARS.map((p) => `
     <tr>
@@ -148,9 +213,12 @@ export function renderBoardPackHtml(result: AssessmentResult, opts: BoardPackOpt
     Autonomy: ${esc(result.inputSummary.autonomyAppetite)} ·
     Deployment: ${esc(result.inputSummary.deploymentPreference)}
   </p>
+  ${procurementContext(result.inputSummary)}
   <h3>Why this ranking</h3>
   <p style="margin:4px 0 0">${esc(result.comparisonSummary)}</p>
 </section>
+
+${v13Section(result)}
 
 ${result.ranking.map(vendorBlock).join("")}
 

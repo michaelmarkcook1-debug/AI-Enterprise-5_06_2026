@@ -1,4 +1,5 @@
 import { PageFrame } from "@/components/app-shell";
+import DataSourceRail from "@/components/data-source-rail";
 import { Confidence, EstimatedNote, Panel, ScoreBar } from "@/components/intelligence-ui";
 import { OwnershipLegend, VendorNameWithOwnership } from "@/components/ownership-indicator";
 import { listMarketCategories, listMarketShareEstimates, listVendorMomentum, listIntelligenceVendors } from "@/lib/intelligence/repository";
@@ -15,7 +16,7 @@ export default async function MarketPage() {
   const vendorById = new Map(vendors.map((vendor) => [vendor.id, vendor]));
 
   return (
-    <PageFrame title="Market share and momentum tracker" kicker="Category-specific market movement" description="Market share is modelled by category. A vendor can lead one segment and be weak in another. Estimates are directional and confidence-labelled.">
+    <PageFrame aside={<DataSourceRail tab="market" />} title="Market share and momentum tracker" kicker="Category-specific market movement" description="Market share is modelled by category. A vendor can lead one segment and be weak in another. Estimates are directional and confidence-labelled.">
       <div className="mb-5">
         <OwnershipLegend />
       </div>
@@ -73,7 +74,7 @@ export default async function MarketPage() {
           </div>
         </Panel>
       </div>
-      <div className="mt-5 rounded-lg border border-[#e6dcc3] bg-[#f3ead2] p-4"><EstimatedNote /></div>
+      <div className="mt-5 rounded-lg border border-[#e6dcc3] bg-[#f3ead2] p-4 dark:border-[#1d3a57] dark:bg-[#0c2238]"><EstimatedNote /></div>
     </PageFrame>
   );
 }

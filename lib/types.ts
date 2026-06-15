@@ -375,4 +375,18 @@ export interface AssessmentResult {
   inputSummary: AssessmentInput & { industryName: string };
   ranking: VendorResult[];
   comparisonSummary: string;
+
+  /* ─── v1.3 outputs (engine attaches these; optional so older runs parse) ─── */
+
+  /** Opportunity-value context derived from valueAtStake × expectedUplift. */
+  opportunity?: {
+    valueAtStake?: string;
+    expectedUplift?: string;
+    estimatedAnnualValue?: number;
+    priority: "low" | "medium" | "high" | "flagship";
+  } | null;
+  /** Buyer ecosystem concentration (single-parent lock-in signal). */
+  buyerConcentration?: { topParent: string | null; share: number };
+  /** Tier-overlay weight deltas + plain-English rationale for the score shifts. */
+  tierOverlay?: { weightDelta: Partial<Record<PillarId, number>>; rationale: string[] };
 }

@@ -1,4 +1,5 @@
 import type { EvidenceGrade } from "@/lib/types";
+import { evidenceGradeClasses } from "@/lib/ui/semantic-colors";
 
 // Terminal-style stat: thin gold rule on top, large mono numeral, smallcaps label.
 export function Metric({ label, value, note }: { label: string; value: string | number; note?: string }) {
@@ -81,7 +82,9 @@ export function Confidence(_: { value: number }) {
 
 export function EvidenceBadge({ grade }: { grade: EvidenceGrade }) {
   const label = grade === "E5" || grade === "E4" ? "verified" : grade === "E3" ? "tested" : grade === "E2" ? "documented" : "inferred";
-  return <span className="rounded border border-[#e0d6ba] px-1.5 py-0.5 text-xs text-[#4a5a70] dark:border-[#2a4a6b] dark:text-[#a7bacd]">{grade} {label}</span>;
+  // Colour-coded by grade so verified (E5/E4 emerald) is visually distinct from
+  // inferred (E0 slate) — previously every grade rendered the same muted colour.
+  return <span className={`rounded px-1.5 py-0.5 text-xs font-medium ${evidenceGradeClasses(grade)}`}>{grade} {label}</span>;
 }
 
 export function ScoreBar({ value, label }: { value: number; label?: string }) {

@@ -100,3 +100,27 @@ export async function getPersistedAssessmentResult(
 
   return run?.outputJson ?? null;
 }
+
+/**
+ * v1.3 — the most recent completed assessment run, typed as an AssessmentResult.
+ * Lets Monitor and Demonstrate surface the latest assessment's outputs
+ * (opportunity value, EU AI Act risk class, concentration, scoring rationale)
+ * without the lossy vendor-id-only shortlist hand-off. Returns null when there
+ * is no database or no completed run yet.
+ */
+export async function getLatestAssessmentResult(
+  client?: Pick<PrismaClient, "assessmentRun">,
+): Promise<AssessmentResult | null> {
+  if (!client && !hasDatabase()) return null;
+  try {
+    const c = client ?? getPrisma();
+    const run = await c.assessmentRun.findFirst({
+      where: { status: "completed" },
+      orderBy: { createdAt: "desc" },
+      select: { outputJson: true },
+    });
+    return (run?.outputJson as unknown as AssessmentResult) ?? null;
+  } catch {
+    return null;
+  }
+}

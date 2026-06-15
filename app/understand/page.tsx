@@ -15,6 +15,7 @@
 
 import Link from "next/link";
 import { PageFrame } from "@/components/app-shell";
+import DataSourceRail from "@/components/data-source-rail";
 import { Confidence, Panel, ScoreBar } from "@/components/intelligence-ui";
 import { OwnershipLegend, VendorNameWithOwnership } from "@/components/ownership-indicator";
 import CapabilityMatrix, { type MatrixCell } from "@/components/understand/CapabilityMatrix";
@@ -102,6 +103,7 @@ export default async function UnderstandPage() {
 
   return (
     <PageFrame
+      aside={<DataSourceRail tab="understand" />}
       title="Understand"
       kicker="What is this vendor and where does it fit?"
       description="The definitive AI vendor intelligence layer — capability matrix, strategic sustainability, platform encroachment risk, dependency analysis, vendor viability, and the methodology backbone. Understand every vendor's position, defensibility, and risk profile before you assess."

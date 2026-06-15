@@ -7,11 +7,15 @@ export function PageFrame({
   kicker,
   description,
   children,
+  aside,
 }: {
   title: string;
   kicker?: string;
   description?: string;
   children: React.ReactNode;
+  /** Optional left-hand rail (e.g. <DataSourceRail/>). When set, the page
+   *  renders as a 2-column layout below the masthead; otherwise unchanged. */
+  aside?: React.ReactNode;
 }) {
   return (
     <AppShell>
@@ -36,7 +40,14 @@ export function PageFrame({
             <span className="h-px flex-1 bg-[#13294b]/10 dark:bg-white/10" />
           </div>
         </div>
-        {children}
+        {aside ? (
+          <div className="grid items-start gap-6 lg:grid-cols-[236px_minmax(0,1fr)]">
+            <aside className="lg:sticky lg:top-6">{aside}</aside>
+            <div className="min-w-0">{children}</div>
+          </div>
+        ) : (
+          children
+        )}
       </main>
     </AppShell>
   );

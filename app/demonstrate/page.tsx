@@ -5,6 +5,9 @@
 
 import Link from "next/link";
 import { PageFrame } from "@/components/app-shell";
+import DataSourceRail from "@/components/data-source-rail";
+import AssessmentOutputsPanel from "@/components/assessment-outputs-panel";
+import { getLatestAssessmentResult } from "@/lib/services/assessment-service";
 import { Confidence, Panel, ScoreBar, SeedDataBadge } from "@/components/intelligence-ui";
 import { OwnershipLegend, VendorNameWithOwnership } from "@/components/ownership-indicator";
 import {
@@ -15,6 +18,7 @@ import {
   getMarketDashboard,
 } from "@/lib/intelligence/repository";
 import { getDataProvenance } from "@/lib/intelligence/provenance";
+import { newsCategoryClasses } from "@/lib/ui/semantic-colors";
 import {
   REPUTATION_VENDOR_IDS,
   CUSTOMER_REPUTATION,
@@ -63,10 +67,11 @@ export default async function DemonstratePage({ searchParams }: PageProps) {
   const dataSensitivity = params.dataSensitivity ?? "";
   const costSensitivity = params.costSensitivity ?? "";
 
-  const [news, vendors, momentum, pillarScores, provenance, dashboard, liveGithub] = await Promise.all([
+  const [news, vendors, momentum, pillarScores, provenance, dashboard, liveGithub, latestAssessment] = await Promise.all([
     listNewsItems(), listIntelligenceVendors(), listVendorMomentum(),
     listVendorPillarScores(), getDataProvenance(), getMarketDashboard(),
     fetchLiveGitHubSignals().catch(() => []),
+    getLatestAssessmentResult(),
   ]);
 
   // Merge live GitHub stats into seed developer reputation
@@ -115,6 +120,7 @@ export default async function DemonstratePage({ searchParams }: PageProps) {
 
   return (
     <PageFrame
+      aside={<DataSourceRail tab="demonstrate" />}
       title="Demonstrate"
       kicker="How do you defend this decision to the board?"
       description="The CIO Board Defence module. Structure your AI investment case around the questions the board, CFO, procurement, audit, and risk committee will ask."
@@ -129,6 +135,8 @@ export default async function DemonstratePage({ searchParams }: PageProps) {
         recommendation: decisionStatus,
         criticalRisks: SEED_ENTERPRISE_RISKS.filter((r) => r.severity === "Critical").length,
       })} />
+
+      {latestAssessment && <AssessmentOutputsPanel result={latestAssessment} />}
 
       {/* Assessed shortlist cards — click to compare vs top 3 in category */}
       <ShortlistVendorCards
@@ -341,9 +349,9 @@ export default async function DemonstratePage({ searchParams }: PageProps) {
         <BS title="What are the latest signals?">
           <div id="news"><Panel title={shortlistIds.size > 0 ? "Shortlist news" : "Recent intelligence"}>
             {filteredNews.length === 0 ? <p className="text-sm text-[#56657b] dark:text-[#a7bacd]">No recent news.</p> : (
-              <div className="divide-y divide-[#efe9d9]">{filteredNews.slice(0, 6).map((item) => (
+              <div className="divide-y divide-[#efe9d9] dark:divide-[#16314c]">{filteredNews.slice(0, 6).map((item) => (
                 <article key={item.id} className="py-4">
-                  <div className="flex flex-wrap gap-2">{item.categories.slice(0, 3).map((c) => <span key={c} className="rounded bg-[#f3ead2] px-2 py-0.5 text-[10px] text-[#455044]">{c}</span>)}</div>
+                  <div className="flex flex-wrap gap-2">{item.categories.slice(0, 3).map((c) => <span key={c} className={`rounded px-2 py-0.5 text-[10px] font-medium ${newsCategoryClasses(c)}`}>{c}</span>)}</div>
                   <h3 className="mt-2 text-sm font-semibold">{item.title}</h3>
                   <p className="mt-1 text-xs text-[#475a72] dark:text-[#b9c8d9]">{item.whyItMatters}</p>
                   <div className="mt-2 flex gap-3 text-[10px] text-[#5b6b7f] dark:text-[#8fa5bb]"><Confidence value={item.confidenceScore} /><span>Impact: {item.impactScore}</span></div>
