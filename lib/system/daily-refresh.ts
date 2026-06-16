@@ -224,6 +224,8 @@ export async function runDailyRefresh(
       itemsUpserted: r.itemsUpserted,
       totalSearches: r.totalSearches,
       errorCount: r.errors.length,
+      vendorsNoFindings: r.vendorsNoFindings,
+      diagnostic: r.diagnostic,
       source: r.source,
       modelUsed: r.modelUsed,
       tokensIn: r.totalTokensIn,

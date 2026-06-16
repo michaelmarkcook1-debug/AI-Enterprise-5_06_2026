@@ -249,6 +249,8 @@ function AnthropicDependentCard({ steps }: { steps: StepSummary[] }) {
   const llmSource = typeof sourcingSummary.llmSource === "string" ? sourcingSummary.llmSource : "—";
   const compAttempted = Number(compSummary.vendorsAttempted ?? 0);
   const compFindings = Number(compSummary.vendorsWithFindings ?? 0);
+  const compErrorCount = Number(compSummary.errorCount ?? 0);
+  const compDiagnostic = typeof compSummary.diagnostic === "string" ? compSummary.diagnostic : "";
 
   const sourcingDegraded = llmSource === "stub" || proposalsExtracted === 0;
   const compDegraded = compAttempted > 0 && compFindings === 0;
@@ -290,11 +292,18 @@ function AnthropicDependentCard({ steps }: { steps: StepSummary[] }) {
         <div className="rounded-md border border-amber-200 bg-amber-50 p-3 dark:border-amber-900/60 dark:bg-amber-950/20">
           <div className="text-[10px] font-semibold uppercase tracking-wider text-amber-900 dark:text-amber-200">Competitive intel monitor</div>
           <div className="mt-1 font-mono text-xs text-[#475a72] dark:text-[#c2d1e0]">
-            vendorsAttempted: <strong>{compAttempted}</strong> · vendorsWithFindings: <strong>{compFindings}</strong>
+            vendorsAttempted: <strong>{compAttempted}</strong> · vendorsWithFindings: <strong>{compFindings}</strong> · errors: <strong>{compErrorCount}</strong>
           </div>
           <div className="mt-1 text-[11px] italic text-amber-900/80 dark:text-amber-200/80">
-            All 13 vendor lookups returned errors — see the panel below for the exact API response.
+            {compErrorCount > 0
+              ? "Vendor lookups threw API errors — see diagnostic below for the exact response."
+              : "Lookups completed without throwing but found nothing — NOT necessarily a key/billing problem. See diagnostic below."}
           </div>
+          {compDiagnostic && (
+            <div className="mt-1 break-words font-mono text-[10px] text-amber-950 dark:text-amber-100/90">
+              ↳ {compDiagnostic}
+            </div>
+          )}
         </div>
       </div>
       <div className="mt-3 rounded-md border border-emerald-200 bg-emerald-50 p-3 text-xs leading-5 text-emerald-900 dark:border-emerald-900/60 dark:bg-emerald-950/20 dark:text-emerald-200">
@@ -312,8 +321,12 @@ function CompetitiveIntelCard({ step }: { step: StepSummary }) {
   const vendorsWithFindings = Number(s.vendorsWithFindings ?? 0);
   const itemsUpserted = Number(s.itemsUpserted ?? 0);
   const errorCount = Number(s.errorCount ?? 0);
+  const diagnostic = typeof s.diagnostic === "string" ? s.diagnostic : "";
   const source = typeof s.source === "string" ? s.source : "—";
   const isBlocked = vendorsAttempted > 0 && vendorsWithFindings === 0;
+  // Distinguish a thrown API error (key/billing/rate-limit) from a clean run
+  // that simply found nothing (web search ungated, or a genuinely quiet window).
+  const threwErrors = errorCount > 0;
 
   return (
     <Panel
@@ -322,22 +335,38 @@ function CompetitiveIntelCard({ step }: { step: StepSummary }) {
       <div className="grid gap-4 md:grid-cols-[1fr_auto]">
         <div>
           <p className={`text-sm font-semibold ${isBlocked ? "text-rose-700 dark:text-rose-300" : step.ok ? "text-emerald-700 dark:text-emerald-300" : "text-amber-700 dark:text-amber-300"}`}>
-            {isBlocked
-              ? "All vendor lookups failed — likely Anthropic API limit reached or key invalid."
-              : step.ok
+            {!isBlocked && step.ok
               ? "Healthy — fresh findings flowing into /query and /demonstrate."
-              : "Partial failure — some vendors returned, others errored."}
+              : threwErrors
+              ? "Vendor lookups threw Anthropic API errors — likely an invalid key, hit spend cap, or rate limit."
+              : isBlocked
+              ? "Lookups completed without errors but found nothing — check web-search access, not the key."
+              : "Partial — some vendors returned, others didn't."}
           </p>
           <p className="mt-2 text-xs text-[#475a72] dark:text-[#a7bacd]">
             Source: <code className="font-mono">{source}</code> · Attempted {vendorsAttempted} vendors,
             got findings for {vendorsWithFindings} of them, upserted {itemsUpserted} items, recorded {errorCount} errors.
           </p>
-          {isBlocked && (
+          {diagnostic && (
+            <p className="mt-2 break-words rounded bg-[#0c2238]/5 px-2 py-1 font-mono text-[11px] text-[#475a72] dark:bg-white/5 dark:text-[#c2d1e0]">
+              diagnostic: {diagnostic}
+            </p>
+          )}
+          {isBlocked && threwErrors && (
             <div className="mt-3 rounded-md border border-amber-200 bg-amber-50 p-3 text-xs leading-5 text-amber-900 dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-200">
-              <strong>To restore freshness:</strong> raise the spend cap on the Anthropic console
-              (<code className="font-mono">https://console.anthropic.com/settings/limits</code>),
-              wait for the cap window to reset, or rotate <code className="font-mono">ANTHROPIC_API_KEY</code>
-              to a key with budget via <code className="font-mono">vercel env add ANTHROPIC_API_KEY production</code>.
+              <strong>To restore freshness:</strong> the calls are erroring. Check the diagnostic above —
+              if it&apos;s a billing/credit error, raise the spend cap at
+              <code className="font-mono"> console.anthropic.com/settings/limits</code>; if it&apos;s an auth
+              error, rotate <code className="font-mono">ANTHROPIC_API_KEY</code> via
+              <code className="font-mono"> vercel env add ANTHROPIC_API_KEY production</code> then redeploy.
+            </div>
+          )}
+          {isBlocked && !threwErrors && (
+            <div className="mt-3 rounded-md border border-amber-200 bg-amber-50 p-3 text-xs leading-5 text-amber-900 dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-200">
+              <strong>No errors were thrown</strong> — the key is working. The web-search tool returned
+              nothing for every vendor, which usually means web search isn&apos;t enabled for this API key/plan,
+              or the search server-tool loop paused. The monitor now auto-resumes paused searches; if this
+              persists, confirm web search is enabled for the org in the Anthropic console.
             </div>
           )}
         </div>

@@ -177,6 +177,13 @@ export interface VendorMonitorResult {
   stageTokens: StageTokens;
   source: "anthropic" | "stub";
   error?: string;
+  /** Why this vendor produced no findings without throwing — e.g. the
+   *  web-search loop paused (pause_turn) and wasn't resumed, no search ran,
+   *  or the search ran but returned nothing recent. Distinguishes a genuine
+   *  "quiet day" from a silent web-search/server-tool failure. */
+  noFindingsReason?: string;
+  /** stop_reason from the Stage-1 (web-search) response, for diagnosis. */
+  stopReason?: string;
 }
 
 export interface MonitorRunResult {
@@ -191,6 +198,12 @@ export interface MonitorRunResult {
   errors: { vendorId: string; error: string }[];
   source: "anthropic" | "stub";
   modelUsed: string;
+  /** Count of vendors that completed without error but produced no findings. */
+  vendorsNoFindings: number;
+  /** A representative diagnostic string surfaced to the admin panel so the
+   *  "0 findings" state names the actual cause (API error vs paused search vs
+   *  quiet day) instead of guessing "key invalid / limit reached". */
+  diagnostic: string;
 }
 
 /* ─── Helpers ───────────────────────────────────────────────────── */
@@ -231,36 +244,66 @@ async function monitorVendor(target: CompetitiveTarget, today: Date): Promise<Ve
     // ── Stage 1: Haiku + web_search — raw ingestion ──────────────
     // Haiku does the web searches and extracts factual items. No
     // interpretation — just find, fetch, and report raw excerpts.
-    const s1 = await client.messages.create({
-      model: HAIKU_MODEL,
-      max_tokens: 3000,
-      system: `You are a news-extraction agent. Use web_search to find events for the given vendor in the last ${LOOKBACK_DAYS} days, then call report_raw_findings. Extract facts only — do not categorise, score, or interpret. Include a verbatim excerpt from each source page in the snippet field.`,
-      tools: [
-        { type: WEB_SEARCH_TOOL_TYPE, name: "web_search", max_uses: MAX_SEARCHES_PER_VENDOR } as unknown as Anthropic.Tool,
-        RAW_FINDINGS_SCHEMA as unknown as Anthropic.Tool,
-      ],
-      messages: [{
-        role: "user",
-        content: `Vendor: ${target.name}${target.aliases.length ? ` (aka ${target.aliases.join(", ")})` : ""}. Domain: ${target.domain}. Today: ${todayIso}.
+    const s1System = `You are a news-extraction agent. Use web_search to find events for the given vendor in the last ${LOOKBACK_DAYS} days, then call report_raw_findings. Extract facts only — do not categorise, score, or interpret. Include a verbatim excerpt from each source page in the snippet field.`;
+    const s1Tools = [
+      { type: WEB_SEARCH_TOOL_TYPE, name: "web_search", max_uses: MAX_SEARCHES_PER_VENDOR } as unknown as Anthropic.Tool,
+      RAW_FINDINGS_SCHEMA as unknown as Anthropic.Tool,
+    ];
+    const s1Messages: Anthropic.MessageParam[] = [{
+      role: "user",
+      content: `Vendor: ${target.name}${target.aliases.length ? ` (aka ${target.aliases.join(", ")})` : ""}. Domain: ${target.domain}. Today: ${todayIso}.
 
 Search for events in the last ${LOOKBACK_DAYS} days across: new products/models/capabilities, pricing changes, partnerships/integrations, executive changes, analyst mentions, funding rounds.
 
 Use up to ${MAX_SEARCHES_PER_VENDOR} web_search calls. Return up to 6 items via report_raw_findings. For each item set sourceUrl to the exact https:// URL you fetched.`,
-      }],
-    } as unknown as Anthropic.MessageCreateParamsNonStreaming);
+    }];
 
-    stage.haiku.in  += s1.usage.input_tokens;
-    stage.haiku.out += s1.usage.output_tokens;
-    searchesUsed    += (s1.usage as { server_tool_use?: { web_search_requests?: number } }).server_tool_use?.web_search_requests ?? 0;
+    // The web_search server tool runs a server-side loop that returns
+    // stop_reason "pause_turn" when it hits its iteration cap BEFORE the model
+    // emits report_raw_findings. Resume the turn by re-sending with the
+    // assistant's partial content appended (no extra user turn) until it
+    // finishes or we hit the continuation cap. Without this, a paused search
+    // silently yields zero findings — which previously looked identical to an
+    // outright failure (0 findings, 0 errors) on the admin panel.
+    const MAX_PAUSE_CONTINUATIONS = 3;
+    let s1stopReason = "";
+    const rawBlocks: Anthropic.ToolUseBlock[] = [];
+    for (let attempt = 0; attempt <= MAX_PAUSE_CONTINUATIONS; attempt++) {
+      const s1 = await client.messages.create({
+        model: HAIKU_MODEL,
+        max_tokens: 3000,
+        system: s1System,
+        tools: s1Tools,
+        messages: s1Messages,
+      } as unknown as Anthropic.MessageCreateParamsNonStreaming);
 
-    const s1block = s1.content.find((b): b is Anthropic.ToolUseBlock => b.type === "tool_use" && b.name === "report_raw_findings");
-    const rawItems: RawFinding[] = ((s1block?.input as { findings?: RawFinding[] })?.findings ?? [])
+      stage.haiku.in  += s1.usage.input_tokens;
+      stage.haiku.out += s1.usage.output_tokens;
+      searchesUsed    += (s1.usage as { server_tool_use?: { web_search_requests?: number } }).server_tool_use?.web_search_requests ?? 0;
+      s1stopReason = s1.stop_reason ?? "";
+
+      for (const b of s1.content) {
+        if (b.type === "tool_use" && b.name === "report_raw_findings") rawBlocks.push(b as Anthropic.ToolUseBlock);
+      }
+      if (s1.stop_reason !== "pause_turn") break;
+      s1Messages.push({ role: "assistant", content: s1.content });
+    }
+
+    const rawItems: RawFinding[] = rawBlocks
+      .flatMap((blk) => ((blk.input as { findings?: RawFinding[] })?.findings ?? []))
       .filter((f) => typeof f.title === "string" && typeof f.sourceUrl === "string"
         && f.sourceUrl.startsWith("https://") && isRecent(f.publishedAt, today));
 
     if (rawItems.length === 0) {
+      // Name the cause so the admin panel stops guessing "key invalid".
+      const reason = s1stopReason === "pause_turn"
+        ? `web_search still paused after ${MAX_PAUSE_CONTINUATIONS} continuations`
+        : searchesUsed === 0
+        ? "no web_search performed — web search may be disabled/ungated on this key or plan"
+        : "web_search ran but returned no qualifying recent items (possibly a quiet window)";
       return { ...stub, searchesUsed, stageTokens: stage, source: "anthropic",
-        tokensIn: stage.haiku.in, tokensOut: stage.haiku.out };
+        tokensIn: stage.haiku.in, tokensOut: stage.haiku.out,
+        stopReason: s1stopReason, noFindingsReason: reason };
     }
 
     // ── Stage 2: Sonnet — classify and score ─────────────────────
@@ -350,7 +393,14 @@ Use up to ${MAX_SEARCHES_PER_VENDOR} web_search calls. Return up to 6 items via 
     return { vendorId: target.vendorId, vendorName: target.name, findings, searchesUsed, tokensIn, tokensOut, stageTokens: stage, source: "anthropic" };
 
   } catch (err) {
-    return { ...stub, source: "anthropic", error: (err as Error).message };
+    // Capture HTTP status + Anthropic error type, not just the message, so the
+    // panel can tell 401 (key invalid) from 429 (rate limit) from 400 billing
+    // ("credit balance too low") from 404 (model_not_found).
+    const e = err as { status?: number; error?: { type?: string }; type?: string; message?: string };
+    const status = e?.status ? `${e.status} ` : "";
+    const type = e?.error?.type ?? e?.type ?? "";
+    const msg = (err as Error)?.message ?? String(err);
+    return { ...stub, source: "anthropic", error: `${status}${type ? type + ": " : ""}${msg}`.slice(0, 300) };
   }
 }
 
@@ -438,6 +488,25 @@ export async function runCompetitiveIntelMonitor(
 
   const source = results.some((r) => r.source === "anthropic") ? "anthropic" : "stub";
 
+  // Vendors that completed WITHOUT throwing but produced no findings — the
+  // case that previously read as a hard failure on the panel.
+  const vendorsNoFindings = results.filter((r) => !r.error && r.findings.length === 0).length;
+
+  // One representative line explaining the run for the admin panel: prefer a
+  // real API error (now status+type-tagged), else the most common no-findings
+  // reason, else a generic note. Never claim "key invalid" when nothing threw.
+  let diagnostic = "";
+  if (errors.length > 0) {
+    diagnostic = `API error (${errors.length}/${targets.length} vendors): ${errors[0].error}`;
+  } else if (vendorsWithFindings === 0 && results.length > 0) {
+    const reasons = results.map((r) => r.noFindingsReason).filter((x): x is string => Boolean(x));
+    diagnostic = reasons[0]
+      ? `No errors thrown; ${reasons[0]}.`
+      : "No errors thrown, but all vendors returned zero findings.";
+  } else {
+    diagnostic = `${vendorsWithFindings}/${targets.length} vendors returned findings.`;
+  }
+
   return {
     ranAt,
     vendorsAttempted: targets.length,
@@ -450,5 +519,7 @@ export async function runCompetitiveIntelMonitor(
     errors,
     source,
     modelUsed: `${HAIKU_MODEL}→${SONNET_MODEL}→${OPUS_MODEL}`,
+    vendorsNoFindings,
+    diagnostic,
   };
 }

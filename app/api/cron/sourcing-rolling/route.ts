@@ -73,14 +73,19 @@ async function handle(request: Request) {
     // the sourcing run, and its idempotent upserts simply resume next day.
     // (On Vercel Pro this would be a cleaner dedicated /api/cron/competitive-intel
     // daily cron — see vercel.json note.)
-    let newsRefresh: { ok: boolean; itemsUpserted?: number; error?: string };
+    let newsRefresh: { ok: boolean; itemsUpserted?: number; error?: string; diagnostic?: string };
     try {
       const monitor = await runCompetitiveIntelMonitor();
       await touchRefreshTimestamp("competitive_intel", {
         vendorsAttempted: monitor.vendorsAttempted,
+        vendorsWithFindings: monitor.vendorsWithFindings,
+        vendorsNoFindings: monitor.vendorsNoFindings,
         itemsUpserted: monitor.itemsUpserted,
+        errorCount: monitor.errors.length,
+        diagnostic: monitor.diagnostic,
+        source: monitor.source,
       });
-      newsRefresh = { ok: monitor.errors.length === 0, itemsUpserted: monitor.itemsUpserted };
+      newsRefresh = { ok: monitor.errors.length === 0, itemsUpserted: monitor.itemsUpserted, diagnostic: monitor.diagnostic };
     } catch (newsErr) {
       console.error("[cron/sourcing-rolling] news monitor failed (sourcing still ok)", newsErr);
       newsRefresh = { ok: false, error: (newsErr as Error).message };
