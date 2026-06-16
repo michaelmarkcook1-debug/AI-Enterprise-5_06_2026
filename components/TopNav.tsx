@@ -178,7 +178,7 @@ export default function TopNav() {
                 className={`flex items-center border-b-2 px-3.5 transition-colors ${
                   active
                     ? "border-[#d4af37] font-semibold text-white"
-                    : "border-transparent font-medium text-[#9db1c7] hover:border-[#d4af37]/40 hover:text-[#e8effa]"
+                    : "border-transparent font-medium text-[#c8d7e9] hover:border-[#d4af37]/40 hover:text-[#e8effa]"
                 }`}
               >
                 {n.label}
@@ -193,7 +193,7 @@ export default function TopNav() {
               className={`flex items-center gap-1 border-b-2 px-3.5 transition-colors ${
                 LIBRARY.some((l) => pathname.startsWith(l.href))
                   ? "border-[#d4af37] font-semibold text-white"
-                  : "border-transparent font-medium text-[#9db1c7] hover:border-[#d4af37]/40 hover:text-[#e8effa]"
+                  : "border-transparent font-medium text-[#c8d7e9] hover:border-[#d4af37]/40 hover:text-[#e8effa]"
               }`}
             >
               Library
@@ -226,7 +226,7 @@ export default function TopNav() {
             className={`flex items-center border-b-2 px-3.5 transition-colors ${
               pathname.startsWith("/investor-tools") || pathname.startsWith("/investing")
                 ? "border-[#d4af37] font-semibold text-[#e8c95c]"
-                : "border-transparent font-medium text-[#c3a558] hover:border-[#d4af37]/40 hover:text-[#e8c95c]"
+                : "border-transparent font-medium text-[#d8bd6a] hover:border-[#d4af37]/40 hover:text-[#e8c95c]"
             }`}
           >
             Investor Tools
@@ -252,7 +252,7 @@ export default function TopNav() {
             className={`hidden h-8 w-8 items-center justify-center rounded-md transition-colors md:flex ${
               pathname.startsWith("/settings") || pathname.startsWith("/admin")
                 ? "bg-[#d4af37] text-[#0a1f38]"
-                : "text-[#9db1c7] hover:bg-white/[0.07] hover:text-white"
+                : "text-[#c8d7e9] hover:bg-white/[0.07] hover:text-white"
             }`}
           >
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
@@ -336,7 +336,7 @@ export default function TopNav() {
                 className={`block rounded-md px-3 py-2.5 transition-colors ${
                   pathname.startsWith("/investor-tools") || pathname.startsWith("/investing")
                     ? "bg-[#d4af37] font-semibold !text-[#0a1f38]"
-                    : "font-medium text-[#c3a558] hover:bg-white/[0.06] hover:text-[#e8c95c]"
+                    : "font-medium text-[#d8bd6a] hover:bg-white/[0.06] hover:text-[#e8c95c]"
                 }`}
               >
                 Investor Tools

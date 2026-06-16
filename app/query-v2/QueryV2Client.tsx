@@ -412,7 +412,7 @@ export default function QueryV2Client({ entities, winningByLayer }: { entities: 
                 onClick={() => chooseCategory(option.key)}
                 className={`rounded-md border px-3 py-2 text-xs font-semibold transition-colors ${
                   active
-                    ? "border-[#13294b] bg-[#13294b] text-white dark:border-[#d4af37] dark:bg-[#d4af37] dark:text-[#eef3f8]"
+                    ? "border-[#13294b] bg-[#13294b] text-white dark:border-[#d4af37] dark:bg-[#d4af37] dark:text-[#0a1f38]"
                     : "border-[#ddd3b6] bg-[#fdfaf1] text-[#475a72] hover:bg-[#f3ead2] dark:border-[#1d3a57] dark:bg-[#0c2238] dark:text-[#c2d1e0] dark:hover:bg-[#143049]"
                 }`}
               >
@@ -1125,7 +1125,7 @@ function RoleScatter({
                 onClick={() => setPickedRole(role)}
                 className={`rounded-md border px-2.5 py-1.5 text-[11px] font-semibold transition-colors ${
                   active
-                    ? "border-[#13294b] bg-[#13294b] text-white dark:border-[#d4af37] dark:bg-[#d4af37] dark:text-[#eef3f8]"
+                    ? "border-[#13294b] bg-[#13294b] text-white dark:border-[#d4af37] dark:bg-[#d4af37] dark:text-[#0a1f38]"
                     : "border-[#ddd3b6] bg-[#fdfaf1] text-[#475a72] hover:bg-[#f3ead2] dark:border-[#1d3a57] dark:bg-[#0c2238] dark:text-[#c2d1e0] dark:hover:bg-[#143049]"
                 }`}
               >
