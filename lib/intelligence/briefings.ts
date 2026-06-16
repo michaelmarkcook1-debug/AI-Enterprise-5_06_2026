@@ -1,4 +1,4 @@
-import { getMarketDashboard, getIntelligenceVendor, listNewsItems, listVendorMomentum } from "./repository";
+import { getMarketDashboard, getBreakingNews, getIntelligenceVendor, listNewsItems, listVendorMomentum } from "./repository";
 
 /** Lower-case the first letter so a field can be spliced mid-sentence —
  *  but preserve leading acronyms ("AI infrastructure", "GPU vendor"). */
@@ -26,8 +26,21 @@ function leadWhy(top: Awaited<ReturnType<typeof getMarketDashboard>>["topVendors
   return `${top.name} is the highest-scoring platform at ${top.overallScore}/100, ${role}${basis}.${read}`;
 }
 
+/** Compose an analyst bullet from the freshest high-impact news item so the
+ *  market overview reflects the live feed, not only static vendor scores. */
+function freshSignal(breaking: Awaited<ReturnType<typeof getBreakingNews>>): string {
+  const lead = breaking.items[0];
+  if (!lead) return "";
+  const when = new Date(lead.publishedAt).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+  const why = lead.whyItMatters ? ` — ${stripPeriod(lead.whyItMatters)}` : "";
+  return `Freshest market signal (${when}, ${lead.sourceName}): ${stripPeriod(lead.title)}${why}.`;
+}
+
 export async function generateWeeklyBriefing() {
-  const dashboard = await getMarketDashboard();
+  const [dashboard, breaking] = await Promise.all([
+    getMarketDashboard(),
+    getBreakingNews({ days: 7, minImpact: 60, limit: 3 }).catch(() => null),
+  ]);
   const top = dashboard.topVendors[0];
   const runnerUp = dashboard.topVendors[1];
   const agentic = dashboard.agenticMomentum.slice(0, 3);
@@ -36,11 +49,13 @@ export async function generateWeeklyBriefing() {
   const executiveSummary = [
     // 1. The "why" behind the #1 score — grounded in real vendor data.
     leadWhy(top),
-    // 2. The closest challenger and what differentiates it.
+    // 2. Freshest high-impact signal from the live news feed (last 7 days).
+    breaking ? freshSignal(breaking) : "",
+    // 3. The closest challenger and what differentiates it.
     runnerUp
       ? `Closest challenger: ${runnerUp.name} at ${runnerUp.overallScore}/100 — ${lowerFirst(stripPeriod(runnerUp.description ?? runnerUp.category))}${runnerUp.marketPosition ? ` (positioned as a ${runnerUp.marketPosition})` : ""}.`
       : "",
-    // 3. Agentic momentum, with the capability that earns it rather than a bare list.
+    // 4. Agentic momentum, with the capability that earns it rather than a bare list.
     agentic.length > 0
       ? `Agentic momentum concentrates around ${agentic.map((a) => a.vendor.name).join(", ")}${agenticLead?.agenticCapability ? ` — e.g. ${agenticLead.name}: ${lowerFirst(stripPeriod(agenticLead.agenticCapability))}` : ""}.`
       : "",

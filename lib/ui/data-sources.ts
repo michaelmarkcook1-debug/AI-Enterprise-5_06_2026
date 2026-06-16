@@ -33,6 +33,7 @@ export const TAB_DATA_SOURCES: Record<TabKey, DataSourceGroup[]> = {
     { label: "Live signals", sources: [
       { name: "GitHub REST API", kind: "live", grade: "E3", note: "developer momentum" },
       { name: "GDELT", kind: "live", grade: "E2", note: "news / events" },
+      { name: "AI news + commentary", kind: "live", grade: "E3", note: "press, expert newsletters, benchmarks (daily RSS)" },
       { name: "SEC EDGAR", kind: "live", grade: "E5", note: "official filings" },
     ]},
     { label: "Modelled", sources: [
@@ -88,11 +89,18 @@ export const TAB_DATA_SOURCES: Record<TabKey, DataSourceGroup[]> = {
   news: [
     { label: "News sources", sources: [
       { name: "GDELT", kind: "live", grade: "E2", note: "global events" },
-      { name: "Vendor press releases", kind: "mixed", note: "discovery pipeline" },
+      { name: "Vendor press releases", kind: "mixed", note: "RSS + discovery pipeline" },
+      { name: "AI press desks", kind: "live", grade: "E3", note: "TechCrunch, VentureBeat, Verge, Register…" },
       { name: "SEC 8-K", kind: "live", grade: "E5", note: "material events" },
     ]},
+    { label: "Industry commentary", sources: [
+      { name: "Expert newsletters", kind: "live", grade: "E3", note: "Stratechery, Import AI, Interconnects, Latent Space…" },
+      { name: "AI testing / benchmarks", kind: "live", grade: "E2", note: "HF, Epoch, MLCommons, METR, LMArena, Ai2" },
+      { name: "Analyst / VC", kind: "live", grade: "E3", note: "Sequoia, CB Insights, Bloomberg, IEEE" },
+    ]},
     { label: "Enrichment", sources: [
-      { name: "Competitive-intel monitor", kind: "live", note: "web-search grounded" },
+      { name: "Competitive-intel monitor", kind: "live", note: "web-search grounded, Haiku→Sonnet→Opus" },
+      { name: "Market-news scorer", kind: "live", note: "Haiku impact + sentiment + vendor tagging" },
     ]},
   ],
   market: [

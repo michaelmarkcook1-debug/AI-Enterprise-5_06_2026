@@ -12,7 +12,7 @@ function fmtDate(iso: string): string {
 }
 
 export default function BreakingNewsCard({ news }: { news: BreakingNews }) {
-  const { items, windowDays, latestPublishedAt, latestAgeDays } = news;
+  const { items, windowDays, latestPublishedAt, latestAgeDays, usedFallback } = news;
   // News is meant to ingest daily, so flag "behind" once the newest tracked
   // story is more than 2 days old (not just older than the whole window).
   const stale = latestAgeDays != null && latestAgeDays > 2;
@@ -33,7 +33,9 @@ export default function BreakingNewsCard({ news }: { news: BreakingNews }) {
       {/* Freshness / staleness line — honest about the daily ingest cadence. */}
       {latestPublishedAt && (
         <div className={`mt-1 text-[11px] ${stale ? "text-amber-700 dark:text-amber-400" : "text-[#6b7d93] dark:text-[#7a9bb8]"}`}>
-          {stale
+          {usedFallback
+            ? `No new signals in the last ${windowDays} days — showing the most recent (${fmtDate(latestPublishedAt)}, ${latestAgeDays}d ago).`
+            : stale
             ? `Feed last updated ${fmtDate(latestPublishedAt)} (${latestAgeDays}d ago) — daily ingest may be behind.`
             : `Updated ${fmtDate(latestPublishedAt)}.`}
         </div>

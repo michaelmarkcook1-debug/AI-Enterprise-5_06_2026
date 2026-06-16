@@ -14,7 +14,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { createHash, randomUUID } from "node:crypto";
 import { fetchAndParseRss, type RssItem } from "./rss-parser";
-import { AI_NEWS_SOURCES, TRACKED_VENDOR_NAMES } from "./ai-news-manifest";
+import { AI_NEWS_SOURCES, TRACKED_VENDOR_NAMES, type AiNewsCategory } from "./ai-news-manifest";
 import { hasLLM } from "../agents/llm-client";
 import { hasDatabase, getPrisma } from "../prisma";
 import { logEvent } from "./logger";
@@ -25,7 +25,10 @@ const MIN_IMPACT = 45;
 // How many days back to look in each feed (keeps cost bounded).
 const LOOKBACK_DAYS = 3;
 // Hard cap per run — prevents a very active news day from blowing the budget.
-const MAX_ITEMS_TO_SCORE = 40;
+const MAX_ITEMS_TO_SCORE = 60;
+// Per-feed cap applied BEFORE the global cap, so a high-volume desk (TechCrunch,
+// Bloomberg) can't crowd out the slower, high-signal weekly commentary feeds.
+const PER_FEED_CAP = 5;
 // How many RSS items to send in each Haiku batch (fits comfortably in 4096 tokens).
 const BATCH_SIZE = 10;
 
@@ -42,14 +45,24 @@ export interface MarketNewsRunResult {
   durationMs: number;
 }
 
+type Sentiment = "positive" | "negative" | "neutral" | "mixed";
+
+// An RSS item annotated with the source type it came from, so the scorer can
+// treat commentary / benchmark posts as legitimately high-signal rather than
+// rejecting everything that isn't a hard product announcement.
+type CandidateItem = RssItem & { sourceCategory: AiNewsCategory };
+
 interface ScoredItem {
-  item: RssItem;
+  item: CandidateItem;
   impactScore: number;
   relevantVendorIds: string[];
   categories: string[];
   whyItMatters: string;
+  sentiment: Sentiment;
   keep: boolean;
 }
+
+const SENTIMENTS: ReadonlySet<string> = new Set(["positive", "negative", "neutral", "mixed"]);
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
@@ -70,23 +83,36 @@ const NAME_TO_ID = Object.fromEntries(
 
 // ── Haiku batch scoring ────────────────────────────────────────────────────────
 
-async function scoreBatch(items: RssItem[], client: Anthropic): Promise<ScoredItem[]> {
+const SOURCE_KIND_HINT: Record<AiNewsCategory, string> = {
+  news: "news report",
+  commentary: "expert analyst commentary",
+  testing: "model evaluation / benchmark source",
+  analyst: "enterprise-AI analyst / market research",
+};
+
+async function scoreBatch(items: CandidateItem[], client: Anthropic): Promise<ScoredItem[]> {
   const vendorList = Object.values(TRACKED_VENDOR_NAMES).join(", ");
-  const prompt = `You are an enterprise AI industry analyst. Score each article for enterprise relevance.
+  const prompt = `You are an enterprise AI industry analyst. Score each item for enterprise relevance.
+
+Sources include three kinds, ALL valuable — do not down-rank an item just because it is analysis rather than a hard announcement:
+  • news — events (launches, deals, funding, regulation)
+  • expert analyst commentary — strategic interpretation of the AI market
+  • model evaluation / benchmark sources — how models actually perform
 
 Tracked vendors: ${vendorList}
 
-For each article return a JSON object (one per article, same order):
-- impactScore: integer 0-100 (significance for enterprise AI buyers/analysts)
+For each item return a JSON object (one per item, same order):
+- impactScore: integer 0-100 (significance for enterprise AI buyers/analysts; a sharp benchmark result or strategic essay can score high even with no single "event")
 - relevantVendors: string[] (only names from the tracked list explicitly mentioned or clearly implied)
-- categories: string[] (one or more: product_launch | pricing_change | partnership | key_hire | funding_round | regulatory | press_coverage)
+- categories: string[] (one or more, use these EXACT labels: "Product launch" | "Pricing" | "Partnership" | "Strategy signal" | "Market movement" | "Regulation" | "Enterprise control" | "Agentic AI" | "Infrastructure" | "Risk event")
+- sentiment: "positive" | "negative" | "neutral" | "mixed" (for the tracked vendors named — positive if it strengthens their position, negative if it weakens it, mixed if both, neutral if no directional read)
 - whyItMatters: string (max 240 chars — the SO-WHAT for an enterprise AI buyer or competitive analyst)
-- keep: boolean (false if article is off-topic, consumer-focused, or irrelevant to enterprise AI)
+- keep: boolean (false only if genuinely off-topic, consumer-gadget, or irrelevant to enterprise AI — substantive commentary and benchmarks should be kept)
 
 Return a JSON array only — no markdown fences.
 
-Articles:
-${items.map((it, i) => `[${i}] "${it.title}"\nSource: ${it.sourceName}\nExcerpt: ${it.description.slice(0, 200)}`).join("\n\n")}`;
+Items:
+${items.map((it, i) => `[${i}] "${it.title}"\nSource: ${it.sourceName} (${SOURCE_KIND_HINT[it.sourceCategory]})\nExcerpt: ${it.description.slice(0, 200)}`).join("\n\n")}`;
 
   try {
     const msg = await client.messages.create({
@@ -100,19 +126,23 @@ ${items.map((it, i) => `[${i}] "${it.title}"\nSource: ${it.sourceName}\nExcerpt:
       impactScore?: number;
       relevantVendors?: string[];
       categories?: string[];
+      sentiment?: string;
       whyItMatters?: string;
       keep?: boolean;
     }>;
 
     return items.map((item, i) => {
       const r = parsed[i] ?? {};
+      const sentiment: Sentiment =
+        r.sentiment && SENTIMENTS.has(r.sentiment) ? (r.sentiment as Sentiment) : "neutral";
       return {
         item,
         impactScore: Math.min(100, Math.max(0, Number(r.impactScore ?? 0))),
         relevantVendorIds: (r.relevantVendors ?? [])
           .map((n) => NAME_TO_ID[n.toLowerCase()])
           .filter((id): id is string => Boolean(id)),
-        categories: r.categories?.length ? r.categories : ["press_coverage"],
+        categories: r.categories?.length ? r.categories : ["Market movement"],
+        sentiment,
         whyItMatters: (r.whyItMatters ?? "").slice(0, 360),
         keep: r.keep !== false,
       };
@@ -121,8 +151,8 @@ ${items.map((it, i) => `[${i}] "${it.title}"\nSource: ${it.sourceName}\nExcerpt:
     console.error("[market-news-runner] Haiku batch failed", err);
     // On failure mark all as don't-keep to avoid persisting unscored items
     return items.map((item) => ({
-      item, impactScore: 0, relevantVendorIds: [], categories: ["press_coverage"],
-      whyItMatters: "", keep: false,
+      item, impactScore: 0, relevantVendorIds: [], categories: ["Market movement"],
+      sentiment: "neutral" as Sentiment, whyItMatters: "", keep: false,
     }));
   }
 }
@@ -150,11 +180,17 @@ export async function runMarketNewsIngestion(): Promise<MarketNewsRunResult> {
     ),
   );
 
-  const allItems: RssItem[] = [];
+  const allItems: CandidateItem[] = [];
   for (const r of rawFetches) {
     if (r.status === "fulfilled") {
       feedsFetched++;
-      const fresh = r.value.items.filter((it) => new Date(it.publishedAt) >= cutoff);
+      const fresh = r.value.items
+        .filter((it) => new Date(it.publishedAt) >= cutoff)
+        // Newest first, then cap per feed so a high-volume desk can't crowd out
+        // the slower high-signal commentary feeds under the global cap below.
+        .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
+        .slice(0, PER_FEED_CAP)
+        .map((it) => ({ ...it, sourceCategory: r.value.src.category }));
       allItems.push(...fresh);
     } else {
       const msg = r.reason instanceof Error ? r.reason.message : String(r.reason);
@@ -163,7 +199,7 @@ export async function runMarketNewsIngestion(): Promise<MarketNewsRunResult> {
   }
 
   // 2. Dedup across feeds by URL (keep first seen, newest-publish wins when re-sorted)
-  const byUrl = new Map<string, RssItem>();
+  const byUrl = new Map<string, CandidateItem>();
   const sorted = [...allItems].sort(
     (a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime(),
   );
@@ -235,13 +271,14 @@ export async function runMarketNewsIngestion(): Promise<MarketNewsRunResult> {
             affectedPillars: [],
             suggestedScoreImpact: [],
             relatedVendors: [],
-            sentiment: "neutral",
+            sentiment: s.sentiment,
           },
           update: {
             impactScore: s.impactScore,
             whyItMatters: s.whyItMatters,
             categories: s.categories,
             vendors: s.relevantVendorIds,
+            sentiment: s.sentiment,
           },
         });
         upserted++;

@@ -22,6 +22,7 @@ import { isCronOrAdminRequest, cronUnauthorized } from "@/lib/cron/auth";
 import { runSourcing } from "@/lib/sourcing/runner";
 import { runCompetitiveIntelMonitor } from "@/lib/intelligence/competitive-monitor";
 import { runMarketNewsIngestion } from "@/lib/sourcing/market-news-runner";
+import { deriveVendorScores } from "@/lib/system/derive-scores";
 import { SOURCE_MANIFEST } from "@/lib/sourcing/manifest";
 import { hasDatabase } from "@/lib/prisma";
 import { touchRefreshTimestamp } from "@/lib/system/daily-refresh-store";
@@ -96,6 +97,25 @@ async function handle(request: Request) {
       marketNews = { ok: false, error: (marketErr as Error).message };
     }
 
+    // Recompute vendor momentum + overall/confidence scores from the freshly
+    // ingested news + evidence. Pure DB math (no LLM cost) — runs LAST so it
+    // sees this run's new rows. Idempotent; wrapped so a failure never fails
+    // the sourcing run. This is what makes newly-sourced intel flow into the
+    // momentum, winning/losing lists, and market-overview analysis daily —
+    // previously deriveVendorScores only ran on a manual /admin trigger.
+    let scoreRecompute: { ok: boolean; vendorsUpdated?: number; momentumRowsUpdated?: number; error?: string };
+    try {
+      const derived = await deriveVendorScores();
+      await touchRefreshTimestamp("derive_scores", {
+        vendorsUpdated: derived.vendorsUpdated,
+        momentumRowsUpdated: derived.momentumRowsUpdated,
+      });
+      scoreRecompute = { ok: !derived.skipped, vendorsUpdated: derived.vendorsUpdated, momentumRowsUpdated: derived.momentumRowsUpdated };
+    } catch (deriveErr) {
+      console.error("[cron/sourcing-rolling] score recompute failed (sourcing still ok)", deriveErr);
+      scoreRecompute = { ok: false, error: (deriveErr as Error).message };
+    }
+
     return Response.json({
       ok: true,
       vendor,
@@ -103,6 +123,7 @@ async function handle(request: Request) {
       durationMs: result.durationMs,
       newsRefresh,
       marketNews,
+      scoreRecompute,
       totals: result.totals,
       // Trim per-source detail — keep response under 1 MB so Vercel
       // logging stays clean.

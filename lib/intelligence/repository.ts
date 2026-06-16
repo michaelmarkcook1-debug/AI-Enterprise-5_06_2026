@@ -399,6 +399,10 @@ export interface BreakingNews {
   latestAgeDays: number | null;
   /** Of the windowed items, how many are source-backed (sourceKind === "real"). */
   liveCount: number;
+  /** True when nothing fell inside the window so we fell back to the most
+   *  recent items — the card shows them but flags the feed as stale rather
+   *  than rendering an empty "0 signals" state when we DO have intelligence. */
+  usedFallback: boolean;
 }
 
 /**
@@ -421,12 +425,27 @@ export async function getBreakingNews(opts: { days?: number; minImpact?: number;
   const windowed = all
     .filter((n) => Date.parse(n.publishedAt) >= cutoff && n.impactScore >= minImpact)
     .sort((a, b) => (a.publishedAt < b.publishedAt ? 1 : -1));
+
+  // Graceful degradation: when nothing falls inside the window (e.g. the daily
+  // ingest is a few days behind, so the freshest item is older than `days`),
+  // don't render an empty "0 signals" card while we actually hold intelligence.
+  // Fall back to the most recent meaningful items (relaxed impact floor) and
+  // flag the feed as stale so the UI is honest about it. `all` is newest-first.
+  let items = windowed.slice(0, limit);
+  let usedFallback = false;
+  if (items.length === 0 && all.length > 0) {
+    const relaxed = Math.max(40, minImpact - 15);
+    items = all.filter((n) => n.impactScore >= relaxed).slice(0, limit);
+    usedFallback = items.length > 0;
+  }
+
   return {
-    items: windowed.slice(0, limit),
+    items,
     windowDays: days,
     latestPublishedAt,
     latestAgeDays,
-    liveCount: windowed.filter((n) => n.sourceKind === "real").length,
+    liveCount: items.filter((n) => n.sourceKind === "real").length,
+    usedFallback,
   };
 }
 

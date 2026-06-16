@@ -1,8 +1,23 @@
 import { hashContext, runAssessment } from "../engine";
 import { getPrisma, hasDatabase } from "../prisma";
 import { listVendorProfiles } from "../repositories/vendor-profiles";
+import { listNewsItems } from "../intelligence/repository";
+import { computeNewsAdjustments } from "../intelligence/news-signal";
 import type { Prisma, PrismaClient } from "../../generated/prisma/client";
-import type { AssessmentInput, AssessmentResult, VendorResult } from "../types";
+import type { AssessmentInput, AssessmentResult, NewsAdjustment, VendorResult } from "../types";
+
+/** Load recent news and turn it into bounded per-vendor pillar adjustments.
+ *  Never throws — a news failure must not break scoring (returns undefined). */
+async function loadNewsAdjustments(): Promise<Map<string, NewsAdjustment> | undefined> {
+  try {
+    const news = await listNewsItems();
+    const adj = computeNewsAdjustments(news);
+    return adj.size > 0 ? adj : undefined;
+  } catch (err) {
+    console.warn("[assessment-service] news signal unavailable; scoring without it", err);
+    return undefined;
+  }
+}
 
 type AssessmentWriteClient = Pick<PrismaClient, "assessmentRun">;
 
@@ -69,12 +84,12 @@ export async function persistAssessmentResult(
 
 export async function scoreAndPersistAssessment(input: AssessmentInput): Promise<AssessmentResult> {
   if (!hasDatabase()) {
-    const vendors = await listVendorProfiles();
-    return runAssessment(input, vendors);
+    const [vendors, newsAdj] = await Promise.all([listVendorProfiles(), loadNewsAdjustments()]);
+    return runAssessment(input, vendors, undefined, newsAdj);
   }
   const client = getPrisma();
-  const vendors = await listVendorProfiles(client);
-  const result = runAssessment(input, vendors);
+  const [vendors, newsAdj] = await Promise.all([listVendorProfiles(client), loadNewsAdjustments()]);
+  const result = runAssessment(input, vendors, undefined, newsAdj);
   const vendorSet = result.ranking.map((vendorResult) => vendorResult.vendorId);
   try {
     await persistAssessmentResult(input, result, vendorSet, client);

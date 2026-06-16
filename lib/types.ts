@@ -366,6 +366,23 @@ export interface VendorResult {
   excludedReason?: string;
   bonuses: { strategicFit: number; sectorAdoptionFit: number };
   penalties: { risk: number; missingEvidence: number; adoptionFriction: number };
+  /** v1.4 — bounded market-signal (news) adjustment applied to this vendor's
+   *  pillar scores, when fresh high-impact news is supplied to the engine.
+   *  Absent when no news signal applied. Capped (±3 pts/pillar) so it tilts,
+   *  never flips, an evidence-graded evaluation. */
+  newsAdjustment?: NewsAdjustment;
+}
+
+/** A bounded, time-decayed adjustment to a vendor's pillar scores derived from
+ *  fresh news. Produced by lib/intelligence/news-signal.ts and consumed by the
+ *  engine; lives here so the engine stays free of intelligence-layer imports. */
+export interface NewsAdjustment {
+  /** Net delta per pillar after capping (points on the 0-100 pillar scale). */
+  perPillar: Partial<Record<PillarId, number>>;
+  /** The news items that drove the adjustment, for transparency in outputs. */
+  drivers: { title: string; pillars: PillarId[]; delta: number; publishedAt: string }[];
+  /** Sum of absolute per-pillar deltas — quick "how much did news move this" gauge. */
+  totalAbs: number;
 }
 
 export interface AssessmentResult {

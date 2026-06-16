@@ -10,6 +10,7 @@ import {
   EVIDENCE_MODIFIER,
   EvidenceItem,
   IndustryProfile,
+  NewsAdjustment,
   PILLARS,
   PillarBreakdown,
   PillarId,
@@ -400,8 +401,27 @@ export function scoreVendor(
   industry: IndustryProfile,
   profile?: WorkflowRiskProfile,
   tierOverlay?: TierAdjustment,
+  newsAdj?: NewsAdjustment,
 ): VendorResult {
   const { breakdown, pillarScores, confidence } = buildPillarBreakdown(vendor, weights, industry);
+
+  // v1.4 — bounded market-signal (news) nudge. Applied AFTER evidence-based
+  // pillar scoring, capped per pillar upstream (±3 pts), so it tilts a
+  // calibrated evaluation without flipping it. We mutate the pillar score +
+  // its weighted contribution in place so the displayed breakdown, strengths,
+  // and the final score all stay internally consistent. Only pillars that
+  // already have evidence (score > 0) are nudged — news can't manufacture a
+  // score where there's no evidence at all.
+  if (newsAdj) {
+    for (const b of breakdown) {
+      const delta = newsAdj.perPillar[b.pillar];
+      if (delta == null || delta === 0 || b.score <= 0) continue;
+      const adjusted = Math.max(0, Math.min(100, b.score + delta));
+      b.score = adjusted;
+      b.weightedContribution = adjusted * b.weight;
+      pillarScores[b.pillar] = adjusted;
+    }
+  }
   const sfBonus = strategicFitBonus(vendor, input);
   const saBonus = sectorAdoptionFitBonus(vendor, input);
   const { triggered, penalty: riskPenalty, excluded, excludedReason } = evaluateRisks(vendor, input, industry);
@@ -477,6 +497,8 @@ export function scoreVendor(
         ? { workflowOverlay: workflowOverlayPenalty }
         : {}),
     } as VendorResult["penalties"] & { workflowOverlay?: number },
+    // v1.4 — surface the applied news nudge (when any) for transparent output.
+    ...(newsAdj && newsAdj.totalAbs > 0 ? { newsAdjustment: newsAdj } : {}),
   };
 }
 
@@ -484,6 +506,7 @@ export function runAssessment(
   input: AssessmentInput,
   vendors: Vendor[],
   runIdSeed: string = hashContext(input),
+  newsAdjustments?: Map<string, NewsAdjustment>,
 ): AssessmentResult {
   const industry = getIndustry(input.industry);
   // v1.1.0 — derive the workflow-risk overlay once, then thread it
@@ -506,7 +529,7 @@ export function runAssessment(
     : vendors;
 
   const results = selected
-    .map((v) => scoreVendor(v, input, weights, industry, profile, tierOverlay))
+    .map((v) => scoreVendor(v, input, weights, industry, profile, tierOverlay, newsAdjustments?.get(v.id)))
     .sort((a, b) => {
       if (a.excluded !== b.excluded) return a.excluded ? 1 : -1;
       return b.finalScore - a.finalScore;

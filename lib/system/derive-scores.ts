@@ -74,7 +74,7 @@ export async function deriveVendorScores(now: Date = new Date()): Promise<Derive
     }),
     prisma.intelligenceNewsItem.findMany({
       where: { publishedAt: { gte: newsCutoff } },
-      select: { vendors: true, publishedAt: true },
+      select: { vendors: true, publishedAt: true, impactScore: true },
     }),
     prisma.vendorCapability.findMany({
       where: { lastVerified: { gte: capCutoff } },
@@ -121,9 +121,13 @@ export async function deriveVendorScores(now: Date = new Date()): Promise<Derive
   }
 
   for (const n of newsRows) {
+    // Impact-weight the velocity so a major launch (impact 80) counts more
+    // than routine coverage (impact 40), rather than a flat +1 per row.
+    // 50-impact ≈ 1.0, 80 ≈ 1.6, capped [0.4, 2.0]; null impact → 1.0.
+    const weight = clamp((n.impactScore ?? 50) / 50, 0.4, 2.0);
     for (const vendorId of n.vendors) {
       const a = agg.get(vendorId);
-      if (a) a.newsVelocity += 1;
+      if (a) a.newsVelocity += weight;
     }
   }
 
