@@ -26,6 +26,7 @@ import { logEvent } from "./logger";
 import { SOURCE_MANIFEST } from "./manifest";
 import { categoriseClassifyFailure } from "./runner";
 import { discoverNewsArticles, type DiscoveredArticle } from "../agents/news-discoverer";
+import { fetchAndParseRss } from "./rss-parser";
 
 // Maximum articles ingested per listing page per cron run.
 // Guards against cost blowout if a vendor has 50+ recent articles.
@@ -96,9 +97,12 @@ export async function runNewsSourcing(vendorId: string): Promise<NewsRunResult> 
 
   const listings: NewsListingOutcome[] = [];
   for (const entry of entries) {
-    listings.push(
-      await processOneListing(runId, vendorId, entry.url, databaseConfigured),
-    );
+    if (entry.rssUrl) {
+      // Fast path: structured RSS feed skips Haiku article-discovery (stages 0a/0b).
+      listings.push(await processRssListing(runId, vendorId, entry.rssUrl, entry.url, databaseConfigured));
+    } else {
+      listings.push(await processOneListing(runId, vendorId, entry.url, databaseConfigured));
+    }
   }
 
   const finishedAt = new Date();
@@ -127,6 +131,110 @@ export async function runNewsSourcing(vendorId: string): Promise<NewsRunResult> 
     databaseConfigured,
     listings,
     totals,
+  };
+}
+
+// ─── RSS fast-path ────────────────────────────────────────────────────────────
+// Replaces stages 0a + 0b (HTML fetch + Haiku discovery) with a direct RSS
+// parse. The structured feed gives us article URLs and titles immediately;
+// we go straight to per-article ingestion (stages 1–4).
+
+async function processRssListing(
+  runId: string,
+  vendorId: string,
+  rssUrl: string,
+  fallbackUrl: string,
+  persist: boolean,
+): Promise<NewsListingOutcome> {
+  const listingStart = Date.now();
+  const base = { runId, vendorId, listingUrl: rssUrl };
+
+  await logEvent({ ts: new Date().toISOString(), ...base, event: "news.rss.fetch.start" });
+
+  let discovered: DiscoveredArticle[];
+  try {
+    const items = await fetchAndParseRss(rssUrl);
+    // Convert RSS items to DiscoveredArticle shape — RSS items are pre-curated
+    // so we score them highly; importanceScore 75 keeps them above the dedup
+    // threshold without spending Haiku tokens on discovery scoring.
+    discovered = items.slice(0, 20).map((it) => ({
+      title: it.title,
+      url: it.url,
+      publishedAt: it.publishedAt,
+      teaser: it.description.slice(0, 300),
+      relevanceScore: 80,
+      importanceScore: 75,
+      newsType: "other" as const,
+      scoringReason: "Vendor's own RSS feed — directly curated source.",
+    }));
+    await logEvent({
+      ts: new Date().toISOString(), ...base,
+      event: "news.rss.fetch.ok",
+      data: { itemsInFeed: items.length, afterCap: discovered.length },
+    });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    await logEvent({ ts: new Date().toISOString(), ...base, event: "news.rss.fetch.fail", error: message });
+    // Graceful fallback: run the HTML listing pipeline instead
+    await logEvent({ ts: new Date().toISOString(), ...base, event: "news.rss.fallback", data: { fallbackUrl } });
+    return processOneListing(runId, vendorId, fallbackUrl, persist);
+  }
+
+  if (discovered.length === 0) {
+    return {
+      listingUrl: rssUrl, listingFetchOk: true,
+      articlesDiscovered: 0, articlesPassedFilter: 0,
+      articlesDedupSkipped: 0, articlesIngested: 0,
+      proposalsExtracted: 0, proposalsPersisted: 0,
+      articles: [], durationMs: Date.now() - listingStart,
+    };
+  }
+
+  // Stage 0c: Dedup — same as HTML path
+  let toIngest = discovered;
+  let dedupSkipped = 0;
+
+  if (persist && hasDatabase()) {
+    const prisma = getPrisma();
+    const candidateUrls = discovered.map((a) => a.url);
+    const existing = await prisma.evidenceProposal.findMany({
+      where: { vendorId, sourceUrl: { in: candidateUrls } },
+      select: { sourceUrl: true },
+      distinct: ["sourceUrl"],
+    });
+    const knownUrls = new Set(
+      (existing as { sourceUrl: string | null }[])
+        .map((e) => e.sourceUrl)
+        .filter((u): u is string => Boolean(u)),
+    );
+    const fresh = discovered.filter((a) => !knownUrls.has(a.url));
+    dedupSkipped = discovered.length - fresh.length;
+    toIngest = fresh.slice(0, MAX_ARTICLES_PER_RUN);
+  } else {
+    toIngest = discovered.slice(0, MAX_ARTICLES_PER_RUN);
+  }
+
+  // Stages 1–4: same article ingestion as HTML path
+  const articleOutcomes: NewsArticleOutcome[] = [];
+  for (const article of toIngest) {
+    articleOutcomes.push(await ingestOneArticle(runId, vendorId, article, persist && hasDatabase()));
+  }
+
+  const proposalsExtracted = articleOutcomes.reduce((s, o) => s + o.proposalsExtracted, 0);
+  const proposalsPersisted = articleOutcomes.reduce((s, o) => s + o.proposalsPersisted, 0);
+  const articlesIngested = articleOutcomes.filter((o) => o.status === "ok").length;
+
+  return {
+    listingUrl: rssUrl,
+    listingFetchOk: true,
+    articlesDiscovered: discovered.length,
+    articlesPassedFilter: discovered.length,
+    articlesDedupSkipped: dedupSkipped,
+    articlesIngested,
+    proposalsExtracted,
+    proposalsPersisted,
+    articles: articleOutcomes,
+    durationMs: Date.now() - listingStart,
   };
 }
 

@@ -26,6 +26,9 @@ export interface SourceManifestEntry {
   expectedDomains: string[];
   // How many days a fetched snapshot is treated as fresh.
   freshnessHorizonDays: number;
+  // RSS/Atom feed URL. When present the news-runner uses the structured feed
+  // instead of HTML scraping (faster, cheaper — skips Haiku article discovery).
+  rssUrl?: string;
   // Operator notes — why we chose this URL, caveats.
   notes?: string;
 }
@@ -347,6 +350,7 @@ export const SOURCE_MANIFEST: SourceManifestEntry[] = [
   // ─ OpenAI ───────────────────────────────────────────────────────────────
   { vendorId: "vendor_openai", category: "press_release",
     url: "https://openai.com/news/",
+    rssUrl: "https://openai.com/blog/rss/",
     label: "OpenAI news listing",
     expectedDomains: ["market_position", "agentic_autonomy", "integration_architecture"],
     freshnessHorizonDays: NEWS_HORIZON },
@@ -354,6 +358,7 @@ export const SOURCE_MANIFEST: SourceManifestEntry[] = [
   // ─ Microsoft ────────────────────────────────────────────────────────────
   { vendorId: "vendor_microsoft", category: "press_release",
     url: "https://news.microsoft.com/category/artificial-intelligence/",
+    rssUrl: "https://news.microsoft.com/category/artificial-intelligence/feed/",
     label: "Microsoft AI news",
     expectedDomains: ["market_position", "integration_architecture", "agentic_autonomy"],
     freshnessHorizonDays: NEWS_HORIZON },
@@ -361,6 +366,7 @@ export const SOURCE_MANIFEST: SourceManifestEntry[] = [
   // ─ Google ───────────────────────────────────────────────────────────────
   { vendorId: "vendor_google", category: "press_release",
     url: "https://blog.google/technology/ai/",
+    rssUrl: "https://blog.google/technology/ai/rss/",
     label: "Google AI blog",
     expectedDomains: ["market_position", "agentic_autonomy", "model_reliability"],
     freshnessHorizonDays: NEWS_HORIZON },
@@ -370,11 +376,13 @@ export const SOURCE_MANIFEST: SourceManifestEntry[] = [
     url: "https://www.anthropic.com/news",
     label: "Anthropic news listing",
     expectedDomains: ["market_position", "model_reliability", "data_security_privacy"],
-    freshnessHorizonDays: NEWS_HORIZON },
+    freshnessHorizonDays: NEWS_HORIZON,
+    notes: "No public RSS — HTML listing used." },
 
   // ─ AWS ──────────────────────────────────────────────────────────────────
   { vendorId: "vendor_aws", category: "press_release",
     url: "https://aws.amazon.com/blogs/machine-learning/",
+    rssUrl: "https://aws.amazon.com/blogs/machine-learning/feed/",
     label: "AWS Machine Learning blog",
     expectedDomains: ["integration_architecture", "agentic_autonomy", "market_position"],
     freshnessHorizonDays: NEWS_HORIZON },
@@ -384,18 +392,21 @@ export const SOURCE_MANIFEST: SourceManifestEntry[] = [
     url: "https://www.salesforce.com/news/press-releases/",
     label: "Salesforce press releases",
     expectedDomains: ["market_position", "agentic_autonomy", "business_fit"],
-    freshnessHorizonDays: NEWS_HORIZON },
+    freshnessHorizonDays: NEWS_HORIZON,
+    notes: "No reliable public RSS — HTML listing used." },
 
   // ─ ServiceNow ───────────────────────────────────────────────────────────
   { vendorId: "vendor_servicenow", category: "press_release",
     url: "https://www.servicenow.com/company/media/press-room.html",
     label: "ServiceNow press room",
     expectedDomains: ["market_position", "agentic_autonomy", "integration_architecture"],
-    freshnessHorizonDays: NEWS_HORIZON },
+    freshnessHorizonDays: NEWS_HORIZON,
+    notes: "No public RSS — HTML listing used." },
 
   // ─ Oracle ───────────────────────────────────────────────────────────────
   { vendorId: "vendor_oracle", category: "press_release",
     url: "https://www.oracle.com/news/",
+    rssUrl: "https://www.oracle.com/news/rss/oracle-news-rss.xml",
     label: "Oracle newsroom",
     expectedDomains: ["market_position", "integration_architecture", "governance_compliance"],
     freshnessHorizonDays: NEWS_HORIZON },
@@ -403,6 +414,7 @@ export const SOURCE_MANIFEST: SourceManifestEntry[] = [
   // ─ SAP ──────────────────────────────────────────────────────────────────
   { vendorId: "vendor_sap", category: "press_release",
     url: "https://news.sap.com/",
+    rssUrl: "https://news.sap.com/feed/",
     label: "SAP newsroom",
     expectedDomains: ["market_position", "integration_architecture", "agentic_autonomy"],
     freshnessHorizonDays: NEWS_HORIZON },
@@ -410,6 +422,7 @@ export const SOURCE_MANIFEST: SourceManifestEntry[] = [
   // ─ IBM ──────────────────────────────────────────────────────────────────
   { vendorId: "vendor_ibm", category: "press_release",
     url: "https://newsroom.ibm.com/",
+    rssUrl: "https://newsroom.ibm.com/rss/",
     label: "IBM newsroom",
     expectedDomains: ["market_position", "governance_compliance", "integration_architecture"],
     freshnessHorizonDays: NEWS_HORIZON },
@@ -417,6 +430,7 @@ export const SOURCE_MANIFEST: SourceManifestEntry[] = [
   // ─ Cohere ───────────────────────────────────────────────────────────────
   { vendorId: "vendor_cohere", category: "press_release",
     url: "https://cohere.com/blog",
+    rssUrl: "https://cohere.com/blog/rss",
     label: "Cohere blog",
     expectedDomains: ["market_position", "model_reliability", "integration_architecture"],
     freshnessHorizonDays: NEWS_HORIZON },
@@ -426,25 +440,29 @@ export const SOURCE_MANIFEST: SourceManifestEntry[] = [
     url: "https://mistral.ai/news/",
     label: "Mistral news",
     expectedDomains: ["market_position", "model_reliability", "data_security_privacy"],
-    freshnessHorizonDays: NEWS_HORIZON },
+    freshnessHorizonDays: NEWS_HORIZON,
+    notes: "No confirmed public RSS — HTML listing used." },
 
   // ─ Glean ────────────────────────────────────────────────────────────────
   { vendorId: "vendor_glean", category: "press_release",
     url: "https://www.glean.com/press",
     label: "Glean press releases",
     expectedDomains: ["market_position", "integration_architecture"],
-    freshnessHorizonDays: NEWS_HORIZON },
+    freshnessHorizonDays: NEWS_HORIZON,
+    notes: "No public RSS — HTML listing used." },
 
   // ─ Moveworks ────────────────────────────────────────────────────────────
   { vendorId: "vendor_moveworks", category: "press_release",
     url: "https://www.moveworks.com/us/en/resources/press-releases",
     label: "Moveworks press releases",
     expectedDomains: ["market_position", "agentic_autonomy", "workforce_adoption"],
-    freshnessHorizonDays: NEWS_HORIZON },
+    freshnessHorizonDays: NEWS_HORIZON,
+    notes: "No public RSS — HTML listing used." },
 
   // ─ Writer ───────────────────────────────────────────────────────────────
   { vendorId: "vendor_writer", category: "press_release",
     url: "https://writer.com/blog/",
+    rssUrl: "https://writer.com/blog/rss/",
     label: "Writer blog",
     expectedDomains: ["market_position", "agentic_autonomy", "governance_compliance"],
     freshnessHorizonDays: NEWS_HORIZON },
@@ -454,25 +472,29 @@ export const SOURCE_MANIFEST: SourceManifestEntry[] = [
     url: "https://www.hebbia.com/blog",
     label: "Hebbia blog",
     expectedDomains: ["market_position", "business_fit"],
-    freshnessHorizonDays: NEWS_HORIZON },
+    freshnessHorizonDays: NEWS_HORIZON,
+    notes: "No public RSS — HTML listing used." },
 
   // ─ Rogo ─────────────────────────────────────────────────────────────────
   { vendorId: "vendor_rogo", category: "press_release",
     url: "https://rogo.ai/blog",
     label: "Rogo blog",
     expectedDomains: ["market_position", "business_fit"],
-    freshnessHorizonDays: NEWS_HORIZON },
+    freshnessHorizonDays: NEWS_HORIZON,
+    notes: "No public RSS — HTML listing used." },
 
   // ─ Harvey ───────────────────────────────────────────────────────────────
   { vendorId: "vendor_harvey", category: "press_release",
     url: "https://www.harvey.ai/blog",
     label: "Harvey blog",
     expectedDomains: ["market_position", "business_fit", "data_security_privacy"],
-    freshnessHorizonDays: NEWS_HORIZON },
+    freshnessHorizonDays: NEWS_HORIZON,
+    notes: "No public RSS — HTML listing used." },
 
   // ─ Databricks ───────────────────────────────────────────────────────────
   { vendorId: "vendor_databricks", category: "press_release",
     url: "https://www.databricks.com/blog",
+    rssUrl: "https://www.databricks.com/blog/feed",
     label: "Databricks blog",
     expectedDomains: ["market_position", "integration_architecture", "agentic_autonomy"],
     freshnessHorizonDays: NEWS_HORIZON },
@@ -480,6 +502,7 @@ export const SOURCE_MANIFEST: SourceManifestEntry[] = [
   // ─ Snowflake ────────────────────────────────────────────────────────────
   { vendorId: "vendor_snowflake", category: "press_release",
     url: "https://www.snowflake.com/en/blog/",
+    rssUrl: "https://www.snowflake.com/blog/feed/",
     label: "Snowflake blog",
     expectedDomains: ["market_position", "integration_architecture"],
     freshnessHorizonDays: NEWS_HORIZON },

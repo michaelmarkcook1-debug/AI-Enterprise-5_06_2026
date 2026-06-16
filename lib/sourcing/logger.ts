@@ -59,7 +59,15 @@ export type SourcingEventName =
   | "news.article.extract.ok"
   | "news.article.extract.fail"
   | "news.article.persist.ok"
-  | "news.article.persist.fail";
+  | "news.article.persist.fail"
+  // News RSS fast-path events
+  | "news.rss.fetch.start"
+  | "news.rss.fetch.ok"
+  | "news.rss.fetch.fail"
+  | "news.rss.fallback"
+  // Market news (broad AI/tech RSS) pipeline events
+  | "market_news.run.start"
+  | "market_news.run.summary";
 
 export interface SourcingEvent {
   ts: string;             // ISO timestamp
