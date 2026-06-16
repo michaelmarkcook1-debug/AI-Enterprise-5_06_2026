@@ -90,7 +90,7 @@ const SOURCE_KIND_HINT: Record<AiNewsCategory, string> = {
   analyst: "enterprise-AI analyst / market research",
 };
 
-async function scoreBatch(items: CandidateItem[], client: Anthropic): Promise<ScoredItem[]> {
+async function scoreBatch(items: CandidateItem[], client: Anthropic, errors: string[]): Promise<ScoredItem[]> {
   const vendorList = Object.values(TRACKED_VENDOR_NAMES).join(", ");
   const prompt = `You are an enterprise AI industry analyst. Score each item for enterprise relevance.
 
@@ -149,7 +149,11 @@ ${items.map((it, i) => `[${i}] "${it.title}"\nSource: ${it.sourceName} (${SOURCE
     });
   } catch (err) {
     console.error("[market-news-runner] Haiku batch failed", err);
-    // On failure mark all as don't-keep to avoid persisting unscored items
+    // Record the failure so the run's `errors` array is non-empty — otherwise a
+    // total LLM outage (401/429/billing) reads as a healthy "0 kept" run at the
+    // cron/admin layer. The status+type now ride on the message via llm-client.
+    errors.push(`score: ${((err as Error)?.message ?? String(err)).slice(0, 200)}`);
+    // Mark all as don't-keep to avoid persisting unscored items.
     return items.map((item) => ({
       item, impactScore: 0, relevantVendorIds: [], categories: ["Market movement"],
       sentiment: "neutral" as Sentiment, whyItMatters: "", keep: false,
@@ -241,7 +245,7 @@ export async function runMarketNewsIngestion(): Promise<MarketNewsRunResult> {
   const scored: ScoredItem[] = [];
   for (let i = 0; i < toScore.length; i += BATCH_SIZE) {
     const batch = toScore.slice(i, i + BATCH_SIZE);
-    const results = await scoreBatch(batch, anthropic);
+    const results = await scoreBatch(batch, anthropic, errors);
     scored.push(...results);
   }
 

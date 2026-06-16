@@ -53,20 +53,35 @@ export async function extractStructured<T>(params: ExtractParams<T>): Promise<LL
     };
   }
 
-  const message = await client.messages.create({
-    model: DEFAULT_MODEL,
-    max_tokens: params.maxTokens ?? 4096,
-    system: params.systemPrompt,
-    tools: [
-      {
-        name: params.schema.name,
-        description: params.schema.description,
-        input_schema: params.schema.jsonSchema as Anthropic.Tool["input_schema"],
-      },
-    ],
-    tool_choice: { type: "tool", name: params.schema.name },
-    messages: [{ role: "user", content: params.userPrompt }],
-  });
+  let message: Anthropic.Message;
+  try {
+    message = await client.messages.create({
+      model: DEFAULT_MODEL,
+      max_tokens: params.maxTokens ?? 4096,
+      system: params.systemPrompt,
+      tools: [
+        {
+          name: params.schema.name,
+          description: params.schema.description,
+          input_schema: params.schema.jsonSchema as Anthropic.Tool["input_schema"],
+        },
+      ],
+      tool_choice: { type: "tool", name: params.schema.name },
+      messages: [{ role: "user", content: params.userPrompt }],
+    });
+  } catch (err) {
+    // Preserve the Anthropic HTTP status + error type on the re-thrown error so
+    // every caller's catch can show "401 authentication_error" / "rate_limit_error"
+    // / "billing_error" instead of a generic message — the difference between
+    // "rotate the key", "raise the spend cap", and "wait out the rate limit".
+    const e = err as { status?: number; error?: { type?: string }; type?: string };
+    const status = e?.status;
+    const apiType = e?.error?.type ?? e?.type;
+    const enriched = new Error(
+      `anthropic ${status ?? ""} ${apiType ?? ""}: ${(err as Error)?.message ?? String(err)}`.replace(/\s{2,}/g, " ").trim(),
+    );
+    throw Object.assign(enriched, { status, anthropicType: apiType, cause: err });
+  }
 
   const toolUse = message.content.find((b): b is Anthropic.ToolUseBlock => b.type === "tool_use");
   if (!toolUse) throw new Error("LLM returned no tool_use block");

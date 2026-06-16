@@ -185,7 +185,11 @@ export async function discoverNewsArticles(
       fallback: () => ({ articles: [] }),
     });
     articleList = result.data;
-  } catch {
+  } catch (err) {
+    // Don't swallow silently — a 401/429/billing failure here would otherwise
+    // look identical to "0 articles on a quiet day". Log the (status+type-enriched)
+    // error so it surfaces in server logs / Vercel logs.
+    console.error(`[news-discoverer] article-list extraction failed for ${vendorId}: ${(err as Error)?.message ?? String(err)}`);
     return [];
   }
 
@@ -214,7 +218,8 @@ export async function discoverNewsArticles(
       fallback: () => ({ scores: [] }),
     });
     scored = result.data;
-  } catch {
+  } catch (err) {
+    console.error(`[news-discoverer] article scoring failed for ${vendorId}: ${(err as Error)?.message ?? String(err)}`);
     return [];
   }
 
