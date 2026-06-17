@@ -256,6 +256,8 @@ function AnthropicDependentCard({ steps }: { steps: StepSummary[] }) {
   const compFindings = Number(compSummary.vendorsWithFindings ?? 0);
   const compErrorCount = Number(compSummary.errorCount ?? 0);
   const compDiagnostic = typeof compSummary.diagnostic === "string" ? compSummary.diagnostic : "";
+  const sourcingFailed = Number(sourcingSummary.failedExtract ?? sourcingSummary.failed ?? 0);
+  const sourcingFirstError = typeof sourcingSummary.firstError === "string" ? sourcingSummary.firstError : "";
 
   const sourcingDegraded = llmSource === "stub" || proposalsExtracted === 0;
   const compDegraded = compAttempted > 0 && compFindings === 0;
@@ -286,13 +288,18 @@ function AnthropicDependentCard({ steps }: { steps: StepSummary[] }) {
         <div className="rounded-md border border-amber-200 bg-amber-50 p-3 dark:border-amber-900/60 dark:bg-amber-950/20">
           <div className="text-[10px] font-semibold uppercase tracking-wider text-amber-900 dark:text-amber-200">Sourcing extractor</div>
           <div className="mt-1 font-mono text-xs text-[#475a72] dark:text-[#c2d1e0]">
-            llmSource: <strong>{llmSource}</strong> · proposalsExtracted: <strong>{proposalsExtracted}</strong> · proposalsPersisted: <strong>{proposalsPersisted}</strong>
+            llmSource: <strong>{llmSource}</strong> · proposalsExtracted: <strong>{proposalsExtracted}</strong> · proposalsPersisted: <strong>{proposalsPersisted}</strong> · failed: <strong>{sourcingFailed}</strong>
           </div>
           <div className="mt-1 text-[11px] italic text-amber-900/80 dark:text-amber-200/80">
             {llmSource === "stub"
               ? "ANTHROPIC_API_KEY missing or unreachable; extractor fell back to stub (no LLM)."
-              : "LLM is configured but returned no usable proposals — check sourcing logs for credit_balance / rate_limit / model_not_found."}
+              : sourcingFirstError
+              ? "Source fetch/extract threw an API error — exact response below."
+              : "No proposals extracted, but no error was recorded — likely a quiet manifest rotation this run, not a failure."}
           </div>
+          {sourcingFirstError && (
+            <div className="mt-1 break-words font-mono text-[10px] text-amber-950 dark:text-amber-100/90">↳ {sourcingFirstError}</div>
+          )}
         </div>
         <div className="rounded-md border border-amber-200 bg-amber-50 p-3 dark:border-amber-900/60 dark:bg-amber-950/20">
           <div className="text-[10px] font-semibold uppercase tracking-wider text-amber-900 dark:text-amber-200">Competitive intel monitor</div>

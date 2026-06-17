@@ -132,7 +132,7 @@ function buildEmailHtml(alerts: VendorAlert[]): string {
 </html>`;
 }
 
-export async function checkAndSendWatchlistAlerts(
+async function runWatchlistAlerts(
   now: Date,
 ): Promise<WatchlistAlertResult> {
   const result: WatchlistAlertResult = { sent: 0, checked: 0, errors: [] };
@@ -286,4 +286,20 @@ export async function checkAndSendWatchlistAlerts(
   }
 
   return result;
+}
+
+/**
+ * Public entry point. Wraps the alert logic so a watchlist/email problem (a
+ * thrown DB query, a bad Resend config, etc.) is RECORDED rather than crashing
+ * the daily-refresh pipeline step — watchlist email is non-critical and should
+ * never show as a hard FAILED step. The reason is surfaced in `errors`.
+ */
+export async function checkAndSendWatchlistAlerts(
+  now: Date,
+): Promise<WatchlistAlertResult> {
+  try {
+    return await runWatchlistAlerts(now);
+  } catch (err) {
+    return { sent: 0, checked: 0, errors: [`pipeline: ${(err as Error).message}`] };
+  }
 }

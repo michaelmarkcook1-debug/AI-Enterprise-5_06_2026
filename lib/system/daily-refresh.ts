@@ -166,6 +166,8 @@ export async function runDailyRefresh(
       sources: r.totals.sources,
       ok: r.totals.ok,
       failed: r.totals.failed,
+      failedExtract: r.totals.failedExtract,
+      firstError: r.totals.firstError,
       proposalsExtracted: r.totals.proposalsExtracted,
       proposalsPersisted: r.totals.proposalsPersisted,
       llmSource: r.llmSource,
@@ -357,7 +359,7 @@ export async function runDailyRefresh(
   // ── 11. Watchlist alerts ───────────────────────────────────────
   await trackedStep("watchlist_alerts", async () => {
     const r = await checkAndSendWatchlistAlerts(now);
-    return { sent: r.sent, checked: r.checked, errors: r.errors.length };
+    return { sent: r.sent, checked: r.checked, errors: r.errors.length, firstError: r.errors[0] };
   });
 
   const errors = steps.flatMap((s) => (s.error ? [`${s.step}: ${s.error}`] : []));

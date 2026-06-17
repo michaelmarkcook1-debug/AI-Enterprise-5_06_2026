@@ -126,12 +126,16 @@ export interface SourcingRunResult {
     sources: number;
     ok: number;
     failed: number;
+    failedExtract: number;
     skipped: number;
     proposalsExtracted: number;
     proposalsPersisted: number;
     tokensIn: number;
     tokensOut: number;
     estimatedCostUsd: number;
+    /** First per-source error (status+message), so the admin card can show the
+     *  real cause (e.g. "400 ... API usage limits") instead of a generic guess. */
+    firstError?: string;
   };
   llmSource: "anthropic" | "stub";
   databaseConfigured: boolean;
@@ -202,16 +206,19 @@ export async function runSourcing(options: RunnerOptions = {}): Promise<Sourcing
   // Haiku pricing (sourcing always uses Haiku via llm-client.ts)
   const HAIKU_IN = 0.80 / 1_000_000;
   const HAIKU_OUT = 4.00 / 1_000_000;
+  const firstFailure = outcomes.find((o) => o.error);
   const totals = {
     sources: outcomes.length,
     ok: outcomes.filter((o) => o.status === "ok").length,
     failed: outcomes.filter((o) => o.status !== "ok" && o.status !== "skipped").length,
+    failedExtract: outcomes.filter((o) => o.status === "extract_failed").length,
     skipped: outcomes.filter((o) => o.status === "skipped").length,
     proposalsExtracted: outcomes.reduce((s, o) => s + o.proposalsExtracted, 0),
     proposalsPersisted: outcomes.reduce((s, o) => s + o.proposalsPersisted, 0),
     tokensIn: totalTokensIn,
     tokensOut: totalTokensOut,
     estimatedCostUsd: parseFloat(((totalTokensIn * HAIKU_IN) + (totalTokensOut * HAIKU_OUT)).toFixed(4)),
+    firstError: firstFailure ? `[${firstFailure.status}] ${(firstFailure.error ?? "").slice(0, 240)}` : undefined,
   };
 
   await logEvent({
