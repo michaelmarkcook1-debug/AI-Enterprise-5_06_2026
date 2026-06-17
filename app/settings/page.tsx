@@ -195,33 +195,23 @@ export default async function SettingsPage() {
         </div>
       </Panel>
 
-      {/* ── Cron schedule ─────────────────────────────────────────────── */}
-      <Panel title="Automated pipeline schedule">
+      {/* ── The one pipeline ──────────────────────────────────────────── */}
+      <Panel title="Automated data pipeline">
+        <p className="mb-3 text-sm text-[#4c5d75] dark:text-[#a7bacd]">
+          There is one pipeline. It runs every step in order, once a day — sourcing,
+          triage, projection, scoring, ranking, competitive + market news, investor
+          tools, reputation, macro signals, and watchlist alerts. Each step is
+          independent (one failing doesn&apos;t block the rest). Watch every step&apos;s
+          status and the exact reason for any failure on{" "}
+          <Link href="/admin/pipeline-health" className="font-medium text-[#a07f1f] hover:underline dark:text-[#d4af37]">Pipeline health →</Link>
+        </p>
         <div className="space-y-3 text-sm">
           <CronRow
             time="03:05 UTC daily"
-            label="Rolling evidence sourcing"
-            description="Fetches trust centres, pricing pages, docs, status pages for today's rotation vendor. Cycles through all vendors over ~20 days."
-            endpoint="/api/cron/sourcing-rolling"
-          />
-          <CronRow
-            time="05:05 UTC daily"
-            label="News & press-release sourcing"
-            description="Discovers and scores articles from vendor news listing pages. Relevance ≥ 60 and importance ≥ 40 required before ingestion. Max 5 articles per vendor."
-            endpoint="/api/cron/sourcing-news"
-            highlight
-          />
-          <CronRow
-            time="After sourcing"
-            label="Safe-actions promotion"
-            description="Promotes high-confidence pending proposals to approved evidence records automatically."
-            endpoint="/api/cron/safe-actions"
-          />
-          <CronRow
-            time="Daily"
-            label="Daily refresh"
-            description="Recomputes scores, snapshots rankings, refreshes competitive intel and investor tools."
+            label="Daily data refresh — the whole pipeline"
+            description="Runs all ~13 steps end to end. Heavy web-search steps (full 43-vendor news, analyst coverage, IPO estimates) run weekly on Mondays; daily runs cover core-vendor news plus all the cheap deterministic steps. Trigger 'Run now' to execute every step immediately."
             endpoint="/api/cron/daily-refresh"
+            highlight
           />
         </div>
       </Panel>

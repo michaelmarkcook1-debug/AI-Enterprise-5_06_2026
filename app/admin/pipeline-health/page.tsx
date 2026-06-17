@@ -33,8 +33,13 @@ const STEP_LABELS: Record<string, { title: string; what: string }> = {
   projection: { title: "Projection", what: "Project verified evidence into the dashboard read tables." },
   derive_scores: { title: "Derive scores", what: "Recompute vendor pillar + overall scores." },
   ranking_snapshot: { title: "Ranking snapshot", what: "Capture today's overall + momentum for the trend graphs." },
-  competitive_intel: { title: "Competitive intelligence", what: "Refresh the 13-vendor Anthropic web-search news monitor." },
+  competitive_intel: { title: "Competitive intelligence", what: "Per-vendor Anthropic web-search news monitor (Haiku→Sonnet→Opus)." },
+  market_news: { title: "Market news", what: "Broad AI press / commentary / benchmark RSS, Haiku-scored + vendor-tagged." },
+  sourcing_news: { title: "Vendor press releases", what: "One rotating vendor's press-release RSS feed → evidence proposals." },
   investor_tools_refresh: { title: "Investor Tools live refresh", what: "SEC XBRL financials → Stooq+SEC valuations → IPO estimator (LLM + news) → curated analyst-coverage scrape." },
+  reputation_github: { title: "Reputation (GitHub)", what: "Live GitHub developer-momentum signals (no LLM)." },
+  macro_signals: { title: "Macro signals", what: "FRED + GDELT macro / event signals (no LLM)." },
+  watchlist_alerts: { title: "Watchlist alerts", what: "Notify on triggered watchlist conditions." },
 };
 
 function parseSteps(raw: unknown): StepSummary[] {

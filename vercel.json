@@ -3,12 +3,8 @@
   "buildCommand": "prisma generate && prisma migrate deploy && next build",
   "crons": [
     {
-      "path": "/api/cron/sourcing-rolling",
+      "path": "/api/cron/daily-refresh",
       "schedule": "5 3 * * *"
-    },
-    {
-      "path": "/api/cron/sourcing-news",
-      "schedule": "5 5 * * *"
     }
   ]
 }

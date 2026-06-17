@@ -9,11 +9,12 @@ import { getLastRefreshRun } from "@/lib/system/daily-refresh-store";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-/** Known full-pipeline step names (10 steps in runDailyRefresh). */
+/** Known full-pipeline step names (in runDailyRefresh order). Keep in sync with
+ *  lib/system/daily-refresh.ts — used for crash detection + expectedSteps. */
 const FULL_PIPELINE_STEPS = [
   "sourcing", "safe_linkage", "triage", "projection", "derive_scores",
-  "ranking_snapshot", "competitive_intel", "investor_tools_refresh",
-  "reputation_github", "macro_signals", "watchlist_alerts",
+  "ranking_snapshot", "competitive_intel", "market_news", "sourcing_news",
+  "investor_tools_refresh", "reputation_github", "macro_signals", "watchlist_alerts",
 ];
 
 interface StepRaw {

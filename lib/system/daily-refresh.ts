@@ -1,28 +1,40 @@
-// Daily-refresh orchestrator.
-// ──────────────────────────
-// One function that runs the entire data-refresh pipeline in order:
+// Daily-refresh orchestrator — THE single data pipeline.
+// ──────────────────────────────────────────────────────
+// One function runs the ENTIRE data refresh in order. There is no other
+// scheduled pipeline: one daily cron (/api/cron/daily-refresh) calls this,
+// the "Run full ingestion" admin button calls this, and /admin/pipeline-health
+// shows every step's pass/fail + reason. Nothing ingests outside this.
 //
-//   1. Sourcing         — fetch + extract proposals from the manifest.
-//   2. Safe linkage     — auto-attach product scope to high-confidence
-//                         proposals.
-//   3. Triage           — auto-approve proposals that pass the strict
-//                         gate (E2+, ≥0.85 confidence, etc.).
-//   4. Projection       — fold verified evidence into the read tables
-//                         the dashboard / news / capabilities pages
-//                         render from.
-//   5. Ranking snapshot — capture today's overall + momentum scores
-//                         for the trend graphs.
-//   6. Competitive intel— refresh the 13-vendor news monitor.
+//   1.  Sourcing          — fetch + extract evidence proposals from the manifest.
+//   2.  Safe linkage      — auto-attach product scope to high-confidence proposals.
+//   3.  Triage            — auto-approve proposals that pass the strict gate.
+//   4.  Projection        — fold verified evidence into the read tables.
+//   5.  Derive scores     — recompute overall/confidence/momentum from fresh data.
+//   6.  Ranking snapshot  — capture today's scores for the trend graphs.
+//   7.  Competitive intel — per-vendor web-search news monitor (Haiku→Sonnet→Opus).
+//   7b. Market news       — broad AI press/commentary/benchmark RSS, Haiku-scored.
+//   7c. Vendor press RSS  — one rotating vendor's press-release feed.
+//   8.  Investor tools    — SEC financials, valuations, (weekly) IPO + analyst coverage.
+//   9.  Reputation        — live GitHub signals.
+//   10. Macro signals     — FRED + GDELT.
+//   11. Watchlist alerts  — notify on triggered watchlist conditions.
 //
-// Every step is independently failure-tolerant: a failure in one step
-// records its error and the next step still runs. The function returns
-// a structured summary the cron route serialises to JSON for logging.
+// Cost tiering: heavy web-search steps (full 43-vendor competitive set, analyst
+// coverage, IPO estimates) run weekly (Monday UTC) or on a forced run; daily
+// runs cover the core-vendor news + all the cheap deterministic steps.
+//
+// Every step is independently failure-tolerant: a failure in one step records
+// its error and the next step still runs. The function returns a structured
+// summary the cron route serialises to JSON for logging.
 //
 // All 38 page routes in /app are `export const dynamic = "force-dynamic"`
 // so any change written to the DB by this pipeline is immediately
 // visible to a refresh — no cache invalidation step is needed.
 
 import { runSourcing } from "../sourcing/runner";
+import { runNewsSourcing } from "../sourcing/news-runner";
+import { runMarketNewsIngestion } from "../sourcing/market-news-runner";
+import { SOURCE_MANIFEST } from "../sourcing/manifest";
 import { runSafeLinkageApply } from "../services/safe-linkage-runner";
 import { runTriage } from "../services/triage-runner";
 import { projectEvidenceToIntelligence } from "../services/intelligence-projector";
@@ -231,6 +243,39 @@ export async function runDailyRefresh(
       tokensIn: r.totalTokensIn,
       tokensOut: r.totalTokensOut,
       estimatedCostUsd: r.estimatedCostUsd,
+    };
+  });
+
+  // ── 7b. Market news — broad AI/tech + commentary + benchmark RSS ──
+  //     Haiku-scored, vendor-tagged, written to IntelligenceNewsItem.
+  //     (Folded in from the former standalone sourcing-rolling cron.)
+  await trackedStep("market_news", async () => {
+    const r = await runMarketNewsIngestion();
+    return {
+      feedsFetched: r.feedsFetched,
+      itemsScored: r.itemsScored,
+      itemsUpserted: r.itemsUpserted,
+      errorCount: r.errors.length,
+      diagnostic: r.errors[0] ?? (r.itemsUpserted > 0 ? `${r.itemsUpserted} items upserted` : "no new relevant items"),
+    };
+  });
+
+  // ── 7c. Vendor press-release RSS (one rotating vendor) ──────────
+  //     (Folded in from the former standalone sourcing-news cron.)
+  await trackedStep("sourcing_news", async () => {
+    if (!dbConfigured) return { skipped: "no_database" };
+    const newsVendors = [...new Set(
+      SOURCE_MANIFEST.filter((e) => e.category === "press_release").map((e) => e.vendorId),
+    )].sort();
+    if (newsVendors.length === 0) return { skipped: "no_news_vendors" };
+    const dayOfEpoch = Math.floor(now.getTime() / 86_400_000);
+    const vendor = newsVendors[dayOfEpoch % newsVendors.length];
+    const r = await runNewsSourcing(vendor);
+    return {
+      vendor,
+      articlesDiscovered: r.totals.articlesDiscovered,
+      articlesIngested: r.totals.articlesIngested,
+      proposalsPersisted: r.totals.proposalsPersisted,
     };
   });
 

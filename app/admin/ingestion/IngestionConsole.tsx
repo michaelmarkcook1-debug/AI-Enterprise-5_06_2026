@@ -109,21 +109,19 @@ export default function IngestionConsole({
     setIngestError(null);
     setIngestResult(null);
     try {
-      const qs = scope === "vendor" && vendorOverride ? `?vendor=${encodeURIComponent(vendorOverride)}` : "";
-      const res = await fetch(`/api/cron/sourcing-rolling${qs}`, {
+      // Manual per-vendor standard sourcing. The SCHEDULED run lives in the one
+      // daily-refresh pipeline; this is the admin "run one vendor now" tool.
+      const res = await fetch(`/api/admin/sourcing/run`, {
         method: "POST",
-        headers: token ? { "x-admin-token": token } : {},
+        headers: { "content-type": "application/json", ...(token ? { "x-admin-token": token } : {}) },
+        body: JSON.stringify({ vendorId: scope === "vendor" ? vendorOverride : undefined, persist: true }),
       });
       const body = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(body.error ?? `HTTP ${res.status}`);
-      if (body.skipped) {
-        setIngestResult(`Skipped: ${body.skipped}`);
-      } else {
-        const totals = body.totals ?? {};
-        setIngestResult(
-          `${body.vendor} · ${body.durationMs ?? 0} ms · ${totals.proposalsExtracted ?? 0} extracted · ${totals.proposalsPersisted ?? 0} persisted`,
-        );
-      }
+      const totals = body.totals ?? {};
+      setIngestResult(
+        `${vendorOverride ?? "today's vendor"} · ${body.durationMs ?? 0} ms · ${totals.proposalsExtracted ?? 0} extracted · ${totals.proposalsPersisted ?? 0} persisted`,
+      );
       await refreshJobs();
     } catch (e) {
       setIngestError((e as Error).message);
@@ -137,21 +135,25 @@ export default function IngestionConsole({
     setNewsError(null);
     setNewsResult(null);
     try {
-      const qs = vendorOverride ? `?vendor=${encodeURIComponent(vendorOverride)}` : "";
-      const res = await fetch(`/api/cron/sourcing-news${qs}`, {
+      // News sourcing is per-vendor; default to today's rotating news vendor
+      // (same rotation the scheduled pipeline uses).
+      let vendor = vendorOverride;
+      if (!vendor && newsVendors.length > 0) {
+        const dayOfEpoch = Math.floor(Date.now() / 86_400_000);
+        vendor = newsVendors[dayOfEpoch % newsVendors.length].id;
+      }
+      if (!vendor) throw new Error("No news vendors configured");
+      const res = await fetch(`/api/admin/sourcing/run`, {
         method: "POST",
-        headers: token ? { "x-admin-token": token } : {},
+        headers: { "content-type": "application/json", ...(token ? { "x-admin-token": token } : {}) },
+        body: JSON.stringify({ vendorId: vendor, news: true, persist: true }),
       });
       const body = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(body.error ?? `HTTP ${res.status}`);
-      if (body.skipped) {
-        setNewsResult(`Skipped: ${body.skipped}`);
-      } else {
-        const t = body.totals ?? {};
-        setNewsResult(
-          `${body.vendor} · ${body.durationMs ?? 0} ms · ${t.articlesDiscovered ?? 0} discovered · ${t.articlesIngested ?? 0} ingested · ${t.proposalsPersisted ?? 0} proposals`,
-        );
-      }
+      const t = body.totals ?? {};
+      setNewsResult(
+        `${vendor} · ${body.durationMs ?? 0} ms · ${t.articlesDiscovered ?? 0} discovered · ${t.articlesIngested ?? 0} ingested · ${t.proposalsPersisted ?? 0} proposals`,
+      );
       await refreshJobs();
     } catch (e) {
       setNewsError((e as Error).message);
