@@ -29,6 +29,12 @@
 
 import type { PrismaClient } from "../../generated/prisma/client";
 import { VENDOR_CAPABILITIES } from "../intelligence/seed-capabilities";
+import { DOMAIN_TO_PILLAR, type DomainId, type EvidenceGrade } from "../types";
+import { freshnessFactor } from "../engine";
+
+function clampScore(value: number, min = 0, max = 100): number {
+  return Math.max(min, Math.min(max, value));
+}
 
 /** Map ingestion-domain enum → capability tracker id. Domains that don't
  * map to a capability family (capital_resilience, market_position,
@@ -364,4 +370,135 @@ function hostnameOf(url: string): string {
   } catch {
     return "Analyst-verified evidence";
   }
+}
+
+// ── Evidence → pillar-score projection (the live-scoring keystone) ──────────
+// Folds analyst_verified EvidenceRecord rows into IntelligencePillarScore — the
+// per-(vendor,pillar) capabilityScore that deriveVendorScores() turns into the
+// headline overallScore (and, downstream, momentum / quadrant position /
+// ecosystem navigator / generators). Before this, pillar scores were ONLY
+// seed-loaded, so every recompute ran against frozen seed. Now ingested
+// evidence shifts the pillar — and therefore the whole app — live.
+//
+// Blend model (persists across vendor additions & cold starts):
+//   evidenceScore   = Σ(rawScore · gradeWeight · freshness) / Σ(gradeWeight · freshness)
+//   blendW          = 1 − exp(−depth / 4)        // 1 row→.22, 4→.63, 10→.92
+//   capabilityScore = blendW · evidenceScore + (1−blendW) · existingBaseline
+// A (vendor,pillar) with NO evidence is left untouched, so a freshly-added
+// vendor keeps its seed baseline until evidence arrives, then drifts live.
+const PILLAR_GRADE_WEIGHT: Record<string, number> = {
+  // Strong→weak, matching the engine's E5-is-best convention (deliberately NOT
+  // the inverted derive-scores GRADE_WEIGHT the audit flagged).
+  E5: 1.0, E4: 0.85, E3: 0.7, E2: 0.55, E1: 0.4, E0: 0.2,
+};
+
+/** Evidence-grade weight (E5 strongest). Exported for testing. */
+export function pillarGradeWeight(grade: string): number {
+  return PILLAR_GRADE_WEIGHT[grade] ?? 0.4;
+}
+
+/** Blend an evidence-derived pillar score with its prior/seed baseline, with
+ * weight rising as evidence depth grows (1 row→.22, 4→.63, 10→.92). Depth 0
+ * returns the baseline unchanged, so un-ingested (vendor,pillar) pairs keep
+ * their seed value. Exported for testing. */
+export function blendPillarScore(evidenceScore: number, baseline: number, depth: number): number {
+  const w = 1 - Math.exp(-depth / 4);
+  return Math.round((w * evidenceScore + (1 - w) * baseline) * 10) / 10;
+}
+
+export interface PillarProjectionResult {
+  scannedRows: number;
+  pillarRowsUpserted: number;
+  vendorsTouched: number;
+  shifts: { vendorId: string; pillar: string; from: number; to: number }[];
+}
+
+export async function projectEvidenceToPillarScores(
+  prisma: PrismaClient,
+  now: Date = new Date(),
+): Promise<PillarProjectionResult> {
+  const rows = (await prisma.evidenceRecord.findMany({
+    where: { reviewStatus: "analyst_verified" },
+    select: { vendorId: true, domain: true, evidenceGrade: true, rawScore: true, capturedAt: true },
+    take: 10000,
+  })) as Array<{ vendorId: string; domain: string; evidenceGrade: string; rawScore: number; capturedAt: Date }>;
+
+  if (rows.length === 0) {
+    return { scannedRows: 0, pillarRowsUpserted: 0, vendorsTouched: 0, shifts: [] };
+  }
+
+  // Resolve plain evidence vendorIds → IntelligenceVendor ids (the same bridge
+  // the capability/news projection uses).
+  const plainIds = [...new Set(rows.map((r) => r.vendorId))];
+  const candidates = plainIds.flatMap((p) => candidateIntelligenceIds(p));
+  const existing = await prisma.intelligenceVendor.findMany({
+    where: { id: { in: candidates } },
+    select: { id: true },
+  });
+  const existingIds = new Set(existing.map((v) => v.id));
+  const plainToIntelligence = new Map<string, string>();
+  for (const plain of plainIds) {
+    const match = candidateIntelligenceIds(plain).find((id) => existingIds.has(id));
+    if (match) plainToIntelligence.set(plain, match);
+  }
+
+  // Aggregate evidence per (intelligenceVendorId, pillar).
+  type Agg = { weightedSum: number; weightSum: number; depth: number; bestGrade: string };
+  const agg = new Map<string, Agg>();
+  for (const r of rows) {
+    const vid = plainToIntelligence.get(r.vendorId);
+    if (!vid) continue;
+    const pillar = DOMAIN_TO_PILLAR[r.domain as DomainId];
+    if (!pillar) continue;
+    const gradeW = pillarGradeWeight(r.evidenceGrade);
+    const fresh = freshnessFactor(r.capturedAt.toISOString(), now);
+    const w = gradeW * fresh;
+    if (w <= 0) continue;
+    const key = `${vid}::${pillar}`;
+    const a = agg.get(key) ?? { weightedSum: 0, weightSum: 0, depth: 0, bestGrade: "E0" };
+    a.weightedSum += r.rawScore * w;
+    a.weightSum += w;
+    a.depth += 1;
+    if ((GRADE_RANK[r.evidenceGrade] ?? 0) > (GRADE_RANK[a.bestGrade] ?? 0)) a.bestGrade = r.evidenceGrade;
+    agg.set(key, a);
+  }
+
+  // Existing pillar rows give the seed/prior baseline to blend against.
+  const touchedVendorIds = [...new Set([...agg.keys()].map((k) => k.split("::")[0]))];
+  const existingRows = await prisma.intelligencePillarScore.findMany({
+    where: { vendorId: { in: touchedVendorIds } },
+    select: { vendorId: true, pillar: true, capabilityScore: true },
+  });
+  const baselineScore = new Map<string, number>();
+  for (const r of existingRows) baselineScore.set(`${r.vendorId}::${r.pillar}`, r.capabilityScore);
+
+  const shifts: PillarProjectionResult["shifts"] = [];
+  let pillarRowsUpserted = 0;
+  const vendorsTouched = new Set<string>();
+
+  for (const [key, a] of agg) {
+    if (a.weightSum <= 0) continue;
+    const [vendorId, pillar] = key.split("::");
+    const evidenceScore = clampScore(a.weightedSum / a.weightSum);
+    const baseline = baselineScore.get(key) ?? 50;
+    const capabilityScore = blendPillarScore(evidenceScore, baseline, a.depth);
+    const confidence = Math.round(clampScore(40 + 45 * (1 - Math.exp(-a.depth / 5)), 0, 95));
+
+    try {
+      await prisma.intelligencePillarScore.upsert({
+        where: { vendorId_pillar: { vendorId, pillar } },
+        create: { vendorId, pillar, capabilityScore, evidenceGrade: a.bestGrade as EvidenceGrade, confidence },
+        update: { capabilityScore, evidenceGrade: a.bestGrade as EvidenceGrade, confidence },
+      });
+      pillarRowsUpserted += 1;
+      vendorsTouched.add(vendorId);
+      if (Math.abs(capabilityScore - baseline) > 0.05) {
+        shifts.push({ vendorId, pillar, from: baseline, to: capabilityScore });
+      }
+    } catch {
+      // Skip a single pillar's write failure rather than aborting the pass.
+    }
+  }
+
+  return { scannedRows: rows.length, pillarRowsUpserted, vendorsTouched: vendorsTouched.size, shifts: shifts.slice(0, 30) };
 }

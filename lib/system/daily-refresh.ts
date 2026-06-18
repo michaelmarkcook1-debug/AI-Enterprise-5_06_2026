@@ -37,7 +37,7 @@ import { runMarketNewsIngestion } from "../sourcing/market-news-runner";
 import { SOURCE_MANIFEST } from "../sourcing/manifest";
 import { runSafeLinkageApply } from "../services/safe-linkage-runner";
 import { runTriage } from "../services/triage-runner";
-import { projectEvidenceToIntelligence } from "../services/intelligence-projector";
+import { projectEvidenceToIntelligence, projectEvidenceToPillarScores } from "../services/intelligence-projector";
 import {
   captureRankingSnapshots,
   backfillRankingSnapshots,
@@ -195,11 +195,26 @@ export async function runDailyRefresh(
   await trackedStep("projection", async () => {
     if (!dbConfigured) return { skipped: "no_database" };
     const r = await projectEvidenceToIntelligence(getPrisma());
+    // Keystone: fold verified evidence into per-pillar scores BEFORE
+    // derive_scores (step 5) reads them, so ingested evidence actually moves
+    // the headline overallScore / momentum / quadrant rather than recomputing
+    // against frozen seed. Wrapped so a pillar-projection failure can't break
+    // the rest of the projection step.
+    let pillar = { pillarRowsUpserted: 0, vendorsTouched: 0, shifts: [] as { vendorId: string; pillar: string; from: number; to: number }[] };
+    try {
+      const p = await projectEvidenceToPillarScores(getPrisma(), now);
+      pillar = { pillarRowsUpserted: p.pillarRowsUpserted, vendorsTouched: p.vendorsTouched, shifts: p.shifts };
+    } catch (err) {
+      console.error("[daily-refresh] pillar-score projection failed (capabilities/news still projected)", err);
+    }
     return {
       scannedEvidenceRows: r.scannedEvidenceRows,
       capabilitiesUpserted: r.capabilitiesUpserted,
       newsUpserted: r.newsUpserted,
       vendorsSkipped: r.vendorsSkipped.length,
+      pillarRowsUpserted: pillar.pillarRowsUpserted,
+      pillarVendorsTouched: pillar.vendorsTouched,
+      pillarShifts: pillar.shifts.length,
     };
   });
 
