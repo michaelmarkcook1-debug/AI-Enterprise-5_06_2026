@@ -71,7 +71,10 @@ export function hashContext(input: AssessmentInput): string {
 }
 
 // Freshness modifier: full credit ≤ 90 days, decays to 0.7 by 365.
-function freshnessFactor(capturedAt: string, asOf: Date = new Date("2026-05-07")): number {
+// `asOf` MUST default to the live clock — a hardcoded date freezes the decay so
+// evidence never ages (the P0 "frozen clock" defect). Pass an explicit `asOf`
+// only in tests that need a deterministic reference point.
+export function freshnessFactor(capturedAt: string, asOf: Date = new Date()): number {
   const days = Math.max(0, (asOf.getTime() - new Date(capturedAt).getTime()) / 86_400_000);
   if (days <= 90) return 1.0;
   if (days >= 365) return 0.7;

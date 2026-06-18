@@ -14,9 +14,14 @@ export default async function MarketPage() {
     listIntelligenceVendors(),
   ]);
   const vendorById = new Map(vendors.map((vendor) => [vendor.id, vendor]));
+  // Surface the freshest estimate date so directional figures are honestly dated.
+  const asOf = shares.map((s) => s.sourceDate).filter(Boolean).sort().at(-1);
+  const asOfLabel = asOf
+    ? ` Figures as of ${new Date(asOf).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })} (analyst estimate).`
+    : "";
 
   return (
-    <PageFrame aside={<DataSourceRail tab="market" />} title="Market share and momentum tracker" kicker="Category-specific market movement" description="Market share is modelled by category. A vendor can lead one segment and be weak in another. Estimates are directional and confidence-labelled.">
+    <PageFrame aside={<DataSourceRail tab="market" />} title="Market share and momentum tracker" kicker="Category-specific market movement" description={`Market share is modelled by category. A vendor can lead one segment and be weak in another. Estimates are directional and confidence-labelled.${asOfLabel}`}>
       <div className="mb-5">
         <OwnershipLegend />
       </div>

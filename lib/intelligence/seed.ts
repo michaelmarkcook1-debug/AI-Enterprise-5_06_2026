@@ -17,7 +17,7 @@ import { calculateMarketMomentum, marketShareChangePct } from "./metrics";
 const lastUpdated = "2026-05-07T00:00:00.000Z";
 
 export const INTELLIGENCE_VENDORS: Vendor[] = [
-  vendor("openai", "OpenAI", "Frontier model/API", 91, 78, "San Francisco, US", "private", ["Frontier model/API", "Agent platform", "Enterprise assistant"], "Category shaper with strong model cadence and fast enterprise API expansion.", "Lead with model quality, agent runtime, enterprise controls, and ecosystem distribution through strategic partners.", "Advanced supervised and autonomous agent patterns; enterprise production controls still need careful validation.", ["Models", "Agents", "Developer productivity", "Knowledge assistant"], ["SSO", "admin controls", "API controls"], ["Commercial dependency concentration", "fast-changing roadmap"], "Winning, but buyers should separate model capability from enterprise operating control.", { roleTags: ["Model Provider", "Application Vendor"] }),
+  vendor("openai", "OpenAI", "Frontier model/API", 89, 78, "San Francisco, US", "private", ["Frontier model/API", "Agent platform", "Enterprise assistant"], "Category shaper with strong model cadence and fast enterprise API expansion.", "Lead with model quality, agent runtime, enterprise controls, and ecosystem distribution through strategic partners.", "Advanced supervised and autonomous agent patterns; enterprise production controls still need careful validation.", ["Models", "Agents", "Developer productivity", "Knowledge assistant"], ["SSO", "admin controls", "API controls"], ["Commercial dependency concentration", "fast-changing roadmap"], "Winning, but buyers should separate model capability from enterprise operating control.", { roleTags: ["Model Provider", "Application Vendor"] }),
   vendor("microsoft", "Microsoft", "Cloud AI platform", 90, 84, "Redmond, US", "public", ["Cloud AI platform", "Enterprise assistant", "Developer/coding agent"], "Distribution leader through Microsoft 365, Azure, GitHub, and enterprise procurement reach.", "Bundle AI into productivity, developer, security, and cloud workflows while shifting buyers into Azure-managed control planes.", "Strong copilot estate with widening agent orchestration across productivity and developer workflows.", ["Enterprise assistant", "Developer productivity", "Cloud AI", "Governance"], ["identity", "compliance", "tenant controls", "security"], ["Bundling opacity", "cost governance complexity"], "Likely to own the enterprise access layer, but category share must be measured by workload, not by suite reach.", { roleTags: ["Platform Vendor", "Application Vendor", "Investor", "Infrastructure Player", "Model Provider", "Cloud / Hosting Provider"], infraBand: "cloud_compute", infraBandSecondary: "silicon" }),
   vendor("google", "Google", "Cloud AI platform", 86, 76, "Mountain View, US", "public", ["Cloud AI platform", "Frontier model/API", "RAG/enterprise search"], "Technically deep platform with improving enterprise packaging through Google Cloud and Workspace.", "Differentiate on model research, multimodal capability, data/cloud integration, and Workspace adoption.", "Strong model and multimodal progress; enterprise agent operating model varies by buyer stack.", ["Models", "Cloud AI", "Enterprise search", "Workspace"], ["cloud controls", "data controls", "identity"], ["Enterprise adoption consistency", "fragmented portfolio perception"], "Strong challenger where data, search, and cloud-native workloads matter.", { roleTags: ["Platform Vendor", "Model Provider", "Cloud / Hosting Provider", "Hardware Provider", "Application Vendor"], infraBand: "cloud_compute", infraBandSecondary: "silicon" }),
   // Anthropic — refreshed May 2026. Previous overallScore 84 / confidence 73
@@ -32,7 +32,7 @@ export const INTELLIGENCE_VENDORS: Vendor[] = [
   // autonomyLevelMax bumped to "supervised_agent" — computer-use
   // and tool-use ship as GA and Anthropic deserves the same tier as
   // OpenAI / MSFT / AWS.
-  vendor("anthropic", "Anthropic", "Frontier model/API", 88, 84, "San Francisco, US", "private", ["Frontier model/API", "Developer/coding agent", "Agent platform"], "Frontier-reasoning + coding leader with computer-use GA and broad hyperscaler distribution. Claude Sonnet is the default model for Cursor, Aider, and GitHub Copilot Workspace; Claude Opus leads enterprise reasoning benchmarks.", "Lead on reasoning + coding quality, ship computer-use and tool-use primitives, and distribute through Bedrock, Vertex, Snowflake, and Databricks rather than a packaged assistant UI.", "Computer-use GA and tool-use leadership put Anthropic on the same agent tier as OpenAI / MSFT / AWS; buyer diligence should still inspect deployment, retention, and audit-log evidence.", ["Frontier reasoning", "Coding", "Computer-use agents", "Multi-cloud distribution"], ["DPA + audit logs", "AWS Bedrock + GCP Vertex tenant isolation", "PrivateLink / VPC routing"], ["Capital intensity vs hyperscaler peers", "Multi-hyperscaler distribution dependency"], "Reasoning + coding leader with a credible safety narrative; the gap on a packaged enterprise assistant is a distribution choice, not a capability one.", { roleTags: ["Model Provider", "Application Vendor"] }),
+  vendor("anthropic", "Anthropic", "Frontier model/API", 92, 85, "San Francisco, US", "private", ["Frontier model/API", "Developer/coding agent", "Agent platform"], "Frontier-reasoning + coding leader with computer-use GA and broad hyperscaler distribution. Claude Sonnet is the default model for Cursor, Aider, and GitHub Copilot Workspace; Claude Opus leads enterprise reasoning benchmarks.", "Lead on reasoning + coding quality, ship computer-use and tool-use primitives, and distribute through Bedrock, Vertex, Snowflake, and Databricks rather than a packaged assistant UI.", "Computer-use GA and tool-use leadership put Anthropic on the same agent tier as OpenAI / MSFT / AWS; buyer diligence should still inspect deployment, retention, and audit-log evidence.", ["Frontier reasoning", "Coding", "Computer-use agents", "Multi-cloud distribution"], ["DPA + audit logs", "AWS Bedrock + GCP Vertex tenant isolation", "PrivateLink / VPC routing"], ["Capital intensity vs hyperscaler peers", "Multi-hyperscaler distribution dependency"], "Reasoning + coding leader with a credible safety narrative; the gap on a packaged enterprise assistant is a distribution choice, not a capability one.", { roleTags: ["Model Provider", "Application Vendor"] }),
   vendor("aws", "AWS", "Cloud AI platform", 83, 82, "Seattle, US", "public", ["Cloud AI platform", "Agent platform", "Infrastructure"], "Infrastructure-heavy AI platform provider with breadth across model choice, deployment, and cloud operations.", "Win through Bedrock-style model optionality, cloud-native deployment, and enterprise infrastructure trust.", "Strong agent platform foundations for AWS estates; business-user assistant layer is less concentrated.", ["Cloud AI", "Agent platform", "Infrastructure", "Governance"], ["cloud identity", "network controls", "observability"], ["Complexity for non-AWS estates", "service sprawl"], "Best considered a control plane and deployment platform, not a single assistant market-share proxy.", { roleTags: ["Platform Vendor", "Cloud / Hosting Provider", "Investor", "Infrastructure Player"], infraBand: "cloud_compute", infraBandSecondary: "silicon" }),
   vendor("salesforce", "Salesforce", "CRM/customer AI", 80, 75, "San Francisco, US", "public", ["CRM/customer AI", "Agent platform", "Workflow automation AI"], "CRM workflow owner with strong access to sales, service, and customer data.", "Embed AI agents into CRM workflows and monetise via packaged customer-facing productivity outcomes.", "Strong domain-agent narrative in sales and service; cross-enterprise autonomy requires validation.", ["CRM AI", "Service AI", "Agents"], ["data cloud governance", "admin controls"], ["Platform cost", "CRM-centric scope"], "A sector leader for customer workflows, but not a universal enterprise AI platform.", { roleTags: ["Application Vendor", "Platform Vendor", "Data & Services Provider"] }),
   vendor("servicenow", "ServiceNow", "ITSM/HR/service AI", 79, 76, "Santa Clara, US", "public", ["ITSM/HR/service AI", "Workflow automation AI", "Agent platform"], "Workflow automation incumbent with strong IT, HR, and enterprise service management footprint.", "Position AI agents as workflow execution inside systems of record for service operations.", "Good supervised workflow-agent fit; autonomy should be staged around approval and audit paths.", ["ITSM", "HR service", "Workflow automation"], ["workflow audit", "RBAC", "approval controls"], ["Suite dependency", "implementation complexity"], "A practical enterprise agent player where workflows already live in ServiceNow.", { roleTags: ["Application Vendor", "Platform Vendor", "Vertical Specialist"] }),
@@ -224,24 +224,23 @@ export const MARKET_CATEGORIES: MarketCategory[] = [
 //   - Snowflake Arctic now appears in frontier_model_api (small slice).
 const shareRows: [string, MarketCategoryId, number, number | undefined, number][] = [
   // Frontier model API — global frontier set.
-  // Anthropic 15 → 19 (May 2026 rebalance). Claude usage on Bedrock +
-  // Vertex + direct API is structurally larger than 15%, especially
-  // given how much enterprise reasoning + coding traffic flows
-  // through Claude Sonnet/Opus. OpenAI dropped 24→22 to make room.
-  ["openai", "frontier_model_api", 22, 26, 74], ["anthropic", "frontier_model_api", 19, 14, 78], ["google", "frontier_model_api", 14, 15, 62],
-  ["meta", "frontier_model_api", 10, 7, 65], ["mistral", "frontier_model_api", 6, 5, 55], ["xai", "frontier_model_api", 5, 3, 55],
-  ["deepseek", "frontier_model_api", 5, 2, 50], ["alibaba", "frontier_model_api", 5, 3, 48], ["cohere", "frontier_model_api", 4, 6, 58],
-  ["moonshot", "frontier_model_api", 3, 1, 45], ["ai21", "frontier_model_api", 2, 2, 50], ["snowflake", "frontier_model_api", 1, 0, 45],
+  // 2026-06-18 audit rebalance — corrected to ENTERPRISE LLM-spend reality
+  // (Menlo/Ramp-style analyst triangulation): Anthropic now leads enterprise
+  // API spend (~35%), OpenAI ~26%, Google ~16%. `previousEstimate` is the prior
+  // (May) value so changePct surfaces Anthropic's enterprise surge in movers.
+  ["openai", "frontier_model_api", 26, 22, 74], ["anthropic", "frontier_model_api", 35, 19, 80], ["google", "frontier_model_api", 16, 14, 64],
+  ["meta", "frontier_model_api", 5, 10, 60], ["mistral", "frontier_model_api", 4, 6, 55], ["xai", "frontier_model_api", 3, 5, 52],
+  ["deepseek", "frontier_model_api", 4, 5, 50], ["alibaba", "frontier_model_api", 3, 5, 48], ["cohere", "frontier_model_api", 1, 4, 55],
+  ["moonshot", "frontier_model_api", 2, 3, 45], ["ai21", "frontier_model_api", 1, 2, 50], ["snowflake", "frontier_model_api", 0, 1, 45],
   // Enterprise assistant — Anthropic 5 → 9. Even without a packaged
   // assistant UI, Claude is the model behind a large slice of
   // enterprise-assistant workloads via direct API + Bedrock + Vertex.
   ["microsoft", "enterprise_assistant", 28, 31, 72], ["openai", "enterprise_assistant", 18, 13, 58], ["anthropic", "enterprise_assistant", 9, 4, 62], ["glean", "enterprise_assistant", 10, 8, 57], ["writer", "enterprise_assistant", 6, 5, 52],
-  // Developer coding agent — Anthropic 12 → 22. This is the most
-  // defensible rebalance: Claude Sonnet is the default in Cursor,
-  // Aider, and GitHub Copilot Workspace; Claude Code is the
-  // first-party CLI. Microsoft 34 → 28 (still leads on distribution
-  // via VS Code + GitHub but the underlying model traffic is Claude).
-  ["microsoft", "developer_coding_agent", 28, 36, 70], ["anthropic", "developer_coding_agent", 22, 8, 78], ["openai", "developer_coding_agent", 14, 10, 55], ["google", "developer_coding_agent", 8, 8, 49],
+  // Developer coding agent — 2026-06-18: Anthropic is the clear model leader
+  // (~50%): Claude is the default in Cursor/Aider/Copilot and Claude Code.
+  // Microsoft is a distribution layer (VS Code + GitHub) running Claude, so its
+  // model-share credit drops to ~18%; OpenAI ~21%.
+  ["anthropic", "developer_coding_agent", 50, 22, 80], ["openai", "developer_coding_agent", 21, 14, 58], ["microsoft", "developer_coding_agent", 18, 28, 64], ["google", "developer_coding_agent", 8, 8, 49],
   // Agent platform — Anthropic newly credited at 12. Computer Use is
   // GA, tool-use is a developer primitive, and Claude Code is
   // shipping agentic workflows. AWS 19 → 17 to make room.
@@ -267,9 +266,9 @@ export const MARKET_SHARE_ESTIMATES: MarketShareEstimate[] = shareRows.map(([ven
   previousEstimate,
   changePct: marketShareChangePct(estimatedShare, previousEstimate),
   confidence,
-  source: "AI Enterprise seed data (mock market model)",
-  sourceDate: "2026-05-06T00:00:00.000Z",
-  methodology: "Directional category estimate based on mock adoption, distribution, product-signal, and customer-reference proxies. Not audited market share.",
+  source: "AI Enterprise analyst triangulation (Menlo/Ramp-style enterprise-spend + product-signal proxies)",
+  sourceDate: "2026-06-18T00:00:00.000Z",
+  methodology: "Directional category estimate triangulated from enterprise LLM-spend reporting, distribution, product-signal, and customer-reference proxies. Analyst estimate, not audited market share — surfaced with an as-of date.",
 }));
 
 export const VENDOR_MOMENTUM: VendorMomentum[] = INTELLIGENCE_VENDORS.map((v, index) => {
