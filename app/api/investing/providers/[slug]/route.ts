@@ -10,7 +10,7 @@ import {
   getInvestmentProvider,
   listFinancialMetrics,
   listIndirectExposureScores,
-  listValuationMetrics,
+  listValuationMetricsLive,
 } from "@/lib/investing/intelligence";
 import { IPO_PROFILES } from "@/lib/investing/seed";
 import { productScopesForVendor } from "@/lib/investor-tools/product-scope";
@@ -23,6 +23,7 @@ export async function GET(_request: Request, ctx: { params: Promise<{ slug: stri
   const provider = getInvestmentProvider(slug);
   if (!provider) return Response.json({ error: "not_found" }, { status: 404 });
 
+  const valuations = await listValuationMetricsLive();
   return Response.json({
     provider,
     scores: {
@@ -34,7 +35,7 @@ export async function GET(_request: Request, ctx: { params: Promise<{ slug: stri
       hypePenalty: calculateHypePenalty(provider),
     },
     financialMetrics: listFinancialMetrics().filter((metric) => metric.providerId === provider.id),
-    valuationMetric: listValuationMetrics().find((metric) => metric.providerId === provider.id) ?? null,
+    valuationMetric: valuations.find((metric) => metric.providerId === provider.id) ?? null,
     ipoProfile: IPO_PROFILES.find((profile) => profile.providerId === provider.id) ?? null,
     indirectExposures: listIndirectExposureScores().filter((edge) => edge.privateProviderId === provider.id || edge.publicTicker === provider.ticker),
     productScopes: productScopesForVendor(provider.id),

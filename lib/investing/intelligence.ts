@@ -10,7 +10,8 @@ import {
   POST_IPO_FLUCTUATION_BANDS,
   VALUATION_METRICS,
 } from "./seed";
-import type { IndirectExposure, IPOEvidenceQuality, IPOForecast, IPOProfile, InvestmentProviderProfile, MissingIPODataChecklist, PostIPOFluctuationBand } from "./types";
+import { loadValuations } from "./live-cache";
+import type { IndirectExposure, IPOEvidenceQuality, IPOForecast, IPOProfile, InvestmentProviderProfile, MissingIPODataChecklist, PostIPOFluctuationBand, ValuationMetric } from "./types";
 
 export interface IpoForecastRow {
   forecast: IPOForecast;
@@ -224,6 +225,19 @@ export function listFinancialMetrics() {
 }
 
 export function listValuationMetrics() {
+  return VALUATION_METRICS;
+}
+
+/** Live valuations from the cron-populated cache (real Stooq/SEC caps), falling
+ * back to the curated real-cap seed when the cache is empty/unavailable. Use
+ * this on read paths; sync listValuationMetrics() stays the seed baseline. */
+export async function listValuationMetricsLive(): Promise<ValuationMetric[]> {
+  try {
+    const live = await loadValuations();
+    if (live && live.payload.length > 0) return live.payload;
+  } catch {
+    /* fall through to seed */
+  }
   return VALUATION_METRICS;
 }
 

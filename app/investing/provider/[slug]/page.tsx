@@ -15,7 +15,7 @@ import {
   isWatchlistOnly,
   listFinancialMetrics,
   listIndirectExposureScores,
-  listValuationMetrics,
+  listValuationMetricsLive,
 } from "@/lib/investing/intelligence";
 import { IPO_PROFILES } from "@/lib/investing/seed";
 import { WarningStrip, label } from "../../investing-ui";
@@ -31,7 +31,7 @@ export default async function ProviderInvestmentPage({ params }: { params: Promi
   const ipo = IPO_PROFILES.find((p) => p.providerId === provider.providerId || p.providerId === provider.id);
   const indirect = listIndirectExposureScores().filter((e) => e.privateProviderId === provider.providerId || e.privateProviderId === provider.id);
   const financials = listFinancialMetrics().filter((m) => m.providerId === provider.providerId || m.providerId === provider.id);
-  const valuation = listValuationMetrics().find((v) => v.providerId === provider.providerId || v.providerId === provider.id);
+  const valuation = (await listValuationMetricsLive()).find((v) => v.providerId === provider.providerId || v.providerId === provider.id);
   const dnr = doNotRankReason(provider);
   const watchlist = isWatchlistOnly(provider);
   const consumer = calculateConsumerInvestmentPotential(provider);

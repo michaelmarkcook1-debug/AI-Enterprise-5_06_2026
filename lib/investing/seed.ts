@@ -66,7 +66,7 @@ export const INVESTMENT_PROVIDERS: InvestmentProviderProfile[] = [
   provider("openai", "openai", "OpenAI", null, "ipo_watch", "private", "ipo_watch", 96, 65, 92, 70, 95, 80, "high", 20, 92, 86, 95, 72, 96, 55, "E2", "Category-defining frontier AI platform.", "Extreme valuation, compute cost, and IPO structure uncertainty."),
   provider("anthropic", "anthropic", "Anthropic", null, "ipo_watch", "private", "ipo_watch", 92, 68, 88, 73, 92, 78, "high", 20, 90, 84, 94, 64, 94, 55, "E2", "Strong enterprise model and coding momentum.", "Compute dependency and extreme valuation sensitivity."),
   provider("databricks", "databricks", "Databricks", null, "ipo_watch", "private", "ipo_watch", 86, 76, 82, 84, 86, 86, "medium_high", 20, 72, 72, 48, 30, 42, 60, "E2", "Enterprise data/AI infrastructure with clearer software economics.", "IPO multiple and Snowflake/platform competition."),
-  provider("cerebras", "cerebras", "Cerebras", null, "ipo_watch", "private", "ipo_watch", 82, 62, 85, 58, 88, 90, "high", 25, 82, 78, 86, 36, 90, 58, "E2", "Rare AI chip pure-play IPO candidate.", "Hardware cycle, customer concentration, and Nvidia competition."),
+  provider("cerebras", "cerebras", "Cerebras", "CBRS", "ai_infrastructure", "public", "public_direct", 82, 62, 85, 58, 88, 90, "high", 100, 82, 78, 86, 36, 90, 58, "E3", "Wafer-scale inference challenger — IPO'd on Nasdaq May 2026 (~$56B), anchored by a $20B+ OpenAI compute commitment.", "Hardware cycle, historical customer concentration, and Nvidia competition."),
   provider("harvey", "harvey", "Harvey", null, "private_inaccessible", "private", "private_inaccessible", 76, 58, 78, 62, 82, 62, "high", 5, 88, 90, 28, 62, 35, 50, "E1", "Legal AI vertical specialist with strong mindshare.", "Private access, valuation uncertainty, and vertical concentration."),
   provider("cohere", "cohere", "Cohere", null, "private_inaccessible", "private", "private_inaccessible", 72, 56, 65, 62, 74, 54, "medium_high", 5, 80, 88, 72, 48, 78, 50, "E1", "Enterprise-focused model provider with regulated-market positioning.", "Competitive pressure from frontier labs and cloud platforms."),
   provider("mistral", "mistral", "Mistral", null, "private_inaccessible", "private", "private_inaccessible", 74, 60, 72, 66, 80, 58, "medium_high", 5, 78, 88, 66, 46, 74, 52, "E1", "European sovereign/open-model AI thesis.", "Private access and hyperscaler competition."),
@@ -139,7 +139,7 @@ export const IPO_PROFILES: IPOProfile[] = [
 ];
 
 export const IPO_EVIDENCE_QUALITY: IPOEvidenceQuality[] = [
-  ipoEvidence("cerebras", "R4_or_R5", 74, "rumoured", true, "Closest near-term IPO candidate in seed model, but production display still requires filing/roadshow source validation."),
+  ipoEvidence("cerebras", "R4_or_R5", 74, "rumoured", true, "Completed — Cerebras IPO'd on Nasdaq May 2026 (~$56B). Retained for historical reference."),
   ipoEvidence("openai", "R3_or_R4", 56, "rumoured", true, "Possible process signals are modelled only; no confirmed listing date or offer terms are seeded."),
   ipoEvidence("anthropic", "R3", 54, "rumoured", true, "Large private funding may delay IPO; no confirmed filing or offer terms are seeded."),
   ipoEvidence("databricks", "R2_or_R3", 62, "rumoured", true, "Plausible software IPO watch, but timing remains modelled without a confirmed S-1/F-1."),
@@ -155,7 +155,7 @@ export const IPO_EVIDENCE_QUALITY: IPOEvidenceQuality[] = [
 ];
 
 export const IPO_FORECASTS: IPOForecast[] = [
-  ipoForecast("cerebras", "2026-05", "2026-05", "2026-05", "high", "R4_or_R5", "active_process", "speculative_ai_infrastructure", "Closest near-term IPO in the seed model; active roadshow, price-range, or filing evidence is required for production validation."),
+  ipoForecast("cerebras", "2026-05", "2026-05", "2026-05", "high", "R4_or_R5", "active_process", "speculative_ai_infrastructure", "LISTED on Nasdaq May 2026 (~$56B) — now tracked as a public provider (ticker CBRS). This forecast is retained for historical reference only."),
   ipoForecast("openai", "2027-05", "2026-12", "2027-09", "medium_low", "R3_or_R4", "model_estimate_not_fact", "mega_hype_valuation_sensitive", "Possible H2 2026 filing reports are not treated as confirmed listing evidence; valuation and compute-cost risk remain high."),
   ipoForecast("anthropic", "2027-09", "2026-12", "2027-12", "medium_low", "R3", "model_estimate_not_fact", "high_quality_compute_and_valuation_risk", "Large private fundraising may delay IPO; compute dependency and valuation risk are high."),
   ipoForecast("databricks", "2027-11", "2027-05", "2028-04", "medium", "R2_or_R3", "model_estimate_not_fact", "software_compounder_candidate", "Best fundamental software IPO candidate in this seed model if valuation is disciplined."),
@@ -200,9 +200,10 @@ export const FINANCIAL_METRICS: FinancialMetric[] = INVESTMENT_PROVIDERS
 const PUBLIC_MARKET_CAP_USD_B: Record<string, number> = {
   nvda: 5000, msft: 3100, googl: 2800, amzn: 2400, avgo: 1500, orcl: 900,
   asml: 420, amd: 360, sap: 330, crm: 280, ibm: 260, now: 250, arm: 180, snow: 85,
+  cerebras: 56, // Listed on Nasdaq May 2026.
 };
 
-export const VALUATION_METRICS: ValuationMetric[] = INVESTMENT_PROVIDERS
+const PUBLIC_VALUATION_METRICS: ValuationMetric[] = INVESTMENT_PROVIDERS
   .filter((provider) => provider.publicStatus === "public")
   .map((provider) => ({
     providerId: provider.id,
@@ -220,6 +221,29 @@ export const VALUATION_METRICS: ValuationMetric[] = INVESTMENT_PROVIDERS
     valuationDate: "2026-06-18",
     confidence: provider.evidenceConfidence,
   }));
+
+// Private-lab last-known valuations ($B, analyst estimate as of 2026-06 — most
+// recent primary/secondary round or tender). Fixes the marquee labs showing
+// "No valuation metrics": they're private with no public market cap, but a
+// dated round valuation is the honest figure to surface. Lower confidence than
+// a public market cap. Cerebras kept here until the IPO reclassification lands.
+const PRIVATE_VALUATION_USD_B: Record<string, number> = {
+  openai: 500, anthropic: 350, xai: 250, databricks: 130, perplexity: 18,
+  mistral: 14, harvey: 11, glean: 7, cohere: 7,
+};
+
+const PRIVATE_VALUATION_METRICS: ValuationMetric[] = INVESTMENT_PROVIDERS
+  .filter((provider) => provider.publicStatus !== "public" && PRIVATE_VALUATION_USD_B[provider.id] != null)
+  .map((provider) => ({
+    providerId: provider.id,
+    marketCap: PRIVATE_VALUATION_USD_B[provider.id],
+    // Private rounds don't publish public-market ratios; leave them undefined
+    // rather than fabricate. The valuation itself + as-of date is the signal.
+    valuationDate: "2026-06-18",
+    confidence: 55,
+  }));
+
+export const VALUATION_METRICS: ValuationMetric[] = [...PUBLIC_VALUATION_METRICS, ...PRIVATE_VALUATION_METRICS];
 
 function provider(
   id: string,
