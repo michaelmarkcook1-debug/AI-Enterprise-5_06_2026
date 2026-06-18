@@ -258,6 +258,10 @@ function AnthropicDependentCard({ steps }: { steps: StepSummary[] }) {
   const compDiagnostic = typeof compSummary.diagnostic === "string" ? compSummary.diagnostic : "";
   const sourcingFailed = Number(sourcingSummary.failedExtract ?? sourcingSummary.failed ?? 0);
   const sourcingFirstError = typeof sourcingSummary.firstError === "string" ? sourcingSummary.firstError : "";
+  // A CONFIGURED usage/spend limit ("specified API usage limits", "regain access
+  // on …") is distinct from a depleted credit balance — adding credits won't lift
+  // it. Detect it so we point at the right lever (Console → Limits), not credits.
+  const usageLimitHit = /usage limit|regain access|reached your specified/i.test(`${compDiagnostic} ${sourcingFirstError}`);
 
   const sourcingDegraded = llmSource === "stub" || proposalsExtracted === 0;
   const compDegraded = compAttempted > 0 && compFindings === 0;
@@ -318,6 +322,20 @@ function AnthropicDependentCard({ steps }: { steps: StepSummary[] }) {
           )}
         </div>
       </div>
+      {usageLimitHit && (
+        <div className="mt-3 rounded-md border border-rose-300 bg-rose-50 p-3 text-xs leading-5 text-rose-900 dark:border-rose-900/60 dark:bg-rose-950/30 dark:text-rose-200">
+          <strong>This is a configured usage limit hit by whatever key/workspace the deployed{" "}
+          <code className="font-mono">ANTHROPIC_API_KEY</code> belongs to</strong> — not necessarily the account
+          you topped up. If your credit + limits look healthy, the deployed key likely belongs to a different or
+          older workspace with a low monthly cap. To confirm exactly which: copy the{" "}
+          <code className="font-mono">request_id</code> from the diagnostic above and look it up in{" "}
+          <strong>Anthropic Console → Logs</strong> — it names the org, workspace, and key that hit the limit.
+          Then raise that workspace&apos;s limit (Settings → Limits) or rotate{" "}
+          <code className="font-mono">ANTHROPIC_API_KEY</code> in Vercel to a key from the uncapped workspace.
+          Note: this panel shows the <em>last persisted run</em> and doesn&apos;t auto-refresh — trigger a fresh
+          run to confirm the error is current, not from before your fix.
+        </div>
+      )}
       <div className="mt-3 rounded-md border border-emerald-200 bg-emerald-50 p-3 text-xs leading-5 text-emerald-900 dark:border-emerald-900/60 dark:bg-emerald-950/20 dark:text-emerald-200">
         <strong>Independent of this:</strong> derive_scores, ranking_snapshot, and the 13 public-data
         connectors (SEC, FRED, GitHub, statuspages, etc.) continue to run normally. The QUAD tabs

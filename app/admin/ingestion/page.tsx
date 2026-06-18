@@ -1,7 +1,6 @@
 import IngestionConsole from "./IngestionConsole";
 import ManifestPatchesPanel from "@/components/admin/ManifestPatchesPanel";
 import { listIngestionJobs } from "@/lib/ingestion/ingest-service";
-import { listVendorProfiles } from "@/lib/repositories/vendor-profiles";
 import { hasDatabase, getPrisma } from "@/lib/prisma";
 import { SOURCE_MANIFEST } from "@/lib/sourcing/manifest";
 import Link from "next/link";
@@ -71,17 +70,24 @@ function buildManifestSummary() {
 const pressReleaseEntries = SOURCE_MANIFEST.filter((e) => e.category === "press_release");
 
 export default async function IngestionPage() {
-  const [jobs, vendors, patches] = await Promise.all([
+  const [jobs, patches] = await Promise.all([
     hasDatabase() ? listIngestionJobs() : Promise.resolve([]),
-    listVendorProfiles(),
     listPendingManifestPatches(),
   ]);
 
   const manifestSummary = buildManifestSummary();
-  const newsVendorIds = new Set(pressReleaseEntries.map((e) => e.vendorId));
-  const newsVendors = vendors
-    .filter((v) => newsVendorIds.has(v.id))
-    .map((v) => ({ id: v.id, name: v.name }));
+  // The console operates on the SOURCE_MANIFEST (that's what sourcing iterates),
+  // so derive selectable vendors from the manifest itself — NOT the vendor-profiles
+  // table. The manifest keys vendors as `vendor_openai` while the profile table
+  // uses bare `openai`, so intersecting them produced an EMPTY list (the "0 news
+  // vendors / can't select a vendor" bug). Manifest ids are also exactly what
+  // runSourcing / runNewsSourcing expect, so the buttons resolve correctly.
+  const vendors = [...new Set(SOURCE_MANIFEST.map((e) => e.vendorId))]
+    .sort()
+    .map((id) => ({ id, name: id.replace(/^vendor_/, "") }));
+  const newsVendors = [...new Set(pressReleaseEntries.map((e) => e.vendorId))]
+    .sort()
+    .map((id) => ({ id, name: id.replace(/^vendor_/, "") }));
 
   return (
     <>

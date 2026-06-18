@@ -147,6 +147,11 @@ export interface RunnerOptions {
   sourceUrl?: string;           // restrict to one URL
   // When true, persist proposals to DB if available; when false, dry-run only.
   persist?: boolean;
+  // Process the ENTIRE manifest (all vendors) in one run. Off by default — the
+  // default is "today's rotation vendor" so a daily run is one vendor and cycles
+  // through the whole manifest over ~vendorCount days. A full run is ~42× the
+  // cost/time and will exceed the function timeout; only set this deliberately.
+  allVendors?: boolean;
 }
 
 export async function runSourcing(options: RunnerOptions = {}): Promise<SourcingRunResult> {
@@ -157,9 +162,22 @@ export async function runSourcing(options: RunnerOptions = {}): Promise<Sourcing
   const databaseConfigured = hasDatabase();
   const persist = options.persist !== false; // default true
 
-  let entries: SourceManifestEntry[] = options.vendorId
-    ? manifestForVendor(options.vendorId)
-    : SOURCE_MANIFEST;
+  // Vendor selection: one explicit vendor → that vendor; allVendors → the whole
+  // manifest; otherwise (the default) → today's rotation vendor, so a daily run
+  // is ONE vendor and cycles through the manifest over ~vendorCount days. This
+  // is what the deleted sourcing-rolling cron did; running the full manifest by
+  // default was a footgun (4-min runs / 504s / ~$8/day).
+  let rotationVendor: string | undefined;
+  let entries: SourceManifestEntry[];
+  if (options.vendorId) {
+    entries = manifestForVendor(options.vendorId);
+  } else if (options.allVendors) {
+    entries = SOURCE_MANIFEST;
+  } else {
+    const vendorIds = [...new Set(SOURCE_MANIFEST.map((e) => e.vendorId))].sort();
+    rotationVendor = vendorIds[Math.floor(Date.now() / 86_400_000) % vendorIds.length];
+    entries = manifestForVendor(rotationVendor);
+  }
   if (options.sourceUrl) {
     entries = entries.filter((e) => e.url === options.sourceUrl);
   }
@@ -169,7 +187,8 @@ export async function runSourcing(options: RunnerOptions = {}): Promise<Sourcing
     runId,
     event: "sourcing.run.start",
     data: {
-      vendorId: options.vendorId,
+      vendorId: options.vendorId ?? rotationVendor,
+      rotation: !options.vendorId && !options.allVendors,
       sourceUrl: options.sourceUrl,
       sources: entries.length,
       llmSource,
