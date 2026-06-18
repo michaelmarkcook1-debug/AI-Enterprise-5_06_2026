@@ -16,18 +16,16 @@
 // scalars the UI actually reads.
 
 import { getPrisma, hasDatabase } from "../prisma";
-import type { PillarId } from "../types";
+import { PILLARS, type PillarId } from "../types";
 
-// Same weights used by rankIntelligenceVendors — duplicating the
-// constant here to avoid a circular import from repository.ts.
-const PILLAR_WEIGHTS: Record<PillarId, number> = {
-  business_fit: 0.17,
-  enterprise_control: 0.24,
-  reliability_safety: 0.16,
-  integration_ops: 0.16,
-  vendor_resilience: 0.13,
-  market_strength: 0.14,
-};
+// Dashboard base weights are derived from the SAME canonical PILLARS source the
+// assessment engine starts from (lib/types.ts), so the two scoring pathways no
+// longer drift apart on a duplicated constant. The dashboard score is the
+// context-free baseline (these base weights); the per-buyer assessment engine
+// then layers industry + tier deltas on top — that's the legitimate difference.
+const PILLAR_WEIGHTS = Object.fromEntries(
+  PILLARS.map((p) => [p.id, p.defaultWeight]),
+) as Record<PillarId, number>;
 
 /** Cut-off windows used by the velocity inputs. */
 const NEWS_WINDOW_DAYS = 30;
@@ -136,10 +134,13 @@ export async function deriveVendorScores(now: Date = new Date()): Promise<Derive
     if (a) a.productVelocity += 1;
   }
 
-  // Evidence-grade weights for the confidence input. Higher grades
-  // (E2, E1) count more than self-attested (E3) or anecdotal (E4).
+  // Evidence-grade weights for the confidence input. E5 (independent audit /
+  // certified benchmark) is the STRONGEST and E1 (vendor marketing claim) the
+  // weakest — matching the engine's E5-is-best convention. (The previous scale
+  // here was inverted: E1=1.5 / E5 absent, so marketing claims boosted
+  // confidence more than audited evidence. Audit fix.)
   const GRADE_WEIGHT: Record<string, number> = {
-    E1: 1.5, E2: 1.0, E3: 0.5, E4: 0.2,
+    E5: 1.5, E4: 1.2, E3: 0.9, E2: 0.6, E1: 0.3, E0: 0.1,
   };
   for (const ev of evRows as Array<{ vendorId: string; evidenceGrade: string }>) {
     const a = agg.get(ev.vendorId);

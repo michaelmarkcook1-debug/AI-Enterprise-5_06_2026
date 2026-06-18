@@ -431,7 +431,13 @@ export async function getBreakingNews(opts: { days?: number; minImpact?: number;
   const days = opts.days ?? 7;
   const minImpact = opts.minImpact ?? 55;
   const limit = opts.limit ?? 6;
-  const all = await listNewsItems(); // already sorted newest-first
+  const merged = await listNewsItems(); // already sorted newest-first
+  // Buyer-facing "breaking news" must only show REAL, linkable items — never
+  // seed/[MOCK] scaffolding. Gate on sourceKind "real" + a usable https URL, so
+  // an empty live feed shows an honest empty state instead of mock headlines.
+  const hasRealSource = (n: NewsItem) =>
+    n.sourceKind === "real" && typeof n.sourceUrl === "string" && n.sourceUrl.startsWith("http");
+  const all = merged.filter(hasRealSource);
   const latestPublishedAt = all[0]?.publishedAt ?? null;
   const latestAgeDays = latestPublishedAt
     ? Math.floor((Date.now() - Date.parse(latestPublishedAt)) / 86_400_000)
@@ -442,10 +448,10 @@ export async function getBreakingNews(opts: { days?: number; minImpact?: number;
     .sort((a, b) => (a.publishedAt < b.publishedAt ? 1 : -1));
 
   // Graceful degradation: when nothing falls inside the window (e.g. the daily
-  // ingest is a few days behind, so the freshest item is older than `days`),
-  // don't render an empty "0 signals" card while we actually hold intelligence.
-  // Fall back to the most recent meaningful items (relaxed impact floor) and
-  // flag the feed as stale so the UI is honest about it. `all` is newest-first.
+  // ingest is a few days behind, so the freshest REAL item is older than `days`),
+  // don't render an empty "0 signals" card while we actually hold real intel.
+  // Fall back to the most recent meaningful real items (relaxed impact floor)
+  // and flag the feed as stale so the UI is honest about it.
   let items = windowed.slice(0, limit);
   let usedFallback = false;
   if (items.length === 0 && all.length > 0) {
