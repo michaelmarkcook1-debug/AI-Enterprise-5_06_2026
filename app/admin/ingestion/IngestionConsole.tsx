@@ -46,6 +46,11 @@ export default function IngestionConsole({
   const [marketResult, setMarketResult] = useState<string | null>(null);
   const [marketError, setMarketError] = useState<string | null>(null);
 
+  // ── Recompute state (project evidence → scores, no LLM cost) ────────────
+  const [busyRecompute, setBusyRecompute] = useState(false);
+  const [recomputeResult, setRecomputeResult] = useState<string | null>(null);
+  const [recomputeError, setRecomputeError] = useState<string | null>(null);
+
   // ── News sourcing state ─────────────────────────────────────────────────
   const [busyNews, setBusyNews] = useState(false);
   const [newsResult, setNewsResult] = useState<string | null>(null);
@@ -217,7 +222,34 @@ export default function IngestionConsole({
     }
   }
 
-  const anyBusy = busyAll || busyNews || busyManual || busyMarket;
+  async function recomputeNow() {
+    setBusyRecompute(true);
+    setRecomputeError(null);
+    setRecomputeResult(null);
+    try {
+      // No sourcing / no LLM — just re-projects existing verified evidence into
+      // pillar scores and re-derives overall/momentum/snapshots so the whole app
+      // reflects the latest evidence immediately.
+      const res = await fetch(`/api/admin/recompute`, {
+        method: "POST",
+        headers: token ? { "x-admin-token": token } : {},
+      });
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(body.error ?? `HTTP ${res.status}`);
+      if (body.skipped) { setRecomputeResult(`Skipped: ${body.skipped}`); return; }
+      const shifts = body.scores?.scoreShifts ?? [];
+      const topShift = shifts[0] ? ` · e.g. ${shifts[0].vendorId} ${shifts[0].from}→${shifts[0].to}` : "";
+      setRecomputeResult(
+        `${body.projection?.scannedEvidenceRows ?? 0} verified rows · ${body.pillars?.pillarRowsUpserted ?? 0} pillar scores · ${body.scores?.vendorsUpdated ?? 0} vendors moved${topShift}${body.note ? ` — ${body.note}` : ""}`,
+      );
+    } catch (e) {
+      setRecomputeError((e as Error).message);
+    } finally {
+      setBusyRecompute(false);
+    }
+  }
+
+  const anyBusy = busyAll || busyNews || busyManual || busyMarket || busyRecompute;
 
   return (
     <div className="min-h-screen bg-[#f6f1e3] dark:bg-[#071827] text-[#15263c] dark:text-[#eef3f8]">
@@ -241,6 +273,33 @@ export default function IngestionConsole({
             <input value={token} onChange={(e) => setToken(e.target.value)} type="password"
               className="w-full max-w-sm rounded-lg border border-[#d6c9a8] dark:border-[#2a4a6b] bg-white dark:bg-[#071827] px-3 py-2 text-sm" />
           </label>
+        </div>
+
+        {/* ── RECOMPUTE: project existing evidence → live scores (no LLM) ─ */}
+        <div className="mt-8 rounded-2xl border-2 border-[#d4af37] bg-[#fbf6e4] p-6 shadow-sm dark:border-[#d4af37] dark:bg-[#1a1605]/40">
+          <div className="text-[10px] font-semibold uppercase tracking-wider text-[#a07f1f] dark:text-[#d4af37]">
+            Live engine · recompute the whole app from evidence
+          </div>
+          <h2 className="mt-1 text-xl font-semibold text-[#15263c] dark:text-[#eef3f8]">
+            Recompute scores now
+          </h2>
+          <p className="mt-1 text-sm text-[#3f5068] dark:text-[#a7bacd]">
+            Re-projects all verified evidence into pillar scores, then re-derives overall scores, momentum,
+            and ranking snapshots — so the dashboard, quadrant, ecosystem navigator, and generators reflect
+            the latest evidence immediately. No sourcing, no LLM cost. (The 03:05 UTC cron does this daily.)
+          </p>
+          <div className="mt-4 flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              disabled={anyBusy}
+              onClick={() => recomputeNow()}
+              className="inline-flex items-center gap-2 rounded-full bg-[#13294b] px-6 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[#1d3a5f] disabled:opacity-40 dark:bg-[#d4af37] dark:text-[#0a1f38] dark:hover:bg-[#e8c95c]"
+            >
+              {busyRecompute ? <><SpinIcon />Recomputing…</> : <>Recompute from evidence <span aria-hidden>→</span></>}
+            </button>
+          </div>
+          {recomputeResult && !busyRecompute && <ResultBanner text={recomputeResult} />}
+          {recomputeError && <ErrorBanner text={recomputeError} />}
         </div>
 
         {/* ── PRIMARY: rolling ingest ─────────────────────────────────── */}

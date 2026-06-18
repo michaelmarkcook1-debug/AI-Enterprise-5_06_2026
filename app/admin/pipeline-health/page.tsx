@@ -32,6 +32,7 @@ const STEP_LABELS: Record<string, { title: string; what: string }> = {
   triage: { title: "Triage", what: "Auto-approve proposals that pass the strict gate." },
   projection: { title: "Projection", what: "Project verified evidence into the dashboard read tables." },
   derive_scores: { title: "Derive scores", what: "Recompute vendor pillar + overall scores." },
+  market_share_movement: { title: "Market-share movement", what: "Momentum-adjust category shares around the analyst baseline + recompute movers." },
   ranking_snapshot: { title: "Ranking snapshot", what: "Capture today's overall + momentum for the trend graphs." },
   competitive_intel: { title: "Competitive intelligence", what: "Per-vendor Anthropic web-search news monitor (Haiku→Sonnet→Opus)." },
   market_news: { title: "Market news", what: "Broad AI press / commentary / benchmark RSS, Haiku-scored + vendor-tagged." },

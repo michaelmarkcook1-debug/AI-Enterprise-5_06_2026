@@ -58,6 +58,7 @@ import { INVESTMENT_PROVIDERS } from "../investing/seed";
 import { fetchLiveGitHubSignals } from "../reputation/live-github";
 import { fetchAllMacroSignals } from "../market-signals/live-macro";
 import { deriveVendorScores } from "./derive-scores";
+import { deriveMarketShareMovement } from "./derive-market-share";
 import { checkAndSendWatchlistAlerts } from "../watchlist/notify";
 import {
   persistRefreshReport,
@@ -226,6 +227,12 @@ export async function runDailyRefresh(
   await trackedStep("derive_scores", async () => {
     const r = await deriveVendorScores(now);
     return r as unknown as Record<string, unknown>;
+  });
+
+  // ── 5b. Market-share movement (momentum-adjusted, after derive_scores) ──
+  await trackedStep("market_share_movement", async () => {
+    const r = await deriveMarketShareMovement(now);
+    return { rowsUpdated: r.rowsUpdated, topMovers: r.topMovers.length, skipped: r.skipped, reason: r.reason };
   });
 
   // ── 6. Ranking snapshot (incl. one-time backfill) ──────────
