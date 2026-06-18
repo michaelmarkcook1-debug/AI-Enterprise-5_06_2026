@@ -21,6 +21,7 @@ import {
   ENTITIES,
   rolesFor,
   roleLeadership,
+  rankingLeadership,
 } from "./entities";
 
 const KNOWN_ROLES: Role[] = [
@@ -29,6 +30,12 @@ const KNOWN_ROLES: Role[] = [
   "Sovereign / Regional AI", "Regulator / Policy Actor", "Open-Source Ecosystem", "Vertical Specialist",
 ];
 const KNOWN_BANDS: InfraBand[] = ["silicon", "cloud_compute", "neocloud", "inference", "data_platform"];
+
+// Curated per-role score profiles from the static roster, keyed by id, already
+// scale-compressed at construction. The DB stores no per-role columns, so we
+// attach these to live entities — making per-role compression, category lenses
+// and role breakdowns work in production rather than only on the seed fallback.
+const STATIC_ROLE_SCORES_BY_ID = new Map(ENTITIES.map((e) => [e.id, e.roleScores]));
 
 const clamp = (n: number, lo = 0, hi = 100) => Math.max(lo, Math.min(hi, Math.round(n)));
 const asRole = (s: string): Role | null => (KNOWN_ROLES.includes(s as Role) ? (s as Role) : null);
@@ -106,11 +113,24 @@ async function getEntitiesFromDB(): Promise<Entity[]> {
     const momentumScore = mom?.momentumScore ?? 50;
     const newsVelocity = mom?.newsVelocity ?? momentumScore;
 
-    const leadershipScore = clamp(v.overallScore);
     const confidence = clamp(v.confidenceScore);
     const innovation = clamp(0.5 * momentumScore + 0.5 * newsVelocity);
     const controlPillar = controlPillarByVendor.get(v.id) ?? confidence;
     const readiness = clamp(0.6 * controlPillar + 0.4 * confidence);
+    // Leadership axis is the DOWNGRADED ranking score (see rankingLeadership in
+    // entities.ts): raw market leadership (v.overallScore) is blended toward
+    // capability/innovation AND scale-compressed for distribution/capital-primary
+    // vendors, so the leaderboard ranks AI merit rather than sheer scale. This is
+    // the headline score the roster sorts on, so the scale penalty reaches the
+    // main ranking — not just the per-role layer tables.
+    // Curated per-role score profile (analyst-authored; the DB has no per-role
+    // columns). Attaching it lets the per-role scale compression, category lenses
+    // and role breakdowns work on the LIVE roster — not just the static fallback —
+    // and feeds the capability carve-out (so a model house like Google isn't
+    // compressed as a scale player).
+    const roleScores = STATIC_ROLE_SCORES_BY_ID.get(v.id);
+    const marketLeadership = clamp(v.overallScore);
+    const leadershipScore = rankingLeadership(v.overallScore, readiness, innovation, primaryRole, roleScores);
 
     const usageShare = Math.round(((rawShareByVendor.get(v.id) ?? 0) / totalRawShare) * 1000) / 10;
 
@@ -125,8 +145,17 @@ async function getEntitiesFromDB(): Promise<Entity[]> {
     const ecosystemReach = clamp(reachRaw);
 
     // Deltas from the two most-recent ranking snapshots (0 when no history).
+    // The leadership delta is computed on the BLENDED+compressed ranking score
+    // (not raw overallScore) so the "leadership move" arrow matches the leadership
+    // value it sits beside. Snapshots store only raw overallScore, so we re-derive
+    // both endpoints through rankingLeadership with the current readiness/innovation.
     const [latest, prev] = snapsByVendor.get(v.id) ?? [];
-    const dLeadership = latest && prev ? Math.round(latest.overallScore - prev.overallScore) : 0;
+    const dLeadership = latest && prev
+      ? Math.round(
+          rankingLeadership(latest.overallScore, readiness, innovation, primaryRole, roleScores) -
+            rankingLeadership(prev.overallScore, readiness, innovation, primaryRole, roleScores),
+        )
+      : 0;
     const dAdoption = latest && prev ? Math.round(latest.momentumScore - prev.momentumScore) : 0;
     const dRank = latest && prev ? prev.rank - latest.rank : 0; // rank up (smaller) = positive
 
@@ -138,6 +167,7 @@ async function getEntitiesFromDB(): Promise<Entity[]> {
       primaryRole,
       secondaryRoles,
       leadershipScore,
+      marketLeadership,
       momentum: clamp(momentumScore),
       ecosystemReach,
       risk: riskBucket(confidence, v.riskProfile?.length ?? 0),
@@ -163,6 +193,7 @@ async function getEntitiesFromDB(): Promise<Entity[]> {
       dataCaveats: v.dataCaveats ?? "Directional, evidence-labelled estimate derived from live signals.",
       infraBand: asBand(v.infraBand),
       infraBandSecondary: asBand(v.infraBandSecondary),
+      roleScores,
     };
   });
 

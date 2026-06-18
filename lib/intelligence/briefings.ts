@@ -29,7 +29,9 @@ function leadWhy(top: Awaited<ReturnType<typeof getMarketDashboard>>["topVendors
 /** Compose an analyst bullet from the freshest high-impact news item so the
  *  market overview reflects the live feed, not only static vendor scores. */
 function freshSignal(breaking: Awaited<ReturnType<typeof getBreakingNews>>): string {
-  const lead = breaking.items[0];
+  // getBreakingNews now returns items ranked by IMPACT (not recency), so pick the
+  // genuinely newest item for the "freshest signal" line rather than items[0].
+  const lead = [...breaking.items].sort((a, b) => (a.publishedAt < b.publishedAt ? 1 : -1))[0];
   if (!lead) return "";
   const when = new Date(lead.publishedAt).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
   const why = lead.whyItMatters ? ` — ${stripPeriod(lead.whyItMatters)}` : "";

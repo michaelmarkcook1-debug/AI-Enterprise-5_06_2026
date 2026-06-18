@@ -114,9 +114,12 @@ export async function POST(request: Request) {
           supportedEcosystems: e.infrastructureExposure,
           deploymentOptions: [],
           autonomyLevelMax: "supervised_agent",
-          overallScore: e.leadershipScore,
+          // overallScore is the RAW market primitive (the read path blends it via
+          // rankingLeadership). Persist marketLeadership, NOT the already-blended
+          // leadershipScore, or the adapter blends it a second time.
+          overallScore: e.marketLeadership,
           confidenceScore: e.confidence,
-          marketPosition: marketPositionFromScore(e.leadershipScore),
+          marketPosition: marketPositionFromScore(e.marketLeadership),
           strategy: e.cioInterpretation || `${e.name} operates as a ${e.primaryRole.toLowerCase()}.`,
           productCapabilities: [...e.modelsOwned, ...e.infrastructureExposure].filter(Boolean),
           enterpriseControls: [],
@@ -187,7 +190,7 @@ export async function POST(request: Request) {
         data: {
           vendorId: dbId,
           snapshotDate: today,
-          overallScore: e.leadershipScore,
+          overallScore: e.marketLeadership,
           momentumScore: e.momentum,
           confidenceScore: e.confidence,
           rank: 0,

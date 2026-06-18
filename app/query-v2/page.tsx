@@ -25,10 +25,10 @@ export default async function QueryV2Page() {
   const winningByLayer = computeWinningByLayer(entities);
   // Weekly market overview — moved here from Assess (12 Jun 2026) so the
   // market read lives where the market data lives. Breaking-news card sits
-  // alongside it: last-7-day, impact-filtered AI-market stories.
+  // alongside it: last-14-day, importance-ranked, deduped, vendor-spread top-10 stories.
   const [brief, breakingNews] = await Promise.all([
     generateWeeklyBriefing().catch(() => null),
-    getBreakingNews({ days: 7, minImpact: 55, limit: 6 }).catch(() => null),
+    getBreakingNews({ days: 14, minImpact: 50, limit: 10, maxPerVendor: 2 }).catch(() => null),
   ]);
 
   // Analyst insight — derived from the same entities the tab renders

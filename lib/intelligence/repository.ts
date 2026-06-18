@@ -403,21 +403,55 @@ export async function listNewsItems(): Promise<NewsItem[]> {
   );
 }
 
+/** Importance tier for a news item, derived from its market-impact score. */
+export type ImportanceLevel = "critical" | "high" | "notable";
+
+export interface BreakingNewsItem extends NewsItem {
+  /** Importance tier (critical ≥80, high ≥65, notable otherwise). */
+  importance: ImportanceLevel;
+  /** Primary (first-listed) vendor, normalised id + display name — used to
+   *  spread coverage across vendors and to label each story. */
+  primaryVendorId: string | null;
+  primaryVendorName: string | null;
+}
+
 export interface BreakingNews {
-  /** High-impact items published within the window, newest first. */
-  items: NewsItem[];
+  /** Top items: deduped, importance-ranked, vendor-spread, capped at `limit`. */
+  items: BreakingNewsItem[];
   /** The window applied (days). */
   windowDays: number;
   /** Newest publishedAt across the ENTIRE feed — used to surface staleness. */
   latestPublishedAt: string | null;
   /** How many days old the newest tracked story is (null if feed empty). */
   latestAgeDays: number | null;
-  /** Of the windowed items, how many are source-backed (sourceKind === "real"). */
+  /** Of the shown items, how many are source-backed (sourceKind === "real"). */
   liveCount: number;
   /** True when nothing fell inside the window so we fell back to the most
    *  recent items — the card shows them but flags the feed as stale rather
    *  than rendering an empty "0 signals" state when we DO have intelligence. */
   usedFallback: boolean;
+  /** Distinct vendors represented across the shown items. */
+  vendorsCovered: number;
+}
+
+function importanceOf(score: number): ImportanceLevel {
+  if (score >= 80) return "critical";
+  if (score >= 65) return "high";
+  return "notable";
+}
+
+/** Normalised title key for dedup: lower-case alphanumerics, collapsed spaces.
+ *  Catches the same headline re-ingested or carried by multiple sources without
+ *  over-merging genuinely distinct stories. */
+function newsTitleKey(title: string): string {
+  return title.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+}
+
+/** Normalise a vendor id so prefixed/bare variants (vendor_openai / openai)
+ *  count as one vendor for the spread cap and the name lookup. */
+function normalizeVendorId(id: string | undefined): string | null {
+  if (!id) return null;
+  return id.replace(/^vendor_/, "") || null;
 }
 
 /**
@@ -427,11 +461,23 @@ export interface BreakingNews {
  * date across the whole feed so the UI can honestly flag a stale feed when the
  * daily ingest hasn't run.
  */
-export async function getBreakingNews(opts: { days?: number; minImpact?: number; limit?: number } = {}): Promise<BreakingNews> {
-  const days = opts.days ?? 7;
-  const minImpact = opts.minImpact ?? 55;
-  const limit = opts.limit ?? 6;
-  const merged = await listNewsItems(); // already sorted newest-first
+export async function getBreakingNews(
+  opts: { days?: number; minImpact?: number; limit?: number; maxPerVendor?: number } = {},
+): Promise<BreakingNews> {
+  const days = opts.days ?? 14;
+  const minImpact = opts.minImpact ?? 50;
+  const limit = opts.limit ?? 10;
+  const maxPerVendor = opts.maxPerVendor ?? 2;
+
+  // Pull the feed plus an id→name map so we can label + spread by vendor.
+  const [merged, vendors] = await Promise.all([
+    listNewsItems(), // already sorted newest-first
+    listIntelligenceVendors().catch(() => [] as Vendor[]),
+  ]);
+  const nameById = new Map(vendors.map((v) => [v.id, v.name]));
+  const resolveVendorName = (id: string | null) =>
+    id ? nameById.get(id) ?? nameById.get(`vendor_${id}`) ?? id : null;
+
   // Buyer-facing "breaking news" must only show REAL, linkable items — never
   // seed/[MOCK] scaffolding. Gate on sourceKind "real" + a usable https URL, so
   // an empty live feed shows an honest empty state instead of mock headlines.
@@ -442,23 +488,75 @@ export async function getBreakingNews(opts: { days?: number; minImpact?: number;
   const latestAgeDays = latestPublishedAt
     ? Math.floor((Date.now() - Date.parse(latestPublishedAt)) / 86_400_000)
     : null;
+
+  // Rank by importance (impact) first, then recency — so "top N" means the
+  // most consequential stories, and dedup keeps the strongest instance.
+  const ranked = [...all].sort(
+    (a, b) => b.impactScore - a.impactScore || (a.publishedAt < b.publishedAt ? 1 : -1),
+  );
+
+  // Dedup near-identical headlines (same story re-ingested or multi-sourced).
+  const dedupe = (list: NewsItem[]): NewsItem[] => {
+    const seen = new Set<string>();
+    const out: NewsItem[] = [];
+    for (const n of list) {
+      const key = newsTitleKey(n.title);
+      if (key && seen.has(key)) continue;
+      if (key) seen.add(key);
+      out.push(n);
+    }
+    return out;
+  };
+
+  // Spread coverage: cap any single primary vendor at `maxPerVendor` while
+  // filling up to `limit`; only relax the cap if we'd otherwise fall short
+  // (so a genuinely single-vendor week still fills, per "where applicable").
+  const selectSpread = (list: NewsItem[]): NewsItem[] => {
+    const counts = new Map<string, number>();
+    const picked: NewsItem[] = [];
+    const deferred: NewsItem[] = [];
+    for (const n of list) {
+      if (picked.length >= limit) break;
+      const key = normalizeVendorId(n.vendors[0]) ?? "__none__";
+      const c = counts.get(key) ?? 0;
+      if (c < maxPerVendor) {
+        counts.set(key, c + 1);
+        picked.push(n);
+      } else {
+        deferred.push(n);
+      }
+    }
+    for (const n of deferred) {
+      if (picked.length >= limit) break;
+      picked.push(n);
+    }
+    return picked;
+  };
+
   const cutoff = Date.now() - days * 86_400_000;
-  const windowed = all
-    .filter((n) => Date.parse(n.publishedAt) >= cutoff && n.impactScore >= minImpact)
-    .sort((a, b) => (a.publishedAt < b.publishedAt ? 1 : -1));
+  const windowed = ranked.filter((n) => Date.parse(n.publishedAt) >= cutoff && n.impactScore >= minImpact);
 
   // Graceful degradation: when nothing falls inside the window (e.g. the daily
-  // ingest is a few days behind, so the freshest REAL item is older than `days`),
-  // don't render an empty "0 signals" card while we actually hold real intel.
-  // Fall back to the most recent meaningful real items (relaxed impact floor)
-  // and flag the feed as stale so the UI is honest about it.
-  let items = windowed.slice(0, limit);
+  // ingest is a few days behind), fall back to the most recent meaningful real
+  // items (relaxed impact floor) and flag the feed as stale rather than showing
+  // an empty "0 signals" card while we actually hold real intel.
+  let chosen = selectSpread(dedupe(windowed));
   let usedFallback = false;
-  if (items.length === 0 && all.length > 0) {
+  if (chosen.length === 0 && all.length > 0) {
     const relaxed = Math.max(40, minImpact - 15);
-    items = all.filter((n) => n.impactScore >= relaxed).slice(0, limit);
-    usedFallback = items.length > 0;
+    chosen = selectSpread(dedupe(ranked.filter((n) => n.impactScore >= relaxed)));
+    usedFallback = chosen.length > 0;
   }
+
+  const items: BreakingNewsItem[] = chosen.map((n) => {
+    const primaryVendorId = normalizeVendorId(n.vendors[0]);
+    return {
+      ...n,
+      importance: importanceOf(n.impactScore),
+      primaryVendorId,
+      primaryVendorName: resolveVendorName(primaryVendorId),
+    };
+  });
 
   return {
     items,
@@ -467,6 +565,7 @@ export async function getBreakingNews(opts: { days?: number; minImpact?: number;
     latestAgeDays,
     liveCount: items.filter((n) => n.sourceKind === "real").length,
     usedFallback,
+    vendorsCovered: new Set(items.map((i) => i.primaryVendorId).filter(Boolean)).size,
   };
 }
 
