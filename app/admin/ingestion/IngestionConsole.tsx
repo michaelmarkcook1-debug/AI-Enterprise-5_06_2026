@@ -41,6 +41,11 @@ export default function IngestionConsole({
   const elapsedRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  // ── Market-news feed state (writes IntelligenceNewsItem) ────────────────
+  const [busyMarket, setBusyMarket] = useState(false);
+  const [marketResult, setMarketResult] = useState<string | null>(null);
+  const [marketError, setMarketError] = useState<string | null>(null);
+
   // ── News sourcing state ─────────────────────────────────────────────────
   const [busyNews, setBusyNews] = useState(false);
   const [newsResult, setNewsResult] = useState<string | null>(null);
@@ -186,7 +191,33 @@ export default function IngestionConsole({
     }
   }
 
-  const anyBusy = busyAll || busyNews || busyManual;
+  async function refreshNewsFeed() {
+    setBusyMarket(true);
+    setMarketError(null);
+    setMarketResult(null);
+    try {
+      // Writes IntelligenceNewsItem (the /news + Query feed) from the AI-news
+      // RSS sources, Haiku-scored. This is the feed itself — distinct from the
+      // press-release button below, which writes evidence proposals.
+      const res = await fetch(`/api/admin/sourcing/run`, {
+        method: "POST",
+        headers: { "content-type": "application/json", ...(token ? { "x-admin-token": token } : {}) },
+        body: JSON.stringify({ market: true }),
+      });
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(body.error ?? `HTTP ${res.status}`);
+      const firstErr = Array.isArray(body.errors) && body.errors.length > 0 ? ` · first error: ${body.errors[0]}` : "";
+      setMarketResult(
+        `${body.feedsFetched ?? 0}/${body.feedsAttempted ?? 0} feeds · ${body.itemsScored ?? 0} scored · ${body.itemsUpserted ?? 0} added to feed${firstErr}`,
+      );
+    } catch (e) {
+      setMarketError((e as Error).message);
+    } finally {
+      setBusyMarket(false);
+    }
+  }
+
+  const anyBusy = busyAll || busyNews || busyManual || busyMarket;
 
   return (
     <div className="min-h-screen bg-[#f6f1e3] dark:bg-[#071827] text-[#15263c] dark:text-[#eef3f8]">
@@ -255,6 +286,35 @@ export default function IngestionConsole({
           {busyAll && <ProgressBanner elapsed={elapsedSec} label="Rolling pipeline" detail="Fetching sources, extracting proposals with the 3-stage AI pipeline (Haiku → Sonnet → Opus), and writing results. Typically 1–4 minutes." />}
           {ingestResult && !busyAll && <ResultBanner text={ingestResult} />}
           {ingestError && <ErrorBanner text={ingestError} />}
+        </div>
+
+        {/* ── NEWS FEED: market-news RSS (writes IntelligenceNewsItem) ─── */}
+        <div className="mt-6 rounded-2xl border-2 border-violet-500 bg-violet-50 p-6 shadow-sm dark:border-violet-600 dark:bg-violet-950/30">
+          <div className="text-[10px] font-semibold uppercase tracking-wider text-violet-700 dark:text-violet-400">
+            News feed · powers /news + the Query breaking-news card
+          </div>
+          <h2 className="mt-1 text-xl font-semibold text-violet-900 dark:text-violet-100">
+            Refresh the news feed (AI-news RSS)
+          </h2>
+          <p className="mt-1 text-sm text-violet-900/80 dark:text-violet-200/80">
+            Fetches the curated AI press / commentary / benchmark RSS sources, Haiku-scores each item for
+            enterprise impact, tags which tracked vendors are mentioned, and writes the kept items to the
+            <strong> news feed (IntelligenceNewsItem)</strong>. This is what actually populates the News tab —
+            the press-release button below writes <em>evidence proposals</em>, not the feed. Needs the Anthropic
+            API (Haiku); if usage is capped, this run will report the exact error.
+          </p>
+          <div className="mt-4 flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              disabled={anyBusy}
+              onClick={() => refreshNewsFeed()}
+              className="inline-flex items-center gap-2 rounded-full bg-violet-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-violet-700 disabled:opacity-40 dark:bg-violet-500 dark:hover:bg-violet-400"
+            >
+              {busyMarket ? <><SpinIcon />Refreshing…</> : <>Refresh news feed <span aria-hidden>→</span></>}
+            </button>
+          </div>
+          {marketResult && !busyMarket && <ResultBanner text={marketResult} color="sky" />}
+          {marketError && <ErrorBanner text={marketError} />}
         </div>
 
         {/* ── NEWS SOURCING: press-release discovery ──────────────────── */}
