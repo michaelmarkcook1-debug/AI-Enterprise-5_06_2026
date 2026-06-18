@@ -357,13 +357,28 @@ export async function listMarketShareEstimates(): Promise<MarketShareEstimate[]>
   );
 }
 
+// Keep only the newest period per vendor. The live derive-scores writer emits
+// `rolling_30d` rows while older seed rows use `2026-Wnn`; without this, both
+// leak through and stale seed momentum can pollute winning/losing-vendor
+// filters. Rows arrive period-desc, so the first seen per vendor is newest.
+function newestMomentumPerVendor(rows: VendorMomentum[]): VendorMomentum[] {
+  const seen = new Set<string>();
+  const out: VendorMomentum[] = [];
+  for (const r of rows) {
+    if (seen.has(r.vendorId)) continue;
+    seen.add(r.vendorId);
+    out.push(r);
+  }
+  return out;
+}
+
 export async function listVendorMomentum(): Promise<VendorMomentum[]> {
   return databaseOrSeed(
     async (client) => {
       const rows = await client.vendorMomentum.findMany({ orderBy: [{ period: "desc" }, { momentumScore: "desc" }] });
-      return rows.length ? rows.map(mapMomentum) : vendorMomentumMockRepository.list();
+      return newestMomentumPerVendor(rows.length ? rows.map(mapMomentum) : await vendorMomentumMockRepository.list());
     },
-    () => vendorMomentumMockRepository.list(),
+    async () => newestMomentumPerVendor(await vendorMomentumMockRepository.list()),
   );
 }
 

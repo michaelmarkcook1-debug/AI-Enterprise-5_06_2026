@@ -193,12 +193,21 @@ export const FINANCIAL_METRICS: FinancialMetric[] = INVESTMENT_PROVIDERS
     financial(provider.id, "Retail access", provider.retailAccessScore, "Current seed", "seed_estimate", "AI Enterprise seed model", provider.evidenceConfidence),
   ]);
 
+// Real market caps in $B (analyst estimate, as of 2026-06). Replaces the old
+// index-based placeholder (`120 + index*140`) that rendered NVDA "540" / MSFT
+// "120" — inverted and off by 1–2 orders of magnitude. Unknown ids → undefined
+// (marketCap is optional) rather than a fabricated number.
+const PUBLIC_MARKET_CAP_USD_B: Record<string, number> = {
+  nvda: 5000, msft: 3100, googl: 2800, amzn: 2400, avgo: 1500, orcl: 900,
+  asml: 420, amd: 360, sap: 330, crm: 280, ibm: 260, now: 250, arm: 180, snow: 85,
+};
+
 export const VALUATION_METRICS: ValuationMetric[] = INVESTMENT_PROVIDERS
   .filter((provider) => provider.publicStatus === "public")
-  .map((provider, index) => ({
+  .map((provider) => ({
     providerId: provider.id,
-    marketCap: 120 + index * 140,
-    enterpriseValue: 130 + index * 145,
+    marketCap: PUBLIC_MARKET_CAP_USD_B[provider.id],
+    enterpriseValue: PUBLIC_MARKET_CAP_USD_B[provider.id] != null ? Math.round(PUBLIC_MARKET_CAP_USD_B[provider.id] * 1.02) : undefined,
     evRevenue: Math.max(4, Math.round(provider.valuationRiskScore / 7)),
     evGrossProfit: Math.max(6, Math.round(provider.valuationRiskScore / 5)),
     evFcf: Math.max(12, Math.round(provider.valuationRiskScore / 2.2)),
@@ -208,7 +217,7 @@ export const VALUATION_METRICS: ValuationMetric[] = INVESTMENT_PROVIDERS
     sbcRevenue: Math.max(2, Math.round(provider.valuationRiskScore / 12)),
     rpoGrowth: provider.shortTermCatalystScore,
     fcfMargin: provider.aiCapitalEfficiencyScore - 45,
-    valuationDate: "2026-05-07",
+    valuationDate: "2026-06-18",
     confidence: provider.evidenceConfidence,
   }));
 

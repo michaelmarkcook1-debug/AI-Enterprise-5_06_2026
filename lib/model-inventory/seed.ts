@@ -557,6 +557,32 @@ export const SEED_MODELS: CommercialModel[] = [
 
   // ───────────── Anthropic (first-party) ─────────────
   model({
+    id: "model_anthropic_claude_fable_5",
+    vendorId: "anthropic", vendorName: "Anthropic",
+    ownerVendorId: "anthropic", ownerVendorName: "Anthropic",
+    modelName: "Claude Fable 5", modelFamily: "Claude", modelCategory: "multimodal",
+    ownershipType: "first_party", availabilityStage: "ga",
+    commercialAvailability: "api_available",
+    inputModalities: ["text", "image"], outputModalities: ["text"], toolSupport: ["function_calling", "computer_use"],
+    contextWindow: 1_000_000,
+    sourceIds: ["src_anthropic_models_overview", "src_anthropic_models_list_api"],
+    sourceUrls: ["https://docs.anthropic.com/en/docs/about-claude/models/overview", "https://docs.anthropic.com/en/api/models-list"],
+    sourceNames: ["Anthropic — Claude Models overview", "Anthropic — models-list API"],
+  }),
+  model({
+    id: "model_anthropic_claude_opus_48",
+    vendorId: "anthropic", vendorName: "Anthropic",
+    ownerVendorId: "anthropic", ownerVendorName: "Anthropic",
+    modelName: "Claude Opus 4.8", modelFamily: "Claude", modelCategory: "multimodal",
+    ownershipType: "first_party", availabilityStage: "ga",
+    commercialAvailability: "api_available",
+    inputModalities: ["text", "image"], outputModalities: ["text"], toolSupport: ["function_calling", "computer_use"],
+    contextWindow: 1_000_000,
+    sourceIds: ["src_anthropic_models_overview", "src_anthropic_models_list_api"],
+    sourceUrls: ["https://docs.anthropic.com/en/docs/about-claude/models/overview", "https://docs.anthropic.com/en/api/models-list"],
+    sourceNames: ["Anthropic — Claude Models overview", "Anthropic — models-list API"],
+  }),
+  model({
     id: "model_anthropic_claude_opus_47",
     vendorId: "anthropic", vendorName: "Anthropic",
     ownerVendorId: "anthropic", ownerVendorName: "Anthropic",
