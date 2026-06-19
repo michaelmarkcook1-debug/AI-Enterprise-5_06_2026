@@ -13,6 +13,25 @@ function fmtDate(iso: string): string {
   return new Date(iso).toLocaleDateString("en-GB", { day: "2-digit", month: "short" });
 }
 
+// Decode the few HTML entities that leak into stored titles/summaries so they
+// don't render as literal "&quot;" / "&amp;" in the feed.
+function decodeEntities(s: string): string {
+  return s
+    .replace(/&quot;/g, '"').replace(/&#34;/g, '"')
+    .replace(/&#39;/g, "'").replace(/&apos;/g, "'")
+    .replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">");
+}
+
+// Turn the projector's "<subfactor> update — <vendor>" placeholder into a
+// readable headline (the vendor chip already names the vendor). Real headlines
+// pass through unchanged.
+function cleanTitle(raw: string): string {
+  let t = decodeEntities(raw).replace(/\s+update\s+[—-]\s+[a-z0-9 ._-]+$/i, "");
+  t = t.replace(/_/g, " ").trim();
+  if (!t) t = decodeEntities(raw);
+  return t.charAt(0).toUpperCase() + t.slice(1);
+}
+
 // Importance tiers, in display order. Colours are deliberately tier-coded so the
 // eye can triage critical → notable without reading every score.
 const TIERS: Array<{ level: ImportanceLevel; label: string; dot: string; text: string }> = [
@@ -22,17 +41,40 @@ const TIERS: Array<{ level: ImportanceLevel; label: string; dot: string; text: s
 ];
 
 function NewsRow({ item }: { item: BreakingNewsItem }) {
+  const title = cleanTitle(item.title);
+  const story = item.summary ? decodeEntities(item.summary) : "";
+  const why = item.whyItMatters ? decodeEntities(item.whyItMatters) : "";
+  // Hover synopsis: story + why it matters (native tooltip — no JS needed).
+  const synopsis = [story && `Story: ${story}`, why && `Why it matters: ${why}`]
+    .filter(Boolean)
+    .join("\n\n");
   return (
     <li className="py-2.5 first:pt-0">
       <div className="flex items-start justify-between gap-2">
-        <p className="text-[13px] font-semibold leading-5 text-[#13294b] dark:text-[#eef3f8]">{item.title}</p>
+        {item.sourceUrl ? (
+          <a
+            href={item.sourceUrl}
+            target="_blank"
+            rel="noreferrer"
+            title={synopsis || undefined}
+            className="text-[13px] font-semibold leading-5 text-[#13294b] hover:underline dark:text-[#eef3f8]"
+          >
+            {title} <span aria-hidden className="text-[10px] text-[#6b7d93]">↗</span>
+          </a>
+        ) : (
+          <span title={synopsis || undefined} className="text-[13px] font-semibold leading-5 text-[#13294b] dark:text-[#eef3f8]">
+            {title}
+          </span>
+        )}
         <span className={`shrink-0 rounded px-1.5 py-0.5 text-[10px] font-bold tabular-nums ${impactClasses(item.impactScore)}`} title="Market-impact score">
           {item.impactScore}
         </span>
       </div>
-      <p className="mt-1 line-clamp-2 text-[11px] leading-4 text-[#54647a] dark:text-[#a7bacd]">
-        <span className="font-semibold text-[#3f5068] dark:text-[#c2d1e0]">Why it matters: </span>{item.whyItMatters}
-      </p>
+      {why && (
+        <p className="mt-1 line-clamp-2 text-[11px] leading-4 text-[#54647a] dark:text-[#a7bacd]" title={synopsis || undefined}>
+          <span className="font-semibold text-[#3f5068] dark:text-[#c2d1e0]">Why it matters: </span>{why}
+        </p>
+      )}
       <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
         {item.primaryVendorName && (
           <span className="rounded bg-[#e7eef6] px-1.5 py-0.5 text-[9px] font-semibold text-[#33506f] dark:bg-[#16314c] dark:text-[#9fc2e0]">
@@ -42,6 +84,16 @@ function NewsRow({ item }: { item: BreakingNewsItem }) {
         {item.categories.slice(0, 1).map((c) => (
           <span key={c} className="rounded bg-[#f3ead2] px-1.5 py-0.5 text-[9px] font-medium text-[#5a4f33] dark:bg-[#1a2c3f] dark:text-[#a7bacd]">{c}</span>
         ))}
+        {item.sourceUrl && item.sourceName && (
+          <a
+            href={item.sourceUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="text-[9px] text-[#6b7d93] underline hover:text-[#33506f] dark:text-[#8fa5bb]"
+          >
+            {item.sourceName}
+          </a>
+        )}
         <span className="ml-auto text-[10px] tabular-nums text-[#8a98a8]">{fmtDate(item.publishedAt)}</span>
       </div>
     </li>

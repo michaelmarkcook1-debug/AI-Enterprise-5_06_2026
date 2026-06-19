@@ -279,9 +279,18 @@ export async function projectEvidenceToIntelligence(
     .slice(0, newsLimit);
   for (const row of newsRows) {
     const vendorId = plainToIntelligence.get(row.vendorId)!;
-    const title = row.subfactor
-      ? `${row.subfactor} update — ${row.vendorId}`
-      : `Verified evidence — ${row.vendorId}`;
+    // Real headline from the source excerpt's first sentence (not the internal
+    // "<subfactor> update — <vendor>" placeholder, which reads like machine noise
+    // in the buyer-facing feed). Fall back to a prettified subfactor.
+    const firstSentence = row.excerpt.trim().split(/(?<=[.!?])\s+/)[0]?.trim() ?? "";
+    const title =
+      firstSentence.length >= 20 && firstSentence.length <= 140
+        ? firstSentence
+        : firstSentence.length > 140
+          ? `${firstSentence.slice(0, 137).trimEnd()}…`
+          : row.subfactor
+            ? `${row.subfactor.replace(/_/g, " ")} — ${row.vendorId}`
+            : `Verified update — ${row.vendorId}`;
     await prisma.intelligenceNewsItem.upsert({
       where: { id: row.id },
       create: {

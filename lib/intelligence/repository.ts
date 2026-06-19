@@ -440,11 +440,29 @@ function importanceOf(score: number): ImportanceLevel {
   return "notable";
 }
 
-/** Normalised title key for dedup: lower-case alphanumerics, collapsed spaces.
- *  Catches the same headline re-ingested or carried by multiple sources without
- *  over-merging genuinely distinct stories. */
+/** Normalised title key for dedup. Strips the projector's
+ *  "<subfactor> update — <vendor>" boilerplate before normalising so two
+ *  machine-titled variants of the same event collapse. */
 function newsTitleKey(title: string): string {
-  return title.toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+  return title
+    .toLowerCase()
+    .replace(/\s+update\s+[—-]\s+[a-z0-9 ._-]+$/i, "") // drop trailing "… update — vendor"
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
+/** Content-aware dedup key: same primary vendor + same core content (the
+ *  why-it-matters / summary prefix). Catches near-duplicate machine titles that
+ *  describe the SAME event — e.g. "token_based_pricing update — cohere" and
+ *  "model_pricing_clarity update — cohere", which share the same pricing text. */
+function newsDedupKey(n: NewsItem): string {
+  const vendor = normalizeVendorId(n.vendors[0]) ?? "";
+  const content = (n.whyItMatters || n.summary || n.title || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim()
+    .slice(0, 80);
+  return `${vendor}|${content}`;
 }
 
 /** Normalise a vendor id so prefixed/bare variants (vendor_openai / openai)
@@ -495,14 +513,17 @@ export async function getBreakingNews(
     (a, b) => b.impactScore - a.impactScore || (a.publishedAt < b.publishedAt ? 1 : -1),
   );
 
-  // Dedup near-identical headlines (same story re-ingested or multi-sourced).
+  // Dedup the same story (re-ingested, multi-sourced, or machine-titled twins).
+  // `ranked` is impact-desc then recency, so the strongest instance is kept.
   const dedupe = (list: NewsItem[]): NewsItem[] => {
     const seen = new Set<string>();
     const out: NewsItem[] = [];
     for (const n of list) {
-      const key = newsTitleKey(n.title);
-      if (key && seen.has(key)) continue;
-      if (key) seen.add(key);
+      const tKey = newsTitleKey(n.title);
+      const cKey = newsDedupKey(n);
+      if ((tKey && seen.has(tKey)) || seen.has(cKey)) continue;
+      if (tKey) seen.add(tKey);
+      seen.add(cKey);
       out.push(n);
     }
     return out;
