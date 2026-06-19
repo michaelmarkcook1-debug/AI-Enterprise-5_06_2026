@@ -13,6 +13,18 @@ interface Job {
   error?: string;
 }
 
+interface LastRun {
+  id: string;
+  kind: string;
+  label: string;
+  status: "ok" | "error";
+  summary: Record<string, unknown>;
+  error: string | null;
+  startedAt: string;
+  finishedAt: string;
+  durationMs: number;
+}
+
 const SOURCE_CATEGORIES = [
   "vendor_docs", "trust_center", "pricing_page", "status_page", "changelog",
   "public_filing", "job_posting", "review_platform", "marketplace", "github",
@@ -24,11 +36,13 @@ export default function IngestionConsole({
   vendors,
   initialJobs,
   newsVendors,
+  lastRun,
 }: {
   hasDatabase: boolean;
   vendors: { id: string; name: string }[];
   initialJobs: Job[];
   newsVendors: { id: string; name: string }[];
+  lastRun: LastRun | null;
 }) {
   const [jobs, setJobs] = useState<Job[]>(initialJobs);
   const [token, setToken] = useState("");
@@ -275,6 +289,11 @@ export default function IngestionConsole({
           </label>
         </div>
 
+        {/* ── LAST COMPLETED RUN — durable, server-sourced ───────────────
+            Persists across tab switches / navigation because it is read from
+            the admin_run_log table on the server, not held in client state. */}
+        {lastRun && <LastRunCard run={lastRun} />}
+
         {/* ── RECOMPUTE: project existing evidence → live scores (no LLM) ─ */}
         <div className="mt-8 rounded-2xl border-2 border-[#d4af37] bg-[#fbf6e4] p-6 shadow-sm dark:border-[#d4af37] dark:bg-[#1a1605]/40">
           <div className="text-[10px] font-semibold uppercase tracking-wider text-[#a07f1f] dark:text-[#d4af37]">
@@ -499,6 +518,51 @@ export default function IngestionConsole({
 }
 
 // ── Sub-components ────────────────────────────────────────────────────────────
+
+function LastRunCard({ run }: { run: LastRun }) {
+  const when = new Date(run.finishedAt);
+  const secs = Math.round(run.durationMs / 1000);
+  const dur = secs >= 60 ? `${Math.floor(secs / 60)}m ${secs % 60}s` : `${secs}s`;
+  // Render the compact summary as "key: value" chips (primitives only).
+  const chips = Object.entries(run.summary ?? {})
+    .filter(([, v]) => typeof v === "number" || typeof v === "string" || typeof v === "boolean")
+    .map(([k, v]) => `${k}: ${v}`);
+  const ok = run.status === "ok";
+  return (
+    <div className={`mt-6 rounded-xl border px-4 py-3 ${ok
+      ? "border-[#cfe0cf] bg-[#f3f8f3] dark:border-[#244a36] dark:bg-[#0c2a1c]/40"
+      : "border-red-200 bg-red-50 dark:border-red-900/40 dark:bg-red-950/30"}`}>
+      <div className="flex items-center justify-between gap-2">
+        <div className="text-[10px] font-semibold uppercase tracking-wider text-[#4c5d75] dark:text-[#7a9bb8]">
+          Last completed run · persisted
+        </div>
+        <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${ok
+          ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
+          : "bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300"}`}>
+          {ok ? "OK" : "ERROR"}
+        </span>
+      </div>
+      <div className="mt-1 text-sm font-semibold text-[#15263c] dark:text-[#eef3f8]">{run.label}</div>
+      <div className="mt-0.5 text-xs text-[#4c5d75] dark:text-[#a7bacd]">
+        {when.toLocaleString()} · {dur}
+      </div>
+      {chips.length > 0 && (
+        <div className="mt-2 flex flex-wrap gap-1.5">
+          {chips.map((c) => (
+            <span key={c} className="rounded bg-white/70 px-1.5 py-0.5 text-[10px] font-medium text-[#3f5068] tabular-nums dark:bg-[#0c2238] dark:text-[#a7bacd]">
+              {c}
+            </span>
+          ))}
+        </div>
+      )}
+      {run.error && (
+        <div className="mt-2 rounded-lg bg-red-50 px-3 py-2 text-xs text-red-700 dark:bg-red-950/40 dark:text-red-300">
+          {run.error}
+        </div>
+      )}
+    </div>
+  );
+}
 
 function SpinIcon() {
   return (

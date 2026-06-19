@@ -272,10 +272,14 @@ Omit a house entirely if you find NO public coverage. Do NOT fabricate. Call rep
       output_config: { effort: "high" },
       system: `You are a senior analyst (Gartner/Forrester/IDC calibre) writing decision-useful coverage summaries. For each house item, write 1-2 sentences explaining what the house's positioning MEANS for an enterprise buyer: capability gaps to probe, commercial leverage to expect, risks to mitigate, who this vendor is right for. Not a restatement of the label. Make "strengths" and "cautions" decision-useful (capability, delivery, commercial).`,
       tools: [SUMMARY_SCHEMA as unknown as Anthropic.Tool],
-      tool_choice: { type: "tool", name: "report_coverage_summaries" } as unknown as Anthropic.ToolChoice,
+      // tool_choice MUST be "auto" with `thinking` enabled — forcing a tool +
+      // thinking is a 400 ("Thinking may not be enabled when tool_choice forces
+      // tool use"). The merge below falls back to a derived summary if Stage 3
+      // misses an item, so real coverage is never dropped.
+      tool_choice: { type: "auto" } as unknown as Anthropic.ToolChoice,
       messages: [{
         role: "user",
-        content: `Vendor: "${provider.name}"\n\nNormalised analyst-house coverage:\n${structuredList}\n\nWrite a summary for each item (by index). Call report_coverage_summaries.`,
+        content: `Vendor: "${provider.name}"\n\nNormalised analyst-house coverage:\n${structuredList}\n\nWrite a summary for each item (by index). You MUST call report_coverage_summaries with one entry per index — do not answer in prose.`,
       }],
     } as unknown as Anthropic.MessageCreateParamsNonStreaming);
 
@@ -291,6 +295,10 @@ Omit a house entirely if you find NO public coverage. Do NOT fabricate. Call rep
         const raw = rawHouses[n.idx];
         const house = ANALYST_HOUSES.find((h) => h.id === raw?.houseId);
         if (!raw || !house) return null;
+        // Fall back to a derived, decision-useful summary if Stage 3 (which now
+        // runs with tool_choice:auto) didn't return one for this index — losing
+        // the whole coverage item over a missing one-liner would be worse.
+        const fallbackSummary = `${house.name} positions ${provider.name}${raw.positioning ? ` as ${raw.positioning}` : ""} — review the cited report for capability gaps, commercial leverage, and fit.`;
         return {
           providerId: provider.id,
           houseId: raw.houseId,
@@ -298,7 +306,7 @@ Omit a house entirely if you find NO public coverage. Do NOT fabricate. Call rep
           reportTitle: raw.reportTitle,
           positioning: raw.positioning ?? null,
           reportYear: raw.reportYear ?? null,
-          summary: summaryMap.get(n.idx) ?? "",
+          summary: summaryMap.get(n.idx) ?? fallbackSummary,
           strengths: n.cleanedStrengths,
           cautions: n.cleanedCautions,
           sourceUrl: raw.sourceUrl ?? null,

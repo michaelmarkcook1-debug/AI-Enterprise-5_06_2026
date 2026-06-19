@@ -214,10 +214,44 @@ export async function runSourcing(options: RunnerOptions = {}): Promise<Sourcing
     });
   }
 
-  const outcomes: SourceRunOutcome[] = [];
-  for (const entry of entries) {
-    outcomes.push(await runOneSource(runId, entry, persist && databaseConfigured));
+  // Process sources with bounded concurrency. The OLD behaviour ran them
+  // sequentially, where a single vendor's full manifest (fetch + Haiku extract +
+  // per-proposal classify, plus a web_search URL-repair on any dead link) could
+  // exceed the 300s function limit — that was the gateway 504 the operator hit
+  // on "Ingest today's vendor". Each source is independent (its own job row, its
+  // own URL), so a small pool cuts wall-clock ~Nx while keeping peak Anthropic
+  // concurrency in check (peak ≈ SOURCE_CONCURRENCY × per-source classify calls;
+  // no web_search on the classify/extract path).
+  const shouldPersist = persist && databaseConfigured;
+  // Env-tunable so the cap can be dialled down without a redeploy if 429s appear.
+  const SOURCE_CONCURRENCY = Math.max(1, Number(process.env.SOURCE_CONCURRENCY) || 5);
+  const outcomes: SourceRunOutcome[] = new Array(entries.length);
+  let cursor = 0;
+  async function sourceWorker() {
+    // Post-increment: read the current cursor, THEN advance — each index goes to
+    // exactly one worker; the worker that reads cursor === length exits without
+    // processing (no off-by-one, no double-processing).
+    let i: number;
+    while ((i = cursor++) < entries.length) {
+      const entry = entries[i];
+      // runOneSource is *almost* total, but attemptUrlRepair (and its recursive
+      // runOneSource) has awaits outside try/catch. Guard here so a single
+      // source can never reject the whole pool — which would discard siblings'
+      // already-completed work and leave a sparse `outcomes` the totals reduce
+      // would crash on.
+      outcomes[i] = await runOneSource(runId, entry, shouldPersist).catch(
+        (err): SourceRunOutcome => ({
+          vendorId: entry.vendorId, category: entry.category, url: entry.url,
+          status: "fetch_failed", proposalsExtracted: 0, proposalsPersisted: 0,
+          llmSource: hasLLM() ? "anthropic" : "stub",
+          durationMs: 0, error: err instanceof Error ? err.message : String(err),
+        }),
+      );
+    }
   }
+  await Promise.all(
+    Array.from({ length: Math.min(SOURCE_CONCURRENCY, entries.length) }, () => sourceWorker()),
+  );
 
   const finishedAt = new Date();
   const totalTokensIn  = outcomes.reduce((s, o) => s + (o.tokensIn  ?? 0), 0);

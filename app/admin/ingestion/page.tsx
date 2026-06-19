@@ -3,6 +3,7 @@ import ManifestPatchesPanel from "@/components/admin/ManifestPatchesPanel";
 import { listIngestionJobs } from "@/lib/ingestion/ingest-service";
 import { hasDatabase, getPrisma } from "@/lib/prisma";
 import { SOURCE_MANIFEST } from "@/lib/sourcing/manifest";
+import { getLatestAdminRun } from "@/lib/system/admin-run-log";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
@@ -70,9 +71,10 @@ function buildManifestSummary() {
 const pressReleaseEntries = SOURCE_MANIFEST.filter((e) => e.category === "press_release");
 
 export default async function IngestionPage() {
-  const [jobs, patches] = await Promise.all([
+  const [jobs, patches, lastRun] = await Promise.all([
     hasDatabase() ? listIngestionJobs() : Promise.resolve([]),
     listPendingManifestPatches(),
+    hasDatabase() ? getLatestAdminRun() : Promise.resolve(null),
   ]);
 
   const manifestSummary = buildManifestSummary();
@@ -103,6 +105,7 @@ export default async function IngestionPage() {
           error: j.error ?? undefined,
         }))}
         newsVendors={newsVendors}
+        lastRun={lastRun}
       />
 
       {/* ── Manifest sources breakdown ─────────────────────────────── */}

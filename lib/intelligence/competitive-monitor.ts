@@ -358,10 +358,16 @@ Use up to ${MAX_SEARCHES_PER_VENDOR} web_search calls. Return up to 6 items via 
       output_config: { effort: "high" },
       system: `You are a senior competitive-intelligence analyst (Gartner/Forrester calibre). For each finding, write "whyItMatters": 1-2 sentences (max 360 chars) on the SO-WHAT for an enterprise buyer or competing service provider — who gains leverage, what shifts in vendor selection/pricing power/switching cost, and what the reader should DO next. Be specific and falsifiable. No filler ("this is significant", "remains to be seen").`,
       tools: [ANALYSIS_SCHEMA as unknown as Anthropic.Tool],
-      tool_choice: { type: "tool", name: "report_analysis" } as unknown as Anthropic.ToolChoice,
+      // tool_choice MUST be "auto" (not a forced tool) whenever `thinking` is
+      // enabled — the API rejects forced tool use + thinking with a 400
+      // ("Thinking may not be enabled when tool_choice forces tool use"), which
+      // was zeroing out EVERY vendor that reached Stage 3. With a single tool +
+      // an explicit instruction Opus reliably calls it after thinking; the
+      // assembly below tolerates a missed call so a vendor run is never lost.
+      tool_choice: { type: "auto" } as unknown as Anthropic.ToolChoice,
       messages: [{
         role: "user",
-        content: `Vendor: ${target.name}\n\nClassified findings:\n${clList}\n\nWrite whyItMatters for each (by index). Use report_analysis.`,
+        content: `Vendor: ${target.name}\n\nClassified findings:\n${clList}\n\nWrite whyItMatters for each (by index). You MUST call report_analysis with one entry per index — do not answer in prose.`,
       }],
     } as unknown as Anthropic.MessageCreateParamsNonStreaming);
 
@@ -373,8 +379,11 @@ Use up to ${MAX_SEARCHES_PER_VENDOR} web_search calls. Return up to 6 items via 
       (s3block?.input as { findings?: { idx: number; whyItMatters: string }[] })?.findings ?? [];
     const whyMap = new Map(analyses.map((a) => [a.idx, a.whyItMatters]));
 
+    // Keep every classified finding even if Stage 3 (analyst commentary) missed
+    // one. Stage 3 uses tool_choice:auto (required alongside thinking), so an
+    // occasional missing whyItMatters is possible — but it must NOT discard an
+    // otherwise-complete finding (real title, source, dimension, scores).
     const findings: MonitorFinding[] = classified
-      .filter((c) => whyMap.has(c.idx))
       .slice(0, MAX_ITEMS_PER_VENDOR)
       .map((c) => {
         const raw = rawItems[c.idx]!;
@@ -388,7 +397,8 @@ Use up to ${MAX_SEARCHES_PER_VENDOR} web_search calls. Return up to 6 items via 
           impactScore: c.impactScore,
           confidenceScore: c.confidenceScore,
           sentiment: c.sentiment,
-          whyItMatters: whyMap.get(c.idx)!,
+          whyItMatters: whyMap.get(c.idx)
+            ?? `Assess the impact on ${target.name}'s competitive position, pricing leverage, and vendor selection.`,
         };
       });
 
