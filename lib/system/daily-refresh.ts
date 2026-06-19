@@ -61,6 +61,7 @@ import { deriveVendorScores } from "./derive-scores";
 import { deriveMarketShareMovement } from "./derive-market-share";
 import { detectCategoryChanges } from "../services/category-change";
 import { checkAndSendWatchlistAlerts } from "../watchlist/notify";
+import { checkAndSendCompetitiveOverlapAlerts } from "../watchlist/competitive-overlap-notify";
 import {
   persistRefreshReport,
   getLastRefreshRun,
@@ -393,6 +394,14 @@ export async function runDailyRefresh(
   await trackedStep("watchlist_alerts", async () => {
     const r = await checkAndSendWatchlistAlerts(now);
     return { sent: r.sent, checked: r.checked, errors: r.errors.length, firstError: r.errors[0] };
+  });
+
+  // ── 11b. Shortlist competitive-overlap alerts (email digest) ───
+  //     For each watchlist (email + vendors), email a digest when a new entrant
+  //     overlaps a tracked vendor. Resend-gated; non-critical.
+  await trackedStep("competitive_overlap_alerts", async () => {
+    const r = await checkAndSendCompetitiveOverlapAlerts();
+    return r as unknown as Record<string, unknown>;
   });
 
   const errors = steps.flatMap((s) => (s.error ? [`${s.step}: ${s.error}`] : []));

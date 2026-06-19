@@ -139,3 +139,28 @@ export async function getLatestAssessmentResult(
     return null;
   }
 }
+
+/**
+ * The full original AssessmentInput for a run (by id / engineRunId), or the
+ * latest completed run when no id is given. Powers the shortlist re-selection
+ * analysis: re-running the engine in the buyer's ORIGINAL context (industry,
+ * use-cases, sensitivities, governance, etc.) rather than a reconstructed
+ * approximation. Returns null with no database or no completed run.
+ */
+export async function getAssessmentInput(
+  runId?: string,
+  client?: Pick<PrismaClient, "assessmentRun">,
+): Promise<AssessmentInput | null> {
+  if (!client && !hasDatabase()) return null;
+  try {
+    const c = client ?? getPrisma();
+    const run = await c.assessmentRun.findFirst({
+      where: runId ? { OR: [{ id: runId }, { engineRunId: runId }] } : { status: "completed" },
+      orderBy: { createdAt: "desc" },
+      select: { inputsJson: true },
+    });
+    return (run?.inputsJson as unknown as AssessmentInput) ?? null;
+  } catch {
+    return null;
+  }
+}

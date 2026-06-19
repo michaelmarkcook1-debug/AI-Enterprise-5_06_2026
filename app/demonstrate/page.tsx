@@ -44,6 +44,8 @@ import BoardPackExporter from "@/components/demonstrate/BoardPackExporter";
 import { pricingForVendorIds } from "@/lib/model-inventory/token-pricing";
 import { aggregateUptake, INDUSTRIES, REGIONS, type Industry, type Region } from "@/lib/intelligence/vendor-uptake-seed";
 import ShortlistVendorCards from "@/components/shortlist-vendor-cards";
+import ShortlistCompetitiveAlerts from "@/components/demonstrate/ShortlistCompetitiveAlerts";
+import { getShortlistCompetitiveAlerts } from "@/lib/services/shortlist-alerts";
 import { boardDefenceScore } from "@/lib/decision-intelligence/board-defence-score";
 import AnalystInsight from "@/components/analyst-insight";
 import { demonstrateInsight } from "@/lib/insights/tab-insights";
@@ -67,11 +69,12 @@ export default async function DemonstratePage({ searchParams }: PageProps) {
   const dataSensitivity = params.dataSensitivity ?? "";
   const costSensitivity = params.costSensitivity ?? "";
 
-  const [news, vendors, momentum, pillarScores, provenance, dashboard, liveGithub, latestAssessment] = await Promise.all([
+  const [news, vendors, momentum, pillarScores, provenance, dashboard, liveGithub, latestAssessment, shortlistAlerts] = await Promise.all([
     listNewsItems(), listIntelligenceVendors(), listVendorMomentum(),
     listVendorPillarScores(), getDataProvenance(), getMarketDashboard(),
     fetchLiveGitHubSignals().catch(() => []),
     getLatestAssessmentResult(),
+    getShortlistCompetitiveAlerts(shortlistKeys).catch(() => []),
   ]);
 
   // Merge live GitHub stats into seed developer reputation
@@ -143,6 +146,9 @@ export default async function DemonstratePage({ searchParams }: PageProps) {
         universe={vendors.filter(isRankable).map((v) => ({ id: v.id, name: v.name, category: v.category, score: v.overallScore, confidence: v.confidenceScore, ownershipType: v.ownershipType }))}
         initialShortlistIds={shortlistVendors.map((v) => v.id)}
       />
+
+      {/* Shortlist-aware competitive alerts — new entrants overlapping a shortlisted vendor, re-scored head-to-head */}
+      <ShortlistCompetitiveAlerts alerts={shortlistAlerts} />
 
       {/* Executive Defence Summary */}
       <section className="mb-6 grid gap-4 md:grid-cols-4">
