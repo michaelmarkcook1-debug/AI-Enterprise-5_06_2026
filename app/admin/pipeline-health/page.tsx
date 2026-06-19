@@ -358,6 +358,10 @@ function CompetitiveIntelCard({ step }: { step: StepSummary }) {
   // Distinguish a thrown API error (key/billing/rate-limit) from a clean run
   // that simply found nothing (web search ungated, or a genuinely quiet window).
   const threwErrors = errorCount > 0;
+  // A 400 invalid-request / unsupported-tool error is a CODE/CONFIG bug (e.g. a
+  // server tool the model tier can't call), NOT a key / billing / rate-limit
+  // problem — so the remediation is "fix the request shape", never "rotate the key".
+  const configError = /invalid_request_error|allowed_callers|programmatic tool calling|does not support|unsupported/i.test(diagnostic);
 
   return (
     <Panel
@@ -368,6 +372,8 @@ function CompetitiveIntelCard({ step }: { step: StepSummary }) {
           <p className={`text-sm font-semibold ${isBlocked ? "text-rose-700 dark:text-rose-300" : step.ok ? "text-emerald-700 dark:text-emerald-300" : "text-amber-700 dark:text-amber-300"}`}>
             {!isBlocked && step.ok
               ? "Healthy — fresh findings flowing into /query and /demonstrate."
+              : threwErrors && configError
+              ? "Vendor lookups threw a 400 invalid-request error — a tool/model CONFIG bug, not a key, billing, or rate-limit issue. See diagnostic."
               : threwErrors
               ? "Vendor lookups threw Anthropic API errors — likely an invalid key, hit spend cap, or rate limit."
               : isBlocked
@@ -383,7 +389,16 @@ function CompetitiveIntelCard({ step }: { step: StepSummary }) {
               diagnostic: {diagnostic}
             </p>
           )}
-          {isBlocked && threwErrors && (
+          {isBlocked && threwErrors && configError && (
+            <div className="mt-3 rounded-md border border-amber-200 bg-amber-50 p-3 text-xs leading-5 text-amber-900 dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-200">
+              <strong>This is a request-config error, not billing or auth.</strong> The diagnostic is a 400
+              invalid-request response (e.g. a server tool the model tier can&apos;t call). Do NOT rotate the key
+              or raise the spend cap — neither will help. Fix the request shape in the sourcing code (e.g. set
+              <code className="font-mono"> allowed_callers: [&quot;direct&quot;]</code> on the web_search tool, or
+              use a model tier that supports it) and redeploy.
+            </div>
+          )}
+          {isBlocked && threwErrors && !configError && (
             <div className="mt-3 rounded-md border border-amber-200 bg-amber-50 p-3 text-xs leading-5 text-amber-900 dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-200">
               <strong>To restore freshness:</strong> the calls are erroring. Check the diagnostic above —
               if it&apos;s a billing/credit error, raise the spend cap at

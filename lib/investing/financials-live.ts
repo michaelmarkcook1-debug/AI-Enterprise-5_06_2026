@@ -155,7 +155,10 @@ async function fetchFromIrPage(
       model: DEFAULT_MODEL,
       max_tokens: 1500,
       // Web search server tool: lets Claude fetch the IR page directly.
-      tools: [{ type: "web_search_20260209", name: "web_search", max_uses: 3 } as never],
+      // allowed_callers: ["direct"] — the 2026-02 web_search tool defaults to
+      // requiring programmatic tool calling, which Haiku-tier models don't support
+      // (400 invalid_request_error). Force direct invocation.
+      tools: [{ type: "web_search_20260209", name: "web_search", max_uses: 3, allowed_callers: ["direct"] } as never],
       messages: [{
         role: "user",
         content: `Visit ${provider.name}'s investor-relations page (${irUrl}) and extract their MOST RECENT reported figures for the four metrics below. Return ONLY a JSON array, no prose, no markdown fences.

@@ -246,7 +246,11 @@ async function monitorVendor(target: CompetitiveTarget, today: Date): Promise<Ve
     // interpretation — just find, fetch, and report raw excerpts.
     const s1System = `You are a news-extraction agent. Use web_search to find events for the given vendor in the last ${LOOKBACK_DAYS} days, then call report_raw_findings. Extract facts only — do not categorise, score, or interpret. Include a verbatim excerpt from each source page in the snippet field.`;
     const s1Tools = [
-      { type: WEB_SEARCH_TOOL_TYPE, name: "web_search", max_uses: MAX_SEARCHES_PER_VENDOR } as unknown as Anthropic.Tool,
+      // allowed_callers: ["direct"] — the 2026-02 web_search tool defaults to
+      // requiring PROGRAMMATIC tool calling (server-side dynamic filtering),
+      // which Haiku 4.5 does not support → 400 invalid_request_error. Forcing
+      // direct invocation keeps web_search working on the Haiku extraction tier.
+      { type: WEB_SEARCH_TOOL_TYPE, name: "web_search", max_uses: MAX_SEARCHES_PER_VENDOR, allowed_callers: ["direct"] } as unknown as Anthropic.Tool,
       RAW_FINDINGS_SCHEMA as unknown as Anthropic.Tool,
     ];
     const s1Messages: Anthropic.MessageParam[] = [{

@@ -191,7 +191,9 @@ async function fetchCoverageForProvider(
       max_tokens: 4000,
       system: `You are a web-scraping agent. Search analyst-house websites for publicly available coverage of a specific vendor. Extract raw facts only — do not interpret, score, or paraphrase. Report verbatim text from each page you find.`,
       tools: [
-        { type: "web_search_20260209", name: "web_search", max_uses: 6 } as never,
+        // allowed_callers: ["direct"] — the 2026-02 web_search tool defaults to
+        // requiring programmatic tool calling, unsupported on Haiku (400). Force direct.
+        { type: "web_search_20260209", name: "web_search", max_uses: 6, allowed_callers: ["direct"] } as never,
         RAW_COVERAGE_SCHEMA as unknown as Anthropic.Tool,
       ],
       messages: [{
