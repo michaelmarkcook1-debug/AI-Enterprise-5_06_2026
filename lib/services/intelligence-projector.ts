@@ -155,9 +155,10 @@ export async function projectEvidenceToIntelligence(
   const candidates = plainIds.flatMap((p) => candidateIntelligenceIds(p));
   const existingVendors = await prisma.intelligenceVendor.findMany({
     where: { id: { in: candidates } },
-    select: { id: true },
+    select: { id: true, name: true },
   });
   const existingIds = new Set(existingVendors.map((v) => v.id));
+  const nameByIntelligenceId = new Map(existingVendors.map((v) => [v.id, v.name]));
   const plainToIntelligence = new Map<string, string>();
   const vendorsSkipped: { vendorId: string; reason: string }[] = [];
   for (const plain of plainIds) {
@@ -279,18 +280,23 @@ export async function projectEvidenceToIntelligence(
     .slice(0, newsLimit);
   for (const row of newsRows) {
     const vendorId = plainToIntelligence.get(row.vendorId)!;
-    // Real headline from the source excerpt's first sentence (not the internal
-    // "<subfactor> update — <vendor>" placeholder, which reads like machine noise
-    // in the buyer-facing feed). Fall back to a prettified subfactor.
+    const vendorName = nameByIntelligenceId.get(vendorId) ?? row.vendorId;
+    // Real headline from the source excerpt's first sentence (as close to the
+    // original article as we store — the raw <title> isn't captured), falling
+    // back to a prettified subfactor. No underscores, then lead with the vendor.
     const firstSentence = row.excerpt.trim().split(/(?<=[.!?])\s+/)[0]?.trim() ?? "";
-    const title =
+    const headline = (
       firstSentence.length >= 20 && firstSentence.length <= 140
         ? firstSentence
         : firstSentence.length > 140
           ? `${firstSentence.slice(0, 137).trimEnd()}…`
           : row.subfactor
-            ? `${row.subfactor.replace(/_/g, " ")} — ${row.vendorId}`
-            : `Verified update — ${row.vendorId}`;
+            ? row.subfactor.replace(/_/g, " ")
+            : "Verified update"
+    ).replace(/_/g, " ").replace(/\s+/g, " ").trim();
+    const title = headline.toLowerCase().startsWith(vendorName.toLowerCase())
+      ? headline
+      : `${vendorName}: ${headline}`;
     await prisma.intelligenceNewsItem.upsert({
       where: { id: row.id },
       create: {

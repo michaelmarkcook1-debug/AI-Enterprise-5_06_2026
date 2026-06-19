@@ -27,9 +27,18 @@ function decodeEntities(s: string): string {
 // pass through unchanged.
 function cleanTitle(raw: string): string {
   let t = decodeEntities(raw).replace(/\s+update\s+[—-]\s+[a-z0-9 ._-]+$/i, "");
-  t = t.replace(/_/g, " ").trim();
-  if (!t) t = decodeEntities(raw);
+  t = t.replace(/_/g, " ").replace(/\s+/g, " ").trim();
+  if (!t) t = decodeEntities(raw).replace(/_/g, " ").trim();
   return t.charAt(0).toUpperCase() + t.slice(1);
+}
+
+// Lead every headline with the vendor name (per product requirement), without
+// double-prefixing when the headline already starts with the vendor.
+function withVendorPrefix(title: string, vendor: string | null): string {
+  if (!vendor) return title;
+  const t = title.trim();
+  if (t.toLowerCase().startsWith(vendor.toLowerCase())) return t;
+  return `${vendor}: ${t}`;
 }
 
 // Importance tiers, in display order. Colours are deliberately tier-coded so the
@@ -41,7 +50,7 @@ const TIERS: Array<{ level: ImportanceLevel; label: string; dot: string; text: s
 ];
 
 function NewsRow({ item }: { item: BreakingNewsItem }) {
-  const title = cleanTitle(item.title);
+  const title = withVendorPrefix(cleanTitle(item.title), item.primaryVendorName);
   const story = item.summary ? decodeEntities(item.summary) : "";
   const why = item.whyItMatters ? decodeEntities(item.whyItMatters) : "";
   // Hover synopsis: story + why it matters (native tooltip — no JS needed).
@@ -76,11 +85,6 @@ function NewsRow({ item }: { item: BreakingNewsItem }) {
         </p>
       )}
       <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-        {item.primaryVendorName && (
-          <span className="rounded bg-[#e7eef6] px-1.5 py-0.5 text-[9px] font-semibold text-[#33506f] dark:bg-[#16314c] dark:text-[#9fc2e0]">
-            {item.primaryVendorName}
-          </span>
-        )}
         {item.categories.slice(0, 1).map((c) => (
           <span key={c} className="rounded bg-[#f3ead2] px-1.5 py-0.5 text-[9px] font-medium text-[#5a4f33] dark:bg-[#1a2c3f] dark:text-[#a7bacd]">{c}</span>
         ))}
