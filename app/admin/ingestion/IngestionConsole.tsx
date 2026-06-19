@@ -73,6 +73,11 @@ export default function IngestionConsole({
   const elapsedNewsRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const pollNewsRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  // ── Multi-vendor selection (batch runs) ─────────────────────────────────
+  const [stdSelected, setStdSelected] = useState<string[]>([]);
+  const [newsSelected, setNewsSelected] = useState<string[]>([]);
+  const [batch, setBatch] = useState<{ scope: "std" | "news"; current: number; total: number; vendor: string } | null>(null);
+
   useEffect(() => {
     if (busyAll) {
       setElapsedSec(0);
@@ -128,23 +133,24 @@ export default function IngestionConsole({
     }
   }
 
-  async function ingestNow(scope: "rolling" | "vendor", vendorOverride?: string) {
+  async function ingestNow() {
     setBusyAll(true);
     setIngestError(null);
     setIngestResult(null);
     try {
-      // Manual per-vendor standard sourcing. The SCHEDULED run lives in the one
-      // daily-refresh pipeline; this is the admin "run one vendor now" tool.
+      // Today's rotation vendor. The SCHEDULED run lives in the daily-refresh
+      // pipeline; this is the admin "run the rotation vendor now" button.
+      // (Specific / multiple vendors go through ingestSelected below.)
       const res = await fetch(`/api/admin/sourcing/run`, {
         method: "POST",
         headers: { "content-type": "application/json", ...(token ? { "x-admin-token": token } : {}) },
-        body: JSON.stringify({ vendorId: scope === "vendor" ? vendorOverride : undefined, persist: true }),
+        body: JSON.stringify({ persist: true }),
       });
       const body = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(body.error ?? `HTTP ${res.status}`);
       const totals = body.totals ?? {};
       setIngestResult(
-        `${vendorOverride ?? "today's vendor"} · ${body.durationMs ?? 0} ms · ${totals.proposalsExtracted ?? 0} extracted · ${totals.proposalsPersisted ?? 0} persisted`,
+        `today's vendor · ${body.durationMs ?? 0} ms · ${totals.proposalsExtracted ?? 0} extracted · ${totals.proposalsPersisted ?? 0} persisted`,
       );
       await refreshJobs();
     } catch (e) {
@@ -183,6 +189,99 @@ export default function IngestionConsole({
       setNewsError((e as Error).message);
     } finally {
       setBusyNews(false);
+    }
+  }
+
+  // Run STANDARD evidence sourcing for a SET of vendors, one at a time. Each
+  // request is a single vendor (≤300s — no 504); the loop is sequential so peak
+  // Anthropic concurrency stays bounded (every vendor already parallelises its
+  // own sources). One vendor failing does not abort the batch, and each vendor
+  // is persisted as it finishes (admin_run_log + jobs), so closing the tab
+  // mid-batch keeps the completed vendors.
+  async function ingestSelected(ids: string[]) {
+    if (ids.length === 0) return;
+    const perVendor = estimateIngestionCost().totalUsd / 42;
+    if (
+      ids.length > 3 &&
+      !window.confirm(
+        `Run standard ingestion for ${ids.length} vendors, one after another?\n\n` +
+          `Estimated ~$${(perVendor * ids.length).toFixed(2)} and ~${Math.max(1, Math.ceil(ids.length * 1.5))} min. ` +
+          `Keep this tab open — each vendor is saved as it finishes.`,
+      )
+    ) {
+      return;
+    }
+    setBusyAll(true);
+    setIngestError(null);
+    setIngestResult(null);
+    const lines: string[] = [];
+    try {
+      for (let k = 0; k < ids.length; k++) {
+        setBatch({ scope: "std", current: k + 1, total: ids.length, vendor: ids[k] });
+        try {
+          const res = await fetch(`/api/admin/sourcing/run`, {
+            method: "POST",
+            headers: { "content-type": "application/json", ...(token ? { "x-admin-token": token } : {}) },
+            body: JSON.stringify({ vendorId: ids[k], persist: true }),
+          });
+          const body = await res.json().catch(() => ({}));
+          if (!res.ok) lines.push(`${ids[k]}: ✗ ${body.error ?? `HTTP ${res.status}`}`);
+          else {
+            const t = body.totals ?? {};
+            lines.push(`${ids[k]}: ${t.proposalsExtracted ?? 0}→${t.proposalsPersisted ?? 0}`);
+          }
+        } catch (e) {
+          lines.push(`${ids[k]}: ✗ ${(e as Error).message}`);
+        }
+        await refreshJobs();
+      }
+      setIngestResult(`Ran ${ids.length} vendor${ids.length !== 1 ? "s" : ""} · ${lines.join(" · ")}`);
+    } finally {
+      setBusyAll(false);
+      setBatch(null);
+    }
+  }
+
+  // Same pattern for the news / press-release pipeline.
+  async function ingestNewsSelected(ids: string[]) {
+    if (ids.length === 0) return;
+    if (
+      ids.length > 3 &&
+      !window.confirm(
+        `Run news & press-release sourcing for ${ids.length} vendors, one after another?\n\n` +
+          `~${Math.max(1, Math.ceil(ids.length * 2))} min. Keep this tab open — each vendor is saved as it finishes.`,
+      )
+    ) {
+      return;
+    }
+    setBusyNews(true);
+    setNewsError(null);
+    setNewsResult(null);
+    const lines: string[] = [];
+    try {
+      for (let k = 0; k < ids.length; k++) {
+        setBatch({ scope: "news", current: k + 1, total: ids.length, vendor: ids[k] });
+        try {
+          const res = await fetch(`/api/admin/sourcing/run`, {
+            method: "POST",
+            headers: { "content-type": "application/json", ...(token ? { "x-admin-token": token } : {}) },
+            body: JSON.stringify({ vendorId: ids[k], news: true, persist: true }),
+          });
+          const body = await res.json().catch(() => ({}));
+          if (!res.ok) lines.push(`${ids[k]}: ✗ ${body.error ?? `HTTP ${res.status}`}`);
+          else {
+            const t = body.totals ?? {};
+            lines.push(`${ids[k]}: ${t.proposalsPersisted ?? 0} proposals`);
+          }
+        } catch (e) {
+          lines.push(`${ids[k]}: ✗ ${(e as Error).message}`);
+        }
+        await refreshJobs();
+      }
+      setNewsResult(`Ran ${ids.length} vendor${ids.length !== 1 ? "s" : ""} · ${lines.join(" · ")}`);
+    } finally {
+      setBusyNews(false);
+      setBatch(null);
     }
   }
 
@@ -341,7 +440,7 @@ export default function IngestionConsole({
             <button
               type="button"
               disabled={anyBusy}
-              onClick={() => ingestNow("rolling")}
+              onClick={() => ingestNow()}
               className="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 disabled:opacity-40 dark:bg-emerald-500 dark:hover:bg-emerald-400"
             >
               {busyAll ? (
@@ -350,18 +449,20 @@ export default function IngestionConsole({
                 <>Ingest today&apos;s vendor <span aria-hidden>→</span></>
               )}
             </button>
-            <span className="text-xs text-emerald-900/70 dark:text-emerald-300/70">or pick a vendor:</span>
-            <select
-              defaultValue=""
-              onChange={(e) => { const v = e.target.value; if (!v) return; void ingestNow("vendor", v); e.target.value = ""; }}
-              disabled={anyBusy}
-              className="rounded-full border border-emerald-300 bg-white px-3 py-1.5 text-xs dark:border-emerald-700 dark:bg-[#0c2238]"
-            >
-              <option value="">Run for specific vendor…</option>
-              {vendors.map((v) => <option key={v.id} value={v.id}>{v.name}</option>)}
-            </select>
           </div>
-          {busyAll && <ProgressBanner elapsed={elapsedSec} label="Rolling pipeline" detail="Fetching sources, extracting proposals with the 3-stage AI pipeline (Haiku → Sonnet → Opus), and writing results. Typically 1–4 minutes." />}
+
+          {/* Multi-vendor batch selection — runs sequentially, each vendor saved as it finishes. */}
+          <VendorMultiSelect
+            title="Or select vendors to ingest (multi-select + select all)"
+            vendors={vendors}
+            selected={stdSelected}
+            onChange={setStdSelected}
+            accent="emerald"
+            disabled={anyBusy}
+            onRun={() => ingestSelected(stdSelected)}
+            runLabel="Run selected"
+          />
+          {busyAll && <ProgressBanner elapsed={elapsedSec} label="Rolling pipeline" detail="Fetching sources, extracting proposals with the 3-stage AI pipeline (Haiku → Sonnet → Opus), and writing results. Typically 1–4 minutes." batch={batch?.scope === "std" ? batch : null} />}
           {ingestResult && !busyAll && <ResultBanner text={ingestResult} />}
           {ingestError && <ErrorBanner text={ingestError} />}
         </div>
@@ -424,18 +525,20 @@ export default function IngestionConsole({
                 <>Run today&apos;s news vendor <span aria-hidden>→</span></>
               )}
             </button>
-            <span className="text-xs text-sky-800/70 dark:text-sky-300/70">or pick a vendor:</span>
-            <select
-              defaultValue=""
-              onChange={(e) => { const v = e.target.value; if (!v) return; void ingestNews(v); e.target.value = ""; }}
-              disabled={anyBusy}
-              className="rounded-full border border-sky-300 bg-white px-3 py-1.5 text-xs dark:border-sky-700 dark:bg-[#0c2238]"
-            >
-              <option value="">Run for specific news vendor…</option>
-              {newsVendors.map((v) => <option key={v.id} value={v.id}>{v.name}</option>)}
-            </select>
           </div>
-          {busyNews && <ProgressBanner elapsed={elapsedNewsSec} label="News discovery pipeline" detail="Fetching listing pages, scoring articles for relevance and importance (Haiku), deduplicating, then ingesting fresh articles. Typically 2–5 minutes." color="sky" />}
+
+          {/* Multi-vendor batch selection for the news pipeline. */}
+          <VendorMultiSelect
+            title="Or select news vendors to run (multi-select + select all)"
+            vendors={newsVendors}
+            selected={newsSelected}
+            onChange={setNewsSelected}
+            accent="sky"
+            disabled={anyBusy}
+            onRun={() => ingestNewsSelected(newsSelected)}
+            runLabel="Run selected"
+          />
+          {busyNews && <ProgressBanner elapsed={elapsedNewsSec} label="News discovery pipeline" detail="Fetching listing pages, scoring articles for relevance and importance (Haiku), deduplicating, then ingesting fresh articles. Typically 2–5 minutes." color="sky" batch={batch?.scope === "news" ? batch : null} />}
           {newsResult && !busyNews && <ResultBanner text={newsResult} color="sky" />}
           {newsError && <ErrorBanner text={newsError} />}
         </div>
@@ -573,7 +676,7 @@ function SpinIcon() {
   );
 }
 
-function ProgressBanner({ elapsed, label, detail, color = "emerald" }: { elapsed: number; label: string; detail: string; color?: string }) {
+function ProgressBanner({ elapsed, label, detail, color = "emerald", batch }: { elapsed: number; label: string; detail: string; color?: string; batch?: { current: number; total: number; vendor: string } | null }) {
   const border = color === "sky" ? "border-sky-300 dark:border-sky-700" : "border-emerald-300 dark:border-emerald-700";
   const bg = color === "sky" ? "bg-sky-50/60 dark:bg-sky-950/40" : "bg-emerald-50/60 dark:bg-emerald-950/40";
   const text = color === "sky" ? "text-sky-800 dark:text-sky-200" : "text-emerald-800 dark:text-emerald-200";
@@ -583,8 +686,96 @@ function ProgressBanner({ elapsed, label, detail, color = "emerald" }: { elapsed
       <div className={`flex items-center gap-2 text-sm font-medium ${text}`}>
         <SpinIcon />
         {label} running — {elapsed}s elapsed
+        {batch && <span className="font-semibold"> · vendor {batch.current}/{batch.total} ({batch.vendor.replace(/^vendor_/, "")})</span>}
       </div>
       <p className={`mt-1 text-xs ${sub}`}>{detail}</p>
+    </div>
+  );
+}
+
+// Multi-vendor picker with filter + select-all, used by both the standard and
+// news ingestion sections. Selecting "all" while a filter is active toggles
+// only the filtered subset, which is the expected behaviour for a search box.
+function VendorMultiSelect({
+  title, vendors, selected, onChange, accent, disabled, onRun, runLabel,
+}: {
+  title: string;
+  vendors: { id: string; name: string }[];
+  selected: string[];
+  onChange: (ids: string[]) => void;
+  accent: "emerald" | "sky";
+  disabled: boolean;
+  onRun: () => void;
+  runLabel: string;
+}) {
+  const [q, setQ] = useState("");
+  const ql = q.trim().toLowerCase();
+  const filtered = ql
+    ? vendors.filter((v) => v.name.toLowerCase().includes(ql) || v.id.toLowerCase().includes(ql))
+    : vendors;
+  const sel = new Set(selected);
+  const toggle = (id: string) =>
+    onChange(sel.has(id) ? selected.filter((x) => x !== id) : [...selected, id]);
+  const allFilteredSelected = filtered.length > 0 && filtered.every((v) => sel.has(v.id));
+  const a = accent === "sky"
+    ? { ring: "border-sky-300 dark:border-sky-700", btn: "bg-sky-600 hover:bg-sky-700 dark:bg-sky-500 dark:hover:bg-sky-400", chip: "text-sky-800 dark:text-sky-300", box: "accent-sky-600" }
+    : { ring: "border-emerald-300 dark:border-emerald-700", btn: "bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-400", chip: "text-emerald-800 dark:text-emerald-300", box: "accent-emerald-600" };
+  return (
+    <div className={`mt-4 rounded-xl border ${a.ring} bg-white/60 p-3 dark:bg-[#0c2238]/60`}>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <span className={`text-xs font-semibold ${a.chip}`}>{title}</span>
+        <div className="flex items-center gap-3 text-[11px]">
+          <button
+            type="button"
+            disabled={disabled || filtered.length === 0}
+            onClick={() =>
+              onChange(
+                allFilteredSelected
+                  ? selected.filter((id) => !filtered.some((v) => v.id === id))
+                  : [...new Set([...selected, ...filtered.map((v) => v.id)])],
+              )
+            }
+            className="underline disabled:opacity-40"
+          >
+            {allFilteredSelected ? "Deselect" : "Select all"}{ql ? " (filtered)" : ` (${vendors.length})`}
+          </button>
+          {selected.length > 0 && (
+            <button type="button" disabled={disabled} onClick={() => onChange([])} className="underline disabled:opacity-40">
+              Clear
+            </button>
+          )}
+        </div>
+      </div>
+      <input
+        value={q}
+        onChange={(e) => setQ(e.target.value)}
+        placeholder="Filter vendors…"
+        className={`mt-2 w-full max-w-xs rounded-lg border ${a.ring} bg-white px-2.5 py-1 text-xs dark:bg-[#071827]`}
+      />
+      <div className="mt-2 grid max-h-52 grid-cols-2 gap-x-3 gap-y-1 overflow-y-auto sm:grid-cols-3">
+        {filtered.map((v) => (
+          <label key={v.id} className="flex items-center gap-1.5 text-xs text-[#2e3f57] dark:text-[#c2d1e0]">
+            <input type="checkbox" className={a.box} checked={sel.has(v.id)} disabled={disabled} onChange={() => toggle(v.id)} />
+            <span className="truncate" title={v.name}>{v.name}</span>
+          </label>
+        ))}
+        {filtered.length === 0 && (
+          <span className="col-span-full text-xs text-[#6b7d93]">No vendors match “{q}”.</span>
+        )}
+      </div>
+      <div className="mt-3 flex flex-wrap items-center gap-3">
+        <button
+          type="button"
+          disabled={disabled || selected.length === 0}
+          onClick={onRun}
+          className={`inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-semibold text-white shadow-sm disabled:opacity-40 ${a.btn}`}
+        >
+          {runLabel} ({selected.length}) <span aria-hidden>→</span>
+        </button>
+        {selected.length > 0 && (
+          <span className="text-[11px] text-[#6b7d93] dark:text-[#8fa5bb]">runs sequentially · each vendor saved as it finishes</span>
+        )}
+      </div>
     </div>
   );
 }
