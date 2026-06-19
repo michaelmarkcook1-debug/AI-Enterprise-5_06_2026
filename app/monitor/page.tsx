@@ -26,6 +26,7 @@ import {
   listVendorMomentum,
   listNewsItems,
   listWatchlists,
+  listNewVendorCapabilities,
 } from "@/lib/intelligence/repository";
 import { getDataProvenance } from "@/lib/intelligence/provenance";
 import { isRankable } from "@/lib/intelligence/roles";
@@ -38,7 +39,7 @@ import { monitorInsight } from "@/lib/insights/tab-insights";
 export const dynamic = "force-dynamic";
 
 export default async function MonitorPage() {
-  const [dashboard, vendors, momentum, news, watchlists, provenance, latestAssessment] = await Promise.all([
+  const [dashboard, vendors, momentum, news, watchlists, provenance, latestAssessment, newVendorCapabilities] = await Promise.all([
     getMarketDashboard(),
     listIntelligenceVendors(),
     listVendorMomentum(),
@@ -46,6 +47,7 @@ export default async function MonitorPage() {
     listWatchlists(),
     getDataProvenance(),
     getLatestAssessmentResult(),
+    listNewVendorCapabilities({ days: 60, limit: 12 }),
   ]);
 
   const momentumByVendor = new Map(momentum.map((m) => [m.vendorId, m]));
@@ -293,6 +295,55 @@ export default async function MonitorPage() {
             ))}
             {vendorChangeEvents.length === 0 && <div className="py-3 text-sm text-[#4c5d75]">No recent change signals.</div>}
           </div>
+        </Panel>
+      </section>
+
+      {/* New vendor capabilities — newly gained from ingested evidence (vs curated baseline) */}
+      <section className="mb-6">
+        <Panel
+          title="New vendor capabilities"
+          action={<SeedDataBadge label={provenance.source === "live" ? "Live" : "Seed"} provenance={provenance.source} reason={provenance.reason} />}
+        >
+          <p className="mb-3 text-xs text-[#56657b] dark:text-[#a7bacd]">
+            Capabilities vendors have newly gained from ingested evidence, beyond the curated baseline. A vendor appearing here now overlaps competitors on that capability family — if it overlaps a shortlisted vendor, the impact surfaces on your Demonstrate shortlist.
+          </p>
+          {newVendorCapabilities.length === 0 ? (
+            <div className="rounded-lg border border-dashed border-[#e6dcc3] p-5 text-center text-xs leading-5 text-[#6b7d93] dark:border-[#1d3a57] dark:text-[#7a9bb8]">
+              No new vendor capabilities detected in the last 60 days. New capabilities appear here as ingestion verifies a vendor gaining a capability it did not previously hold.
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="min-w-full text-sm">
+                <thead>
+                  <tr className="border-b border-[#e6dcc3] text-left text-[10px] uppercase tracking-wider text-[#7a6a48] dark:border-[#1d3a57] dark:text-[#7a9bb8]">
+                    <th className="py-1.5 pr-3">Vendor</th>
+                    <th className="py-1.5 pr-3">New capability</th>
+                    <th className="py-1.5 pr-3">Overlaps on</th>
+                    <th className="py-1.5 pr-3 text-right">Maturity</th>
+                    <th className="py-1.5 pr-3">Evidence</th>
+                    <th className="py-1.5">Detected</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {newVendorCapabilities.map((nc) => (
+                    <tr key={`${nc.vendorId}_${nc.capabilityId}`} className="border-b border-[#efe9d9]/60 dark:border-[#16314c]">
+                      <td className="py-2 pr-3 align-top font-medium text-[#13294b] dark:text-[#eef3f8]">{nc.vendorName}</td>
+                      <td className="py-2 pr-3 align-top text-[#33455e] dark:text-[#c2d1e0]">
+                        {nc.capabilityName}
+                        {nc.notes ? <span className="mt-0.5 block text-[11px] leading-4 text-[#6b7d93] dark:text-[#8fa5bb]">{nc.notes}</span> : null}
+                      </td>
+                      <td className="py-2 pr-3 align-top">
+                        <span className="rounded bg-[#f3ead2] px-1.5 py-0.5 text-[10px] text-[#455044] dark:bg-[#143049] dark:text-[#c2d1e0]">{nc.capabilityFamily}</span>
+                      </td>
+                      <td className="py-2 pr-3 text-right align-top font-mono tabular-nums text-[#33455e] dark:text-[#c2d1e0]">{Math.round(nc.maturityScore)}</td>
+                      <td className="py-2 pr-3 align-top font-mono text-xs text-[#5b6b7f] dark:text-[#8fa5bb]">{nc.evidenceGrade}</td>
+                      <td className="py-2 align-top text-xs tabular-nums text-[#8a98a8]">{new Date(nc.lastVerified).toLocaleDateString("en-GB", { day: "2-digit", month: "short" })}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </Panel>
       </section>
 

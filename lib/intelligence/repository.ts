@@ -601,6 +601,87 @@ export async function listVendorCapabilities(): Promise<VendorCapability[]> {
   );
 }
 
+/** A capability a vendor has NEWLY gained from ingested evidence. */
+export interface NewVendorCapability {
+  vendorId: string;
+  vendorName: string;
+  vendorCategory: string;
+  capabilityId: string;
+  capabilityName: string;
+  /** Capability family (the dimension the vendor now overlaps competitors on). */
+  capabilityFamily: string;
+  maturityScore: number;
+  evidenceGrade: VendorCapability["evidenceGrade"];
+  lastVerified: string;
+  notes: string;
+  sourceUrls: string[];
+}
+
+/**
+ * Capabilities a vendor has NEWLY gained from ingested evidence within the
+ * recency window — i.e. a (vendor, capability) cell that the live DB holds
+ * (evidence-projected) but which is ABSENT from the curated seed baseline. That
+ * absence is the signal: the analyst roster never credited the vendor with this
+ * capability, so its appearance from real evidence means the vendor just gained
+ * it (e.g. "Anthropic shipped a legal app it never had"). Derived at read-time —
+ * no schema change — by diffing live DB cells against the seed set. Returns []
+ * when there's no database (pure-seed mode has no "new" capabilities by
+ * definition — everything is the baseline).
+ */
+export async function listNewVendorCapabilities(
+  opts: { days?: number; limit?: number } = {},
+): Promise<NewVendorCapability[]> {
+  const days = opts.days ?? 60;
+  const limit = opts.limit ?? 12;
+  return databaseOrSeed<NewVendorCapability[]>(
+    async (client) => {
+      const cutoff = new Date(Date.now() - days * 86_400_000);
+      const dbRows = (await client.vendorCapability.findMany({
+        where: { lastVerified: { gte: cutoff } },
+        orderBy: { lastVerified: "desc" },
+      })).map(mapVendorCapability);
+      if (dbRows.length === 0) return [];
+      // Curated baseline: a (vendor, capability) pair present in the seed is an
+      // analyst-known capability (it may have been re-verified by evidence, but
+      // it is NOT newly gained). Only DB cells absent from the seed are "new".
+      const seed = await capabilitiesMockRepository.listVendorCapabilities();
+      const seedKeys = new Set(seed.map((s) => `${s.vendorId}_${s.capabilityId}`));
+      const fresh = dbRows.filter((r) => !seedKeys.has(`${r.vendorId}_${r.capabilityId}`));
+      if (fresh.length === 0) return [];
+      const [caps, vendors] = await Promise.all([listCapabilities(), listIntelligenceVendors()]);
+      const capById = new Map(caps.map((c) => [c.id, c]));
+      const venById = new Map(vendors.map((v) => [v.id, v]));
+      const out: NewVendorCapability[] = [];
+      for (const r of fresh) {
+        const cap = capById.get(r.capabilityId);
+        // Vendor ids appear bare ("openai") or prefixed ("vendor_openai") across
+        // tables — resolve either form so rows aren't silently dropped.
+        const ven =
+          venById.get(r.vendorId) ??
+          venById.get(r.vendorId.replace(/^vendor_/, "")) ??
+          venById.get(`vendor_${r.vendorId}`);
+        if (!cap || !ven) continue; // skip orphans (no matching capability/vendor)
+        out.push({
+          vendorId: r.vendorId,
+          vendorName: ven.name,
+          vendorCategory: ven.category,
+          capabilityId: r.capabilityId,
+          capabilityName: cap.name,
+          capabilityFamily: cap.category,
+          maturityScore: r.maturityScore,
+          evidenceGrade: r.evidenceGrade,
+          lastVerified: r.lastVerified,
+          notes: r.notes,
+          sourceUrls: r.sourceUrls ?? [],
+        });
+        if (out.length >= limit) break;
+      }
+      return out;
+    },
+    (): NewVendorCapability[] => [],
+  );
+}
+
 export async function listVendorPillarScores(): Promise<VendorPillarScore[]> {
   // Same merge strategy as listVendorCapabilities above.
   return databaseOrSeed(
