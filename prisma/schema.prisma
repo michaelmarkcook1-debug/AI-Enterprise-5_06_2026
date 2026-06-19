@@ -372,6 +372,35 @@ model EvidenceProposal {
   @@map("evidence_proposals")
 }
 
+/// Admin-reviewed proposal to change a vendor's category / role membership,
+/// raised automatically when ingested evidence shows a vendor gaining a
+/// capability tied to a role it does not yet hold (e.g. a model lab shipping a
+/// vertical application). NEVER auto-applied — an admin approves before the
+/// vendor's category/roleTags change and the rankings recompute.
+model VendorCategoryChangeProposal {
+  id                  String         @id @default(cuid()) @map("proposal_id")
+  vendorId            String         @map("vendor_id")
+  vendorName          String         @map("vendor_name")
+  currentCategory     String         @map("current_category")
+  proposedCategory    String?        @map("proposed_category")
+  currentRoleTags     String[]       @default([]) @map("current_role_tags")
+  proposedRoleTags    String[]       @default([]) @map("proposed_role_tags")
+  rationale           String         @db.Text
+  triggerCapabilityId String?        @map("trigger_capability_id")
+  triggerMaturity     Float?         @map("trigger_maturity")
+  sourceUrls          String[]       @default([]) @map("source_urls")
+  status              ProposalStatus @default(pending)
+  reviewerId          String?        @map("reviewer_id")
+  reviewedAt          DateTime?      @map("reviewed_at")
+  reviewNotes         String?        @map("review_notes")
+  appliedAt           DateTime?      @map("applied_at")
+  createdAt           DateTime       @default(now()) @map("created_at")
+
+  @@index([status, createdAt])
+  @@index([vendorId, status])
+  @@map("vendor_category_change_proposals")
+}
+
 /// Proposed replacement for a stale (4xx) source URL in lib/sourcing/manifest.ts.
 /// Created automatically by the URL-finder agent when the runner hits a 404 etc.
 /// Operator approves at /admin/ingestion → manifest entry is rewritten on next ingest.

@@ -16,6 +16,7 @@ import { projectEvidenceToIntelligence, projectEvidenceToPillarScores } from "@/
 import { deriveVendorScores } from "@/lib/system/derive-scores";
 import { deriveMarketShareMovement } from "@/lib/system/derive-market-share";
 import { captureRankingSnapshots } from "@/lib/intelligence/ranking-snapshots";
+import { detectCategoryChanges } from "@/lib/services/category-change";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -30,6 +31,9 @@ async function handle(request: Request) {
   try {
     const projection = await projectEvidenceToIntelligence(prisma);
     const pillars = await projectEvidenceToPillarScores(prisma, now);
+    // Raise admin-review proposals for any vendor whose new capabilities imply a
+    // role it doesn't hold (never auto-applied — surfaces in /admin/category-changes).
+    const categoryChanges = await detectCategoryChanges();
     const derive = await deriveVendorScores(now);
     const shareMovement = await deriveMarketShareMovement(now);
     const snapshot = await captureRankingSnapshots(now);
@@ -52,6 +56,11 @@ async function handle(request: Request) {
         vendorsUpdated: derive.vendorsUpdated,
         momentumRowsUpdated: derive.momentumRowsUpdated,
         scoreShifts: derive.scoreShifts,
+      },
+      categoryChangeProposals: {
+        scanned: categoryChanges.scanned,
+        created: categoryChanges.created,
+        createdFor: categoryChanges.createdFor,
       },
       snapshot,
       note:

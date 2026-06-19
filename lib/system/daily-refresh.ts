@@ -59,6 +59,7 @@ import { fetchLiveGitHubSignals } from "../reputation/live-github";
 import { fetchAllMacroSignals } from "../market-signals/live-macro";
 import { deriveVendorScores } from "./derive-scores";
 import { deriveMarketShareMovement } from "./derive-market-share";
+import { detectCategoryChanges } from "../services/category-change";
 import { checkAndSendWatchlistAlerts } from "../watchlist/notify";
 import {
   persistRefreshReport,
@@ -217,6 +218,16 @@ export async function runDailyRefresh(
       pillarVendorsTouched: pillar.vendorsTouched,
       pillarShifts: pillar.shifts.length,
     };
+  });
+
+  // ── 4b. Detect vendor category / role changes from new capabilities ──
+  //     Raises admin-review proposals when ingested evidence shows a vendor
+  //     gaining a capability that implies a role it doesn't hold. NEVER
+  //     auto-applied — an admin approves before the vendor's roleTags change.
+  await trackedStep("category_change_detection", async () => {
+    if (!dbConfigured) return { skipped: "no_database" };
+    const r = await detectCategoryChanges();
+    return r as unknown as Record<string, unknown>;
   });
 
   // ── 5. Derive headline scores from fresh evidence ──────────
