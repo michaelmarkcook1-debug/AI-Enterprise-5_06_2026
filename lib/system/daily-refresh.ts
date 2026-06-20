@@ -58,6 +58,7 @@ import { INVESTMENT_PROVIDERS } from "../investing/seed";
 import { fetchLiveGitHubSignals } from "../reputation/live-github";
 import { fetchAllMacroSignals } from "../market-signals/live-macro";
 import { deriveVendorScores } from "./derive-scores";
+import { seedEloPillarScores } from "./elo-scores";
 import { deriveMarketShareMovement } from "./derive-market-share";
 import { detectCategoryChanges } from "../services/category-change";
 import { checkAndSendWatchlistAlerts } from "../watchlist/notify";
@@ -229,6 +230,17 @@ export async function runDailyRefresh(
     if (!dbConfigured) return { skipped: "no_database" };
     const r = await detectCategoryChanges();
     return r as unknown as Record<string, unknown>;
+  });
+
+  // ── 4c. Model-quality pillar from Arena ELO ────────────────
+  //     Writes the model_quality pillar (openlm.ai Arena ELO, bare ids) so the
+  //     model-provider ranking reflects raw model capability. Must run BEFORE
+  //     derive_scores so overallScore folds it in this run. The evidence
+  //     projector never touches model_quality, so this is the only writer.
+  await trackedStep("model_quality_elo", async () => {
+    if (!dbConfigured) return { skipped: "no_database" };
+    const r = await seedEloPillarScores();
+    return { updated: r.updated, skipped: r.skipped, notFound: r.notFound.length };
   });
 
   // ── 5. Derive headline scores from fresh evidence ──────────

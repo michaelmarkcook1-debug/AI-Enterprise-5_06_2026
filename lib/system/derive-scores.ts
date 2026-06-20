@@ -16,16 +16,28 @@
 // scalars the UI actually reads.
 
 import { getPrisma, hasDatabase } from "../prisma";
-import { PILLARS, type PillarId } from "../types";
+import { PILLARS } from "../types";
 
 // Dashboard base weights are derived from the SAME canonical PILLARS source the
 // assessment engine starts from (lib/types.ts), so the two scoring pathways no
 // longer drift apart on a duplicated constant. The dashboard score is the
 // context-free baseline (these base weights); the per-buyer assessment engine
 // then layers industry + tier deltas on top — that's the legitimate difference.
-const PILLAR_WEIGHTS = Object.fromEntries(
-  PILLARS.map((p) => [p.id, p.defaultWeight]),
-) as Record<PillarId, number>;
+// Model quality (Arena ELO, written as a `model_quality` pillar row by
+// seedEloPillarScores) is folded into the dashboard ranking at a fixed weight,
+// with the canonical six scaled down to leave room for it, so a model
+// provider's overallScore reflects raw model capability — not just enterprise/
+// market pillars. Only model providers carry a model_quality row; derive-scores
+// normalizes by the weights of the pillars each vendor actually has, so a vendor
+// WITHOUT model_quality is simply scored over the six rebalanced base weights
+// (relative ranking unchanged). This is a dashboard-scoring concern only — the
+// canonical PILLARS set (and the per-buyer assessment engine) stays at six.
+const MODEL_QUALITY_WEIGHT = 0.2;
+const BASE_PILLAR_SCALE = 1 - MODEL_QUALITY_WEIGHT; // 0.80
+const PILLAR_WEIGHTS: Record<string, number> = {
+  ...Object.fromEntries(PILLARS.map((p) => [p.id, p.defaultWeight * BASE_PILLAR_SCALE])),
+  model_quality: MODEL_QUALITY_WEIGHT,
+};
 
 // Minimum distinct pillar rows before pillar average overrides overallScore.
 // Prevents a single sourcing run from crashing an ELO-anchored score.
@@ -114,7 +126,7 @@ export async function deriveVendorScores(now: Date = new Date()): Promise<Derive
   for (const p of pillarRows) {
     const a = agg.get(p.vendorId);
     if (!a) continue;
-    const w = PILLAR_WEIGHTS[p.pillar as PillarId] ?? 0;
+    const w = PILLAR_WEIGHTS[p.pillar] ?? 0;
     if (w === 0) continue;
     a.pillarWeightedSum += p.capabilityScore * w;
     a.pillarWeightSum += w;

@@ -97,3 +97,65 @@ export async function seedEloScores(): Promise<EloSeedResult> {
 
   return result;
 }
+
+export interface EloPillarSeedResult {
+  updated: number;
+  skipped: number;
+  notFound: string[];
+}
+
+/**
+ * Upsert the `model_quality` pillar row for every vendor in VENDOR_ELO_MAP from
+ * Arena ELO. This is the DURABLE path that makes ELO part of the model ranking:
+ * derive-scores folds the `model_quality` pillar into overallScore on every run
+ * (see MODEL_QUALITY_WEIGHT in derive-scores.ts), so ELO survives the daily
+ * recompute instead of being overwritten by it. Idempotent; BARE ids; skips
+ * vendors absent from the DB. The evidence projector never writes model_quality
+ * (no DomainId maps to it), so this row is never clobbered by sourcing.
+ */
+export async function seedEloPillarScores(): Promise<EloPillarSeedResult> {
+  if (!hasDatabase()) return { updated: 0, skipped: 0, notFound: [] };
+  const prisma = getPrisma();
+  const result: EloPillarSeedResult = { updated: 0, skipped: 0, notFound: [] };
+
+  for (const [vendorId, data] of Object.entries(VENDOR_ELO_MAP)) {
+    const score = normalizeElo(data.topTwoAvg);
+    const provenance = `Arena ELO top-2 avg ${data.topTwoAvg} (${data.top1}, ${data.top2})`;
+    try {
+      const existing = await prisma.intelligenceVendor.findUnique({
+        where: { id: vendorId },
+        select: { id: true },
+      });
+      if (!existing) {
+        result.notFound.push(vendorId);
+        result.skipped++;
+        continue;
+      }
+      await prisma.intelligencePillarScore.upsert({
+        where: { vendorId_pillar: { vendorId, pillar: "model_quality" } },
+        create: {
+          vendorId,
+          pillar: "model_quality",
+          capabilityScore: score,
+          evidenceGrade: "E4",
+          confidence: 90,
+          strengths: [provenance],
+          risks: [],
+          missingEvidence: [],
+        },
+        update: {
+          capabilityScore: score,
+          evidenceGrade: "E4",
+          confidence: 90,
+          strengths: [provenance],
+        },
+      });
+      result.updated++;
+    } catch (err) {
+      console.error(`[elo-scores] model_quality pillar upsert failed for ${vendorId}:`, err);
+      result.skipped++;
+    }
+  }
+
+  return result;
+}

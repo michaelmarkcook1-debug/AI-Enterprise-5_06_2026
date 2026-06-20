@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { seedEloScores, ARENA_ELO_SOURCE_URL, VENDOR_ELO_MAP, normalizeElo } from "@/lib/system/elo-scores";
+import { seedEloScores, seedEloPillarScores, ARENA_ELO_SOURCE_URL, VENDOR_ELO_MAP, normalizeElo } from "@/lib/system/elo-scores";
 
 export const dynamic = "force-dynamic";
 
@@ -30,10 +30,15 @@ export async function POST(req: NextRequest) {
   }
 
   try {
+    // Durable path: write the model_quality pillar so derive-scores folds ELO
+    // into overallScore on every recompute. Also nudge overallScore directly so
+    // the change is visible before the next derive run.
+    const pillarResult = await seedEloPillarScores();
     const result = await seedEloScores();
     return NextResponse.json({
       ok: true,
       source: ARENA_ELO_SOURCE_URL,
+      modelQualityPillar: pillarResult,
       ...result,
     });
   } catch (err) {
