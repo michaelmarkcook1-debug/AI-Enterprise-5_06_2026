@@ -28,7 +28,10 @@ export function normalizeElo(eloAvg: number): number {
 }
 
 // Top-2 Arena ELO average per vendor.
-// Key = IntelligenceVendor.id (DB format, with "vendor_" prefix).
+// Key = IntelligenceVendor.id — verified 2026-06-20 against the live DB, which
+// uses BARE ids (e.g. "anthropic", "alibaba", "zai"), NOT a "vendor_" prefix.
+// Note id≠slug for three: Alibaba/Qwen→"alibaba", Moonshot/Kimi→"moonshot",
+// Zhipu/GLM (now Z.ai)→"zai".
 // Fetched: 2026-06-20 from https://openlm.ai/chatbot-arena/
 // Update this map each time the leaderboard is refreshed; bump fetchedAt.
 export const VENDOR_ELO_MAP: Record<string, {
@@ -37,16 +40,16 @@ export const VENDOR_ELO_MAP: Record<string, {
   top2: string;
   fetchedAt: string;
 }> = {
-  "vendor_anthropic":     { topTwoAvg: 1508.0, top1: "Claude Fable 5 (1510)",           top2: "Claude Opus 4.8 Thinking (1506)", fetchedAt: "2026-06-20" },
-  "vendor_openai":        { topTwoAvg: 1500.5, top1: "GPT-5.5-high (1506)",              top2: "GPT-5.4-high (1495)",             fetchedAt: "2026-06-20" },
-  "vendor_xai":           { topTwoAvg: 1489.0, top1: "Grok-4.20 (1496)",                 top2: "Grok-4.1-Thinking (1482)",        fetchedAt: "2026-06-20" },
-  "vendor_alibaba-qwen":  { topTwoAvg: 1476.0, top1: "Qwen3.7-Max (1486)",               top2: "Qwen3.5-Max (1466)",              fetchedAt: "2026-06-20" },
-  "vendor_zhipu-glm":     { topTwoAvg: 1477.5, top1: "GLM-5.2 (1488)",                   top2: "GLM-5.1 (1467)",                  fetchedAt: "2026-06-20" },
-  "vendor_moonshot-kimi": { topTwoAvg: 1458.5, top1: "Kimi-K2.6-Thinking (1466)",        top2: "Kimi-K2.5-Thinking (1451)",       fetchedAt: "2026-06-20" },
-  "vendor_deepseek":      { topTwoAvg: 1456.0, top1: "DeepSeek-V4-Pro (1467)",           top2: "DeepSeek-V4-Flash (1445)",        fetchedAt: "2026-06-20" },
-  "vendor_mistral":       { topTwoAvg: 1414.5, top1: "Mistral Large 3 (1428)",           top2: "Mistral Medium 3.1 (1401)",       fetchedAt: "2026-06-20" },
-  "vendor_meta":          { topTwoAvg: 1388.5, top1: "Muse Spark (1485)",                top2: "Llama-4-Maverick (1292)",         fetchedAt: "2026-06-20" },
-  "vendor_cohere":        { topTwoAvg: 1280.0, top1: "Command A 03-2025 (1327)",         top2: "Command R+ 08-2024 (1233)",       fetchedAt: "2026-06-20" },
+  "anthropic": { topTwoAvg: 1508.0, top1: "Claude Fable 5 (1510)",    top2: "Claude Opus 4.8 Thinking (1506)", fetchedAt: "2026-06-20" },
+  "openai":    { topTwoAvg: 1500.5, top1: "GPT-5.5-high (1506)",       top2: "GPT-5.4-high (1495)",             fetchedAt: "2026-06-20" },
+  "xai":       { topTwoAvg: 1489.0, top1: "Grok-4.20 (1496)",          top2: "Grok-4.1-Thinking (1482)",        fetchedAt: "2026-06-20" },
+  "alibaba":   { topTwoAvg: 1476.0, top1: "Qwen3.7-Max (1486)",        top2: "Qwen3.5-Max (1466)",              fetchedAt: "2026-06-20" },
+  "zai":       { topTwoAvg: 1477.5, top1: "GLM-5.2 (1488)",            top2: "GLM-5.1 (1467)",                  fetchedAt: "2026-06-20" },
+  "moonshot":  { topTwoAvg: 1458.5, top1: "Kimi-K2.6-Thinking (1466)", top2: "Kimi-K2.5-Thinking (1451)",       fetchedAt: "2026-06-20" },
+  "deepseek":  { topTwoAvg: 1456.0, top1: "DeepSeek-V4-Pro (1467)",    top2: "DeepSeek-V4-Flash (1445)",        fetchedAt: "2026-06-20" },
+  "mistral":   { topTwoAvg: 1414.5, top1: "Mistral Large 3 (1428)",    top2: "Mistral Medium 3.1 (1401)",       fetchedAt: "2026-06-20" },
+  "meta":      { topTwoAvg: 1388.5, top1: "Muse Spark (1485)",         top2: "Llama-4-Maverick (1292)",         fetchedAt: "2026-06-20" },
+  "cohere":    { topTwoAvg: 1280.0, top1: "Command A 03-2025 (1327)",  top2: "Command R+ 08-2024 (1233)",       fetchedAt: "2026-06-20" },
 };
 
 export interface EloSeedResult {

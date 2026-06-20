@@ -119,8 +119,17 @@ export interface BackfillResult {
  * Safe to run repeatedly: existing (vendorId, snapshotDate) rows are
  * never overwritten (skipDuplicates), so a real "snapshot" row always
  * wins over a "backfill" row for the same day.
+ *
+ * `opts.vendorIds` restricts which vendors get rows WRITTEN — used to backfill
+ * only vendors that lack reconstructed history (e.g. ones added after the
+ * original table-wide backfill ran). The reconstruction itself is still built
+ * across the FULL roster so each day's rank is computed against the whole
+ * tracked universe, not just the subset being written.
  */
-export async function backfillRankingSnapshots(now: Date = new Date()): Promise<BackfillResult> {
+export async function backfillRankingSnapshots(
+  now: Date = new Date(),
+  opts: { vendorIds?: string[] } = {},
+): Promise<BackfillResult> {
   if (!hasDatabase()) {
     return { inserted: 0, vendors: 0, skipped: true, reason: "no DATABASE_URL" };
   }
@@ -129,11 +138,15 @@ export async function backfillRankingSnapshots(now: Date = new Date()): Promise<
     listIntelligenceVendors(),
     listVendorMomentum(),
   ]);
+  // Build across the whole roster so reconstructed daily ranks are correct,
+  // then write only the targeted vendors' rows below.
   const histories = buildRankingHistories(vendors, momentum, now);
+  const targetIds = opts.vendorIds ? new Set(opts.vendorIds) : null;
   const prisma = getPrisma();
 
   const rows = [];
   for (const history of histories.values()) {
+    if (targetIds && !targetIds.has(history.vendorId)) continue;
     for (const point of history.points) {
       rows.push({
         vendorId: history.vendorId,
@@ -153,7 +166,7 @@ export async function backfillRankingSnapshots(now: Date = new Date()): Promise<
     skipDuplicates: true,
   });
 
-  return { inserted: result.count, vendors: histories.size, skipped: false };
+  return { inserted: result.count, vendors: targetIds ? targetIds.size : histories.size, skipped: false };
 }
 
 interface SnapshotRow {

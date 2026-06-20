@@ -250,11 +250,26 @@ export async function runDailyRefresh(
   // ── 6. Ranking snapshot (incl. one-time backfill) ──────────
   await trackedStep("ranking_snapshot", async () => {
     if (!dbConfigured) return { skipped: "no_database" };
-    // Backfill only if the snapshot table is empty.
-    const existing = await getPrisma().vendorRankingSnapshot.count();
+    // Backfill reconstructed pre-history for any vendor that LACKS it. Originally
+    // this ran only when the whole table was empty, so vendors added after the
+    // first run never got reconstructed history → flat, stubby hover-trend lines.
+    // Now we target exactly the vendors with no backfill rows. Idempotent:
+    // createMany(skipDuplicates) protects existing backfill rows and real captures.
+    const prisma = getPrisma();
+    const [haveBackfillRows, allVendors] = await Promise.all([
+      prisma.vendorRankingSnapshot.findMany({
+        where: { source: "backfill" },
+        select: { vendorId: true },
+        distinct: ["vendorId"],
+      }),
+      prisma.intelligenceVendor.findMany({ select: { id: true } }),
+    ]);
+    const haveBackfill = new Set(haveBackfillRows.map((r) => r.vendorId));
+    const needBackfill = allVendors.map((v) => v.id).filter((id) => !haveBackfill.has(id));
+
     let backfill: { inserted: number; vendors: number; ran: boolean } = { inserted: 0, vendors: 0, ran: false };
-    if (existing === 0) {
-      const r = await backfillRankingSnapshots(now);
+    if (needBackfill.length > 0) {
+      const r = await backfillRankingSnapshots(now, { vendorIds: needBackfill });
       backfill = { inserted: r.inserted, vendors: r.vendors, ran: true };
     }
     const capture = await captureRankingSnapshots(now);
