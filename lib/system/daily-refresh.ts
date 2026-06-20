@@ -32,6 +32,7 @@
 // visible to a refresh — no cache invalidation step is needed.
 
 import { runSourcing } from "../sourcing/runner";
+import { runWebEvidenceSweep } from "../sourcing/web-evidence-runner";
 import { runNewsSourcing } from "../sourcing/news-runner";
 import { runMarketNewsIngestion } from "../sourcing/market-news-runner";
 import { SOURCE_MANIFEST } from "../sourcing/manifest";
@@ -178,6 +179,27 @@ export async function runDailyRefresh(
       tokensIn: r.totals.tokensIn,
       tokensOut: r.totals.tokensOut,
       estimatedCostUsd: r.totals.estimatedCostUsd,
+    };
+  });
+
+  // ── 1b. Roster-driven web_search evidence (weekly; cost-tiered) ──
+  //     Discovers REAL, cited sources for EVERY vendor in the live roster across
+  //     the pillar domains, so vendors without curated manifest URLs still accrue
+  //     real evidence instead of floating at an un-audited seed baseline. Feeds
+  //     the same triage → projection → pillar path as manifest sourcing. Weekly
+  //     to bound web_search cost (or on a forced run).
+  await trackedStep("web_evidence", async () => {
+    if (!dbConfigured) return { skipped: "no_database" };
+    if (!isWeekly) return { skipped: "weekly-only step (skipped on daily run)" };
+    const vendors = await getPrisma().intelligenceVendor.findMany({ select: { id: true, name: true } });
+    const r = await runWebEvidenceSweep(vendors);
+    return {
+      vendorsAttempted: r.vendorsAttempted,
+      vendorsWithFindings: r.vendorsWithFindings,
+      proposalsPersisted: r.proposalsPersisted,
+      totalSearches: r.totalSearches,
+      errorCount: r.errors.length,
+      firstError: r.errors[0]?.error,
     };
   });
 
