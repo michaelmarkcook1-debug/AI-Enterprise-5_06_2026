@@ -1,17 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server";
+import { isAdminRequest } from "@/lib/admin-auth";
 import { seedEloScores, seedEloPillarScores, ARENA_ELO_SOURCE_URL, VENDOR_ELO_MAP, normalizeElo } from "@/lib/system/elo-scores";
 
 export const dynamic = "force-dynamic";
-
-function isCronOrAdminRequest(req: NextRequest): boolean {
-  const auth = req.headers.get("authorization") ?? "";
-  const cronSecret = process.env.CRON_SECRET ?? "";
-  if (cronSecret && auth === `Bearer ${cronSecret}`) return true;
-  const adminKey = process.env.ADMIN_API_KEY ?? "";
-  if (adminKey && auth === `Bearer ${adminKey}`) return true;
-  if (process.env.NODE_ENV !== "production") return true;
-  return false;
-}
 
 export async function GET(req: NextRequest) {
   // Preview mode — return current ELO table without writing anything.
@@ -25,7 +16,7 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  if (!isCronOrAdminRequest(req)) {
+  if (!isAdminRequest(req)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
