@@ -27,6 +27,10 @@ const PILLAR_WEIGHTS = Object.fromEntries(
   PILLARS.map((p) => [p.id, p.defaultWeight]),
 ) as Record<PillarId, number>;
 
+// Minimum distinct pillar rows before pillar average overrides overallScore.
+// Prevents a single sourcing run from crashing an ELO-anchored score.
+const MIN_PILLAR_COUNT = 3;
+
 /** Cut-off windows used by the velocity inputs. */
 const NEWS_WINDOW_DAYS = 30;
 const CAPABILITY_WINDOW_DAYS = 30;
@@ -158,10 +162,10 @@ export async function deriveVendorScores(now: Date = new Date()): Promise<Derive
   for (const v of vendors) {
     const a = agg.get(v.id)!;
 
-    // Overall score: weighted pillar average (0-100). When a vendor
-    // has no pillar coverage we leave the score alone — don't blow
-    // up a seeded score with a 0.
-    const newOverall = a.pillarWeightSum > 0
+    // Overall score: weighted pillar average (0-100). Requires MIN_PILLAR_COUNT
+    // distinct pillar rows before overriding — a single write from one sourcing
+    // run cannot crash an ELO-anchored or analyst-seeded score.
+    const newOverall = a.pillarCount >= MIN_PILLAR_COUNT && a.pillarWeightSum > 0
       ? clamp(a.pillarWeightedSum / a.pillarWeightSum, 0, 100)
       : v.overallScore;
 

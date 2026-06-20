@@ -35,7 +35,14 @@ const KNOWN_BANDS: InfraBand[] = ["silicon", "cloud_compute", "neocloud", "infer
 // scale-compressed at construction. The DB stores no per-role columns, so we
 // attach these to live entities — making per-role compression, category lenses
 // and role breakdowns work in production rather than only on the seed fallback.
-const STATIC_ROLE_SCORES_BY_ID = new Map(ENTITIES.map((e) => [e.id, e.roleScores]));
+//
+// The DB uses a "vendor_" prefix on IDs (e.g. "vendor_openai") while the
+// static roster uses bare IDs ("openai"). Both forms are indexed so the lookup
+// always hits regardless of which format v.id arrives in.
+const STATIC_ROLE_SCORES_BY_ID = new Map<string, typeof ENTITIES[number]["roleScores"]>([
+  ...ENTITIES.map((e) => [e.id, e.roleScores] as [string, typeof e.roleScores]),
+  ...ENTITIES.map((e) => [`vendor_${e.id}`, e.roleScores] as [string, typeof e.roleScores]),
+]);
 
 const clamp = (n: number, lo = 0, hi = 100) => Math.max(lo, Math.min(hi, Math.round(n)));
 const asRole = (s: string): Role | null => (KNOWN_ROLES.includes(s as Role) ? (s as Role) : null);

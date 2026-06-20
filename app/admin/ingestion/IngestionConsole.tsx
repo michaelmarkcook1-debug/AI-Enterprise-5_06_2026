@@ -65,6 +65,11 @@ export default function IngestionConsole({
   const [recomputeResult, setRecomputeResult] = useState<string | null>(null);
   const [recomputeError, setRecomputeError] = useState<string | null>(null);
 
+  // ── Arena ELO seed state (openlm.ai/chatbot-arena/) ─────────────────────
+  const [busyElo, setBusyElo] = useState(false);
+  const [eloResult, setEloResult] = useState<string | null>(null);
+  const [eloError, setEloError] = useState<string | null>(null);
+
   // ── News sourcing state ─────────────────────────────────────────────────
   const [busyNews, setBusyNews] = useState(false);
   const [newsResult, setNewsResult] = useState<string | null>(null);
@@ -362,7 +367,28 @@ export default function IngestionConsole({
     }
   }
 
-  const anyBusy = busyAll || busyNews || busyManual || busyMarket || busyRecompute;
+  async function updateEloScores() {
+    setBusyElo(true);
+    setEloError(null);
+    setEloResult(null);
+    try {
+      const res = await fetch(`/api/admin/elo/seed`, {
+        method: "POST",
+        headers: token ? { "x-admin-token": token } : {},
+      });
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(body.error ?? `HTTP ${res.status}`);
+      setEloResult(
+        `${body.updated ?? 0} vendors updated · ${body.notFound?.length ?? 0} not found in DB`,
+      );
+    } catch (e) {
+      setEloError((e as Error).message);
+    } finally {
+      setBusyElo(false);
+    }
+  }
+
+  const anyBusy = busyAll || busyNews || busyManual || busyMarket || busyRecompute || busyElo;
 
   return (
     <div className="min-h-screen bg-[#f6f1e3] dark:bg-[#071827] text-[#15263c] dark:text-[#eef3f8]">
@@ -418,6 +444,38 @@ export default function IngestionConsole({
           </div>
           {recomputeResult && !busyRecompute && <ResultBanner text={recomputeResult} />}
           {recomputeError && <ErrorBanner text={recomputeError} />}
+        </div>
+
+        {/* ── ARENA ELO: seed Model Provider overallScores from benchmark ─ */}
+        <div className="mt-6 rounded-2xl border border-[#d6c9a8] dark:border-[#2a4a6b] bg-white dark:bg-[#0c2238] p-6 shadow-sm">
+          <div className="text-[10px] font-semibold uppercase tracking-wider text-[#4c5d75]">
+            Benchmark anchor · Model Provider scoring
+          </div>
+          <h2 className="mt-1 text-lg font-semibold text-[#15263c] dark:text-[#eef3f8]">
+            Update Arena ELO scores
+          </h2>
+          <p className="mt-1 text-sm text-[#3f5068] dark:text-[#a7bacd]">
+            Seeds <code className="font-mono text-xs">overallScore</code> for each Model Provider vendor from the top-2 Arena ELO average per vendor.
+            Source:{" "}
+            <a href="https://openlm.ai/chatbot-arena/" target="_blank" rel="noopener noreferrer"
+              className="underline hover:text-[#15263c] dark:hover:text-white">
+              openlm.ai/chatbot-arena/
+            </a>
+            . Fixed anchors (ELO 1050→30, ELO 1510→95) — stable as new vendors enter the leaderboard.
+            The <code className="font-mono text-xs">derive-scores</code> cron will not override these until a vendor has ≥3 pillar evidence rows.
+          </p>
+          <div className="mt-4 flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              disabled={anyBusy}
+              onClick={() => updateEloScores()}
+              className="inline-flex items-center gap-2 rounded-full bg-[#0c2238] px-5 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#1d3a5f] disabled:opacity-40 dark:bg-[#1d3a5f] dark:hover:bg-[#2a4a6b]"
+            >
+              {busyElo ? <><SpinIcon />Updating ELO scores…</> : <>Seed Arena ELO scores <span aria-hidden>→</span></>}
+            </button>
+          </div>
+          {eloResult && !busyElo && <ResultBanner text={eloResult} />}
+          {eloError && <ErrorBanner text={eloError} />}
         </div>
 
         {/* ── PRIMARY: rolling ingest ─────────────────────────────────── */}
