@@ -109,6 +109,12 @@ export type Entity = {
   cioInterpretation: string;
   evidenceGrade: "E1" | "E2" | "E3" | "E4" | "E5";
   dataCaveats: string;
+  // Evidence depth + honesty band. evidenceDepth = count of analyst_verified
+  // EvidenceRecord rows backing this vendor (0 = pure seed, no verified data).
+  // dataConfidence is derived from it (see evidenceDepthBand) so every surface
+  // can mark un-evidenced scores instead of presenting them as authoritative.
+  evidenceDepth: number;
+  dataConfidence: "verified" | "limited" | "seed";
   // Optional infra sub-band (primary + optional secondary), for the
   // Silicon / Cloud / Neocloud grouping. Absent = not yet banded.
   infraBand?: InfraBand;
@@ -273,10 +279,26 @@ export function entity(
     cioInterpretation,
     evidenceGrade,
     dataCaveats,
+    // The static roster carries no DB-verified evidence by definition, so it is
+    // honestly labelled 'seed'. The live adapter overrides these from real
+    // analyst_verified counts.
+    evidenceDepth: 0,
+    dataConfidence: "seed",
     infraBand: bands?.infraBand,
     infraBandSecondary: bands?.infraBandSecondary,
     roleScores,
   };
+}
+
+/**
+ * Single source of truth for the evidence-confidence band. Driven by the count
+ * of analyst_verified EvidenceRecord rows backing a vendor:
+ *   ≥10 verified · 1–9 limited · 0 seed (no verified evidence).
+ * Both the live adapter and any static labelling import this so the thresholds
+ * never drift.
+ */
+export function evidenceDepthBand(depth: number): Entity["dataConfidence"] {
+  return depth >= 10 ? "verified" : depth >= 1 ? "limited" : "seed";
 }
 
 export const ENTITIES: Entity[] = [

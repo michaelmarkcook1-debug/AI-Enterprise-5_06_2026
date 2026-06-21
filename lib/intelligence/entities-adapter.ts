@@ -22,6 +22,7 @@ import {
   rolesFor,
   roleLeadership,
   rankingLeadership,
+  evidenceDepthBand,
 } from "./entities";
 
 const KNOWN_ROLES: Role[] = [
@@ -83,12 +84,17 @@ export async function getEntities(): Promise<Entity[]> {
 
 async function getEntitiesFromDB(): Promise<Entity[]> {
   const prisma = getPrisma();
-  const [rows, momentum, pillars, shares, snapshots] = await Promise.all([
+  const [rows, momentum, pillars, shares, snapshots, evidenceDepthRows] = await Promise.all([
     prisma.intelligenceVendor.findMany(),
     prisma.vendorMomentum.findMany(),
     prisma.intelligencePillarScore.findMany({ where: { pillar: "enterprise_control" } }),
     prisma.marketShareEstimate.findMany({ select: { vendorId: true, estimatedShare: true } }),
     prisma.vendorRankingSnapshot.findMany({ orderBy: { snapshotDate: "desc" }, select: { vendorId: true, overallScore: true, momentumScore: true, rank: true } }),
+    // Evidence depth = analyst_verified EvidenceRecord rows per vendor. This is
+    // the honest signal that distinguishes a measured score from a pure seed
+    // estimate (confidenceScore alone cannot — a 0-evidence vendor still sits
+    // at ~50-64). Bare vendor ids match v.id.
+    prisma.evidenceRecord.groupBy({ by: ["vendorId"], where: { reviewStatus: "analyst_verified" }, _count: { _all: true } }).catch(() => [] as { vendorId: string; _count: { _all: number } }[]),
   ]);
 
   // Latest momentum row per vendor (period sorts lexically; W-weeks are safe).
@@ -98,6 +104,8 @@ async function getEntitiesFromDB(): Promise<Entity[]> {
     if (!cur || m.period > cur.period) momentumByVendor.set(m.vendorId, m);
   }
   const controlPillarByVendor = new Map(pillars.map((p) => [p.vendorId, p.capabilityScore]));
+  const evidenceDepthByVendor = new Map<string, number>();
+  for (const r of evidenceDepthRows) evidenceDepthByVendor.set(r.vendorId, r._count._all);
 
   // Raw market-share sum per vendor → normalised to a global usage share.
   const rawShareByVendor = new Map<string, number>();
@@ -198,6 +206,8 @@ async function getEntitiesFromDB(): Promise<Entity[]> {
       cioInterpretation: v.cioInterpretation ?? v.analystInterpretation ?? "",
       evidenceGrade: (v.evidenceGrade as Entity["evidenceGrade"]) ?? evidenceFromConfidence(confidence),
       dataCaveats: v.dataCaveats ?? "Directional, evidence-labelled estimate derived from live signals.",
+      evidenceDepth: evidenceDepthByVendor.get(v.id) ?? 0,
+      dataConfidence: evidenceDepthBand(evidenceDepthByVendor.get(v.id) ?? 0),
       infraBand: asBand(v.infraBand),
       infraBandSecondary: asBand(v.infraBandSecondary),
       roleScores,

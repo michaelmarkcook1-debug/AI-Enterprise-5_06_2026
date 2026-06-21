@@ -69,6 +69,42 @@ export function SeedDataBadge({
   );
 }
 
+/**
+ * Honest evidence-depth marker. Driven by the count of analyst_verified
+ * EvidenceRecord rows behind a vendor's scores (see entities.ts evidenceDepthBand):
+ *   ≥10 verified → renders nothing (score is source-backed),
+ *   1–9 limited  → amber "Limited evidence (n verified)",
+ *   0  seed      → rose "Seed estimate — no verified evidence".
+ * Use it next to any authoritative score so an un-evidenced number is never
+ * presented as fact. Pair with lowEvidenceClass() to de-emphasise the row.
+ */
+export function EvidenceDepthBadge({ depth }: { depth: number }) {
+  if (depth >= 10) return null;
+  const seed = depth <= 0;
+  const tone = seed
+    ? "border-rose-400 bg-rose-50 text-rose-900 dark:border-rose-700 dark:bg-rose-950/50 dark:text-rose-200"
+    : "border-amber-400 bg-amber-50 text-amber-900 dark:border-amber-700 dark:bg-amber-950/40 dark:text-amber-200";
+  const text = seed ? "Seed estimate — no verified evidence" : `Limited evidence (${depth} verified)`;
+  const tooltip = seed
+    ? "This vendor's scores are seed estimates with NO analyst-verified evidence behind them. Treat as directional only."
+    : `Only ${depth} analyst-verified evidence row${depth === 1 ? "" : "s"} back these scores — treat as preliminary.`;
+  return (
+    <span
+      className={`inline-flex items-center gap-1 rounded border px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${tone}`}
+      title={tooltip}
+    >
+      <span aria-hidden className={`inline-block h-1.5 w-1.5 rounded-full ${seed ? "bg-rose-500" : "bg-amber-500"}`} />
+      {text}
+    </span>
+  );
+}
+
+/** Tailwind opacity class to de-emphasise a low-evidence row (never hide it). */
+export function lowEvidenceClass(depth: number): string {
+  if (depth >= 10) return "";
+  return depth <= 0 ? "opacity-60" : "opacity-80";
+}
+
 // Confidence badge removed per product decision — scores were noisy and
 // drew attention from the headline rank. The component is kept as a
 // no-op so every existing `<Confidence value={...} />` call site
