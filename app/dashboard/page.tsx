@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { AppShell } from "@/components/app-shell";
-import { Confidence, EstimatedNote, Metric, Panel, ScoreBar, SeedDataBadge } from "@/components/intelligence-ui";
+import { Confidence, EstimatedNote, Metric, Panel, ScoreBar, SeedDataBadge, EvidenceDepthBadge, lowEvidenceClass } from "@/components/intelligence-ui";
 import { OwnershipLegend, VendorNameWithOwnership } from "@/components/ownership-indicator";
 import { marketMoverStatus, momentumStatus } from "@/lib/intelligence/metrics";
 import { getMarketDashboard, listIntelligenceVendors, listVendorMomentum } from "@/lib/intelligence/repository";
@@ -68,10 +68,13 @@ export default async function DashboardPage() {
                       <VendorNameWithOwnership name={vendor.name} ownershipType={vendor.ownershipType} />
                     </div>
                     <div className="text-xs text-[#5d6b80] dark:text-[#8fa5bb]">{vendor.category} - {vendor.marketPosition}</div>
+                    {vendor.dataConfidence !== "verified" && (
+                      <div className="mt-1"><EvidenceDepthBadge depth={vendor.evidenceDepth ?? 0} /></div>
+                    )}
                   </div>
-                  <div className="text-right">
+                  <div className={`text-right ${lowEvidenceClass(vendor.evidenceDepth ?? 0)}`}>
                     <div className="font-mono text-lg font-semibold dark:text-[#eef3f8]">{vendor.overallScore}</div>
-                    <Confidence value={vendor.confidenceScore} />
+                    <div className="text-[10px] font-mono text-[#8a9382] dark:text-[#7d93aa]">{(vendor.evidenceDepth ?? 0) > 0 ? `${vendor.evidenceDepth}✓ evidence` : "0 evidence"}</div>
                   </div>
                 </Link>
               ))}
@@ -93,7 +96,7 @@ export default async function DashboardPage() {
                         <div className="text-sm font-medium">
                           <VendorNameWithOwnership name={item.vendor.name} ownershipType={item.vendor.ownershipType} />
                         </div>
-                        <Confidence value={item.confidence} />
+                        {item.vendor.dataConfidence !== "verified" && <EvidenceDepthBadge depth={item.vendor.evidenceDepth ?? 0} />}
                       </div>
                       <div className="mt-1 text-xs leading-5 text-[#54647a] dark:text-[#a7bacd]">{item.reason}</div>
                     </div>
@@ -116,7 +119,7 @@ export default async function DashboardPage() {
                         <div className="text-sm font-medium">
                           <VendorNameWithOwnership name={item.vendor.name} ownershipType={item.vendor.ownershipType} />
                         </div>
-                        <Confidence value={item.confidence} />
+                        {item.vendor.dataConfidence !== "verified" && <EvidenceDepthBadge depth={item.vendor.evidenceDepth ?? 0} />}
                       </div>
                       <div className="mt-1 text-xs leading-5 text-[#54647a] dark:text-[#a7bacd]">{item.reason}</div>
                     </div>

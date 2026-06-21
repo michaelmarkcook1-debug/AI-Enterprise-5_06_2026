@@ -51,6 +51,7 @@ import {
   watchlistsMockRepository,
 } from "./mock-repositories";
 import { calculateRiskPenalty, riskStatusForVendor } from "./metrics";
+import { evidenceDepthBand } from "./entities";
 
 let dbFallbackWarningShown = false;
 
@@ -761,14 +762,41 @@ export async function createWatchlist(input: Omit<Watchlist, "id" | "createdAt">
   );
 }
 
+/**
+ * Per-vendor count of analyst_verified EvidenceRecord rows — the honest
+ * evidence-depth signal. Shared by the dashboard, understand, vendor-detail and
+ * export surfaces so they all use ONE query + threshold. Returns an empty Map
+ * with no database (the seed/no-DB path is honestly all-seed). Read-only.
+ */
+export async function getEvidenceDepthByVendor(): Promise<Map<string, number>> {
+  if (!hasDatabase()) return new Map();
+  try {
+    const rows = await getPrisma().evidenceRecord.groupBy({
+      by: ["vendorId"],
+      where: { reviewStatus: "analyst_verified" },
+      _count: { _all: true },
+    });
+    return new Map(rows.map((r) => [r.vendorId, r._count._all]));
+  } catch {
+    return new Map();
+  }
+}
+
 export async function getMarketDashboard(): Promise<MarketDashboard> {
-  const [vendors, shares, categories, momentum, news] = await Promise.all([
+  const [vendorsRaw, shares, categories, momentum, news, evidenceDepthByVendor] = await Promise.all([
     listIntelligenceVendors(),
     listMarketShareEstimates(),
     listMarketCategories(),
     listVendorMomentum(),
     listNewsItems(),
+    getEvidenceDepthByVendor(),
   ]);
+  // Attach the evidence-depth honesty signal to every vendor so all dashboard
+  // panels can mark un-evidenced scores (a 0-depth vendor is a seed estimate).
+  const vendors = vendorsRaw.map((vendor) => {
+    const evidenceDepth = evidenceDepthByVendor.get(vendor.id) ?? 0;
+    return { ...vendor, evidenceDepth, dataConfidence: evidenceDepthBand(evidenceDepth) };
+  });
   const vendorById = new Map(vendors.map((vendor) => [vendor.id, vendor]));
   const topVendors = [...vendors].sort(byScoreDesc).slice(0, 8);
   const momentumByVendor = new Map(momentum.map((row) => [row.vendorId, row]));

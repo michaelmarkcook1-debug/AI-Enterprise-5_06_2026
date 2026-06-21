@@ -64,6 +64,11 @@ export interface Vendor {
   // Optional secondary infra band for entities straddling two layers
   // (e.g. NVIDIA = silicon + neocloud; Cerebras = silicon + inference).
   infraBandSecondary?: string;
+  // Optional evidence-depth honesty signal (count of analyst_verified
+  // EvidenceRecord rows + derived band). Attached by getMarketDashboard so the
+  // dashboard panels can mark un-evidenced scores. Absent = not yet computed.
+  evidenceDepth?: number;
+  dataConfidence?: "verified" | "limited" | "seed";
 }
 
 export interface VendorPillarScore {
