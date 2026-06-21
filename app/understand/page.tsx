@@ -16,7 +16,7 @@
 import Link from "next/link";
 import { PageFrame } from "@/components/app-shell";
 import DataSourceRail from "@/components/data-source-rail";
-import { Confidence, Panel, ScoreBar } from "@/components/intelligence-ui";
+import { Panel, ScoreBar, EvidenceDepthBadge } from "@/components/intelligence-ui";
 import { OwnershipLegend, VendorNameWithOwnership } from "@/components/ownership-indicator";
 import CapabilityMatrix, { type MatrixCell } from "@/components/understand/CapabilityMatrix";
 import ExposureMapHero from "@/components/dashboard/ExposureMapHero";
@@ -25,6 +25,7 @@ import {
   listIntelligenceVendors,
   listVendorCapabilities,
   listVendorMomentum,
+  getEvidenceDepthByVendor,
 } from "@/lib/intelligence/repository";
 import {
   capabilityRenderState,
@@ -53,6 +54,7 @@ export default async function UnderstandPage() {
     momentum,
     connectors,
     provenance,
+    evidenceDepthByVendor,
   ] = await Promise.all([
     listCapabilities(),
     listVendorCapabilities(),
@@ -60,6 +62,7 @@ export default async function UnderstandPage() {
     listVendorMomentum(),
     Promise.resolve(listConnectorHealth()),
     getDataProvenance(),
+    getEvidenceDepthByVendor(),
   ]);
 
   const vendorsRanked = [...vendors].sort((a, b) => b.overallScore - a.overallScore);
@@ -321,6 +324,7 @@ export default async function UnderstandPage() {
           <div className="divide-y divide-[#efe9d9] dark:divide-[#1d3a57]">
             {vendorsRanked.map((vendor) => {
               const mom = momentumByVendor.get(vendor.id);
+              const depth = evidenceDepthByVendor.get(vendor.id) ?? 0;
               return (
                 <Link
                   key={vendor.id}
@@ -328,17 +332,18 @@ export default async function UnderstandPage() {
                   className="grid gap-4 py-4 md:grid-cols-[1fr_160px_160px] md:items-center"
                 >
                   <div>
-                    <div className="text-base font-semibold text-[#13294b] dark:text-[#eef3f8]">
+                    <div className="flex flex-wrap items-center gap-2 text-base font-semibold text-[#13294b] dark:text-[#eef3f8]">
                       <VendorNameWithOwnership name={vendor.name} ownershipType={vendor.ownershipType} compactBadge={false} />
+                      {depth < 10 && <EvidenceDepthBadge depth={depth} />}
                     </div>
                     <div className="mt-1 text-sm text-[#54647a] dark:text-[#a7bacd]">{vendor.category} · {vendor.marketPosition}</div>
                     <div className="mt-2 text-xs leading-5 text-[#5d6b80] dark:text-[#8fa5bb]">{vendor.description}</div>
                   </div>
-                  <div>
+                  <div className={depth < 10 ? (depth <= 0 ? "opacity-60" : "opacity-80") : ""}>
                     <ScoreBar label="Overall" value={vendor.overallScore} />
                   </div>
                   <div className="md:text-right">
-                    <Confidence value={vendor.confidenceScore} />
+                    <div className="text-xs text-[#5d6b80] dark:text-[#8fa5bb]">{depth > 0 ? `${depth}✓ evidence` : "0 evidence"}</div>
                     <div className="mt-2 text-xs text-[#5d6b80] dark:text-[#8fa5bb]">Momentum {mom?.momentumScore ?? 0}/100</div>
                   </div>
                 </Link>

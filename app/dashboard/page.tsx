@@ -146,7 +146,9 @@ export default async function DashboardPage() {
                       </span>
                     </div>
                     <div className="text-xs leading-5 text-[#5d6b80] dark:text-[#a7bacd]">{item.reason}</div>
-                    <div className="mt-1"><Confidence value={item.confidence} /></div>
+                    {item.vendor.dataConfidence !== "verified" && (
+                      <div className="mt-1"><EvidenceDepthBadge depth={item.vendor.evidenceDepth ?? 0} /></div>
+                    )}
                   </div>
                 );
               })}
@@ -162,7 +164,10 @@ export default async function DashboardPage() {
                     {category.leaders.map(({ vendor, estimate }) => (
                       <div key={`${category.category.id}_${vendor.id}`}>
                         <div className="flex items-center justify-between gap-3 text-sm dark:text-[#d8e2ec]">
-                          <span><VendorNameWithOwnership name={vendor.name} ownershipType={vendor.ownershipType} /></span>
+                          <span className="inline-flex items-center gap-1.5">
+                            <VendorNameWithOwnership name={vendor.name} ownershipType={vendor.ownershipType} />
+                            {vendor.dataConfidence === "seed" && <EvidenceDepthBadge depth={vendor.evidenceDepth ?? 0} />}
+                          </span>
                           <span className="font-mono">{estimate.estimatedShare}%</span>
                         </div>
                         <div className="mt-1 flex items-center justify-between gap-2">
