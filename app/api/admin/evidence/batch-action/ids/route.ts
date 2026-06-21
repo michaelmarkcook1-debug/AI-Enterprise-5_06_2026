@@ -25,6 +25,15 @@ export async function GET(request: Request) {
   if (!hasDatabase()) return Response.json({ ids: [] });
 
   const url = new URL(request.url);
+  // Which triage lane the operator is bulk-acting on. Defaults to the safe
+  // recommend_approve cohort; other lanes are honoured so "Auto-process all N"
+  // actually targets the rows the UI shows (the previous hard-coded
+  // recommend_approve filter made the button a silent no-op on other lanes).
+  const requestedLane = url.searchParams.get("lane");
+  const lane =
+    requestedLane === "human_review_required" || requestedLane === "recommend_reject"
+      ? requestedLane
+      : "recommend_approve";
   const filters: BatchReviewFilters = {
     vendorId: url.searchParams.get("vendor") || undefined,
     confidenceBand:
@@ -76,7 +85,18 @@ export async function GET(request: Request) {
         classifierConfidence: p.classifierConfidence,
         confidenceIsFallback: fallback,
       });
-      if (decision.lane !== "recommend_approve") continue;
+      if (decision.lane !== lane) continue;
+
+      // Factual-integrity floor: never bulk-promote genuinely unverifiable rows,
+      // even when an operator bulk-approves the human_review lane. Missing source,
+      // E0 evidence, an unsafe category, or a flagged source conflict must be
+      // resolved per-row — they can never become "analyst_verified" in bulk.
+      if (lane !== "recommend_approve") {
+        const hardBlocked = decision.reasons.some((r) =>
+          /missing source|E0 evidence|unsafe category|source conflict/i.test(r),
+        );
+        if (hardBlocked) continue;
+      }
 
       const linkage = suggestLinkage(
         {

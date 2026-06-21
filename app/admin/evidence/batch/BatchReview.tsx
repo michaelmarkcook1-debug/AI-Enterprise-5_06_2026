@@ -100,15 +100,23 @@ export default function BatchReview({ result, filters, paging, hasDatabase }: Pr
   }
 
   function confirmAndBulk(action: "approve" | "reject" | "defer", ids: string[], scope: string) {
-    if (ids.length === 0) return;
-    // Auto-process approve actions without a confirm dialog — operators
-    // asked for one-click batch ingest. Reject/Defer still confirm
-    // because they're irreversible per-row decisions that can hide
-    // signal. The `scope` arg is kept so the bulk progress strip can
-    // still show what's being processed.
+    if (ids.length === 0) {
+      // Honest feedback instead of a silent no-op — e.g. nothing matched after
+      // the factual-integrity floor excluded unverifiable rows on this lane.
+      setError(`Nothing to ${action}: 0 rows matched (${scope}). Rows missing a source, E0, or in an unsafe category are excluded from bulk approval.`);
+      return;
+    }
+    setError(null);
+    // Small same-page approve batches stay one-click (operators asked for it).
+    // Reject/Defer always confirm (irreversible per-row), and any LARGE blanket
+    // approve (>20, i.e. an "auto-process all" / "all matching" run, including
+    // the human_review lane) confirms too — so hundreds of rows are never
+    // promoted to analyst_verified on an accidental click.
     if (action !== "approve") {
       const verb = action === "reject" ? "Reject" : "Defer";
       if (!window.confirm(`${verb} ${ids.length} proposal${ids.length === 1 ? "" : "s"} (${scope})?\n\nThis is irreversible. Continue?`)) return;
+    } else if (ids.length > 20) {
+      if (!window.confirm(`Approve ${ids.length} proposals (${scope})?\n\nThey will be promoted to analyst_verified evidence and feed vendor scores. Continue?`)) return;
     }
     void bulkAct(ids, action);
   }
@@ -454,6 +462,7 @@ function BulkAllMatchingButton({
           if (filters.linkageStatus) u.set("linkage", filters.linkageStatus);
           if (filters.sourceUrlContains) u.set("source", filters.sourceUrlContains);
           if (filters.includeDeferred) u.set("includeDeferred", "1");
+          if (filters.lane) u.set("lane", filters.lane); // resolve the lane the operator is viewing
           u.set("ids", "1"); // tell the server to return just ids
           const res = await fetch(`/api/admin/evidence/batch-action/ids?${u.toString()}`);
           if (!res.ok) throw new Error(`HTTP ${res.status}`);
