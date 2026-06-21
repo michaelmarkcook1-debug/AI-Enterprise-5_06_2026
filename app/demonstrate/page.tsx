@@ -16,6 +16,7 @@ import {
   listVendorMomentum,
   listVendorPillarScores,
   getMarketDashboard,
+  getEvidenceDepthByVendor,
 } from "@/lib/intelligence/repository";
 import { getDataProvenance } from "@/lib/intelligence/provenance";
 import { newsCategoryClasses } from "@/lib/ui/semantic-colors";
@@ -69,12 +70,13 @@ export default async function DemonstratePage({ searchParams }: PageProps) {
   const dataSensitivity = params.dataSensitivity ?? "";
   const costSensitivity = params.costSensitivity ?? "";
 
-  const [news, vendors, momentum, pillarScores, provenance, dashboard, liveGithub, latestAssessment, shortlistAlerts] = await Promise.all([
+  const [news, vendors, momentum, pillarScores, provenance, dashboard, liveGithub, latestAssessment, shortlistAlerts, depthByVendor] = await Promise.all([
     listNewsItems(), listIntelligenceVendors(), listVendorMomentum(),
     listVendorPillarScores(), getDataProvenance(), getMarketDashboard(),
     fetchLiveGitHubSignals().catch(() => []),
     getLatestAssessmentResult(),
     getShortlistCompetitiveAlerts(shortlistKeys).catch(() => []),
+    getEvidenceDepthByVendor(),
   ]);
 
   // Merge live GitHub stats into seed developer reputation
@@ -433,6 +435,7 @@ export default async function DemonstratePage({ searchParams }: PageProps) {
                     role: v.category ?? "Enterprise AI",
                     score: v.overallScore,
                     confidence: mom?.confidence ?? v.confidenceScore,
+                    evidenceDepth: depthByVendor.get(v.id) ?? 0,
                     topPillars: pills.map((p) => p.pillar),
                     risks: (v.riskProfile ?? []).slice(0, 2),
                   };
@@ -451,7 +454,7 @@ export default async function DemonstratePage({ searchParams }: PageProps) {
                   totalVendors: rankableUniverse.length,
                   totalCategories: new Set(rankableUniverse.map((v) => v.category)).size,
                   topVendors: [...rankableUniverse].sort((a, b) => b.overallScore - a.overallScore).slice(0, 8)
-                    .map((v) => ({ name: v.name, category: v.category, score: v.overallScore, confidence: v.confidenceScore, ownershipType: v.ownershipType })),
+                    .map((v) => ({ name: v.name, category: v.category, score: v.overallScore, confidence: v.confidenceScore, ownershipType: v.ownershipType, evidenceDepth: depthByVendor.get(v.id) ?? 0 })),
                   categoryLeaders: [...new Set(rankableUniverse.map((v) => v.category))]
                     .map((category) => ({
                       category,
