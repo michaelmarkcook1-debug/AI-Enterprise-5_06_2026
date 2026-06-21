@@ -20,6 +20,9 @@ import {
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+// E0–E5 ordinal ranks for the "cited + E3+" bulk-approval check.
+const GRADE_RANK = { E0: 0, E1: 1, E2: 2, E3: 3, E4: 4, E5: 5 } as const;
+
 export async function GET(request: Request) {
   if (!isAdminRequest(request)) return unauthorized();
   if (!hasDatabase()) return Response.json({ ids: [] });
@@ -87,15 +90,23 @@ export async function GET(request: Request) {
       });
       if (decision.lane !== lane) continue;
 
-      // Factual-integrity floor: never bulk-promote genuinely unverifiable rows,
-      // even when an operator bulk-approves the human_review lane. Missing source,
-      // E0 evidence, an unsafe category, or a flagged source conflict must be
-      // resolved per-row — they can never become "analyst_verified" in bulk.
+      // Factual-integrity floor for operator bulk-approval of the human_review
+      // lane. ALWAYS blocked from bulk (must be resolved per-row): missing source,
+      // E0 evidence, a flagged source conflict, or a DISPUTED claim — these are
+      // genuinely unreliable. The other "unsafe categories" (valuation, market
+      // share, adoption estimate, IPO timing) are speculative-by-default and
+      // normally need a human glance — but a CITED reported fact (has a source
+      // URL AND grade ≥ E3) is allowed through bulk, because the operator
+      // explicitly approving the review lane IS the human in the loop. Per the
+      // approval-policy decision: "allow bulk-approve if cited + E3+".
       if (lane !== "recommend_approve") {
-        const hardBlocked = decision.reasons.some((r) =>
-          /missing source|E0 evidence|unsafe category|source conflict/i.test(r),
-        );
-        if (hardBlocked) continue;
+        const gradeRank = GRADE_RANK[p.proposedGrade as keyof typeof GRADE_RANK] ?? 0;
+        const cited = !!p.sourceUrl && gradeRank >= GRADE_RANK.E3;
+        const alwaysBlocked = !p.sourceUrl
+          || p.proposedGrade === "E0"
+          || decision.reasons.some((r) => /source conflict|unsafe category: disputed/i.test(r));
+        const speculativeUncited = decision.reasons.some((r) => /unsafe category:/i.test(r)) && !cited;
+        if (alwaysBlocked || speculativeUncited) continue;
       }
 
       const linkage = suggestLinkage(
