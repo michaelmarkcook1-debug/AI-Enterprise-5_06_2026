@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import { estimateIngestionCost } from "@/lib/ingestion/cost-model";
+import { useBackgroundJob, type BackgroundJob } from "./useBackgroundJob";
 
 interface Job {
   id: string;
@@ -37,12 +38,16 @@ export default function IngestionConsole({
   initialJobs,
   newsVendors,
   lastRun,
+  activeJobs,
 }: {
   hasDatabase: boolean;
   vendors: { id: string; name: string }[];
   initialJobs: Job[];
   newsVendors: { id: string; name: string }[];
   lastRun: LastRun | null;
+  /** In-flight background jobs at page-load, keyed by kind — lets the console
+   *  re-attach to a run that started before the user navigated back. */
+  activeJobs?: Record<string, BackgroundJob | null>;
 }) {
   const [jobs, setJobs] = useState<Job[]>(initialJobs);
   const [token, setToken] = useState("");
@@ -71,9 +76,10 @@ export default function IngestionConsole({
   const [eloError, setEloError] = useState<string | null>(null);
 
   // ── Fill evidence gaps: web_search-source vendors with limited/no evidence ─
-  const [busyGaps, setBusyGaps] = useState(false);
-  const [gapsResult, setGapsResult] = useState<string | null>(null);
-  const [gapsError, setGapsError] = useState<string | null>(null);
+  // Web-evidence gap-sourcing runs server-side via after() (admin_jobs), so it
+  // survives navigating away from this tab. The hook fires the start endpoint,
+  // polls /api/admin/jobs/status, and re-attaches to an in-flight run on mount.
+  const gapsJob = useBackgroundJob("web_evidence", { token, initialActive: activeJobs?.web_evidence ?? null });
 
   // ── News sourcing state ─────────────────────────────────────────────────
   const [busyNews, setBusyNews] = useState(false);
@@ -393,32 +399,24 @@ export default function IngestionConsole({
     }
   }
 
-  async function fillEvidenceGaps() {
-    setBusyGaps(true);
-    setGapsError(null);
-    setGapsResult(null);
-    try {
-      // Batch of up to 10 least-evidenced vendors per click to bound web_search
-      // cost + runtime; the response reports how many gaps remain.
-      const res = await fetch(`/api/admin/web-evidence`, {
-        method: "POST",
-        headers: { "content-type": "application/json", ...(token ? { "x-admin-token": token } : {}) },
-        body: JSON.stringify({ gaps: true, limit: 10 }),
-      });
-      const body = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(body.error ?? `HTTP ${res.status}`);
-      const remaining = Math.max(0, (body.totalGaps ?? 0) - (body.sourced ?? 0));
-      setGapsResult(
-        `Sourced ${body.sourced ?? 0} of ${body.totalGaps ?? 0} gap vendors · ${body.vendorsWithFindings ?? 0} returned evidence · ${body.proposalsPersisted ?? 0} proposals queued for review${remaining > 0 ? ` · ${remaining} still need sourcing — run again` : " · all gaps sourced"}`,
-      );
-    } catch (e) {
-      setGapsError((e as Error).message);
-    } finally {
-      setBusyGaps(false);
-    }
+  function fillEvidenceGaps() {
+    // Batch of up to 10 least-evidenced vendors per click to bound web_search
+    // cost + runtime. The work runs server-side; safe to navigate away.
+    void gapsJob.fire(`/api/admin/web-evidence`, { gaps: true, limit: 10 });
   }
 
-  const anyBusy = busyAll || busyNews || busyManual || busyMarket || busyRecompute || busyElo || busyGaps;
+  // Format the gap-sourcing result from the completed background job.
+  const gapsResult = (() => {
+    const j = gapsJob.job;
+    if (gapsJob.busy || !j || j.status !== "ok") return null;
+    const r = j.result as { totalGaps?: number; sourced?: number; vendorsWithFindings?: number; proposalsPersisted?: number };
+    if (typeof r.sourced !== "number") return null;
+    const remaining = Math.max(0, (r.totalGaps ?? 0) - (r.sourced ?? 0));
+    return `Sourced ${r.sourced ?? 0} of ${r.totalGaps ?? 0} gap vendors · ${r.vendorsWithFindings ?? 0} returned evidence · ${r.proposalsPersisted ?? 0} proposals queued for review${remaining > 0 ? ` · ${remaining} still need sourcing — run again` : " · all gaps sourced"}`;
+  })();
+  const gapsError = gapsJob.error ?? (gapsJob.job?.status === "error" ? gapsJob.job.error : null);
+
+  const anyBusy = busyAll || busyNews || busyManual || busyMarket || busyRecompute || busyElo || gapsJob.busy;
 
   return (
     <div className="min-h-screen bg-[#f6f1e3] dark:bg-[#071827] text-[#15263c] dark:text-[#eef3f8]">
@@ -529,10 +527,19 @@ export default function IngestionConsole({
               onClick={() => fillEvidenceGaps()}
               className="inline-flex items-center gap-2 rounded-full bg-[#0c2238] px-5 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#1d3a5f] disabled:opacity-40 dark:bg-[#1d3a5f] dark:hover:bg-[#2a4a6b]"
             >
-              {busyGaps ? <><SpinIcon />Sourcing gap vendors…</> : <>Source next 10 gap vendors <span aria-hidden>→</span></>}
+              {gapsJob.busy ? <><SpinIcon />Sourcing gap vendors…</> : <>Source next 10 gap vendors <span aria-hidden>→</span></>}
             </button>
+            {gapsJob.busy && (
+              <span className="text-xs text-[#4c5d75] dark:text-[#a7bacd]">
+                {(() => {
+                  const p = gapsJob.job?.progress as { current?: number; total?: number; vendor?: string } | undefined;
+                  const prog = p && typeof p.current === "number" && p.total ? `${p.current}/${p.total}${p.vendor ? ` · ${p.vendor}` : ""}` : "starting…";
+                  return `Running server-side (${prog}) · ${gapsJob.elapsedSec}s — safe to leave this page`;
+                })()}
+              </span>
+            )}
           </div>
-          {gapsResult && !busyGaps && <ResultBanner text={gapsResult} />}
+          {gapsResult && <ResultBanner text={gapsResult} />}
           {gapsError && <ErrorBanner text={gapsError} />}
         </div>
 

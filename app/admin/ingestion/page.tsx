@@ -4,6 +4,7 @@ import { listIngestionJobs } from "@/lib/ingestion/ingest-service";
 import { hasDatabase, getPrisma } from "@/lib/prisma";
 import { SOURCE_MANIFEST } from "@/lib/sourcing/manifest";
 import { getLatestAdminRun } from "@/lib/system/admin-run-log";
+import { listActiveJobs, type AdminJob } from "@/lib/system/admin-job-store";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
@@ -71,11 +72,16 @@ function buildManifestSummary() {
 const pressReleaseEntries = SOURCE_MANIFEST.filter((e) => e.category === "press_release");
 
 export default async function IngestionPage() {
-  const [jobs, patches, lastRun] = await Promise.all([
+  const [jobs, patches, lastRun, activeJobList] = await Promise.all([
     hasDatabase() ? listIngestionJobs() : Promise.resolve([]),
     listPendingManifestPatches(),
     hasDatabase() ? getLatestAdminRun() : Promise.resolve(null),
+    hasDatabase() ? listActiveJobs() : Promise.resolve([] as AdminJob[]),
   ]);
+  // In-flight background jobs keyed by kind, so the console re-attaches to a run
+  // that started before the user navigated back (the "survive tab switch" path).
+  const activeJobs: Record<string, AdminJob | null> = {};
+  for (const j of activeJobList) if (!activeJobs[j.kind]) activeJobs[j.kind] = j;
 
   const manifestSummary = buildManifestSummary();
   // The console operates on the SOURCE_MANIFEST (that's what sourcing iterates),
@@ -106,6 +112,7 @@ export default async function IngestionPage() {
         }))}
         newsVendors={newsVendors}
         lastRun={lastRun}
+        activeJobs={activeJobs}
       />
 
       {/* ── Manifest sources breakdown ─────────────────────────────── */}

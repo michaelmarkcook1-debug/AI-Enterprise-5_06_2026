@@ -233,15 +233,25 @@ export interface WebEvidenceSweepResult {
  */
 export async function runWebEvidenceSweep(
   vendors: { id: string; name: string }[],
-  opts: { concurrency?: number } = {},
+  opts: {
+    concurrency?: number;
+    /** Called after each vendor finishes — used as a background-job heartbeat
+     *  + progress snapshot so a long sweep isn't mistaken for crashed. */
+    onProgress?: (done: number, total: number, vendor: string) => void | Promise<void>;
+  } = {},
 ): Promise<WebEvidenceSweepResult> {
   const concurrency = Math.max(1, Math.min(opts.concurrency ?? 4, 8));
   const results: WebEvidenceResult[] = [];
+  const total = vendors.length;
   let cursor = 0;
+  let done = 0;
   async function worker() {
     while (cursor < vendors.length) {
       const v = vendors[cursor++];
-      results.push(await runWebEvidenceSourcing(v.id, v.name));
+      const r = await runWebEvidenceSourcing(v.id, v.name);
+      results.push(r);
+      done += 1;
+      if (opts.onProgress) await opts.onProgress(done, total, v.name);
     }
   }
   await Promise.all(Array.from({ length: Math.min(concurrency, vendors.length) }, worker));
