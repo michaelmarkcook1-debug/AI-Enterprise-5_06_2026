@@ -70,6 +70,11 @@ export default function IngestionConsole({
   const [eloResult, setEloResult] = useState<string | null>(null);
   const [eloError, setEloError] = useState<string | null>(null);
 
+  // ── Fill evidence gaps: web_search-source vendors with limited/no evidence ─
+  const [busyGaps, setBusyGaps] = useState(false);
+  const [gapsResult, setGapsResult] = useState<string | null>(null);
+  const [gapsError, setGapsError] = useState<string | null>(null);
+
   // ── News sourcing state ─────────────────────────────────────────────────
   const [busyNews, setBusyNews] = useState(false);
   const [newsResult, setNewsResult] = useState<string | null>(null);
@@ -388,7 +393,32 @@ export default function IngestionConsole({
     }
   }
 
-  const anyBusy = busyAll || busyNews || busyManual || busyMarket || busyRecompute || busyElo;
+  async function fillEvidenceGaps() {
+    setBusyGaps(true);
+    setGapsError(null);
+    setGapsResult(null);
+    try {
+      // Batch of up to 10 least-evidenced vendors per click to bound web_search
+      // cost + runtime; the response reports how many gaps remain.
+      const res = await fetch(`/api/admin/web-evidence`, {
+        method: "POST",
+        headers: { "content-type": "application/json", ...(token ? { "x-admin-token": token } : {}) },
+        body: JSON.stringify({ gaps: true, limit: 10 }),
+      });
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(body.error ?? `HTTP ${res.status}`);
+      const remaining = Math.max(0, (body.totalGaps ?? 0) - (body.sourced ?? 0));
+      setGapsResult(
+        `Sourced ${body.sourced ?? 0} of ${body.totalGaps ?? 0} gap vendors · ${body.vendorsWithFindings ?? 0} returned evidence · ${body.proposalsPersisted ?? 0} proposals queued for review${remaining > 0 ? ` · ${remaining} still need sourcing — run again` : " · all gaps sourced"}`,
+      );
+    } catch (e) {
+      setGapsError((e as Error).message);
+    } finally {
+      setBusyGaps(false);
+    }
+  }
+
+  const anyBusy = busyAll || busyNews || busyManual || busyMarket || busyRecompute || busyElo || busyGaps;
 
   return (
     <div className="min-h-screen bg-[#f6f1e3] dark:bg-[#071827] text-[#15263c] dark:text-[#eef3f8]">
@@ -476,6 +506,34 @@ export default function IngestionConsole({
           </div>
           {eloResult && !busyElo && <ResultBanner text={eloResult} />}
           {eloError && <ErrorBanner text={eloError} />}
+        </div>
+
+        {/* ── FILL EVIDENCE GAPS: web_search-source un-evidenced vendors ─ */}
+        <div className="mt-6 rounded-2xl border border-[#d6c9a8] dark:border-[#2a4a6b] bg-white dark:bg-[#0c2238] p-6 shadow-sm">
+          <div className="text-[10px] font-semibold uppercase tracking-wider text-[#4c5d75]">
+            Establish data sources · vendors with limited / no evidence
+          </div>
+          <h2 className="mt-1 text-lg font-semibold text-[#15263c] dark:text-[#eef3f8]">
+            Fill evidence gaps (web search)
+          </h2>
+          <p className="mt-1 text-sm text-[#3f5068] dark:text-[#a7bacd]">
+            Targets exactly the vendors showing the <span className="font-semibold text-rose-700 dark:text-rose-300">&ldquo;seed estimate&rdquo;</span> / <span className="font-semibold text-amber-700 dark:text-amber-300">&ldquo;limited evidence&rdquo;</span> alerts (fewer than 10 analyst-verified rows). Uses web search to discover <strong>real, cited</strong> sources across the pillar domains and queues them as proposals for review in <Link href="/admin/evidence" className="underline">/admin/evidence</Link>. Processes up to 10 least-evidenced vendors per click to bound cost — re-run for the rest.
+          </p>
+          <p className="mt-2 text-xs font-semibold text-amber-700 dark:text-amber-300">
+            ⚠ Spends Anthropic web_search credit (~5 searches/vendor). Nothing is fabricated — only real cited sources are recorded.
+          </p>
+          <div className="mt-4 flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              disabled={anyBusy}
+              onClick={() => fillEvidenceGaps()}
+              className="inline-flex items-center gap-2 rounded-full bg-[#0c2238] px-5 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#1d3a5f] disabled:opacity-40 dark:bg-[#1d3a5f] dark:hover:bg-[#2a4a6b]"
+            >
+              {busyGaps ? <><SpinIcon />Sourcing gap vendors…</> : <>Source next 10 gap vendors <span aria-hidden>→</span></>}
+            </button>
+          </div>
+          {gapsResult && !busyGaps && <ResultBanner text={gapsResult} />}
+          {gapsError && <ErrorBanner text={gapsError} />}
         </div>
 
         {/* ── PRIMARY: rolling ingest ─────────────────────────────────── */}
