@@ -33,6 +33,7 @@
 
 import { runSourcing } from "../sourcing/runner";
 import { runWebEvidenceSweep } from "../sourcing/web-evidence-runner";
+import { ensureVendorProfilesForSpine } from "../services/vendor-id-bridge";
 import { runNewsSourcing } from "../sourcing/news-runner";
 import { runMarketNewsIngestion } from "../sourcing/market-news-runner";
 import { SOURCE_MANIFEST } from "../sourcing/manifest";
@@ -162,6 +163,16 @@ export async function runDailyRefresh(
   // A manual/forced run (the admin "Run full ingestion" button) executes
   // everything regardless of weekday.
   const isWeekly = opts.force === true || now.getUTCDay() === 1;
+
+  // ── 0. Vendor-profile sync ─────────────────────────────────
+  //     Ensure every spine vendor has a VendorProfile so the EvidenceRecord FK
+  //     resolves for ALL vendors (incl. ones added since the last run) before
+  //     any approval/projection downstream. Idempotent, DB-only, no LLM cost.
+  await trackedStep("sync_vendor_profiles", async () => {
+    if (!dbConfigured) return { skipped: "no_database" };
+    const r = await ensureVendorProfilesForSpine(getPrisma());
+    return r as unknown as Record<string, unknown>;
+  });
 
   // ── 1. Sourcing ────────────────────────────────────────────
   await trackedStep("sourcing", async () => {

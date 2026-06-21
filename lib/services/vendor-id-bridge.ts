@@ -120,3 +120,43 @@ export async function resolveOrCreateVendorProfileId(
   });
   return spine.id;
 }
+
+/**
+ * Proactively ensure EVERY IntelligenceVendor in the spine has a matching
+ * VendorProfile (keyed on the bare spine id). Closes the coverage gap (the spine
+ * carries more vendors than vendor_profiles did) so the EvidenceRecord FK and
+ * all id resolution are consistent for every vendor — not just the ones that
+ * happen to get approved. Idempotent and additive: existing profiles are left
+ * untouched; new ones carry only REAL spine identity (id, name, primary-role
+ * category, ownership, analyst summary) — no scores invented. Safe to run on
+ * every universe load / refresh.
+ */
+export async function ensureVendorProfilesForSpine(
+  c: PrismaClient,
+): Promise<{ created: number; existing: number; total: number }> {
+  const vendors = await c.intelligenceVendor.findMany({
+    select: { id: true, name: true, ownershipType: true, roleTags: true, analystInterpretation: true },
+  });
+  const existingRows = await c.vendorProfile.findMany({ select: { id: true } });
+  const have = new Set(existingRows.map((r) => r.id));
+
+  let created = 0;
+  for (const v of vendors) {
+    if (have.has(v.id)) continue;
+    const ownership: "public" | "private" | "subsidiary" =
+      v.ownershipType === "public" || v.ownershipType === "subsidiary" ? v.ownershipType : "private";
+    await c.vendorProfile.upsert({
+      where: { id: v.id },
+      create: {
+        id: v.id,
+        name: v.name,
+        category: v.roleTags?.[0] ?? "AI Vendor",
+        ownership,
+        summary: v.analystInterpretation ?? "",
+      },
+      update: {},
+    });
+    created += 1;
+  }
+  return { created, existing: vendors.length - created, total: vendors.length };
+}
