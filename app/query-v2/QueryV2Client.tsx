@@ -568,7 +568,7 @@ export default function QueryV2Client({ entities, winningByLayer }: { entities: 
                   <th className="py-2 pr-3" title="Rank within the current layer or category lens only">#</th>
                   <th className="py-2 pr-3">Entity</th>
                   <th className="py-2 pr-3">Role</th>
-                  <th className="py-2 pr-3 text-right" title="Leadership score in the active role context">Leadership</th>
+                  <th className="py-2 pr-3 text-right" title="Final score — the composite this ranking sorts on (market position + readiness + innovation; includes the Arena-ELO model-quality pillar). The columns to the right are its sub-components.">Final Score</th>
                   <th className="py-2 pr-3 text-right" title="R&D velocity, product launch cadence, differentiation vs peers">Innovation</th>
                   <th className="py-2 pr-3 text-right" title="Enterprise readiness: compliance, SLAs, integrations, governance posture">Readiness</th>
                   <th className="py-2 pr-3 text-right" title="Trailing momentum across news, product and partnership signals">Momentum</th>
@@ -959,7 +959,7 @@ function VendorScoreHoverCard({ vendorId, entity, anchorY, anchorX, onMouseEnter
 
       <div className="grid grid-cols-3 gap-px border-b border-[#ece4d0] bg-[#ece4d0] dark:border-[#1d3a57] dark:bg-[#143049]">
         {[
-          { label: "Leadership", value: entity.leadershipScore },
+          { label: "Final Score", value: entity.leadershipScore },
           { label: "Innovation", value: entity.innovation },
           { label: "Readiness", value: entity.readiness },
           { label: "Momentum", value: entity.momentum },

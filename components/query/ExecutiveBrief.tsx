@@ -346,14 +346,14 @@ function renderExportHtml(brief: ReturnType<typeof generateBrief>, headshotDataU
 
 <div class="score-row">
   <div class="score-card"><div class="label">Entities Tracked</div><div class="value">${brief.total}</div><div class="sub">role-classified universe</div></div>
-  <div class="score-card"><div class="label">Avg Leadership</div><div class="value">${brief.avgLeadership}</div><div class="sub">out of 100</div></div>
+  <div class="score-card"><div class="label">Avg Final Score</div><div class="value">${brief.avgLeadership}</div><div class="sub">out of 100</div></div>
   <div class="score-card"><div class="label">Avg Momentum</div><div class="value">${brief.avgMomentum}</div><div class="sub">out of 100</div></div>
   <div class="score-card"><div class="label">Avg Confidence</div><div class="value">${brief.avgConfidence}%</div><div class="sub">evidence quality</div></div>
 </div>
 
 <h2>Market Narrative</h2>
 <div class="narrative">
-  <p>AnalystGenius tracks <strong>${brief.total} entities</strong> across the enterprise AI landscape, classified by role — platform, model, application, infrastructure, hardware, investor, and sovereign layers. The average leadership score is <strong>${brief.avgLeadership}/100</strong> with market momentum at <strong>${brief.avgMomentum}/100</strong>.</p>
+  <p>AnalystGenius tracks <strong>${brief.total} entities</strong> across the enterprise AI landscape, classified by role — platform, model, application, infrastructure, hardware, investor, and sovereign layers. The average final score is <strong>${brief.avgLeadership}/100</strong> with market momentum at <strong>${brief.avgMomentum}/100</strong>.</p>
   <p style="margin-top:10px"><strong>Platform leadership</strong> is concentrated among ${brief.platformWinners.length > 0 ? brief.platformWinners.map(esc).join(", ") : "a narrow set of vendors"}, where distribution, identity, and governance create durable advantages. <strong>Model provision</strong> is led by ${brief.modelWinners.length > 0 ? brief.modelWinners.map(esc).join(", ") : "frontier providers"}, though open-weight alternatives continue to erode proprietary premiums.</p>
   <p style="margin-top:10px">The risk profile shows <strong>${brief.risk.high} high-risk</strong>, ${brief.risk.medium} medium-risk, and ${brief.risk.low} low-risk entities. High-risk flags typically reflect limited enterprise evidence, concentration exposure, or thin governance disclosure.</p>
   <p style="margin-top:10px">Evidence confidence averages <strong>${brief.avgConfidence}%</strong> — characteristic of a directional intelligence model. Scores are evidence-graded E0–E5; estimated data is clearly labelled throughout.</p>
@@ -379,7 +379,7 @@ ${developments.map((d) => `
 </table>
 
 <h2>Market Movers</h2>
-<h3>Rising by Leadership</h3>
+<h3>Rising by Final Score</h3>
 <ul>${moversList}</ul>
 <h3>Rising by Adoption</h3>
 <ul>${adoptionList}</ul>
@@ -459,7 +459,7 @@ export default function ExecutiveBrief({ entities, winningByLayer, developments 
           <div>
             <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#a07f1f] dark:text-[#d4af37]">Executive Brief</div>
             <div className="mt-1 text-sm font-semibold text-[#13294b] dark:text-[#eef3f8]">
-              {brief.total} entities tracked · Avg leadership {brief.avgLeadership} · Confidence {brief.avgConfidence}% · {brief.risk.high} high-risk · {devs.length} developments
+              {brief.total} entities tracked · Avg final score {brief.avgLeadership} · Confidence {brief.avgConfidence}% · {brief.risk.high} high-risk · {devs.length} developments
             </div>
           </div>
           <span className="ml-2 text-xs text-[#5b6b7f]">{expanded ? "▲" : "▼"}</span>
@@ -472,7 +472,7 @@ export default function ExecutiveBrief({ entities, winningByLayer, developments 
                 <div className="text-[10px] font-semibold uppercase tracking-wider text-[#5b6b7f]">Market Snapshot</div>
                 <p className="mt-2 text-sm leading-6 text-[#2c3b52] dark:text-[#c2d1e0]">
                   AnalystGenius tracks <strong>{brief.total} entities</strong> across the enterprise AI landscape.
-                  Average leadership score is <strong>{brief.avgLeadership}/100</strong> with momentum
+                  Average final score is <strong>{brief.avgLeadership}/100</strong> with momentum
                   at <strong>{brief.avgMomentum}</strong>.
                   Platform leadership is concentrated among {brief.platformWinners.join(", ") || "a narrow set"}.
                   Model provision is led by {brief.modelWinners.join(", ") || "frontier providers"}.
@@ -536,7 +536,7 @@ export default function ExecutiveBrief({ entities, winningByLayer, developments 
                 </div>
               </div>
               <div>
-                <div className="text-[10px] font-semibold uppercase tracking-wider text-[#5b6b7f]">Rising Leadership</div>
+                <div className="text-[10px] font-semibold uppercase tracking-wider text-[#5b6b7f]">Rising — Final Score</div>
                 <div className="mt-2 space-y-1.5">
                   {brief.fastestMovers.length > 0 ? brief.fastestMovers.map((e) => (
                     <div key={e.id} className="flex items-center justify-between text-xs">

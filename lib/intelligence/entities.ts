@@ -131,13 +131,18 @@ export type Entity = {
 // The fix is `rankingLeadership()`, applied once at entity construction (and
 // mirrored in the live DB adapter) so every surface agrees. It is two stages:
 //
-//  1. blendLeadership(): dilute raw market leadership with capability signals —
-//     50% market leadership, 30% enterprise readiness, 20% innovation velocity.
-//     The scale compression below (not a deweighting of readiness) is what demotes
-//     incumbents, so readiness stays meaningful — it stops immature, high-risk
-//     labs (low readiness / E1 evidence) from floating above enterprise-ready
-//     platforms on the board. Innovation is kept the smallest term because in the
-//     live path it is momentum-derived (noisy); leadership should be steadier.
+//  1. blendLeadership(): dilute raw market leadership with capability signals.
+//     Most roles: 50% market leadership, 30% enterprise readiness, 20% innovation.
+//     MODEL PROVIDERS: 70% / 10% / 20% — readiness is downgraded because for a
+//     model ranking raw capability (incl. the Arena-ELO model_quality pillar
+//     carried in overallScore) should dominate, and a high readiness weight
+//     double-counted enterprise_control (already a base pillar) — letting
+//     optimistically-seeded enterprise pillars float a lab above higher-ELO
+//     peers. The scale compression below (not a deweighting of readiness) is what
+//     demotes incumbents in the OTHER roles, so readiness stays meaningful there —
+//     it stops immature, high-risk labs from floating above enterprise-ready
+//     platforms. Innovation is kept small because in the live path it is
+//     momentum-derived (noisy); leadership should be steadier.
 //  2. compressScaleLeadership(): for the pure scale / distribution / capital roles
 //     (Platform, Cloud / Hosting, Investor) the score is compressed halfway toward
 //     a strong-but-not-leading 70 anchor. Being the #1 investor or cloud reseller
@@ -167,13 +172,28 @@ const CAPABILITY_HOUSE_MODEL_THRESHOLD = 75;
 
 const finite = (x: number): number => (Number.isFinite(x) ? x : 0);
 
-/** Capability-aware blend of a raw market-leadership score. */
+/** Capability-aware blend of a raw market-leadership score.
+ *
+ * MODEL PROVIDERS use a readiness-downgraded weighting (Jun 2026): readiness is
+ * cut to 0.10 and the freed weight moves to market leadership (which carries the
+ * Arena-ELO model_quality pillar). Rationale: for a *model* ranking, raw model
+ * quality should dominate enterprise readiness — and readiness double-counts
+ * enterprise_control, which is already a base pillar inside overallScore, so a
+ * high 0.30 readiness weight let optimistically-seeded enterprise pillars prop
+ * vendors above higher-ELO peers. Every other role keeps the original
+ * 0.50/0.30/0.20, where enterprise readiness is genuinely more load-bearing.
+ * primaryRole is optional + defaults to the original weights so other callers
+ * are unaffected. */
 export function blendLeadership(
   marketLeadership: number,
   readiness: number,
   innovation: number,
+  primaryRole?: Role,
 ): number {
-  const blended = 0.5 * finite(marketLeadership) + 0.3 * finite(readiness) + 0.2 * finite(innovation);
+  const [wO, wR, wI] = primaryRole === "Model Provider"
+    ? [0.7, 0.1, 0.2]
+    : [0.5, 0.3, 0.2];
+  const blended = wO * finite(marketLeadership) + wR * finite(readiness) + wI * finite(innovation);
   return Math.round(Math.max(0, Math.min(100, blended)));
 }
 
@@ -203,7 +223,7 @@ export function rankingLeadership(
   primaryRole: Role,
   roleScores?: RoleScores,
 ): number {
-  const blended = blendLeadership(marketLeadership, readiness, innovation);
+  const blended = blendLeadership(marketLeadership, readiness, innovation, primaryRole);
   if (!LEADERSHIP_BY_SCALE_ROLES.has(primaryRole)) return blended;
   // Carve-out: a genuine frontier-model house keeps its blended score even when
   // its primary tag is a platform/cloud/capital role.

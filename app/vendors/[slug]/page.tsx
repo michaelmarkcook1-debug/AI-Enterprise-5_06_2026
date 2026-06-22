@@ -518,7 +518,7 @@ export default async function VendorDeepDivePage({
 
         {/* ── Score grid (6 tiles) ──────────────────────────────────────── */}
         <section className={`mb-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6 ${evidenceDepth < 10 ? (evidenceDepth <= 0 ? "opacity-60" : "opacity-80") : ""}`}>
-          <ScoreTile label="Leadership" value={entity.leadershipScore} delta={entity.deltas.leadership} />
+          <ScoreTile label="Final Score" value={entity.leadershipScore} delta={entity.deltas.leadership} />
           <ScoreTile label="Innovation"  value={entity.innovation} />
           <ScoreTile label="Readiness"   value={entity.readiness} />
           <ScoreTile label="Momentum"   value={entity.momentum}   delta={entity.deltas.reach} />
