@@ -11,8 +11,9 @@
 // (see MIN_PILLAR_COUNT guard there).
 
 import { getPrisma, hasDatabase } from "../prisma";
+import { fetchArenaElo, ARENA_ELO_SOURCE_URL } from "./elo-fetch";
 
-export const ARENA_ELO_SOURCE_URL = "https://openlm.ai/chatbot-arena/";
+export { ARENA_ELO_SOURCE_URL };
 
 const ANCHOR_MIN_ELO = 1050;
 const ANCHOR_MAX_ELO = 1510;
@@ -102,25 +103,39 @@ export interface EloPillarSeedResult {
   updated: number;
   skipped: number;
   notFound: string[];
+  source: "live" | "snapshot";
+  vendorsSourced: number;
 }
 
 /**
- * Upsert the `model_quality` pillar row for every vendor in VENDOR_ELO_MAP from
- * Arena ELO. This is the DURABLE path that makes ELO part of the model ranking:
- * derive-scores folds the `model_quality` pillar into overallScore on every run
- * (see MODEL_QUALITY_WEIGHT in derive-scores.ts), so ELO survives the daily
- * recompute instead of being overwritten by it. Idempotent; BARE ids; skips
- * vendors absent from the DB. The evidence projector never writes model_quality
- * (no DomainId maps to it), so this row is never clobbered by sourcing.
+ * Upsert the `model_quality` pillar row for every model vendor with a real Arena
+ * ELO. PRIMARY source is the LIVE openlm.ai leaderboard (fetchArenaElo) — every
+ * ranked org mapped to a roster vendor, top-2 average; this auto-covers Google,
+ * Microsoft, etc. and stays current. Falls back to the hand-maintained
+ * VENDOR_ELO_MAP snapshot if the fetch/parse fails. Vendors not on the
+ * leaderboard get nothing (honest absence — never an invented score).
+ *
+ * This is the DURABLE path that makes ELO part of the model ranking: derive-
+ * scores folds the model_quality pillar into overallScore on every run (see
+ * MODEL_QUALITY_WEIGHT). Idempotent; BARE ids; skips vendors absent from the DB.
  */
 export async function seedEloPillarScores(): Promise<EloPillarSeedResult> {
-  if (!hasDatabase()) return { updated: 0, skipped: 0, notFound: [] };
+  if (!hasDatabase()) return { updated: 0, skipped: 0, notFound: [], source: "snapshot", vendorsSourced: 0 };
   const prisma = getPrisma();
-  const result: EloPillarSeedResult = { updated: 0, skipped: 0, notFound: [] };
 
-  for (const [vendorId, data] of Object.entries(VENDOR_ELO_MAP)) {
+  // Build [vendorId, {topTwoAvg, top1, top2}] from the live leaderboard, or the
+  // static snapshot if the live fetch fails.
+  const live = await fetchArenaElo();
+  const entries: [string, { topTwoAvg: number; top1: string; top2: string }][] = live && live.size > 0
+    ? [...live.entries()].map(([id, e]) => [id, { topTwoAvg: e.topTwoAvg, top1: e.top1, top2: e.top2 }])
+    : Object.entries(VENDOR_ELO_MAP).map(([id, e]) => [id, { topTwoAvg: e.topTwoAvg, top1: e.top1, top2: e.top2 }]);
+  const source: "live" | "snapshot" = live && live.size > 0 ? "live" : "snapshot";
+
+  const result: EloPillarSeedResult = { updated: 0, skipped: 0, notFound: [], source, vendorsSourced: entries.length };
+
+  for (const [vendorId, data] of entries) {
     const score = normalizeElo(data.topTwoAvg);
-    const provenance = `Arena ELO top-2 avg ${data.topTwoAvg} (${data.top1}, ${data.top2})`;
+    const provenance = `Arena ELO top-2 avg ${data.topTwoAvg} (${data.top1}, ${data.top2}) — ${source} openlm.ai`;
     try {
       const existing = await prisma.intelligenceVendor.findUnique({
         where: { id: vendorId },
