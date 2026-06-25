@@ -37,7 +37,7 @@ export const ExtractionResponseSchema = z.object({
 export type ExtractedProposal = z.infer<typeof EvidenceProposalSchema>;
 export type ExtractionResponse = z.infer<typeof ExtractionResponseSchema>;
 
-const SYSTEM_PROMPT = `You are the Vendor Evidence Extractor for an enterprise AI platform ranking engine.
+export const EXTRACTOR_SYSTEM_PROMPT = `You are the Vendor Evidence Extractor for an enterprise AI platform ranking engine.
 
 Your job is to read raw vendor source content (docs, trust centre, pricing, status page, changelog, filings, jobs, reviews, etc.) and emit STRUCTURED EVIDENCE ITEMS — one per discrete capability claim or proof point — that map to the v2.0 framework's 12 backend domains.
 
@@ -71,7 +71,7 @@ Domain quick-reference:
 - capital_resilience: runway proxy, infra dependency, ownership
 - market_position: category share, sector adoption, momentum`;
 
-const TOOL_SCHEMA = {
+export const EXTRACTOR_TOOL_SCHEMA = {
   name: "emit_evidence_proposals",
   description: "Emit structured evidence proposals extracted from vendor source content.",
   jsonSchema: {
@@ -112,8 +112,11 @@ export interface ExtractInput {
   rawContent: string;
 }
 
-export async function extractEvidence(input: ExtractInput) {
-  const userPrompt = `VENDOR: ${input.vendorName} (${input.vendorCategory})
+/** The user-prompt for one source. Shared verbatim by the synchronous path
+ * (extractEvidence) and the Batch API path (lib/sourcing/batch-runner.ts) so the
+ * two NEVER drift on what the model is asked to do. */
+export function buildExtractorUserPrompt(input: ExtractInput): string {
+  return `VENDOR: ${input.vendorName} (${input.vendorCategory})
 SOURCE CATEGORY: ${input.sourceCategory}
 SOURCE URL: ${input.sourceUrl}
 
@@ -123,13 +126,25 @@ ${input.rawContent.slice(0, 28_000)}
 """
 
 Extract the highest-signal evidence proposals. Skip navigation, footers, cookie banners, generic marketing fluff.`;
+}
 
+/** Max output tokens for one extraction — shared by both paths. */
+export const EXTRACTOR_MAX_TOKENS = 6000;
+
+/** Validate a raw tool-input payload into the typed extraction response.
+ * Used by the Batch API collector to parse each result the same way the
+ * synchronous path does. */
+export function parseExtraction(raw: unknown): ExtractionResponse {
+  return ExtractionResponseSchema.parse(raw);
+}
+
+export async function extractEvidence(input: ExtractInput) {
   return extractStructured({
-    systemPrompt: SYSTEM_PROMPT,
-    userPrompt,
-    schema: TOOL_SCHEMA,
-    parse: (raw) => ExtractionResponseSchema.parse(raw),
-    maxTokens: 6000,
+    systemPrompt: EXTRACTOR_SYSTEM_PROMPT,
+    userPrompt: buildExtractorUserPrompt(input),
+    schema: EXTRACTOR_TOOL_SCHEMA,
+    parse: parseExtraction,
+    maxTokens: EXTRACTOR_MAX_TOKENS,
     fallback: () => stubExtraction(input),
   });
 }

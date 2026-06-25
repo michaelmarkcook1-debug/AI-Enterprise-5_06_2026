@@ -22,6 +22,7 @@ export type EnvKey =
   | "REFRESH_KILL_SWITCH"
   | "REFRESH_CYCLE_CAP_USD"
   | "REFRESH_DAY_CAP_USD"
+  | "SOURCING_BATCH_MODE"
   | "SOURCING_LOG_DIR"
   | "NODE_ENV"
   | "VERCEL_ENV";
@@ -129,6 +130,14 @@ export const ENV_SPEC: EnvVarSpec[] = [
     severity: "optional",
     enables: ["Bounds total daily Anthropic spend even if the refresh is triggered repeatedly"],
     remediation: "Defaults to $25. Lower it to tighten the daily ceiling; raise deliberately.",
+    secret: false,
+  },
+  {
+    key: "SOURCING_BATCH_MODE",
+    description: "Set to '1' to run sourcing extraction via the two-phase Anthropic Batch API (~50% cheaper, async).",
+    severity: "optional",
+    enables: ["~50% cheaper extraction via overnight batch (submit one cycle, collect the next)"],
+    remediation: "Leave unset for the proven synchronous path. Set to '1' once the two-phase flow has been validated in preview.",
     secret: false,
   },
   {

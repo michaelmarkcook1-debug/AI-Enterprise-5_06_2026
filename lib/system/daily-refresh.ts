@@ -32,6 +32,7 @@
 // visible to a refresh — no cache invalidation step is needed.
 
 import { runSourcing } from "../sourcing/runner";
+import { submitExtractionBatch, collectExtractionBatches } from "../sourcing/batch-runner";
 import { runNewsSourcing } from "../sourcing/news-runner";
 import { runMarketNewsIngestion } from "../sourcing/market-news-runner";
 import { SOURCE_MANIFEST } from "../sourcing/manifest";
@@ -208,6 +209,31 @@ export async function runDailyRefresh(
   // ── 1. Sourcing ────────────────────────────────────────────
   await trackedStep("sourcing", async () => {
     if (spend.exhausted()) return { skipped: "spend_cap", ...spend.status() };
+
+    // Two-phase Batch API mode (opt-in via SOURCING_BATCH_MODE=1). Extraction
+    // runs ~50% cheaper but async: collect any batches submitted in prior cycles
+    // (classify + persist), then submit THIS cycle's batch for collection next
+    // cycle. Default OFF → the proven synchronous runner below is used as-is.
+    if (process.env.SOURCING_BATCH_MODE === "1") {
+      const collected = await collectExtractionBatches();
+      const submitted = await submitExtractionBatch({ allVendors: isWeekly });
+      return {
+        mode: "batch",
+        batchSubmitted: submitted.submitted,
+        batchId: submitted.batchId,
+        submitSkipped: submitted.skipped,
+        fetchFailed: submitted.fetchFailed,
+        batchesCollected: collected.batchesCollected,
+        stillPending: collected.stillPending,
+        proposalsPersisted: collected.proposalsPersisted,
+        failedExtractions: collected.failedExtractions,
+        collectErrors: collected.errors.length,
+        tokensIn: collected.tokensIn,
+        tokensOut: collected.tokensOut,
+        estimatedCostUsd: collected.estimatedCostUsd,
+      };
+    }
+
     const r = await runSourcing({ persist: dbConfigured });
     return {
       runId: r.runId,
