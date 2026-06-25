@@ -19,6 +19,8 @@ export type EnvKey =
   | "ADMIN_API_TOKEN"
   | "ADMIN_API_OPEN"
   | "CRON_SECRET"
+  | "RESEND_API_KEY"
+  | "INTENT_HASH_SALT"
   | "REFRESH_KILL_SWITCH"
   | "REFRESH_CYCLE_CAP_USD"
   | "REFRESH_DAY_CAP_USD"
@@ -106,6 +108,25 @@ export const ENV_SPEC: EnvVarSpec[] = [
       "Keep the only LLM-spending pipeline gated to the scheduler + admins",
     ],
     remediation: "Generate with `openssl rand -hex 32`, set CRON_SECRET in Vercel; the cron sends it as `Authorization: Bearer …`.",
+    secret: true,
+  },
+  {
+    key: "RESEND_API_KEY",
+    description: "Resend API key for transactional email (subscription confirmations, watchlist alerts).",
+    severity: "recommended",
+    enables: [
+      "Double opt-in newsletter confirmation emails",
+      "Watchlist + competitive-overlap alert emails",
+    ],
+    remediation: "Get a key from resend.com and set RESEND_API_KEY. While unset, email sends are labelled no-ops (capture still records pending subscribers).",
+    secret: true,
+  },
+  {
+    key: "INTENT_HASH_SALT",
+    description: "Server-only salt for the anonymous buyer-intent session hash.",
+    severity: "recommended",
+    enables: ["Non-reversible, daily-rotating session identity for IntentEvent — privacy by construction"],
+    remediation: "Generate with `openssl rand -hex 32` and set INTENT_HASH_SALT in prod. Unset falls back to a fixed dev salt, which makes hashes guessable off-box — set it in production.",
     secret: true,
   },
   {
