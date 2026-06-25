@@ -31,6 +31,7 @@ import type { PrismaClient } from "../../generated/prisma/client";
 import { VENDOR_CAPABILITIES } from "../intelligence/seed-capabilities";
 import { DOMAIN_TO_PILLAR, type DomainId, type EvidenceGrade } from "../types";
 import { freshnessFactor } from "../engine";
+import { writePillarScore } from "../scores/score-writer";
 
 function clampScore(value: number, min = 0, max = 100): number {
   return Math.max(min, Math.min(max, value));
@@ -500,11 +501,13 @@ export async function projectEvidenceToPillarScores(
     const confidence = Math.round(clampScore(40 + 45 * (1 - Math.exp(-a.depth / 5)), 0, 95));
 
     try {
-      await prisma.intelligencePillarScore.upsert({
-        where: { vendorId_pillar: { vendorId, pillar } },
-        create: { vendorId, pillar, capabilityScore, evidenceGrade: a.bestGrade as EvidenceGrade, confidence },
-        update: { capabilityScore, evidenceGrade: a.bestGrade as EvidenceGrade, confidence },
-      });
+      // Firewall: pillar scores are written ONLY through the sanctioned writer,
+      // with an evidence-pipeline provenance. See lib/scores/score-writer.ts.
+      await writePillarScore(
+        prisma,
+        { vendorId, pillar, capabilityScore, evidenceGrade: a.bestGrade as EvidenceGrade, confidence },
+        { provenance: "evidence_projection" },
+      );
       pillarRowsUpserted += 1;
       vendorsTouched.add(vendorId);
       if (Math.abs(capabilityScore - baseline) > 0.05) {

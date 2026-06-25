@@ -17,6 +17,7 @@
 
 import { getPrisma, hasDatabase } from "../prisma";
 import { PILLARS, type PillarId } from "../types";
+import { writeVendorScore } from "../scores/score-writer";
 
 // Dashboard base weights are derived from the SAME canonical PILLARS source the
 // assessment engine starts from (lib/types.ts), so the two scoring pathways no
@@ -180,10 +181,14 @@ export async function deriveVendorScores(now: Date = new Date()): Promise<Derive
     const roundedConfidence = Math.round(newConfidence * 10) / 10;
 
     if (Math.abs(roundedOverall - v.overallScore) > 0.05 || Math.abs(roundedConfidence - v.confidenceScore) > 0.05) {
-      await prisma.intelligenceVendor.update({
-        where: { id: v.id },
-        data: { overallScore: roundedOverall, confidenceScore: roundedConfidence },
-      });
+      // Firewall: scores are written ONLY through the sanctioned writer, with
+      // an evidence-pipeline provenance. See lib/scores/score-writer.ts.
+      await writeVendorScore(
+        prisma,
+        v.id,
+        { overallScore: roundedOverall, confidenceScore: roundedConfidence },
+        { provenance: "rubric_derive" },
+      );
       scoreShifts.push({ vendorId: v.id, from: v.overallScore, to: roundedOverall });
       vendorsUpdated += 1;
     }
