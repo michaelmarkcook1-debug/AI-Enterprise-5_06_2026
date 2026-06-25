@@ -1,0 +1,10 @@
+# Local git-workaround / packaging artifacts that live inside the project dir
+# but are NOT part of the deployable app. Excluded so CLI (`vercel --prod`)
+# uploads don't try to build the nested fresh-clone copy (its @/ imports resolve
+# to the root and break `next build`).
+app/ranking-engine/
+app/ranking-engine.zip
+app/deploy-query-changes.sh
+build_pack_02/
+implementation_pack/
+packs_03_05/

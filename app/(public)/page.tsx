@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
 import Link from "next/link";
 import ExposureMapHero from "@/components/dashboard/ExposureMapHero";
-import RankingsRail from "@/components/home/RankingsRail";
+import CategoryLeadersRail from "@/components/home/CategoryLeadersRail";
+import MarketByCategory from "@/components/home/MarketByCategory";
 import MarketTodayBand from "@/components/home/MarketTodayBand";
+import { getCategoryRankings } from "@/lib/home/category-rankings";
 import SubscribeForm from "@/components/SubscribeForm";
 import { EXPOSURE_NODES } from "@/lib/investing/exposure-map-data";
 import { projectExposureToDependencyEdges, summariseByKind } from "@/lib/graph/dependency-projection";
@@ -57,10 +58,11 @@ export default async function HomePage() {
   const total = edges.length;
 
   // Honest freshness + provenance (guarded — never fabricate a timestamp).
-  const [provenance, lastRefreshed, articles] = await Promise.all([
+  const [provenance, lastRefreshed, articles, categoryRankings] = await Promise.all([
     getDataProvenance().catch(() => null),
     getLastRefreshedAt().catch(() => null),
     listPublishedArticles().catch(() => []),
+    getCategoryRankings(),
   ]);
   const isLive = provenance?.source === "live";
   const updated = fmtDate(lastRefreshed) ?? fmtDate(provenance?.lastIngestedAt);
@@ -113,9 +115,7 @@ export default async function HomePage() {
           </p>
         </div>
         <div className="lg:col-span-4">
-          <Suspense fallback={<div className={`${CARD} motion-safe:animate-pulse text-sm ${MUTED}`}>Loading rankings…</div>}>
-            <RankingsRail limit={8} />
-          </Suspense>
+          <CategoryLeadersRail rankings={categoryRankings} />
         </div>
       </section>
 
@@ -127,6 +127,9 @@ export default async function HomePage() {
 
       {/* ── Market today ── */}
       <MarketTodayBand coverage={{ edgesTotal: total, high, medium, seed }} />
+
+      {/* ── The market, by category (segmented rankings + the explained taxonomy) ── */}
+      <MarketByCategory rankings={categoryRankings} />
 
       {/* ── Most depended-upon, by layer (indexable summary of the hero) ── */}
       <section className={`${CARD} mb-10`}>
