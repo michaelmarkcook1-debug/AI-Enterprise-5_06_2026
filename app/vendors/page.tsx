@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { PageFrame } from "@/components/app-shell";
 import { Confidence, Panel, ScoreBar } from "@/components/intelligence-ui";
@@ -5,6 +6,13 @@ import { OwnershipLegend, VendorNameWithOwnership } from "@/components/ownership
 import { listIntelligenceVendors, listVendorMomentum } from "@/lib/intelligence/repository";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "Vendor Rankings",
+  description:
+    "Live, evidence-based rankings of enterprise AI vendors by overall score, confidence, and momentum — independent and explainable.",
+  alternates: { canonical: "/vendors" },
+};
 
 export default async function VendorsPage() {
   const [vendors, momentum] = await Promise.all([listIntelligenceVendors(), listVendorMomentum()]);

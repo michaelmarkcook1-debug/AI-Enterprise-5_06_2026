@@ -9,6 +9,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import { absoluteUrl } from "@/lib/site";
 
 import { ENTITIES, roleLeadership, type Entity, type Role } from "@/lib/intelligence/entities";
 import { listNewsItems } from "@/lib/intelligence/repository";
@@ -39,7 +40,15 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   const entity = ENTITIES.find((e) => e.slug === slug);
-  return { title: entity ? `${entity.name} · AI Vendor Profile` : "Vendor Profile" };
+  const title = entity ? `${entity.name} · AI Vendor Profile` : "Vendor Profile";
+  return {
+    title,
+    description: entity
+      ? `Independent, evidence-based profile of ${entity.name}: scores, momentum, role, and the sources behind every rating.`
+      : undefined,
+    alternates: { canonical: `/vendors/${slug}` },
+    openGraph: { title, url: absoluteUrl(`/vendors/${slug}`), type: "profile" },
+  };
 }
 
 // ── Role badge colours (matching QueryV2Client ROLE_TONE) ─────────────────────

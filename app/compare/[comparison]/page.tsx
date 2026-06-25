@@ -1,0 +1,149 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { absoluteUrl } from "@/lib/site";
+import {
+  getIntelligenceVendor,
+  listVendorPillarScores,
+  listVendorMomentum,
+} from "@/lib/intelligence/repository";
+
+// ISR: on-demand server-render + CDN cache (comparisons are combinatorial, so
+// not pre-generated), revalidated hourly. DB reads only — no LLM at request time.
+export const revalidate = 3600;
+
+type Params = { comparison: string };
+
+/** Parse a "slug-a-vs-slug-b" segment into its two vendor slugs. */
+function parsePair(comparison: string): [string, string] | null {
+  const parts = comparison.split("-vs-");
+  if (parts.length !== 2 || !parts[0] || !parts[1]) return null;
+  return [parts[0], parts[1]];
+}
+
+const PILLAR_LABEL = (p: string) =>
+  p.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+
+export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
+  const { comparison } = await params;
+  const pair = parsePair(comparison);
+  if (!pair) return { title: "Comparison not found" };
+  const [a, b] = await Promise.all([getIntelligenceVendor(pair[0]), getIntelligenceVendor(pair[1])]);
+  if (!a || !b) return { title: "Comparison not found" };
+  const title = `${a.name} vs ${b.name}`;
+  const description = `Side-by-side: ${a.name} and ${b.name} on overall score, confidence, and every capability pillar — evidence-based, no vendor input.`;
+  return {
+    title,
+    description,
+    alternates: { canonical: `/compare/${comparison}` },
+    openGraph: { title, description, url: absoluteUrl(`/compare/${comparison}`), type: "website" },
+  };
+}
+
+const CARD = "rounded-xl border border-black/10 dark:border-white/10 bg-white/60 dark:bg-white/5 p-5";
+const MUTED = "text-[#15263c]/60 dark:text-[#eef3f8]/60";
+
+function VendorColumn({
+  name,
+  slug,
+  overall,
+  confidence,
+  category,
+  position,
+  momentum,
+}: {
+  name: string;
+  slug: string;
+  overall: number;
+  confidence: number;
+  category: string;
+  position: string;
+  momentum: number | null;
+}) {
+  return (
+    <div className={CARD}>
+      <Link href={`/vendors/${slug}`} className="text-lg font-semibold underline underline-offset-2">
+        {name}
+      </Link>
+      <div className={`mt-1 text-xs ${MUTED}`}>{category} · {position}</div>
+      <dl className="mt-4 space-y-2 text-sm">
+        <div className="flex justify-between"><dt className={MUTED}>Overall score</dt><dd className="tabular-nums font-medium">{overall.toFixed(1)}</dd></div>
+        <div className="flex justify-between"><dt className={MUTED}>Confidence</dt><dd className="tabular-nums">{Math.round(confidence)}%</dd></div>
+        <div className="flex justify-between"><dt className={MUTED}>Momentum</dt><dd className="tabular-nums">{momentum == null ? "—" : Math.round(momentum)}</dd></div>
+      </dl>
+    </div>
+  );
+}
+
+export default async function ComparePage({ params }: { params: Promise<Params> }) {
+  const { comparison } = await params;
+  const pair = parsePair(comparison);
+  if (!pair) notFound();
+
+  const [a, b] = await Promise.all([getIntelligenceVendor(pair[0]), getIntelligenceVendor(pair[1])]);
+  if (!a || !b) notFound();
+
+  const [pillars, momentum] = await Promise.all([listVendorPillarScores(), listVendorMomentum()]);
+  const momentumBy = new Map(momentum.map((m) => [m.vendorId, m.momentumScore]));
+
+  const aPillars = new Map(pillars.filter((p) => p.vendorId === a.id).map((p) => [p.pillar, p.capabilityScore]));
+  const bPillars = new Map(pillars.filter((p) => p.vendorId === b.id).map((p) => [p.pillar, p.capabilityScore]));
+  const pillarKeys = [...new Set([...aPillars.keys(), ...bPillars.keys()])].sort();
+
+  return (
+    <main className="mx-auto max-w-4xl px-4 py-10">
+      <nav className={`mb-3 text-xs ${MUTED}`}>
+        <Link href="/vendors" className="underline underline-offset-2">Vendors</Link> · Compare
+      </nav>
+      <header className="mb-8">
+        <h1 className="font-[var(--font-display)] text-3xl font-extrabold tracking-tight">
+          {a.name} <span className={MUTED}>vs</span> {b.name}
+        </h1>
+        <p className={`mt-2 text-sm ${MUTED}`}>
+          Evidence-based capability comparison. Scores are computed from cited evidence by a fixed
+          rubric — neither vendor can influence them.
+        </p>
+      </header>
+
+      <section className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <VendorColumn name={a.name} slug={a.slug} overall={a.overallScore} confidence={a.confidenceScore} category={a.category} position={a.marketPosition} momentum={momentumBy.get(a.id) ?? null} />
+        <VendorColumn name={b.name} slug={b.slug} overall={b.overallScore} confidence={b.confidenceScore} category={b.category} position={b.marketPosition} momentum={momentumBy.get(b.id) ?? null} />
+      </section>
+
+      {pillarKeys.length > 0 ? (
+        <section className={CARD}>
+          <h2 className="mb-3 text-sm font-semibold">Capability pillars</h2>
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse text-sm">
+              <thead>
+                <tr className={`text-left ${MUTED}`}>
+                  <th className="py-2 pr-4 font-medium">Pillar</th>
+                  <th className="py-2 pr-4 font-medium tabular-nums">{a.name}</th>
+                  <th className="py-2 pr-4 font-medium tabular-nums">{b.name}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {pillarKeys.map((p) => {
+                  const av = aPillars.get(p);
+                  const bv = bPillars.get(p);
+                  return (
+                    <tr key={p} className="border-t border-black/5 dark:border-white/10">
+                      <td className="py-2 pr-4">{PILLAR_LABEL(p)}</td>
+                      <td className="py-2 pr-4 tabular-nums">{av == null ? "—" : av.toFixed(0)}</td>
+                      <td className="py-2 pr-4 tabular-nums">{bv == null ? "—" : bv.toFixed(0)}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+          <p className={`mt-4 text-xs ${MUTED}`}>A “—” means insufficient evidence for that pillar — not a zero score.</p>
+        </section>
+      ) : (
+        <div className={CARD}>
+          <p className="text-sm">No pillar-level evidence is available yet for either vendor to compare.</p>
+        </div>
+      )}
+    </main>
+  );
+}

@@ -5,6 +5,7 @@ import TopNav from "@/components/TopNav";
 import GlobalFooter from "@/components/GlobalFooter";
 import AmbientHeroBackdrop from "@/components/AmbientHeroBackdrop";
 import NotLiveBanner from "@/components/NotLiveBanner";
+import { SITE_URL, SITE_NAME } from "@/lib/site";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
@@ -23,9 +24,32 @@ const plusJakarta = Plus_Jakarta_Sans({
   display: "swap",
 });
 
+const SITE_DESCRIPTION =
+  "Independent, evidence-based rankings of enterprise AI vendors — scores, market share, agentic momentum, and the dependency/encroachment graph of who relies on (and threatens) whom.";
+
 export const metadata: Metadata = {
-  title: "AI Enterprise — Enterprise AI Market Intelligence",
-  description: "Executive market intelligence portal for enterprise AI: vendor rankings, market share, agentic momentum, news, capabilities, and platform-fit assessment.",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: "AI Enterprise — Enterprise AI Market Intelligence",
+    template: `%s | ${SITE_NAME}`,
+  },
+  description: SITE_DESCRIPTION,
+  applicationName: SITE_NAME,
+  robots: { index: true, follow: true },
+  // NOTE: no default `alternates.canonical` here — canonical is set per-page so
+  // it never inherits the home URL onto unrelated routes. Likewise openGraph.url
+  // is per-page; the root only provides sensible shared OG defaults.
+  openGraph: {
+    type: "website",
+    siteName: SITE_NAME,
+    title: "AI Enterprise — Enterprise AI Market Intelligence",
+    description: SITE_DESCRIPTION,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "AI Enterprise — Enterprise AI Market Intelligence",
+    description: SITE_DESCRIPTION,
+  },
 };
 
 // Inline script that runs before paint to apply the user's stored / preferred
