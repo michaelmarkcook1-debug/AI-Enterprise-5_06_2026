@@ -7,6 +7,7 @@ import {
   projectExposureToDependencyEdges,
   summariseByKind,
 } from "@/lib/graph/dependency-projection";
+import { deriveEncroachmentEdges, buildRolesByNodeId } from "@/lib/graph/encroachment";
 
 // ISR: server-rendered + CDN-cached, revalidated hourly. The graph data is
 // curated + source-backed (lib/investing/exposure-map-data.ts); zero LLM at
@@ -34,6 +35,7 @@ export default function DependenciesPage() {
   const byKind = summariseByKind(edges);
   const labelById = new Map(EXPOSURE_NODES.map((n) => [n.id, n.label]));
   const label = (id: string) => labelById.get(id) ?? id;
+  const encroachments = deriveEncroachmentEdges(edges, buildRolesByNodeId());
 
   const total = edges.length;
   // Three tiers that partition every edge (sum === total) — no silent omission.
@@ -91,6 +93,36 @@ export default function DependenciesPage() {
             </div>
           ))}
         </div>
+      </section>
+
+      {/* Encroachment watch — DERIVED signals, clearly labelled, never stated as fact. */}
+      <section className={`${CARD} mt-6`}>
+        <h2 className="mb-1 text-lg font-semibold">Encroachment watch</h2>
+        <p className="mb-1 inline-block rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-[11px] font-medium">
+          Derived analytical signal — not a stated fact
+        </p>
+        <p className={`mb-4 text-xs ${MUTED}`}>
+          Each line combines a <strong>source-backed dependency</strong> with a{" "}
+          <strong>role overlap</strong>: a supplier that also operates in its customer&apos;s layer
+          is positioned to compete. We show these only where both hold — never as a measured claim.
+        </p>
+        {encroachments.length === 0 ? (
+          <p className={`text-sm ${MUTED}`}>No role-overlap encroachment signals in the current data.</p>
+        ) : (
+          <ul className="space-y-2">
+            {encroachments.slice(0, 12).map((e) => (
+              <li
+                key={`${e.fromVendorId}->${e.toVendorId}`}
+                className="rounded-lg border border-amber-500/20 bg-amber-500/5 px-3 py-2 text-sm"
+              >
+                <span className="font-medium">{label(e.fromVendorId)}</span>
+                <span className={MUTED}> could encroach on </span>
+                <span className="font-medium">{label(e.toVendorId)}</span>
+                <p className={`mt-0.5 text-xs ${MUTED}`}>{e.rationale}</p>
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
 
       <p className={`mt-6 text-sm ${MUTED}`}>

@@ -3,9 +3,7 @@ import { getIntentDemand, type IntentTop } from "@/lib/intent/aggregate";
 import { listIntelligenceVendors, listMarketCategories } from "@/lib/intelligence/repository";
 
 // Internal demand dashboard — the aggregated, anonymous buyer-intent signal.
-// Read-only, always fresh. NOTE: like the other /admin pages, page-level auth is
-// not enforced here (the app gates mutating /api/admin/* routes, not admin
-// pages); a proper admin-auth gate across /admin is a recommended follow-up.
+// Read-only, always fresh. Auth is enforced via app/admin/layout.tsx (cookie gate).
 export const dynamic = "force-dynamic";
 
 const PANEL = "rounded-xl border border-[#e3d9c0] dark:border-[#1d3a57] bg-white/60 dark:bg-white/5 p-5";

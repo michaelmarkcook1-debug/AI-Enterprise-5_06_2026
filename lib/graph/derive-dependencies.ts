@@ -9,22 +9,30 @@
 import { getPrisma, hasDatabase } from "../prisma";
 import type { EvidenceGrade } from "../../generated/prisma/client";
 import { projectExposureToDependencyEdges } from "./dependency-projection";
+import { deriveEncroachmentEdges, buildRolesByNodeId } from "./encroachment";
 
 export interface DeriveDependenciesResult {
   skipped: boolean;
   reason?: string;
+  /** depends_on edges upserted. */
+  dependsOn: number;
+  /** derived threatens (encroachment) edges upserted. */
+  threatens: number;
   upserted: number;
   failed: number;
 }
 
 export async function deriveDependencySignals(): Promise<DeriveDependenciesResult> {
   if (!hasDatabase()) {
-    return { skipped: true, reason: "no_database", upserted: 0, failed: 0 };
+    return { skipped: true, reason: "no_database", dependsOn: 0, threatens: 0, upserted: 0, failed: 0 };
   }
   const prisma = getPrisma();
-  const edges = projectExposureToDependencyEdges();
+  const dependsOnEdges = projectExposureToDependencyEdges();
+  const encroachmentEdges = deriveEncroachmentEdges(dependsOnEdges, buildRolesByNodeId());
+  const edges = [...dependsOnEdges, ...encroachmentEdges];
 
   let upserted = 0;
+  let threatens = 0;
   let failed = 0;
   for (const e of edges) {
     try {
@@ -57,11 +65,12 @@ export async function deriveDependencySignals(): Promise<DeriveDependenciesResul
         },
       });
       upserted += 1;
+      if (e.direction === "threatens") threatens += 1;
     } catch {
       // Skip a single edge's write failure rather than aborting the pass.
       failed += 1;
     }
   }
 
-  return { skipped: false, upserted, failed };
+  return { skipped: false, dependsOn: upserted - threatens, threatens, upserted, failed };
 }
