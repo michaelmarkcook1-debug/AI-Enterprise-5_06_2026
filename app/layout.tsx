@@ -5,6 +5,7 @@ import TopNav from "@/components/TopNav";
 import GlobalFooter from "@/components/GlobalFooter";
 import AmbientHeroBackdrop from "@/components/AmbientHeroBackdrop";
 import NotLiveBanner from "@/components/NotLiveBanner";
+import IntentBeacon from "@/components/IntentBeacon";
 import { SITE_URL, SITE_NAME } from "@/lib/site";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
@@ -82,6 +83,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-full flex flex-col bg-[#faf6ec] dark:bg-[#071827] text-[#15263c] dark:text-[#eef3f8]">
         <AmbientHeroBackdrop />
+        <IntentBeacon />
         <div className="relative z-10 flex flex-1 flex-col">
           <TopNav />
           <NotLiveBanner />

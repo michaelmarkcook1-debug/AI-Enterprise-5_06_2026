@@ -127,6 +127,11 @@ export default async function AdminHome() {
             title="Exposure-map edits"
             body="Propose adds / updates / removals to the indirect-exposure graph. Append-only JSONL audit; nothing live until a reviewer folds it in."
           />
+          <AdminCard
+            href="/admin/intent-demand"
+            title="Buyer-intent demand"
+            body="Aggregated anonymous demand signal — most-viewed vendors, comparisons run, category interest. The data asset forming."
+          />
         </div>
 
         {/* Bottom strip: dev-mode note. */}
