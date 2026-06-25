@@ -60,6 +60,7 @@ import { fetchLiveGitHubSignals } from "../reputation/live-github";
 import { fetchAllMacroSignals } from "../market-signals/live-macro";
 import { deriveVendorScores } from "./derive-scores";
 import { deriveMarketShareMovement } from "./derive-market-share";
+import { deriveDependencySignals } from "../graph/derive-dependencies";
 import { detectCategoryChanges } from "../services/category-change";
 import { checkAndSendWatchlistAlerts } from "../watchlist/notify";
 import { checkAndSendCompetitiveOverlapAlerts } from "../watchlist/competitive-overlap-notify";
@@ -330,6 +331,15 @@ export async function runDailyRefresh(
     }
     const capture = await captureRankingSnapshots(now);
     return { backfill, captured: capture.captured, snapshotDate: capture.snapshotDate };
+  });
+
+  // ── 6b. Dependency / encroachment graph edges ──────────────
+  //     Deterministic projection of the curated, source-backed exposure data
+  //     into DependencySignal rows (no LLM, no spend). Powers the /dependencies
+  //     hero graph; idempotent via the (from,to,kind,direction) unique key.
+  await trackedStep("derive_dependencies", async () => {
+    const r = await deriveDependencySignals();
+    return r as unknown as Record<string, unknown>;
   });
 
   // ── 7. Competitive-intel monitor ───────────────────────────
