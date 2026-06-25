@@ -18,8 +18,10 @@ interface BeaconPayload {
 function classify(pathname: string): BeaconPayload | null {
   const parts = pathname.split("/").filter(Boolean);
   const head = parts[0];
+  // Home — the most important public view — is a page_view in its own right.
+  if (!head) return { eventType: "page_view" };
   // Never instrument admin tooling or API routes.
-  if (!head || head === "admin" || head === "api") return null;
+  if (head === "admin" || head === "api") return null;
 
   const slug = parts[1];
   if (head === "vendors" && slug) return { eventType: "vendor_viewed", targetType: "vendor", targetId: slug };

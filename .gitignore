@@ -41,3 +41,7 @@ backups/
 .vscode/
 .claude/
 .github/workflows/
+
+# Stray vendored copy of the app — never a route, never committed
+/app/ranking-engine/
+/app/ranking-engine*.zip

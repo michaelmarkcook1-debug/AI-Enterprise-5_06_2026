@@ -574,6 +574,7 @@ function NodeBubble({
   onKey: (e: React.KeyboardEvent<SVGGElement>) => void;
 }) {
   const [logoFailed, setLogoFailed] = useState(false);
+  const [focused, setFocused] = useState(false);
   const showLogo = node.logoDomain && !logoFailed;
   const labelDx = labelSide === "left" ? -(NODE_R + 14) : NODE_R + 14;
   const labelAnchor = labelSide === "left" ? "end" : "start";
@@ -584,8 +585,8 @@ function NodeBubble({
       tabIndex={0}
       role="button"
       aria-label={`${node.label} — ${node.category}${pinned ? " (pinned)" : ""}`}
-      onFocus={onEnter}
-      onBlur={onLeave}
+      onFocus={() => { setFocused(true); onEnter(); }}
+      onBlur={() => { setFocused(false); onLeave(); }}
       onMouseEnter={onEnter}
       onMouseLeave={onLeave}
       onClick={onClick}
@@ -597,6 +598,11 @@ function NodeBubble({
         outline: "none",
       }}
     >
+      {/* Keyboard focus ring — explicit, brand gold. SVG <g> does not reliably
+          paint the CSS :focus-visible outline, so we render our own (WCAG 2.4.7). */}
+      {focused && (
+        <circle r={NODE_R + 4} fill="none" stroke="#b08d2f" strokeWidth={2} pointerEvents="none" />
+      )}
       {/* Pin ring (dashed) — animated unless reduced motion. */}
       {pinned && (
         <circle

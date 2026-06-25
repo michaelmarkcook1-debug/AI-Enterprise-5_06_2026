@@ -1,11 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Cormorant_Garamond, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
-import TopNav from "@/components/TopNav";
-import GlobalFooter from "@/components/GlobalFooter";
-import AmbientHeroBackdrop from "@/components/AmbientHeroBackdrop";
-import NotLiveBanner from "@/components/NotLiveBanner";
-import IntentBeacon from "@/components/IntentBeacon";
 import { SITE_URL, SITE_NAME } from "@/lib/site";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
@@ -81,15 +76,13 @@ export default function RootLayout({
       <head>
         <script dangerouslySetInnerHTML={{ __html: NO_FLASH_THEME_SCRIPT }} />
       </head>
-      <body className="min-h-full flex flex-col bg-[#faf6ec] dark:bg-[#071827] text-[#15263c] dark:text-[#eef3f8]">
-        <AmbientHeroBackdrop />
-        <IntentBeacon />
-        <div className="relative z-10 flex flex-1 flex-col">
-          <TopNav />
-          <NotLiveBanner />
-          <div className="flex-1">{children}</div>
-          <GlobalFooter />
-        </div>
+      {/* Minimal root: html/body, fonts, and the no-flash theme script only.
+          All page chrome lives in the route-group layouts — app/(public) gets a
+          lean, idle-reaching shell; app/(internal) gets the gated, live-polling
+          dashboard shell. This separation is what lets public pages avoid the
+          dashboard's pollers and reach document-idle. */}
+      <body className="min-h-full bg-[#faf6ec] dark:bg-[#071827] text-[#15263c] dark:text-[#eef3f8]">
+        {children}
       </body>
     </html>
   );
