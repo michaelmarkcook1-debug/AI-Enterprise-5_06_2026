@@ -58,7 +58,19 @@ export async function extractStructured<T>(params: ExtractParams<T>): Promise<LL
     message = await client.messages.create({
       model: DEFAULT_MODEL,
       max_tokens: params.maxTokens ?? 4096,
-      system: params.systemPrompt,
+      // Prompt-cache the system/rubric prompt: it is identical across every
+      // source URL in a refresh run, so caching it makes the repeated input
+      // ~10× cheaper (cache reads are 0.1× input price). Below the model's
+      // minimum cacheable length the directive is simply ignored — safe either
+      // way. The shared central refresh is the only caller, so this is a direct
+      // cost win on the pipeline that has to scale cheaply.
+      system: [
+        {
+          type: "text",
+          text: params.systemPrompt,
+          cache_control: { type: "ephemeral" },
+        },
+      ],
       tools: [
         {
           name: params.schema.name,

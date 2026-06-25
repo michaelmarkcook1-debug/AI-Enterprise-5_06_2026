@@ -14,8 +14,14 @@ export type EnvKey =
   | "DATABASE_URL"
   | "ANTHROPIC_API_KEY"
   | "ANTHROPIC_MODEL"
+  | "ANTHROPIC_EXTRACT_MODEL"
+  | "ANTHROPIC_ANALYST_MODEL"
   | "ADMIN_API_TOKEN"
   | "ADMIN_API_OPEN"
+  | "CRON_SECRET"
+  | "REFRESH_KILL_SWITCH"
+  | "REFRESH_CYCLE_CAP_USD"
+  | "REFRESH_DAY_CAP_USD"
   | "SOURCING_LOG_DIR"
   | "NODE_ENV"
   | "VERCEL_ENV";
@@ -72,6 +78,57 @@ export const ENV_SPEC: EnvVarSpec[] = [
     severity: "optional",
     enables: ["Pin to a specific model version for reproducibility"],
     remediation: "Defaults to claude-sonnet-4-6. Override only if you need a specific model.",
+    secret: false,
+  },
+  {
+    key: "ANTHROPIC_EXTRACT_MODEL",
+    description: "Override the model used for structured evidence extraction/classification.",
+    severity: "optional",
+    enables: ["Tune the bulk-extraction model independently of the default"],
+    remediation: "Defaults to claude-haiku-4-5 (cheap bulk tier). Override only if extraction needs more.",
+    secret: false,
+  },
+  {
+    key: "ANTHROPIC_ANALYST_MODEL",
+    description: "Override the model used for analyst-grade synthesis (Stage 3).",
+    severity: "optional",
+    enables: ["Pin the analyst-synthesis model"],
+    remediation: "Defaults to claude-opus-4-8. Override only for reproducibility.",
+    secret: false,
+  },
+  {
+    key: "CRON_SECRET",
+    description: "Bearer secret the Vercel cron sends to /api/cron/* so only the scheduler can trigger the shared refresh.",
+    severity: "recommended",
+    enables: [
+      "Authenticate the scheduled daily refresh (vs. open trigger)",
+      "Keep the only LLM-spending pipeline gated to the scheduler + admins",
+    ],
+    remediation: "Generate with `openssl rand -hex 32`, set CRON_SECRET in Vercel; the cron sends it as `Authorization: Bearer …`.",
+    secret: true,
+  },
+  {
+    key: "REFRESH_KILL_SWITCH",
+    description: "Hard stop for the shared market refresh. Set to '1' to halt ALL LLM spend.",
+    severity: "optional",
+    enables: ["Emergency, redeploy-safe stop on the only pipeline that spends Anthropic credits"],
+    remediation: "Leave unset normally. Set to '1' in Vercel to freeze the refresh without a code change.",
+    secret: false,
+  },
+  {
+    key: "REFRESH_CYCLE_CAP_USD",
+    description: "Hard per-run spend cap for the shared refresh (USD).",
+    severity: "optional",
+    enables: ["Bounds the cost of any single refresh cycle"],
+    remediation: "Defaults to $5. Lower it to tighten the per-run ceiling; raise deliberately.",
+    secret: false,
+  },
+  {
+    key: "REFRESH_DAY_CAP_USD",
+    description: "Hard per-UTC-day spend cap across all refresh runs (USD).",
+    severity: "optional",
+    enables: ["Bounds total daily Anthropic spend even if the refresh is triggered repeatedly"],
+    remediation: "Defaults to $25. Lower it to tighten the daily ceiling; raise deliberately.",
     secret: false,
   },
   {

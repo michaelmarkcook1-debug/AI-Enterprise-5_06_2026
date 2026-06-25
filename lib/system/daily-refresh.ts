@@ -71,6 +71,8 @@ import {
   isRunActive,
 } from "./daily-refresh-store";
 import { getPrisma, hasDatabase } from "../prisma";
+import { getKillSwitchState } from "./refresh-killswitch";
+import { makeSpendGuard, recordCycleSpend } from "./spend-ledger";
 
 interface StepReport {
   step: string;
@@ -128,6 +130,38 @@ export async function runDailyRefresh(
   now: Date = new Date(),
   opts: { force?: boolean } = {},
 ): Promise<DailyRefreshReport> {
+  // ── Kill switch (hard stop) ─────────────────────────────────────────────
+  // The single lever that halts ALL LLM spend. Checked FIRST — before the
+  // dedup lock and before any step — and it guards `force` runs too because it
+  // lives here in the orchestrator, not in the cron route. Either the
+  // operator-owned env flag (REFRESH_KILL_SWITCH=1) or the runtime DB row can
+  // trip it. A tripped switch is an intentional no-op (ok=true), not a failure.
+  const killState = await getKillSwitchState();
+  if (killState.active) {
+    const ts = now.toISOString();
+    console.warn(
+      `[daily-refresh] kill switch active (${killState.source}) — skipping run. reason: ${killState.reason ?? "n/a"}`,
+    );
+    return {
+      startedAt: ts,
+      finishedAt: new Date().toISOString(),
+      ok: true,
+      databaseConfigured: hasDatabase(),
+      steps: [
+        {
+          step: "kill_switch",
+          ok: true,
+          durationMs: 0,
+          summary: { skipped: "kill_switch_active", source: killState.source, reason: killState.reason },
+        },
+      ],
+      errors: [],
+      totalTokensIn: 0,
+      totalTokensOut: 0,
+      estimatedCostUsd: 0,
+    };
+  }
+
   // ── Deduplication lock ─────────────────────────────────────────────────
   // Prevents two concurrent pipeline runs (e.g. Vercel cron + manual trigger
   // firing simultaneously) from both burning Anthropic credits. The lock is
@@ -146,9 +180,19 @@ export async function runDailyRefresh(
   // leaves an audit trail. Each step updates the row incrementally.
   const progressId = await beginRun(startedAt);
 
-  /** Helper: run a step, push to `steps`, persist progress. */
+  // ── Spend cap ───────────────────────────────────────────────────────────
+  // Reads today's prior spend once, then accumulates this cycle's cost as steps
+  // complete. The LLM-heavy steps below ask `spend.exhausted()` BEFORE running;
+  // once the per-cycle ($5) or per-day ($25) cap is reached no further LLM step
+  // starts. Cheap deterministic steps always run. Caps are env-overridable.
+  const spend = await makeSpendGuard(now);
+
+  /** Helper: run a step, push to `steps`, fold its cost into the spend guard,
+   * persist progress. */
   async function trackedStep(stepName: string, fn: () => Promise<Record<string, unknown>>): Promise<void> {
-    steps.push(await timed(stepName, fn));
+    const report = await timed(stepName, fn);
+    steps.push(report);
+    spend.record(Number((report.summary as Record<string, unknown>).estimatedCostUsd) || 0);
     if (progressId) {
       await updateRunProgress(progressId, steps).catch(() => {});
     }
@@ -163,6 +207,7 @@ export async function runDailyRefresh(
 
   // ── 1. Sourcing ────────────────────────────────────────────
   await trackedStep("sourcing", async () => {
+    if (spend.exhausted()) return { skipped: "spend_cap", ...spend.status() };
     const r = await runSourcing({ persist: dbConfigured });
     return {
       runId: r.runId,
@@ -263,6 +308,7 @@ export async function runDailyRefresh(
 
   // ── 7. Competitive-intel monitor ───────────────────────────
   await trackedStep("competitive_intel", async () => {
+    if (spend.exhausted()) return { skipped: "spend_cap", ...spend.status() };
     // Daily: core vendors only. Weekly (Monday): full universe.
     const r = await runCompetitiveIntelMonitor(now, isWeekly ? {} : { targets: COMPETITIVE_CORE });
     return {
@@ -286,6 +332,7 @@ export async function runDailyRefresh(
   //     Haiku-scored, vendor-tagged, written to IntelligenceNewsItem.
   //     (Folded in from the former standalone sourcing-rolling cron.)
   await trackedStep("market_news", async () => {
+    if (spend.exhausted()) return { skipped: "spend_cap", ...spend.status() };
     const r = await runMarketNewsIngestion();
     return {
       feedsFetched: r.feedsFetched,
@@ -300,6 +347,7 @@ export async function runDailyRefresh(
   //     (Folded in from the former standalone sourcing-news cron.)
   await trackedStep("sourcing_news", async () => {
     if (!dbConfigured) return { skipped: "no_database" };
+    if (spend.exhausted()) return { skipped: "spend_cap", ...spend.status() };
     const newsVendors = [...new Set(
       SOURCE_MANIFEST.filter((e) => e.category === "press_release").map((e) => e.vendorId),
     )].sort();
@@ -341,7 +389,10 @@ export async function runDailyRefresh(
     // run them only on the weekly day. SEC financials + valuations (8a/8b above)
     // stay daily because they're deterministic/cheap.
     let ipoFromLlm = 0, ipoFromDeterministic = 0, acItems = 0, acVendorsWithCoverage = 0, acErrors = 0;
-    if (isWeekly) {
+    // The weekly web-search/LLM sub-steps respect the spend cap; the cheap
+    // deterministic financials/valuations above always run.
+    const runWeeklyLlm = isWeekly && !spend.exhausted();
+    if (runWeeklyLlm) {
       // 8c. IPO forecasts — LLM + news, deterministic fallback.
       const ipo = await estimateAllIpoForecasts();
       await saveIpoForecasts(ipo.forecasts);
@@ -357,7 +408,7 @@ export async function runDailyRefresh(
     }
 
     return {
-      cadence: isWeekly ? "weekly_full" : "daily_financials_only",
+      cadence: runWeeklyLlm ? "weekly_full" : isWeekly ? "weekly_spend_capped" : "daily_financials_only",
       financialsFromSec: finFromSec,
       financialsFromIrFallback: finFromIr,
       financialsErrors: finErrors,
@@ -424,6 +475,16 @@ export async function runDailyRefresh(
     totalTokensOut,
     estimatedCostUsd,
   };
+
+  // Record this cycle's actual spend to the day ledger so the per-day cap and
+  // the next cycle's guard see it. Best-effort; never blocks the report.
+  await recordCycleSpend({
+    cycleId: progressId,
+    costUsd: estimatedCostUsd,
+    tokensIn: totalTokensIn,
+    tokensOut: totalTokensOut,
+    now,
+  });
 
   // Finalise the progressive-persistence row (marks ok + final errors).
   // Also persist the legacy full-report row for backward compat.
