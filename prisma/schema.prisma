@@ -680,3 +680,138 @@ model EvidenceSource {
   @@index([evidenceGrade])
   @@map("evidence_sources")
 }
+
+// ─────────────────────────────────────────────────────────────────────────
+// PHASE 1 (v2 new shape) — public rankings + insight site foundations.
+//
+// INDEPENDENCE FIREWALL — read this before touching anything below.
+// The vendor *scores* that drive the public rankings live on
+// IntelligenceVendor (overallScore / confidenceScore) and
+// IntelligencePillarScore (capabilityScore) and are written ONLY by the
+// evidence→rubric pipeline (see lib/scores/score-writer.ts, enforced by
+// lib/scores/score-writer.test.ts). Anything *commercial* — a vendor having
+// claimed their profile, paid for placement, etc. — lives in
+// `VendorCommercial` below, which holds only a SOFT string reference to a
+// vendor (no Prisma @relation into a score table) precisely so a commercial
+// write can never reach a score. The separation is structural, not a
+// convention. Do not add score fields here and do not add a relation from a
+// commercial row to a score row.
+// ─────────────────────────────────────────────────────────────────────────
+
+/// Commercial / vendor-supplied facts about a vendor. DELIBERATELY isolated
+/// from every score table. Empty in Wave 1 — it exists now so future paid
+/// features have a home that the rankings can never be contaminated by.
+model VendorCommercial {
+  id               String   @id @default(cuid())
+  /// Soft reference to IntelligenceVendor.id / VendorProfile.id. Intentionally
+  /// NOT a Prisma relation — keeps commercial data un-joinable into scores.
+  vendorId         String   @unique @map("vendor_id")
+  /// Has the vendor claimed/verified ownership of their profile?
+  claimed          Boolean  @default(false)
+  claimedByEmail   String?  @map("claimed_by_email")
+  /// Commercial tier — future use. none = no commercial relationship.
+  tier             String   @default("none")
+  sponsorPlacement Boolean  @default(false) @map("sponsor_placement")
+  paidPlanName     String?  @map("paid_plan_name")
+  notes            String?  @db.Text
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  @@index([vendorId])
+  @@index([tier])
+  @@map("vendor_commercial")
+}
+
+/// Hero signal — an edge in the dependency / encroachment graph. Each edge is
+/// evidence-cited (evidenceIds → EvidenceRecord) the same way scores are, so
+/// the graph is explainable rather than asserted.
+model DependencySignal {
+  id            String         @id @default(cuid())
+  fromVendorId  String         @map("from_vendor_id")
+  toVendorId    String         @map("to_vendor_id")
+  /// compute | model | infra | capital | distribution | encroachment
+  kind          String
+  /// depends_on | threatens
+  direction     String         @default("depends_on")
+  /// 0–100, evidence-derived strength of the relationship.
+  strength      Float          @default(0)
+  /// Plain-English, analyst-voice explanation of the relationship.
+  rationale     String         @db.Text
+  /// Cited EvidenceRecord ids backing this edge (soft references).
+  evidenceIds   String[]       @default([]) @map("evidence_ids")
+  sourceUrls    String[]       @default([]) @map("source_urls")
+  confidence    Float          @default(0)
+  evidenceGrade EvidenceGrade? @map("evidence_grade")
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @updatedAt @map("updated_at")
+
+  @@unique([fromVendorId, toVendorId, kind, direction])
+  @@index([fromVendorId])
+  @@index([toVendorId])
+  @@index([kind])
+  @@map("dependency_signals")
+}
+
+/// Insight / education articles (CMS-lite). markdown/MDX in `body`.
+model Article {
+  id          String    @id @default(cuid())
+  slug        String    @unique
+  title       String
+  summary     String?   @db.Text
+  body        String    @db.Text
+  /// draft | published
+  status      String    @default("draft")
+  tags        String[]  @default([])
+  vendorIds   String[]  @default([]) @map("vendor_ids")
+  authorName  String?   @map("author_name")
+  publishedAt DateTime? @map("published_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  @@index([status, publishedAt])
+  @@index([slug])
+  @@map("articles")
+}
+
+/// Anonymous buyer-intent event stream — THE future data asset. No PII:
+/// `sessionHash` is a salted hash, never a raw identifier, and firmographics
+/// are coarse + optional. See lib/http/anon-session.ts.
+model IntentEvent {
+  id          String   @id @default(cuid())
+  /// vendor_viewed | comparison_run | category_browsed | article_read | search
+  eventType   String   @map("event_type")
+  targetId    String?  @map("target_id")
+  /// vendor | category | comparison | article
+  targetType  String?  @map("target_type")
+  industry    String?
+  sizeBand    String?  @map("size_band")
+  /// Salted, non-reversible session hash — NOT a user id, no PII.
+  sessionHash String   @map("session_hash")
+  referrer    String?
+  path        String?
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@index([eventType, createdAt])
+  @@index([targetType, targetId])
+  @@index([createdAt])
+  @@map("intent_events")
+}
+
+/// Newsletter / email capture. Explicit double-opt-in; only PII we hold.
+model Subscriber {
+  id             String    @id @default(cuid())
+  email          String    @unique
+  /// pending | confirmed | unsubscribed
+  status         String    @default("pending")
+  source         String?
+  confirmToken   String?   @unique @map("confirm_token")
+  confirmedAt    DateTime? @map("confirmed_at")
+  unsubscribedAt DateTime? @map("unsubscribed_at")
+  industry       String?
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  @@index([status])
+  @@index([email])
+  @@map("subscribers")
+}
