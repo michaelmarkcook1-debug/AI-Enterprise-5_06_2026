@@ -51,6 +51,7 @@ import {
   watchlistsMockRepository,
 } from "./mock-repositories";
 import { calculateRiskPenalty, riskStatusForVendor } from "./metrics";
+import { isDataVendorSource } from "./source-quality";
 
 let dbFallbackWarningShown = false;
 
@@ -499,8 +500,14 @@ export async function getBreakingNews(
   // Buyer-facing "breaking news" must only show REAL, linkable items — never
   // seed/[MOCK] scaffolding. Gate on sourceKind "real" + a usable https URL, so
   // an empty live feed shows an honest empty state instead of mock headlines.
+  // AND reject items whose source is a data/firmographic VENDOR (Zoominfo,
+  // Flexera, …) rather than a credible publication — we suppress, never
+  // substitute a source. See lib/intelligence/source-quality.ts.
   const hasRealSource = (n: NewsItem) =>
-    n.sourceKind === "real" && typeof n.sourceUrl === "string" && n.sourceUrl.startsWith("http");
+    n.sourceKind === "real" &&
+    typeof n.sourceUrl === "string" &&
+    n.sourceUrl.startsWith("http") &&
+    !isDataVendorSource(n.sourceName);
   const all = merged.filter(hasRealSource);
   const latestPublishedAt = all[0]?.publishedAt ?? null;
   const latestAgeDays = latestPublishedAt
