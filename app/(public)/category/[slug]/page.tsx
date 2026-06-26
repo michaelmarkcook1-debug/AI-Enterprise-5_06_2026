@@ -95,14 +95,16 @@ export default async function CategoryPage({ params }: { params: Promise<Params>
                         {v.composite!.toFixed(0)}
                         <span className={`ml-1 text-[10px] ${MUTED}`}>composite</span>
                       </span>
+                      <span className={`font-mono text-[11px] tabular-nums ${MUTED}`}>{Math.round(v.coverage * 100)}% covered</span>
                       <span className={`font-mono text-[11px] tabular-nums ${MUTED}`}>{v.compositeConfidence}% conf</span>
                       <TrackButton item={`vendor:${v.vendorSlug}`} label={v.vendorName} />
                     </span>
                   </div>
                   {v.marketContext.estimatedShare !== null && (
                     <p className={`mt-1 text-[10px] ${MUTED}`}>
-                      Market context: ~{v.marketContext.estimatedShare.toFixed(1)}% est. category share
-                      {v.marketContext.isSeedSource ? " (seed-signed source — not counted)" : ""} · context only, not the rank
+                      {v.marketContext.isSeedSource
+                        ? "Market context: insufficient real-sourced share estimate"
+                        : `Market context: ~${v.marketContext.estimatedShare.toFixed(1)}% est. category share · context only, not the rank`}
                     </p>
                   )}
                   <PillarContributionTable vendor={v} />

@@ -40,10 +40,13 @@ export const METHODOLOGY_NOTE =
   `Weighted composite of ${PILLARS.length} evidence-graded pillars (` +
   PILLARS.map((p) => `${p.label} ${Math.round(p.defaultWeight * 100)}%`).join(", ") +
   `), ranked within category. Only pillars with admissible evidence (grade E2+ and ≥` +
-  `${MIN_PILLAR_CONFIDENCE}% confidence) count; weights renormalize over covered pillars. ` +
+  `${MIN_PILLAR_CONFIDENCE}% confidence) count; each contributes its score × rubric weight × a ` +
+  `confidence blend (0.7 + 0.3×confidence), and a missing pillar contributes zero — so coverage ` +
+  `directly discounts the composite (selective evidence can never out-rank comprehensive evidence). ` +
   `A vendor needs ≥${Math.round(COVERAGE_FLOOR * 100)}% of pillar weight evidenced and a verified ` +
-  `Enterprise Control pillar to be ranked — otherwise it is shown as “insufficient evidence”, ` +
-  `never floated on a default. Market share is context, not the rank.`;
+  `Enterprise Control pillar to be ranked — otherwise it is shown as “insufficient evidence”, never ` +
+  `floated on a default. The shown confidence is the evidenced-pillar average, discounted for ` +
+  `coverage (capped at 99%). Market share is context, not the rank.`;
 
 function clamp(n: number, lo: number, hi: number): number {
   return Math.max(lo, Math.min(hi, n));
@@ -102,7 +105,6 @@ export function scoreVendorComposite(
       pillar: pillar.id,
       label: pillar.label,
       baseWeight: pillar.defaultWeight,
-      effectiveWeight: null,
       capabilityScore: null,
       confidence: null,
       evidenceGrade: s?.evidenceGrade ?? "E0",
@@ -113,14 +115,14 @@ export function scoreVendorComposite(
       missingEvidence: s?.missingEvidence ?? [],
     };
     if (!has || !s) return base;
-    // Evidenced pillar: always surface its score/confidence/grade. Effective
-    // weight + contribution only exist when the vendor is actually ranked.
+    // Evidenced pillar: always surface its score/confidence/grade. Contribution
+    // uses the RUBRIC weight directly (NOT renormalized) — a missing pillar
+    // contributes 0, so coverage discounts the composite and thin, selective
+    // evidence can never out-rank comprehensive evidence.
     base.capabilityScore = s.capabilityScore;
     base.confidence = s.confidence;
-    if (!incomplete && coveredWeight > 0) {
-      const effW = pillar.defaultWeight / coveredWeight;
-      base.effectiveWeight = effW;
-      base.contribution = s.capabilityScore * effW * confidenceBlend(s.confidence);
+    if (!incomplete) {
+      base.contribution = s.capabilityScore * pillar.defaultWeight * confidenceBlend(s.confidence);
     }
     return base;
   });
@@ -155,18 +157,22 @@ export function scoreVendorComposite(
     };
   }
 
-  // Ranked: composite over covered pillars (renormalized) + coverage-aware confidence.
+  // Ranked: composite = Σ(score × rubric-weight × confidence-blend) over covered
+  // pillars. Missing pillars contribute 0 → coverage discounts the composite.
   const composite = clamp(
     pillars.reduce((sum, p) => sum + (p.contribution ?? 0), 0),
     0,
     100,
   );
-  const weightedConfidence = pillars.reduce(
-    (sum, p) => sum + (p.effectiveWeight ?? 0) * (p.confidence ?? 0),
+  // Confidence = confidence-weighted average over EVIDENCED pillars, then
+  // discounted for coverage (thinner evidence ⇒ lower confidence; capped < 100).
+  const confNumerator = pillars.reduce(
+    (sum, p) => sum + (p.state === "scored" ? p.baseWeight * (p.confidence ?? 0) : 0),
     0,
   );
+  const avgConf = coveredWeight > 0 ? confNumerator / coveredWeight : 0;
   const coveragePenalty = 0.5 + 0.5 * coveredWeight;
-  const compositeConfidence = clamp(Math.round(weightedConfidence * coveragePenalty), 0, 99);
+  const compositeConfidence = clamp(Math.round(avgConf * coveragePenalty), 0, 99);
 
   return {
     vendorId: vendor.id,

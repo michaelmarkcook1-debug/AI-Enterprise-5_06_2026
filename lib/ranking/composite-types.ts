@@ -18,16 +18,16 @@ export type EvidenceCompleteness = "full" | "substantial" | "partial" | "insuffi
 export interface PillarContribution {
   pillar: PillarId;
   label: string;
-  /** Canonical weight from PILLARS (e.g. 0.25 for enterprise_control). */
+  /** Canonical rubric weight from PILLARS (e.g. 0.25 for enterprise_control).
+   *  Contributions use this weight directly — a missing pillar contributes 0, so
+   *  coverage discounts the composite (no renormalization). */
   baseWeight: number;
-  /** Renormalized weight over covered pillars; null when excluded. */
-  effectiveWeight: number | null;
   /** 0–100; null when the pillar has insufficient evidence. */
   capabilityScore: number | null;
   /** 0–100; null when insufficient. */
   confidence: number | null;
   evidenceGrade: EvidenceGrade;
-  /** capabilityScore × effectiveWeight × confidenceBlend; null when excluded. */
+  /** capabilityScore × rubric weight × confidenceBlend; null when excluded. */
   contribution: number | null;
   state: "scored" | "insufficient_evidence";
   /** Why this pillar is dark / what would lift it (from VendorPillarScore). */

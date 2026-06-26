@@ -94,7 +94,7 @@ export default function PillarContributionTable({
                     {p.capabilityScore === null ? "—" : Math.round(p.capabilityScore)}
                   </td>
                   <td className="py-1.5 pr-3 text-right font-mono tabular-nums">
-                    {p.effectiveWeight !== null ? `${pct(p.effectiveWeight)}%` : `${pct(p.baseWeight)}%`}
+                    {pct(p.baseWeight)}%
                   </td>
                   <td className="py-1.5 pr-3 text-right font-mono tabular-nums">
                     {p.confidence === null ? "—" : `${Math.round(p.confidence)}%`}
@@ -127,8 +127,9 @@ export default function PillarContributionTable({
       )}
 
       <p className={`mt-2 text-[10px] ${MUTED}`}>
-        Weights renormalize over evidenced pillars; contributions sum to the composite. Market share is
-        context, not part of the score.
+        Each pillar contributes score × rubric weight × a confidence blend (0.7 + 0.3×confidence);
+        a missing pillar contributes zero, so coverage discounts the composite — contributions sum to it.
+        Market share is context, not part of the score.
       </p>
     </details>
   );

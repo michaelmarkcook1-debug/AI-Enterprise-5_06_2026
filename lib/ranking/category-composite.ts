@@ -58,7 +58,12 @@ export async function getCategoryComposites(): Promise<CategoryComposite[]> {
       .map((x, i) => ({ ...x, rank: i + 1 }));
     const incomplete = scored
       .filter((x) => x.state === "incomplete")
-      .sort((a, b) => b.coverage - a.coverage);
+      // Deterministic order (mirrors compareRanked's terminal tie-break): coverage
+      // desc, then vendorId — so display order never depends on DB row order.
+      .sort((a, b) => {
+        const byCov = b.coverage - a.coverage;
+        return Math.abs(byCov) > 1e-9 ? byCov : a.vendorId.localeCompare(b.vendorId);
+      });
 
     return { category, ranked, incomplete, isLive: live, methodologyNote: METHODOLOGY_NOTE };
   });

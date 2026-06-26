@@ -54,9 +54,9 @@ describe("scoreVendorComposite — ranked path", () => {
     expect(r.evidenceCompleteness).toBe("full");
     expect(r.pillars).toHaveLength(PILLARS.length);
     expect(r.pillars.every((p) => p.state === "scored")).toBe(true);
-    // effective weights renormalize to sum 1.
-    const sumEffW = r.pillars.reduce((s, p) => s + (p.effectiveWeight ?? 0), 0);
-    expect(sumEffW).toBeCloseTo(1, 5);
+    // Contributions sum to the composite (no hidden factor).
+    const sumContrib = r.pillars.reduce((s, p) => s + (p.contribution ?? 0), 0);
+    expect(sumContrib).toBeCloseTo(r.composite!, 5);
   });
 
   it("is deterministic (same input → identical output)", () => {
@@ -65,7 +65,7 @@ describe("scoreVendorComposite — ranked path", () => {
     expect(a).toEqual(b);
   });
 
-  it("renormalizes over covered pillars (one dark pillar) without inflating, and NEVER defaults the dark pillar", () => {
+  it("coverage discounts the composite (missing pillar contributes 0), and NEVER defaults the dark pillar", () => {
     // Drop vendor_resilience (0.15) → coverage 0.85, still ranked.
     const scores = PILLARS.filter((p) => p.id !== "vendor_resilience").map((p) =>
       ps(p.id, { capabilityScore: 80, evidenceGrade: "E3", confidence: 70 }),
@@ -73,13 +73,29 @@ describe("scoreVendorComposite — ranked path", () => {
     const r = scoreVendorComposite(VENDOR, scores);
     expect(r.state).toBe("ranked");
     expect(r.coverage).toBeCloseTo(0.85, 5);
-    // blend = 0.7 + 0.3*0.7 = 0.91 ; composite = 80 * 0.91 = 72.8
-    expect(r.composite).toBeCloseTo(72.8, 4);
+    // Rubric weights, NOT renormalized: blend = 0.7 + 0.3*0.7 = 0.91 ;
+    // composite = 80 * 0.91 * 0.85 (coverage) = 61.88 — lower than full coverage's 72.8.
+    expect(r.composite).toBeCloseTo(61.88, 2);
     const dark = r.pillars.find((p) => p.pillar === "vendor_resilience")!;
     expect(dark.state).toBe("insufficient_evidence");
     expect(dark.capabilityScore).toBeNull(); // never a default value
     expect(dark.contribution).toBeNull();
-    expect(dark.effectiveWeight).toBeNull();
+  });
+
+  it("FULL coverage out-ranks thin-but-higher-scoring coverage (no silent inflation)", () => {
+    // A: all 6 pillars @ 72 conf 75 (comprehensive) → 72 * 0.925 * 1.0 = 66.6
+    const a = scoreVendorComposite({ id: "a", slug: "a", name: "A" }, allPillars(72, "E3", 75));
+    // B: only 0.70 of weight evidenced (ent_control+business_fit+reliability+integration) @ 90 conf 75
+    const bScores = PILLARS.filter((p) =>
+      ["enterprise_control", "business_fit", "reliability_safety", "integration_ops"].includes(p.id),
+    ).map((p) => ps(p.id, { capabilityScore: 90, evidenceGrade: "E3", confidence: 75 }));
+    const b = scoreVendorComposite({ id: "b", slug: "b", name: "B" }, bScores);
+    expect(a.state).toBe("ranked");
+    expect(b.state).toBe("ranked"); // clears floor + has enterprise_control
+    expect(b.coverage).toBeCloseTo(0.7, 5);
+    // Comprehensive A must out-rank selective-but-higher B.
+    expect(a.composite!).toBeGreaterThan(b.composite!);
+    expect(compareRanked(a, b)).toBeLessThan(0); // A sorts first
   });
 
   it("compositeConfidence DROPS with thinner coverage (under-claim)", () => {

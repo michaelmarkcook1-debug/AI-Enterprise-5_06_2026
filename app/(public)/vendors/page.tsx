@@ -91,6 +91,7 @@ export default async function VendorsPage() {
                             {v.composite!.toFixed(0)}
                             <span className={`ml-1 text-[10px] ${MUTED}`}>composite</span>
                           </span>
+                          <span className={`font-mono text-[11px] tabular-nums ${MUTED}`}>{Math.round(v.coverage * 100)}% covered</span>
                           <span className={`font-mono text-[11px] tabular-nums ${MUTED}`}>{v.compositeConfidence}% conf</span>
                           <TrackButton item={`vendor:${v.vendorSlug}`} label={v.vendorName} />
                         </span>
