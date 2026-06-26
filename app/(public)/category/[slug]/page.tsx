@@ -8,15 +8,12 @@ import DataUnavailable from "@/components/DataUnavailable";
 import PillarContributionTable from "@/components/ranking/PillarContributionTable";
 import TrackButton from "@/components/member/TrackButton";
 
-// ISR: server-rendered + CDN-cached, revalidated hourly; DB reads only.
-export const revalidate = 3600;
+// force-dynamic (not ISR): rankings are DB-backed + recalculated each pipeline
+// run, so the page must reflect the live data immediately — never serve a stale
+// pre-recompute render. DB reads only; no LLM at request time.
+export const dynamic = "force-dynamic";
 
 type Params = { slug: string };
-
-export async function generateStaticParams(): Promise<Params[]> {
-  const categories = await listMarketCategories().catch(() => []);
-  return categories.map((c) => ({ slug: c.id }));
-}
 
 export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
   const { slug } = await params;

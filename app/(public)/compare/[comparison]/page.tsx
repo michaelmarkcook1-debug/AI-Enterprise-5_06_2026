@@ -10,9 +10,9 @@ import {
 import { isLiveData } from "@/lib/intelligence/provenance";
 import DataUnavailable from "@/components/DataUnavailable";
 
-// ISR: on-demand server-render + CDN cache (comparisons are combinatorial, so
-// not pre-generated), revalidated hourly. DB reads only — no LLM at request time.
-export const revalidate = 3600;
+// force-dynamic: comparisons are DB-backed (real pillar scores), so reflect the
+// live/recalculated data immediately rather than serve a stale render.
+export const dynamic = "force-dynamic";
 
 type Params = { comparison: string };
 
