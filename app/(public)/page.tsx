@@ -100,14 +100,21 @@ export default async function HomePage() {
         </div>
       </header>
 
-      {/* Derived "so what" — recomputed from the live edge data, labelled derived. */}
+      {/* Derived "so what" — recomputed from the live edge data, labelled derived.
+          Chokepoints (compute/cloud/capital leverage) are stated separately from
+          model ubiquity, so open-weight integration is never mislabelled as pricing power. */}
       {graphTakeaway && (
-        <p className="mb-4 max-w-3xl text-sm leading-6 text-[#15263c] dark:text-[#eef3f8]">
-          <span className="mr-2 inline-block rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide align-middle">
-            Derived signal
-          </span>
-          {graphTakeaway}
-        </p>
+        <div className="mb-4 max-w-3xl text-sm leading-6">
+          <p className="text-[#15263c] dark:text-[#eef3f8]">
+            <span className="mr-2 inline-block rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide align-middle">
+              Derived signal
+            </span>
+            {graphTakeaway.chokepoints}
+          </p>
+          {graphTakeaway.ubiquity && (
+            <p className="mt-1.5 text-[#15263c]/70 dark:text-[#eef3f8]/70">{graphTakeaway.ubiquity}</p>
+          )}
+        </div>
       )}
 
       {/* Fold: graph (~70%) + live rankings rail (~30%) */}

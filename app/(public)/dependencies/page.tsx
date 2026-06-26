@@ -52,14 +52,19 @@ export default function DependenciesPage() {
         <p className={`mt-2 max-w-3xl text-sm ${MUTED}`}>{DESCRIPTION}</p>
       </header>
 
-      {/* Derived "so what" — recomputed from the live edge data, labelled derived. */}
+      {/* Derived "so what" — chokepoints (compute/cloud/capital leverage) stated
+          separately from model ubiquity, so open-weight integration is never
+          mislabelled as pricing power. Recomputed from the live edge data. */}
       {takeaway && (
-        <p className="mb-6 max-w-3xl text-sm leading-6">
-          <span className="mr-2 inline-block rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide align-middle">
-            Derived signal
-          </span>
-          {takeaway}
-        </p>
+        <div className="mb-6 max-w-3xl text-sm leading-6">
+          <p>
+            <span className="mr-2 inline-block rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide align-middle">
+              Derived signal
+            </span>
+            {takeaway.chokepoints}
+          </p>
+          {takeaway.ubiquity && <p className={`mt-1.5 ${MUTED}`}>{takeaway.ubiquity}</p>}
+        </div>
       )}
 
       {/* How to read it + provenance — honest about what the edges are. */}
