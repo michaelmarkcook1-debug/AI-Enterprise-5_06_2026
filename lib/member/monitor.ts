@@ -13,10 +13,11 @@ import {
 } from "../intelligence/repository";
 import { projectExposureToDependencyEdges } from "../graph/dependency-projection";
 import { deriveEncroachmentEdges, buildRolesByNodeId, NODE_TO_SLUG } from "../graph/encroachment";
-import { EXPOSURE_NODES } from "../investing/exposure-map-data";
 import type { MemberWatchlistView } from "./watchlist";
 
-const MOVE_THRESHOLD = 1; // ≥1 pt of estimated-share change counts as a "move"
+// changePct is a RELATIVE percentage change ((cur-prev)/prev*100), matching the
+// public surface — so this is ≥1% relative change in the estimate, not points.
+const MOVE_THRESHOLD_PCT = 1;
 
 export type Tier = "high" | "medium" | "seed";
 function tierOf(confidence: number): Tier {
@@ -68,6 +69,7 @@ export async function buildMonitor(watchlist: MemberWatchlistView): Promise<Moni
 
   const nameBySlug = new Map(vendors.map((v) => [v.slug, v.name]));
   const nameById = new Map(vendors.map((v) => [v.id, v.name]));
+  const slugById = new Map(vendors.map((v) => [v.id, v.slug])); // estimates are keyed by id; links need the slug
   const catName = new Map(categories.map((c) => [c.id as string, c.name]));
   const vName = (idOrSlug: string) => nameById.get(idOrSlug) ?? nameBySlug.get(idOrSlug) ?? idOrSlug;
 
@@ -81,10 +83,10 @@ export async function buildMonitor(watchlist: MemberWatchlistView): Promise<Moni
   // ── Ranking moves: estimates touching a saved vendor OR saved category, with
   //    a material move. Directional estimates (labelled in the UI). ──
   const rankingMoves: RankingMove[] = estimates
-    .filter((e) => Math.abs(e.changePct ?? 0) >= MOVE_THRESHOLD)
+    .filter((e) => Math.abs(e.changePct ?? 0) >= MOVE_THRESHOLD_PCT)
     .filter((e) => vendorSet.has(e.vendorId) || categorySet.has(e.categoryId))
     .map((e) => ({
-      vendorSlug: e.vendorId,
+      vendorSlug: slugById.get(e.vendorId) ?? e.vendorId, // canonical slug for the link (id may diverge)
       vendorName: vName(e.vendorId),
       categoryId: e.categoryId,
       categoryName: catName.get(e.categoryId) ?? e.categoryId,
@@ -131,7 +133,8 @@ export async function buildMonitor(watchlist: MemberWatchlistView): Promise<Moni
     .filter(
       (n) =>
         (n.primaryVendorId && vendorSet.has(n.primaryVendorId)) ||
-        (n.vendors ?? []).some((v) => vendorSet.has(v)),
+        // n.vendors may carry vendor_-prefixed tokens; vendorSet holds bare slugs.
+        (n.vendors ?? []).some((v) => vendorSet.has(v.replace(/^vendor_/, ""))),
     )
     .slice(0, 12)
     .map((n) => ({
