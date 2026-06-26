@@ -506,6 +506,158 @@ export const SOURCE_MANIFEST: SourceManifestEntry[] = [
     label: "Snowflake blog",
     expectedDomains: ["market_position", "integration_architecture"],
     freshnessHorizonDays: NEWS_HORIZON },
+
+  // ── Thin-tail vendors wired 2026-06-26 (Batch-4 #03). Every URL below was
+  //    web-fetched + confirmed first-party before adding (no guessed feeds).
+  //    Adds ongoing daily sourcing for vendors that previously got only weekly
+  //    competitive-news coverage. TSMC deliberately OMITTED — no credible
+  //    AI-specific first-party source verified; left honest-empty, not padded.
+  //    Investors (Sequoia, SoftBank, a16z, MGX) are excluded by existing design
+  //    (they sit on the market map, not the evidence/news feed).
+
+  // ─ Fireworks AI ─────────────────────────────────────────────────────────
+  { vendorId: "vendor_fireworks", category: "press_release",
+    url: "https://fireworks.ai/blog",
+    label: "Fireworks AI blog",
+    expectedDomains: ["market_position", "model_reliability", "integration_architecture"],
+    freshnessHorizonDays: NEWS_HORIZON },
+  { vendorId: "vendor_fireworks", category: "vendor_docs",
+    url: "https://docs.fireworks.ai",
+    label: "Fireworks AI docs",
+    expectedDomains: ["integration_architecture", "agentic_autonomy", "model_reliability"],
+    freshnessHorizonDays: TRUST_HORIZON },
+  { vendorId: "vendor_fireworks", category: "pricing_page",
+    url: "https://fireworks.ai/pricing",
+    label: "Fireworks AI pricing",
+    expectedDomains: ["cost_finops"],
+    freshnessHorizonDays: PRICING_HORIZON },
+
+  // ─ Together AI ──────────────────────────────────────────────────────────
+  { vendorId: "vendor_together", category: "press_release",
+    url: "https://www.together.ai/blog",
+    label: "Together AI blog",
+    expectedDomains: ["market_position", "model_reliability", "agentic_autonomy"],
+    freshnessHorizonDays: NEWS_HORIZON },
+  { vendorId: "vendor_together", category: "vendor_docs",
+    url: "https://docs.together.ai",
+    label: "Together AI docs",
+    expectedDomains: ["integration_architecture", "agentic_autonomy", "model_reliability"],
+    freshnessHorizonDays: TRUST_HORIZON },
+  { vendorId: "vendor_together", category: "pricing_page",
+    url: "https://www.together.ai/pricing",
+    label: "Together AI pricing",
+    expectedDomains: ["cost_finops"],
+    freshnessHorizonDays: PRICING_HORIZON },
+
+  // ─ HUMAIN ───────────────────────────────────────────────────────────────
+  { vendorId: "vendor_humain", category: "press_release",
+    url: "https://www.humain.com/en/media-press.html",
+    label: "HUMAIN media center",
+    expectedDomains: ["market_position", "integration_architecture"],
+    freshnessHorizonDays: NEWS_HORIZON,
+    notes: "humain.ai 301-redirects to www.humain.com; no RSS (rss.xml 404)." },
+
+  // ─ G42 ──────────────────────────────────────────────────────────────────
+  { vendorId: "vendor_g42", category: "press_release",
+    url: "https://www.g42.ai/resources/news",
+    label: "G42 newsroom",
+    expectedDomains: ["market_position", "governance_compliance", "integration_architecture"],
+    freshnessHorizonDays: NEWS_HORIZON },
+
+  // ─ Moonshot AI (Kimi) ───────────────────────────────────────────────────
+  { vendorId: "vendor_moonshot", category: "press_release",
+    url: "https://www.kimi.com/blog/",
+    label: "Kimi (Moonshot AI) research blog",
+    expectedDomains: ["model_reliability", "agentic_autonomy", "market_position"],
+    freshnessHorizonDays: NEWS_HORIZON },
+  { vendorId: "vendor_moonshot", category: "vendor_docs",
+    url: "https://platform.kimi.ai/docs/introduction",
+    label: "Kimi API docs",
+    expectedDomains: ["integration_architecture", "model_reliability"],
+    freshnessHorizonDays: TRUST_HORIZON,
+    notes: "platform.moonshot.ai/docs 301-redirects to platform.kimi.ai." },
+  { vendorId: "vendor_moonshot", category: "pricing_page",
+    url: "https://platform.kimi.ai/docs/pricing/chat",
+    label: "Kimi API pricing",
+    expectedDomains: ["cost_finops"],
+    freshnessHorizonDays: PRICING_HORIZON },
+
+  // ─ Zhipu / Z.ai ─────────────────────────────────────────────────────────
+  { vendorId: "vendor_zai", category: "changelog",
+    url: "https://docs.z.ai/release-notes/new-released",
+    label: "Z.ai model release notes",
+    expectedDomains: ["model_reliability", "agentic_autonomy"],
+    freshnessHorizonDays: CHANGELOG_HORIZON },
+  { vendorId: "vendor_zai", category: "vendor_docs",
+    url: "https://docs.z.ai/",
+    label: "Z.ai developer docs",
+    expectedDomains: ["integration_architecture", "model_reliability"],
+    freshnessHorizonDays: TRUST_HORIZON },
+  { vendorId: "vendor_zai", category: "pricing_page",
+    url: "https://docs.z.ai/guides/overview/pricing",
+    label: "Z.ai pricing",
+    expectedDomains: ["cost_finops"],
+    freshnessHorizonDays: PRICING_HORIZON },
+
+  // ─ xAI ──────────────────────────────────────────────────────────────────
+  { vendorId: "vendor_xai", category: "vendor_docs",
+    url: "https://docs.x.ai/docs/overview",
+    label: "xAI API docs",
+    expectedDomains: ["integration_architecture", "model_reliability", "agentic_autonomy"],
+    freshnessHorizonDays: TRUST_HORIZON },
+  { vendorId: "vendor_xai", category: "pricing_page",
+    url: "https://docs.x.ai/docs/pricing",
+    label: "xAI API pricing",
+    expectedDomains: ["cost_finops"],
+    freshnessHorizonDays: PRICING_HORIZON,
+    notes: "No first-party news/blog feed verified — docs + pricing only." },
+
+  // ─ Lambda ───────────────────────────────────────────────────────────────
+  { vendorId: "vendor_lambda", category: "press_release",
+    url: "https://lambda.ai/blog",
+    rssUrl: "https://lambda.ai/blog/rss.xml",
+    label: "Lambda blog",
+    expectedDomains: ["market_position", "integration_architecture"],
+    freshnessHorizonDays: NEWS_HORIZON },
+  { vendorId: "vendor_lambda", category: "pricing_page",
+    url: "https://lambda.ai/pricing",
+    label: "Lambda GPU cloud pricing",
+    expectedDomains: ["cost_finops"],
+    freshnessHorizonDays: PRICING_HORIZON },
+  { vendorId: "vendor_lambda", category: "vendor_docs",
+    url: "https://docs.lambda.ai",
+    label: "Lambda docs",
+    expectedDomains: ["integration_architecture"],
+    freshnessHorizonDays: TRUST_HORIZON },
+
+  // ─ Sakana AI ────────────────────────────────────────────────────────────
+  { vendorId: "vendor_sakana", category: "press_release",
+    url: "https://sakana.ai/blog/",
+    label: "Sakana AI blog",
+    expectedDomains: ["model_reliability", "market_position"],
+    freshnessHorizonDays: NEWS_HORIZON },
+  { vendorId: "vendor_sakana", category: "vendor_docs",
+    url: "https://console.sakana.ai/get-started",
+    label: "Sakana AI console docs",
+    expectedDomains: ["integration_architecture"],
+    freshnessHorizonDays: TRUST_HORIZON },
+
+  // ─ Perplexity ───────────────────────────────────────────────────────────
+  { vendorId: "vendor_perplexity", category: "changelog",
+    url: "https://docs.perplexity.ai/changelog/changelog",
+    label: "Perplexity API changelog",
+    expectedDomains: ["model_reliability", "integration_architecture"],
+    freshnessHorizonDays: CHANGELOG_HORIZON },
+  { vendorId: "vendor_perplexity", category: "vendor_docs",
+    url: "https://docs.perplexity.ai/getting-started/overview",
+    label: "Perplexity API docs",
+    expectedDomains: ["integration_architecture", "agentic_autonomy"],
+    freshnessHorizonDays: TRUST_HORIZON },
+  { vendorId: "vendor_perplexity", category: "pricing_page",
+    url: "https://docs.perplexity.ai/getting-started/pricing",
+    label: "Perplexity API pricing",
+    expectedDomains: ["cost_finops"],
+    freshnessHorizonDays: PRICING_HORIZON },
 ];
 
 export function manifestForVendor(vendorId: string): SourceManifestEntry[] {
