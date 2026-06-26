@@ -9,6 +9,7 @@ import SubscribeForm from "@/components/SubscribeForm";
 import { EXPOSURE_NODES } from "@/lib/investing/exposure-map-data";
 import { projectExposureToDependencyEdges, summariseByKind } from "@/lib/graph/dependency-projection";
 import { deriveEncroachmentEdges, buildRolesByNodeId } from "@/lib/graph/encroachment";
+import { deriveGraphTakeaway } from "@/lib/graph/takeaway";
 import { getDataProvenance } from "@/lib/intelligence/provenance";
 import { getLastRefreshedAt } from "@/lib/system/daily-refresh";
 import { listPublishedArticles } from "@/lib/articles/repository";
@@ -49,6 +50,7 @@ export default async function HomePage() {
   const encroachments = deriveEncroachmentEdges(edges, buildRolesByNodeId());
   const labelById = new Map(EXPOSURE_NODES.map((n) => [n.id, n.label]));
   const label = (id: string) => labelById.get(id) ?? id;
+  const graphTakeaway = deriveGraphTakeaway(edges, label);
 
   // Confidence partition DERIVED from the data so the credibility line can never
   // drift from the edges themselves (high ≥80, medium 45–79, seed <45).
@@ -97,6 +99,16 @@ export default async function HomePage() {
           <span className={MUTED}>{updated ? `Updated ${updated}` : "Not yet refreshed"}</span>
         </div>
       </header>
+
+      {/* Derived "so what" — recomputed from the live edge data, labelled derived. */}
+      {graphTakeaway && (
+        <p className="mb-4 max-w-3xl text-sm leading-6 text-[#15263c] dark:text-[#eef3f8]">
+          <span className="mr-2 inline-block rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide align-middle">
+            Derived signal
+          </span>
+          {graphTakeaway}
+        </p>
+      )}
 
       {/* Fold: graph (~70%) + live rankings rail (~30%) */}
       <section className="mb-3 grid grid-cols-1 gap-5 lg:grid-cols-12">

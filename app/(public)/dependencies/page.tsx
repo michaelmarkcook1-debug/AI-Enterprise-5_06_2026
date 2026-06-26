@@ -8,6 +8,7 @@ import {
   summariseByKind,
 } from "@/lib/graph/dependency-projection";
 import { deriveEncroachmentEdges, buildRolesByNodeId } from "@/lib/graph/encroachment";
+import { deriveGraphTakeaway } from "@/lib/graph/takeaway";
 
 // ISR: server-rendered + CDN-cached, revalidated hourly. The graph data is
 // curated + source-backed (lib/investing/exposure-map-data.ts); zero LLM at
@@ -36,6 +37,7 @@ export default function DependenciesPage() {
   const labelById = new Map(EXPOSURE_NODES.map((n) => [n.id, n.label]));
   const label = (id: string) => labelById.get(id) ?? id;
   const encroachments = deriveEncroachmentEdges(edges, buildRolesByNodeId());
+  const takeaway = deriveGraphTakeaway(edges, label);
 
   const total = edges.length;
   // Three tiers that partition every edge (sum === total) — no silent omission.
@@ -49,6 +51,16 @@ export default function DependenciesPage() {
         <h1 className="font-[var(--font-display)] text-3xl font-extrabold tracking-tight">{TITLE}</h1>
         <p className={`mt-2 max-w-3xl text-sm ${MUTED}`}>{DESCRIPTION}</p>
       </header>
+
+      {/* Derived "so what" — recomputed from the live edge data, labelled derived. */}
+      {takeaway && (
+        <p className="mb-6 max-w-3xl text-sm leading-6">
+          <span className="mr-2 inline-block rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide align-middle">
+            Derived signal
+          </span>
+          {takeaway}
+        </p>
+      )}
 
       {/* How to read it + provenance — honest about what the edges are. */}
       <section className={`${CARD} mb-6 text-sm`}>
