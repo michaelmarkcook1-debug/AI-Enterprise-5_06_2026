@@ -811,7 +811,62 @@ model Subscriber {
   createdAt      DateTime  @default(now()) @map("created_at")
   updatedAt      DateTime  @updatedAt @map("updated_at")
 
+  // Phase 2 member identity — back-relations only (the FK columns live on the
+  // child tables, so this adds no column to `subscribers`).
+  authTokens AuthToken[]
+  sessions   MemberSession[]
+  watchlist  MemberWatchlist?
+
   @@index([status])
   @@index([email])
   @@map("subscribers")
+}
+
+/// Phase 2 — passwordless magic-link token. Single-use, short-TTL, hashed at rest.
+model AuthToken {
+  id           String     @id @default(cuid())
+  subscriberId String     @map("subscriber_id")
+  tokenHash    String     @unique @map("token_hash")
+  purpose      String     @default("signin")
+  expiresAt    DateTime   @map("expires_at")
+  consumedAt   DateTime?  @map("consumed_at")
+  createdAt    DateTime   @default(now()) @map("created_at")
+  subscriber   Subscriber @relation(fields: [subscriberId], references: [id], onDelete: Cascade)
+
+  @@index([subscriberId])
+  @@index([expiresAt])
+  @@map("auth_tokens")
+}
+
+/// Phase 2 — member session. The httpOnly cookie holds the raw token; we store
+/// only its sha256 hash, so a DB read can't reconstruct a usable session token.
+model MemberSession {
+  id           String     @id @default(cuid())
+  subscriberId String     @map("subscriber_id")
+  tokenHash    String     @unique @map("token_hash")
+  expiresAt    DateTime   @map("expires_at")
+  createdAt    DateTime   @default(now()) @map("created_at")
+  lastSeenAt   DateTime   @default(now()) @map("last_seen_at")
+  subscriber   Subscriber @relation(fields: [subscriberId], references: [id], onDelete: Cascade)
+
+  @@index([subscriberId])
+  @@index([expiresAt])
+  @@map("member_sessions")
+}
+
+/// Phase 2 — a member's private saved watchlist. FIREWALLED from rankings: stores
+/// vendor slugs + category ids as plain strings, with NO foreign key to any score
+/// table and NO relation to the anonymous `Watchlist`. One-way reads only.
+model MemberWatchlist {
+  id           String     @id @default(cuid())
+  subscriberId String     @unique @map("subscriber_id")
+  vendors      String[]   @default([])
+  categories   String[]   @default([])
+  useCases     String[]   @default([]) @map("use_cases")
+  currentStack String[]   @default([]) @map("current_stack")
+  createdAt    DateTime   @default(now()) @map("created_at")
+  updatedAt    DateTime   @updatedAt @map("updated_at")
+  subscriber   Subscriber @relation(fields: [subscriberId], references: [id], onDelete: Cascade)
+
+  @@map("member_watchlists")
 }
