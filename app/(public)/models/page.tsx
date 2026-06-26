@@ -5,7 +5,7 @@ import {
   getAllVendorSummaries,
   getDashboardSummary,
 } from "@/lib/model-inventory/repository";
-import { isLiveData } from "@/lib/intelligence/provenance";
+import { HARDCODED_SURFACES_WIRED } from "@/lib/availability";
 import DataUnavailable from "@/components/DataUnavailable";
 
 // ISR: server-rendered + CDN-cached, revalidated hourly. STRICT mode: the model
@@ -38,7 +38,7 @@ function Stat({ label, value }: { label: string; value: string | number }) {
 
 export default async function ModelsPage() {
   // STRICT: hold the hardcoded model inventory until evidence-backed.
-  if (!(await isLiveData())) {
+  if (!HARDCODED_SURFACES_WIRED) {
     return (
       <main className="mx-auto max-w-6xl px-4 py-10">
         <header className="mb-8">

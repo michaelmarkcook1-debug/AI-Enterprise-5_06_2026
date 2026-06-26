@@ -9,7 +9,7 @@ import {
 } from "@/lib/graph/dependency-projection";
 import { deriveEncroachmentEdges, buildRolesByNodeId } from "@/lib/graph/encroachment";
 import { deriveGraphTakeaway } from "@/lib/graph/takeaway";
-import { isLiveData } from "@/lib/intelligence/provenance";
+import { HARDCODED_SURFACES_WIRED } from "@/lib/availability";
 import DataUnavailable from "@/components/DataUnavailable";
 
 // ISR: server-rendered + CDN-cached, revalidated hourly. STRICT mode: the graph
@@ -35,7 +35,7 @@ const MUTED = "text-[#15263c]/60 dark:text-[#eef3f8]/60";
 export default async function DependenciesPage() {
   // STRICT: hold the hardcoded graph until the portal is backed by verified
   // evidence — we never present curated relationships as if measured/live.
-  if (!(await isLiveData())) {
+  if (!HARDCODED_SURFACES_WIRED) {
     return (
       <main className="mx-auto max-w-6xl px-4 py-10">
         <header className="mb-6">

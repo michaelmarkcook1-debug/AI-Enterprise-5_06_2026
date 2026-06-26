@@ -1,115 +1,160 @@
-// Live market-share movement.
-// ───────────────────────────
-// Market share has no free authoritative real-time feed, so absolute shares
-// stay analyst-estimate baselines (the curated, dated MARKET_SHARE_ESTIMATES).
-// What this step makes LIVE is the MOVEMENT: each run it tilts each vendor's
-// share around its baseline by that vendor's momentum (which is itself driven
-// by ingested news + verified evidence), then recomputes changePct so the
-// "weekly movers" surfaces actually move with new data.
+// Live market-share = evidence-derived category-PRESENCE share.
+// ───────────────────────────────────────────────────────────────────────────
+// REPLACES the old seed-baseline-tilt (which rewrote the hardcoded
+// MARKET_SHARE_ESTIMATES seed with its seed source string). There is no real
+// measured-share feed, so each run we recompute a directional category-presence
+// estimate for every evidenced vendor from the REAL ingested signals
+// (verified-evidence depth + production references + deployment depth + momentum)
+// via lib/system/market-presence.ts, and stamp an HONEST, non-seed source.
 //
-// The tilt is BOUNDED and NON-COMPOUNDING — it's always computed from the
-// curated baseline, never from the previous tilted value, so shares respond to
-// momentum without ever drifting away from the analyst anchor. Per category the
-// tilted shares are renormalised to preserve the baseline category total.
+// Category MEMBERSHIP (which category a vendor competes in) reuses the curated
+// taxonomy embedded in MARKET_SHARE_ESTIMATES — a structural analyst assignment,
+// NOT the fabricated share numbers, which we discard. Vendors with no curated
+// membership are reported (uncovered) rather than guessed; vendors with no real
+// signal are omitted (insufficient evidence), never floated at 0.
 
 import { getPrisma, hasDatabase } from "../prisma";
 import { MARKET_SHARE_ESTIMATES } from "../intelligence/seed";
 import { marketShareChangePct } from "../intelligence/metrics";
-
-/** Per-momentum-point tilt and the hard clamp on total relative movement. */
-const TILT_PER_POINT = 0.012; // 20-pt momentum lead vs category avg → +24%
-const TILT_CLAMP = 0.25; // never move a share more than ±25% of its baseline
-
-function clamp(v: number, min: number, max: number): number {
-  return Math.max(min, Math.min(max, v));
-}
-
-/** Bounded, non-compounding momentum tilt of a baseline share. momentum and
- * catAvgMomentum are 0-100 momentum scores. Returns the tilted (pre-renormalise)
- * share. Exported for testing. */
-export function momentumTiltedShare(baselineShare: number, momentum: number, catAvgMomentum: number): number {
-  const factor = 1 + clamp(TILT_PER_POINT * (momentum - catAvgMomentum), -TILT_CLAMP, TILT_CLAMP);
-  return Math.max(0, baselineShare * factor);
-}
+import { isSeedSignedSource } from "../intelligence/provenance";
+import {
+  computePresenceShares,
+  PRESENCE_SOURCE,
+  PRESENCE_METHODOLOGY,
+  type VendorSignal,
+} from "./market-presence";
 
 export interface MarketShareMovementResult {
   skipped: boolean;
   reason?: string;
   rowsUpdated: number;
-  topMovers: { vendorId: string; categoryId: string; from: number; to: number; changePct: number }[];
+  seedRowsDeleted: number;
+  vendorsCovered: number;
+  uncoveredVendorIds: string[];
+  topMovers: { vendorId: string; categoryId: string; to: number; changePct: number }[];
+}
+
+/** Distinct curated (vendorId, categoryId) memberships — taxonomy only. */
+function curatedMemberships(): { vendorId: string; categoryId: string }[] {
+  const seen = new Set<string>();
+  const out: { vendorId: string; categoryId: string }[] = [];
+  for (const e of MARKET_SHARE_ESTIMATES) {
+    const key = `${e.vendorId}__${e.categoryId}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push({ vendorId: e.vendorId, categoryId: e.categoryId });
+  }
+  return out;
 }
 
 export async function deriveMarketShareMovement(now: Date = new Date()): Promise<MarketShareMovementResult> {
   if (!hasDatabase()) {
-    return { skipped: true, reason: "no_database", rowsUpdated: 0, topMovers: [] };
+    return { skipped: true, reason: "no_database", rowsUpdated: 0, seedRowsDeleted: 0, vendorsCovered: 0, uncoveredVendorIds: [], topMovers: [] };
   }
   const prisma = getPrisma();
 
-  // Live momentum per vendor (written by deriveVendorScores — run this AFTER it).
-  const momRows = await prisma.vendorMomentum.findMany({
-    where: { period: "rolling_30d" },
-    select: { vendorId: true, momentumScore: true },
-  });
-  const momentum = new Map(momRows.map((r) => [r.vendorId, r.momentumScore]));
+  // ── Real per-vendor signals ────────────────────────────────────────────────
+  const [evGroups, momRows, profiles, allVendors, existing] = await Promise.all([
+    prisma.evidenceRecord.groupBy({ by: ["vendorId"], where: { reviewStatus: "analyst_verified" }, _count: { _all: true } }),
+    prisma.vendorMomentum.findMany({ where: { period: "rolling_30d" }, select: { vendorId: true, momentumScore: true } }),
+    prisma.vendorProfile.findMany({ include: { industryAdoption: true } }).catch(() => []),
+    prisma.intelligenceVendor.findMany({ select: { id: true } }),
+    prisma.marketShareEstimate.findMany({ select: { vendorId: true, categoryId: true, estimatedShare: true, source: true } }),
+  ]);
 
-  // Group the curated baseline by category.
-  const byCategory = new Map<string, typeof MARKET_SHARE_ESTIMATES>();
-  for (const s of MARKET_SHARE_ESTIMATES) {
-    const arr = byCategory.get(s.categoryId) ?? [];
-    arr.push(s);
-    byCategory.set(s.categoryId, arr);
+  const verifiedEvidence = new Map<string, number>(evGroups.map((g) => [g.vendorId, g._count._all]));
+  const momentum = new Map<string, number>(momRows.map((r) => [r.vendorId, r.momentumScore]));
+  const prodRefs = new Map<string, number>();
+  const deployDepth = new Map<string, number>();
+  for (const p of profiles as { id: string; industryAdoption: { productionReferenceCount: number; deploymentDepthScore: number }[] }[]) {
+    const refs = p.industryAdoption.reduce((s, a) => s + (a.productionReferenceCount ?? 0), 0);
+    const depths = p.industryAdoption.map((a) => a.deploymentDepthScore ?? 0).filter((d) => d > 0);
+    prodRefs.set(p.id, refs);
+    deployDepth.set(p.id, depths.length ? depths.reduce((s, d) => s + d, 0) / depths.length : 0);
   }
 
+  const signals = new Map<string, VendorSignal>();
+  for (const v of allVendors) {
+    signals.set(v.id, {
+      verifiedEvidence: verifiedEvidence.get(v.id) ?? 0,
+      productionReferences: prodRefs.get(v.id) ?? 0,
+      deploymentDepth: deployDepth.get(v.id) ?? 0,
+      momentum: momentum.get(v.id) ?? 0,
+    });
+  }
+
+  // ── Compute real presence shares over the curated taxonomy ─────────────────
+  const memberships = curatedMemberships();
+  const shares = computePresenceShares(memberships, signals);
+
+  // Coverage report: which of the 47 vendors got at least one share.
+  const covered = new Set(shares.map((s) => s.vendorId));
+  const uncoveredVendorIds = allVendors.map((v) => v.id).filter((id) => !covered.has(id)).sort();
+
+  const prevShare = new Map<string, number>(
+    existing.map((e) => [`${e.vendorId}__${e.categoryId}`, e.estimatedShare]),
+  );
   const movers: MarketShareMovementResult["topMovers"] = [];
   let rowsUpdated = 0;
 
-  for (const [, rows] of byCategory) {
-    const moms = rows.map((r) => momentum.get(r.vendorId) ?? 50);
-    const catAvg = moms.reduce((s, m) => s + m, 0) / (moms.length || 1);
-    const baselineTotal = rows.reduce((s, r) => s + r.estimatedShare, 0);
+  for (const s of shares) {
+    const baseline = prevShare.get(`${s.vendorId}__${s.categoryId}`);
+    const prev = baseline ?? s.share;
+    const changePct = marketShareChangePct(s.share, prev);
+    try {
+      await prisma.marketShareEstimate.upsert({
+        where: { vendorId_categoryId: { vendorId: s.vendorId, categoryId: s.categoryId } },
+        create: {
+          vendorId: s.vendorId,
+          categoryId: s.categoryId,
+          estimatedShare: s.share,
+          previousEstimate: prev,
+          changePct,
+          confidence: s.confidence,
+          source: PRESENCE_SOURCE,
+          sourceDate: now,
+          methodology: PRESENCE_METHODOLOGY,
+        },
+        update: {
+          estimatedShare: s.share,
+          previousEstimate: prev,
+          changePct,
+          confidence: s.confidence,
+          source: PRESENCE_SOURCE,
+          sourceDate: now,
+          methodology: PRESENCE_METHODOLOGY,
+        },
+      });
+      rowsUpdated += 1;
+      if (Math.abs(changePct) >= 1) movers.push({ vendorId: s.vendorId, categoryId: s.categoryId, to: s.share, changePct });
+    } catch {
+      // Skip a single row (e.g. missing IntelligenceVendor FK) rather than abort.
+    }
+  }
 
-    const tilted = rows.map((r) => momentumTiltedShare(r.estimatedShare, momentum.get(r.vendorId) ?? 50, catAvg));
-    const tiltedTotal = tilted.reduce((s, t) => s + t, 0) || 1;
-
-    for (let i = 0; i < rows.length; i++) {
-      const r = rows[i];
-      const baseline = r.estimatedShare;
-      // Renormalise so the category total is preserved (a tilt up for one
-      // vendor is a tilt down for the rest).
-      const newShare = Math.round((tilted[i] / tiltedTotal) * baselineTotal * 10) / 10;
-      const changePct = marketShareChangePct(newShare, baseline);
-
-      try {
-        await prisma.marketShareEstimate.upsert({
-          where: { vendorId_categoryId: { vendorId: r.vendorId, categoryId: r.categoryId } },
-          create: {
-            vendorId: r.vendorId,
-            categoryId: r.categoryId,
-            estimatedShare: newShare,
-            previousEstimate: baseline,
-            changePct,
-            confidence: r.confidence,
-            source: r.source,
-            sourceDate: now,
-            methodology: `${r.methodology} Movement is momentum-adjusted each run (bounded ±${TILT_CLAMP * 100}% around the analyst baseline).`,
-          },
-          update: {
-            estimatedShare: newShare,
-            previousEstimate: baseline,
-            changePct,
-            sourceDate: now,
-          },
-        });
-        rowsUpdated += 1;
-        if (Math.abs(changePct) >= 1) {
-          movers.push({ vendorId: r.vendorId, categoryId: r.categoryId, from: baseline, to: newShare, changePct });
-        }
-      } catch {
-        // Skip a single row (e.g. missing IntelligenceVendor FK) rather than abort.
-      }
+  // ── Drop any leftover SEED-signed rows so only real-derived rows remain ─────
+  let seedRowsDeleted = 0;
+  const seedKeys = existing
+    .filter((e) => isSeedSignedSource(e.source))
+    .map((e) => ({ vendorId: e.vendorId, categoryId: e.categoryId }));
+  for (const k of seedKeys) {
+    // Only delete if we did NOT just write a real row for this pair.
+    if (covered.has(k.vendorId) && shares.some((s) => s.vendorId === k.vendorId && s.categoryId === k.categoryId)) continue;
+    try {
+      await prisma.marketShareEstimate.delete({ where: { vendorId_categoryId: { vendorId: k.vendorId, categoryId: k.categoryId } } });
+      seedRowsDeleted += 1;
+    } catch {
+      /* row already gone / replaced */
     }
   }
 
   movers.sort((a, b) => Math.abs(b.changePct) - Math.abs(a.changePct));
-  return { skipped: false, rowsUpdated, topMovers: movers.slice(0, 15) };
+  return {
+    skipped: false,
+    rowsUpdated,
+    seedRowsDeleted,
+    vendorsCovered: covered.size,
+    uncoveredVendorIds,
+    topMovers: movers.slice(0, 15),
+  };
 }

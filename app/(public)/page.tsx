@@ -15,6 +15,7 @@ import { getLastRefreshedAt } from "@/lib/system/daily-refresh";
 import { listPublishedArticles } from "@/lib/articles/repository";
 import { absoluteUrl } from "@/lib/site";
 import DataUnavailable from "@/components/DataUnavailable";
+import { HARDCODED_SURFACES_WIRED } from "@/lib/availability";
 
 // Public front door. DB-backed (live rankings, breaking news, provenance) →
 // force-dynamic, matching /vendors. All reads are parallel + guarded so the page
@@ -107,10 +108,10 @@ export default async function HomePage() {
         </div>
       </header>
 
-      {/* Derived "so what" — from the dependency graph. STRICT mode: the graph is
-          hardcoded (not live-DB evidence), so it only shows when the portal is
-          backed by verified evidence. */}
-      {isLive && graphTakeaway && (
+      {/* Derived "so what" — from the dependency graph. The graph is still
+          HARDCODED (not live-DB), so it gates on HARDCODED_SURFACES_WIRED — it
+          must not ride the provenance flip and show hardcoded data as live. */}
+      {HARDCODED_SURFACES_WIRED && graphTakeaway && (
         <div className="mb-4 max-w-3xl text-sm leading-6">
           <p className="text-[#15263c] dark:text-[#eef3f8]">
             <span className="mr-2 inline-block rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide align-middle">
@@ -124,39 +125,45 @@ export default async function HomePage() {
         </div>
       )}
 
-      {/* Fold: graph (~70%) + rankings rail (~30%). STRICT mode: the dependency
-          graph and the rankings are hardcoded/seed-derived (not live-DB verified
-          evidence), so the entire fold holds until the portal is evidence-backed —
-          we never display hardcoded or estimated figures as if measured. */}
-      {isLive ? (
-        <section className="mb-3 grid grid-cols-1 gap-5 lg:grid-cols-12">
-          <div className="lg:col-span-8">
-            {/* Gold "vitrine" bracket mounts the instrument without recolouring it. */}
-            <div className="relative rounded-xl border border-black/10 p-1.5 dark:border-white/10">
-              {/* Gold vitrine — L-brackets at opposite corners frame the instrument. */}
-              <span className="pointer-events-none absolute left-0 top-0 h-8 w-px bg-[#d4af37]" aria-hidden />
-              <span className="pointer-events-none absolute left-0 top-0 h-px w-8 bg-[#d4af37]" aria-hidden />
-              <span className="pointer-events-none absolute bottom-0 right-0 h-8 w-px bg-[#d4af37]" aria-hidden />
-              <span className="pointer-events-none absolute bottom-0 right-0 h-px w-8 bg-[#d4af37]" aria-hidden />
-              <ExposureMapHero />
-            </div>
-            <p className="mt-2 inline-block rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-[11px] font-medium">
-              Encroachment edges are a derived analytical signal — not a stated fact
-            </p>
-          </div>
-          <div className="lg:col-span-4">
+      {/* Fold: graph (~70%) + rankings rail (~30%), gated INDEPENDENTLY. The
+          rankings are the real evidence-derived composite → gate on isLive. The
+          dependency graph is still HARDCODED → gate on HARDCODED_SURFACES_WIRED so
+          it can't ride the provenance flip and show hardcoded data as live. */}
+      <section className="mb-3 grid grid-cols-1 gap-5 lg:grid-cols-12">
+        <div className="lg:col-span-8">
+          {HARDCODED_SURFACES_WIRED ? (
+            <>
+              {/* Gold "vitrine" bracket mounts the instrument without recolouring it. */}
+              <div className="relative rounded-xl border border-black/10 p-1.5 dark:border-white/10">
+                <span className="pointer-events-none absolute left-0 top-0 h-8 w-px bg-[#d4af37]" aria-hidden />
+                <span className="pointer-events-none absolute left-0 top-0 h-px w-8 bg-[#d4af37]" aria-hidden />
+                <span className="pointer-events-none absolute bottom-0 right-0 h-8 w-px bg-[#d4af37]" aria-hidden />
+                <span className="pointer-events-none absolute bottom-0 right-0 h-px w-8 bg-[#d4af37]" aria-hidden />
+                <ExposureMapHero />
+              </div>
+              <p className="mt-2 inline-block rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-[11px] font-medium">
+                Encroachment edges are a derived analytical signal — not a stated fact
+              </p>
+            </>
+          ) : (
+            <DataUnavailable
+              title="Dependency graph unavailable"
+              detail="The dependency/encroachment graph is curated, not yet wired to the live evidence store — so we hold it rather than present it as live. The vendor rankings beside this are evidence-derived and shown when backed by verified evidence."
+            />
+          )}
+        </div>
+        <div className="lg:col-span-4">
+          {isLive ? (
             <CategoryCompositeRail composites={categoryComposites} />
-          </div>
-        </section>
-      ) : (
-        <section className="mb-3">
-          <DataUnavailable
-            title="Live market intelligence unavailable"
-            detail="We show the dependency/encroachment graph and vendor rankings only when they're backed by analyst-verified evidence in our live data store. No verified evidence has been ingested yet, so we hold them rather than display hardcoded or estimated figures as if measured."
-            reason={provenance?.reason}
-          />
-        </section>
-      )}
+          ) : (
+            <DataUnavailable
+              title="Live rankings unavailable"
+              detail="Rankings appear once the market data is backed by analyst-verified evidence."
+              reason={provenance?.reason}
+            />
+          )}
+        </div>
+      </section>
 
       {/* Signature: the gold "dependency spine" seam between owned-signal and evidence */}
       <div className="my-8 flex items-center gap-3" aria-hidden>
@@ -181,8 +188,8 @@ export default async function HomePage() {
       )}
 
       {/* ── Most depended-upon, by layer (indexable summary of the hero).
-            STRICT mode: graph-derived (hardcoded) → only when evidence-backed. ── */}
-      {isLive && (
+            Graph-derived (hardcoded) → gate on HARDCODED_SURFACES_WIRED. ── */}
+      {HARDCODED_SURFACES_WIRED && (
       <section className={`${CARD} mb-10`}>
         <div className="mb-1 flex items-baseline justify-between gap-3">
           <h2 className="font-[var(--font-display)] text-xl font-extrabold tracking-tight">

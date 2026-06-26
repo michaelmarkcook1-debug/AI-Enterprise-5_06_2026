@@ -13,7 +13,7 @@ import { absoluteUrl } from "@/lib/site";
 
 import { ENTITIES, roleLeadership, type Entity, type Role } from "@/lib/intelligence/entities";
 import { listNewsItems } from "@/lib/intelligence/repository";
-import { isLiveData } from "@/lib/intelligence/provenance";
+import { HARDCODED_SURFACES_WIRED } from "@/lib/availability";
 import DataUnavailable from "@/components/DataUnavailable";
 import { getPrisma, hasDatabase } from "@/lib/prisma";
 import { Panel } from "@/components/intelligence-ui";
@@ -488,7 +488,7 @@ export default async function VendorDeepDivePage({
   // from live-DB verified evidence — so we hold it until the portal is
   // evidence-backed rather than present hardcoded scores as measured. The vendor
   // name is the page subject (the URL), not a fabricated metric.
-  if (!(await isLiveData())) {
+  if (!HARDCODED_SURFACES_WIRED) {
     return (
       <div className="min-h-screen bg-white dark:bg-[#071827]">
         <main className="mx-auto max-w-3xl px-5 py-8">

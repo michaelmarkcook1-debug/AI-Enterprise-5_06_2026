@@ -46,3 +46,16 @@ export function seedFallbackAllowed(): boolean {
   if (process.env.NODE_ENV === "test") return true;
   return process.env.ALLOW_SEED_FALLBACK === "1";
 }
+
+/**
+ * Surfaces still rendered from HARDCODED data (the dependency/exposure graph,
+ * the ENTITIES vendor-profile scores, the /models inventory) — NOT the live DB.
+ *
+ * These must NOT ride the provenance "live" flip. Once real market-share rows
+ * exist, `isLiveData()` becomes true and the evidence-backed surfaces (composite
+ * rankings, news) correctly light up — but these hardcoded surfaces would then
+ * show hardcoded data AS live, breaking the no-fabrication promise. So they gate
+ * on this flag and stay an honest "unavailable" state until each is wired to real
+ * DB data. Flip when that wiring lands. See [[no-seed-strict-live-db-only]].
+ */
+export const HARDCODED_SURFACES_WIRED: boolean = false;

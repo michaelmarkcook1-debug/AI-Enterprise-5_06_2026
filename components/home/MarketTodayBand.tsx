@@ -1,4 +1,5 @@
 import { getBreakingNews, getMarketDashboard, listIntelligenceVendors } from "@/lib/intelligence/repository";
+import { HARDCODED_SURFACES_WIRED } from "@/lib/availability";
 
 // "Market Today" — composed ONLY from real / explicitly-labelled readers. There
 // is no measured "market index" field, so we never invent one. Three tiles:
@@ -128,18 +129,24 @@ export default async function MarketTodayBand({
               <dd className="font-display text-2xl tabular-nums">{vendors.length || "—"}</dd>
               <dt className={`mt-0.5 text-[11px] ${MUTED}`}>Vendors tracked</dt>
             </div>
-            <div className={TILE}>
-              <dd className="font-display text-2xl tabular-nums">{coverage.edgesTotal}</dd>
-              <dt className={`mt-0.5 text-[11px] ${MUTED}`}>Source-cited edges</dt>
-            </div>
-            <div className={TILE}>
-              <dd className="font-display text-2xl tabular-nums">{coverage.high}</dd>
-              <dt className={`mt-0.5 text-[11px] ${MUTED}`}>High-confidence</dt>
-            </div>
-            <div className={TILE}>
-              <dd className="font-display text-2xl tabular-nums">{coverage.medium} · {coverage.seed}</dd>
-              <dt className={`mt-0.5 text-[11px] ${MUTED}`}>Medium · seed</dt>
-            </div>
+            {/* Edge counts are graph-derived (hardcoded) — gate so they don't ride
+                the provenance flip and show hardcoded numbers as live. */}
+            {HARDCODED_SURFACES_WIRED && (
+              <>
+                <div className={TILE}>
+                  <dd className="font-display text-2xl tabular-nums">{coverage.edgesTotal}</dd>
+                  <dt className={`mt-0.5 text-[11px] ${MUTED}`}>Source-cited edges</dt>
+                </div>
+                <div className={TILE}>
+                  <dd className="font-display text-2xl tabular-nums">{coverage.high}</dd>
+                  <dt className={`mt-0.5 text-[11px] ${MUTED}`}>High-confidence</dt>
+                </div>
+                <div className={TILE}>
+                  <dd className="font-display text-2xl tabular-nums">{coverage.medium} · {coverage.seed}</dd>
+                  <dt className={`mt-0.5 text-[11px] ${MUTED}`}>Medium · seed</dt>
+                </div>
+              </>
+            )}
           </dl>
         </div>
         </>
