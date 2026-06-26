@@ -19,7 +19,8 @@ export default function CategoryLeadersRail({ rankings }: { rankings: CategoryRa
         </Link>
       </div>
       <p className={`mt-1 text-[11px] ${MUTED}`}>
-        Ranked within each category — never across them. Shares are directional estimates.
+        Ranked within each category — never across them. Figures are <strong>Market Share Est.</strong> —
+        directional, derived from cited signals, not measured.
       </p>
 
       {withLeaders.length === 0 ? (
@@ -39,8 +40,8 @@ export default function CategoryLeadersRail({ rankings }: { rankings: CategoryRa
                       {top.vendor.name} leads · {r.leaders.length} tracked
                     </span>
                   </span>
-                  <span className="shrink-0 font-mono text-sm tabular-nums text-[#b08d2f] dark:text-[#d4af37]">
-                    {top.estimatedShare.toFixed(0)}%
+                  <span className="shrink-0 font-mono text-sm tabular-nums text-[#b08d2f] dark:text-[#d4af37]" title="Market Share Est. — derived from cited signals, not measured. Directional.">
+                    Est. {Math.round(top.estimatedShare)}%
                   </span>
                 </Link>
               </li>

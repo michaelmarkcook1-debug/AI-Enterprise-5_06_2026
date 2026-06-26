@@ -77,9 +77,10 @@ export default async function InsightsPage() {
         </p>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <MethodCard title="Rankings — within category, never across" href="/vendors" hrefLabel="See the rankings">
-            Vendors are ranked inside each of 13 market categories by directional market-share estimates,
-            each carrying its source and a confidence figure. We never put a chip foundry, a VC, and a model
-            lab on one leaderboard — they aren&apos;t comparable.
+            Vendors are ranked inside each of 13 market categories by a coverage-discounted, multi-pillar
+            composite of reviewed, source-backed evidence — not a market-share proxy. Market Share Est. is just
+            one input (via Market Strength), never the rank. We never put a chip foundry, a VC, and a model lab
+            on one leaderboard — they aren&apos;t comparable.
           </MethodCard>
           <MethodCard title="The graph — every edge is sourced" href="/dependencies" hrefLabel="Explore the graph">
             Each edge (who relies on whom for compute, models, cloud, capital) carries its own public source
@@ -92,6 +93,14 @@ export default async function InsightsPage() {
             absence of evidence is reported, never estimated upward.
           </MethodCard>
         </div>
+        <p id="market-share-est" className={`mt-5 max-w-3xl scroll-mt-24 text-xs leading-5 ${MUTED}`}>
+          <strong>On &ldquo;Market Share Est.&rdquo;:</strong> there is no measured market-share feed for these
+          largely-private vendors. Each figure is an <strong>estimate</strong> derived from real cited signals
+          (reviewed evidence depth, dependency/delivery reach, adoption, momentum), normalised within a category
+          and recalculated every refresh. It is directional context — <strong>not</strong> measured revenue or
+          audited share — and never the basis of the rank. Vendors we cannot map to a category show
+          &ldquo;mapping insufficient&rdquo; rather than a guessed number.
+        </p>
       </section>
 
       <p className={`text-sm ${MUTED}`}>

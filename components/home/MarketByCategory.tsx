@@ -24,8 +24,11 @@ export default function MarketByCategory({ rankings }: { rankings: CategoryRanki
         We rank vendors <strong>within</strong> comparable categories — never across them. A model lab,
         a chip foundry, and a cloud platform don&apos;t belong on one leaderboard, so each has its own.
       </p>
-      <p className="mb-4 inline-block rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-[11px] font-medium">
-        Share figures are directional estimates, not measured market data
+      <p className={`mb-4 max-w-3xl text-[11px] leading-5 ${MUTED}`}>
+        <span className="rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 font-medium">Market Share Est.</span>{" "}
+        — figures are estimates derived from real cited signals (reviewed evidence, dependencies, adoption, momentum),
+        not measured market data. Directional, recalculated each refresh.{" "}
+        <Link href="/insights#market-share-est" className="underline underline-offset-2">How this is estimated</Link>.
       </p>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -49,7 +52,7 @@ export default function MarketByCategory({ rankings }: { rankings: CategoryRanki
                     <Link href={`/vendors/${l.vendor.slug}`} className="min-w-0 truncate underline-offset-2 hover:underline">
                       <VendorNameWithOwnership name={l.vendor.name} ownershipType={l.vendor.ownershipType} compactBadge />
                     </Link>
-                    <span className={`font-mono text-xs tabular-nums ${MUTED}`}>{l.estimatedShare.toFixed(1)}%</span>
+                    <span className={`font-mono text-xs tabular-nums ${MUTED}`} title="Market Share Est. — derived from cited signals, not measured. Directional.">Est. {Math.round(l.estimatedShare)}%</span>
                   </li>
                 ))}
               </ol>

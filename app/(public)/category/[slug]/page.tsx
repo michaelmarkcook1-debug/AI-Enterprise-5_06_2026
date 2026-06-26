@@ -97,11 +97,14 @@ export default async function CategoryPage({ params }: { params: Promise<Params>
                       <TrackButton item={`vendor:${v.vendorSlug}`} label={v.vendorName} />
                     </span>
                   </div>
-                  {v.marketContext.estimatedShare !== null && (
+                  {v.marketContext.estimatedShare === null ? (
+                    <p className={`mt-1 text-[10px] ${MUTED}`}>Market Share Est.: mapping insufficient</p>
+                  ) : v.marketContext.isSeedSource ? (
+                    <p className={`mt-1 text-[10px] ${MUTED}`}>Market Share Est.: insufficient real-sourced estimate</p>
+                  ) : (
                     <p className={`mt-1 text-[10px] ${MUTED}`}>
-                      {v.marketContext.isSeedSource
-                        ? "Market context: insufficient real-sourced share estimate"
-                        : `Market context: ~${v.marketContext.estimatedShare.toFixed(1)}% est. category share · context only, not the rank`}
+                      Market Share Est.: ~{Math.round(v.marketContext.estimatedShare)}% category share · context only, not the rank ·{" "}
+                      <Link href="/insights#market-share-est" className="underline underline-offset-2">how this is estimated</Link>
                     </p>
                   )}
                   <PillarContributionTable vendor={v} />
