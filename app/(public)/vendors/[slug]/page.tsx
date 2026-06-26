@@ -22,6 +22,7 @@ import ReputationPanel from "@/components/vendor/ReputationPanel";
 import FinancialsPanel from "@/components/vendor/FinancialsPanel";
 import { getVendorReputation } from "@/lib/reputation/vendor-reputation";
 import { getReputationSnapshots, type ReputationSnapshotPoint } from "@/lib/reputation/reputation-snapshots";
+import { intelVendorId } from "@/lib/intelligence/vendor-id";
 
 export const dynamic = "force-dynamic";
 
@@ -389,9 +390,9 @@ function ScoreHistoryChart({ snapshots, reputation = [] }: { snapshots: Snapshot
       <line x1={PAD_LEFT + 70} y1={PAD_TOP - 4} x2={PAD_LEFT + 86} y2={PAD_TOP - 4} stroke="#f59e0b" strokeWidth="1.5" strokeDasharray="5 3" />
       <text x={PAD_LEFT + 90} y={PAD_TOP} fontSize="9" fill="#9ca3af">Momentum</text>
       <line x1={PAD_LEFT + 150} y1={PAD_TOP - 4} x2={PAD_LEFT + 166} y2={PAD_TOP - 4} stroke="#a78bfa" strokeWidth="1.5" />
-      <text x={PAD_LEFT + 170} y={PAD_TOP} fontSize="9" fill="#9ca3af">Reputation</text>
+      <text x={PAD_LEFT + 170} y={PAD_TOP} fontSize="9" fill="#9ca3af">Reputation (composite)</text>
     </svg>
-    {repInRange.length === 0 && (
+    {repInRange.length < 2 && (
       <p className="mt-2 text-[11px] text-[#5b6b7f] dark:text-[#8fa5bb]">
         Reputation tracking begins with the next daily refresh — the line builds forward from there, never back-filled.
       </p>
@@ -477,17 +478,17 @@ export default async function VendorDeepDivePage({
     notFound();
   }
 
-  // Resolve the reputation key: entity.id, falling back to slug for aliased
-  // vendors (e.g. alibaba-qwen → alibaba) so the panel + the forward-tracking
-  // series both read under the id capture wrote them with.
-  const repById = getVendorReputation(entity.id);
-  const reputation = repById.hasData ? repById : getVendorReputation(entity.slug);
-  const repKey = repById.hasData ? entity.id : entity.slug;
+  // Resolve the canonical intelligence-spine id (the id capture writes snapshots
+  // under). Used uniformly for the score read, the reputation read, and the
+  // reputation panel so an aliased entity (e.g. alibaba-qwen → alibaba,
+  // fireworks-ai → fireworks) doesn't silently miss its history.
+  const intelId = intelVendorId(entity);
+  const reputation = getVendorReputation(intelId);
 
   // 2. Fetch snapshot history + reputation history + news in parallel
   const [snapshots, reputationSeries, allNews] = await Promise.all([
-    fetchSnapshots(entity.id),
-    getReputationSnapshots(repKey),
+    fetchSnapshots(intelId),
+    getReputationSnapshots(intelId),
     listNewsItems(),
   ]);
 

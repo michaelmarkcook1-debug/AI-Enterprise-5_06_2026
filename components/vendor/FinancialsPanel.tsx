@@ -22,14 +22,18 @@ export default function FinancialsPanel({
   dataCaveats?: string;
   vendorName: string;
 }) {
-  const isPublic = ownership.toLowerCase() === "public";
+  // Ownership is a 3-value enum (public | private | subsidiary). A subsidiary of
+  // a public parent is NOT "privately held" and its revenue may be in the
+  // parent's filings — so we never collapse it into the private branch.
+  const kind = ownership.toLowerCase();
+  const badge = kind === "public" ? "Publicly traded" : kind === "subsidiary" ? "Subsidiary" : "Privately held";
   const signals = capitalSignals.filter((s) => s && s.trim().length > 0);
 
   return (
     <Panel title="Financial profile">
       <div className="flex flex-wrap items-center gap-2">
         <span className="rounded-full border border-[#e9e0c8] bg-white px-2 py-0.5 text-[11px] font-medium text-[#13294b] dark:border-[#1d3a57] dark:bg-[#0c2238]/60 dark:text-[#eef3f8]">
-          {isPublic ? "Publicly traded" : "Privately held"}
+          {badge}
         </span>
         {evidenceGrade && (
           <span className={`rounded-full border border-[#e9e0c8] px-2 py-0.5 text-[11px] dark:border-[#1d3a57] ${MUTED}`}>
@@ -39,10 +43,17 @@ export default function FinancialsPanel({
       </div>
 
       <p className={`mt-3 text-sm ${MUTED}`}>
-        {isPublic ? (
+        {kind === "public" ? (
           <>
             {vendorName} is publicly traded — revenue and margins are disclosed in its regulatory
             filings. We do not restate them here; figures should be read from the primary filings.
+          </>
+        ) : kind === "subsidiary" ? (
+          <>
+            {vendorName} is a subsidiary — its financials may be consolidated into its parent&apos;s
+            filings (e.g. acquisition consideration or segment data) and are{" "}
+            <strong className="text-[#13294b] dark:text-[#eef3f8]">not separately disclosed here</strong>.
+            What we can source is its capital position.
           </>
         ) : (
           <>

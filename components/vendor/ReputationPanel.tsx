@@ -12,6 +12,23 @@ const STATUS: Record<string, { label: string; cls: string }> = {
   seed: { label: "curated", cls: "border-amber-500/40 bg-amber-500/10 text-amber-800 dark:text-amber-200" },
 };
 
+type Grade = "seed" | "documented" | "verified";
+const RANK: Record<Grade, number> = { seed: 1, documented: 2, verified: 3 };
+
+// A pillar's row-level dataStatus is "seed" even when individual cells were
+// fetched live (cellStatus), so the badge must reflect the BEST real grade among
+// its cells — otherwise verified-live signals read as "curated", contradicting
+// the "live signals" caption. Honest direction: surface the strongest evidence.
+function effectiveStatus(dataStatus: Grade, cellStatus?: Partial<Record<string, Grade>>): Grade {
+  let best: Grade = dataStatus ?? "seed";
+  if (cellStatus) {
+    for (const v of Object.values(cellStatus)) {
+      if (v && RANK[v] > RANK[best]) best = v;
+    }
+  }
+  return best;
+}
+
 const MUTED = "text-[#54647a] dark:text-[#a7bacd]";
 
 function Badge({ status }: { status: "seed" | "documented" | "verified" }) {
@@ -75,6 +92,18 @@ export default function ReputationPanel({
 
   const { developer: d, employee: e, customer: c, combined, asOf } = reputation;
 
+  // Effective per-pillar grades (best real evidence among cells), and the
+  // composite's worst-case grade — the combined blends seed + live, so it can
+  // only honestly claim its weakest contributor.
+  const devStatus = d ? effectiveStatus(d.dataStatus, d.cellStatus) : null;
+  const empStatus = e ? effectiveStatus(e.dataStatus, e.cellStatus) : null;
+  const cusStatus = c ? c.dataStatus : null;
+  const present = [devStatus, empStatus, cusStatus].filter((s): s is Grade => s !== null);
+  const combinedGrade: Grade = present.reduce<Grade>(
+    (worst, s) => (RANK[s] < RANK[worst] ? s : worst),
+    "verified",
+  );
+
   return (
     <Panel title="Reputation">
       <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
@@ -82,17 +111,20 @@ export default function ReputationPanel({
           <span className={`font-mono text-2xl font-bold tabular-nums ${combined !== null ? scoreTone(combined) : ""}`}>
             {combined ?? "—"}
           </span>
+          {present.length > 0 && <Badge status={combinedGrade} />}
           <span className={`text-xs ${MUTED}`}>combined reputation (developer · employee · customer)</span>
         </div>
-        <span className={`text-[11px] ${MUTED}`}>{asOf ? `Live signals as of ${asOf}` : "Curated — no live fetch yet"}</span>
+        <span className={`text-[11px] ${MUTED}`}>
+          {present.length}/3 pillars · {asOf ? `live signals to ${asOf}` : "curated, no live fetch yet"}
+        </span>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-3">
-        {d && (
+        {d && devStatus && (
           <Pillar
             label="Developer"
             overall={d.overall}
-            status={d.dataStatus}
+            status={devStatus}
             metrics={[
               { k: "GitHub", v: d.githubScore },
               { k: "Forum", v: d.forumScore },
@@ -102,11 +134,11 @@ export default function ReputationPanel({
             themes={d.primaryThemes}
           />
         )}
-        {e && (
+        {e && empStatus && (
           <Pillar
             label="Employee"
             overall={e.overall}
-            status={e.dataStatus}
+            status={empStatus}
             metrics={[
               { k: "Culture", v: e.culture },
               { k: "WLB", v: e.workLifeBalance },
@@ -116,11 +148,11 @@ export default function ReputationPanel({
             themes={e.primaryThemes}
           />
         )}
-        {c && (
+        {c && cusStatus && (
           <Pillar
             label="Customer"
             overall={c.overall}
-            status={c.dataStatus}
+            status={cusStatus}
             metrics={[
               { k: "Uptime", v: `${c.averageUptimePct}%` },
               { k: "Value", v: c.valueForMoney },
