@@ -6,7 +6,7 @@ import { useState } from "react";
 // /api/auth/request. Enumeration-safe by design (the API returns the same
 // response either way), so the success state never confirms whether the email
 // existed.
-export default function SignInForm() {
+export default function SignInForm({ track, returnTo }: { track?: string; returnTo?: string }) {
   const [email, setEmail] = useState("");
   const [consent, setConsent] = useState(false);
   const [state, setState] = useState<"idle" | "loading" | "sent" | "error">("idle");
@@ -25,7 +25,7 @@ export default function SignInForm() {
       const res = await fetch("/api/auth/request", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, consent }),
+        body: JSON.stringify({ email, consent, track, returnTo }),
       });
       if (res.ok || res.status === 202) {
         setState("sent");

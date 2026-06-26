@@ -5,6 +5,7 @@
 import { NextResponse } from "next/server";
 import { randomBytes } from "node:crypto";
 import { requestMagicLink, SIGNIN_NONCE_COOKIE, SIGNIN_NONCE_MAX_AGE_S } from "@/lib/member/auth";
+import { parseTrackItem, safeReturnTo } from "@/lib/member/track";
 import { sendEmail, emailConfigured } from "@/lib/email/mailer";
 import { rateLimit, rateLimitHeaders } from "@/lib/http/rate-limit";
 import { anonSessionHash } from "@/lib/http/anon-session";
@@ -45,7 +46,7 @@ export async function POST(request: Request): Promise<Response> {
   } catch {
     return Response.json({ error: "invalid_json" }, { status: 400 });
   }
-  const b = body as { email?: unknown; consent?: unknown };
+  const b = body as { email?: unknown; consent?: unknown; track?: unknown; returnTo?: unknown };
   const email = typeof b.email === "string" ? b.email.trim() : "";
   const consent = b.consent === true;
   if (!isValidEmail(email)) return Response.json({ error: "invalid_email" }, { status: 422 });
@@ -78,7 +79,14 @@ export async function POST(request: Request): Promise<Response> {
     { ok: true, message: "If that email is valid, a sign-in link is on its way." },
     { status: 202, headers: rateLimitHeaders(ipRl) },
   );
-  res.cookies.set(SIGNIN_NONCE_COOKIE, nonce, {
+  // The nonce cookie also carries the validated sign-in intent (a thing to track +
+  // where to return), so it survives the email round-trip in this browser only.
+  const intent = {
+    n: nonce,
+    t: parseTrackItem(b.track) ? String(b.track) : null,
+    r: typeof b.returnTo === "string" ? safeReturnTo(b.returnTo) : null,
+  };
+  res.cookies.set(SIGNIN_NONCE_COOKIE, JSON.stringify(intent), {
     httpOnly: true,
     secure: true,
     sameSite: "lax",

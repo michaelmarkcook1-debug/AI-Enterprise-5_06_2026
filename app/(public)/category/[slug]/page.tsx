@@ -7,6 +7,7 @@ import {
   listMarketShareEstimates,
   listIntelligenceVendors,
 } from "@/lib/intelligence/repository";
+import TrackButton from "@/components/member/TrackButton";
 
 // ISR: server-rendered + CDN-cached, revalidated hourly; DB reads only.
 export const revalidate = 3600;
@@ -61,7 +62,10 @@ export default async function CategoryPage({ params }: { params: Promise<Params>
         <Link href="/vendors" className="underline underline-offset-2">Vendors</Link> · Category
       </nav>
       <header className="mb-8">
-        <h1 className="font-[var(--font-display)] text-3xl font-extrabold tracking-tight">{category.name}</h1>
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <h1 className="font-[var(--font-display)] text-3xl font-extrabold tracking-tight">{category.name}</h1>
+          <TrackButton item={`category:${category.id}`} label={category.name} />
+        </div>
         <p className={`mt-2 max-w-2xl text-sm ${MUTED}`}>{category.description}</p>
       </header>
 
@@ -88,6 +92,7 @@ export default async function CategoryPage({ params }: { params: Promise<Params>
                   <th className="py-2 pr-4 font-medium tabular-nums">Est. share</th>
                   <th className="py-2 pr-4 font-medium tabular-nums">Confidence</th>
                   <th className="py-2 pr-4 font-medium">Source / method</th>
+                  <th className="py-2 font-medium"><span className="sr-only">Track</span></th>
                 </tr>
               </thead>
               <tbody>
@@ -102,6 +107,9 @@ export default async function CategoryPage({ params }: { params: Promise<Params>
                     <td className="py-2 pr-4 tabular-nums">{Math.round(est.confidence)}%</td>
                     <td className={`py-2 pr-4 text-xs ${MUTED}`}>
                       {est.source} · {est.methodology}
+                    </td>
+                    <td className="py-2 text-right">
+                      <TrackButton item={`vendor:${vendor.slug}`} label={vendor.name} />
                     </td>
                   </tr>
                 ))}

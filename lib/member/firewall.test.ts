@@ -22,10 +22,12 @@ describe("member firewall", () => {
     const files = [
       "lib/member/auth.ts",
       "lib/member/watchlist.ts",
+      "lib/member/track.ts",
       "app/api/auth/request/route.ts",
       "app/api/auth/callback/route.ts",
       "app/api/auth/signout/route.ts",
       "app/api/member/watchlist/route.ts",
+      "app/api/member/track/route.ts",
     ];
     const SCORE_WRITE = /\.(intelligenceVendor|intelligencePillarScore)\.(update|upsert|create|updateMany|createMany)/;
     const SCORE_FIELD = /overallScore|confidenceScore|capabilityScore/;

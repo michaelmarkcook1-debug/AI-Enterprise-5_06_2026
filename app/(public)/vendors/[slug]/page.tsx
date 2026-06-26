@@ -20,6 +20,7 @@ import { entityInsight } from "@/lib/insights/tab-insights";
 import { OwnershipBadge } from "@/components/ownership-indicator";
 import ReputationPanel from "@/components/vendor/ReputationPanel";
 import FinancialsPanel from "@/components/vendor/FinancialsPanel";
+import TrackButton from "@/components/member/TrackButton";
 import { getVendorReputation } from "@/lib/reputation/vendor-reputation";
 import { getReputationSnapshots, type ReputationSnapshotPoint } from "@/lib/reputation/reputation-snapshots";
 import { intelVendorId } from "@/lib/intelligence/vendor-id";
@@ -513,12 +514,15 @@ export default async function VendorDeepDivePage({
 
         {/* ── Header band ──────────────────────────────────────────────── */}
         <div className="mb-7 border-b border-[#e9e0c8] pb-6 dark:border-[#1d3a57]">
-          <Link
-            href="/vendors"
-            className="inline-flex items-center gap-1 text-xs font-medium text-[#54647a] hover:text-[#13294b] dark:text-[#a7bacd] dark:hover:text-[#eef3f8]"
-          >
-            ← Back to rankings
-          </Link>
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <Link
+              href="/vendors"
+              className="inline-flex items-center gap-1 text-xs font-medium text-[#54647a] hover:text-[#13294b] dark:text-[#a7bacd] dark:hover:text-[#eef3f8]"
+            >
+              ← Back to rankings
+            </Link>
+            <TrackButton item={`vendor:${entity.slug}`} label={entity.name} />
+          </div>
 
           <div className="mt-4 flex flex-wrap items-start gap-3">
             <h1 className="text-3xl font-semibold tracking-tight text-[#13294b] dark:text-[#f6f9fc] md:text-4xl">

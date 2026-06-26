@@ -3,6 +3,7 @@ import Link from "next/link";
 import { PageFrame } from "@/components/app-shell";
 import { OwnershipLegend, VendorNameWithOwnership } from "@/components/ownership-indicator";
 import { getCategoryRankings } from "@/lib/home/category-rankings";
+import TrackButton from "@/components/member/TrackButton";
 
 // Rankings are SEGMENTED BY CATEGORY — vendors are only compared WITHIN a market
 // category, never across them. The old flat "Overall" leaderboard mixed
@@ -71,7 +72,8 @@ export default async function VendorsPage() {
                     <th className="w-8 py-1.5 pr-3 font-medium">#</th>
                     <th className="py-1.5 pr-3 font-medium">Vendor</th>
                     <th className="py-1.5 pr-3 text-right font-medium tabular-nums">Est. share</th>
-                    <th className="py-1.5 text-right font-medium tabular-nums">Confidence</th>
+                    <th className="py-1.5 pr-3 text-right font-medium tabular-nums">Confidence</th>
+                    <th className="py-1.5 text-right font-medium"><span className="sr-only">Track</span></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -84,7 +86,10 @@ export default async function VendorsPage() {
                         </Link>
                       </td>
                       <td className="py-1.5 pr-3 text-right font-mono tabular-nums">{l.estimatedShare.toFixed(1)}%</td>
-                      <td className="py-1.5 text-right font-mono tabular-nums">{Math.round(l.confidence)}%</td>
+                      <td className="py-1.5 pr-3 text-right font-mono tabular-nums">{Math.round(l.confidence)}%</td>
+                      <td className="py-1.5 text-right">
+                        <TrackButton item={`vendor:${l.vendor.slug}`} label={l.vendor.name} />
+                      </td>
                     </tr>
                   ))}
                 </tbody>
