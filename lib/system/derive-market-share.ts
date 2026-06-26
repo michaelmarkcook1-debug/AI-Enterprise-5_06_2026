@@ -17,6 +17,7 @@ import { getPrisma, hasDatabase } from "../prisma";
 import { MARKET_SHARE_ESTIMATES } from "../intelligence/seed";
 import { marketShareChangePct } from "../intelligence/metrics";
 import { isSeedSignedSource } from "../intelligence/provenance";
+import { getDeliveryReachByVendor, type DeliveryReach } from "../delivery/repository";
 import {
   computePresenceShares,
   PRESENCE_SOURCE,
@@ -54,12 +55,13 @@ export async function deriveMarketShareMovement(now: Date = new Date()): Promise
   const prisma = getPrisma();
 
   // ── Real per-vendor signals ────────────────────────────────────────────────
-  const [evGroups, momRows, profiles, allVendors, existing] = await Promise.all([
+  const [evGroups, momRows, profiles, allVendors, existing, deliveryReach] = await Promise.all([
     prisma.evidenceRecord.groupBy({ by: ["vendorId"], where: { reviewStatus: "analyst_verified" }, _count: { _all: true } }),
     prisma.vendorMomentum.findMany({ where: { period: "rolling_30d" }, select: { vendorId: true, momentumScore: true } }),
     prisma.vendorProfile.findMany({ include: { industryAdoption: true } }).catch(() => []),
     prisma.intelligenceVendor.findMany({ select: { id: true } }),
     prisma.marketShareEstimate.findMany({ select: { vendorId: true, categoryId: true, estimatedShare: true, source: true } }),
+    getDeliveryReachByVendor().catch(() => new Map<string, DeliveryReach>()),
   ]);
 
   const verifiedEvidence = new Map<string, number>(evGroups.map((g) => [g.vendorId, g._count._all]));
@@ -80,6 +82,9 @@ export async function deriveMarketShareMovement(now: Date = new Date()): Promise
       productionReferences: prodRefs.get(v.id) ?? 0,
       deploymentDepth: deployDepth.get(v.id) ?? 0,
       momentum: momentum.get(v.id) ?? 0,
+      // Curated/analyst-graded delivery reach — enriches a present vendor's estimate
+      // but never floats an evidence-less one (see market-presence hasRealSignal).
+      deliveryReach: deliveryReach.get(v.id)?.reachRaw ?? 0,
     });
   }
 

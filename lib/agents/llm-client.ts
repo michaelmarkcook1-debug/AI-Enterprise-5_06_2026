@@ -14,6 +14,10 @@ export interface ExtractParams<T> {
   schema: { name: string; description: string; jsonSchema: unknown };
   parse: (raw: unknown) => T;
   maxTokens?: number;
+  // Per-call model override for tiered routing (cheap classify vs mid/frontier
+  // extract). Defaults to DEFAULT_MODEL (Haiku). Forward-compatible with a
+  // central routing table — callers pass the tier they need.
+  model?: string;
   // Deterministic fallback when no API key is configured
   fallback: () => T;
 }
@@ -53,10 +57,11 @@ export async function extractStructured<T>(params: ExtractParams<T>): Promise<LL
     };
   }
 
+  const model = params.model ?? DEFAULT_MODEL;
   let message: Anthropic.Message;
   try {
     message = await client.messages.create({
-      model: DEFAULT_MODEL,
+      model,
       max_tokens: params.maxTokens ?? 4096,
       // Prompt-cache the system/rubric prompt: it is identical across every
       // source URL in a refresh run, so caching it makes the repeated input
@@ -104,7 +109,7 @@ export async function extractStructured<T>(params: ExtractParams<T>): Promise<LL
     usage: {
       inputTokens: message.usage.input_tokens,
       outputTokens: message.usage.output_tokens,
-      model: DEFAULT_MODEL,
+      model,
     },
     source: "anthropic",
   };

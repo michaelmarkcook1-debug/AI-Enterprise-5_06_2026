@@ -9,29 +9,40 @@
 //   - productionReferences sum of named production deployments (in-market signal)
 //   - deploymentDepth      how deep those deployments go (0–100)
 //   - momentum             rolling_30d momentum from news + capability velocity
+//   - deliveryReach        IT-services/GSI delivery breadth × tier × spread
+//                          (lib/delivery — curated/analyst-graded, confidence-discounted)
 //
-// presence(vendor) = weighted blend of those four, each min-max normalised WITHIN
+// presence(vendor) = weighted blend of those five, each min-max normalised WITHIN
 // the category (so it's a relative, comparable signal). share = presence / Σpresence
 // over the category's evidenced members → sums to ~100% per category. A vendor with
 // NO real signal is omitted (insufficient evidence), never floated at 0.
+//
+// HONESTY: deliveryReach is derived from CURATED analyst partnership data (lower
+// provenance than pipeline-verified evidence), so it ENRICHES the estimate for a
+// vendor that already has real pipeline signal — it does NOT, on its own, float a
+// vendor that has zero verified pipeline signal into the share (see hasRealSignal),
+// and it does NOT raise confidence (confidence stays tied to verified-evidence
+// depth). Under-claim: curated reach refines, never fabricates, presence.
 //
 // This is a labelled DIRECTIONAL estimate of observed enterprise-adoption signal —
 // NOT measured revenue share. The honest source string below is what's stamped on
 // every row (and it is deliberately NOT seed-signed, so it reads as real).
 
 export const PRESENCE_SOURCE =
-  "Evidence-derived adoption-signal estimate (verified evidence + production references + deployment depth + momentum)";
+  "Evidence-derived adoption-signal estimate (verified evidence + production references + deployment depth + momentum + IT-services delivery reach)";
 export const PRESENCE_METHODOLOGY =
-  "Directional category-presence estimate computed each refresh from real ingested signals — share of observed enterprise-adoption signal within the category. NOT measured revenue/market share. Confidence reflects evidence depth.";
+  "Directional category-presence estimate computed each refresh from real ingested signals — share of observed enterprise-adoption signal within the category, including IT-services/GSI delivery reach (curated, confidence-discounted). NOT measured revenue/market share. Confidence reflects verified-evidence depth only.";
 
 /** Transparent, tunable blend weights (sum to 1). Adoption signals weigh most —
  *  production references + deployment depth are the strongest real in-market
- *  signal; evidence depth is coverage; momentum is recency. */
+ *  signal; evidence depth is coverage; momentum is recency; delivery reach is a
+ *  modest, curated/analyst-graded enterprise-channel signal. */
 export const PRESENCE_WEIGHTS = {
-  productionReferences: 0.4,
-  deploymentDepth: 0.25,
-  verifiedEvidence: 0.2,
-  momentum: 0.15,
+  productionReferences: 0.35,
+  deploymentDepth: 0.22,
+  verifiedEvidence: 0.18,
+  momentum: 0.13,
+  deliveryReach: 0.12,
 } as const;
 
 export interface VendorSignal {
@@ -39,6 +50,8 @@ export interface VendorSignal {
   productionReferences: number;
   deploymentDepth: number;
   momentum: number;
+  /** IT-services/GSI delivery-reach raw signal (lib/delivery). Optional → 0. */
+  deliveryReach?: number;
 }
 
 export interface PresenceShare {
@@ -52,7 +65,9 @@ export interface PresenceShare {
   confidence: number;
 }
 
-/** True when a vendor has ANY real signal (else excluded as insufficient evidence). */
+/** True when a vendor has ANY real PIPELINE signal (else excluded as insufficient
+ *  evidence). deliveryReach is deliberately NOT a qualifier — curated partnership
+ *  data enriches a present vendor's estimate but never floats an evidence-less one. */
 export function hasRealSignal(s: VendorSignal | undefined): boolean {
   return !!s && (s.verifiedEvidence > 0 || s.productionReferences > 0 || s.deploymentDepth > 0 || s.momentum > 0);
 }
@@ -93,13 +108,15 @@ export function computePresenceShares(
     const maxPr = Math.max(...members.map((m) => m.s.productionReferences), 0);
     const maxDd = Math.max(...members.map((m) => m.s.deploymentDepth), 0);
     const maxMo = Math.max(...members.map((m) => m.s.momentum), 0);
+    const maxDr = Math.max(...members.map((m) => m.s.deliveryReach ?? 0), 0);
 
     const presences = members.map((m) => {
       const p =
         PRESENCE_WEIGHTS.productionReferences * normWithinCategory(m.s.productionReferences, maxPr) +
         PRESENCE_WEIGHTS.deploymentDepth * normWithinCategory(m.s.deploymentDepth, maxDd) +
         PRESENCE_WEIGHTS.verifiedEvidence * normWithinCategory(m.s.verifiedEvidence, maxEv) +
-        PRESENCE_WEIGHTS.momentum * normWithinCategory(m.s.momentum, maxMo);
+        PRESENCE_WEIGHTS.momentum * normWithinCategory(m.s.momentum, maxMo) +
+        PRESENCE_WEIGHTS.deliveryReach * normWithinCategory(m.s.deliveryReach ?? 0, maxDr);
       return { vendorId: m.vendorId, presence: p, verifiedEvidence: m.s.verifiedEvidence };
     });
 

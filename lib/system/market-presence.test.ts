@@ -79,4 +79,31 @@ describe("market-presence engine", () => {
     expect(hasRealSignal(sig())).toBe(false);
     expect(hasRealSignal(sig({ momentum: 10 }))).toBe(true);
   });
+
+  it("delivery reach ENRICHES a present vendor's share but never floats an evidence-less one", () => {
+    // delivery reach alone is NOT a qualifying signal (curated, lower provenance).
+    expect(hasRealSignal(sig({ deliveryReach: 99 }))).toBe(false);
+
+    const members = [
+      { vendorId: "a", categoryId: "frontier_model_api" },
+      { vendorId: "b", categoryId: "frontier_model_api" },
+      { vendorId: "ghost", categoryId: "frontier_model_api" }, // curated reach only, no pipeline signal
+    ];
+    // a and b identical on pipeline signals; a additionally has strong delivery reach.
+    const base = { verifiedEvidence: 10, productionReferences: 10, deploymentDepth: 50, momentum: 50 };
+    const withReach = new Map<string, VendorSignal>([
+      ["a", sig({ ...base, deliveryReach: 8 })],
+      ["b", sig({ ...base, deliveryReach: 0 })],
+      ["ghost", sig({ deliveryReach: 12 })], // no verified/prod/depth/momentum
+    ]);
+    const r = computePresenceShares(members, withReach);
+    // ghost is omitted entirely (insufficient pipeline evidence).
+    expect(r.find((x) => x.vendorId === "ghost")).toBeUndefined();
+    // a out-shares b purely on the delivery-reach enrichment.
+    const a = r.find((x) => x.vendorId === "a")!;
+    const b = r.find((x) => x.vendorId === "b")!;
+    expect(a.share).toBeGreaterThan(b.share);
+    // confidence stays tied to verified-evidence depth only (equal here, reach ignored).
+    expect(a.confidence).toBe(b.confidence);
+  });
 });

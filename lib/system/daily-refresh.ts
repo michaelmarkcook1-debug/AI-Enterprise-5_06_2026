@@ -62,6 +62,7 @@ import { sweepMemberAuth } from "../member/auth";
 import { deriveVendorScores } from "./derive-scores";
 import { deriveMarketShareMovement } from "./derive-market-share";
 import { deriveDependencySignals } from "../graph/derive-dependencies";
+import { runDeliveryUpdateFromRecentNews } from "../delivery/news-update";
 import { detectCategoryChanges } from "../services/category-change";
 import { checkAndSendWatchlistAlerts } from "../watchlist/notify";
 import { checkAndSendCompetitiveOverlapAlerts } from "../watchlist/competitive-overlap-notify";
@@ -398,6 +399,18 @@ export async function runDailyRefresh(
       articlesIngested: r.totals.articlesIngested,
       proposalsPersisted: r.totals.proposalsPersisted,
     };
+  });
+
+  // ── 7d. Delivery-partnership self-update (tiered: Haiku classify → Sonnet extract) ──
+  //     Reads the news just ingested above and ADDs/UPGRADEs/marks-ended GSI×vendor
+  //     delivery partnerships — ONLY from a real cited item, ONLY for known
+  //     partner+vendor (no invention). Touches delivery_partnership rows only —
+  //     never a vendor score (firewall). Respects the spend cap.
+  await trackedStep("delivery_partnership_update", async () => {
+    if (!dbConfigured) return { skipped: "no_database" };
+    if (spend.exhausted()) return { skipped: "spend_cap", ...spend.status() };
+    const r = await runDeliveryUpdateFromRecentNews({ now });
+    return r as unknown as Record<string, unknown>;
   });
 
   // ── 8. Investor-tools live refresh ─────────────────────────

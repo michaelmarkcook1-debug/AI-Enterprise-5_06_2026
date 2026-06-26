@@ -28,6 +28,8 @@ import { getReputationSnapshots, type ReputationSnapshotPoint } from "@/lib/repu
 import { intelVendorId } from "@/lib/intelligence/vendor-id";
 import { getVendorCategoryStandings } from "@/lib/ranking/category-composite";
 import PillarContributionTable from "@/components/ranking/PillarContributionTable";
+import { getDeliveryPartnershipsForVendor } from "@/lib/delivery/repository";
+import ImplementationPartnersPanel from "@/components/vendor/ImplementationPartnersPanel";
 
 export const dynamic = "force-dynamic";
 
@@ -483,6 +485,17 @@ export default async function VendorDeepDivePage({
     notFound();
   }
 
+  // Canonical intelligence-spine id (aliases mapped, e.g. alibaba-qwen → alibaba).
+  // Used for the score/reputation reads AND the curated delivery-partnership read.
+  const intelId = intelVendorId(entity);
+
+  // Implementation partners are CURATED analyst reference data shown WITH their
+  // provenance label (like the taxonomy) — independent of the hardcoded-score
+  // gating below, so they render even while scores are held.
+  const deliveryPartnerships = await getDeliveryPartnershipsForVendor(intelId).catch(() => []);
+  const partnerIndustries = [...new Set(deliveryPartnerships.flatMap((p) => p.industries))].sort();
+  const partnerRegions = [...new Set(deliveryPartnerships.flatMap((p) => p.regions))].sort();
+
   // STRICT mode: the full profile (scores, momentum, role breakdown, financials,
   // analyst interpretation) is sourced from the hardcoded ENTITIES roster — not
   // from live-DB verified evidence — so we hold it until the portal is
@@ -508,16 +521,23 @@ export default async function VendorDeepDivePage({
             title={`${entity.name} — profile data unavailable`}
             detail="Scores, momentum, role breakdown and financial signals appear only when backed by analyst-verified evidence in our live data store. No verified evidence has been ingested for this vendor yet, so we hold the profile rather than show hardcoded figures as if measured."
           />
+          {deliveryPartnerships.length > 0 && (
+            <section className="mt-6">
+              <Panel title="Implementation partners">
+                <ImplementationPartnersPanel
+                  vendorName={entity.name}
+                  partnerships={deliveryPartnerships}
+                  industries={partnerIndustries}
+                  regions={partnerRegions}
+                />
+              </Panel>
+            </section>
+          )}
         </main>
       </div>
     );
   }
 
-  // Resolve the canonical intelligence-spine id (the id capture writes snapshots
-  // under). Used uniformly for the score read, the reputation read, and the
-  // reputation panel so an aliased entity (e.g. alibaba-qwen → alibaba,
-  // fireworks-ai → fireworks) doesn't silently miss its history.
-  const intelId = intelVendorId(entity);
   const reputation = getVendorReputation(intelId);
 
   // 2. Fetch snapshot history + reputation history + news + within-category
@@ -689,6 +709,20 @@ export default async function VendorDeepDivePage({
         <section className="mb-6">
           <ReputationPanel reputation={reputation} vendorName={entity.name} />
         </section>
+
+        {/* ── Implementation partners (IT-services / GSI delivery layer) ──── */}
+        {deliveryPartnerships.length > 0 && (
+          <section className="mb-6">
+            <Panel title="Implementation partners">
+              <ImplementationPartnersPanel
+                vendorName={entity.name}
+                partnerships={deliveryPartnerships}
+                industries={partnerIndustries}
+                regions={partnerRegions}
+              />
+            </Panel>
+          </section>
+        )}
 
         {/* ── Financial profile (ownership + sourced capital signals) ─────── */}
         <section className="mb-6">

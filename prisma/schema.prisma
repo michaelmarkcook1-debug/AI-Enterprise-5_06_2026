@@ -488,6 +488,7 @@ model IntelligenceVendor {
   momentum            VendorMomentum[]
   capabilities        VendorCapability[]
   rankingSnapshots    VendorRankingSnapshot[]
+  deliveryPartnerships DeliveryPartnership[]
   createdAt           DateTime                @default(now()) @map("created_at")
   updatedAt           DateTime                @updatedAt @map("updated_at")
 
@@ -875,4 +876,78 @@ model MemberWatchlist {
   subscriber   Subscriber @relation(fields: [subscriberId], references: [id], onDelete: Cascade)
 
   @@map("member_watchlists")
+}
+
+// ── IT-services / GSI delivery-partnership layer ─────────────────────────────
+// Curated analyst source (condensed_ai_model_it_services_partner_analysis.txt,
+// AnalystGenius 2026-06-26). Treated like the category taxonomy: real/structural
+// curated data, NOT fabricated scores. The three partnershipTier categories are
+// NEVER merged. A partnership carries NO path to a vendor SCORE column (firewall):
+// aiVendorId is an identity FK only; scoring reads partnerships FORWARD to compute
+// a labeled delivery-reach signal, never writes back.
+enum PartnershipTier {
+  direct_named
+  cloud_certified
+  observed_implementer
+}
+
+enum EvidenceTierPartnership {
+  strong
+  moderate
+  plausible_unverified
+}
+
+enum PartnershipProvenance {
+  analyst_curated_seed
+  news_confirmed
+}
+
+model DeliveryPartner {
+  id                  String   @id @map("delivery_partner_id")
+  name                String
+  slug                String   @unique
+  /// global_si | strategy_consultancy | regional_si | platform_hybrid
+  kind                String   @default("global_si")
+  /// IBM-type firm that is both an AI platform owner and an SI — encroachment flag.
+  platformHybrid      Boolean  @default(false) @map("platform_hybrid")
+  hq                  String?
+  regions             String[] @default([])
+  source              String?
+  partnerships        DeliveryPartnership[]
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  @@index([slug])
+  @@map("delivery_partners")
+}
+
+model DeliveryPartnership {
+  id                  String                  @id @default(cuid())
+  deliveryPartnerId   String                  @map("delivery_partner_id")
+  aiVendorId          String                  @map("ai_vendor_id")
+  partnershipTier     PartnershipTier         @map("partnership_tier")
+  evidenceTier        EvidenceTierPartnership @map("evidence_tier")
+  provenance          PartnershipProvenance   @default(analyst_curated_seed)
+  /// Seed rows: "AnalystGenius curated 2026-06-26"; upgraded only with a real external source.
+  source              String?
+  implementationAreas String[]                @default([]) @map("implementation_areas")
+  industries          String[]                @default([])
+  regions             String[]                @default([])
+  /// Soft references (no FK) backing a news_confirmed upgrade — like DependencySignal.
+  evidenceIds         String[]                @default([]) @map("evidence_ids")
+  sourceUrls          String[]                @default([]) @map("source_urls")
+  confidence          Float?
+  lastVerified        DateTime?               @map("last_verified")
+  /// Set ONLY by a real cited item reporting the partnership ended (mark-ended).
+  /// Ended rows are kept (lost-contract intel), excluded from the active read.
+  endedAt             DateTime?               @map("ended_at")
+  deliveryPartner     DeliveryPartner         @relation(fields: [deliveryPartnerId], references: [id], onDelete: Cascade)
+  aiVendor            IntelligenceVendor      @relation(fields: [aiVendorId], references: [id], onDelete: Cascade)
+  createdAt           DateTime                @default(now()) @map("created_at")
+  updatedAt           DateTime                @updatedAt @map("updated_at")
+
+  @@unique([deliveryPartnerId, aiVendorId, partnershipTier])
+  @@index([aiVendorId, partnershipTier])
+  @@index([provenance, partnershipTier])
+  @@map("delivery_partnerships")
 }
