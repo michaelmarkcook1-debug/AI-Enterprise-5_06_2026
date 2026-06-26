@@ -1,14 +1,33 @@
 // Data provenance — answers "is this dashboard built on real ingested
-// evidence, or seed data?" The dashboard badge flips based on this.
+// evidence, or seed data?" Every quantitative surface gates on this.
 //
-// Real data is defined as: Postgres reachable AND at least one
-// `EvidenceRecord` row with reviewStatus="analyst_verified" exists.
-// Anything less is "seed".
+// "live" requires BOTH:
+//   (a) Postgres reachable AND ≥1 analyst-verified EvidenceRecord (or approved
+//       EvidenceProposal), AND
+//   (b) ≥1 market-share estimate that is NOT seed-signed.
+//
+// (b) is load-bearing: the live DB was at some point loaded with the typed seed,
+// INCLUDING "analyst_verified" evidence rows — so (a) alone is a FALSE POSITIVE
+// on a seed-populated database. Every seed market-share row carries a fixed
+// source string (see lib/intelligence/seed.ts), so its absence-of-a-real-row is
+// a reliable "this DB is still all seed" signal. Until real ingestion writes a
+// real-sourced estimate, the portal stays "seed" → surfaces show honest
+// "insufficient evidence" rather than seed dressed as live.
 
 import { cache } from "react";
 import { getPrisma, hasDatabase } from "../prisma";
 
 export type Provenance = "seed" | "live";
+
+/** Fixed source string stamped on every seeded market-share row
+ *  (lib/intelligence/seed.ts). Real, evidence-derived estimates never use it,
+ *  so it is a reliable seed marker for both provenance and reader filtering. */
+export const SEED_MARKET_SHARE_SOURCE_PREFIX = "AI Enterprise analyst triangulation";
+
+/** True when an estimate's source is the seed signature (i.e. fabricated/seed). */
+export function isSeedSignedSource(source: string | null | undefined): boolean {
+  return typeof source === "string" && source.startsWith(SEED_MARKET_SHARE_SOURCE_PREFIX);
+}
 
 export interface ProvenanceSummary {
   source: Provenance;
@@ -47,9 +66,15 @@ export async function getDataProvenance(): Promise<ProvenanceSummary> {
 
   try {
     const client = getPrisma();
-    const [evidenceCount, approvedProposalCount, lastJob] = await Promise.all([
+    const [evidenceCount, approvedProposalCount, realEstimateCount, lastJob] = await Promise.all([
       client.evidenceRecord.count({ where: { reviewStatus: "analyst_verified" } }),
       client.evidenceProposal.count({ where: { status: "approved" } }),
+      // Real = NOT carrying the seed source signature. If zero, the DB's
+      // market-share is still entirely seed → portal is NOT live (even if seed
+      // "verified evidence" rows exist), so we never show seed dressed as live.
+      client.marketShareEstimate.count({
+        where: { NOT: { source: { startsWith: SEED_MARKET_SHARE_SOURCE_PREFIX } } },
+      }),
       client.ingestionJob.findFirst({
         where: { status: { in: ["completed", "ready_for_review"] } },
         orderBy: { createdAt: "desc" },
@@ -57,12 +82,16 @@ export async function getDataProvenance(): Promise<ProvenanceSummary> {
       }),
     ]);
 
-    if (evidenceCount === 0 && approvedProposalCount === 0) {
+    const hasVerifiedEvidence = evidenceCount > 0 || approvedProposalCount > 0;
+
+    if (!hasVerifiedEvidence || realEstimateCount === 0) {
       return {
         source: "seed",
         evidenceCount,
         approvedProposalCount,
-        reason: "DB connected but no analyst-verified evidence yet. Run admin/ingestion + approve in admin/evidence to flip to live.",
+        reason: realEstimateCount === 0
+          ? "DB market-share is still entirely seed-loaded (no real-sourced estimates). Run real ingestion or purge the seed rows to go live."
+          : "DB connected but no analyst-verified evidence yet. Run admin/ingestion + approve in admin/evidence to flip to live.",
       };
     }
 
@@ -71,7 +100,7 @@ export async function getDataProvenance(): Promise<ProvenanceSummary> {
       evidenceCount,
       approvedProposalCount,
       lastIngestedAt: lastJob?.finishedAt?.toISOString() ?? lastJob?.createdAt.toISOString(),
-      reason: `${evidenceCount} verified evidence rows · ${approvedProposalCount} approved proposals.`,
+      reason: `${evidenceCount} verified evidence rows · ${approvedProposalCount} approved proposals · ${realEstimateCount} real-sourced estimates.`,
     };
   } catch (error) {
     return {

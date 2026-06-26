@@ -55,6 +55,7 @@ import {
 } from "./mock-repositories";
 import { calculateRiskPenalty, riskStatusForVendor } from "./metrics";
 import { isDataVendorSource } from "./source-quality";
+import { isSeedSignedSource } from "./provenance";
 import { DataUnavailableError, seedFallbackAllowed } from "../availability";
 
 let dbFallbackWarningShown = false;
@@ -368,7 +369,11 @@ export async function listMarketShareEstimates(): Promise<MarketShareEstimate[]>
   return databaseOrSeed(
     async (client) => {
       const rows = await client.marketShareEstimate.findMany({ orderBy: [{ categoryId: "asc" }, { estimatedShare: "desc" }] });
-      return rows.length ? rows.map(mapMarketShare) : marketShareEstimatesMockRepository.list();
+      // Drop any seed-signed rows: the live DB was seed-loaded, so seed estimates
+      // can sit in the table. They must NEVER render as real, even when the
+      // portal is otherwise live. Real, evidence-derived estimates remain.
+      const real = rows.map(mapMarketShare).filter((e) => !isSeedSignedSource(e.source));
+      return real.length ? real : marketShareEstimatesMockRepository.list();
     },
     () => marketShareEstimatesMockRepository.list(),
   );
