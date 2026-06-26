@@ -47,7 +47,7 @@ export default async function ModelsPage() {
         </header>
         <DataUnavailable
           title="Model inventory unavailable"
-          detail="The commercial model inventory appears only when backed by analyst-verified evidence in our live data store. No verified evidence has been ingested yet, so we hold it rather than show a hardcoded inventory as if current."
+          detail="The commercial model inventory appears only when backed by reviewed, source-backed evidence in our live data store. No reviewed evidence has been ingested yet, so we hold it rather than show a hardcoded inventory as if current."
         />
       </main>
     );

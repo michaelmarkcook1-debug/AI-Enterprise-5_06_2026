@@ -44,7 +44,7 @@ export default async function DependenciesPage() {
         </header>
         <DataUnavailable
           title="Dependency graph unavailable"
-          detail="The dependency/encroachment graph appears only when backed by analyst-verified evidence in our live data store. No verified evidence has been ingested yet, so we hold it rather than present curated relationships as if measured."
+          detail="The dependency/encroachment graph appears only when backed by reviewed, source-backed evidence in our live data store. No reviewed evidence has been ingested yet, so we hold it rather than present curated relationships as if measured."
         />
       </main>
     );

@@ -228,7 +228,7 @@ export default async function HomePage() {
           ) : (
             <DataUnavailable
               title="Live rankings unavailable"
-              detail="Rankings appear once the market data is backed by analyst-verified evidence."
+              detail="Rankings appear once the market data is backed by reviewed, source-backed evidence."
               reason={provenance?.reason}
             />
           )}

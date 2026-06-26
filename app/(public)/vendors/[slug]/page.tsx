@@ -519,7 +519,7 @@ export default async function VendorDeepDivePage({
           </h1>
           <DataUnavailable
             title={`${entity.name} — profile data unavailable`}
-            detail="Scores, momentum, role breakdown and financial signals appear only when backed by analyst-verified evidence in our live data store. No verified evidence has been ingested for this vendor yet, so we hold the profile rather than show hardcoded figures as if measured."
+            detail="Scores, momentum, role breakdown and financial signals appear only when backed by reviewed, source-backed evidence in our live data store. No reviewed evidence has been ingested for this vendor yet, so we hold the profile rather than show hardcoded figures as if measured."
           />
           {deliveryPartnerships.length > 0 && (
             <section className="mt-6">

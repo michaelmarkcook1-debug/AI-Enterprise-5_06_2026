@@ -3,7 +3,7 @@
  *
  * Server component that calls getDataProvenance() at request time and renders
  * a bold red strip directly under the TopNav whenever the portal is operating
- * on seed/typed-module data instead of analyst-verified evidence.
+ * on seed/typed-module data instead of reviewed, source-backed evidence.
  *
  * Purpose: every executive who lands on any page must see, in red, that the
  * numbers in front of them are not live, AND be told exactly what to do to
@@ -45,7 +45,7 @@ export default async function NotLiveBanner() {
         </div>
         <div className="flex flex-wrap items-center gap-3 font-semibold">
           <span className="rounded-full border border-rose-300 bg-white/70 px-2 py-0.5 text-[10px] uppercase tracking-wide dark:border-rose-700 dark:bg-rose-950/40">
-            Verified evidence: <span className="font-extrabold tabular-nums">{provenance.evidenceCount}</span>
+            Reviewed evidence: <span className="font-extrabold tabular-nums">{provenance.evidenceCount}</span>
           </span>
           <span className="rounded-full border border-rose-300 bg-white/70 px-2 py-0.5 text-[10px] uppercase tracking-wide dark:border-rose-700 dark:bg-rose-950/40">
             Approved proposals: <span className="font-extrabold tabular-nums">{provenance.approvedProposalCount}</span>

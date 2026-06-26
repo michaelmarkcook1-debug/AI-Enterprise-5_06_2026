@@ -89,7 +89,7 @@ export default async function ComparePage({ params }: { params: Promise<Params> 
       <main className="mx-auto max-w-4xl px-4 py-10">
         <DataUnavailable
           title="Vendor comparison unavailable"
-          detail="Side-by-side scores appear only when backed by analyst-verified evidence in our live data store. No verified evidence has been ingested yet, so we hold comparisons rather than compare hardcoded scores as if measured."
+          detail="Side-by-side scores appear only when backed by reviewed, source-backed evidence in our live data store. No reviewed evidence has been ingested yet, so we hold comparisons rather than compare hardcoded scores as if measured."
         />
       </main>
     );

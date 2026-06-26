@@ -77,7 +77,7 @@ export default async function MonitorPage() {
               <p className="text-sm font-medium">Market signals appear once backed by verified evidence.</p>
               <p className={`mt-1 text-xs ${MUTED}`}>
                 Ranking moves and dependency/encroachment alerts are held until our live data store carries
-                analyst-verified evidence — we don&apos;t surface seed or estimated figures as if measured.
+                reviewed, source-backed evidence — we don&apos;t surface seed or estimated figures as if measured.
                 Source-backed news on your shortlist still appears here when there is any.
               </p>
             </>

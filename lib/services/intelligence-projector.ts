@@ -304,7 +304,7 @@ export async function projectEvidenceToIntelligence(
         id: row.id,
         title,
         summary: row.excerpt.slice(0, 600),
-        sourceName: row.sourceUrl ? hostnameOf(row.sourceUrl) : "Analyst-verified evidence",
+        sourceName: row.sourceUrl ? hostnameOf(row.sourceUrl) : "Reviewed evidence record",
         sourceUrl: row.sourceUrl ?? undefined,
         publishedAt: row.capturedAt,
         vendors: [vendorId],
@@ -384,7 +384,7 @@ function hostnameOf(url: string): string {
   try {
     return new URL(url).hostname;
   } catch {
-    return "Analyst-verified evidence";
+    return "Reviewed evidence record";
   }
 }
 
