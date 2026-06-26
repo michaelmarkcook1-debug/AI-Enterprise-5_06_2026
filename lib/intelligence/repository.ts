@@ -1,7 +1,10 @@
 // Intelligence-layer repository — backs the executive market portal.
 //
-// Reads from Prisma/Postgres when configured and falls back to typed seed data
-// for local demos, static builds, and first-run development.
+// Reads from Prisma/Postgres. Typed seed data is served ONLY in local dev /
+// tests (gated by `seedFallbackAllowed()` in lib/data/availability.ts). In any
+// deployed build (production OR preview) an unavailable DB throws
+// `DataUnavailableError` — surfaces render an honest "live data unavailable"
+// state and NEVER substitute seed dressed as real.
 
 import { Prisma } from "../../generated/prisma/client";
 import type {
@@ -52,6 +55,7 @@ import {
 } from "./mock-repositories";
 import { calculateRiskPenalty, riskStatusForVendor } from "./metrics";
 import { isDataVendorSource } from "./source-quality";
+import { DataUnavailableError, seedFallbackAllowed } from "../availability";
 
 let dbFallbackWarningShown = false;
 
@@ -59,21 +63,33 @@ function byScoreDesc(a: Vendor, b: Vendor): number {
   return b.overallScore - a.overallScore;
 }
 
+// Read live data from Postgres. Seed is served ONLY when `seedFallbackAllowed()`
+// (local dev / tests) — in any deployed build an unavailable DB throws
+// `DataUnavailableError` so the surface can render an honest "live data
+// unavailable" state instead of silently dressing seed as real.
 async function databaseOrSeed<T>(
   read: (client: PrismaClient) => Promise<T>,
   seed: () => T | Promise<T>,
 ): Promise<T> {
-  if (!hasDatabase()) return seed();
+  if (!hasDatabase()) {
+    if (seedFallbackAllowed()) return seed();
+    throw new DataUnavailableError("intelligence database is not configured (DATABASE_URL unset)");
+  }
 
   try {
     return await read(getPrisma());
   } catch (error) {
-    if (!dbFallbackWarningShown && process.env.NODE_ENV !== "test") {
-      dbFallbackWarningShown = true;
-      const message = error instanceof Error ? error.message : String(error);
-      console.warn(`AI Enterprise intelligence DB unavailable; using seed data. ${message}`);
+    const message = error instanceof Error ? error.message : String(error);
+    if (seedFallbackAllowed()) {
+      if (!dbFallbackWarningShown && process.env.NODE_ENV !== "test") {
+        dbFallbackWarningShown = true;
+        console.warn(`AI Enterprise intelligence DB unavailable; using LOCAL-DEV seed data. ${message}`);
+      }
+      return seed();
     }
-    return seed();
+    // Deployed build: never mask a real outage with seed. Surface it honestly.
+    console.error(`AI Enterprise intelligence DB read failed (no seed fallback in deployed builds): ${message}`);
+    throw new DataUnavailableError(`intelligence data is temporarily unavailable: ${message}`);
   }
 }
 
@@ -718,7 +734,11 @@ export async function listVendorPillarScores(): Promise<VendorPillarScore[]> {
         orderBy: [{ vendorId: "asc" }, { pillar: "asc" }],
       })).map(mapPillarScore);
       const dbKeys = new Set(dbRows.map((r) => `${r.vendorId}_${r.pillar}`));
-      const seedFallback = VENDOR_PILLAR_SCORES.filter((s) => !dbKeys.has(`${s.vendorId}_${s.pillar}`));
+      // Seed pillar scores layer in ONLY in local dev/tests — never in a
+      // deployed build (else fabricated scores merge alongside real DB rows).
+      const seedFallback = seedFallbackAllowed()
+        ? VENDOR_PILLAR_SCORES.filter((s) => !dbKeys.has(`${s.vendorId}_${s.pillar}`))
+        : [];
       return [...dbRows, ...seedFallback];
     },
     () => VENDOR_PILLAR_SCORES,

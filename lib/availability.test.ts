@@ -1,0 +1,66 @@
+import { describe, it, expect, vi, afterEach } from "vitest";
+import { seedFallbackAllowed, DataUnavailableError, isDataUnavailable } from "./availability";
+import {
+  vendorsMockRepository,
+  newsMockRepository,
+  marketShareEstimatesMockRepository,
+  marketCategoriesMockRepository,
+  vendorMomentumMockRepository,
+} from "./intelligence/mock-repositories";
+import { listIntelligenceVendors, listMarketShareEstimates } from "./intelligence/repository";
+
+afterEach(() => vi.unstubAllEnvs());
+
+describe("seedFallbackAllowed — the seed firewall", () => {
+  it("is FALSE on any Vercel deploy, even under NODE_ENV=test", () => {
+    vi.stubEnv("VERCEL", "1");
+    expect(seedFallbackAllowed()).toBe(false);
+  });
+
+  it("is FALSE in production (no VERCEL)", () => {
+    vi.stubEnv("VERCEL", "");
+    vi.stubEnv("NODE_ENV", "production");
+    expect(seedFallbackAllowed()).toBe(false);
+  });
+
+  it("is TRUE under NODE_ENV=test (the unit suite runs on fixtures)", () => {
+    vi.stubEnv("VERCEL", "");
+    vi.stubEnv("NODE_ENV", "test");
+    expect(seedFallbackAllowed()).toBe(true);
+  });
+
+  it("local dev requires an explicit ALLOW_SEED_FALLBACK=1 opt-in", () => {
+    vi.stubEnv("VERCEL", "");
+    vi.stubEnv("NODE_ENV", "development");
+    vi.stubEnv("ALLOW_SEED_FALLBACK", "");
+    expect(seedFallbackAllowed()).toBe(false);
+    vi.stubEnv("ALLOW_SEED_FALLBACK", "1");
+    expect(seedFallbackAllowed()).toBe(true);
+  });
+});
+
+describe("no seed-data path is reachable in a deployed build", () => {
+  it("every mock repository returns empty when seed is disallowed (VERCEL set)", async () => {
+    vi.stubEnv("VERCEL", "1");
+    expect(await vendorsMockRepository.list()).toEqual([]);
+    expect(await vendorsMockRepository.get("openai")).toBeNull();
+    expect(await newsMockRepository.list()).toEqual([]);
+    expect(await newsMockRepository.byVendor("openai")).toEqual([]);
+    expect(await marketShareEstimatesMockRepository.list()).toEqual([]);
+    expect(await marketCategoriesMockRepository.list()).toEqual([]);
+    expect(await vendorMomentumMockRepository.list()).toEqual([]);
+  });
+
+  it("repository readers throw DataUnavailableError instead of seeding (VERCEL set, no DB)", async () => {
+    vi.stubEnv("VERCEL", "1");
+    vi.stubEnv("DATABASE_URL", "");
+    await expect(listIntelligenceVendors()).rejects.toThrow(DataUnavailableError);
+    await expect(listMarketShareEstimates()).rejects.toThrow(DataUnavailableError);
+  });
+
+  it("isDataUnavailable identifies the error type", () => {
+    expect(isDataUnavailable(new DataUnavailableError("x"))).toBe(true);
+    expect(isDataUnavailable(new Error("x"))).toBe(false);
+    expect(isDataUnavailable(null)).toBe(false);
+  });
+});

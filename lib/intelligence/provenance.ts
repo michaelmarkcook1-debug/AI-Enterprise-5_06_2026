@@ -5,6 +5,7 @@
 // `EvidenceRecord` row with reviewStatus="analyst_verified" exists.
 // Anything less is "seed".
 
+import { cache } from "react";
 import { getPrisma, hasDatabase } from "../prisma";
 
 export type Provenance = "seed" | "live";
@@ -15,6 +16,23 @@ export interface ProvenanceSummary {
   approvedProposalCount: number;
   lastIngestedAt?: string;
   reason: string;
+}
+
+/** Request-deduped provenance read — safe to call from several surfaces in one
+ *  render without re-querying. Use this in pages/components; the raw
+ *  `getDataProvenance` stays exported for callers that need a fresh read. */
+export const getCachedProvenance = cache(getDataProvenance);
+
+/** True only when the portal is backed by analyst-verified evidence. Quantitative
+ *  surfaces (rankings, market-share, momentum, scores) render their numbers ONLY
+ *  when this is true — otherwise they show an honest "insufficient evidence"
+ *  state rather than seed/estimate figures dressed as live. Never throws. */
+export async function isLiveData(): Promise<boolean> {
+  try {
+    return (await getCachedProvenance()).source === "live";
+  } catch {
+    return false;
+  }
 }
 
 export async function getDataProvenance(): Promise<ProvenanceSummary> {

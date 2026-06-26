@@ -9,11 +9,12 @@ import {
 } from "@/lib/graph/dependency-projection";
 import { deriveEncroachmentEdges, buildRolesByNodeId } from "@/lib/graph/encroachment";
 import { deriveGraphTakeaway } from "@/lib/graph/takeaway";
+import { isLiveData } from "@/lib/intelligence/provenance";
+import DataUnavailable from "@/components/DataUnavailable";
 
-// ISR: server-rendered + CDN-cached, revalidated hourly. The graph data is
-// curated + source-backed (lib/investing/exposure-map-data.ts); zero LLM at
-// request time. The interactive graph hydrates on the client; the summary below
-// is server-rendered so the page is indexable and works without JS.
+// ISR: server-rendered + CDN-cached, revalidated hourly. STRICT mode: the graph
+// is curated/hardcoded (lib/investing/exposure-map-data.ts) — NOT live-DB
+// verified evidence — so it only renders when the portal is evidence-backed.
 export const revalidate = 3600;
 
 const TITLE = "AI Dependency & Encroachment Graph";
@@ -31,7 +32,24 @@ export const metadata: Metadata = {
 const CARD = "rounded-xl border border-black/10 dark:border-white/10 bg-white/60 dark:bg-white/5 p-5";
 const MUTED = "text-[#15263c]/60 dark:text-[#eef3f8]/60";
 
-export default function DependenciesPage() {
+export default async function DependenciesPage() {
+  // STRICT: hold the hardcoded graph until the portal is backed by verified
+  // evidence — we never present curated relationships as if measured/live.
+  if (!(await isLiveData())) {
+    return (
+      <main className="mx-auto max-w-6xl px-4 py-10">
+        <header className="mb-6">
+          <h1 className="font-[var(--font-display)] text-3xl font-extrabold tracking-tight">{TITLE}</h1>
+          <p className={`mt-2 max-w-3xl text-sm ${MUTED}`}>{DESCRIPTION}</p>
+        </header>
+        <DataUnavailable
+          title="Dependency graph unavailable"
+          detail="The dependency/encroachment graph appears only when backed by analyst-verified evidence in our live data store. No verified evidence has been ingested yet, so we hold it rather than present curated relationships as if measured."
+        />
+      </main>
+    );
+  }
+
   const edges = projectExposureToDependencyEdges();
   const byKind = summariseByKind(edges);
   const labelById = new Map(EXPOSURE_NODES.map((n) => [n.id, n.label]));

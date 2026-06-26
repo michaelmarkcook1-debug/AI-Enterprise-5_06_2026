@@ -7,6 +7,9 @@ import {
   listMarketShareEstimates,
   listIntelligenceVendors,
 } from "@/lib/intelligence/repository";
+import { isLiveData } from "@/lib/intelligence/provenance";
+import { isDataUnavailable } from "@/lib/availability";
+import DataUnavailable from "@/components/DataUnavailable";
 import TrackButton from "@/components/member/TrackButton";
 
 // ISR: server-rendered + CDN-cached, revalidated hourly; DB reads only.
@@ -38,11 +41,26 @@ const MUTED = "text-[#15263c]/60 dark:text-[#eef3f8]/60";
 
 export default async function CategoryPage({ params }: { params: Promise<Params> }) {
   const { slug } = await params;
-  const [categories, estimates, vendors] = await Promise.all([
-    listMarketCategories(),
-    listMarketShareEstimates(),
-    listIntelligenceVendors(),
-  ]);
+  // Share figures render ONLY when backed by verified evidence; otherwise the
+  // honest "insufficient evidence" state below shows instead of seed estimates.
+  const isLive = await isLiveData();
+  let categories, estimates, vendors;
+  try {
+    [categories, estimates, vendors] = await Promise.all([
+      listMarketCategories(),
+      isLive ? listMarketShareEstimates() : Promise.resolve([]),
+      isLive ? listIntelligenceVendors() : Promise.resolve([]),
+    ]);
+  } catch (error) {
+    if (isDataUnavailable(error)) {
+      return (
+        <main className="mx-auto max-w-5xl px-4 py-10">
+          <DataUnavailable title="Live category data unavailable" />
+        </main>
+      );
+    }
+    throw error;
+  }
 
   const category = categories.find((c) => c.id === slug);
   if (!category) notFound();

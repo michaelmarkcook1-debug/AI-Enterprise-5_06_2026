@@ -3,6 +3,7 @@ import Link from "next/link";
 import { PageFrame } from "@/components/app-shell";
 import { OwnershipLegend, VendorNameWithOwnership } from "@/components/ownership-indicator";
 import { getCategoryRankings } from "@/lib/home/category-rankings";
+import { isLiveData } from "@/lib/intelligence/provenance";
 import TrackButton from "@/components/member/TrackButton";
 
 // Rankings are SEGMENTED BY CATEGORY — vendors are only compared WITHIN a market
@@ -24,7 +25,10 @@ const CARD = "rounded-xl border border-black/10 dark:border-white/10 bg-white/60
 const MUTED = "text-[#15263c]/60 dark:text-[#eef3f8]/60";
 
 export default async function VendorsPage() {
-  const rankings = await getCategoryRankings();
+  // Rank ONLY on verified, source-backed evidence. Without it we show the honest
+  // "insufficient evidence" state below rather than seed/estimate figures.
+  const isLive = await isLiveData();
+  const rankings = isLive ? await getCategoryRankings().catch(() => []) : [];
   const withLeaders = rankings.filter((r) => r.leaders.length > 0);
 
   return (

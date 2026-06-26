@@ -1,6 +1,7 @@
 import { getPrisma, hasDatabase } from "../prisma";
 import { toVendor } from "./vendor-mapper";
 import { getIntelligenceAssessmentVendors } from "../intelligence/assessment-adapter";
+import { DataUnavailableError, seedFallbackAllowed } from "../availability";
 import type { Prisma, PrismaClient } from "../../generated/prisma/client";
 import type { EvidenceItem, Vendor } from "../types";
 
@@ -19,21 +20,30 @@ const vendorProfileInclude = {
 type VendorReadClient = Pick<PrismaClient, "vendorProfile" | "evidenceRecord">;
 
 /**
- * Fall back to seed intelligence whenever the DB layer fails for ANY reason —
- * common cases: DATABASE_URL is set but migrations haven't been applied, the
- * connection pool exhausted, or the Postgres instance is sleeping (Neon free
- * tier). Without this guard a fresh Vercel deploy with a brand-new database
- * would 500 on every page that touches vendor-profiles. We log the failure
- * (via console.warn — surfaces in `vercel logs`) so operators can see when the
- * fallback kicked in, but the page still renders against seed data.
+ * Seed intelligence is served ONLY in local dev / tests (`seedFallbackAllowed()`).
+ * In any deployed build a DB failure throws `DataUnavailableError` so the surface
+ * renders an honest "live data unavailable" state — we never dress seed as real.
  */
 function dbFallback<T>(label: string, error: unknown, fallback: T): T {
-  console.warn(`[vendor-profiles] DB ${label} failed; using seed intelligence fallback. Reason:`, (error as Error)?.message ?? error);
+  const reason = (error as Error)?.message ?? error;
+  if (!seedFallbackAllowed()) {
+    console.error(`[vendor-profiles] DB ${label} failed (no seed fallback in deployed builds):`, reason);
+    throw new DataUnavailableError(`vendor profiles temporarily unavailable: ${String(reason)}`);
+  }
+  console.warn(`[vendor-profiles] DB ${label} failed; using LOCAL-DEV seed intelligence fallback. Reason:`, reason);
   return fallback;
 }
 
+/** No DB configured: seed in local dev/tests, else honest-unavailable. */
+function noDbFallback<T>(seed: () => T): T {
+  if (!seedFallbackAllowed()) {
+    throw new DataUnavailableError("vendor profiles database is not configured (DATABASE_URL unset)");
+  }
+  return seed();
+}
+
 export async function listVendorProfiles(client?: VendorReadClient): Promise<Vendor[]> {
-  if (!client && !hasDatabase()) return getIntelligenceAssessmentVendors();
+  if (!client && !hasDatabase()) return noDbFallback(() => getIntelligenceAssessmentVendors());
   try {
     const c = client ?? getPrisma();
     const rows = await c.vendorProfile.findMany({
@@ -48,7 +58,7 @@ export async function listVendorProfiles(client?: VendorReadClient): Promise<Ven
 }
 
 export async function getVendorProfile(id: string, client?: VendorReadClient): Promise<Vendor | null> {
-  if (!client && !hasDatabase()) return getIntelligenceAssessmentVendors().find((v) => v.id === id) ?? null;
+  if (!client && !hasDatabase()) return noDbFallback(() => getIntelligenceAssessmentVendors().find((v) => v.id === id) ?? null);
   try {
     const c = client ?? getPrisma();
     const row = await c.vendorProfile.findUnique({
@@ -62,7 +72,7 @@ export async function getVendorProfile(id: string, client?: VendorReadClient): P
 }
 
 export async function listVendorEvidence(vendorId: string, client?: VendorReadClient): Promise<EvidenceItem[]> {
-  if (!client && !hasDatabase()) return getIntelligenceAssessmentVendors().find((vendor) => vendor.id === vendorId)?.evidence ?? [];
+  if (!client && !hasDatabase()) return noDbFallback(() => getIntelligenceAssessmentVendors().find((vendor) => vendor.id === vendorId)?.evidence ?? []);
   try {
     const c = client ?? getPrisma();
     const rows = await c.evidenceRecord.findMany({

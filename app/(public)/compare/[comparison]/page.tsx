@@ -7,6 +7,8 @@ import {
   listVendorPillarScores,
   listVendorMomentum,
 } from "@/lib/intelligence/repository";
+import { isLiveData } from "@/lib/intelligence/provenance";
+import DataUnavailable from "@/components/DataUnavailable";
 
 // ISR: on-demand server-render + CDN cache (comparisons are combinatorial, so
 // not pre-generated), revalidated hourly. DB reads only — no LLM at request time.
@@ -79,6 +81,19 @@ export default async function ComparePage({ params }: { params: Promise<Params> 
   const { comparison } = await params;
   const pair = parsePair(comparison);
   if (!pair) notFound();
+
+  // STRICT: overall/confidence/momentum/pillar scores are seed-derived unless
+  // backed by verified evidence — hold the comparison until the portal is live.
+  if (!(await isLiveData())) {
+    return (
+      <main className="mx-auto max-w-4xl px-4 py-10">
+        <DataUnavailable
+          title="Vendor comparison unavailable"
+          detail="Side-by-side scores appear only when backed by analyst-verified evidence in our live data store. No verified evidence has been ingested yet, so we hold comparisons rather than compare hardcoded scores as if measured."
+        />
+      </main>
+    );
+  }
 
   const [a, b] = await Promise.all([getIntelligenceVendor(pair[0]), getIntelligenceVendor(pair[1])]);
   if (!a || !b) notFound();

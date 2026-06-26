@@ -13,6 +13,7 @@ import {
 } from "../intelligence/repository";
 import { projectExposureToDependencyEdges } from "../graph/dependency-projection";
 import { deriveEncroachmentEdges, buildRolesByNodeId, NODE_TO_SLUG } from "../graph/encroachment";
+import { isLiveData } from "../intelligence/provenance";
 import type { MemberWatchlistView } from "./watchlist";
 
 // changePct is a RELATIVE percentage change ((cur-prev)/prev*100), matching the
@@ -48,6 +49,10 @@ export interface MonitorNews {
 export interface MonitorView {
   hasItems: boolean;
   hasSignal: boolean;
+  /** STRICT mode: ranking moves + dependency/encroachment alerts are
+   *  seed/hardcoded-derived, so they're only composed when the portal is backed
+   *  by verified evidence. False here means those sections are held (not "quiet"). */
+  isLive: boolean;
   savedVendors: { slug: string; name: string }[];
   savedCategories: { id: string; name: string }[];
   rankingMoves: RankingMove[];
@@ -60,8 +65,13 @@ export async function buildMonitor(watchlist: MemberWatchlistView): Promise<Moni
   const categorySet = new Set(watchlist.categories);
   const hasItems = vendorSet.size > 0 || categorySet.size > 0;
 
+  // STRICT: market-share moves + the dependency/encroachment graph are
+  // seed/hardcoded — surface them ONLY when backed by verified evidence.
+  // Breaking news is independently real-gated, so it shows regardless.
+  const live = await isLiveData();
+
   const [estimates, categories, vendors, breaking] = await Promise.all([
-    listMarketShareEstimates().catch(() => []),
+    live ? listMarketShareEstimates().catch(() => []) : Promise.resolve([]),
     listMarketCategories().catch(() => []),
     listIntelligenceVendors().catch(() => []),
     getBreakingNews({ days: 30, limit: 40 }).catch(() => null),
@@ -98,35 +108,37 @@ export async function buildMonitor(watchlist: MemberWatchlistView): Promise<Moni
     .slice(0, 20);
 
   // ── Graph alerts: dependency + encroachment edges touching a saved vendor.
-  //    Use each edge's own curated rationale (no direction guesswork). ──
-  const slugToNode = new Map<string, string>();
-  for (const [nodeId, slug] of Object.entries(NODE_TO_SLUG)) {
-    if (!slugToNode.has(slug)) slugToNode.set(slug, nodeId);
-  }
-  const savedNodeIds = new Set(
-    [...vendorSet].map((s) => slugToNode.get(s)).filter((x): x is string => !!x),
-  );
-  const allEdges = projectExposureToDependencyEdges();
-  const encroach = deriveEncroachmentEdges(allEdges, buildRolesByNodeId());
-  const seen = new Set<string>();
-  const graphAlerts: GraphAlert[] = [];
-  const pushAlert = (kind: GraphAlert["kind"], text: string, confidence: number) => {
-    if (seen.has(text)) return;
-    seen.add(text);
-    graphAlerts.push({ kind, text, tier: tierOf(confidence) });
-  };
-  for (const e of encroach) {
-    if (savedNodeIds.has(e.fromVendorId) || savedNodeIds.has(e.toVendorId)) {
-      pushAlert("encroachment", e.rationale, e.confidence);
+  //    Use each edge's own curated rationale (no direction guesswork). STRICT:
+  //    the graph is hardcoded, so only surface it when evidence-backed. ──
+  const trimmedAlerts: GraphAlert[] = [];
+  if (live) {
+    const slugToNode = new Map<string, string>();
+    for (const [nodeId, slug] of Object.entries(NODE_TO_SLUG)) {
+      if (!slugToNode.has(slug)) slugToNode.set(slug, nodeId);
+    }
+    const savedNodeIds = new Set(
+      [...vendorSet].map((s) => slugToNode.get(s)).filter((x): x is string => !!x),
+    );
+    const allEdges = projectExposureToDependencyEdges();
+    const encroach = deriveEncroachmentEdges(allEdges, buildRolesByNodeId());
+    const seen = new Set<string>();
+    const pushAlert = (kind: GraphAlert["kind"], text: string, confidence: number) => {
+      if (seen.has(text) || trimmedAlerts.length >= 12) return;
+      seen.add(text);
+      trimmedAlerts.push({ kind, text, tier: tierOf(confidence) });
+    };
+    for (const e of encroach) {
+      if (savedNodeIds.has(e.fromVendorId) || savedNodeIds.has(e.toVendorId)) {
+        pushAlert("encroachment", e.rationale, e.confidence);
+      }
+    }
+    for (const e of allEdges) {
+      if (e.direction !== "depends_on") continue;
+      if (savedNodeIds.has(e.fromVendorId) || savedNodeIds.has(e.toVendorId)) {
+        pushAlert("dependency", e.rationale, e.confidence);
+      }
     }
   }
-  for (const e of allEdges) {
-    if (e.direction !== "depends_on") continue;
-    if (savedNodeIds.has(e.fromVendorId) || savedNodeIds.has(e.toVendorId)) {
-      pushAlert("dependency", e.rationale, e.confidence);
-    }
-  }
-  const trimmedAlerts = graphAlerts.slice(0, 12);
 
   // ── News: real-gated breaking items mentioning a saved vendor. ──
   const news: MonitorNews[] = (breaking?.items ?? [])
@@ -150,6 +162,7 @@ export async function buildMonitor(watchlist: MemberWatchlistView): Promise<Moni
   return {
     hasItems,
     hasSignal,
+    isLive: live,
     savedVendors,
     savedCategories,
     rankingMoves,

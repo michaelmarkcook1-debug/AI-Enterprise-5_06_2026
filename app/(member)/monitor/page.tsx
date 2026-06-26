@@ -65,10 +65,23 @@ export default async function MonitorPage() {
         </div>
       ) : !monitor.hasSignal ? (
         <div className={CARD}>
-          <p className="text-sm font-medium">No material change for your shortlist this week.</p>
-          <p className={`mt-1 text-xs ${MUTED}`}>
-            We only report movement that&apos;s in the data — no change is an honest answer, not an empty one.
-          </p>
+          {monitor.isLive ? (
+            <>
+              <p className="text-sm font-medium">No material change for your shortlist this week.</p>
+              <p className={`mt-1 text-xs ${MUTED}`}>
+                We only report movement that&apos;s in the data — no change is an honest answer, not an empty one.
+              </p>
+            </>
+          ) : (
+            <>
+              <p className="text-sm font-medium">Market signals appear once backed by verified evidence.</p>
+              <p className={`mt-1 text-xs ${MUTED}`}>
+                Ranking moves and dependency/encroachment alerts are held until our live data store carries
+                analyst-verified evidence — we don&apos;t surface seed or estimated figures as if measured.
+                Source-backed news on your shortlist still appears here when there is any.
+              </p>
+            </>
+          )}
         </div>
       ) : (
         <div className="space-y-6">

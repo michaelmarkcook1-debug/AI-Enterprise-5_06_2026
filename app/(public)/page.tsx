@@ -10,10 +10,11 @@ import { EXPOSURE_NODES } from "@/lib/investing/exposure-map-data";
 import { projectExposureToDependencyEdges, summariseByKind } from "@/lib/graph/dependency-projection";
 import { deriveEncroachmentEdges, buildRolesByNodeId } from "@/lib/graph/encroachment";
 import { deriveGraphTakeaway } from "@/lib/graph/takeaway";
-import { getDataProvenance } from "@/lib/intelligence/provenance";
+import { getCachedProvenance } from "@/lib/intelligence/provenance";
 import { getLastRefreshedAt } from "@/lib/system/daily-refresh";
 import { listPublishedArticles } from "@/lib/articles/repository";
 import { absoluteUrl } from "@/lib/site";
+import DataUnavailable from "@/components/DataUnavailable";
 
 // Public front door. DB-backed (live rankings, breaking news, provenance) →
 // force-dynamic, matching /vendors. All reads are parallel + guarded so the page
@@ -60,14 +61,16 @@ export default async function HomePage() {
   const total = edges.length;
 
   // Honest freshness + provenance (guarded — never fabricate a timestamp).
-  const [provenance, lastRefreshed, articles, categoryRankings] = await Promise.all([
-    getDataProvenance().catch(() => null),
+  // Rankings are loaded only when the portal is backed by verified evidence;
+  // otherwise we hold the section rather than render directional/seed figures.
+  const [provenance, lastRefreshed, articles] = await Promise.all([
+    getCachedProvenance().catch(() => null),
     getLastRefreshedAt().catch(() => null),
     listPublishedArticles().catch(() => []),
-    getCategoryRankings(),
   ]);
   const isLive = provenance?.source === "live";
-  const updated = fmtDate(lastRefreshed) ?? fmtDate(provenance?.lastIngestedAt);
+  const categoryRankings = isLive ? await getCategoryRankings().catch(() => []) : [];
+  const updated = isLive ? (fmtDate(lastRefreshed) ?? fmtDate(provenance?.lastIngestedAt)) : null;
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-10">
@@ -94,16 +97,18 @@ export default async function HomePage() {
             }`}
           >
             <span className={`h-1.5 w-1.5 rounded-full ${isLive ? "bg-emerald-500" : "bg-amber-500"}`} aria-hidden />
-            {isLive ? "Live source" : "Not live — figures illustrative until ingestion lands"}
+            {isLive
+              ? "Live source"
+              : "Live rankings unavailable — shown only when backed by verified evidence"}
           </span>
-          <span className={MUTED}>{updated ? `Updated ${updated}` : "Not yet refreshed"}</span>
+          <span className={MUTED}>{isLive && updated ? `Updated ${updated}` : ""}</span>
         </div>
       </header>
 
-      {/* Derived "so what" — recomputed from the live edge data, labelled derived.
-          Chokepoints (compute/cloud/capital leverage) are stated separately from
-          model ubiquity, so open-weight integration is never mislabelled as pricing power. */}
-      {graphTakeaway && (
+      {/* Derived "so what" — from the dependency graph. STRICT mode: the graph is
+          hardcoded (not live-DB evidence), so it only shows when the portal is
+          backed by verified evidence. */}
+      {isLive && graphTakeaway && (
         <div className="mb-4 max-w-3xl text-sm leading-6">
           <p className="text-[#15263c] dark:text-[#eef3f8]">
             <span className="mr-2 inline-block rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide align-middle">
@@ -117,26 +122,39 @@ export default async function HomePage() {
         </div>
       )}
 
-      {/* Fold: graph (~70%) + live rankings rail (~30%) */}
-      <section className="mb-3 grid grid-cols-1 gap-5 lg:grid-cols-12">
-        <div className="lg:col-span-8">
-          {/* Gold "vitrine" bracket mounts the instrument without recolouring it. */}
-          <div className="relative rounded-xl border border-black/10 p-1.5 dark:border-white/10">
-            {/* Gold vitrine — L-brackets at opposite corners frame the instrument. */}
-            <span className="pointer-events-none absolute left-0 top-0 h-8 w-px bg-[#d4af37]" aria-hidden />
-            <span className="pointer-events-none absolute left-0 top-0 h-px w-8 bg-[#d4af37]" aria-hidden />
-            <span className="pointer-events-none absolute bottom-0 right-0 h-8 w-px bg-[#d4af37]" aria-hidden />
-            <span className="pointer-events-none absolute bottom-0 right-0 h-px w-8 bg-[#d4af37]" aria-hidden />
-            <ExposureMapHero />
+      {/* Fold: graph (~70%) + rankings rail (~30%). STRICT mode: the dependency
+          graph and the rankings are hardcoded/seed-derived (not live-DB verified
+          evidence), so the entire fold holds until the portal is evidence-backed —
+          we never display hardcoded or estimated figures as if measured. */}
+      {isLive ? (
+        <section className="mb-3 grid grid-cols-1 gap-5 lg:grid-cols-12">
+          <div className="lg:col-span-8">
+            {/* Gold "vitrine" bracket mounts the instrument without recolouring it. */}
+            <div className="relative rounded-xl border border-black/10 p-1.5 dark:border-white/10">
+              {/* Gold vitrine — L-brackets at opposite corners frame the instrument. */}
+              <span className="pointer-events-none absolute left-0 top-0 h-8 w-px bg-[#d4af37]" aria-hidden />
+              <span className="pointer-events-none absolute left-0 top-0 h-px w-8 bg-[#d4af37]" aria-hidden />
+              <span className="pointer-events-none absolute bottom-0 right-0 h-8 w-px bg-[#d4af37]" aria-hidden />
+              <span className="pointer-events-none absolute bottom-0 right-0 h-px w-8 bg-[#d4af37]" aria-hidden />
+              <ExposureMapHero />
+            </div>
+            <p className="mt-2 inline-block rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-[11px] font-medium">
+              Encroachment edges are a derived analytical signal — not a stated fact
+            </p>
           </div>
-          <p className="mt-2 inline-block rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-[11px] font-medium">
-            Encroachment edges are a derived analytical signal — not a stated fact
-          </p>
-        </div>
-        <div className="lg:col-span-4">
-          <CategoryLeadersRail rankings={categoryRankings} />
-        </div>
-      </section>
+          <div className="lg:col-span-4">
+            <CategoryLeadersRail rankings={categoryRankings} />
+          </div>
+        </section>
+      ) : (
+        <section className="mb-3">
+          <DataUnavailable
+            title="Live market intelligence unavailable"
+            detail="We show the dependency/encroachment graph and vendor rankings only when they're backed by analyst-verified evidence in our live data store. No verified evidence has been ingested yet, so we hold them rather than display hardcoded or estimated figures as if measured."
+            reason={provenance?.reason}
+          />
+        </section>
+      )}
 
       {/* Signature: the gold "dependency spine" seam between owned-signal and evidence */}
       <div className="my-8 flex items-center gap-3" aria-hidden>
@@ -144,13 +162,25 @@ export default async function HomePage() {
         <span className="h-px flex-1 bg-black/10 dark:bg-white/10" />
       </div>
 
-      {/* ── Market today ── */}
-      <MarketTodayBand coverage={{ edgesTotal: total, high, medium, seed }} />
+      {/* ── Market today (breaking news is real-gated; movers gated on live evidence) ── */}
+      <MarketTodayBand coverage={{ edgesTotal: total, high, medium, seed }} isLive={isLive} />
 
       {/* ── The market, by category (segmented rankings + the explained taxonomy) ── */}
-      <MarketByCategory rankings={categoryRankings} />
+      {isLive ? (
+        <MarketByCategory rankings={categoryRankings} />
+      ) : (
+        <section className="mb-10">
+          <DataUnavailable
+            title="Live rankings by category unavailable"
+            detail="We rank vendors only on verified, source-backed evidence. Until ingestion lands and evidence is approved, we hold these rankings rather than show directional estimates as if measured."
+            reason={provenance?.reason}
+          />
+        </section>
+      )}
 
-      {/* ── Most depended-upon, by layer (indexable summary of the hero) ── */}
+      {/* ── Most depended-upon, by layer (indexable summary of the hero).
+            STRICT mode: graph-derived (hardcoded) → only when evidence-backed. ── */}
+      {isLive && (
       <section className={`${CARD} mb-10`}>
         <div className="mb-1 flex items-baseline justify-between gap-3">
           <h2 className="font-[var(--font-display)] text-xl font-extrabold tracking-tight">
@@ -204,6 +234,7 @@ export default async function HomePage() {
           </div>
         )}
       </section>
+      )}
 
       {/* ── Latest insight (honestly empty when none) ── */}
       {articles.length > 0 && (

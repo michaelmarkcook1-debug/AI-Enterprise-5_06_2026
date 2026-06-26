@@ -5,9 +5,12 @@ import {
   getAllVendorSummaries,
   getDashboardSummary,
 } from "@/lib/model-inventory/repository";
+import { isLiveData } from "@/lib/intelligence/provenance";
+import DataUnavailable from "@/components/DataUnavailable";
 
-// ISR: server-rendered + CDN-cached, revalidated hourly. Zero LLM at request
-// time — the model inventory is read from the curated repository.
+// ISR: server-rendered + CDN-cached, revalidated hourly. STRICT mode: the model
+// inventory is hardcoded (lib/model-inventory/seed.ts), NOT live-DB verified
+// evidence, so it only renders when the portal is evidence-backed.
 export const revalidate = 3600;
 
 const TITLE = "AI Model Inventory";
@@ -33,7 +36,23 @@ function Stat({ label, value }: { label: string; value: string | number }) {
   );
 }
 
-export default function ModelsPage() {
+export default async function ModelsPage() {
+  // STRICT: hold the hardcoded model inventory until evidence-backed.
+  if (!(await isLiveData())) {
+    return (
+      <main className="mx-auto max-w-6xl px-4 py-10">
+        <header className="mb-8">
+          <h1 className="font-[var(--font-display)] text-3xl font-extrabold tracking-tight">{TITLE}</h1>
+          <p className={`mt-2 max-w-2xl text-sm ${MUTED}`}>{DESCRIPTION}</p>
+        </header>
+        <DataUnavailable
+          title="Model inventory unavailable"
+          detail="The commercial model inventory appears only when backed by analyst-verified evidence in our live data store. No verified evidence has been ingested yet, so we hold it rather than show a hardcoded inventory as if current."
+        />
+      </main>
+    );
+  }
+
   const summary = getDashboardSummary();
   const vendors = getAllVendorSummaries()
     .slice()

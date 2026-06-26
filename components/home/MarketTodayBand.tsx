@@ -22,16 +22,20 @@ function ageLabel(days: number | null): string {
 
 export default async function MarketTodayBand({
   coverage,
+  isLive,
 }: {
   coverage: { edgesTotal: number; high: number; medium: number; seed: number };
+  /** Movers are quantitative estimates — only shown when backed by verified
+   *  evidence. Breaking news + coverage counts are independently real-gated. */
+  isLive: boolean;
 }) {
   const [news, dashboard, vendors] = await Promise.all([
     getBreakingNews({ days: 14, limit: 5 }).catch(() => null),
-    getMarketDashboard().catch(() => null),
+    isLive ? getMarketDashboard().catch(() => null) : Promise.resolve(null),
     listIntelligenceVendors().catch(() => []),
   ]);
 
-  const movers = (dashboard?.weeklyMovers ?? []).slice(0, 5);
+  const movers = isLive ? (dashboard?.weeklyMovers ?? []).slice(0, 5) : [];
 
   return (
     <section className="mb-10">
@@ -42,8 +46,8 @@ export default async function MarketTodayBand({
         </span>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        {/* Tile 1 — Breaking (real-gated by construction) */}
+      <div className={`grid grid-cols-1 gap-4 ${isLive ? "lg:grid-cols-3" : ""}`}>
+        {/* Tile 1 — Breaking (real-gated by construction; shown regardless) */}
         <div className={CARD}>
           <h3 className="text-sm font-semibold">Breaking</h3>
           {!news || news.items.length === 0 ? (
@@ -84,14 +88,21 @@ export default async function MarketTodayBand({
           )}
         </div>
 
-        {/* Tile 2 — Movers (estimates, explicitly labelled) */}
+        {/* Tiles 2 + 3 (Movers, Coverage) are estimate/graph-derived — STRICT mode
+            holds them until the portal is backed by verified evidence. */}
+        {isLive && (
+        <>
         <div className={CARD}>
           <h3 className="text-sm font-semibold">Movers</h3>
           <p className="mt-1 inline-block rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-[10px] font-medium">
             Directional estimates, not measured market data
           </p>
           {movers.length === 0 ? (
-            <p className={`mt-3 text-sm ${MUTED}`}>No estimated movement to report.</p>
+            <p className={`mt-3 text-sm ${MUTED}`}>
+              {isLive
+                ? "No estimated movement to report."
+                : "Held until backed by verified evidence — we don't show directional estimates as if measured."}
+            </p>
           ) : (
             <ul className="mt-3 space-y-2">
               {movers.map((m) => {
@@ -131,6 +142,8 @@ export default async function MarketTodayBand({
             </div>
           </dl>
         </div>
+        </>
+        )}
       </div>
     </section>
   );

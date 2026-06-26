@@ -13,6 +13,8 @@ import { absoluteUrl } from "@/lib/site";
 
 import { ENTITIES, roleLeadership, type Entity, type Role } from "@/lib/intelligence/entities";
 import { listNewsItems } from "@/lib/intelligence/repository";
+import { isLiveData } from "@/lib/intelligence/provenance";
+import DataUnavailable from "@/components/DataUnavailable";
 import { getPrisma, hasDatabase } from "@/lib/prisma";
 import { Panel } from "@/components/intelligence-ui";
 import AnalystInsight from "@/components/analyst-insight";
@@ -477,6 +479,36 @@ export default async function VendorDeepDivePage({
   const entity = ENTITIES.find((e) => e.slug === slug);
   if (!entity) {
     notFound();
+  }
+
+  // STRICT mode: the full profile (scores, momentum, role breakdown, financials,
+  // analyst interpretation) is sourced from the hardcoded ENTITIES roster — not
+  // from live-DB verified evidence — so we hold it until the portal is
+  // evidence-backed rather than present hardcoded scores as measured. The vendor
+  // name is the page subject (the URL), not a fabricated metric.
+  if (!(await isLiveData())) {
+    return (
+      <div className="min-h-screen bg-white dark:bg-[#071827]">
+        <main className="mx-auto max-w-3xl px-5 py-8">
+          <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+            <Link
+              href="/vendors"
+              className="inline-flex items-center gap-1 text-xs font-medium text-[#54647a] hover:text-[#13294b] dark:text-[#a7bacd] dark:hover:text-[#eef3f8]"
+            >
+              ← Back to rankings
+            </Link>
+            <TrackButton item={`vendor:${entity.slug}`} label={entity.name} />
+          </div>
+          <h1 className="mb-4 text-3xl font-semibold tracking-tight text-[#13294b] dark:text-[#f6f9fc]">
+            {entity.name}
+          </h1>
+          <DataUnavailable
+            title={`${entity.name} — profile data unavailable`}
+            detail="Scores, momentum, role breakdown and financial signals appear only when backed by analyst-verified evidence in our live data store. No verified evidence has been ingested for this vendor yet, so we hold the profile rather than show hardcoded figures as if measured."
+          />
+        </main>
+      </div>
+    );
   }
 
   // Resolve the canonical intelligence-spine id (the id capture writes snapshots
