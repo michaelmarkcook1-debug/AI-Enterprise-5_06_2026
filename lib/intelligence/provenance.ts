@@ -19,14 +19,23 @@ import { getPrisma, hasDatabase } from "../prisma";
 
 export type Provenance = "seed" | "live";
 
-/** Fixed source string stamped on every seeded market-share row
- *  (lib/intelligence/seed.ts). Real, evidence-derived estimates never use it,
- *  so it is a reliable seed marker for both provenance and reader filtering. */
-export const SEED_MARKET_SHARE_SOURCE_PREFIX = "AI Enterprise analyst triangulation";
+// The live DB was loaded from MULTIPLE seed variants — confirmed in prod:
+//   "AI Enterprise analyst triangulation (Menlo/Ramp-style …)"  (lib/.../seed.ts)
+//   "AI Enterprise seed data (mock market model)"               (app/ranking-engine/.../seed.ts)
+// Both are SELF-ATTRIBUTED to "AI Enterprise" (our own model), never an external
+// citation; the second literally says "seed"/"mock". A real, evidence-derived
+// estimate cites an EXTERNAL source (publication, filing, URL). So treat any
+// self-attributed or seed/mock-marked source as NOT real — robust to new seed
+// variants without per-string whack-a-mole.
 
-/** True when an estimate's source is the seed signature (i.e. fabricated/seed). */
+/** Self-attribution prefix every seed market-share row carries. */
+export const SEED_MARKET_SHARE_SOURCE_PREFIX = "AI Enterprise";
+
+/** True when an estimate's source is seed/mock/self-attributed (i.e. not real). */
 export function isSeedSignedSource(source: string | null | undefined): boolean {
-  return typeof source === "string" && source.startsWith(SEED_MARKET_SHARE_SOURCE_PREFIX);
+  if (typeof source !== "string") return false;
+  const s = source.toLowerCase();
+  return s.startsWith("ai enterprise") || s.includes("seed") || s.includes("mock");
 }
 
 export interface ProvenanceSummary {
@@ -69,11 +78,20 @@ export async function getDataProvenance(): Promise<ProvenanceSummary> {
     const [evidenceCount, approvedProposalCount, realEstimateCount, lastJob] = await Promise.all([
       client.evidenceRecord.count({ where: { reviewStatus: "analyst_verified" } }),
       client.evidenceProposal.count({ where: { status: "approved" } }),
-      // Real = NOT carrying the seed source signature. If zero, the DB's
-      // market-share is still entirely seed → portal is NOT live (even if seed
-      // "verified evidence" rows exist), so we never show seed dressed as live.
+      // Real = an EXTERNAL-cited estimate (not self-attributed to "AI Enterprise"
+      // and not seed/mock-marked). If zero, the DB's market-share is still
+      // entirely seed → portal is NOT live (even if seed "verified evidence" rows
+      // exist), so we never show seed dressed as live. Mirrors isSeedSignedSource.
       client.marketShareEstimate.count({
-        where: { NOT: { source: { startsWith: SEED_MARKET_SHARE_SOURCE_PREFIX } } },
+        where: {
+          NOT: {
+            OR: [
+              { source: { startsWith: SEED_MARKET_SHARE_SOURCE_PREFIX, mode: "insensitive" } },
+              { source: { contains: "seed", mode: "insensitive" } },
+              { source: { contains: "mock", mode: "insensitive" } },
+            ],
+          },
+        },
       }),
       client.ingestionJob.findFirst({
         where: { status: { in: ["completed", "ready_for_review"] } },
