@@ -15,10 +15,11 @@ function hostOf(value: string | null): string | null {
 }
 
 /**
- * True when the request looks same-origin. A cross-site POST carries a foreign
+ * True when the request looks same-origin. A cross-site request carries a foreign
  * Origin/Referer and is rejected; a same-origin request matches the host it was
- * sent to. When neither header is present we allow it and rely on the sameSite
- * cookie (some legitimate same-origin clients omit Origin).
+ * sent to. FAIL-CLOSED: if neither Origin nor Referer is present we reject —
+ * browsers always attach Origin on unsafe (POST/PUT/DELETE) same-origin requests,
+ * so this only blocks header-stripped/forged traffic, not legitimate callers.
  */
 export function isSameOrigin(request: Request): boolean {
   const host = request.headers.get("host");
@@ -30,5 +31,5 @@ export function isSameOrigin(request: Request): boolean {
   const refererHost = hostOf(request.headers.get("referer"));
   if (refererHost) return refererHost === host;
 
-  return true;
+  return false;
 }

@@ -13,6 +13,10 @@ import { getPrisma, hasDatabase } from "../prisma";
 import { captureSubscriber } from "../subscribers/service";
 
 export const MEMBER_COOKIE = "ae_member";
+/** Per-request browser nonce cookie — binds a magic link to the browser that
+ *  requested it (login-CSRF / session-fixation defence). httpOnly, 15-min. */
+export const SIGNIN_NONCE_COOKIE = "ae_signin";
+export const SIGNIN_NONCE_MAX_AGE_S = 15 * 60;
 const TOKEN_TTL_MS = 15 * 60 * 1000; // magic-link: 15 minutes
 const SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000; // session: 30 days
 export const MEMBER_SESSION_MAX_AGE_S = Math.floor(SESSION_TTL_MS / 1000);
@@ -43,7 +47,11 @@ export interface MagicLinkResult {
 /** Create a single-use magic-link token for an email. Reuses captureSubscriber
  *  so the person exists + is opted in. Enumeration-safety is the caller's job
  *  (return an identical response regardless of outcome). */
-export async function requestMagicLink(emailRaw: string, source = "signin"): Promise<MagicLinkResult> {
+export async function requestMagicLink(
+  emailRaw: string,
+  source = "signin",
+  requesterNonce?: string,
+): Promise<MagicLinkResult> {
   const email = emailRaw.trim().toLowerCase();
   if (!hasDatabase()) return { outcome: "no_database", email };
 
@@ -68,17 +76,31 @@ export async function requestMagicLink(emailRaw: string, source = "signin"): Pro
       tokenHash: sha256(rawToken),
       purpose: "signin",
       expiresAt: new Date(Date.now() + TOKEN_TTL_MS),
+      // Bind to the requesting browser (nonce held in an httpOnly cookie) so the
+      // token can only complete a sign-in in the same browser that requested it.
+      requesterHash: requesterNonce ? sha256(requesterNonce) : null,
     },
   });
   return { outcome: "sent", rawToken, email };
 }
 
-/** Validate + single-use-consume a magic link. Confirms the subscriber on success. */
-export async function consumeMagicLink(rawToken: string): Promise<{ ok: boolean; subscriberId?: string }> {
+/** Validate + single-use-consume a magic link. Confirms the subscriber on success.
+ *  `presentedNonce` is the requesting-browser nonce from the httpOnly cookie; when
+ *  the token was bound (requesterHash set) it MUST match, else we reject WITHOUT
+ *  consuming (so a wrong-browser/forged attempt can't burn the legit link). */
+export async function consumeMagicLink(
+  rawToken: string,
+  presentedNonce?: string,
+): Promise<{ ok: boolean; subscriberId?: string }> {
   if (!hasDatabase() || !rawToken) return { ok: false };
   const prisma = getPrisma();
   const row = await prisma.authToken.findUnique({ where: { tokenHash: sha256(rawToken) } });
   if (!row || row.consumedAt || row.expiresAt.getTime() < Date.now()) return { ok: false };
+
+  // Requester-binding: the token only works in the browser that requested it.
+  if (row.requesterHash && (!presentedNonce || sha256(presentedNonce) !== row.requesterHash)) {
+    return { ok: false };
+  }
 
   await prisma.authToken.update({ where: { id: row.id }, data: { consumedAt: new Date() } });
   await prisma.subscriber

@@ -831,6 +831,9 @@ model AuthToken {
   expiresAt    DateTime   @map("expires_at")
   consumedAt   DateTime?  @map("consumed_at")
   createdAt    DateTime   @default(now()) @map("created_at")
+  // sha256 of a per-request browser nonce — the token only establishes a session
+  // in the browser that requested it (prevents login-CSRF / session fixation).
+  requesterHash String?   @map("requester_hash")
   subscriber   Subscriber @relation(fields: [subscriberId], references: [id], onDelete: Cascade)
 
   @@index([subscriberId])

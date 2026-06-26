@@ -20,8 +20,8 @@ describe("isSameOrigin", () => {
     expect(isSameOrigin(req({ host: "ex.com", referer: "https://evil.com/x" }))).toBe(false);
   });
 
-  it("allows when neither Origin nor Referer is present (rely on sameSite cookie)", () => {
-    expect(isSameOrigin(req({ host: "ex.com" }))).toBe(true);
+  it("fails closed when neither Origin nor Referer is present", () => {
+    expect(isSameOrigin(req({ host: "ex.com" }))).toBe(false);
   });
 
   it("rejects when there is no host header at all", () => {

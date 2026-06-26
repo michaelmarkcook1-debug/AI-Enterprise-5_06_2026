@@ -2,11 +2,13 @@
 // Enumeration-safe (identical 202 regardless of whether the email exists),
 // rate-limited per IP AND per email, explicit-consent gated.
 
-import { requestMagicLink } from "@/lib/member/auth";
+import { NextResponse } from "next/server";
+import { randomBytes } from "node:crypto";
+import { requestMagicLink, SIGNIN_NONCE_COOKIE, SIGNIN_NONCE_MAX_AGE_S } from "@/lib/member/auth";
 import { sendEmail, emailConfigured } from "@/lib/email/mailer";
 import { rateLimit, rateLimitHeaders } from "@/lib/http/rate-limit";
 import { anonSessionHash } from "@/lib/http/anon-session";
-import { SITE_NAME } from "@/lib/site";
+import { SITE_NAME, trustedOrigin } from "@/lib/site";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -55,11 +57,14 @@ export async function POST(request: Request): Promise<Response> {
     return Response.json({ error: "rate_limited" }, { status: 429, headers: rateLimitHeaders(emailRl) });
   }
 
-  const result = await requestMagicLink(email, "signin");
+  // Per-request browser nonce — bound to the token, held in an httpOnly cookie,
+  // so the link can only complete a sign-in in THIS browser (login-CSRF defence).
+  const nonce = randomBytes(32).toString("hex");
+  const result = await requestMagicLink(email, "signin", nonce);
   if (result.outcome === "sent" && result.rawToken) {
-    // Build the link from THIS deployment's origin so it works on preview + prod.
-    const origin = new URL(request.url).origin;
-    const url = `${origin}/api/auth/callback?token=${encodeURIComponent(result.rawToken)}`;
+    // Build the link from a TRUSTED origin, never the client Host header
+    // (host-header injection would otherwise steal the token).
+    const url = `${trustedOrigin()}/api/auth/callback?token=${encodeURIComponent(result.rawToken)}`;
     if (emailConfigured()) {
       await sendEmail({ to: result.email, subject: `Sign in to ${SITE_NAME}`, html: magicLinkHtml(url) });
     } else {
@@ -68,9 +73,17 @@ export async function POST(request: Request): Promise<Response> {
     }
   }
 
-  // Enumeration-safe: identical response no matter what.
-  return Response.json(
+  // Enumeration-safe: identical response (and nonce cookie) no matter what.
+  const res = NextResponse.json(
     { ok: true, message: "If that email is valid, a sign-in link is on its way." },
     { status: 202, headers: rateLimitHeaders(ipRl) },
   );
+  res.cookies.set(SIGNIN_NONCE_COOKIE, nonce, {
+    httpOnly: true,
+    secure: true,
+    sameSite: "lax",
+    path: "/",
+    maxAge: SIGNIN_NONCE_MAX_AGE_S,
+  });
+  return res;
 }

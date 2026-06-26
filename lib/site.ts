@@ -19,3 +19,16 @@ export function absoluteUrl(path = "/"): string {
   const p = path.startsWith("/") ? path : `/${path}`;
   return `${SITE_URL}${p === "/" ? "" : p}`;
 }
+
+/**
+ * A TRUSTED origin for building security-bearing URLs (e.g. magic links) and
+ * auth redirects — NEVER derived from the client-controllable Host header.
+ * Production uses the canonical SITE_URL; preview uses the Vercel-set VERCEL_URL
+ * (trusted, per-deployment) so links still self-host on preview deployments.
+ */
+export function trustedOrigin(): string {
+  if (process.env.VERCEL_ENV === "production") return SITE_URL;
+  const v = process.env.VERCEL_URL; // set by Vercel, not from the request Host
+  if (v) return `https://${v.replace(/\/+$/, "")}`;
+  return SITE_URL;
+}
