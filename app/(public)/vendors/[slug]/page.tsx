@@ -18,6 +18,10 @@ import { Panel } from "@/components/intelligence-ui";
 import AnalystInsight from "@/components/analyst-insight";
 import { entityInsight } from "@/lib/insights/tab-insights";
 import { OwnershipBadge } from "@/components/ownership-indicator";
+import ReputationPanel from "@/components/vendor/ReputationPanel";
+import FinancialsPanel from "@/components/vendor/FinancialsPanel";
+import { getVendorReputation } from "@/lib/reputation/vendor-reputation";
+import { getReputationSnapshots, type ReputationSnapshotPoint } from "@/lib/reputation/reputation-snapshots";
 
 export const dynamic = "force-dynamic";
 
@@ -184,7 +188,7 @@ function EvidenceGradeChip({ grade }: { grade: Entity["evidenceGrade"] }) {
 
 // ── Pure-SVG score history chart ──────────────────────────────────────────────
 
-function ScoreHistoryChart({ snapshots }: { snapshots: SnapshotPoint[] }) {
+function ScoreHistoryChart({ snapshots, reputation = [] }: { snapshots: SnapshotPoint[]; reputation?: ReputationSnapshotPoint[] }) {
   if (snapshots.length < 2) {
     return (
       <div className="flex h-[200px] items-center justify-center rounded-lg border border-dashed border-[#e0d6ba] bg-[#fdfaf1] dark:border-[#2a4a6b] dark:bg-[#081c30]/30">
@@ -233,6 +237,22 @@ function ScoreHistoryChart({ snapshots }: { snapshots: SnapshotPoint[] }) {
   const firstDate = new Date(snapshots[0].date).getTime();
   const lastDate = new Date(snapshots[snapshots.length - 1].date).getTime();
   const MS_30_DAYS = 30 * 24 * 60 * 60 * 1000;
+
+  // Reputation line — mapped onto the SAME time axis by DATE (it shares dates
+  // with the forward score captures). Forward-only, so it sits on the recent
+  // edge and grows; only points within the score date range render. Never
+  // back-filled — an honest, possibly-short line rather than invented history.
+  const span = lastDate - firstDate;
+  const xOfDate = (dateStr: string): number => {
+    const t = new Date(dateStr).getTime();
+    const frac = span > 0 ? (t - firstDate) / span : 1;
+    return PAD_LEFT + Math.max(0, Math.min(1, frac)) * chartW;
+  };
+  const repInRange = reputation.filter((r) => {
+    const t = new Date(r.date).getTime();
+    return Number.isFinite(t) && t >= firstDate && t <= lastDate;
+  });
+  const reputationPoints = repInRange.map((r) => `${xOfDate(r.date)},${yOf(r.reputationScore)}`).join(" ");
   let lastLabelTime = -Infinity;
 
   snapshots.forEach((s, i) => {
@@ -259,6 +279,7 @@ function ScoreHistoryChart({ snapshots }: { snapshots: SnapshotPoint[] }) {
   }
 
   return (
+    <div className="w-full">
     <svg
       viewBox={`0 0 ${W} ${H}`}
       className="w-full"
@@ -333,6 +354,21 @@ function ScoreHistoryChart({ snapshots }: { snapshots: SnapshotPoint[] }) {
         />
       ))}
 
+      {/* Reputation line (forward-tracked composite) */}
+      {repInRange.length >= 2 && (
+        <polyline
+          points={reputationPoints}
+          fill="none"
+          stroke="#a78bfa"
+          strokeWidth="1.5"
+          strokeLinejoin="round"
+          strokeLinecap="round"
+        />
+      )}
+      {repInRange.map((r) => (
+        <circle key={`rep-${r.date}`} cx={xOfDate(r.date)} cy={yOf(r.reputationScore)} r="2.5" fill="#a78bfa" stroke="#fff" strokeWidth="1.2" />
+      ))}
+
       {/* X-axis date labels */}
       {dateLabels.map((item) => (
         <text
@@ -352,7 +388,15 @@ function ScoreHistoryChart({ snapshots }: { snapshots: SnapshotPoint[] }) {
       <text x={PAD_LEFT + 20} y={PAD_TOP} fontSize="9" fill="#9ca3af">Overall</text>
       <line x1={PAD_LEFT + 70} y1={PAD_TOP - 4} x2={PAD_LEFT + 86} y2={PAD_TOP - 4} stroke="#f59e0b" strokeWidth="1.5" strokeDasharray="5 3" />
       <text x={PAD_LEFT + 90} y={PAD_TOP} fontSize="9" fill="#9ca3af">Momentum</text>
+      <line x1={PAD_LEFT + 150} y1={PAD_TOP - 4} x2={PAD_LEFT + 166} y2={PAD_TOP - 4} stroke="#a78bfa" strokeWidth="1.5" />
+      <text x={PAD_LEFT + 170} y={PAD_TOP} fontSize="9" fill="#9ca3af">Reputation</text>
     </svg>
+    {repInRange.length === 0 && (
+      <p className="mt-2 text-[11px] text-[#5b6b7f] dark:text-[#8fa5bb]">
+        Reputation tracking begins with the next daily refresh — the line builds forward from there, never back-filled.
+      </p>
+    )}
+    </div>
   );
 }
 
@@ -433,9 +477,17 @@ export default async function VendorDeepDivePage({
     notFound();
   }
 
-  // 2. Fetch snapshot history + news in parallel
-  const [snapshots, allNews] = await Promise.all([
+  // Resolve the reputation key: entity.id, falling back to slug for aliased
+  // vendors (e.g. alibaba-qwen → alibaba) so the panel + the forward-tracking
+  // series both read under the id capture wrote them with.
+  const repById = getVendorReputation(entity.id);
+  const reputation = repById.hasData ? repById : getVendorReputation(entity.slug);
+  const repKey = repById.hasData ? entity.id : entity.slug;
+
+  // 2. Fetch snapshot history + reputation history + news in parallel
+  const [snapshots, reputationSeries, allNews] = await Promise.all([
     fetchSnapshots(entity.id),
+    getReputationSnapshots(repKey),
     listNewsItems(),
   ]);
 
@@ -545,11 +597,27 @@ export default async function VendorDeepDivePage({
           </section>
         )}
 
-        {/* ── Score history chart ───────────────────────────────────────── */}
+        {/* ── Score history chart (with forward-tracked reputation line) ──── */}
         <section className="mb-6">
           <Panel title="Score history">
-            <ScoreHistoryChart snapshots={snapshots} />
+            <ScoreHistoryChart snapshots={snapshots} reputation={reputationSeries} />
           </Panel>
+        </section>
+
+        {/* ── Reputation (current composite + per-pillar breakdown) ───────── */}
+        <section className="mb-6">
+          <ReputationPanel reputation={reputation} vendorName={entity.name} />
+        </section>
+
+        {/* ── Financial profile (ownership + sourced capital signals) ─────── */}
+        <section className="mb-6">
+          <FinancialsPanel
+            ownership={entity.ownership}
+            capitalSignals={entity.investorRelationships}
+            evidenceGrade={entity.evidenceGrade}
+            dataCaveats={entity.dataCaveats}
+            vendorName={entity.name}
+          />
         </section>
 
         <div className="mb-6 grid gap-5 lg:grid-cols-[1fr_0.55fr]">

@@ -21,6 +21,8 @@
 import { getPrisma, hasDatabase } from "../prisma";
 import { listIntelligenceVendors, listVendorMomentum } from "./repository";
 import { buildRankingHistories, type VendorRankingHistory } from "./ranking-history";
+import { getVendorReputation } from "../reputation/vendor-reputation";
+import { recordReputationSnapshot } from "../reputation/reputation-snapshots";
 import type { Vendor, VendorMomentum } from "./types";
 
 /** yyyy-mm-dd for a Date, in UTC. */
@@ -50,6 +52,8 @@ export interface CaptureResult {
   snapshotDate: string;
   skipped: boolean;
   reason?: string;
+  /** Vendors whose current reputation composite was recorded for this date. */
+  reputationCaptured?: number;
 }
 
 /**
@@ -101,7 +105,23 @@ export async function captureRankingSnapshots(now: Date = new Date()): Promise<C
     captured += 1;
   }
 
-  return { captured, snapshotDate: dateLabel, skipped: false };
+  // Co-locate forward-only reputation tracking: record today's reputation
+  // composite per vendor under the SAME snapshot date, so a real reputation line
+  // accrues alongside the score line (never back-filled). Guarded — a
+  // reputation-table issue must never break the primary score-snapshot capture.
+  let reputationCaptured = 0;
+  for (const vendor of vendors) {
+    const rep = getVendorReputation(vendor.id);
+    if (rep.combined === null) continue;
+    try {
+      await recordReputationSnapshot(vendor.id, dateLabel, rep.combined);
+      reputationCaptured += 1;
+    } catch {
+      // non-fatal — the score snapshot is already persisted
+    }
+  }
+
+  return { captured, snapshotDate: dateLabel, skipped: false, reputationCaptured };
 }
 
 export interface BackfillResult {
