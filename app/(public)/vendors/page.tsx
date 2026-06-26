@@ -1,23 +1,21 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PageFrame } from "@/components/app-shell";
-import { OwnershipLegend, VendorNameWithOwnership } from "@/components/ownership-indicator";
-import { getCategoryRankings } from "@/lib/home/category-rankings";
+import { getCategoryComposites } from "@/lib/ranking/category-composite";
 import { isLiveData } from "@/lib/intelligence/provenance";
+import PillarContributionTable from "@/components/ranking/PillarContributionTable";
 import TrackButton from "@/components/member/TrackButton";
 
-// Rankings are SEGMENTED BY CATEGORY — vendors are only compared WITHIN a market
-// category, never across them. The old flat "Overall" leaderboard mixed
-// incomparable entity types (a foundry, a VC, a model lab) on one score. This
-// reuses the canonical /category logic (market-share estimates), which also means
-// investors / pure-capital entities (Sequoia, SoftBank) simply aren't ranked here
-// — they have no market-share category and live in the dependency graph.
+// Rankings are SEGMENTED BY CATEGORY (never across) and computed from the FULL
+// pillar framework — a transparent, weighted, deterministic composite of all
+// evidence-graded pillars — NOT the single market-share proxy. Each position is
+// explainable (per-pillar breakdown) and gated on verified evidence.
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Vendor Rankings",
   description:
-    "Evidence-based enterprise-AI vendor rankings — ranked WITHIN each market category, never across them. Directional, confidence-labelled, source-cited.",
+    "Enterprise-AI vendor rankings — a weighted composite of all evidence-graded pillars, ranked WITHIN each market category, explainable and source-cited. Never a single market-share proxy.",
   alternates: { canonical: "/vendors" },
 };
 
@@ -28,76 +26,98 @@ export default async function VendorsPage() {
   // Rank ONLY on verified, source-backed evidence. Without it we show the honest
   // "insufficient evidence" state below rather than seed/estimate figures.
   const isLive = await isLiveData();
-  const rankings = isLive ? await getCategoryRankings().catch(() => []) : [];
-  const withLeaders = rankings.filter((r) => r.leaders.length > 0);
+  const composites = isLive ? await getCategoryComposites().catch(() => []) : [];
+  const withVendors = composites.filter((c) => c.ranked.length > 0 || c.incomplete.length > 0);
+  const anyRanked = composites.some((c) => c.ranked.length > 0);
+  const methodology = composites[0]?.methodologyNote;
 
   return (
     <PageFrame
       title="Vendor rankings"
       kicker="Provider intelligence"
-      description="Ranked within each market category — never across them. A model lab, a chip foundry, and a cloud platform don't belong on one leaderboard, so each has its own. Share figures are directional analyst estimates, each carrying its source."
+      description="Ranked within each market category — never across them — by a weighted composite of all evidence-graded pillars. Not a single market-share proxy. Every position is explainable and tied to its evidence."
     >
-      <div className="mb-5 flex flex-wrap items-center gap-3">
-        <span className="inline-block rounded-full border border-amber-500/40 bg-amber-500/10 px-2.5 py-1 text-[11px] font-medium">
-          Directional estimates, not measured market data
-        </span>
-        <OwnershipLegend />
-      </div>
+      {methodology && (
+        <details className="mb-5 text-sm">
+          <summary className="cursor-pointer text-[11px] font-medium underline-offset-2 hover:underline">
+            How these rankings are computed
+          </summary>
+          <p className={`mt-2 max-w-3xl text-xs leading-5 ${MUTED}`}>{methodology}</p>
+        </details>
+      )}
 
-      {withLeaders.length === 0 ? (
+      {!anyRanked ? (
         <div className={CARD}>
           <p className="text-sm">
-            Insufficient verified market-share evidence to rank vendors yet. We report the absence of
-            data rather than estimate upward — explore the{" "}
+            Insufficient verified pillar evidence to rank vendors yet. We rank only on real,
+            source-backed evidence across the full framework — never on a default or a single proxy —
+            so until ingestion lands, we report the absence of data. Explore the{" "}
             <Link href="/dependencies" className="underline underline-offset-2">dependency graph</Link>{" "}
             in the meantime.
           </p>
         </div>
       ) : (
         <div className="space-y-5">
-          {withLeaders.map((r) => (
-            <section key={r.category.id} className={CARD}>
+          {withVendors.map((c) => (
+            <section key={c.category.id} className={CARD}>
               <div className="mb-1 flex items-baseline justify-between gap-3">
                 <h2 className="font-[var(--font-display)] text-lg font-extrabold tracking-tight">
-                  {r.category.name}
+                  {c.category.name}
                 </h2>
                 <Link
-                  href={`/category/${r.category.id}`}
+                  href={`/category/${c.category.id}`}
                   className={`shrink-0 text-xs underline-offset-2 hover:underline ${MUTED}`}
                 >
-                  Sources &amp; full table →
+                  Full table &amp; sources →
                 </Link>
               </div>
-              <p className={`mb-3 max-w-2xl text-xs leading-5 ${MUTED}`}>{r.category.description}</p>
+              <p className={`mb-3 max-w-2xl text-xs leading-5 ${MUTED}`}>{c.category.description}</p>
 
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className={`text-left ${MUTED}`}>
-                    <th className="w-8 py-1.5 pr-3 font-medium">#</th>
-                    <th className="py-1.5 pr-3 font-medium">Vendor</th>
-                    <th className="py-1.5 pr-3 text-right font-medium tabular-nums">Est. share</th>
-                    <th className="py-1.5 pr-3 text-right font-medium tabular-nums">Confidence</th>
-                    <th className="py-1.5 text-right font-medium"><span className="sr-only">Track</span></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {r.leaders.map((l, i) => (
-                    <tr key={l.vendor.id} className="border-t border-black/5 dark:border-white/10">
-                      <td className="py-1.5 pr-3 font-mono tabular-nums text-[#b08d2f] dark:text-[#d4af37]">{i + 1}</td>
-                      <td className="py-1.5 pr-3">
-                        <Link href={`/vendors/${l.vendor.slug}`} className="underline-offset-2 hover:underline">
-                          <VendorNameWithOwnership name={l.vendor.name} ownershipType={l.vendor.ownershipType} compactBadge />
-                        </Link>
-                      </td>
-                      <td className="py-1.5 pr-3 text-right font-mono tabular-nums">{l.estimatedShare.toFixed(1)}%</td>
-                      <td className="py-1.5 pr-3 text-right font-mono tabular-nums">{Math.round(l.confidence)}%</td>
-                      <td className="py-1.5 text-right">
-                        <TrackButton item={`vendor:${l.vendor.slug}`} label={l.vendor.name} />
-                      </td>
-                    </tr>
+              {c.ranked.length === 0 ? (
+                <p className={`text-sm ${MUTED}`}>No vendor has enough verified pillar evidence to rank here yet.</p>
+              ) : (
+                <ol className="divide-y divide-black/5 dark:divide-white/10">
+                  {c.ranked.map((v) => (
+                    <li key={v.vendorId} className="py-3">
+                      <div className="flex flex-wrap items-baseline justify-between gap-2">
+                        <span className="flex min-w-0 items-baseline gap-2">
+                          <span className="font-display tabular-nums text-[#b08d2f] dark:text-[#d4af37]">#{v.rank}</span>
+                          <Link href={`/vendors/${v.vendorSlug}`} className="truncate font-medium underline-offset-2 hover:underline">
+                            {v.vendorName}
+                          </Link>
+                        </span>
+                        <span className="flex shrink-0 items-baseline gap-3">
+                          <span className="font-mono text-sm tabular-nums">
+                            {v.composite!.toFixed(0)}
+                            <span className={`ml-1 text-[10px] ${MUTED}`}>composite</span>
+                          </span>
+                          <span className={`font-mono text-[11px] tabular-nums ${MUTED}`}>{v.compositeConfidence}% conf</span>
+                          <TrackButton item={`vendor:${v.vendorSlug}`} label={v.vendorName} />
+                        </span>
+                      </div>
+                      <PillarContributionTable vendor={v} />
+                    </li>
                   ))}
-                </tbody>
-              </table>
+                </ol>
+              )}
+
+              {c.incomplete.length > 0 && (
+                <div className="mt-4 border-t border-black/5 pt-3 dark:border-white/10">
+                  <p className={`text-[11px] font-medium ${MUTED}`}>
+                    Held — insufficient evidence to rank ({c.incomplete.length})
+                  </p>
+                  <ul className="mt-1.5 space-y-1">
+                    {c.incomplete.map((v) => (
+                      <li key={v.vendorId} className="text-xs">
+                        <Link href={`/vendors/${v.vendorSlug}`} className="underline-offset-2 hover:underline">
+                          {v.vendorName}
+                        </Link>
+                        <span className={MUTED}> — {v.excludedReason} ({Math.round(v.coverage * 100)}% covered)</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </section>
           ))}
         </div>

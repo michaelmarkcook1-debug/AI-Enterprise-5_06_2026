@@ -26,6 +26,8 @@ import TrackButton from "@/components/member/TrackButton";
 import { getVendorReputation } from "@/lib/reputation/vendor-reputation";
 import { getReputationSnapshots, type ReputationSnapshotPoint } from "@/lib/reputation/reputation-snapshots";
 import { intelVendorId } from "@/lib/intelligence/vendor-id";
+import { getVendorCategoryStandings } from "@/lib/ranking/category-composite";
+import PillarContributionTable from "@/components/ranking/PillarContributionTable";
 
 export const dynamic = "force-dynamic";
 
@@ -518,11 +520,13 @@ export default async function VendorDeepDivePage({
   const intelId = intelVendorId(entity);
   const reputation = getVendorReputation(intelId);
 
-  // 2. Fetch snapshot history + reputation history + news in parallel
-  const [snapshots, reputationSeries, allNews] = await Promise.all([
+  // 2. Fetch snapshot history + reputation history + news + within-category
+  //    composite standings in parallel.
+  const [snapshots, reputationSeries, allNews, categoryStandings] = await Promise.all([
     fetchSnapshots(intelId),
     getReputationSnapshots(intelId),
     listNewsItems(),
+    getVendorCategoryStandings(intelId).catch(() => []),
   ]);
 
   // Filter news to this entity
@@ -640,6 +644,46 @@ export default async function VendorDeepDivePage({
             <ScoreHistoryChart snapshots={snapshots} reputation={reputationSeries} />
           </Panel>
         </section>
+
+        {/* ── Standing in category (the multi-pillar composite + why) ──────── */}
+        {categoryStandings.length > 0 && (
+          <section className="mb-6">
+            <Panel title="Standing in category">
+              <p className="mb-3 text-xs leading-5 text-[#54647a] dark:text-[#a7bacd]">
+                Where this vendor places in each market category it competes in — by the weighted
+                composite of all evidence-graded pillars, ranked within category. Expand a category to
+                see exactly which criteria and weights drove the position.
+              </p>
+              <div className="space-y-4">
+                {categoryStandings.map((s) => (
+                  <div key={s.categoryId} className="rounded-lg border border-[#e9e0c8] p-3 dark:border-[#1d3a57]">
+                    <div className="flex flex-wrap items-baseline justify-between gap-2">
+                      <Link
+                        href={`/category/${s.categoryId}`}
+                        className="text-sm font-semibold text-[#13294b] underline-offset-2 hover:underline dark:text-[#eef3f8]"
+                      >
+                        {s.categoryName}
+                      </Link>
+                      {s.standing.state === "ranked" ? (
+                        <span className="font-mono text-sm tabular-nums text-[#13294b] dark:text-[#eef3f8]">
+                          #{s.standing.rank} of {s.rankedCount}
+                          <span className="ml-2 text-xs text-[#54647a] dark:text-[#a7bacd]">
+                            composite {s.standing.composite!.toFixed(0)} · {s.standing.compositeConfidence}% conf
+                          </span>
+                        </span>
+                      ) : (
+                        <span className="text-xs text-amber-700 dark:text-amber-300">
+                          Insufficient evidence to rank
+                        </span>
+                      )}
+                    </div>
+                    <PillarContributionTable vendor={s.standing} />
+                  </div>
+                ))}
+              </div>
+            </Panel>
+          </section>
+        )}
 
         {/* ── Reputation (current composite + per-pillar breakdown) ───────── */}
         <section className="mb-6">

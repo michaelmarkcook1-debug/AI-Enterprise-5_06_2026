@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import ExposureMapHero from "@/components/dashboard/ExposureMapHero";
-import CategoryLeadersRail from "@/components/home/CategoryLeadersRail";
-import MarketByCategory from "@/components/home/MarketByCategory";
+import CategoryCompositeRail from "@/components/home/CategoryCompositeRail";
+import MarketByCategoryComposite from "@/components/home/MarketByCategoryComposite";
 import MarketTodayBand from "@/components/home/MarketTodayBand";
-import { getCategoryRankings } from "@/lib/home/category-rankings";
+import { getCategoryComposites } from "@/lib/ranking/category-composite";
 import SubscribeForm from "@/components/SubscribeForm";
 import { EXPOSURE_NODES } from "@/lib/investing/exposure-map-data";
 import { projectExposureToDependencyEdges, summariseByKind } from "@/lib/graph/dependency-projection";
@@ -69,7 +69,9 @@ export default async function HomePage() {
     listPublishedArticles().catch(() => []),
   ]);
   const isLive = provenance?.source === "live";
-  const categoryRankings = isLive ? await getCategoryRankings().catch(() => []) : [];
+  // Rankings are a weighted multi-pillar composite, within category, computed only
+  // when backed by verified evidence (else honest "insufficient evidence").
+  const categoryComposites = isLive ? await getCategoryComposites().catch(() => []) : [];
   const updated = isLive ? (fmtDate(lastRefreshed) ?? fmtDate(provenance?.lastIngestedAt)) : null;
 
   return (
@@ -143,7 +145,7 @@ export default async function HomePage() {
             </p>
           </div>
           <div className="lg:col-span-4">
-            <CategoryLeadersRail rankings={categoryRankings} />
+            <CategoryCompositeRail composites={categoryComposites} />
           </div>
         </section>
       ) : (
@@ -165,9 +167,9 @@ export default async function HomePage() {
       {/* ── Market today (breaking news is real-gated; movers gated on live evidence) ── */}
       <MarketTodayBand coverage={{ edgesTotal: total, high, medium, seed }} isLive={isLive} />
 
-      {/* ── The market, by category (segmented rankings + the explained taxonomy) ── */}
+      {/* ── The market, by category (composite rankings + the explained taxonomy) ── */}
       {isLive ? (
-        <MarketByCategory rankings={categoryRankings} />
+        <MarketByCategoryComposite composites={categoryComposites} />
       ) : (
         <section className="mb-10">
           <DataUnavailable
