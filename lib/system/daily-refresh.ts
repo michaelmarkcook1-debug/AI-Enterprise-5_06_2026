@@ -76,6 +76,7 @@ import {
 } from "./daily-refresh-store";
 import { getPrisma, hasDatabase } from "../prisma";
 import { checkMigrationDrift } from "../db/migration-drift";
+import { notifyMigrationDriftIfNeeded } from "../db/migration-drift-alert";
 import { getKillSwitchState } from "./refresh-killswitch";
 import { makeSpendGuard, recordCycleSpend } from "./spend-ledger";
 
@@ -220,7 +221,11 @@ export async function runDailyRefresh(
     const drift = await checkMigrationDrift();
     if (drift.status === "behind") {
       console.error(`[daily-refresh] ${drift.message}`);
-    } else if (drift.status === "ahead" || drift.status === "check_failed") {
+      // Active alert (email), de-duped once/day per missing-set. Non-fatal.
+      const alert = await notifyMigrationDriftIfNeeded(drift, { now });
+      return { ...drift, alert } as unknown as Record<string, unknown>;
+    }
+    if (drift.status === "ahead" || drift.status === "check_failed") {
       console.warn(`[daily-refresh] ${drift.message}`);
     }
     return drift as unknown as Record<string, unknown>;
