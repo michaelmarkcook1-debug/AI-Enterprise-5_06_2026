@@ -840,6 +840,9 @@ model AuthToken {
 
 /// Phase 2 — member session. The httpOnly cookie holds the raw token; we store
 /// only its sha256 hash, so a DB read can't reconstruct a usable session token.
+/// Validity is a FIXED 30-day absolute window (no idle/sliding timeout); revoke
+/// hard-deletes the row. `lastSeenAt` is informational (set at creation) and is
+/// the seam if idle expiry is added later.
 model MemberSession {
   id           String     @id @default(cuid())
   subscriberId String     @map("subscriber_id")

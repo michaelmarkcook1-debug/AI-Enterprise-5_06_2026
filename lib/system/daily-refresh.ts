@@ -58,6 +58,7 @@ import {
 import { INVESTMENT_PROVIDERS } from "../investing/seed";
 import { fetchLiveGitHubSignals } from "../reputation/live-github";
 import { fetchAllMacroSignals } from "../market-signals/live-macro";
+import { sweepMemberAuth } from "../member/auth";
 import { deriveVendorScores } from "./derive-scores";
 import { deriveMarketShareMovement } from "./derive-market-share";
 import { deriveDependencySignals } from "../graph/derive-dependencies";
@@ -488,6 +489,13 @@ export async function runDailyRefresh(
   //     overlaps a tracked vendor. Resend-gated; non-critical.
   await trackedStep("competitive_overlap_alerts", async () => {
     const r = await checkAndSendCompetitiveOverlapAlerts();
+    return r as unknown as Record<string, unknown>;
+  });
+
+  // ── 11c. Member auth housekeeping (delete consumed/expired tokens + sessions) ─
+  //     Pure DB, no LLM/cost. Keeps the Phase-2 auth tables from growing unbounded.
+  await trackedStep("member_auth_sweep", async () => {
+    const r = await sweepMemberAuth();
     return r as unknown as Record<string, unknown>;
   });
 

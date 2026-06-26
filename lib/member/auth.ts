@@ -52,6 +52,15 @@ export async function requestMagicLink(emailRaw: string, source = "signin"): Pro
   const subscriber = await prisma.subscriber.findUnique({ where: { email } });
   if (!subscriber) return { outcome: "no_database", email };
 
+  // Newest-link-wins: invalidate this subscriber's other outstanding signin
+  // tokens so a re-request kills the earlier link, collapsing the live-link set
+  // to one (consume-side single-use doesn't cover the "first link still live
+  // after re-request" window).
+  await prisma.authToken.updateMany({
+    where: { subscriberId: subscriber.id, purpose: "signin", consumedAt: null },
+    data: { consumedAt: new Date() },
+  });
+
   const rawToken = newRawToken();
   await prisma.authToken.create({
     data: {
@@ -119,4 +128,18 @@ export async function getMember(): Promise<Member | null> {
 export async function revokeSessionByToken(rawToken: string): Promise<void> {
   if (!rawToken || !hasDatabase()) return;
   await getPrisma().memberSession.deleteMany({ where: { tokenHash: sha256(rawToken) } }).catch(() => {});
+}
+
+/** Housekeeping: delete consumed/expired magic-link tokens + expired sessions so
+ *  the auth tables don't grow unbounded. Pure DB (uses the expires_at indexes);
+ *  safe to call from the daily cron. */
+export async function sweepMemberAuth(): Promise<{ tokens: number; sessions: number }> {
+  if (!hasDatabase()) return { tokens: 0, sessions: 0 };
+  const prisma = getPrisma();
+  const now = new Date();
+  const tokens = await prisma.authToken.deleteMany({
+    where: { OR: [{ expiresAt: { lt: now } }, { consumedAt: { not: null } }] },
+  });
+  const sessions = await prisma.memberSession.deleteMany({ where: { expiresAt: { lt: now } } });
+  return { tokens: tokens.count, sessions: sessions.count };
 }
