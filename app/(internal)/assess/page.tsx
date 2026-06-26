@@ -181,7 +181,7 @@ export default async function AssessPage({ searchParams }: PageProps) {
       <div className="mt-4 flex flex-wrap gap-2 text-xs">
         <Link href="/understand" className="rounded-md border border-[#d6c9a8] px-3 py-2 font-semibold hover:bg-[#f3ead2] dark:border-[#2a4a6b] dark:hover:bg-[#0c2238]">← Research vendors</Link>
         <Link href="/demonstrate" className="rounded-md border border-[#d6c9a8] px-3 py-2 font-semibold hover:bg-[#f3ead2] dark:border-[#2a4a6b] dark:hover:bg-[#0c2238]">Defend decision →</Link>
-        <Link href="/monitor" className="rounded-md border border-[#d6c9a8] px-3 py-2 font-semibold hover:bg-[#f3ead2] dark:border-[#2a4a6b] dark:hover:bg-[#0c2238]">Monitor decisions →</Link>
+        <Link href="/decision-monitor" className="rounded-md border border-[#d6c9a8] px-3 py-2 font-semibold hover:bg-[#f3ead2] dark:border-[#2a4a6b] dark:hover:bg-[#0c2238]">Monitor decisions →</Link>
       </div>
     </PageFrame>
   );

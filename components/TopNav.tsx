@@ -139,7 +139,7 @@ const NAV: { href: string; label: string }[] = [
   { href: "/understand", label: "Understand" },
   { href: "/assess", label: "Assess" },
   { href: "/demonstrate", label: "Demonstrate" },
-  { href: "/monitor", label: "Monitor" },
+  { href: "/decision-monitor", label: "Monitor" },
 ];
 
 function isActiveNavItem(pathname: string, href: string) {

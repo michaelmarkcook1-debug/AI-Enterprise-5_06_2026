@@ -322,7 +322,7 @@ export default async function DemonstratePage({ searchParams }: PageProps) {
         {/* 10. Will this decision age well? */}
         <BS title="Will this decision age well?">
           <Panel title="Decision sustainability">
-            <p className="mb-3 text-sm text-[#475a72] dark:text-[#b9c8d9]">Track whether this recommendation holds over time via the <Link href="/monitor" className="font-semibold underline">Monitor tab</Link>.</p>
+            <p className="mb-3 text-sm text-[#475a72] dark:text-[#b9c8d9]">Track whether this recommendation holds over time via the <Link href="/decision-monitor" className="font-semibold underline">Monitor tab</Link>.</p>
             <div className="grid gap-3 md:grid-cols-2 text-xs">
               <div className="rounded-md border border-[#e6dcc3] p-3 dark:border-[#1d3a57]"><strong>Assumption monitoring:</strong> {SEED_BOARD_ASSUMPTIONS.length} assumptions tracked. {SEED_BOARD_ASSUMPTIONS.filter((a) => a.status === "Watch" || a.status === "At Risk").length} require attention.</div>
               <div className="rounded-md border border-[#e6dcc3] p-3 dark:border-[#1d3a57]"><strong>Reassessment triggers:</strong> Automatic alerts when vendor momentum drops, regulation emerges, or assumptions weaken.</div>
@@ -475,7 +475,7 @@ export default async function DemonstratePage({ searchParams }: PageProps) {
 
       <div className="mt-4 flex flex-wrap gap-2 text-xs">
         <Link href="/assess" className="rounded-md border border-[#d6c9a8] px-3 py-2 font-semibold hover:bg-[#f3ead2] dark:border-[#2a4a6b] dark:hover:bg-[#0c2238]">← Run new assessment</Link>
-        <Link href="/monitor" className="rounded-md border border-[#d6c9a8] px-3 py-2 font-semibold hover:bg-[#f3ead2] dark:border-[#2a4a6b] dark:hover:bg-[#0c2238]">Monitor decisions →</Link>
+        <Link href="/decision-monitor" className="rounded-md border border-[#d6c9a8] px-3 py-2 font-semibold hover:bg-[#f3ead2] dark:border-[#2a4a6b] dark:hover:bg-[#0c2238]">Monitor decisions →</Link>
       </div>
     </PageFrame>
   );
