@@ -27,7 +27,7 @@ export default async function SignInPage({
   const returnTo = typeof sp.returnTo === "string" ? safeReturnTo(sp.returnTo) : undefined;
 
   const member = await getMember();
-  if (member) redirect(returnTo ?? "/watchlist");
+  if (member) redirect(returnTo ?? "/monitor");
 
   const trackLabel = track ? trackItemLabel(track) : null;
 

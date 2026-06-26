@@ -23,12 +23,12 @@ describe("safeReturnTo (open-redirect guard)", () => {
     expect(safeReturnTo("/category/ai_silicon?x=1")).toBe("/category/ai_silicon?x=1");
   });
   it("rejects off-site / protocol-relative / scheme targets → /watchlist", () => {
-    expect(safeReturnTo("//evil.com")).toBe("/watchlist");
-    expect(safeReturnTo("https://evil.com")).toBe("/watchlist");
-    expect(safeReturnTo("/\\evil.com")).toBe("/watchlist");
-    expect(safeReturnTo("javascript:alert(1)")).toBe("/watchlist");
-    expect(safeReturnTo(null)).toBe("/watchlist");
-    expect(safeReturnTo(undefined)).toBe("/watchlist");
+    expect(safeReturnTo("//evil.com")).toBe("/monitor");
+    expect(safeReturnTo("https://evil.com")).toBe("/monitor");
+    expect(safeReturnTo("/\\evil.com")).toBe("/monitor");
+    expect(safeReturnTo("javascript:alert(1)")).toBe("/monitor");
+    expect(safeReturnTo(null)).toBe("/monitor");
+    expect(safeReturnTo(undefined)).toBe("/monitor");
   });
 });
 

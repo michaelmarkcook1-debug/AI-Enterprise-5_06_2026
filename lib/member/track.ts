@@ -81,5 +81,5 @@ export function safeReturnTo(raw: unknown): string {
   ) {
     return raw;
   }
-  return "/watchlist";
+  return "/monitor";
 }

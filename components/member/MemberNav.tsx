@@ -27,7 +27,10 @@ export default function MemberNav({ email }: { email: string }) {
           <BrandLogo size={30} onDark />
         </Link>
         <nav className="hidden flex-1 items-center gap-1 text-sm md:flex">
-          <Link href="/watchlist" className="rounded-md px-3 py-1.5 font-medium text-white">
+          <Link href="/monitor" className="rounded-md px-3 py-1.5 font-medium text-white">
+            Monitor
+          </Link>
+          <Link href="/watchlist" className="rounded-md px-3 py-1.5 font-medium text-[#c8d7e9] hover:text-white">
             My watchlist
           </Link>
           <Link href="/vendors" className="rounded-md px-3 py-1.5 font-medium text-[#c8d7e9] hover:text-white">

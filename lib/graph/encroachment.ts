@@ -16,7 +16,7 @@ import type { DependencyEdge } from "./dependency-projection";
 // Mirrors NODE_TO_VENDOR_SLUG in components/dashboard/ExposureMapHero.tsx —
 // resolves exposure node ids to /vendors slugs (and thus to ENTITIES roles).
 // Nodes absent here simply yield no encroachment edges (honest under-claim).
-const NODE_TO_SLUG: Record<string, string> = {
+export const NODE_TO_SLUG: Record<string, string> = {
   MSFT: "microsoft", AMZN: "aws", GOOGL: "google", NVDA: "nvidia", ORCL: "oracle",
   CRM: "salesforce", SNOW: "snowflake",
   openai: "openai", anthropic: "anthropic", deepmind: "google", mistral: "mistral",
