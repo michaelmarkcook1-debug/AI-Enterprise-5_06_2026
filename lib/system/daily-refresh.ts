@@ -75,6 +75,7 @@ import {
   isRunActive,
 } from "./daily-refresh-store";
 import { getPrisma, hasDatabase } from "../prisma";
+import { checkMigrationDrift } from "../db/migration-drift";
 import { getKillSwitchState } from "./refresh-killswitch";
 import { makeSpendGuard, recordCycleSpend } from "./spend-ledger";
 
@@ -208,6 +209,22 @@ export async function runDailyRefresh(
   // A manual/forced run (the admin "Run full ingestion" button) executes
   // everything regardless of weekday.
   const isWeekly = opts.force === true || now.getUTCDay() === 1;
+
+  // ── 0. Schema-drift guard ───────────────────────────────────
+  //     Runs FIRST, before any data step. Fails LOUD if the live DB is behind
+  //     the migrations this code ships with — the exact failure mode where a
+  //     preview branch looks migrated but the production DB silently isn't, so
+  //     downstream steps write/read tables that don't exist. Non-fatal (every
+  //     other step still runs); the result surfaces in /admin/pipeline-health.
+  await trackedStep("schema_drift_check", async () => {
+    const drift = await checkMigrationDrift();
+    if (drift.status === "behind") {
+      console.error(`[daily-refresh] ${drift.message}`);
+    } else if (drift.status === "ahead" || drift.status === "check_failed") {
+      console.warn(`[daily-refresh] ${drift.message}`);
+    }
+    return drift as unknown as Record<string, unknown>;
+  });
 
   // ── 1. Sourcing ────────────────────────────────────────────
   await trackedStep("sourcing", async () => {
@@ -511,6 +528,14 @@ export async function runDailyRefresh(
     const r = await sweepMemberAuth();
     return r as unknown as Record<string, unknown>;
   });
+
+  // Schema drift is a real failure even though the check step didn't throw:
+  // promote it to a FAIL + error so the run reads red and the operator acts.
+  const driftStep = steps.find((s) => s.step === "schema_drift_check");
+  if (driftStep && (driftStep.summary as Record<string, unknown>).status === "behind") {
+    driftStep.ok = false;
+    driftStep.error = String((driftStep.summary as Record<string, unknown>).message ?? "Live DB is behind the code's migrations.");
+  }
 
   const errors = steps.flatMap((s) => (s.error ? [`${s.step}: ${s.error}`] : []));
 

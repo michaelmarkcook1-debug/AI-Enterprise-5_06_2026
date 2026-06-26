@@ -27,6 +27,7 @@ interface StepSummary {
 }
 
 const STEP_LABELS: Record<string, { title: string; what: string }> = {
+  schema_drift_check: { title: "Schema-drift guard", what: "Verify the live DB has every migration this code expects (catches a lagging production database)." },
   sourcing: { title: "Sourcing", what: "Fetch + extract proposals from the manifest." },
   safe_linkage: { title: "Safe linkage", what: "Auto-attach product scope to high-confidence proposals." },
   triage: { title: "Triage", what: "Auto-approve proposals that pass the strict gate." },
@@ -133,6 +134,9 @@ export default async function PipelineHealthPage() {
         />
       </div>
 
+      {/* Schema-drift callout — only renders when there is something to flag */}
+      <SchemaDriftCard steps={steps} />
+
       {/* Anthropic-dependent steps callout */}
       <div className="mb-6">
         <AnthropicDependentCard steps={steps} />
@@ -236,6 +240,59 @@ export default async function PipelineHealthPage() {
         </Panel>
       </div>
     </PageFrame>
+  );
+}
+
+function SchemaDriftCard({ steps }: { steps: StepSummary[] }) {
+  const step = steps.find((s) => s.step === "schema_drift_check");
+  if (!step) return null;
+  const s = step.summary as Record<string, unknown>;
+  const status = typeof s.status === "string" ? s.status : "unknown";
+  const pending = Array.isArray(s.pending) ? (s.pending as string[]) : [];
+  const unknown = Array.isArray(s.unknown) ? (s.unknown as string[]) : [];
+  const appliedCount = Number(s.appliedCount ?? 0);
+  const expectedCount = Number(s.expectedCount ?? 0);
+  const message = typeof s.message === "string" ? s.message : "";
+
+  // Healthy / no-db / unconfirmable states stay quiet — only flag real signal.
+  if (status === "ok" || status === "no_database") return null;
+
+  if (status === "behind") {
+    return (
+      <div className="mb-6">
+        <Panel title="Database schema — DRIFT DETECTED">
+          <p className="text-sm font-semibold text-rose-700 dark:text-rose-300">
+            The live database is {pending.length} migration{pending.length === 1 ? "" : "s"} behind the deployed code
+            ({appliedCount}/{expectedCount} applied).
+          </p>
+          <p className="mt-2 text-xs text-[#475a72] dark:text-[#a7bacd]">
+            Features that read or write the missing tables/columns will fail silently until the production branch is
+            deployed (or <code className="font-mono">prisma migrate deploy</code> is run) against this database. This is
+            the exact failure mode where a preview branch looks migrated but production isn&apos;t.
+          </p>
+          <div className="mt-3 rounded-md border border-rose-300 bg-rose-50 p-3 dark:border-rose-900/60 dark:bg-rose-950/30">
+            <div className="text-[10px] font-semibold uppercase tracking-wider text-rose-900 dark:text-rose-200">Missing migrations</div>
+            <ul className="mt-1 space-y-0.5 font-mono text-[11px] text-rose-950 dark:text-rose-100/90">
+              {pending.map((m) => <li key={m}>↳ {m}</li>)}
+            </ul>
+          </div>
+        </Panel>
+      </div>
+    );
+  }
+
+  // "ahead" or "check_failed" — informational amber note.
+  return (
+    <div className="mb-6">
+      <Panel title="Database schema — note">
+        <p className="text-sm text-amber-700 dark:text-amber-300">{message}</p>
+        {unknown.length > 0 && (
+          <ul className="mt-2 space-y-0.5 font-mono text-[11px] text-[#475a72] dark:text-[#a7bacd]">
+            {unknown.map((m) => <li key={m}>↳ {m}</li>)}
+          </ul>
+        )}
+      </Panel>
+    </div>
   );
 }
 
