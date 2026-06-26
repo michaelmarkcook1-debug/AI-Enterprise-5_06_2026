@@ -16,6 +16,8 @@ import { listPublishedArticles } from "@/lib/articles/repository";
 import { absoluteUrl } from "@/lib/site";
 import DataUnavailable from "@/components/DataUnavailable";
 import { HARDCODED_SURFACES_WIRED } from "@/lib/availability";
+import { buildDeliveryGraph } from "@/lib/graph/delivery-projection";
+import { TRACKED_VENDOR_NAMES } from "@/lib/sourcing/ai-news-manifest";
 
 // Public front door. DB-backed (live rankings, breaking news, provenance) →
 // force-dynamic, matching /vendors. All reads are parallel + guarded so the page
@@ -60,6 +62,17 @@ export default async function HomePage() {
   const medium = edges.filter((e) => e.confidence >= 45 && e.confidence < 80).length;
   const seed = edges.filter((e) => e.confidence < 45).length;
   const total = edges.length;
+
+  // Delivery-partnership graph — pure/static curated analyst data, always available.
+  const deliveryGraph = buildDeliveryGraph();
+  // Count distinct SIs per AI vendor (for "most covered" ranking).
+  const sisByVendor = new Map<string, number>();
+  for (const e of deliveryGraph.edges) {
+    sisByVendor.set(e.vendorId, (sisByVendor.get(e.vendorId) ?? 0) + 1);
+  }
+  const topVendorsBySI = [...sisByVendor.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 6);
 
   // Honest freshness + provenance (guarded — never fabricate a timestamp).
   // Rankings are loaded only when the portal is backed by verified evidence;
@@ -146,10 +159,67 @@ export default async function HomePage() {
               </p>
             </>
           ) : (
-            <DataUnavailable
-              title="Dependency graph unavailable"
-              detail="The dependency/encroachment graph is curated, not yet wired to the live evidence store — so we hold it rather than present it as live. The vendor rankings beside this are evidence-derived and shown when backed by verified evidence."
-            />
+            /* Delivery-partnership channel — curated analyst data, shows like the taxonomy */
+            <div className="rounded-xl border border-black/10 dark:border-white/10 bg-white/60 dark:bg-white/5 p-5 h-full flex flex-col gap-4">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <h2 className="font-[var(--font-display)] text-lg font-bold tracking-tight">
+                    IT-services delivery channel
+                  </h2>
+                  <p className={`mt-0.5 text-xs ${MUTED}`}>
+                    {deliveryGraph.edges.length} relationships — which global SIs are delivering AI vendors into enterprise
+                  </p>
+                </div>
+                <span className="shrink-0 rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-800 dark:text-amber-200">
+                  Analyst-curated
+                </span>
+              </div>
+
+              {/* Most covered AI vendors by SI count */}
+              <div>
+                <p className={`mb-1.5 text-[11px] font-semibold uppercase tracking-wide ${MUTED}`}>
+                  Most covered AI vendors
+                </p>
+                <ul className="space-y-1.5">
+                  {topVendorsBySI.map(([vendorId, count]) => (
+                    <li key={vendorId} className="flex items-center justify-between">
+                      <Link
+                        href={`/vendors/${vendorId}`}
+                        className="text-sm font-medium hover:underline underline-offset-2"
+                      >
+                        {TRACKED_VENDOR_NAMES[vendorId] ?? vendorId}
+                      </Link>
+                      <span className={`text-xs tabular-nums ${MUTED}`}>
+                        {count} SI{count !== 1 ? "s" : ""}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Encroachment watch */}
+              {deliveryGraph.encroachers.length > 0 && (
+                <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 px-3 py-2.5">
+                  <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-amber-700 dark:text-amber-300">
+                    Derived encroachment signal
+                  </p>
+                  {deliveryGraph.encroachers.map((enc) => (
+                    <p key={enc.partnerId} className="text-xs">
+                      <span className="font-medium">{enc.partnerName}</span>
+                      <span className={MUTED}> delivers rival models: {enc.vendorIds.join(", ")}</span>
+                    </p>
+                  ))}
+                </div>
+              )}
+
+              <p className={`mt-auto text-[11px] ${MUTED}`}>
+                Analyst-curated · pending external confirmation ·{" "}
+                <Link href="/vendors" className="underline underline-offset-2">
+                  see vendor profiles
+                </Link>{" "}
+                for implementation partner details
+              </p>
+            </div>
           )}
         </div>
         <div className="lg:col-span-4">
