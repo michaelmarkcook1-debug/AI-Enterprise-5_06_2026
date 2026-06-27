@@ -25,8 +25,10 @@ const PROBE_QUERIES: Record<string, unknown> = {
   // Macro
   fred: { seriesId: "FEDFUNDS", limit: 1 },
   bls: { seriesIds: ["CUUR0000SA0"] }, // CPI-U, all items
-  bea: { datasetName: "NIPA", tableName: "T10101", frequency: "Q", year: "2024" },
-  fiscalData: { endpoint: "/v1/accounting/od/debt_to_penny", params: { "page[size]": "1" } },
+  bea: { datasetName: "NIPA", tableName: "T10101", frequency: "Q", year: "2023" },
+  // NB: no `page[size]` — URLSearchParams encodes the brackets (page%5Bsize%5D),
+  // which Treasury's router 404s on. A bracket-free query returns 200 + rows.
+  fiscalData: { endpoint: "/v1/accounting/od/debt_to_penny", params: { sort: "-record_date" } },
   // Energy
   eia: { route: "electricity/retail-sales/data", params: { frequency: "monthly", "data[0]": "price", length: 1 } },
   // Markets
@@ -39,8 +41,9 @@ const PROBE_QUERIES: Record<string, unknown> = {
   federalRegister: { path: "/documents.json", params: { per_page: "1", "conditions[term]": "artificial intelligence" } },
   // Developer
   github: { path: "/repos/openai/openai-python" },
-  // Vendor docs (manifest read — no external key, no quota)
-  vendorDocs: { vendorId: "openai" },
+  // NB: vendorDocs (the LLM extractor) is intentionally NOT probed here — a probe
+  //     would spend Anthropic tokens and isn't a connectivity check. It reports
+  //     "skipped" (honest: not tested), never a faked ok.
 };
 
 export type ReingestStatus = ConnectorStatus | "skipped";
