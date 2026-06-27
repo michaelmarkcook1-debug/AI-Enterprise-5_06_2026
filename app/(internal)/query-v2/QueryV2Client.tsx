@@ -2,7 +2,7 @@
 
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { Metric, Panel, SeedDataBadge } from "@/components/intelligence-ui";
+import { Metric, Panel, SeedDataBadge, EvidenceDepthBadge, lowEvidenceClass } from "@/components/intelligence-ui";
 import { OwnershipBadge, VendorNameWithOwnership } from "@/components/ownership-indicator";
 import {
   type Role,
@@ -328,6 +328,9 @@ export default function QueryV2Client({ entities, winningByLayer }: { entities: 
   const renderEntityRow = (entity: Entity, index: number, scopeRoles: Role[]) => {
     const active = entity.id === selectedEntity.id;
     const es = effectiveScore(entity, scopeRoles);
+    // De-emphasise (never hide) the numeric score cells when the vendor's scores
+    // aren't backed by verified evidence; the badge in the name cell names why.
+    const lowEv = lowEvidenceClass(entity.evidenceDepth);
     return (
       <tr
         key={entity.id}
@@ -356,26 +359,29 @@ export default function QueryV2Client({ entities, winningByLayer }: { entities: 
               role-scoped
             </span>
           )}
+          {entity.dataConfidence !== "verified" && (
+            <div className="mt-1"><EvidenceDepthBadge depth={entity.evidenceDepth} /></div>
+          )}
         </td>
         <td className="py-2.5 pr-3">{roleBadge(es.roleScored ?? entity.primaryRole)}</td>
-        <td className="py-2.5 pr-3 text-right">
+        <td className={`py-2.5 pr-3 text-right ${lowEv}`}>
           <ScoreCell value={es.leadership} delta={es.roleScored ? undefined : entity.deltas.leadership} tier={scoreGrade(es.leadership)} />
         </td>
-        <td className="py-2.5 pr-3 text-right">
+        <td className={`py-2.5 pr-3 text-right ${lowEv}`}>
           <ScoreCell value={es.innovation} tier={scoreGrade(es.innovation)} />
         </td>
-        <td className="py-2.5 pr-3 text-right">
+        <td className={`py-2.5 pr-3 text-right ${lowEv}`}>
           <ScoreCell value={es.readiness} tier={scoreGrade(es.readiness)} />
         </td>
-        <td className="py-2.5 pr-3 text-right">
+        <td className={`py-2.5 pr-3 text-right ${lowEv}`}>
           <ScoreCell value={entity.momentum} delta={entity.deltas.leadership} tier={scoreGrade(entity.momentum)} />
         </td>
-        <td className="py-2.5 pr-3 text-right">
+        <td className={`py-2.5 pr-3 text-right ${lowEv}`}>
           <ScoreCell value={es.reach} delta={es.roleScored ? undefined : entity.deltas.reach} tier={scoreGrade(es.reach)} />
         </td>
-        <td className="py-2.5 pr-3 text-right font-mono text-xs text-[#475a72] dark:text-[#a7bacd]">{entity.usageShare.toFixed(1)}%</td>
+        <td className={`py-2.5 pr-3 text-right font-mono text-xs text-[#475a72] dark:text-[#a7bacd] ${lowEv}`}>{entity.usageShare.toFixed(1)}%</td>
         <td className={`py-2.5 pr-3 text-xs font-semibold uppercase ${riskClass(entity.risk)}`}>{entity.risk}</td>
-        <td className="py-2.5 text-right font-mono text-xs text-[#475a72] dark:text-[#a7bacd]">{es.confidence}%</td>
+        <td className="py-2.5 text-right font-mono text-xs text-[#475a72] dark:text-[#a7bacd]">{entity.evidenceDepth > 0 ? `${entity.evidenceDepth}✓` : "0"}</td>
         <td className="py-2.5 pl-1"><WatchButton vendorId={entity.id} vendorName={entity.name} /></td>
       </tr>
     );
@@ -562,14 +568,14 @@ export default function QueryV2Client({ entities, winningByLayer }: { entities: 
                   <th className="py-2 pr-3" title="Rank within the current layer or category lens only">#</th>
                   <th className="py-2 pr-3">Entity</th>
                   <th className="py-2 pr-3">Role</th>
-                  <th className="py-2 pr-3 text-right" title="Leadership score in the active role context">Leadership</th>
+                  <th className="py-2 pr-3 text-right" title="Final score — the composite this ranking sorts on (market position + readiness + innovation; includes the Arena-ELO model-quality pillar). The columns to the right are its sub-components.">Final Score</th>
                   <th className="py-2 pr-3 text-right" title="R&D velocity, product launch cadence, differentiation vs peers">Innovation</th>
                   <th className="py-2 pr-3 text-right" title="Enterprise readiness: compliance, SLAs, integrations, governance posture">Readiness</th>
                   <th className="py-2 pr-3 text-right" title="Trailing momentum across news, product and partnership signals">Momentum</th>
                   <th className="py-2 pr-3 text-right" title="Ecosystem reach — integrations, partnerships, platform embeddedness">Reach</th>
                   <th className="py-2 pr-3 text-right" title="Directional share of named enterprise AI usage">Usage%</th>
                   <th className="py-2 pr-3" title="Operational risk profile (concentration, lock-in, counterparty)">Risk</th>
-                  <th className="py-2 text-right" title="Analyst confidence in the evidence base">Conf%</th>
+                  <th className="py-2 text-right" title="Count of analyst-verified evidence rows behind this vendor's scores. 0 = seed estimate (no verified evidence).">Evidence</th>
                   <th className="py-2 pl-1">Watch</th>
                 </tr>
               </thead>
@@ -953,7 +959,7 @@ function VendorScoreHoverCard({ vendorId, entity, anchorY, anchorX, onMouseEnter
 
       <div className="grid grid-cols-3 gap-px border-b border-[#ece4d0] bg-[#ece4d0] dark:border-[#1d3a57] dark:bg-[#143049]">
         {[
-          { label: "Leadership", value: entity.leadershipScore },
+          { label: "Final Score", value: entity.leadershipScore },
           { label: "Innovation", value: entity.innovation },
           { label: "Readiness", value: entity.readiness },
           { label: "Momentum", value: entity.momentum },

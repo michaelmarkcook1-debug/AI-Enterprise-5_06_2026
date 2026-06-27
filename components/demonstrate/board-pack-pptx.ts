@@ -221,12 +221,20 @@ function slideVendors(pres: PptxGenJS, type: ExportType, p: BoardPackExporterPro
     s.addShape("roundRect", { x, y, w, h: 3.3, rectRadius: 0.08, fill: { color: "FFFFFF" }, line: { color: HAIR, width: 1 }, shadow: { type: "outer", color: "000000", blur: 6, offset: 2, angle: 90, opacity: 0.12 } });
     s.addText(v.name, { x: x + 0.18, y: y + 0.16, w: w - 0.36, h: 0.35, fontFace: FONT, fontSize: 15, bold: true, color: NAVY, margin: 0 });
     s.addText(v.role, { x: x + 0.18, y: y + 0.52, w: w - 0.36, h: 0.3, fontFace: FONT, fontSize: 9, color: MUTED, margin: 0 });
+    // Un-evidenced scores are muted (not authoritative emerald) so the deck
+    // never presents a seed estimate as a verified figure.
+    const vDepth = v.evidenceDepth ?? 0;
+    const scoreColor = vDepth >= 10 ? EMERALD_DARK : MUTED;
     s.addText([
-      { text: String(v.score), options: { fontSize: 26, bold: true, color: EMERALD_DARK } },
+      { text: String(v.score), options: { fontSize: 26, bold: true, color: scoreColor } },
       { text: "  score   ", options: { fontSize: 9, color: MUTED } },
       { text: String(v.confidence), options: { fontSize: 26, bold: true, color: NAVY } },
       { text: "  conf.", options: { fontSize: 9, color: MUTED } },
     ], { x: x + 0.18, y: y + 0.9, w: w - 0.36, h: 0.55, fontFace: FONT, valign: "middle", margin: 0 });
+    if (vDepth < 10) {
+      s.addText(vDepth <= 0 ? "Seed estimate — no verified evidence" : `Limited evidence (${vDepth} verified)`,
+        { x: x + 0.18, y: y + 1.4, w: w - 0.36, h: 0.2, fontFace: FONT, fontSize: 7.5, italic: true, bold: true, color: vDepth <= 0 ? "9F1239" : "B45309", margin: 0 });
+    }
     s.addText("TOP PILLARS", { x: x + 0.18, y: y + 1.6, w: w - 0.36, h: 0.22, fontFace: FONT, fontSize: 7.5, bold: true, color: MUTED, charSpacing: 1, margin: 0 });
     s.addText(v.topPillars.map(humanisePillar).join(", ") || "—", { x: x + 0.18, y: y + 1.82, w: w - 0.36, h: 0.55, fontFace: FONT, fontSize: 9.5, color: INK, margin: 0 });
     s.addText("RISKS", { x: x + 0.18, y: y + 2.42, w: w - 0.36, h: 0.22, fontFace: FONT, fontSize: 7.5, bold: true, color: MUTED, charSpacing: 1, margin: 0 });

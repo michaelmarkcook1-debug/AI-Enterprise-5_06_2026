@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { estimateIngestionCost } from "@/lib/ingestion/cost-model";
+import { useBackgroundJob, type BackgroundJob } from "./useBackgroundJob";
 
 interface Job {
   id: string;
@@ -31,84 +32,82 @@ const SOURCE_CATEGORIES = [
   "analyst_report", "press_release",
 ] as const;
 
+// The projector caps each recompute at 5,000 evidence rows (see
+// intelligence-projector rowLimit) — surface that ceiling honestly if a run hits it.
+const RECOMPUTE_ROW_CAP = 5000;
+
 export default function IngestionConsole({
   hasDatabase,
   vendors,
   initialJobs,
   newsVendors,
   lastRun,
+  activeJobs,
+  verifiedSignals,
 }: {
   hasDatabase: boolean;
   vendors: { id: string; name: string }[];
   initialJobs: Job[];
   newsVendors: { id: string; name: string }[];
   lastRun: LastRun | null;
+  /** In-flight background jobs at page-load, keyed by kind — lets the console
+   *  re-attach to a run that started before the user navigated back. */
+  activeJobs?: Record<string, BackgroundJob | null>;
+  /** Count of analyst_verified evidence rows a recompute will project (live DB
+   *  count; matches scannedEvidenceRows in the result). null when no database. */
+  verifiedSignals?: number | null;
 }) {
   const [jobs, setJobs] = useState<Job[]>(initialJobs);
   const [token, setToken] = useState("");
 
-  // ── Rolling ingest state ────────────────────────────────────────────────
-  const [busyAll, setBusyAll] = useState(false);
-  const [ingestResult, setIngestResult] = useState<string | null>(null);
-  const [ingestError, setIngestError] = useState<string | null>(null);
-  const [elapsedSec, setElapsedSec] = useState(0);
-  const elapsedRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  // ── Market-news feed state (writes IntelligenceNewsItem) ────────────────
-  const [busyMarket, setBusyMarket] = useState(false);
-  const [marketResult, setMarketResult] = useState<string | null>(null);
-  const [marketError, setMarketError] = useState<string | null>(null);
+  // ── Rolling ingest + news + market: server-side background jobs ─────────────
+  // Each runs via after() (admin_jobs) so it survives navigating away; the hook
+  // fires the start endpoint, polls status, and re-attaches to an in-flight run
+  // on mount. Standard sourcing (single + batch) shares kind "sourcing"; news
+  // shares "news_sourcing"; the market feed is "news_feed".
+  const sourcingJob = useBackgroundJob("sourcing", { token, initialActive: activeJobs?.sourcing ?? null });
+  const marketJob = useBackgroundJob("news_feed", { token, initialActive: activeJobs?.news_feed ?? null });
 
   // ── Recompute state (project evidence → scores, no LLM cost) ────────────
   const [busyRecompute, setBusyRecompute] = useState(false);
   const [recomputeResult, setRecomputeResult] = useState<string | null>(null);
   const [recomputeError, setRecomputeError] = useState<string | null>(null);
 
-  // ── News sourcing state ─────────────────────────────────────────────────
-  const [busyNews, setBusyNews] = useState(false);
-  const [newsResult, setNewsResult] = useState<string | null>(null);
-  const [newsError, setNewsError] = useState<string | null>(null);
-  const [elapsedNewsSec, setElapsedNewsSec] = useState(0);
-  const elapsedNewsRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const pollNewsRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  // ── Arena ELO seed state (openlm.ai/chatbot-arena/) ─────────────────────
+  const [busyElo, setBusyElo] = useState(false);
+  const [eloResult, setEloResult] = useState<string | null>(null);
+  const [eloError, setEloError] = useState<string | null>(null);
+
+  // ── Fill evidence gaps: web_search-source vendors with limited/no evidence ─
+  // Web-evidence gap-sourcing runs server-side via after() (admin_jobs), so it
+  // survives navigating away from this tab. The hook fires the start endpoint,
+  // polls /api/admin/jobs/status, and re-attaches to an in-flight run on mount.
+  const gapsJob = useBackgroundJob("web_evidence", { token, initialActive: activeJobs?.web_evidence ?? null });
+
+  // ── News sourcing: server-side background job (kind "news_sourcing") ───────
+  const newsJob = useBackgroundJob("news_sourcing", { token, initialActive: activeJobs?.news_sourcing ?? null });
 
   // ── Multi-vendor selection (batch runs) ─────────────────────────────────
   const [stdSelected, setStdSelected] = useState<string[]>([]);
   const [newsSelected, setNewsSelected] = useState<string[]>([]);
-  const [batch, setBatch] = useState<{ scope: "std" | "news"; current: number; total: number; vendor: string } | null>(null);
 
+  // Refresh the jobs table while any sourcing/news job is in flight so newly
+  // created EvidenceProposal jobs appear without a manual reload.
+  const anySourcingBusy = sourcingJob.busy || newsJob.busy;
   useEffect(() => {
-    if (busyAll) {
-      setElapsedSec(0);
-      elapsedRef.current = setInterval(() => setElapsedSec((s) => s + 1), 1000);
-      pollRef.current = setInterval(() => { void refreshJobs(); }, 5000);
-    } else {
-      if (elapsedRef.current) clearInterval(elapsedRef.current);
-      if (pollRef.current) clearInterval(pollRef.current);
-    }
-    return () => {
-      if (elapsedRef.current) clearInterval(elapsedRef.current);
-      if (pollRef.current) clearInterval(pollRef.current);
-    };
+    if (!anySourcingBusy) return;
+    const t = setInterval(() => { void refreshJobs(); }, 5000);
+    return () => clearInterval(t);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [busyAll]);
+  }, [anySourcingBusy]);
 
-  useEffect(() => {
-    if (busyNews) {
-      setElapsedNewsSec(0);
-      elapsedNewsRef.current = setInterval(() => setElapsedNewsSec((s) => s + 1), 1000);
-      pollNewsRef.current = setInterval(() => { void refreshJobs(); }, 5000);
-    } else {
-      if (elapsedNewsRef.current) clearInterval(elapsedNewsRef.current);
-      if (pollNewsRef.current) clearInterval(pollNewsRef.current);
-    }
-    return () => {
-      if (elapsedNewsRef.current) clearInterval(elapsedNewsRef.current);
-      if (pollNewsRef.current) clearInterval(pollNewsRef.current);
-    };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [busyNews]);
+  // Derived result/error banners from the completed background jobs.
+  const ingestResult = sourcingResultText(sourcingJob);
+  const ingestError = sourcingJob.error ?? (sourcingJob.job?.status === "error" ? sourcingJob.job.error : null);
+  const newsResult = sourcingResultText(newsJob);
+  const newsError = newsJob.error ?? (newsJob.job?.status === "error" ? newsJob.job.error : null);
+  const marketResult = sourcingResultText(marketJob);
+  const marketError = marketJob.error ?? (marketJob.job?.status === "error" ? marketJob.job.error : null);
 
   // ── Advanced paste-form state ───────────────────────────────────────────
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -133,156 +132,54 @@ export default function IngestionConsole({
     }
   }
 
-  async function ingestNow() {
-    setBusyAll(true);
-    setIngestError(null);
-    setIngestResult(null);
-    try {
-      // Today's rotation vendor. The SCHEDULED run lives in the daily-refresh
-      // pipeline; this is the admin "run the rotation vendor now" button.
-      // (Specific / multiple vendors go through ingestSelected below.)
-      const res = await fetch(`/api/admin/sourcing/run`, {
-        method: "POST",
-        headers: { "content-type": "application/json", ...(token ? { "x-admin-token": token } : {}) },
-        body: JSON.stringify({ persist: true }),
-      });
-      const body = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(body.error ?? `HTTP ${res.status}`);
-      const totals = body.totals ?? {};
-      setIngestResult(
-        `today's vendor · ${body.durationMs ?? 0} ms · ${totals.proposalsExtracted ?? 0} extracted · ${totals.proposalsPersisted ?? 0} persisted`,
-      );
-      await refreshJobs();
-    } catch (e) {
-      setIngestError((e as Error).message);
-    } finally {
-      setBusyAll(false);
-    }
+  // Today's rotation vendor. Runs server-side via after() — safe to leave the tab.
+  function ingestNow() {
+    void sourcingJob.fire(`/api/admin/sourcing/run`, { persist: true });
   }
 
-  async function ingestNews(vendorOverride?: string) {
-    setBusyNews(true);
-    setNewsError(null);
-    setNewsResult(null);
-    try {
-      // News sourcing is per-vendor; default to today's rotating news vendor
-      // (same rotation the scheduled pipeline uses).
-      let vendor = vendorOverride;
-      if (!vendor && newsVendors.length > 0) {
-        const dayOfEpoch = Math.floor(Date.now() / 86_400_000);
-        vendor = newsVendors[dayOfEpoch % newsVendors.length].id;
-      }
-      if (!vendor) throw new Error("No news vendors configured");
-      const res = await fetch(`/api/admin/sourcing/run`, {
-        method: "POST",
-        headers: { "content-type": "application/json", ...(token ? { "x-admin-token": token } : {}) },
-        body: JSON.stringify({ vendorId: vendor, news: true, persist: true }),
-      });
-      const body = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(body.error ?? `HTTP ${res.status}`);
-      const t = body.totals ?? {};
-      setNewsResult(
-        `${vendor} · ${body.durationMs ?? 0} ms · ${t.articlesDiscovered ?? 0} discovered · ${t.articlesIngested ?? 0} ingested · ${t.proposalsPersisted ?? 0} proposals`,
-      );
-      await refreshJobs();
-    } catch (e) {
-      setNewsError((e as Error).message);
-    } finally {
-      setBusyNews(false);
+  function ingestNews(vendorOverride?: string) {
+    // News sourcing is per-vendor; default to today's rotating news vendor.
+    let vendor = vendorOverride;
+    if (!vendor && newsVendors.length > 0) {
+      const dayOfEpoch = Math.floor(Date.now() / 86_400_000);
+      vendor = newsVendors[dayOfEpoch % newsVendors.length].id;
     }
+    if (!vendor) return;
+    void newsJob.fire(`/api/admin/sourcing/run`, { vendorId: vendor, news: true, persist: true });
   }
 
-  // Run STANDARD evidence sourcing for a SET of vendors, one at a time. Each
-  // request is a single vendor (≤300s — no 504); the loop is sequential so peak
-  // Anthropic concurrency stays bounded (every vendor already parallelises its
-  // own sources). One vendor failing does not abort the batch, and each vendor
-  // is persisted as it finishes (admin_run_log + jobs), so closing the tab
-  // mid-batch keeps the completed vendors.
-  async function ingestSelected(ids: string[]) {
+  // Standard evidence sourcing for a SET of vendors. The id list is sent ONCE
+  // and the loop runs SERVER-SIDE in after() — so closing the tab no longer
+  // kills the remaining vendors (each is still saved as it finishes).
+  function ingestSelected(ids: string[]) {
     if (ids.length === 0) return;
     const perVendor = estimateIngestionCost().totalUsd / 42;
     if (
       ids.length > 3 &&
       !window.confirm(
-        `Run standard ingestion for ${ids.length} vendors, one after another?\n\n` +
+        `Run standard ingestion for ${ids.length} vendors?\n\n` +
           `Estimated ~$${(perVendor * ids.length).toFixed(2)} and ~${Math.max(1, Math.ceil(ids.length * 1.5))} min. ` +
-          `Keep this tab open — each vendor is saved as it finishes.`,
+          `Runs server-side — safe to leave this page.`,
       )
     ) {
       return;
     }
-    setBusyAll(true);
-    setIngestError(null);
-    setIngestResult(null);
-    const lines: string[] = [];
-    try {
-      for (let k = 0; k < ids.length; k++) {
-        setBatch({ scope: "std", current: k + 1, total: ids.length, vendor: ids[k] });
-        try {
-          const res = await fetch(`/api/admin/sourcing/run`, {
-            method: "POST",
-            headers: { "content-type": "application/json", ...(token ? { "x-admin-token": token } : {}) },
-            body: JSON.stringify({ vendorId: ids[k], persist: true }),
-          });
-          const body = await res.json().catch(() => ({}));
-          if (!res.ok) lines.push(`${ids[k]}: ✗ ${body.error ?? `HTTP ${res.status}`}`);
-          else {
-            const t = body.totals ?? {};
-            lines.push(`${ids[k]}: ${t.proposalsExtracted ?? 0}→${t.proposalsPersisted ?? 0}`);
-          }
-        } catch (e) {
-          lines.push(`${ids[k]}: ✗ ${(e as Error).message}`);
-        }
-        await refreshJobs();
-      }
-      setIngestResult(`Ran ${ids.length} vendor${ids.length !== 1 ? "s" : ""} · ${lines.join(" · ")}`);
-    } finally {
-      setBusyAll(false);
-      setBatch(null);
-    }
+    void sourcingJob.fire(`/api/admin/sourcing/run`, { vendorIds: ids, persist: true });
   }
 
-  // Same pattern for the news / press-release pipeline.
-  async function ingestNewsSelected(ids: string[]) {
+  // Same server-side batch for the news / press-release pipeline.
+  function ingestNewsSelected(ids: string[]) {
     if (ids.length === 0) return;
     if (
       ids.length > 3 &&
       !window.confirm(
-        `Run news & press-release sourcing for ${ids.length} vendors, one after another?\n\n` +
-          `~${Math.max(1, Math.ceil(ids.length * 2))} min. Keep this tab open — each vendor is saved as it finishes.`,
+        `Run news & press-release sourcing for ${ids.length} vendors?\n\n` +
+          `~${Math.max(1, Math.ceil(ids.length * 2))} min. Runs server-side — safe to leave this page.`,
       )
     ) {
       return;
     }
-    setBusyNews(true);
-    setNewsError(null);
-    setNewsResult(null);
-    const lines: string[] = [];
-    try {
-      for (let k = 0; k < ids.length; k++) {
-        setBatch({ scope: "news", current: k + 1, total: ids.length, vendor: ids[k] });
-        try {
-          const res = await fetch(`/api/admin/sourcing/run`, {
-            method: "POST",
-            headers: { "content-type": "application/json", ...(token ? { "x-admin-token": token } : {}) },
-            body: JSON.stringify({ vendorId: ids[k], news: true, persist: true }),
-          });
-          const body = await res.json().catch(() => ({}));
-          if (!res.ok) lines.push(`${ids[k]}: ✗ ${body.error ?? `HTTP ${res.status}`}`);
-          else {
-            const t = body.totals ?? {};
-            lines.push(`${ids[k]}: ${t.proposalsPersisted ?? 0} proposals`);
-          }
-        } catch (e) {
-          lines.push(`${ids[k]}: ✗ ${(e as Error).message}`);
-        }
-        await refreshJobs();
-      }
-      setNewsResult(`Ran ${ids.length} vendor${ids.length !== 1 ? "s" : ""} · ${lines.join(" · ")}`);
-    } finally {
-      setBusyNews(false);
-      setBatch(null);
-    }
+    void newsJob.fire(`/api/admin/sourcing/run`, { vendorIds: ids, news: true, persist: true });
   }
 
   async function triggerManual() {
@@ -309,30 +206,10 @@ export default function IngestionConsole({
     }
   }
 
-  async function refreshNewsFeed() {
-    setBusyMarket(true);
-    setMarketError(null);
-    setMarketResult(null);
-    try {
-      // Writes IntelligenceNewsItem (the /news + Query feed) from the AI-news
-      // RSS sources, Haiku-scored. This is the feed itself — distinct from the
-      // press-release button below, which writes evidence proposals.
-      const res = await fetch(`/api/admin/sourcing/run`, {
-        method: "POST",
-        headers: { "content-type": "application/json", ...(token ? { "x-admin-token": token } : {}) },
-        body: JSON.stringify({ market: true }),
-      });
-      const body = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(body.error ?? `HTTP ${res.status}`);
-      const firstErr = Array.isArray(body.errors) && body.errors.length > 0 ? ` · first error: ${body.errors[0]}` : "";
-      setMarketResult(
-        `${body.feedsFetched ?? 0}/${body.feedsAttempted ?? 0} feeds · ${body.itemsScored ?? 0} scored · ${body.itemsUpserted ?? 0} added to feed${firstErr}`,
-      );
-    } catch (e) {
-      setMarketError((e as Error).message);
-    } finally {
-      setBusyMarket(false);
-    }
+  // Writes IntelligenceNewsItem (the /news + Query feed) from the AI-news RSS
+  // sources, Haiku-scored. Runs server-side — safe to leave the tab.
+  function refreshNewsFeed() {
+    void marketJob.fire(`/api/admin/sourcing/run`, { market: true });
   }
 
   async function recomputeNow() {
@@ -353,7 +230,7 @@ export default function IngestionConsole({
       const shifts = body.scores?.scoreShifts ?? [];
       const topShift = shifts[0] ? ` · e.g. ${shifts[0].vendorId} ${shifts[0].from}→${shifts[0].to}` : "";
       setRecomputeResult(
-        `${body.projection?.scannedEvidenceRows ?? 0} verified rows · ${body.pillars?.pillarRowsUpserted ?? 0} pillar scores · ${body.scores?.vendorsUpdated ?? 0} vendors moved${topShift}${body.note ? ` — ${body.note}` : ""}`,
+        `${(body.projection?.scannedEvidenceRows ?? 0).toLocaleString()} signals processed · ${body.pillars?.pillarRowsUpserted ?? 0} pillar scores · ${body.scores?.vendorsUpdated ?? 0} vendors moved${topShift}${body.note ? ` — ${body.note}` : ""}`,
       );
     } catch (e) {
       setRecomputeError((e as Error).message);
@@ -362,7 +239,45 @@ export default function IngestionConsole({
     }
   }
 
-  const anyBusy = busyAll || busyNews || busyManual || busyMarket || busyRecompute;
+  async function updateEloScores() {
+    setBusyElo(true);
+    setEloError(null);
+    setEloResult(null);
+    try {
+      const res = await fetch(`/api/admin/elo/seed`, {
+        method: "POST",
+        headers: token ? { "x-admin-token": token } : {},
+      });
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(body.error ?? `HTTP ${res.status}`);
+      setEloResult(
+        `${body.updated ?? 0} vendors updated · ${body.notFound?.length ?? 0} not found in DB`,
+      );
+    } catch (e) {
+      setEloError((e as Error).message);
+    } finally {
+      setBusyElo(false);
+    }
+  }
+
+  function fillEvidenceGaps() {
+    // Batch of up to 10 least-evidenced vendors per click to bound web_search
+    // cost + runtime. The work runs server-side; safe to navigate away.
+    void gapsJob.fire(`/api/admin/web-evidence`, { gaps: true, limit: 10 });
+  }
+
+  // Format the gap-sourcing result from the completed background job.
+  const gapsResult = (() => {
+    const j = gapsJob.job;
+    if (gapsJob.busy || !j || j.status !== "ok") return null;
+    const r = j.result as { totalGaps?: number; sourced?: number; vendorsWithFindings?: number; proposalsPersisted?: number };
+    if (typeof r.sourced !== "number") return null;
+    const remaining = Math.max(0, (r.totalGaps ?? 0) - (r.sourced ?? 0));
+    return `Sourced ${r.sourced ?? 0} of ${r.totalGaps ?? 0} gap vendors · ${r.vendorsWithFindings ?? 0} returned evidence · ${r.proposalsPersisted ?? 0} proposals queued for review${remaining > 0 ? ` · ${remaining} still need sourcing — run again` : " · all gaps sourced"}`;
+  })();
+  const gapsError = gapsJob.error ?? (gapsJob.job?.status === "error" ? gapsJob.job.error : null);
+
+  const anyBusy = sourcingJob.busy || newsJob.busy || busyManual || marketJob.busy || busyRecompute || busyElo || gapsJob.busy;
 
   return (
     <div className="min-h-screen bg-[#f6f1e3] dark:bg-[#071827] text-[#15263c] dark:text-[#eef3f8]">
@@ -406,6 +321,21 @@ export default function IngestionConsole({
             and ranking snapshots — so the dashboard, quadrant, ecosystem navigator, and generators reflect
             the latest evidence immediately. No sourcing, no LLM cost. (The 03:05 UTC cron does this daily.)
           </p>
+          {verifiedSignals != null && (
+            <div className="mt-3 inline-flex items-center gap-2 rounded-lg border border-[#d4af37]/60 bg-white/70 px-3 py-1.5 text-sm dark:bg-[#0a1f38]/50">
+              <span className="text-lg font-bold tabular-nums text-[#15263c] dark:text-[#eef3f8]">
+                {verifiedSignals.toLocaleString()}
+              </span>
+              <span className="text-[#3f5068] dark:text-[#a7bacd]">
+                verified evidence signal{verifiedSignals === 1 ? "" : "s"} to process this run
+                {verifiedSignals > RECOMPUTE_ROW_CAP && (
+                  <span className="ml-1 text-[#a07f1f] dark:text-[#d4af37]">
+                    · capped at {RECOMPUTE_ROW_CAP.toLocaleString()}/run (newest first)
+                  </span>
+                )}
+              </span>
+            </div>
+          )}
           <div className="mt-4 flex flex-wrap items-center gap-3">
             <button
               type="button"
@@ -418,6 +348,75 @@ export default function IngestionConsole({
           </div>
           {recomputeResult && !busyRecompute && <ResultBanner text={recomputeResult} />}
           {recomputeError && <ErrorBanner text={recomputeError} />}
+        </div>
+
+        {/* ── ARENA ELO: seed Model Provider overallScores from benchmark ─ */}
+        <div className="mt-6 rounded-2xl border border-[#d6c9a8] dark:border-[#2a4a6b] bg-white dark:bg-[#0c2238] p-6 shadow-sm">
+          <div className="text-[10px] font-semibold uppercase tracking-wider text-[#4c5d75]">
+            Benchmark anchor · Model Provider scoring
+          </div>
+          <h2 className="mt-1 text-lg font-semibold text-[#15263c] dark:text-[#eef3f8]">
+            Update Arena ELO scores
+          </h2>
+          <p className="mt-1 text-sm text-[#3f5068] dark:text-[#a7bacd]">
+            Seeds <code className="font-mono text-xs">overallScore</code> for each Model Provider vendor from the top-2 Arena ELO average per vendor.
+            Source:{" "}
+            <a href="https://openlm.ai/chatbot-arena/" target="_blank" rel="noopener noreferrer"
+              className="underline hover:text-[#15263c] dark:hover:text-white">
+              openlm.ai/chatbot-arena/
+            </a>
+            . Fixed anchors (ELO 1050→30, ELO 1510→95) — stable as new vendors enter the leaderboard.
+            The <code className="font-mono text-xs">derive-scores</code> cron will not override these until a vendor has ≥3 pillar evidence rows.
+          </p>
+          <div className="mt-4 flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              disabled={anyBusy}
+              onClick={() => updateEloScores()}
+              className="inline-flex items-center gap-2 rounded-full bg-[#0c2238] px-5 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#1d3a5f] disabled:opacity-40 dark:bg-[#1d3a5f] dark:hover:bg-[#2a4a6b]"
+            >
+              {busyElo ? <><SpinIcon />Updating ELO scores…</> : <>Seed Arena ELO scores <span aria-hidden>→</span></>}
+            </button>
+          </div>
+          {eloResult && !busyElo && <ResultBanner text={eloResult} />}
+          {eloError && <ErrorBanner text={eloError} />}
+        </div>
+
+        {/* ── FILL EVIDENCE GAPS: web_search-source un-evidenced vendors ─ */}
+        <div className="mt-6 rounded-2xl border border-[#d6c9a8] dark:border-[#2a4a6b] bg-white dark:bg-[#0c2238] p-6 shadow-sm">
+          <div className="text-[10px] font-semibold uppercase tracking-wider text-[#4c5d75]">
+            Establish data sources · vendors with limited / no evidence
+          </div>
+          <h2 className="mt-1 text-lg font-semibold text-[#15263c] dark:text-[#eef3f8]">
+            Fill evidence gaps (web search)
+          </h2>
+          <p className="mt-1 text-sm text-[#3f5068] dark:text-[#a7bacd]">
+            Targets exactly the vendors showing the <span className="font-semibold text-rose-700 dark:text-rose-300">&ldquo;seed estimate&rdquo;</span> / <span className="font-semibold text-amber-700 dark:text-amber-300">&ldquo;limited evidence&rdquo;</span> alerts (fewer than 10 analyst-verified rows). Uses web search to discover <strong>real, cited</strong> sources across the pillar domains and queues them as proposals for review in <Link href="/admin/evidence" className="underline">/admin/evidence</Link>. Processes up to 10 least-evidenced vendors per click to bound cost — re-run for the rest.
+          </p>
+          <p className="mt-2 text-xs font-semibold text-amber-700 dark:text-amber-300">
+            ⚠ Spends Anthropic web_search credit (~5 searches/vendor). Nothing is fabricated — only real cited sources are recorded.
+          </p>
+          <div className="mt-4 flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              disabled={anyBusy}
+              onClick={() => fillEvidenceGaps()}
+              className="inline-flex items-center gap-2 rounded-full bg-[#0c2238] px-5 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#1d3a5f] disabled:opacity-40 dark:bg-[#1d3a5f] dark:hover:bg-[#2a4a6b]"
+            >
+              {gapsJob.busy ? <><SpinIcon />Sourcing gap vendors…</> : <>Source next 10 gap vendors <span aria-hidden>→</span></>}
+            </button>
+            {gapsJob.busy && (
+              <span className="text-xs text-[#4c5d75] dark:text-[#a7bacd]">
+                {(() => {
+                  const p = gapsJob.job?.progress as { current?: number; total?: number; vendor?: string } | undefined;
+                  const prog = p && typeof p.current === "number" && p.total ? `${p.current}/${p.total}${p.vendor ? ` · ${p.vendor}` : ""}` : "starting…";
+                  return `Running server-side (${prog}) · ${gapsJob.elapsedSec}s — safe to leave this page`;
+                })()}
+              </span>
+            )}
+          </div>
+          {gapsResult && <ResultBanner text={gapsResult} />}
+          {gapsError && <ErrorBanner text={gapsError} />}
         </div>
 
         {/* ── PRIMARY: rolling ingest ─────────────────────────────────── */}
@@ -443,7 +442,7 @@ export default function IngestionConsole({
               onClick={() => ingestNow()}
               className="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 disabled:opacity-40 dark:bg-emerald-500 dark:hover:bg-emerald-400"
             >
-              {busyAll ? (
+              {sourcingJob.busy ? (
                 <><SpinIcon />Running…</>
               ) : (
                 <>Ingest today&apos;s vendor <span aria-hidden>→</span></>
@@ -451,7 +450,7 @@ export default function IngestionConsole({
             </button>
           </div>
 
-          {/* Multi-vendor batch selection — runs sequentially, each vendor saved as it finishes. */}
+          {/* Multi-vendor batch selection — loops SERVER-SIDE; safe to leave the tab. */}
           <VendorMultiSelect
             title="Or select vendors to ingest (multi-select + select all)"
             vendors={vendors}
@@ -462,8 +461,8 @@ export default function IngestionConsole({
             onRun={() => ingestSelected(stdSelected)}
             runLabel="Run selected"
           />
-          {busyAll && <ProgressBanner elapsed={elapsedSec} label="Rolling pipeline" detail="Fetching sources, extracting proposals with the 3-stage AI pipeline (Haiku → Sonnet → Opus), and writing results. Typically 1–4 minutes." batch={batch?.scope === "std" ? batch : null} />}
-          {ingestResult && !busyAll && <ResultBanner text={ingestResult} />}
+          {sourcingJob.busy && <ProgressBanner elapsed={sourcingJob.elapsedSec} label="Rolling pipeline" detail="Fetching sources, extracting proposals with the 3-stage AI pipeline (Haiku → Sonnet → Opus), and writing results. Runs server-side — safe to leave this page." batch={jobBatch(sourcingJob.job)} />}
+          {ingestResult && <ResultBanner text={ingestResult} />}
           {ingestError && <ErrorBanner text={ingestError} />}
         </div>
 
@@ -489,10 +488,10 @@ export default function IngestionConsole({
               onClick={() => refreshNewsFeed()}
               className="inline-flex items-center gap-2 rounded-full bg-violet-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-violet-700 disabled:opacity-40 dark:bg-violet-500 dark:hover:bg-violet-400"
             >
-              {busyMarket ? <><SpinIcon />Refreshing…</> : <>Refresh news feed <span aria-hidden>→</span></>}
+              {marketJob.busy ? <><SpinIcon />Refreshing…</> : <>Refresh news feed <span aria-hidden>→</span></>}
             </button>
           </div>
-          {marketResult && !busyMarket && <ResultBanner text={marketResult} color="sky" />}
+          {marketResult && <ResultBanner text={marketResult} color="sky" />}
           {marketError && <ErrorBanner text={marketError} />}
         </div>
 
@@ -519,7 +518,7 @@ export default function IngestionConsole({
               onClick={() => ingestNews()}
               className="inline-flex items-center gap-2 rounded-full bg-sky-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-sky-700 disabled:opacity-40 dark:bg-sky-500 dark:hover:bg-sky-400"
             >
-              {busyNews ? (
+              {newsJob.busy ? (
                 <><SpinIcon />Running…</>
               ) : (
                 <>Run today&apos;s news vendor <span aria-hidden>→</span></>
@@ -538,8 +537,8 @@ export default function IngestionConsole({
             onRun={() => ingestNewsSelected(newsSelected)}
             runLabel="Run selected"
           />
-          {busyNews && <ProgressBanner elapsed={elapsedNewsSec} label="News discovery pipeline" detail="Fetching listing pages, scoring articles for relevance and importance (Haiku), deduplicating, then ingesting fresh articles. Typically 2–5 minutes." color="sky" batch={batch?.scope === "news" ? batch : null} />}
-          {newsResult && !busyNews && <ResultBanner text={newsResult} color="sky" />}
+          {newsJob.busy && <ProgressBanner elapsed={newsJob.elapsedSec} label="News discovery pipeline" detail="Fetching listing pages, scoring articles for relevance and importance (Haiku), deduplicating, then ingesting fresh articles. Runs server-side — safe to leave this page." color="sky" batch={jobBatch(newsJob.job)} />}
+          {newsResult && <ResultBanner text={newsResult} color="sky" />}
           {newsError && <ErrorBanner text={newsError} />}
         </div>
 
@@ -618,6 +617,28 @@ export default function IngestionConsole({
       </main>
     </div>
   );
+}
+
+// ── Background-job result helpers ─────────────────────────────────────────────
+
+/** Format a completed sourcing/news/market/batch job's result for the banner.
+ *  Returns null while running or before a result exists. */
+function sourcingResultText(j: { busy: boolean; job: BackgroundJob | null }): string | null {
+  if (j.busy || !j.job || j.job.status !== "ok") return null;
+  const r = (j.job.result ?? {}) as Record<string, unknown>;
+  const n = (k: string) => Number(r[k] ?? 0);
+  if (typeof r.vendors === "number") return `Ran ${r.vendors} vendor${r.vendors === 1 ? "" : "s"} · ${n("ok")} ok · ${n("failed")} failed · ${n("proposalsPersisted")} proposals`;
+  if (r.itemsUpserted !== undefined || r.feedsFetched !== undefined) return `${n("feedsFetched")} feeds · ${n("itemsScored")} scored · ${n("itemsUpserted")} added to feed`;
+  if (r.articlesDiscovered !== undefined || r.articlesIngested !== undefined) return `${n("articlesDiscovered")} discovered · ${n("articlesIngested")} ingested · ${n("proposalsPersisted")} proposals`;
+  if (r.proposalsExtracted !== undefined || r.proposalsPersisted !== undefined) return `${r.vendorId ?? "vendor"} · ${n("proposalsExtracted")} extracted · ${n("proposalsPersisted")} persisted`;
+  return j.job.label ? `${j.job.label} — done` : "Done";
+}
+
+/** Extract a {current,total,vendor} batch snapshot from a job's progress. */
+function jobBatch(job: BackgroundJob | null): { current: number; total: number; vendor: string } | null {
+  const p = job?.progress as { current?: number; total?: number; vendor?: string } | undefined;
+  if (!p || typeof p.current !== "number" || !p.total || p.total <= 1) return null;
+  return { current: p.current, total: p.total, vendor: typeof p.vendor === "string" ? p.vendor : "" };
 }
 
 // ── Sub-components ────────────────────────────────────────────────────────────

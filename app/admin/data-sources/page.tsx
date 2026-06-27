@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { dashboardSummary, listConnectorHealth } from "@/lib/connectors/registry";
+import ReingestSourcesButton from "@/components/admin/ReingestSourcesButton";
 
 export const dynamic = "force-dynamic";
 
@@ -41,6 +42,9 @@ export default function DataSourcesPage() {
           <Stat label="Status: error" value={summary.errorStatus} tone="bad" />
           <Stat label="Rate limited" value={summary.rateLimited} tone="warn" />
         </div>
+
+        {/* One-time reingest / connectivity probe across every connector */}
+        <ReingestSourcesButton />
 
         {/* Per-group panels */}
         <div className="mt-8 space-y-6">

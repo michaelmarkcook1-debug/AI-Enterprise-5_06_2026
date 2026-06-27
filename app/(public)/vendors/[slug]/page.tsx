@@ -443,6 +443,20 @@ function layerRankFor(entity: Entity): { rank: number; peers: number; layerLabel
 
 // ── Data fetching helpers ─────────────────────────────────────────────────────
 
+/** Live count of analyst_verified evidence rows for this vendor — the honest
+ * signal behind its scores. The static ENTITIES roster is always seed (0), so
+ * the real depth must be read from the DB. 0 = seed estimate. */
+async function fetchEvidenceDepth(entityId: string): Promise<number> {
+  if (!hasDatabase()) return 0;
+  try {
+    return await getPrisma().evidenceRecord.count({
+      where: { vendorId: entityId, reviewStatus: "analyst_verified" },
+    });
+  } catch {
+    return 0;
+  }
+}
+
 async function fetchSnapshots(entityId: string): Promise<SnapshotPoint[]> {
   if (!hasDatabase()) return [];
   try {
@@ -541,12 +555,13 @@ export default async function VendorDeepDivePage({
   const reputation = getVendorReputation(intelId);
 
   // 2. Fetch snapshot history + reputation history + news + within-category
-  //    composite standings in parallel.
-  const [snapshots, reputationSeries, allNews, categoryStandings] = await Promise.all([
+  //    composite standings + evidence depth in parallel.
+  const [snapshots, reputationSeries, allNews, categoryStandings, evidenceDepth] = await Promise.all([
     fetchSnapshots(intelId),
     getReputationSnapshots(intelId),
     listNewsItems(),
     getVendorCategoryStandings(intelId).catch(() => []),
+    fetchEvidenceDepth(entity.id),
   ]);
 
   // Filter news to this entity
@@ -611,14 +626,26 @@ export default async function VendorDeepDivePage({
           leadershipDelta: entity.deltas.leadership,
         })} />
 
+        {/* ── Evidence-depth honesty banner ─────────────────────────────── */}
+        {evidenceDepth < 10 && (
+          <div className={`mb-4 rounded-lg border px-4 py-3 text-sm ${evidenceDepth <= 0
+            ? "border-rose-400 bg-rose-50 text-rose-900 dark:border-rose-700 dark:bg-rose-950/40 dark:text-rose-200"
+            : "border-amber-400 bg-amber-50 text-amber-900 dark:border-amber-700 dark:bg-amber-950/30 dark:text-amber-200"}`}>
+            <strong>{evidenceDepth <= 0 ? "Seed estimate — no verified evidence." : `Limited evidence — ${evidenceDepth} analyst-verified row${evidenceDepth === 1 ? "" : "s"}.`}</strong>{" "}
+            {evidenceDepth <= 0
+              ? "The scores below are directional seed estimates with no analyst-verified evidence behind them. Treat as a starting hypothesis, not a measured assessment."
+              : "The scores below rest on a thin evidence base — treat as preliminary until more sources are verified."}
+          </div>
+        )}
+
         {/* ── Score grid (6 tiles) ──────────────────────────────────────── */}
-        <section className="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
-          <ScoreTile label="Leadership" value={entity.leadershipScore} delta={entity.deltas.leadership} />
+        <section className={`mb-6 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6 ${evidenceDepth < 10 ? (evidenceDepth <= 0 ? "opacity-60" : "opacity-80") : ""}`}>
+          <ScoreTile label="Final Score" value={entity.leadershipScore} delta={entity.deltas.leadership} />
           <ScoreTile label="Innovation"  value={entity.innovation} />
           <ScoreTile label="Readiness"   value={entity.readiness} />
           <ScoreTile label="Momentum"   value={entity.momentum}   delta={entity.deltas.reach} />
           <ScoreTile label="Ecosystem Reach" value={entity.ecosystemReach} delta={entity.deltas.reach} />
-          <ScoreTile label="Confidence" value={entity.confidence} />
+          <ScoreTile label="Evidence" value={evidenceDepth} />
         </section>
 
         {/* ── AI-market role breakdown (multi-role giants only) ─────────────── */}

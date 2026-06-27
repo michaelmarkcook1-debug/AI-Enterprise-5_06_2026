@@ -9,7 +9,7 @@ type Client = PrismaClient;
 
 // resolveVendorProfileId lives in vendor-id-bridge.ts so the seed
 // script + approval path use the same logic.
-import { resolveVendorProfileId } from "./vendor-id-bridge";
+import { resolveOrCreateVendorProfileId } from "./vendor-id-bridge";
 
 export async function listProposals(
   filter: { status?: ProposalStatus; vendorId?: string } = {},
@@ -57,10 +57,11 @@ export async function approveProposal(input: {
   // matches a VendorProfile, use it. Otherwise fall through to the
   // product-linkage canonicaliser (which knows the ticker mappings)
   // and try matching ticker → plain name via a small inverse map.
-  const canonVendorId = await resolveVendorProfileId(c, proposal.vendorId);
+  const canonVendorId = await resolveOrCreateVendorProfileId(c, proposal.vendorId);
   if (!canonVendorId) {
     throw new Error(
-      `Cannot approve ${proposal.id}: no VendorProfile matches "${proposal.vendorId}". Add the vendor first or run prisma db seed.`,
+      `Cannot approve ${proposal.id}: "${proposal.vendorId}" matches no vendor in the intelligence spine. ` +
+        `The vendor must exist in IntelligenceVendor first.`,
     );
   }
 

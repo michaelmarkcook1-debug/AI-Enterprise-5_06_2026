@@ -109,6 +109,12 @@ export type Entity = {
   cioInterpretation: string;
   evidenceGrade: "E1" | "E2" | "E3" | "E4" | "E5";
   dataCaveats: string;
+  // Evidence depth + honesty band. evidenceDepth = count of analyst_verified
+  // EvidenceRecord rows backing this vendor (0 = pure seed, no verified data).
+  // dataConfidence is derived from it (see evidenceDepthBand) so every surface
+  // can mark un-evidenced scores instead of presenting them as authoritative.
+  evidenceDepth: number;
+  dataConfidence: "verified" | "limited" | "seed";
   // Optional infra sub-band (primary + optional secondary), for the
   // Silicon / Cloud / Neocloud grouping. Absent = not yet banded.
   infraBand?: InfraBand;
@@ -125,13 +131,18 @@ export type Entity = {
 // The fix is `rankingLeadership()`, applied once at entity construction (and
 // mirrored in the live DB adapter) so every surface agrees. It is two stages:
 //
-//  1. blendLeadership(): dilute raw market leadership with capability signals —
-//     50% market leadership, 30% enterprise readiness, 20% innovation velocity.
-//     The scale compression below (not a deweighting of readiness) is what demotes
-//     incumbents, so readiness stays meaningful — it stops immature, high-risk
-//     labs (low readiness / E1 evidence) from floating above enterprise-ready
-//     platforms on the board. Innovation is kept the smallest term because in the
-//     live path it is momentum-derived (noisy); leadership should be steadier.
+//  1. blendLeadership(): dilute raw market leadership with capability signals.
+//     Most roles: 50% market leadership, 30% enterprise readiness, 20% innovation.
+//     MODEL PROVIDERS: 70% / 10% / 20% — readiness is downgraded because for a
+//     model ranking raw capability (incl. the Arena-ELO model_quality pillar
+//     carried in overallScore) should dominate, and a high readiness weight
+//     double-counted enterprise_control (already a base pillar) — letting
+//     optimistically-seeded enterprise pillars float a lab above higher-ELO
+//     peers. The scale compression below (not a deweighting of readiness) is what
+//     demotes incumbents in the OTHER roles, so readiness stays meaningful there —
+//     it stops immature, high-risk labs from floating above enterprise-ready
+//     platforms. Innovation is kept small because in the live path it is
+//     momentum-derived (noisy); leadership should be steadier.
 //  2. compressScaleLeadership(): for the pure scale / distribution / capital roles
 //     (Platform, Cloud / Hosting, Investor) the score is compressed halfway toward
 //     a strong-but-not-leading 70 anchor. Being the #1 investor or cloud reseller
@@ -161,13 +172,28 @@ const CAPABILITY_HOUSE_MODEL_THRESHOLD = 75;
 
 const finite = (x: number): number => (Number.isFinite(x) ? x : 0);
 
-/** Capability-aware blend of a raw market-leadership score. */
+/** Capability-aware blend of a raw market-leadership score.
+ *
+ * MODEL PROVIDERS use a readiness-downgraded weighting (Jun 2026): readiness is
+ * cut to 0.10 and the freed weight moves to market leadership (which carries the
+ * Arena-ELO model_quality pillar). Rationale: for a *model* ranking, raw model
+ * quality should dominate enterprise readiness — and readiness double-counts
+ * enterprise_control, which is already a base pillar inside overallScore, so a
+ * high 0.30 readiness weight let optimistically-seeded enterprise pillars prop
+ * vendors above higher-ELO peers. Every other role keeps the original
+ * 0.50/0.30/0.20, where enterprise readiness is genuinely more load-bearing.
+ * primaryRole is optional + defaults to the original weights so other callers
+ * are unaffected. */
 export function blendLeadership(
   marketLeadership: number,
   readiness: number,
   innovation: number,
+  primaryRole?: Role,
 ): number {
-  const blended = 0.5 * finite(marketLeadership) + 0.3 * finite(readiness) + 0.2 * finite(innovation);
+  const [wO, wR, wI] = primaryRole === "Model Provider"
+    ? [0.7, 0.1, 0.2]
+    : [0.5, 0.3, 0.2];
+  const blended = wO * finite(marketLeadership) + wR * finite(readiness) + wI * finite(innovation);
   return Math.round(Math.max(0, Math.min(100, blended)));
 }
 
@@ -197,7 +223,7 @@ export function rankingLeadership(
   primaryRole: Role,
   roleScores?: RoleScores,
 ): number {
-  const blended = blendLeadership(marketLeadership, readiness, innovation);
+  const blended = blendLeadership(marketLeadership, readiness, innovation, primaryRole);
   if (!LEADERSHIP_BY_SCALE_ROLES.has(primaryRole)) return blended;
   // Carve-out: a genuine frontier-model house keeps its blended score even when
   // its primary tag is a platform/cloud/capital role.
@@ -273,10 +299,26 @@ export function entity(
     cioInterpretation,
     evidenceGrade,
     dataCaveats,
+    // The static roster carries no DB-verified evidence by definition, so it is
+    // honestly labelled 'seed'. The live adapter overrides these from real
+    // analyst_verified counts.
+    evidenceDepth: 0,
+    dataConfidence: "seed",
     infraBand: bands?.infraBand,
     infraBandSecondary: bands?.infraBandSecondary,
     roleScores,
   };
+}
+
+/**
+ * Single source of truth for the evidence-confidence band. Driven by the count
+ * of analyst_verified EvidenceRecord rows backing a vendor:
+ *   ≥10 verified · 1–9 limited · 0 seed (no verified evidence).
+ * Both the live adapter and any static labelling import this so the thresholds
+ * never drift.
+ */
+export function evidenceDepthBand(depth: number): Entity["dataConfidence"] {
+  return depth >= 10 ? "verified" : depth >= 1 ? "limited" : "seed";
 }
 
 export const ENTITIES: Entity[] = [
@@ -288,8 +330,8 @@ export const ENTITIES: Entity[] = [
     "Application Vendor":        { leadership: 84, innovation: 76, readiness: 88, reach: 90, confidence: 82, evidenceGrade: "E4", rationale: "Copilot across M365, GitHub Copilot, Security Copilot — deepest packaged-AI application footprint in the enterprise." },
     "Investor":                 { leadership: 93, innovation: 70, readiness: 88, reach: 88, confidence: 88, evidenceGrade: "E4", rationale: "The OpenAI capped-profit stake (~$13B+) plus the Mistral position is arguably the single most valuable AI capital position on earth — it tops the capital-influence table." },
   } }),
-  entity("openai", "OpenAI", "private", "Model Provider", ["Application Vendor"], 89, 74, 89, "medium", 78, 17.6, 90, 78, [1, 1], [2, 2, 4, 0, 2], ["GPT", "o-series", "image/audio models"], [], ["Azure distribution", "API platform", "ChatGPT Enterprise"], ["Microsoft strategic investment"], ["NVIDIA GPU supply", "cloud partner capacity"], "OpenAI remains the model and product cadence shaper, but enterprise buyers should separate model quality from operating controls, data-retention evidence and dependency on Microsoft/Azure distribution.", "E3", "Usage share is directional and heavily influenced by public mindshare, API visibility and ChatGPT Enterprise references."),
-  entity("anthropic", "Anthropic", "private", "Model Provider", ["Application Vendor"], 90, 76, 84, "medium", 76, 19, 88, 80, [2, 2], [3, 3, 5, 1, 1], ["Claude Opus", "Claude Sonnet", "Claude Haiku"], [], ["AWS Bedrock", "Google Vertex AI", "Snowflake", "Databricks"], ["Amazon investment", "Google investment"], ["NVIDIA GPU supply", "AWS Trainium exposure"], "Anthropic is a model provider with rising application pull through Claude Code and computer-use patterns. Its enterprise attractiveness is strongest where reasoning, coding and safety posture matter more than packaged suite breadth.", "E3", "Distribution is multi-cloud but partner-dependent; first-party enterprise application footprint is narrower than Microsoft or Google."),
+  entity("openai", "OpenAI", "private", "Model Provider", ["Application Vendor"], 94, 74, 89, "medium", 78, 17.6, 90, 78, [1, 1], [2, 2, 4, 0, 2], ["GPT", "o-series", "image/audio models"], [], ["Azure distribution", "API platform", "ChatGPT Enterprise"], ["Microsoft strategic investment"], ["NVIDIA GPU supply", "cloud partner capacity"], "OpenAI remains the model and product cadence shaper, but enterprise buyers should separate model quality from operating controls, data-retention evidence and dependency on Microsoft/Azure distribution.", "E3", "Usage share is directional and heavily influenced by public mindshare, API visibility and ChatGPT Enterprise references."),
+  entity("anthropic", "Anthropic", "private", "Model Provider", ["Application Vendor"], 95, 76, 84, "medium", 76, 19, 88, 80, [2, 2], [3, 3, 5, 1, 1], ["Claude Opus", "Claude Sonnet", "Claude Haiku"], [], ["AWS Bedrock", "Google Vertex AI", "Snowflake", "Databricks"], ["Amazon investment", "Google investment"], ["NVIDIA GPU supply", "AWS Trainium exposure"], "Anthropic is a model provider with rising application pull through Claude Code and computer-use patterns. Its enterprise attractiveness is strongest where reasoning, coding and safety posture matter more than packaged suite breadth.", "E3", "Distribution is multi-cloud but partner-dependent; first-party enterprise application footprint is narrower than Microsoft or Google."),
   entity("google", "Google", "public", "Platform Vendor", ["Model Provider", "Cloud / Hosting Provider", "Hardware Provider", "Application Vendor"], 88, 69, 88, "medium", 82, 14.9, 84, 82, [1, 1], [1, 2, 2, 3, 0], ["Gemini", "Imagen", "Veo", "Gemma"], ["Anthropic Claude via Vertex"], ["Google Cloud", "Vertex AI", "Workspace", "TPU ecosystem"], ["Anthropic investment"], ["TPUs", "NVIDIA GPUs"], "Google is both platform and model provider: Gemini, Workspace, Vertex AI and TPU infrastructure should be read as one integrated stack, with enterprise traction strongest in cloud/data-heavy and Workspace-heavy estates.", "E4", "Public evidence is broad; commercial share varies by Workspace, Cloud and model API segment.", { infraBand: "cloud_compute", infraBandSecondary: "silicon", roleScores: {
     "Model Provider":           { leadership: 83, innovation: 90, readiness: 84, reach: 86, confidence: 84, evidenceGrade: "E4", rationale: "Gemini is genuinely frontier FIRST-PARTY model IP (very high innovation), but on ENTERPRISE COMMERCIAL model share Google is a clear #3 (~20%) behind Anthropic and OpenAI — so its model leadership sits just behind them, not ahead. Owns the full stack from research (DeepMind) to model to serving." },
     "Hardware Provider":        { leadership: 84, innovation: 86, readiness: 80, reach: 70, confidence: 80, evidenceGrade: "E4", rationale: "TPU v5/v6 is the only credible at-scale alternative to NVIDIA for frontier training — very high AI-hardware leadership, but largely captive (consumed internally / via Cloud, not broadly merchant-sold)." },
@@ -310,13 +352,13 @@ export const ENTITIES: Entity[] = [
     "Infrastructure Player": { leadership: 88, innovation: 86, readiness: 86, reach: 90, confidence: 86, evidenceGrade: "E4", rationale: "CUDA software moat, DGX Cloud, AI Enterprise software and NVLink/InfiniBand networking extend NVIDIA well beyond the chip into the AI infrastructure stack." },
     "Investor":              { leadership: 78, innovation: 72, readiness: 80, reach: 82, confidence: 80, evidenceGrade: "E3", rationale: "Strategic stakes across the AI ecosystem (neoclouds, model labs, robotics) make NVIDIA a major shaper of who gets compute — capital influence amplifies its hardware dominance." },
   } }),
-  entity("meta", "Meta", "public", "Model Provider", ["Open-Source Ecosystem", "Application Vendor"], 72, 66, 80, "medium", 66, 3.5, 78, 55, [1, 0], [1, 3, 2, 0, 1], ["Llama"], [], ["Open-weight ecosystem", "hyperscaler hosting"], [], ["NVIDIA GPUs"], "Meta matters because Llama changes enterprise negotiation leverage and open-weight strategy — but as a FIRST-PARTY enterprise model vendor it is a minor commercial player: no managed enterprise model service, no first-party enterprise controls, and tiny direct commercial share. Read Meta's strength as open-weights influence, not enterprise model leadership.", "E2", "Enterprise controls and serving come from hosting partners, not Meta first-party; commercial model share is small versus the influence of the open weights.", { roleScores: {
+  entity("meta", "Meta", "public", "Model Provider", ["Open-Source Ecosystem", "Application Vendor"], 78, 66, 80, "medium", 66, 3.5, 78, 55, [1, 0], [1, 3, 2, 0, 1], ["Llama"], [], ["Open-weight ecosystem", "hyperscaler hosting"], [], ["NVIDIA GPUs"], "Meta matters because Llama changes enterprise negotiation leverage and open-weight strategy — but as a FIRST-PARTY enterprise model vendor it is a minor commercial player: no managed enterprise model service, no first-party enterprise controls, and tiny direct commercial share. Read Meta's strength as open-weights influence, not enterprise model leadership.", "E2", "Enterprise controls and serving come from hosting partners, not Meta first-party; commercial model share is small versus the influence of the open weights.", { roleScores: {
     "Open-Source Ecosystem": { leadership: 86, innovation: 82, readiness: 70, reach: 88, confidence: 74, evidenceGrade: "E3", rationale: "Llama anchors the open-weight ecosystem — the reference point that resets enterprise negotiating leverage on closed-model pricing. This is Meta's strongest AI role, and the only one where it genuinely leads." },
     "Model Provider":        { leadership: 63, innovation: 77, readiness: 52, reach: 66, confidence: 64, evidenceGrade: "E2", rationale: "As a first-party ENTERPRISE COMMERCIAL model vendor Meta is mid-pack at best: Llama is capable, but Meta sells no managed enterprise model service, ships no first-party enterprise controls/SLAs, and captures tiny direct commercial share — serving and governance come from hosting partners. The open-weights leverage (scored separately, 86) is the real story, not enterprise model leadership." },
     "Application Vendor":    { leadership: 62, innovation: 66, readiness: 55, reach: 72, confidence: 60, evidenceGrade: "E2", rationale: "Meta AI is consumer-led; first-party enterprise application footprint is thin — a very different (and weaker) story than its open-source leadership." },
   } }),
-  entity("mistral", "Mistral AI", "private", "Model Provider", ["Sovereign / Regional AI", "Open-Source Ecosystem"], 77, 70, 68, "medium", 67, 4.9, 80, 66, [2, 1], [3, 2, 2, 0, 1], ["Large", "Medium", "Small", "Codestral", "Magistral"], [], ["Azure AI Foundry", "La Plateforme"], ["Microsoft partnership"], ["NVIDIA GPUs"], "Mistral is the clearest European sovereign-model alternative with open-weight leverage, but buyers still need to validate enterprise controls and account support depth.", "E2", "Momentum is visible; enterprise production evidence remains more selective than US hyperscaler-backed peers."),
-  entity("cohere", "Cohere (incl. Aleph Alpha)", "private", "Model Provider", ["Data & Services Provider", "Sovereign / Regional AI"], 74, 62, 64, "medium", 69, 3.6, 68, 68, [1, 1], [1, 2, 1, 0, 1], ["Command", "Embed", "Rerank", "Pharia (ex-Aleph Alpha)", "Luminous (ex-Aleph Alpha)"], [], ["Private deployment", "RAG workloads", "STACKIT sovereign cloud"], ["Oracle partnership", "Schwarz/STACKIT backing"], ["NVIDIA GPUs"], "Cohere completed its merger with Aleph Alpha in April 2026 (~$20B combined entity, Cohere shareholders ~90%), forming a transatlantic Canadian-German sovereign-AI champion for regulated sectors. Strongest where private deployment, data residency and RAG outweigh broad-market visibility.", "E2", "Merger is recent (Apr 2026); integration of Pharia/Luminous model lines and combined go-to-market is still consolidating. Aleph Alpha is no longer tracked as a separate entity."),
+  entity("mistral", "Mistral AI", "private", "Model Provider", ["Sovereign / Regional AI", "Open-Source Ecosystem"], 82, 70, 68, "medium", 67, 4.9, 80, 66, [2, 1], [3, 2, 2, 0, 1], ["Large", "Medium", "Small", "Codestral", "Magistral"], [], ["Azure AI Foundry", "La Plateforme"], ["Microsoft partnership"], ["NVIDIA GPUs"], "Mistral is the clearest European sovereign-model alternative with open-weight leverage, but buyers still need to validate enterprise controls and account support depth.", "E2", "Momentum is visible; enterprise production evidence remains more selective than US hyperscaler-backed peers."),
+  entity("cohere", "Cohere (incl. Aleph Alpha)", "private", "Model Provider", ["Data & Services Provider", "Sovereign / Regional AI"], 63, 62, 64, "medium", 69, 3.6, 68, 68, [1, 1], [1, 2, 1, 0, 1], ["Command", "Embed", "Rerank", "Pharia (ex-Aleph Alpha)", "Luminous (ex-Aleph Alpha)"], [], ["Private deployment", "RAG workloads", "STACKIT sovereign cloud"], ["Oracle partnership", "Schwarz/STACKIT backing"], ["NVIDIA GPUs"], "Cohere completed its merger with Aleph Alpha in April 2026 (~$20B combined entity, Cohere shareholders ~90%), forming a transatlantic Canadian-German sovereign-AI champion for regulated sectors. Strongest where private deployment, data residency and RAG outweigh broad-market visibility.", "E2", "Merger is recent (Apr 2026); integration of Pharia/Luminous model lines and combined go-to-market is still consolidating. Aleph Alpha is no longer tracked as a separate entity."),
   entity("ibm", "IBM", "public", "Platform Vendor", ["Model Provider", "Data & Services Provider"], 67, 62, 69, "low", 78, 3.0, 61, 76, [0, 0], [1, 1, 0, 1, -1], ["Granite"], ["Mistral", "Llama"], ["watsonx", "Red Hat", "hybrid cloud"], [], ["NVIDIA GPUs", "IBM Z acceleration"], "IBM is a control, governance and hybrid-AI benchmark. It is less of a hype leader, but it matters in regulated deployments where auditability outranks speed.", "E4", "Momentum is more conservative; score should be weighted differently for high-control buyers. AI-scope recalibration (Jun 2026): composite cut 74→67 — watsonx/Granite are a solid governance-AI story but modest in AI-market terms; the prior score leaned on IBM's general enterprise/services reputation."),
   entity("databricks", "Databricks", "private", "Data & Services Provider", ["Platform Vendor", "Infrastructure Player"], 78, 67, 76, "medium", 74, 3.7, 71, 74, [1, 1], [2, 2, 2, 2, 0], ["Mosaic AI platform (DBRX model retired Apr 2025)"], ["Claude", "Llama", "Mistral"], ["Lakehouse", "Mosaic AI", "model serving"], [], ["NVIDIA GPUs", "cloud GPUs"], "Databricks is a build-and-data platform: high relevance for enterprises treating governed data as the AI foundation, less so for packaged assistant-only needs. Its model strategy is now host-third-party (native Claude via the Anthropic partnership); the first-party DBRX model line was retired in April 2025, though the Mosaic AI platform remains central.", "E3", "Category share depends heavily on data engineering maturity and existing lakehouse footprint. First-party frontier-model IP (DBRX) is deprecated — do not credit Databricks with a first-party model.", { infraBand: "data_platform" }),
   entity("snowflake", "Snowflake", "public", "Data & Services Provider", ["Platform Vendor", "Infrastructure Player"], 76, 64, 73, "medium", 73, 3.2, 68, 73, [1, 0], [1, 1, 1, 2, 0], ["Arctic"], ["Claude", "Mistral", "Llama"], ["Cortex AI", "Snowpark", "Data Cloud"], [], ["Cloud GPU supply"], "Snowflake is a governed data-cloud AI player. CIOs should read it as a data/control layer rather than a standalone frontier model competitor.", "E3", "First-party model claims are secondary to data-cloud adoption and partner model access.", { infraBand: "data_platform" }),
@@ -328,15 +370,15 @@ export const ENTITIES: Entity[] = [
   entity("rogo", "Rogo", "private", "Vertical Specialist", ["Application Vendor"], 69, 57, 46, "medium", 52, 1.6, 61, 55, [0, 0], [1, 0, 1, 0, 1], [], ["Multi-provider"], ["Financial research workflows"], [], ["Cloud GPU supply"], "Rogo is a financial-services specialist; useful for domain shortlists, but scale evidence and horizontal proof remain the diligence points.", "E1", "Small sample of public proof means confidence should stay conservative."),
   entity("writer", "Writer", "private", "Application Vendor", ["Model Provider"], 73, 61, 58, "medium", 60, 2.2, 64, 66, [1, 1], [1, 1, 1, 0, 0], ["Palmyra"], [], ["Enterprise content workflow platform"], [], ["Cloud GPU supply"], "Writer is an enterprise application and model provider for governed content and knowledge workflows. It is not a universal platform, but it can win specific business-user use cases.", "E2", "Category is crowded; broad enterprise scale proof matters."),
   entity("moveworks", "Moveworks", "subsidiary", "Application Vendor", ["Vertical Specialist"], 62, 60, 55, "medium", 63, 1.9, 62, 68, [0, 0], [1, 0, 1, 0, 0], [], ["Multi-provider"], ["Employee support automation"], [], ["Cloud GPU supply"], "Moveworks is now a ServiceNow subsidiary (acquisition closed Dec 2025, ~$2.85B) and is being folded into ServiceNow's Now Assist / Employee Center front-door rather than competing as a standalone platform. Strongest in IT and HR support-automation where deflection and resolution metrics are measurable, but read it as a captive ServiceNow capability, not an independent enterprise-AI leader.", "E2", "Owned by ServiceNow since Dec 2025; standalone competitive positioning no longer applies — assess within the ServiceNow platform."),
-  entity("deepseek", "DeepSeek", "private", "Model Provider", ["Sovereign / Regional AI", "Open-Source Ecosystem"], 66, 71, 65, "high", 55, 2.4, 84, 53, [3, 0], [2, 1, 3, 0, 3], ["R1", "V3"], [], ["API platform", "open release ecosystem"], [], ["GPU access constraints"], "DeepSeek is a cost-per-quality disruptor for model strategy, but regulated buyers must treat jurisdiction, data transfer and access compliance as gating factors.", "E1", "Performance and pricing signals are strong; enterprise controls and geopolitical access are uncertain."),
-  entity("alibaba-qwen", "Alibaba / Qwen", "public", "Model Provider", ["Cloud / Hosting Provider", "Sovereign / Regional AI", "Open-Source Ecosystem"], 71, 66, 70, "high", 58, 2.3, 78, 58, [1, 1], [1, 2, 2, 1, 2], ["Qwen"], [], ["Alibaba Cloud Model Studio"], [], ["GPU and accelerator supply"], "Qwen matters as a global frontier alternative with multilingual and regional reach. Western enterprise adoption depends on jurisdiction and procurement policy.", "E1", "Signals are strongest in APAC and open-weight contexts; global enterprise controls need validation.", { infraBand: "cloud_compute" }),
-  entity("moonshot-kimi", "Moonshot / Kimi", "private", "Model Provider", ["Sovereign / Regional AI"], 70, 63, 52, "high", 48, 1.4, 73, 50, [1, 0], [1, 0, 1, 0, 1], ["Kimi"], [], ["Platform API"], [], ["GPU supply"], "Moonshot/Kimi is a long-context and reasoning contender. It is useful for market scanning, but not yet a default enterprise platform choice.", "E1", "Enterprise packaging, procurement access and controls remain early."),
-  entity("zhipu-glm", "Zhipu / GLM", "private", "Model Provider", ["Sovereign / Regional AI"], 68, 58, 49, "high", 46, 1.2, 70, 49, [0, 0], [0, 0, 1, 0, 1], ["GLM"], [], ["API and regional enterprise deployments"], [], ["GPU supply"], "Zhipu/GLM is relevant for jurisdictional diversity and China-market coverage, with limited Western enterprise readiness evidence.", "E1", "Confidence is low outside domestic/regional contexts."),
+  entity("deepseek", "DeepSeek", "private", "Model Provider", ["Sovereign / Regional AI", "Open-Source Ecosystem"], 87, 71, 65, "high", 55, 2.4, 84, 53, [3, 0], [2, 1, 3, 0, 3], ["R1", "V3"], [], ["API platform", "open release ecosystem"], [], ["GPU access constraints"], "DeepSeek is a cost-per-quality disruptor for model strategy, but regulated buyers must treat jurisdiction, data transfer and access compliance as gating factors.", "E1", "Performance and pricing signals are strong; enterprise controls and geopolitical access are uncertain."),
+  entity("alibaba-qwen", "Alibaba / Qwen", "public", "Model Provider", ["Cloud / Hosting Provider", "Sovereign / Regional AI", "Open-Source Ecosystem"], 90, 66, 70, "high", 58, 2.3, 78, 58, [1, 1], [1, 2, 2, 1, 2], ["Qwen"], [], ["Alibaba Cloud Model Studio"], [], ["GPU and accelerator supply"], "Qwen matters as a global frontier alternative with multilingual and regional reach. Western enterprise adoption depends on jurisdiction and procurement policy.", "E1", "Signals are strongest in APAC and open-weight contexts; global enterprise controls need validation.", { infraBand: "cloud_compute" }),
+  entity("moonshot-kimi", "Moonshot / Kimi", "private", "Model Provider", ["Sovereign / Regional AI"], 88, 63, 52, "high", 48, 1.4, 73, 50, [1, 0], [1, 0, 1, 0, 1], ["Kimi"], [], ["Platform API"], [], ["GPU supply"], "Moonshot/Kimi is a long-context and reasoning contender. It is useful for market scanning, but not yet a default enterprise platform choice.", "E1", "Enterprise packaging, procurement access and controls remain early."),
+  entity("zhipu-glm", "Zhipu / GLM", "private", "Model Provider", ["Sovereign / Regional AI"], 90, 58, 49, "high", 46, 1.2, 70, 49, [0, 0], [0, 0, 1, 0, 1], ["GLM"], [], ["API and regional enterprise deployments"], [], ["GPU supply"], "Zhipu/GLM is relevant for jurisdictional diversity and China-market coverage, with limited Western enterprise readiness evidence.", "E1", "Confidence is low outside domestic/regional contexts."),
   entity("coreweave", "CoreWeave", "private", "Infrastructure Player", ["Cloud / Hosting Provider"], 74, 70, 79, "medium", 61, 1.7, 69, 73, [2, 1], [1, 3, 2, 5, 1], [], [], ["GPU cloud", "AI training infrastructure"], ["NVIDIA ecosystem ties"], ["NVIDIA GPUs"], "CoreWeave is a high-signal infrastructure player. It matters for supply, hosting and training capacity, not as an enterprise application vendor.", "E2", "Dependency and customer concentration should be watched.", { infraBand: "neocloud" }),
   entity("amd", "AMD", "public", "Hardware Provider", ["Infrastructure Player"], 70, 65, 67, "medium", 70, 1.5, 65, 70, [1, 0], [1, 2, 1, 3, 0], [], [], ["MI accelerator ecosystem"], [], ["Own accelerator roadmap"], "AMD is an alternative accelerator provider that affects negotiating leverage and supply diversification more than direct AI application choice.", "E3", "Software ecosystem maturity remains the key counterweight to hardware performance.", { infraBand: "silicon" }),
   entity("broadcom", "Broadcom", "public", "Hardware Provider", ["Infrastructure Player"], 68, 62, 76, "low", 68, 1.3, 60, 73, [0, 0], [0, 2, 0, 3, -1], [], [], ["AI networking", "custom silicon"], [], ["Own networking and ASIC exposure"], "Broadcom is part of the infrastructure dependency map through networking and custom silicon — arguably the second-broadest AI-infrastructure footprint after NVIDIA: ~60% of the custom-AI-ASIC/XPU market (Google TPU, Meta MTIA, etc.) plus the Tomahawk/Jericho networking inside most large training clusters. CIO relevance is indirect but important for cloud cost and capacity.", "E3", "Enterprise buyer visibility is indirect through cloud and infrastructure suppliers; AI revenue is concentrated in a handful of hyperscaler accounts.", { infraBand: "silicon" }),
   entity("tsmc", "TSMC", "public", "Hardware Provider", ["Infrastructure Player"], 72, 60, 82, "low", 78, 1.4, 58, 83, [0, 0], [0, 4, 0, 4, -1], [], [], ["Semiconductor fabrication", "advanced process nodes"], [], ["Own fabrication capacity"], "TSMC is the fabrication backbone for AI hardware. It is a supply-chain and geopolitical risk signal rather than a direct software vendor.", "E4", "Risk is supply-chain and geopolitical, not product-fit.", { infraBand: "silicon" }),
-  entity("xai", "xAI", "private", "Model Provider", ["Application Vendor", "Infrastructure Player"], 71, 66, 59, "medium", 47, 1.4, 74, 54, [1, 1], [1, 1, 1, 2, 1], ["Grok"], [], ["Colossus compute build-out", "X distribution"], [], ["NVIDIA GPU supply", "Oracle OCI exposure"], "xAI is a model provider with compute-scale ambitions and consumer distribution through X. Enterprise readiness evidence remains thin.", "E1", "Treat as watch-list until enterprise controls and customer proof mature.", { infraBand: "neocloud" }),
+  entity("xai", "xAI", "private", "Model Provider", ["Application Vendor", "Infrastructure Player"], 92, 66, 59, "medium", 47, 1.4, 74, 54, [1, 1], [1, 1, 1, 2, 1], ["Grok"], [], ["Colossus compute build-out", "X distribution"], [], ["NVIDIA GPU supply", "Oracle OCI exposure"], "xAI is a model provider with compute-scale ambitions and consumer distribution through X. Enterprise readiness evidence remains thin.", "E1", "Treat as watch-list until enterprise controls and customer proof mature.", { infraBand: "neocloud" }),
 
   // ───────────────────────────────────────────────────────────────────────
   // NEW ENTITIES (added June 2026) — sourced from public reporting.

@@ -16,6 +16,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { createHash } from "node:crypto";
 import { getPrisma, hasDatabase } from "../prisma";
+import { listIntelligenceVendors } from "./repository";
 import {
   COMPETITIVE_TARGETS,
   DIMENSION_TO_NEWS_CATEGORY,
@@ -418,16 +419,63 @@ Use up to ${MAX_SEARCHES_PER_VENDOR} web_search calls. Return up to 6 items via 
   }
 }
 
+// Roles excluded from the competitive NEWS feed (they sit on the market map,
+// not the news stream) — matches the documented COMPETITIVE_TARGETS scope.
+const NEWS_EXCLUDED_ROLES = new Set(["Investor"]);
+
+/**
+ * Resolve the monitor's target set from the LIVE vendor roster, so every vendor
+ * in the spine is tracked — and any vendor added later is covered automatically,
+ * with no hand-maintained list to fall out of date (non-negotiable: no vendor
+ * goes untracked). Curated metadata (aliases/domain) from COMPETITIVE_TARGETS is
+ * used where we have it; otherwise a target is derived from the vendor's own
+ * name, which web_search resolves to real, cited sources. Pure investors are
+ * excluded. Falls back to the static list if the DB is unreachable or empty.
+ */
+export async function resolveCompetitiveTargets(): Promise<CompetitiveTarget[]> {
+  const curatedById = new Map(COMPETITIVE_TARGETS.map((t) => [t.vendorId, t]));
+  let vendors: Awaited<ReturnType<typeof listIntelligenceVendors>>;
+  try {
+    vendors = await listIntelligenceVendors();
+  } catch {
+    return COMPETITIVE_TARGETS;
+  }
+  if (!vendors.length) return COMPETITIVE_TARGETS;
+
+  const targets: CompetitiveTarget[] = [];
+  for (const v of vendors) {
+    const roles = v.roleTags ?? [];
+    // Skip pure investors (every role is an excluded role).
+    if (roles.length > 0 && roles.every((r) => NEWS_EXCLUDED_ROLES.has(r))) continue;
+    const curated = curatedById.get(v.id);
+    if (curated) {
+      targets.push(curated);
+    } else {
+      targets.push({
+        vendorId: v.id,
+        name: v.name,
+        aliases: [],
+        domain: "",
+      });
+    }
+  }
+  return targets;
+}
+
 /**
  * Run the competitive-intelligence monitor across all targets, persisting
  * new findings into IntelligenceNewsItem. Idempotent.
+ *
+ * With no explicit `opts.targets`, the target set is resolved from the LIVE
+ * roster (resolveCompetitiveTargets) so the full sweep tracks every vendor,
+ * including ones added after this code shipped.
  */
 export async function runCompetitiveIntelMonitor(
   now: Date = new Date(),
   opts: { targets?: CompetitiveTarget[] } = {},
 ): Promise<MonitorRunResult> {
   const ranAt = now.toISOString();
-  const targets = opts.targets ?? COMPETITIVE_TARGETS;
+  const targets = opts.targets ?? (await resolveCompetitiveTargets());
   const results = await Promise.all(targets.map((t) => monitorVendor(t, now)));
 
   const errors = results.flatMap((r) => (r.error ? [{ vendorId: r.vendorId, error: r.error }] : []));

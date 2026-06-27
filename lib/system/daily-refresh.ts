@@ -33,6 +33,8 @@
 
 import { runSourcing } from "../sourcing/runner";
 import { submitExtractionBatch, collectExtractionBatches } from "../sourcing/batch-runner";
+import { runWebEvidenceSweep } from "../sourcing/web-evidence-runner";
+import { ensureVendorProfilesForSpine } from "../services/vendor-id-bridge";
 import { runNewsSourcing } from "../sourcing/news-runner";
 import { runMarketNewsIngestion } from "../sourcing/market-news-runner";
 import { SOURCE_MANIFEST } from "../sourcing/manifest";
@@ -60,6 +62,7 @@ import { fetchLiveGitHubSignals } from "../reputation/live-github";
 import { fetchAllMacroSignals } from "../market-signals/live-macro";
 import { sweepMemberAuth } from "../member/auth";
 import { deriveVendorScores } from "./derive-scores";
+import { seedEloPillarScores } from "./elo-scores";
 import { deriveMarketShareMovement } from "./derive-market-share";
 import { deriveDependencySignals } from "../graph/derive-dependencies";
 import { runDeliveryUpdateFromRecentNews } from "../delivery/news-update";
@@ -231,6 +234,15 @@ export async function runDailyRefresh(
     return drift as unknown as Record<string, unknown>;
   });
 
+  // ── 0a. Vendor-profile sync ─────────────────────────────────
+  //      Ensure every spine vendor has a VendorProfile so EvidenceRecord FKs
+  //      resolve for ALL vendors before any approval/projection downstream.
+  await trackedStep("sync_vendor_profiles", async () => {
+    if (!dbConfigured) return { skipped: "no_database" };
+    const r = await ensureVendorProfilesForSpine(getPrisma());
+    return r as unknown as Record<string, unknown>;
+  });
+
   // ── 1. Sourcing ────────────────────────────────────────────
   await trackedStep("sourcing", async () => {
     if (spend.exhausted()) return { skipped: "spend_cap", ...spend.status() };
@@ -273,6 +285,27 @@ export async function runDailyRefresh(
       tokensIn: r.totals.tokensIn,
       tokensOut: r.totals.tokensOut,
       estimatedCostUsd: r.totals.estimatedCostUsd,
+    };
+  });
+
+  // ── 1b. Roster-driven web_search evidence (weekly; cost-tiered) ──
+  //     Discovers REAL, cited sources for EVERY vendor in the live roster across
+  //     the pillar domains, so vendors without curated manifest URLs still accrue
+  //     real evidence instead of floating at an un-audited seed baseline. Feeds
+  //     the same triage → projection → pillar path as manifest sourcing. Weekly
+  //     to bound web_search cost (or on a forced run).
+  await trackedStep("web_evidence", async () => {
+    if (!dbConfigured) return { skipped: "no_database" };
+    if (!isWeekly) return { skipped: "weekly-only step (skipped on daily run)" };
+    const vendors = await getPrisma().intelligenceVendor.findMany({ select: { id: true, name: true } });
+    const r = await runWebEvidenceSweep(vendors);
+    return {
+      vendorsAttempted: r.vendorsAttempted,
+      vendorsWithFindings: r.vendorsWithFindings,
+      proposalsPersisted: r.proposalsPersisted,
+      totalSearches: r.totalSearches,
+      errorCount: r.errors.length,
+      firstError: r.errors[0]?.error,
     };
   });
 
@@ -327,6 +360,17 @@ export async function runDailyRefresh(
     return r as unknown as Record<string, unknown>;
   });
 
+  // ── 4c. Model-quality pillar from Arena ELO ────────────────
+  //     Writes the model_quality pillar (openlm.ai Arena ELO, bare ids) so the
+  //     model-provider ranking reflects raw model capability. Must run BEFORE
+  //     derive_scores so overallScore folds it in this run. The evidence
+  //     projector never touches model_quality, so this is the only writer.
+  await trackedStep("model_quality_elo", async () => {
+    if (!dbConfigured) return { skipped: "no_database" };
+    const r = await seedEloPillarScores();
+    return { updated: r.updated, skipped: r.skipped, notFound: r.notFound.length };
+  });
+
   // ── 5. Derive headline scores from fresh evidence ──────────
   //     Recomputes IntelligenceVendor.overallScore + confidenceScore
   //     and VendorMomentum.{news,product}Velocity + momentumScore so
@@ -346,11 +390,26 @@ export async function runDailyRefresh(
   // ── 6. Ranking snapshot (incl. one-time backfill) ──────────
   await trackedStep("ranking_snapshot", async () => {
     if (!dbConfigured) return { skipped: "no_database" };
-    // Backfill only if the snapshot table is empty.
-    const existing = await getPrisma().vendorRankingSnapshot.count();
+    // Backfill reconstructed pre-history for any vendor that LACKS it. Originally
+    // this ran only when the whole table was empty, so vendors added after the
+    // first run never got reconstructed history → flat, stubby hover-trend lines.
+    // Now we target exactly the vendors with no backfill rows. Idempotent:
+    // createMany(skipDuplicates) protects existing backfill rows and real captures.
+    const prisma = getPrisma();
+    const [haveBackfillRows, allVendors] = await Promise.all([
+      prisma.vendorRankingSnapshot.findMany({
+        where: { source: "backfill" },
+        select: { vendorId: true },
+        distinct: ["vendorId"],
+      }),
+      prisma.intelligenceVendor.findMany({ select: { id: true } }),
+    ]);
+    const haveBackfill = new Set(haveBackfillRows.map((r) => r.vendorId));
+    const needBackfill = allVendors.map((v) => v.id).filter((id) => !haveBackfill.has(id));
+
     let backfill: { inserted: number; vendors: number; ran: boolean } = { inserted: 0, vendors: 0, ran: false };
-    if (existing === 0) {
-      const r = await backfillRankingSnapshots(now);
+    if (needBackfill.length > 0) {
+      const r = await backfillRankingSnapshots(now, { vendorIds: needBackfill });
       backfill = { inserted: r.inserted, vendors: r.vendors, ran: true };
     }
     const capture = await captureRankingSnapshots(now);

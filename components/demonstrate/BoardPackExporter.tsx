@@ -14,8 +14,17 @@ interface VendorSummary {
   role: string;
   score: number;
   confidence: number;
+  evidenceDepth?: number;
   topPillars: string[];
   risks: string[];
+}
+
+/** Honest evidence-depth qualifier appended to any exported score so a board
+ * deck never presents an un-evidenced number as fact. ≥10 verified → "". */
+function evidenceQualifier(depth?: number): string {
+  const d = depth ?? 0;
+  if (d >= 10) return "";
+  return d <= 0 ? " — Seed estimate, no verified evidence" : ` — Limited evidence (${d} verified)`;
 }
 
 interface MitigationControl {
@@ -86,7 +95,7 @@ export interface BoardPackExporterProps {
 export interface MarketOverview {
   totalVendors: number;
   totalCategories: number;
-  topVendors: { name: string; category: string; score: number; confidence: number; ownershipType?: string }[];
+  topVendors: { name: string; category: string; score: number; confidence: number; ownershipType?: string; evidenceDepth?: number }[];
   /** Top vendors grouped per category — leadership is category-specific by design. */
   categoryLeaders: { category: string; vendors: { name: string; score: number }[] }[];
   /** Vendors with the strongest momentum signals. */
@@ -499,7 +508,7 @@ ${sectionReputation(p)}
 function bodyExecutiveSummary(p: BoardPackExporterProps): string {
   if (p.vendors.length === 0) return bodyMarketOverview(p);
   const vendorRows = p.vendors.map((v) =>
-    `<tr><td><strong>${esc(v.name)}</strong></td><td>${esc(v.role)}</td><td>${v.score}</td><td>${v.confidence}</td></tr>`
+    `<tr><td><strong>${esc(v.name)}</strong></td><td>${esc(v.role)}</td><td>${v.score}${esc(evidenceQualifier(v.evidenceDepth))}</td><td>${v.confidence}</td></tr>`
   ).join("");
 
   const riskRows = p.risks
@@ -513,6 +522,9 @@ function bodyExecutiveSummary(p: BoardPackExporterProps): string {
   <div class="score-card green"><div class="label">CIO Confidence</div><div class="value">${p.cioConfidenceScore}</div><div class="sub">out of 100</div></div>
   <div class="score-card"><div class="label">Recommendation</div><div class="value" style="font-size:18px;margin-top:12px">${esc(p.recommendation)}</div></div>
 </div>
+${p.vendors.length > 0 && p.vendors.every((v) => (v.evidenceDepth ?? 0) === 0)
+  ? `<div style="margin:4px 0 16px;padding:10px 12px;border:1px solid #fb7185;border-radius:8px;background:#fff1f2;color:#9f1239;font-size:11px"><strong>Evidence caveat:</strong> every shortlisted vendor is a seed estimate with no analyst-verified evidence behind it. The Board Defence and CIO Confidence figures above are directional only — commission verified evidence before relying on them in a board decision.</div>`
+  : ""}
 
 ${sectionScope(p)}
 
@@ -546,7 +558,7 @@ ${sectionProvenance(p)}`;
 function bodyBoardPack(p: BoardPackExporterProps): string {
   const vendorBlocks = p.vendors.map((v) => `
     <h3>${esc(v.name)}</h3>
-    <p><strong>Role:</strong> ${esc(v.role)} &nbsp;·&nbsp; <strong>Score:</strong> ${v.score} &nbsp;·&nbsp; <strong>Confidence:</strong> ${v.confidence}</p>
+    <p><strong>Role:</strong> ${esc(v.role)} &nbsp;·&nbsp; <strong>Score:</strong> ${v.score}${esc(evidenceQualifier(v.evidenceDepth))} &nbsp;·&nbsp; <strong>Confidence:</strong> ${v.confidence}</p>
     <p><strong>Top pillars:</strong> ${esc(v.topPillars.map(humanisePillar).join(", ") || "—")}</p>
     ${v.risks.length > 0 ? `<p><strong>Risks:</strong> ${esc(v.risks.join(", "))}</p>` : ""}
   `).join("");
@@ -645,7 +657,7 @@ ${sectionProvenance(p)}`;
 
 function bodyProcurementPack(p: BoardPackExporterProps): string {
   const vendorRows = p.vendors.map((v) =>
-    `<tr><td><strong>${esc(v.name)}</strong></td><td>${esc(v.role)}</td><td>${v.score}</td><td>${v.confidence}</td><td>${esc(v.topPillars.map(humanisePillar).join(", ") || "—")}</td><td>${esc(v.risks.join(", ") || "—")}</td></tr>`
+    `<tr><td><strong>${esc(v.name)}</strong></td><td>${esc(v.role)}</td><td>${v.score}${esc(evidenceQualifier(v.evidenceDepth))}</td><td>${v.confidence}</td><td>${esc(v.topPillars.map(humanisePillar).join(", ") || "—")}</td><td>${esc(v.risks.join(", ") || "—")}</td></tr>`
   ).join("");
 
   const vendorRisks = p.risks.filter((r) => r.category === "Vendor Risk" || r.category === "Concentration" || r.category === "Cost");
@@ -727,7 +739,7 @@ function bodyRiskReview(p: BoardPackExporterProps): string {
   `).join("");
 
   const vendorRiskRows = p.vendors.map((v) =>
-    `<li><strong>${esc(v.name)}</strong> (Score: ${v.score}, Confidence: ${v.confidence}) — Risks: ${esc(v.risks.join(", ") || "None identified")}</li>`
+    `<li><strong>${esc(v.name)}</strong> (Score: ${v.score}${esc(evidenceQualifier(v.evidenceDepth))}, Confidence: ${v.confidence}) — Risks: ${esc(v.risks.join(", ") || "None identified")}</li>`
   ).join("");
 
   return `

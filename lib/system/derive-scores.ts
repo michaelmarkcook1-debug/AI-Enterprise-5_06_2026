@@ -16,7 +16,7 @@
 // scalars the UI actually reads.
 
 import { getPrisma, hasDatabase } from "../prisma";
-import { PILLARS, type PillarId } from "../types";
+import { PILLARS } from "../types";
 import { writeVendorScore } from "../scores/score-writer";
 
 // Dashboard base weights are derived from the SAME canonical PILLARS source the
@@ -24,9 +24,25 @@ import { writeVendorScore } from "../scores/score-writer";
 // longer drift apart on a duplicated constant. The dashboard score is the
 // context-free baseline (these base weights); the per-buyer assessment engine
 // then layers industry + tier deltas on top — that's the legitimate difference.
-const PILLAR_WEIGHTS = Object.fromEntries(
-  PILLARS.map((p) => [p.id, p.defaultWeight]),
-) as Record<PillarId, number>;
+// Model quality (Arena ELO, written as a `model_quality` pillar row by
+// seedEloPillarScores) is folded into the dashboard ranking at a fixed weight,
+// with the canonical six scaled down to leave room for it, so a model
+// provider's overallScore reflects raw model capability — not just enterprise/
+// market pillars. Only model providers carry a model_quality row; derive-scores
+// normalizes by the weights of the pillars each vendor actually has, so a vendor
+// WITHOUT model_quality is simply scored over the six rebalanced base weights
+// (relative ranking unchanged). This is a dashboard-scoring concern only — the
+// canonical PILLARS set (and the per-buyer assessment engine) stays at six.
+const MODEL_QUALITY_WEIGHT = 0.2;
+const BASE_PILLAR_SCALE = 1 - MODEL_QUALITY_WEIGHT; // 0.80
+const PILLAR_WEIGHTS: Record<string, number> = {
+  ...Object.fromEntries(PILLARS.map((p) => [p.id, p.defaultWeight * BASE_PILLAR_SCALE])),
+  model_quality: MODEL_QUALITY_WEIGHT,
+};
+
+// Minimum distinct pillar rows before pillar average overrides overallScore.
+// Prevents a single sourcing run from crashing an ELO-anchored score.
+const MIN_PILLAR_COUNT = 3;
 
 /** Cut-off windows used by the velocity inputs. */
 const NEWS_WINDOW_DAYS = 30;
@@ -111,7 +127,7 @@ export async function deriveVendorScores(now: Date = new Date()): Promise<Derive
   for (const p of pillarRows) {
     const a = agg.get(p.vendorId);
     if (!a) continue;
-    const w = PILLAR_WEIGHTS[p.pillar as PillarId] ?? 0;
+    const w = PILLAR_WEIGHTS[p.pillar] ?? 0;
     if (w === 0) continue;
     a.pillarWeightedSum += p.capabilityScore * w;
     a.pillarWeightSum += w;
@@ -159,10 +175,10 @@ export async function deriveVendorScores(now: Date = new Date()): Promise<Derive
   for (const v of vendors) {
     const a = agg.get(v.id)!;
 
-    // Overall score: weighted pillar average (0-100). When a vendor
-    // has no pillar coverage we leave the score alone — don't blow
-    // up a seeded score with a 0.
-    const newOverall = a.pillarWeightSum > 0
+    // Overall score: weighted pillar average (0-100). Requires MIN_PILLAR_COUNT
+    // distinct pillar rows before overriding — a single write from one sourcing
+    // run cannot crash an ELO-anchored or analyst-seeded score.
+    const newOverall = a.pillarCount >= MIN_PILLAR_COUNT && a.pillarWeightSum > 0
       ? clamp(a.pillarWeightedSum / a.pillarWeightSum, 0, 100)
       : v.overallScore;
 

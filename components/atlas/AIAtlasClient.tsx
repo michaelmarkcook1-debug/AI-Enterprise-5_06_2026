@@ -620,7 +620,7 @@ export default function AIAtlasClient() {
 
               <div className="mt-4 grid grid-cols-2 gap-3">
                 <div className="rounded-lg border border-[#18364d] bg-[#081624] p-3">
-                  <span className="block text-xs text-[#8aa4b8]">Leadership</span>
+                  <span className="block text-xs text-[#8aa4b8]">Final Score</span>
                   <b className="text-xl text-[#eff8ff]">{selected.leadership}</b>
                 </div>
                 <div className="rounded-lg border border-[#18364d] bg-[#081624] p-3">

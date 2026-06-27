@@ -17,6 +17,7 @@ import { deriveVendorScores } from "@/lib/system/derive-scores";
 import { deriveMarketShareMovement } from "@/lib/system/derive-market-share";
 import { captureRankingSnapshots } from "@/lib/intelligence/ranking-snapshots";
 import { detectCategoryChanges } from "@/lib/services/category-change";
+import { seedEloPillarScores } from "@/lib/system/elo-scores";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -31,6 +32,9 @@ async function handle(request: Request) {
   try {
     const projection = await projectEvidenceToIntelligence(prisma);
     const pillars = await projectEvidenceToPillarScores(prisma, now);
+    // Refresh the model_quality (Arena ELO) pillar BEFORE derive so overallScore
+    // folds in current model quality in the same run.
+    const eloPillars = await seedEloPillarScores();
     // Raise admin-review proposals for any vendor whose new capabilities imply a
     // role it doesn't hold (never auto-applied — surfaces in /admin/category-changes).
     const categoryChanges = await detectCategoryChanges();
@@ -51,6 +55,11 @@ async function handle(request: Request) {
         pillarRowsUpserted: pillars.pillarRowsUpserted,
         vendorsTouched: pillars.vendorsTouched,
         shifts: pillars.shifts,
+      },
+      modelQualityElo: {
+        updated: eloPillars.updated,
+        skipped: eloPillars.skipped,
+        notFound: eloPillars.notFound,
       },
       scores: {
         vendorsUpdated: derive.vendorsUpdated,

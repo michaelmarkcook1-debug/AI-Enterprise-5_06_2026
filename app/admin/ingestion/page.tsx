@@ -4,6 +4,7 @@ import { listIngestionJobs } from "@/lib/ingestion/ingest-service";
 import { hasDatabase, getPrisma } from "@/lib/prisma";
 import { SOURCE_MANIFEST } from "@/lib/sourcing/manifest";
 import { getLatestAdminRun } from "@/lib/system/admin-run-log";
+import { listActiveJobs, type AdminJob } from "@/lib/system/admin-job-store";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
@@ -70,12 +71,35 @@ function buildManifestSummary() {
 /** All entries for the press_release category. */
 const pressReleaseEntries = SOURCE_MANIFEST.filter((e) => e.category === "press_release");
 
+/**
+ * Count of verified evidence signals a recompute will project. This is the EXACT
+ * set the projector scans (reviewStatus = "analyst_verified"), so the number
+ * shown on the Recompute card matches `scannedEvidenceRows` in the run result.
+ * The projector caps each run at 5,000 rows — the UI flags that ceiling if hit.
+ */
+async function countVerifiedSignals(): Promise<number | null> {
+  if (!hasDatabase()) return null;
+  try {
+    return await getPrisma().evidenceRecord.count({
+      where: { reviewStatus: "analyst_verified" },
+    });
+  } catch {
+    return null;
+  }
+}
+
 export default async function IngestionPage() {
-  const [jobs, patches, lastRun] = await Promise.all([
+  const [jobs, patches, lastRun, activeJobList, verifiedSignals] = await Promise.all([
     hasDatabase() ? listIngestionJobs() : Promise.resolve([]),
     listPendingManifestPatches(),
     hasDatabase() ? getLatestAdminRun() : Promise.resolve(null),
+    hasDatabase() ? listActiveJobs() : Promise.resolve([] as AdminJob[]),
+    countVerifiedSignals(),
   ]);
+  // In-flight background jobs keyed by kind, so the console re-attaches to a run
+  // that started before the user navigated back (the "survive tab switch" path).
+  const activeJobs: Record<string, AdminJob | null> = {};
+  for (const j of activeJobList) if (!activeJobs[j.kind]) activeJobs[j.kind] = j;
 
   const manifestSummary = buildManifestSummary();
   // The console operates on the SOURCE_MANIFEST (that's what sourcing iterates),
@@ -106,6 +130,8 @@ export default async function IngestionPage() {
         }))}
         newsVendors={newsVendors}
         lastRun={lastRun}
+        activeJobs={activeJobs}
+        verifiedSignals={verifiedSignals}
       />
 
       {/* ── Manifest sources breakdown ─────────────────────────────── */}

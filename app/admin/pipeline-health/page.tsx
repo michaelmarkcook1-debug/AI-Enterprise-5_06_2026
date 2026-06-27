@@ -139,7 +139,7 @@ export default async function PipelineHealthPage() {
 
       {/* Anthropic-dependent steps callout */}
       <div className="mb-6">
-        <AnthropicDependentCard steps={steps} />
+        <AnthropicDependentCard steps={steps} runAt={last.startedAt} />
       </div>
 
       {/* Competitive-intel callout when blocked */}
@@ -296,7 +296,12 @@ function SchemaDriftCard({ steps }: { steps: StepSummary[] }) {
   );
 }
 
-function AnthropicDependentCard({ steps }: { steps: StepSummary[] }) {
+function AnthropicDependentCard({ steps, runAt }: { steps: StepSummary[]; runAt: string }) {
+  // Everything below reflects the LAST PERSISTED run, not live state. Surface
+  // its age so a stale error (e.g. a usage-limit response captured hours ago) is
+  // never mistaken for the current key/quota state. A run older than 2h is flagged.
+  const runMsAgo = Date.now() - new Date(runAt).getTime();
+  const stale = runMsAgo > 2 * 60 * 60 * 1000;
   // sourcing and competitive_intel both call Anthropic. When the API
   // is blocked (spend cap / invalid key / rate limit), both produce
   // zero output even though they "complete" successfully — this is the
@@ -337,8 +342,16 @@ function AnthropicDependentCard({ steps }: { steps: StepSummary[] }) {
 
   return (
     <Panel title="LLM-backed steps — degraded">
+      <div className={`mb-3 rounded-md border p-3 text-xs leading-5 ${stale
+        ? "border-amber-400 bg-amber-100 text-amber-950 dark:border-amber-700 dark:bg-amber-950/40 dark:text-amber-100"
+        : "border-[#d6c9a8] bg-[#f6f1e3] text-[#475a72] dark:border-[#2a4a6b] dark:bg-[#0c2238] dark:text-[#a7bacd]"}`}>
+        <strong>Snapshot from the last pipeline run — {ago(runAt)} ({new Date(runAt).toISOString().replace("T", " ").slice(0, 16)} UTC).</strong>{" "}
+        This is <strong>not live</strong>. {stale
+          ? "It is over 2 hours old and may not reflect the current key, quota, or account state — re-run the pipeline before acting on any error below (e.g. don't change billing on the strength of a stale message)."
+          : "Re-run the pipeline to confirm any error below is still current."}
+      </div>
       <p className="text-sm font-semibold text-rose-700 dark:text-rose-300">
-        Two pipeline steps depend on the Anthropic API and both are returning zero data this run.
+        Two pipeline steps depend on the Anthropic API and both returned zero data on that run.
       </p>
       <p className="mt-2 text-xs text-[#475a72] dark:text-[#a7bacd]">
         This is the most likely explanation for &quot;no fresh ingestion today&quot; — sourcing extracts new
@@ -382,7 +395,11 @@ function AnthropicDependentCard({ steps }: { steps: StepSummary[] }) {
       </div>
       {usageLimitHit && (
         <div className="mt-3 rounded-md border border-rose-300 bg-rose-50 p-3 text-xs leading-5 text-rose-900 dark:border-rose-900/60 dark:bg-rose-950/30 dark:text-rose-200">
-          <strong>This is a configured usage limit hit by whatever key/workspace the deployed{" "}
+          <strong>First, confirm this is current:</strong> this message is from the run above ({ago(runAt)}). A successful
+          run since then clears it. If your Anthropic Console shows healthy credit and you&apos;re well under the monthly
+          limit, this is almost certainly stale or a per-workspace cap on a different key — re-run before touching billing.
+          <br /><br />
+          <strong>If it persists on a fresh run, then it&apos;s a configured usage limit hit by whatever key/workspace the deployed{" "}
           <code className="font-mono">ANTHROPIC_API_KEY</code> belongs to</strong> — not necessarily the account
           you topped up. If your credit + limits look healthy, the deployed key likely belongs to a different or
           older workspace with a low monthly cap. To confirm exactly which: copy the{" "}

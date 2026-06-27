@@ -20,11 +20,23 @@ import {
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+// E0–E5 ordinal ranks for the "cited + E3+" bulk-approval check.
+const GRADE_RANK = { E0: 0, E1: 1, E2: 2, E3: 3, E4: 4, E5: 5 } as const;
+
 export async function GET(request: Request) {
   if (!isAdminRequest(request)) return unauthorized();
   if (!hasDatabase()) return Response.json({ ids: [] });
 
   const url = new URL(request.url);
+  // Which triage lane the operator is bulk-acting on. Defaults to the safe
+  // recommend_approve cohort; other lanes are honoured so "Auto-process all N"
+  // actually targets the rows the UI shows (the previous hard-coded
+  // recommend_approve filter made the button a silent no-op on other lanes).
+  const requestedLane = url.searchParams.get("lane");
+  const lane =
+    requestedLane === "human_review_required" || requestedLane === "recommend_reject"
+      ? requestedLane
+      : "recommend_approve";
   const filters: BatchReviewFilters = {
     vendorId: url.searchParams.get("vendor") || undefined,
     confidenceBand:
@@ -76,7 +88,26 @@ export async function GET(request: Request) {
         classifierConfidence: p.classifierConfidence,
         confidenceIsFallback: fallback,
       });
-      if (decision.lane !== "recommend_approve") continue;
+      if (decision.lane !== lane) continue;
+
+      // Factual-integrity floor for operator bulk-approval of the human_review
+      // lane. ALWAYS blocked from bulk (must be resolved per-row): missing source,
+      // E0 evidence, a flagged source conflict, or a DISPUTED claim — these are
+      // genuinely unreliable. The other "unsafe categories" (valuation, market
+      // share, adoption estimate, IPO timing) are speculative-by-default and
+      // normally need a human glance — but a CITED reported fact (has a source
+      // URL AND grade ≥ E3) is allowed through bulk, because the operator
+      // explicitly approving the review lane IS the human in the loop. Per the
+      // approval-policy decision: "allow bulk-approve if cited + E3+".
+      if (lane !== "recommend_approve") {
+        const gradeRank = GRADE_RANK[p.proposedGrade as keyof typeof GRADE_RANK] ?? 0;
+        const cited = !!p.sourceUrl && gradeRank >= GRADE_RANK.E3;
+        const alwaysBlocked = !p.sourceUrl
+          || p.proposedGrade === "E0"
+          || decision.reasons.some((r) => /source conflict|unsafe category: disputed/i.test(r));
+        const speculativeUncited = decision.reasons.some((r) => /unsafe category:/i.test(r)) && !cited;
+        if (alwaysBlocked || speculativeUncited) continue;
+      }
 
       const linkage = suggestLinkage(
         {
