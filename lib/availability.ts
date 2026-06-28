@@ -59,3 +59,14 @@ export function seedFallbackAllowed(): boolean {
  * DB data. Flip when that wiring lands. See [[no-seed-strict-live-db-only]].
  */
 export const HARDCODED_SURFACES_WIRED: boolean = false;
+
+/**
+ * Assessment "paid depth" gate (Phase 3 Wave 2+). The interactive trust-layer
+ * pieces — adjustable domain weights / live re-rank, show-the-working, why-this/
+ * why-not — are the eventual paid surface. This flag is the gate, SCAFFOLDED but
+ * NOT ENFORCED (Wave-1 posture): currently open so the depth is visible, with the
+ * soft-paywall hooking here later. When false, surfaces fall back to the Wave-1
+ * read-only evidence scorecard (no weight controls). The base scorecard + its
+ * data stay deterministic and seed-free regardless of this flag.
+ */
+export const INTERACTIVE_ASSESSMENT_ENABLED: boolean = true;

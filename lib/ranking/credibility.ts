@@ -10,8 +10,11 @@
 //   3. Sanity-check: flag any residual ordering where a materially thinner /
 //      lower-confidence vendor still out-ranks a fuller / higher-confidence one.
 
-/** Composite points within which an ordering is not statistically separable. */
+/** Composite points within which an ordering is not statistically separable.
+ *  NOISE_BAND is the 0–100 pillar scale; ASSESSMENT_NOISE_BAND the 0–5 domain
+ *  scale (the unified ranking metric). Callers pass the one matching their scale. */
 export const NOISE_BAND = 5;
+export const ASSESSMENT_NOISE_BAND = 0.25;
 /** Domain-coverage gap (fraction of 12 domains) considered "material" for the
  *  sanity-check (≈ 2 domains). */
 export const MATERIAL_COVERAGE_GAP = 0.15;
@@ -47,10 +50,10 @@ export function compareAdjusted(a: RankRow, b: RankRow): number {
 }
 
 /** Whole-category discrimination: low when the adjusted spread is within noise. */
-export function assessDiscrimination(adjusted: number[]): { low: boolean; spread: number } {
+export function assessDiscrimination(adjusted: number[], noiseBand: number = NOISE_BAND): { low: boolean; spread: number } {
   if (adjusted.length < 2) return { low: false, spread: 0 };
   const spread = Math.max(...adjusted) - Math.min(...adjusted);
-  return { low: spread < NOISE_BAND, spread: Math.round(spread * 10) / 10 };
+  return { low: spread < noiseBand, spread: Math.round(spread * 100) / 100 };
 }
 
 /**
@@ -59,10 +62,10 @@ export function assessDiscrimination(adjusted: number[]): { low: boolean; spread
  * vendors that aren't statistically separable share a tier (when everything is
  * within noise, all are "Leaders": honest about the lack of separation).
  */
-export function assignTiers(sortedAdjustedDesc: number[]): string[] {
+export function assignTiers(sortedAdjustedDesc: number[], noiseBand: number = NOISE_BAND): string[] {
   let tierIdx = 0;
   return sortedAdjustedDesc.map((v, i) => {
-    if (i > 0 && sortedAdjustedDesc[i - 1] - v > NOISE_BAND) {
+    if (i > 0 && sortedAdjustedDesc[i - 1] - v > noiseBand) {
       tierIdx = Math.min(tierIdx + 1, TIER_LABELS.length - 1);
     }
     return TIER_LABELS[tierIdx];
@@ -76,12 +79,12 @@ export function assignTiers(sortedAdjustedDesc: number[]): string[] {
  * i.e. an ordering a reviewer would (rightly) distrust. Returns human-readable
  * notes; empty when the order is clean.
  */
-export function detectRankingAnomalies(sortedRows: RankRow[]): string[] {
+export function detectRankingAnomalies(sortedRows: RankRow[], noiseBand: number = NOISE_BAND): string[] {
   const notes: string[] = [];
   for (let i = 0; i < sortedRows.length - 1; i++) {
     const above = sortedRows[i];
     const below = sortedRows[i + 1];
-    const withinNoise = Math.abs(above.adjustedComposite - below.adjustedComposite) < NOISE_BAND;
+    const withinNoise = Math.abs(above.adjustedComposite - below.adjustedComposite) < noiseBand;
     if (!withinNoise) continue;
     if (below.domainCoverage - above.domainCoverage > MATERIAL_COVERAGE_GAP) {
       notes.push(

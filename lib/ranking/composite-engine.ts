@@ -159,7 +159,7 @@ export function scoreVendorComposite(
       domainScored: 0,
       domainTotal: 12,
       domainCoverage: 0,
-      adjustedComposite: null,
+      assessmentComposite: null,
       tier: null,
       pillars,
       marketContext,
@@ -194,12 +194,12 @@ export function scoreVendorComposite(
     compositeConfidence,
     evidenceCompleteness: evidenceCompletenessBand(coveredWeight),
     coverage: coveredWeight,
-    // Domain-credibility fields filled by the category layer (RANK-FIX). Default
-    // adjustedComposite = composite (no discount) until real domain coverage applies.
+    // Domain-credibility fields filled by the category layer (the unified
+    // assessment composite is computed there from the 12-domain scorecard).
     domainScored: 0,
     domainTotal: 12,
     domainCoverage: 0,
-    adjustedComposite: composite,
+    assessmentComposite: null,
     tier: null,
     pillars,
     marketContext,

@@ -13,7 +13,7 @@ import { absoluteUrl } from "@/lib/site";
 
 import { ENTITIES, roleLeadership, type Entity, type Role } from "@/lib/intelligence/entities";
 import { listNewsItems } from "@/lib/intelligence/repository";
-import { HARDCODED_SURFACES_WIRED } from "@/lib/availability";
+import { HARDCODED_SURFACES_WIRED, INTERACTIVE_ASSESSMENT_ENABLED } from "@/lib/availability";
 import DataUnavailable from "@/components/DataUnavailable";
 import { getPrisma, hasDatabase } from "@/lib/prisma";
 import { Panel } from "@/components/intelligence-ui";
@@ -32,6 +32,7 @@ import { getDeliveryPartnershipsForVendor } from "@/lib/delivery/repository";
 import ImplementationPartnersPanel from "@/components/vendor/ImplementationPartnersPanel";
 import { getVendorScorecard } from "@/lib/assessment/domain-scores";
 import DomainScorecard from "@/components/assessment/DomainScorecard";
+import WeightedScorecard from "@/components/assessment/WeightedScorecard";
 
 export const dynamic = "force-dynamic";
 
@@ -543,7 +544,11 @@ export default async function VendorDeepDivePage({
           {hasEvidence && scorecard ? (
             <section className="mb-6">
               <Panel title="Enterprise assessment — evidence scorecard">
-                <DomainScorecard scorecard={scorecard} />
+                {INTERACTIVE_ASSESSMENT_ENABLED ? (
+                  <WeightedScorecard scorecard={scorecard} />
+                ) : (
+                  <DomainScorecard scorecard={scorecard} />
+                )}
               </Panel>
             </section>
           ) : (

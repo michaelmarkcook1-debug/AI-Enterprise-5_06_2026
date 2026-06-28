@@ -9,6 +9,10 @@ import PillarContributionTable from "@/components/ranking/PillarContributionTabl
 import TrackButton from "@/components/member/TrackButton";
 import { getVendorScorecardsBatch, type VendorScorecard } from "@/lib/assessment/domain-scores";
 import { DOMAIN_LABEL } from "@/lib/assessment/domain-labels";
+import { INTERACTIVE_ASSESSMENT_ENABLED } from "@/lib/availability";
+import CategoryRerank, { type RerankVendor } from "@/components/assessment/CategoryRerank";
+import { getRankMovements, type RankMovement } from "@/lib/intelligence/rank-movement";
+import RankMovementIndicator from "@/components/ranking/RankMovementIndicator";
 
 // force-dynamic (not ISR): rankings are DB-backed + recalculated each pipeline
 // run, so the page must reflect the live data immediately — never serve a stale
@@ -50,6 +54,20 @@ export default async function CategoryPage({ params }: { params: Promise<Params>
       )
     : new Map<string, VendorScorecard>();
 
+  // Rankings movement — real per-vendor overall-rank delta from snapshot history.
+  const movements: Map<string, RankMovement> = isLive
+    ? await getRankMovements().catch(() => new Map<string, RankMovement>())
+    : new Map<string, RankMovement>();
+
+  // Interactive re-rank uses the SAME 12-domain composite as the static ranking
+  // (default weights → identical order). Feed it every member with a scorecard.
+  const rerankVendors: RerankVendor[] = INTERACTIVE_ASSESSMENT_ENABLED
+    ? [...ranked, ...incomplete].flatMap((v) => {
+        const sc = scorecards.get(v.vendorId);
+        return sc ? [{ vendorId: v.vendorId, vendorName: v.vendorName, vendorSlug: v.vendorSlug, domains: sc.domains }] : [];
+      })
+    : [];
+
   return (
     <main className="mx-auto max-w-5xl px-4 py-10">
       <nav className={`mb-3 text-xs ${MUTED}`}>
@@ -89,9 +107,9 @@ export default async function CategoryPage({ params }: { params: Promise<Params>
               false-precision 1-N list. */}
           {lowDiscrimination && ranked.length > 1 && (
             <p className="mb-3 rounded-md border border-amber-500/30 bg-amber-500/5 px-3 py-2 text-xs text-amber-900 dark:text-amber-200">
-              <strong>Early / thin evidence — limited discrimination.</strong> These vendors&apos; coverage-adjusted
+              <strong>Early / thin evidence — limited discrimination.</strong> These vendors&apos; weighted assessment
               composites sit within the noise band, so treat the order as <strong>tiers</strong> (shown per vendor), not a
-              precise 1-N ranking. More verified evidence will separate them.
+              precise 1-N ranking. More reviewed evidence will separate them.
             </p>
           )}
 
@@ -104,6 +122,7 @@ export default async function CategoryPage({ params }: { params: Promise<Params>
                   <div className="flex flex-wrap items-baseline justify-between gap-2">
                     <span className="flex min-w-0 items-baseline gap-2">
                       <span className="font-display tabular-nums text-[#b08d2f] dark:text-[#d4af37]">#{v.rank}</span>
+                      <RankMovementIndicator movement={movements.get(v.vendorId)} />
                       <Link href={`/vendors/${v.vendorSlug}`} className="truncate font-medium underline-offset-2 hover:underline">
                         {v.vendorName}
                       </Link>
@@ -114,9 +133,9 @@ export default async function CategoryPage({ params }: { params: Promise<Params>
                       )}
                     </span>
                     <span className="flex shrink-0 items-baseline gap-3">
-                      <span className="font-mono text-sm tabular-nums" title={`Raw pillar composite ${v.composite?.toFixed(0)} × ${v.domainScored}/${v.domainTotal} domain coverage`}>
-                        {(v.adjustedComposite ?? 0).toFixed(0)}
-                        <span className={`ml-1 text-[10px] ${MUTED}`}>composite</span>
+                      <span className="font-mono text-sm tabular-nums" title="12-domain weighted assessment composite (0–5), coverage-discounted">
+                        {(v.assessmentComposite ?? 0).toFixed(2)}
+                        <span className={`ml-1 text-[10px] ${MUTED}`}>/5 composite</span>
                       </span>
                       <span className={`font-mono text-[11px] tabular-nums ${MUTED}`}>{v.domainScored}/{v.domainTotal} domains</span>
                       <span className={`font-mono text-[11px] tabular-nums ${MUTED}`}>{v.compositeConfidence}% conf</span>
@@ -144,8 +163,8 @@ export default async function CategoryPage({ params }: { params: Promise<Params>
             <div className="mt-5 border-t border-black/5 pt-4 dark:border-white/10">
               <h2 className="text-sm font-semibold">Held — insufficient evidence to rank ({incomplete.length})</h2>
               <p className={`mt-1 text-xs ${MUTED}`}>
-                These vendors compete in the category but lack enough verified pillar evidence to be ranked.
-                We hold them rather than float them on partial data.
+                These vendors compete in the category but lack enough reviewed evidence across the 12 assessment
+                domains to be ranked. We hold them rather than float them on partial data.
               </p>
               <ul className="mt-2 space-y-3">
                 {incomplete.map((v) => (
@@ -161,6 +180,16 @@ export default async function CategoryPage({ params }: { params: Promise<Params>
                   </li>
                 ))}
               </ul>
+            </div>
+          )}
+
+          {/* Interactive re-rank — weight the 12 domains to your priorities. Uses
+              the SAME composite as the static list above, so at default weights it
+              reproduces this exact order (no surprise reshuffle); adjust to see
+              YOUR ranking. Pure client-side maths, no network call. */}
+          {INTERACTIVE_ASSESSMENT_ENABLED && rerankVendors.length > 1 && (
+            <div className="mt-6 border-t border-black/5 pt-5 dark:border-white/10">
+              <CategoryRerank vendors={rerankVendors} />
             </div>
           )}
         </section>

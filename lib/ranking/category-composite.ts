@@ -16,11 +16,16 @@ import { scoreVendorComposite, evidenceCompletenessBand, METHODOLOGY_NOTE } from
 import type { CategoryComposite, CategoryRankedVendor } from "./composite-types";
 import { getVendorScorecardsBatch, type VendorScorecard } from "../assessment/domain-scores";
 import {
-  coverageAdjustedComposite,
-  compareAdjusted,
+  computeWeightedComposite,
+  compareWeighted,
+  DEFAULT_DOMAIN_WEIGHTS,
+  ASSESSMENT_COVERAGE_FLOOR,
+} from "../assessment/composite";
+import {
   assessDiscrimination,
   assignTiers,
   detectRankingAnomalies,
+  ASSESSMENT_NOISE_BAND,
   type RankRow,
 } from "./credibility";
 
@@ -56,22 +61,35 @@ export async function getCategoryComposites(): Promise<CategoryComposite[]> {
     () => new Map<string, VendorScorecard>(),
   );
 
-  // Enrich a pillar-scored vendor with TRUE domain coverage + the linear
-  // coverage-discount, and re-derive the completeness band from DOMAIN coverage
-  // so the label can never read "full" while the strip shows gaps.
-  function enrich(v: CategoryRankedVendor): CategoryRankedVendor {
-    const sc = scorecards.get(v.vendorId);
-    const domainTotal = sc?.domains.length ?? 12;
-    const domainScored = sc?.scoredCount ?? 0;
-    const domainCoverage = domainTotal > 0 ? domainScored / domainTotal : 0;
-    const adjustedComposite = v.composite != null ? coverageAdjustedComposite(v.composite, domainCoverage) : null;
+  // UNIFIED — rank by the 12-domain assessment composite (the SAME
+  // computeWeightedComposite the interactive re-rank uses), so the static order
+  // and the default-weight re-rank are identical by construction. The pillar
+  // composite + pillars[] from scoreVendorComposite are kept as the "why this
+  // rank" detail; eligibility + the headline score now come from DOMAIN evidence.
+  function enrich(v: CategoryRankedVendor, domains: VendorScorecard | undefined): CategoryRankedVendor {
+    const domainTotal = domains?.domains.length ?? 12;
+    const domainScored = domains?.scoredCount ?? 0;
+    const wc = domains ? computeWeightedComposite(domains.domains, DEFAULT_DOMAIN_WEIGHTS) : null;
+    // RAW coverage (evidenced domains / 12, weight-independent) gates eligibility
+    // and is what we display — so you can't re-weight your way out of thin coverage,
+    // and a vendor never appears ranked here but held in the re-rank (same rule).
+    const domainCoverage = wc?.rawCoverage ?? 0;
+    const ranked = !!wc && domainScored > 0 && domainCoverage >= ASSESSMENT_COVERAGE_FLOOR;
+    const excludedReason = ranked
+      ? undefined
+      : domainScored === 0
+        ? "No reviewed evidence across the 12 assessment domains yet"
+        : `Only ${domainScored}/${domainTotal} domains evidenced (need ≥${Math.round(ASSESSMENT_COVERAGE_FLOOR * domainTotal)})`;
     return {
       ...v,
+      state: ranked ? "ranked" : "incomplete",
+      assessmentComposite: wc ? wc.composite : null,
+      compositeConfidence: wc ? wc.confidence : v.compositeConfidence,
       domainScored,
       domainTotal,
       domainCoverage,
-      adjustedComposite,
-      evidenceCompleteness: v.state === "ranked" ? evidenceCompletenessBand(domainCoverage) : v.evidenceCompleteness,
+      evidenceCompleteness: evidenceCompletenessBand(domainCoverage),
+      excludedReason,
     };
   }
 
@@ -85,43 +103,42 @@ export async function getCategoryComposites(): Promise<CategoryComposite[]> {
       const vendor = vendorById.get(id);
       if (!vendor) return [] as CategoryRankedVendor[];
       const share = shareByVendorCat.get(`${id}__${category.id}`);
-      return [enrich(scoreVendorComposite(vendor, scoresByVendor.get(id) ?? [], share))];
+      return [enrich(scoreVendorComposite(vendor, scoresByVendor.get(id) ?? [], share), scorecards.get(id))];
     });
 
-    // Rank by the COVERAGE-ADJUSTED composite (full evidence is never out-ranked
-    // by thin evidence on a near-tied raw composite). Natural-break tiers + a
-    // sanity-check make thin/compressed orderings honest rather than false-precise.
-    const rankRows: RankRow[] = scored
+    // Sort by the assessment composite via the SAME comparator the re-rank uses
+    // (compareWeighted) → default-weight CategoryRerank produces this exact order.
+    const rankedSorted = scored
       .filter((x) => x.state === "ranked")
-      .map((v) => ({
-        vendorId: v.vendorId,
-        vendorName: v.vendorName,
-        rawComposite: v.composite ?? 0,
-        adjustedComposite: v.adjustedComposite ?? 0,
-        domainCoverage: v.domainCoverage,
-        confidence: v.compositeConfidence ?? 0,
-      }))
-      .sort(compareAdjusted);
+      .sort((a, b) =>
+        compareWeighted(
+          { composite: a.assessmentComposite ?? 0, coverage: a.domainCoverage, confidence: a.compositeConfidence ?? 0, vendorId: a.vendorId },
+          { composite: b.assessmentComposite ?? 0, coverage: b.domainCoverage, confidence: b.compositeConfidence ?? 0, vendorId: b.vendorId },
+        ),
+      );
 
-    const tiers = assignTiers(rankRows.map((r) => r.adjustedComposite));
-    const tierByVendor = new Map(rankRows.map((r, i) => [r.vendorId, tiers[i]] as const));
-    const orderByVendor = new Map(rankRows.map((r, i) => [r.vendorId, i] as const));
-
-    const ranked = scored
-      .filter((x) => x.state === "ranked")
-      .sort((a, b) => (orderByVendor.get(a.vendorId) ?? 0) - (orderByVendor.get(b.vendorId) ?? 0))
-      .map((x, i) => ({ ...x, rank: i + 1, tier: tierByVendor.get(x.vendorId) ?? null }));
+    const adjustedDesc = rankedSorted.map((v) => v.assessmentComposite ?? 0);
+    const tiers = assignTiers(adjustedDesc, ASSESSMENT_NOISE_BAND);
+    const ranked = rankedSorted.map((x, i) => ({ ...x, rank: i + 1, tier: tiers[i] ?? null }));
 
     const incomplete = scored
       .filter((x) => x.state === "incomplete")
-      // Deterministic order: domain coverage desc, then vendorId.
       .sort((a, b) => {
         const byCov = b.domainCoverage - a.domainCoverage;
         return Math.abs(byCov) > 1e-9 ? byCov : a.vendorId.localeCompare(b.vendorId);
       });
 
-    const { low } = assessDiscrimination(rankRows.map((r) => r.adjustedComposite));
-    const anomalies = detectRankingAnomalies(rankRows);
+    // Sanity-check + discrimination on the 0–5 assessment scale.
+    const rankRows: RankRow[] = rankedSorted.map((v) => ({
+      vendorId: v.vendorId,
+      vendorName: v.vendorName,
+      rawComposite: v.composite ?? 0,
+      adjustedComposite: v.assessmentComposite ?? 0,
+      domainCoverage: v.domainCoverage,
+      confidence: v.compositeConfidence ?? 0,
+    }));
+    const { low } = assessDiscrimination(adjustedDesc, ASSESSMENT_NOISE_BAND);
+    const anomalies = detectRankingAnomalies(rankRows, ASSESSMENT_NOISE_BAND);
     if (anomalies.length > 0) {
       console.warn(`[rank-fix] ${category.id}: ${anomalies.length} ranking anomaly(ies) for review:\n  ${anomalies.join("\n  ")}`);
     }

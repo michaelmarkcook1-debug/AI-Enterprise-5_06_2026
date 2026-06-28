@@ -61,11 +61,12 @@ export interface CategoryRankedVendor {
   domainScored: number;
   domainTotal: number;
   domainCoverage: number; // domainScored / domainTotal (0–1)
-  /** RANK-FIX — composite × domain coverage (the linear coverage-discount): a
-   *  vendor evidenced on fewer domains is honestly discounted, so full-coverage
-   *  evidence is never out-ranked by thin evidence on a near-tied raw composite.
-   *  This is the value the ranking SORTS and DISPLAYS by. null when incomplete. */
-  adjustedComposite: number | null;
+  /** UNIFIED ranking metric — the 12-domain assessment composite (0–5,
+   *  coverage-discounted), the SAME computeWeightedComposite the interactive
+   *  re-rank uses. The ranking SORTS and DISPLAYS by this, so the static order
+   *  and the live re-rank (CategoryRerank at default weights) are identical by
+   *  construction — no surprise reshuffle. null when held. */
+  assessmentComposite: number | null;
   /** RANK-FIX — tier band (Leaders / Contenders / Emerging) for honest
    *  presentation when composites are within the noise band; null when incomplete. */
   tier: string | null;
