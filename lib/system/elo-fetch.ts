@@ -40,6 +40,12 @@ const ORG_TO_VENDOR: Record<string, string> = {
   tii: "g42", g42: "g42", falcon: "g42",
   writer: "writer",
   sakana: "sakana", sakanaai: "sakana",
+  // Roster model vendors with Arena-ranked models (added after a roster audit —
+  // each id is a real platform vendor; harmless if not currently ranked).
+  nvidia: "nvidia",
+  databricks: "databricks",
+  snowflake: "snowflake",
+  amazon: "aws", aws: "aws", amazonbedrock: "aws", // Amazon Nova → roster id "aws"
 };
 
 function stripTags(s: string): string {
@@ -70,12 +76,27 @@ export function parseArenaLeaderboard(html: string): ArenaRow[] {
   return out;
 }
 
-/** Group parsed rows by roster vendor → top-2 Elo average per vendor. */
-export function mapRowsToVendors(rows: ArenaRow[]): Map<string, EloVendorEntry> {
+export interface MappedArena {
+  vendors: Map<string, EloVendorEntry>;
+  /** Distinct org names that ARE ranked on Arena but map to no roster vendor —
+   *  the coverage gap. Surfaced so a newly-relevant vendor is never silently
+   *  dropped: when one of these is actually on the platform roster, add it to
+   *  ORG_TO_VENDOR. */
+  unmappedOrgs: string[];
+  totalRanked: number;
+}
+
+/** Group parsed rows by roster vendor → top-2 Elo average per vendor, and
+ *  collect the ranked orgs that mapped to nothing (the coverage gap). */
+export function mapRowsToVendors(rows: ArenaRow[]): MappedArena {
   const byVendor = new Map<string, { model: string; elo: number }[]>();
+  const unmapped = new Map<string, number>(); // normalised org → count (dedup display)
   for (const r of rows) {
     const vid = ORG_TO_VENDOR[normOrg(r.org)];
-    if (!vid) continue;
+    if (!vid) {
+      unmapped.set(r.org, (unmapped.get(r.org) ?? 0) + 1);
+      continue;
+    }
     const arr = byVendor.get(vid) ?? [];
     arr.push({ model: r.model, elo: r.elo });
     byVendor.set(vid, arr);
@@ -92,7 +113,7 @@ export function mapRowsToVendors(rows: ArenaRow[]): Map<string, EloVendorEntry> 
       models: models.length,
     });
   }
-  return out;
+  return { vendors: out, unmappedOrgs: [...unmapped.keys()].sort(), totalRanked: rows.length };
 }
 
 /**
@@ -100,7 +121,7 @@ export function mapRowsToVendors(rows: ArenaRow[]): Map<string, EloVendorEntry> 
  * Returns null on any failure (network, parse, or a suspiciously small parse)
  * so the caller can fall back to the static map. Never throws.
  */
-export async function fetchArenaElo(): Promise<Map<string, EloVendorEntry> | null> {
+export async function fetchArenaElo(): Promise<MappedArena | null> {
   try {
     const res = await fetch(ARENA_ELO_SOURCE_URL, {
       headers: { "user-agent": "Mozilla/5.0 (compatible; AnalystGenius/1.0)", accept: "text/html" },
@@ -110,7 +131,7 @@ export async function fetchArenaElo(): Promise<Map<string, EloVendorEntry> | nul
     const rows = parseArenaLeaderboard(await res.text());
     if (rows.length < 20) return null; // parse almost certainly failed/changed
     const mapped = mapRowsToVendors(rows);
-    return mapped.size > 0 ? mapped : null;
+    return mapped.vendors.size > 0 ? mapped : null;
   } catch {
     return null;
   }

@@ -368,7 +368,16 @@ export async function runDailyRefresh(
   await trackedStep("model_quality_elo", async () => {
     if (!dbConfigured) return { skipped: "no_database" };
     const r = await seedEloPillarScores();
-    return { updated: r.updated, skipped: r.skipped, notFound: r.notFound.length };
+    return {
+      updated: r.updated,
+      skipped: r.skipped,
+      notFound: r.notFound.length,
+      source: r.source,
+      vendorsSourced: r.vendorsSourced,
+      covered: r.covered,
+      unmappedOrgs: r.unmappedOrgs,
+      unmappedCount: r.unmappedOrgs.length,
+    };
   });
 
   // ── 5. Derive headline scores from fresh evidence ──────────

@@ -105,6 +105,11 @@ export interface EloPillarSeedResult {
   notFound: string[];
   source: "live" | "snapshot";
   vendorsSourced: number;
+  /** Roster vendor ids that received a model_quality pillar this run. */
+  covered: string[];
+  /** Orgs ranked on Arena that map to NO roster vendor — the coverage gap. When
+   *  one of these is actually a platform vendor, add it to ORG_TO_VENDOR. */
+  unmappedOrgs: string[];
 }
 
 /**
@@ -120,18 +125,30 @@ export interface EloPillarSeedResult {
  * MODEL_QUALITY_WEIGHT). Idempotent; BARE ids; skips vendors absent from the DB.
  */
 export async function seedEloPillarScores(): Promise<EloPillarSeedResult> {
-  if (!hasDatabase()) return { updated: 0, skipped: 0, notFound: [], source: "snapshot", vendorsSourced: 0 };
+  if (!hasDatabase()) {
+    return { updated: 0, skipped: 0, notFound: [], source: "snapshot", vendorsSourced: 0, covered: [], unmappedOrgs: [] };
+  }
   const prisma = getPrisma();
 
   // Build [vendorId, {topTwoAvg, top1, top2}] from the live leaderboard, or the
   // static snapshot if the live fetch fails.
   const live = await fetchArenaElo();
-  const entries: [string, { topTwoAvg: number; top1: string; top2: string }][] = live && live.size > 0
-    ? [...live.entries()].map(([id, e]) => [id, { topTwoAvg: e.topTwoAvg, top1: e.top1, top2: e.top2 }])
+  const useLive = !!live && live.vendors.size > 0;
+  const entries: [string, { topTwoAvg: number; top1: string; top2: string }][] = useLive
+    ? [...live!.vendors.entries()].map(([id, e]) => [id, { topTwoAvg: e.topTwoAvg, top1: e.top1, top2: e.top2 }])
     : Object.entries(VENDOR_ELO_MAP).map(([id, e]) => [id, { topTwoAvg: e.topTwoAvg, top1: e.top1, top2: e.top2 }]);
-  const source: "live" | "snapshot" = live && live.size > 0 ? "live" : "snapshot";
+  const source: "live" | "snapshot" = useLive ? "live" : "snapshot";
+  const unmappedOrgs = useLive ? live!.unmappedOrgs : [];
 
-  const result: EloPillarSeedResult = { updated: 0, skipped: 0, notFound: [], source, vendorsSourced: entries.length };
+  const result: EloPillarSeedResult = {
+    updated: 0,
+    skipped: 0,
+    notFound: [],
+    source,
+    vendorsSourced: entries.length,
+    covered: [],
+    unmappedOrgs,
+  };
 
   for (const [vendorId, data] of entries) {
     const score = normalizeElo(data.topTwoAvg);
@@ -166,11 +183,20 @@ export async function seedEloPillarScores(): Promise<EloPillarSeedResult> {
         },
       });
       result.updated++;
+      result.covered.push(vendorId);
     } catch (err) {
       console.error(`[elo-scores] model_quality pillar upsert failed for ${vendorId}:`, err);
       result.skipped++;
     }
   }
 
+  // Coverage visibility — so a newly-relevant model vendor on the Arena is never
+  // silently dropped: surface ranked orgs that map to no roster vendor.
+  if (result.unmappedOrgs.length > 0) {
+    console.warn(
+      `[elo-scores] ${result.unmappedOrgs.length} Arena-ranked org(s) map to no roster vendor ` +
+        `(extend ORG_TO_VENDOR if any are platform vendors): ${result.unmappedOrgs.join(", ")}`,
+    );
+  }
   return result;
 }
