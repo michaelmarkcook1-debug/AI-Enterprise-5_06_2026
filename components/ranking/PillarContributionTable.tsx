@@ -52,7 +52,8 @@ export default function PillarContributionTable({
           {ranked ? "Why this rank" : "Why insufficient"}
         </span>
         <span className={`text-[11px] ${MUTED}`}>
-          {pct(vendor.coverage)}% pillar-weight evidenced · {COMPLETENESS_LABEL[vendor.evidenceCompleteness]}
+          {vendor.domainScored}/{vendor.domainTotal} domains evidenced · {COMPLETENESS_LABEL[vendor.evidenceCompleteness]}
+          {" · "}{pct(vendor.coverage)}% pillar-weight
         </span>
       </summary>
 

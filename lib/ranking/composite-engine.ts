@@ -46,7 +46,10 @@ export const METHODOLOGY_NOTE =
   `A vendor needs ≥${Math.round(COVERAGE_FLOOR * 100)}% of pillar weight evidenced and a verified ` +
   `Enterprise Control pillar to be ranked — otherwise it is shown as “insufficient evidence”, never ` +
   `floated on a default. The shown confidence is the evidenced-pillar average, discounted for ` +
-  `coverage (capped at 99%). Market share is context, not the rank.`;
+  `coverage (capped at 99%). The composite is then multiplied by the vendor’s TRUE domain coverage ` +
+  `(evidenced of 12 assessment domains), so breadth of evidence is rewarded and thin-but-high evidence ` +
+  `cannot out-rank comprehensive evidence; when adjusted composites sit within the noise band, vendors ` +
+  `are shown as tiers rather than a false-precision 1-N order. Market share is context, not the rank.`;
 
 function clamp(n: number, lo: number, hi: number): number {
   return Math.max(lo, Math.min(hi, n));
@@ -151,6 +154,13 @@ export function scoreVendorComposite(
       compositeConfidence: null,
       evidenceCompleteness: evidenceCompletenessBand(coveredWeight),
       coverage: coveredWeight,
+      // Domain-credibility fields are filled by the category layer (which reads
+      // the assessment scorecard). Neutral defaults here keep the engine pillar-pure.
+      domainScored: 0,
+      domainTotal: 12,
+      domainCoverage: 0,
+      adjustedComposite: null,
+      tier: null,
       pillars,
       marketContext,
       excludedReason: reason,
@@ -184,6 +194,13 @@ export function scoreVendorComposite(
     compositeConfidence,
     evidenceCompleteness: evidenceCompletenessBand(coveredWeight),
     coverage: coveredWeight,
+    // Domain-credibility fields filled by the category layer (RANK-FIX). Default
+    // adjustedComposite = composite (no discount) until real domain coverage applies.
+    domainScored: 0,
+    domainTotal: 12,
+    domainCoverage: 0,
+    adjustedComposite: composite,
+    tier: null,
     pillars,
     marketContext,
   };

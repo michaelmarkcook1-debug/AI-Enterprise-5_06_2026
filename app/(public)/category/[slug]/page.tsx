@@ -40,7 +40,7 @@ export default async function CategoryPage({ params }: { params: Promise<Params>
   // otherwise the honest "insufficient evidence" state shows — never seed.
   const composite = await getCategoryComposite(slug);
   if (!composite) notFound();
-  const { category, ranked, incomplete, isLive, methodologyNote } = composite;
+  const { category, ranked, incomplete, isLive, methodologyNote, lowDiscrimination } = composite;
 
   // Phase 3 — per-vendor 12-domain evidence scorecards (deterministic, no LLM,
   // batched into one query). Used for the compact domain strip under each vendor.
@@ -84,6 +84,17 @@ export default async function CategoryPage({ params }: { params: Promise<Params>
             <p className={`mt-2 text-xs leading-5 ${MUTED}`}>{methodologyNote}</p>
           </details>
 
+          {/* RANK-FIX — when composites sit inside the noise band the order is not
+              statistically separable; lead with tiers + an honest note, not a
+              false-precision 1-N list. */}
+          {lowDiscrimination && ranked.length > 1 && (
+            <p className="mb-3 rounded-md border border-amber-500/30 bg-amber-500/5 px-3 py-2 text-xs text-amber-900 dark:text-amber-200">
+              <strong>Early / thin evidence — limited discrimination.</strong> These vendors&apos; coverage-adjusted
+              composites sit within the noise band, so treat the order as <strong>tiers</strong> (shown per vendor), not a
+              precise 1-N ranking. More verified evidence will separate them.
+            </p>
+          )}
+
           {ranked.length === 0 ? (
             <p className={`text-sm ${MUTED}`}>No vendor has enough verified pillar evidence to rank here yet.</p>
           ) : (
@@ -96,13 +107,18 @@ export default async function CategoryPage({ params }: { params: Promise<Params>
                       <Link href={`/vendors/${v.vendorSlug}`} className="truncate font-medium underline-offset-2 hover:underline">
                         {v.vendorName}
                       </Link>
+                      {v.tier && (
+                        <span className="rounded-full border border-black/10 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-[#15263c]/70 dark:border-white/15 dark:text-[#eef3f8]/70">
+                          {v.tier}
+                        </span>
+                      )}
                     </span>
                     <span className="flex shrink-0 items-baseline gap-3">
-                      <span className="font-mono text-sm tabular-nums">
-                        {v.composite!.toFixed(0)}
+                      <span className="font-mono text-sm tabular-nums" title={`Raw pillar composite ${v.composite?.toFixed(0)} × ${v.domainScored}/${v.domainTotal} domain coverage`}>
+                        {(v.adjustedComposite ?? 0).toFixed(0)}
                         <span className={`ml-1 text-[10px] ${MUTED}`}>composite</span>
                       </span>
-                      <span className={`font-mono text-[11px] tabular-nums ${MUTED}`}>{Math.round(v.coverage * 100)}% covered</span>
+                      <span className={`font-mono text-[11px] tabular-nums ${MUTED}`}>{v.domainScored}/{v.domainTotal} domains</span>
                       <span className={`font-mono text-[11px] tabular-nums ${MUTED}`}>{v.compositeConfidence}% conf</span>
                       <TrackButton item={`vendor:${v.vendorSlug}`} label={v.vendorName} />
                     </span>

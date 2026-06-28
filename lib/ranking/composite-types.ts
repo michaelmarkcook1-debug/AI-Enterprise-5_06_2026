@@ -50,8 +50,25 @@ export interface CategoryRankedVendor {
   /** Coverage-aware confidence 0–99; null when incomplete. */
   compositeConfidence: number | null;
   evidenceCompleteness: EvidenceCompleteness;
-  /** Fraction of total pillar weight that is evidenced (0–1). */
+  /** Fraction of total pillar weight that is evidenced (0–1). NB: pillar-level —
+   *  a pillar counts as covered with one admissible score, so this can read ~1.0
+   *  while DOMAIN coverage is partial. The user-facing coverage label uses the
+   *  domain figures below (RANK-FIX: label-truth). */
   coverage: number;
+  /** RANK-FIX — TRUE domain coverage: evidenced (non-insufficient) assessment
+   *  domains out of 12. This is what the scorecard strip shows, so labels read
+   *  off it and never contradict the strip. */
+  domainScored: number;
+  domainTotal: number;
+  domainCoverage: number; // domainScored / domainTotal (0–1)
+  /** RANK-FIX — composite × domain coverage (the linear coverage-discount): a
+   *  vendor evidenced on fewer domains is honestly discounted, so full-coverage
+   *  evidence is never out-ranked by thin evidence on a near-tied raw composite.
+   *  This is the value the ranking SORTS and DISPLAYS by. null when incomplete. */
+  adjustedComposite: number | null;
+  /** RANK-FIX — tier band (Leaders / Contenders / Emerging) for honest
+   *  presentation when composites are within the noise band; null when incomplete. */
+  tier: string | null;
   /** ALL pillars in canonical order; dark ones state="insufficient_evidence". */
   pillars: PillarContribution[];
   /** Market share shown as CONTEXT only — never the rank. */
@@ -74,4 +91,13 @@ export interface CategoryComposite {
   isLive: boolean;
   /** Deterministic, human-readable methodology (weights, floor, E2+ rule). */
   methodologyNote: string;
+  /** RANK-FIX — true when the ranked vendors' adjusted composites sit inside the
+   *  noise band (not statistically separable): the UI then leads with tier bands
+   *  + a "thin evidence — limited discrimination" note instead of false-precision
+   *  1-N order. */
+  lowDiscrimination: boolean;
+  /** RANK-FIX — sanity-check: human-readable notes where a materially thinner /
+   *  lower-confidence vendor still out-ranks a fuller / higher-confidence one
+   *  (logged for review; surfaced subtly). Empty when the order is clean. */
+  anomalies: string[];
 }
