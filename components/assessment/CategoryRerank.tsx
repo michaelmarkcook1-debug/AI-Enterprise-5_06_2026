@@ -14,6 +14,7 @@ import { ASSESSMENT_DOMAINS, type DomainScore } from "@/lib/assessment/domain-ru
 import {
   computeWeightedComposite,
   compareWeighted,
+  computeGap,
   normalizeWeights,
   DEFAULT_DOMAIN_WEIGHTS,
   ASSESSMENT_COVERAGE_FLOOR,
@@ -95,24 +96,64 @@ export default function CategoryRerank({ vendors }: { vendors: RerankVendor[] })
         ))}
       </div>
 
-      {/* live ranking */}
+      {/* live ranking + W2-3 "why above the next" deterministic explainer */}
       <ol className="mt-4 divide-y divide-black/5 dark:divide-white/10">
-        {computed.ranked.map((v, i) => (
-          <li key={v.vendorId} className="flex items-baseline justify-between gap-2 py-2">
-            <span className="flex min-w-0 items-baseline gap-2">
-              <span className="font-mono tabular-nums text-[#b08d2f] dark:text-[#d4af37]">#{i + 1}</span>
-              <Link href={`/vendors/${v.vendorSlug}`} className="truncate font-medium underline-offset-2 hover:underline">
-                {v.vendorName}
-              </Link>
-            </span>
-            <span className="flex shrink-0 items-baseline gap-3 text-xs">
-              <span className="font-mono tabular-nums text-[#13294b] dark:text-[#eef3f8]">
-                {v.composite.toFixed(2)}<span className="ml-0.5 text-[10px] text-[#7a8aa0]">/5</span>
-              </span>
-              <span className="font-mono tabular-nums text-[#7a8aa0]">{Math.round(v.coverage * 100)}% cov</span>
-            </span>
-          </li>
-        ))}
+        {computed.ranked.map((v, i) => {
+          const next = computed.ranked[i + 1];
+          // Deterministic gap vs the next-ranked vendor under the CURRENT weights —
+          // recomputes whenever sliders change. Top domains where this vendor leads.
+          const gap = next ? computeGap(v.domains, next.domains, sliders as DomainWeights) : null;
+          const drivers = gap ? gap.drivers.filter((d) => d.weightedDelta > 0.001).slice(0, 3) : [];
+          return (
+            <li key={v.vendorId} className="py-2">
+              <div className="flex items-baseline justify-between gap-2">
+                <span className="flex min-w-0 items-baseline gap-2">
+                  <span className="font-mono tabular-nums text-[#b08d2f] dark:text-[#d4af37]">#{i + 1}</span>
+                  <Link href={`/vendors/${v.vendorSlug}`} className="truncate font-medium underline-offset-2 hover:underline">
+                    {v.vendorName}
+                  </Link>
+                </span>
+                <span className="flex shrink-0 items-baseline gap-3 text-xs">
+                  <span className="font-mono tabular-nums text-[#13294b] dark:text-[#eef3f8]">
+                    {v.composite.toFixed(2)}<span className="ml-0.5 text-[10px] text-[#7a8aa0]">/5</span>
+                  </span>
+                  <span className="font-mono tabular-nums text-[#7a8aa0]">{Math.round(v.coverage * 100)}% cov</span>
+                </span>
+              </div>
+              {next && gap && (
+                <details className="mt-0.5">
+                  <summary className="cursor-pointer select-none text-[10px] text-[#7a8aa0] hover:text-[#13294b] dark:hover:text-[#eef3f8]">
+                    ▸ why above {next.vendorName} (+{gap.compositeDelta.toFixed(2)})
+                  </summary>
+                  {drivers.length === 0 ? (
+                    <p className="mt-1 pl-3 text-[11px] text-[#7a8aa0]">
+                      Effectively tied at your current weights — re-weight to separate them. (Draft — interrogate the cited evidence.)
+                    </p>
+                  ) : (
+                    <ul className="mt-1 space-y-1 pl-3 text-[11px] text-[#5e6b7e] dark:text-[#a7bacd]">
+                      {drivers.map((d) => (
+                        <li key={d.domain} className="flex flex-wrap items-center gap-x-1.5">
+                          <span className="font-medium text-[#13294b] dark:text-[#eef3f8]">{DOMAIN_LABEL[d.domain]}</span>
+                          {d.note === "leader_only" ? (
+                            <span>— {v.vendorName} has reviewed evidence here ({d.leaderScore?.toFixed(1)}/5); {next.vendorName} does not</span>
+                          ) : (
+                            <span>{d.leaderScore?.toFixed(1)} vs {d.runnerScore?.toFixed(1)}/5</span>
+                          )}
+                          {d.citation && (
+                            <a href={d.citation.sourceUrl} target="_blank" rel="noopener noreferrer" className="text-sky-700 hover:underline dark:text-sky-400">
+                              ({d.citation.evidenceGrade} · source)
+                            </a>
+                          )}
+                        </li>
+                      ))}
+                      <li className="text-[10px] italic text-[#7a8aa0]">Draft — a decomposition of the gap, not a verdict. Interrogate the cited evidence.</li>
+                    </ul>
+                  )}
+                </details>
+              )}
+            </li>
+          );
+        })}
       </ol>
 
       {computed.held.length > 0 && (

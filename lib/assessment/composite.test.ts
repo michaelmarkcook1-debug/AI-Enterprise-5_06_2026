@@ -5,6 +5,7 @@ import {
   computeWeightedComposite,
   normalizeWeights,
   compareWeighted,
+  computeGap,
   DEFAULT_DOMAIN_WEIGHTS,
   ASSESSMENT_COVERAGE_FLOOR,
   type DomainWeights,
@@ -170,5 +171,48 @@ describe("default-weight parity (static ranking == interactive re-rank)", () => 
     // Even pouring weight onto thin's 4 evidenced domains can't lift it past the floor.
     const skew = { ...equalWeights(1), [ASSESSMENT_DOMAINS[0]]: 100 };
     expect(order(vendors, skew)).not.toContain("thin");
+  });
+});
+
+describe("computeGap (why this / why not the runner-up)", () => {
+  it("per-domain deltas sum to the composite gap (real arithmetic, not narrative)", () => {
+    const leader = allScored(4);
+    const runner = allScored(3);
+    const gap = computeGap(leader, runner, DEFAULT_DOMAIN_WEIGHTS);
+    const summed = gap.drivers.reduce((s, d) => s + d.weightedDelta, 0);
+    expect(gap.compositeDelta).toBeCloseTo(summed, 6);
+    // And it equals the difference of the two composites.
+    const lc = computeWeightedComposite(leader, DEFAULT_DOMAIN_WEIGHTS).composite;
+    const rc = computeWeightedComposite(runner, DEFAULT_DOMAIN_WEIGHTS).composite;
+    expect(gap.compositeDelta).toBeCloseTo(lc - rc, 1);
+  });
+
+  it("top driver is the domain where the leader leads most (weighted)", () => {
+    const hi = ASSESSMENT_DOMAINS[0];
+    const leader = ASSESSMENT_DOMAINS.map((d) => scored(d, d === hi ? 5 : 3));
+    const runner = ASSESSMENT_DOMAINS.map((d) => scored(d, d === hi ? 1 : 3));
+    const gap = computeGap(leader, runner, equalWeights(1));
+    expect(gap.drivers[0].domain).toBe(hi);
+    expect(gap.drivers[0].weightedDelta).toBeGreaterThan(0);
+  });
+
+  it("flags coverage-driven gaps honestly (leader has evidence, runner-up doesn't)", () => {
+    const d0 = ASSESSMENT_DOMAINS[0];
+    const leader = ASSESSMENT_DOMAINS.map((d) => scored(d, 4));
+    const runner = ASSESSMENT_DOMAINS.map((d, i) => (i === 0 ? insufficient(d) : scored(d, 4)));
+    const gap = computeGap(leader, runner, equalWeights(1));
+    const driver = gap.drivers.find((x) => x.domain === d0)!;
+    expect(driver.note).toBe("leader_only");
+    expect(driver.runnerScore).toBeNull();
+    expect(driver.weightedDelta).toBeGreaterThan(0); // the only domain creating a gap
+  });
+
+  it("never invents a reason when both sides lack evidence (delta 0)", () => {
+    const d0 = ASSESSMENT_DOMAINS[0];
+    const leader = ASSESSMENT_DOMAINS.map((d, i) => (i === 0 ? insufficient(d) : scored(d, 4)));
+    const runner = ASSESSMENT_DOMAINS.map((d, i) => (i === 0 ? insufficient(d) : scored(d, 4)));
+    const driver = computeGap(leader, runner, equalWeights(1)).drivers.find((x) => x.domain === d0)!;
+    expect(driver.note).toBe("both_insufficient");
+    expect(driver.weightedDelta).toBe(0);
   });
 });

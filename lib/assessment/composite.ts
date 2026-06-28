@@ -154,3 +154,72 @@ export function compareWeighted(a: RankableComposite, b: RankableComposite): num
   if (byConf !== 0) return byConf;
   return a.vendorId.localeCompare(b.vendorId);
 }
+
+// ── W2-3 — "why this / why not the runner-up" (deterministic delta) ───────────
+
+export interface GapDriver {
+  domain: DomainId;
+  pillar: PillarId;
+  leaderScore: number | null; // 0–5, null when insufficient
+  runnerScore: number | null;
+  weight: number; // normalized 0–1
+  /** leaderContribution − runnerContribution (insufficient = 0). Positive = the
+   *  leader is ahead on this domain; the per-domain deltas sum to compositeDelta. */
+  weightedDelta: number;
+  /** Honesty flag when a driver is coverage-driven or unevidenced for one side. */
+  note: "both_scored" | "leader_only" | "runner_only" | "both_insufficient";
+  /** The leader's freshest citation for this domain (evidence behind the score). */
+  citation?: { sourceUrl: string; evidenceGrade: string; capturedAt: string };
+}
+
+export interface VendorGap {
+  compositeDelta: number; // leader.composite − runner.composite (≥0 when leader truly leads)
+  drivers: GapDriver[]; // ALL 12, sorted by weightedDelta desc (top = why leader leads)
+}
+
+/**
+ * Deterministic decomposition of WHY `leader` out-ranks `runner` under `weights`:
+ * the per-domain contribution difference (leaderScore·w·blend − runnerScore·w·blend,
+ * insufficient = 0). The deltas SUM to the composite gap — it's the real arithmetic,
+ * not an invented narrative. Honesty flags mark coverage-driven / unevidenced
+ * domains so the UI can say "leader has evidence here, runner-up doesn't" rather
+ * than fabricate a reason. Pure; never mutates inputs.
+ */
+export function computeGap(leader: DomainScore[], runner: DomainScore[], weights: Partial<DomainWeights>): VendorGap {
+  const norm = normalizeWeights(weights);
+  const leaderBy = new Map<DomainId, DomainScore>(leader.map((d) => [d.domain, d]));
+  const runnerBy = new Map<DomainId, DomainScore>(runner.map((d) => [d.domain, d]));
+
+  let compositeDelta = 0;
+  const drivers: GapDriver[] = ASSESSMENT_DOMAINS.map((domain) => {
+    const w = norm[domain];
+    const l = leaderBy.get(domain);
+    const r = runnerBy.get(domain);
+    const lScored = l?.state === "scored";
+    const rScored = r?.state === "scored";
+    const lContribution = lScored ? l!.score * w * confidenceBlend(l!.confidence) : 0;
+    const rContribution = rScored ? r!.score * w * confidenceBlend(r!.confidence) : 0;
+    const weightedDelta = lContribution - rContribution;
+    compositeDelta += weightedDelta;
+    const note: GapDriver["note"] = lScored && rScored
+      ? "both_scored"
+      : lScored
+        ? "leader_only"
+        : rScored
+          ? "runner_only"
+          : "both_insufficient";
+    const cite = lScored ? l!.citations[0] : undefined;
+    return {
+      domain,
+      pillar: DOMAIN_TO_PILLAR[domain],
+      leaderScore: lScored ? l!.score : null,
+      runnerScore: rScored ? r!.score : null,
+      weight: w,
+      weightedDelta,
+      note,
+      citation: cite ? { sourceUrl: cite.sourceUrl, evidenceGrade: cite.evidenceGrade, capturedAt: cite.capturedAt } : undefined,
+    };
+  }).sort((a, b) => b.weightedDelta - a.weightedDelta);
+
+  return { compositeDelta: Math.round(compositeDelta * 100) / 100, drivers };
+}

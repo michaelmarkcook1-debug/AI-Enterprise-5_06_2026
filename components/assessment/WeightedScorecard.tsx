@@ -56,6 +56,10 @@ export default function WeightedScorecard({ scorecard }: { scorecard: VendorScor
 
   const result = useMemo(() => computeWeightedComposite(scorecard.domains, sliders as DomainWeights), [scorecard.domains, sliders]);
   const norm = useMemo(() => normalizeWeights(sliders as DomainWeights), [sliders]);
+  const lowConfidenceCount = useMemo(
+    () => scorecard.domains.filter((d) => d.state === "scored" && d.lowConfidence).length,
+    [scorecard.domains],
+  );
 
   const isDefault = ASSESSMENT_DOMAINS.every((d) => sliders[d] === Math.round(DEFAULT_DOMAIN_WEIGHTS[d] * 100));
 
@@ -79,7 +83,7 @@ export default function WeightedScorecard({ scorecard }: { scorecard: VendorScor
           </div>
         </div>
         <div className="text-xs text-[#3f5068] dark:text-[#a7bacd]">
-          <div>Coverage {Math.round(result.coverage * 100)}%</div>
+          <div>Coverage {Math.round(result.rawCoverage * 100)}%</div>
           <div>Confidence {result.confidence}%</div>
           <div>{result.scoredCount}/12 domains evidenced · {result.insufficientCount} insufficient</div>
         </div>
@@ -91,6 +95,24 @@ export default function WeightedScorecard({ scorecard }: { scorecard: VendorScor
         >
           Reset to framework default
         </button>
+      </div>
+
+      {/* W2-2 — show the working: an honest, deterministic trace of what the rubric
+          actually did. Every figure is real (counts from the Wave-1 rubric output +
+          your weights); no fabricated steps, no fake timing. The composite/coverage
+          terms update live as you re-weight. The honest answer to "why so fast?" —
+          it's a rubric, and this is the rubric. */}
+      <div className="mb-4 rounded-lg border border-[#e3d9c0] bg-white/60 px-3 py-2 text-[11px] leading-5 text-[#3f5068] dark:border-[#1d3a57] dark:bg-[#0c2238]/40 dark:text-[#a7bacd]">
+        <span className="font-semibold uppercase tracking-wide text-[#7a8aa0] dark:text-[#7a9bb8]">How this was computed</span>{" "}
+        <span className="font-semibold text-[#13294b] dark:text-[#eef3f8]">{scorecard.totalEvidenceRows.toLocaleString()}</span> reviewed,
+        source-backed records →{" "}
+        <span className="font-semibold text-[#13294b] dark:text-[#eef3f8]">{result.scoredCount}/12 domains</span> scored from cited
+        evidence (best grade caps each band) → <span className="font-semibold text-[#13294b] dark:text-[#eef3f8]">your weights</span> applied →
+        composite <span className="font-semibold text-[#13294b] dark:text-[#eef3f8]">{result.composite.toFixed(2)}/5</span> at{" "}
+        <span className="font-semibold text-[#13294b] dark:text-[#eef3f8]">{Math.round(result.rawCoverage * 100)}%</span> coverage →{" "}
+        <span className="font-semibold text-[#13294b] dark:text-[#eef3f8]">{lowConfidenceCount}</span> low-confidence,{" "}
+        <span className="font-semibold text-[#13294b] dark:text-[#eef3f8]">{result.insufficientCount}</span> insufficient-evidence.{" "}
+        Deterministic — no model call.
       </div>
 
       {/* Per-domain rows: weight slider + live contribution + citations */}
