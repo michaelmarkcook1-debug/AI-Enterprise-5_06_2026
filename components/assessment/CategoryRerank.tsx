@@ -1,0 +1,131 @@
+"use client";
+
+// Phase 3 Assessment — Wave 2 (W2-1): live within-category re-rank.
+// One shared set of domain weights re-orders every vendor in the category by
+// their weighted 0–5 composite — pure client-side arithmetic on Wave 1's
+// per-domain scores. NO network, NO LLM. Vendors below the coverage floor stay
+// HELD (you can't re-weight your way out of thin coverage). The server still
+// SSRs the canonical pillar ranking above this; this is the personal-lens view.
+
+import { useMemo, useState } from "react";
+import Link from "next/link";
+import { DOMAIN_LABEL } from "@/lib/assessment/domain-labels";
+import { ASSESSMENT_DOMAINS, type DomainScore } from "@/lib/assessment/domain-rubric";
+import {
+  computeWeightedComposite,
+  compareWeighted,
+  normalizeWeights,
+  DEFAULT_DOMAIN_WEIGHTS,
+  ASSESSMENT_COVERAGE_FLOOR,
+  type DomainWeights,
+} from "@/lib/assessment/composite";
+import type { DomainId } from "@/lib/types";
+
+export interface RerankVendor {
+  vendorId: string;
+  vendorName: string;
+  vendorSlug: string;
+  domains: DomainScore[];
+}
+
+const defaultSliders = (): Record<DomainId, number> =>
+  ASSESSMENT_DOMAINS.reduce((acc, d) => {
+    acc[d] = Math.round(DEFAULT_DOMAIN_WEIGHTS[d] * 100);
+    return acc;
+  }, {} as Record<DomainId, number>);
+
+export default function CategoryRerank({ vendors }: { vendors: RerankVendor[] }) {
+  const [sliders, setSliders] = useState<Record<DomainId, number>>(defaultSliders);
+  const norm = useMemo(() => normalizeWeights(sliders as DomainWeights), [sliders]);
+  const isDefault = ASSESSMENT_DOMAINS.every((d) => sliders[d] === Math.round(DEFAULT_DOMAIN_WEIGHTS[d] * 100));
+
+  const computed = useMemo(() => {
+    const rows = vendors.map((v) => {
+      const r = computeWeightedComposite(v.domains, sliders as DomainWeights);
+      return { ...v, composite: r.composite, coverage: r.coverage, confidence: r.confidence, scoredCount: r.scoredCount };
+    });
+    const ranked = rows
+      .filter((r) => r.scoredCount > 0 && r.coverage >= ASSESSMENT_COVERAGE_FLOOR)
+      .sort((a, b) => compareWeighted(a, b));
+    const held = rows.filter((r) => !(r.scoredCount > 0 && r.coverage >= ASSESSMENT_COVERAGE_FLOOR));
+    return { ranked, held };
+  }, [vendors, sliders]);
+
+  return (
+    <div className="rounded-xl border border-[#d4af37]/50 bg-[#fbf6e4]/50 p-4 dark:border-[#d4af37]/40 dark:bg-[#1a1605]/30">
+      <div className="flex flex-wrap items-baseline justify-between gap-2">
+        <h2 className="text-sm font-semibold text-[#13294b] dark:text-[#eef3f8]">Assessment re-rank — your weights</h2>
+        <button
+          type="button"
+          disabled={isDefault}
+          onClick={() => setSliders(defaultSliders())}
+          className="rounded-full border border-[#d6c9a8] px-3 py-1 text-xs font-medium text-[#4c5d75] hover:bg-white disabled:opacity-40 dark:border-[#2a4a6b] dark:text-[#a7bacd] dark:hover:bg-[#0c2238]"
+        >
+          Reset to framework default
+        </button>
+      </div>
+      <p className="mt-1 text-xs text-[#5e6b7e] dark:text-[#a7bacd]">
+        Weight the 12 domains to your priorities; vendors re-order live by their weighted 0–5 composite from reviewed,
+        source-backed evidence. Vendors below {Math.round(ASSESSMENT_COVERAGE_FLOOR * 100)}% domain coverage are held —
+        re-weighting can’t mask thin evidence. Draft — pressure-test the sources on each profile.
+      </p>
+
+      {/* compact weight sliders */}
+      <div className="mt-3 grid grid-cols-1 gap-x-4 gap-y-1 sm:grid-cols-2">
+        {ASSESSMENT_DOMAINS.map((d) => (
+          <label key={d} className="flex items-center gap-2 text-[11px]">
+            <span className="w-44 shrink-0 truncate text-[#3f5068] dark:text-[#a7bacd]" title={DOMAIN_LABEL[d]}>
+              {DOMAIN_LABEL[d]}
+            </span>
+            <input
+              type="range"
+              min={0}
+              max={30}
+              step={1}
+              value={sliders[d]}
+              onChange={(e) => setSliders((s) => ({ ...s, [d]: Number(e.target.value) }))}
+              className="h-1 flex-1 cursor-pointer accent-[#b08d2f] dark:accent-[#d4af37]"
+              aria-label={`Weight for ${DOMAIN_LABEL[d]}`}
+            />
+            <span className="w-9 shrink-0 text-right font-mono tabular-nums text-[#7a8aa0]">{Math.round(norm[d] * 100)}%</span>
+          </label>
+        ))}
+      </div>
+
+      {/* live ranking */}
+      <ol className="mt-4 divide-y divide-black/5 dark:divide-white/10">
+        {computed.ranked.map((v, i) => (
+          <li key={v.vendorId} className="flex items-baseline justify-between gap-2 py-2">
+            <span className="flex min-w-0 items-baseline gap-2">
+              <span className="font-mono tabular-nums text-[#b08d2f] dark:text-[#d4af37]">#{i + 1}</span>
+              <Link href={`/vendors/${v.vendorSlug}`} className="truncate font-medium underline-offset-2 hover:underline">
+                {v.vendorName}
+              </Link>
+            </span>
+            <span className="flex shrink-0 items-baseline gap-3 text-xs">
+              <span className="font-mono tabular-nums text-[#13294b] dark:text-[#eef3f8]">
+                {v.composite.toFixed(2)}<span className="ml-0.5 text-[10px] text-[#7a8aa0]">/5</span>
+              </span>
+              <span className="font-mono tabular-nums text-[#7a8aa0]">{Math.round(v.coverage * 100)}% cov</span>
+            </span>
+          </li>
+        ))}
+      </ol>
+
+      {computed.held.length > 0 && (
+        <div className="mt-3 border-t border-black/5 pt-2 dark:border-white/10">
+          <div className="text-[11px] font-semibold text-[#5e6b7e] dark:text-[#a7bacd]">
+            Held — insufficient domain coverage ({computed.held.length})
+          </div>
+          <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-[#7a8aa0]">
+            {computed.held.map((v) => (
+              <Link key={v.vendorId} href={`/vendors/${v.vendorSlug}`} className="underline-offset-2 hover:underline">
+                {v.vendorName} ({Math.round(v.coverage * 100)}%)
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

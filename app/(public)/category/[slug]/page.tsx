@@ -9,6 +9,8 @@ import PillarContributionTable from "@/components/ranking/PillarContributionTabl
 import TrackButton from "@/components/member/TrackButton";
 import { getVendorScorecardsBatch, type VendorScorecard } from "@/lib/assessment/domain-scores";
 import { DOMAIN_LABEL } from "@/lib/assessment/domain-labels";
+import { INTERACTIVE_ASSESSMENT_ENABLED } from "@/lib/availability";
+import CategoryRerank, { type RerankVendor } from "@/components/assessment/CategoryRerank";
 
 // force-dynamic (not ISR): rankings are DB-backed + recalculated each pipeline
 // run, so the page must reflect the live data immediately — never serve a stale
@@ -50,6 +52,12 @@ export default async function CategoryPage({ params }: { params: Promise<Params>
       )
     : new Map<string, VendorScorecard>();
 
+  // Vendors with real assessment evidence, fed to the live re-rank island (W2-1).
+  const rerankVendors: RerankVendor[] = [...ranked, ...incomplete]
+    .map((v) => ({ v, sc: scorecards.get(v.vendorId) }))
+    .filter((x): x is { v: typeof x.v; sc: VendorScorecard } => !!x.sc && x.sc.hasAnyEvidence)
+    .map(({ v, sc }) => ({ vendorId: v.vendorId, vendorName: v.vendorName, vendorSlug: v.vendorSlug, domains: sc.domains }));
+
   return (
     <main className="mx-auto max-w-5xl px-4 py-10">
       <nav className={`mb-3 text-xs ${MUTED}`}>
@@ -83,6 +91,12 @@ export default async function CategoryPage({ params }: { params: Promise<Params>
             </summary>
             <p className={`mt-2 text-xs leading-5 ${MUTED}`}>{methodologyNote}</p>
           </details>
+
+          {INTERACTIVE_ASSESSMENT_ENABLED && rerankVendors.length > 0 && (
+            <div className="mb-5">
+              <CategoryRerank vendors={rerankVendors} />
+            </div>
+          )}
 
           {ranked.length === 0 ? (
             <p className={`text-sm ${MUTED}`}>No vendor has enough verified pillar evidence to rank here yet.</p>

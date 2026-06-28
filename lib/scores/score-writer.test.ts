@@ -142,6 +142,7 @@ describe("independence firewall — score writes are sanctioned-only", () => {
       "lib/assessment/domain-rubric.ts",
       "lib/assessment/domain-scores.ts",
       "lib/assessment/domain-labels.ts",
+      "lib/assessment/composite.ts",
     ];
     const COMMERCIAL_USE_RE = /\.vendorCommercial\.|"vendor_commercial"|'vendor_commercial'/;
     for (const f of files) {
