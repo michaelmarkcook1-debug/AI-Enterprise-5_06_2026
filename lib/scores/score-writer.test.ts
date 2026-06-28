@@ -32,6 +32,7 @@ const SANCTIONED = new Set<string>([
   "lib/scores/score-writer.ts", // the sanctioned chokepoint (rubric_derive / evidence_projection)
   "app/api/admin/seed-missing-vendors/route.ts", // init-only, admin-gated seed
   "lib/intelligence/load-universe.ts", // idempotent deterministic-seed universe loader
+  "lib/system/elo-scores.ts", // Arena ELO (openlm.ai public benchmark) → model_quality pillar; a benchmark/rubric path, never commercial
 ]);
 
 // Score models + the fields that make a write a "score write".
@@ -129,5 +130,32 @@ describe("independence firewall — score writes are sanctioned-only", () => {
     const writes = findScoreWrites();
     const chokepoint = writes.some((w) => w.file === "lib/scores/score-writer.ts");
     expect(chokepoint, "lib/scores/score-writer.ts should be the sanctioned score writer").toBe(true);
+  });
+
+  // Phase 3 Assessment domain scores are computed-at-read (deterministic rubric
+  // over verified evidence), never persisted — so there must be no writer to
+  // compromise. Pin the assessment modules as read-only + commercial-free; if a
+  // future change persists domain scores, route it through score-writer.ts and
+  // update this guard deliberately.
+  it("assessment domain-score modules never write a score field or touch commercial data", () => {
+    const files = [
+      "lib/assessment/domain-rubric.ts",
+      "lib/assessment/domain-scores.ts",
+      "lib/assessment/domain-labels.ts",
+    ];
+    const COMMERCIAL_USE_RE = /\.vendorCommercial\.|"vendor_commercial"|'vendor_commercial'/;
+    for (const f of files) {
+      const src = readFileSync(join(ROOT, f), "utf8");
+      SCORE_WRITE_RE.lastIndex = 0;
+      const writesScore = (() => {
+        let m: RegExpExecArray | null;
+        while ((m = SCORE_WRITE_RE.exec(src)) !== null) {
+          if (SCORE_FIELD_RE.test(src.slice(m.index, m.index + WINDOW))) return true;
+        }
+        return false;
+      })();
+      expect(writesScore, `${f} must not write a stored score field`).toBe(false);
+      expect(COMMERCIAL_USE_RE.test(src), `${f} must not read commercial data`).toBe(false);
+    }
   });
 });

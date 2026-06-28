@@ -30,6 +30,8 @@ import { getVendorCategoryStandings } from "@/lib/ranking/category-composite";
 import PillarContributionTable from "@/components/ranking/PillarContributionTable";
 import { getDeliveryPartnershipsForVendor } from "@/lib/delivery/repository";
 import ImplementationPartnersPanel from "@/components/vendor/ImplementationPartnersPanel";
+import { getVendorScorecard } from "@/lib/assessment/domain-scores";
+import DomainScorecard from "@/components/assessment/DomainScorecard";
 
 export const dynamic = "force-dynamic";
 
@@ -510,11 +512,18 @@ export default async function VendorDeepDivePage({
   const partnerIndustries = [...new Set(deliveryPartnerships.flatMap((p) => p.industries))].sort();
   const partnerRegions = [...new Set(deliveryPartnerships.flatMap((p) => p.regions))].sort();
 
-  // STRICT mode: the full profile (scores, momentum, role breakdown, financials,
-  // analyst interpretation) is sourced from the hardcoded ENTITIES roster — not
-  // from live-DB verified evidence — so we hold it until the portal is
-  // evidence-backed rather than present hardcoded scores as measured. The vendor
-  // name is the page subject (the URL), not a fabricated metric.
+  // Phase 3 Assessment scorecard — 12-domain 0–5 scores from REAL analyst_verified
+  // evidence (deterministic, no LLM, never seed). Keyed on entity.id to match
+  // EvidenceRecord.vendorId. When the vendor has any verified evidence this lifts
+  // the "profile data unavailable" gate with the real scorecard.
+  const scorecard = await getVendorScorecard(entity.id).catch(() => null);
+  const hasEvidence = !!scorecard?.hasAnyEvidence;
+
+  // STRICT mode: the LEGACY full profile (hardcoded ENTITIES scores, momentum,
+  // role breakdown, financials) stays held behind HARDCODED_SURFACES_WIRED — we
+  // never present seed as measured. But the evidence-derived assessment scorecard
+  // is real, so it renders here in place of the bare "profile data unavailable"
+  // block whenever the vendor has verified evidence.
   if (!HARDCODED_SURFACES_WIRED) {
     return (
       <div className="min-h-screen bg-white dark:bg-[#071827]">
@@ -531,10 +540,18 @@ export default async function VendorDeepDivePage({
           <h1 className="mb-4 text-3xl font-semibold tracking-tight text-[#13294b] dark:text-[#f6f9fc]">
             {entity.name}
           </h1>
-          <DataUnavailable
-            title={`${entity.name} — profile data unavailable`}
-            detail="Scores, momentum, role breakdown and financial signals appear only when backed by reviewed, source-backed evidence in our live data store. No reviewed evidence has been ingested for this vendor yet, so we hold the profile rather than show hardcoded figures as if measured."
-          />
+          {hasEvidence && scorecard ? (
+            <section className="mb-6">
+              <Panel title="Enterprise assessment — evidence scorecard">
+                <DomainScorecard scorecard={scorecard} />
+              </Panel>
+            </section>
+          ) : (
+            <DataUnavailable
+              title={`${entity.name} — profile data unavailable`}
+              detail="Scores, momentum, role breakdown and financial signals appear only when backed by reviewed, source-backed evidence in our live data store. No reviewed evidence has been ingested for this vendor yet, so we hold the profile rather than show hardcoded figures as if measured."
+            />
+          )}
           {deliveryPartnerships.length > 0 && (
             <section className="mt-6">
               <Panel title="Implementation partners">

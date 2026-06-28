@@ -7,6 +7,8 @@ import { getCategoryComposite } from "@/lib/ranking/category-composite";
 import DataUnavailable from "@/components/DataUnavailable";
 import PillarContributionTable from "@/components/ranking/PillarContributionTable";
 import TrackButton from "@/components/member/TrackButton";
+import { getVendorScorecardsBatch, type VendorScorecard } from "@/lib/assessment/domain-scores";
+import { DOMAIN_LABEL } from "@/lib/assessment/domain-labels";
 
 // force-dynamic (not ISR): rankings are DB-backed + recalculated each pipeline
 // run, so the page must reflect the live data immediately — never serve a stale
@@ -39,6 +41,14 @@ export default async function CategoryPage({ params }: { params: Promise<Params>
   const composite = await getCategoryComposite(slug);
   if (!composite) notFound();
   const { category, ranked, incomplete, isLive, methodologyNote } = composite;
+
+  // Phase 3 — per-vendor 12-domain evidence scorecards (deterministic, no LLM,
+  // batched into one query). Used for the compact domain strip under each vendor.
+  const scorecards: Map<string, VendorScorecard> = isLive
+    ? await getVendorScorecardsBatch([...ranked, ...incomplete].map((v) => v.vendorId)).catch(
+        () => new Map<string, VendorScorecard>(),
+      )
+    : new Map<string, VendorScorecard>();
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-10">
@@ -108,6 +118,7 @@ export default async function CategoryPage({ params }: { params: Promise<Params>
                     </p>
                   )}
                   <PillarContributionTable vendor={v} />
+                  <DomainStrip scorecard={scorecards.get(v.vendorId)} />
                 </li>
               ))}
             </ol>
@@ -130,6 +141,7 @@ export default async function CategoryPage({ params }: { params: Promise<Params>
                       <span className={`text-[11px] ${MUTED}`}>{v.excludedReason}</span>
                     </div>
                     <PillarContributionTable vendor={v} />
+                    <DomainStrip scorecard={scorecards.get(v.vendorId)} />
                   </li>
                 ))}
               </ul>
@@ -138,5 +150,35 @@ export default async function CategoryPage({ params }: { params: Promise<Params>
         </section>
       )}
     </main>
+  );
+}
+
+// Compact 12-domain evidence strip: one cell per framework domain showing the
+// 0–5 score (or "—" for insufficient evidence). Deterministic, evidence-only —
+// the fuller scorecard with citations lives on the vendor profile.
+function DomainStrip({ scorecard }: { scorecard?: VendorScorecard }) {
+  if (!scorecard || scorecard.scoredCount === 0) return null;
+  const tone = (band: number) =>
+    band >= 4
+      ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300"
+      : band >= 3
+        ? "bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300"
+        : "bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300";
+  return (
+    <div className="mt-2 flex flex-wrap gap-1" aria-label="Per-domain evidence scores (0–5)">
+      {scorecard.domains.map((d) => (
+        <span
+          key={d.domain}
+          title={`${DOMAIN_LABEL[d.domain]}: ${d.state === "scored" ? `${d.score.toFixed(1)}/5` : "insufficient evidence"}`}
+          className={`inline-flex h-6 min-w-[2.1rem] items-center justify-center rounded px-1 font-mono text-[10px] tabular-nums ${
+            d.state === "scored"
+              ? tone(d.band)
+              : "bg-black/5 text-[#15263c]/40 dark:bg-white/5 dark:text-[#eef3f8]/40"
+          }`}
+        >
+          {d.state === "scored" ? d.score.toFixed(1) : "—"}
+        </span>
+      ))}
+    </div>
   );
 }
