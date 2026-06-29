@@ -88,7 +88,7 @@ export default async function VendorsPage() {
                         </span>
                         <span className="flex shrink-0 items-baseline gap-3">
                           <span className="font-mono text-sm tabular-nums">
-                            {v.composite!.toFixed(0)}
+                            {(v.composite ?? 0).toFixed(0)}
                             <span className={`ml-1 text-[10px] ${MUTED}`}>composite</span>
                           </span>
                           <span className={`font-mono text-[11px] tabular-nums ${MUTED}`}>{Math.round(v.coverage * 100)}% covered</span>

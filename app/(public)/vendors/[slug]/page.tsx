@@ -832,7 +832,7 @@ export default async function VendorDeepDivePage({
                         <span className="font-mono text-sm tabular-nums text-[#13294b] dark:text-[#eef3f8]">
                           #{s.standing.rank} of {s.rankedCount}
                           <span className="ml-2 text-xs text-[#54647a] dark:text-[#a7bacd]">
-                            composite {s.standing.composite!.toFixed(0)} · {s.standing.compositeConfidence}% conf
+                            composite {(s.standing.composite ?? 0).toFixed(0)} · {s.standing.compositeConfidence}% conf
                           </span>
                         </span>
                       ) : (
@@ -901,13 +901,13 @@ export default async function VendorDeepDivePage({
                   <div>
                     <span className="text-xs uppercase tracking-wide text-[#5b6b7f] dark:text-[#8fa5bb]">Latest score</span>
                     <div className="mt-1 text-xl font-semibold tabular-nums text-emerald-700 dark:text-emerald-300">
-                      {lastSnapshot.overallScore.toFixed(1)}
+                      {(lastSnapshot.overallScore ?? 0).toFixed(1)}
                     </div>
                   </div>
                   <div>
                     <span className="text-xs uppercase tracking-wide text-[#5b6b7f] dark:text-[#8fa5bb]">Momentum</span>
                     <div className="mt-1 text-xl font-semibold tabular-nums text-amber-700 dark:text-amber-300">
-                      {lastSnapshot.momentumScore.toFixed(1)}
+                      {(lastSnapshot.momentumScore ?? 0).toFixed(1)}
                     </div>
                   </div>
                   <div>
