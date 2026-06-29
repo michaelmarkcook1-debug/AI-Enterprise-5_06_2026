@@ -19,12 +19,18 @@ export function adminCookieValue(token: string): string {
   return createHash("sha256").update(`ae-admin:v1:${token}`).digest("hex");
 }
 
+/** Resolves the effective admin token — ADMIN_API_TOKEN, falling back to
+ *  CRON_SECRET so no separate key needs to be configured or rotated. */
+export function getAdminToken(): string {
+  return process.env.ADMIN_API_TOKEN || process.env.CRON_SECRET || "";
+}
+
 /** True when the current request may view admin pages. */
 export async function isAdminPageAuthed(): Promise<boolean> {
   // Dev convenience — mirrors isAdminRequest. Never set in production.
   if (process.env.ADMIN_API_OPEN === "1") return true;
-  const expected = process.env.ADMIN_API_TOKEN;
-  if (!expected) return false; // no token configured → locked (safe default)
+  const expected = getAdminToken();
+  if (!expected) return false; // no secret configured → locked (safe default)
   const jar = await cookies();
   const got = jar.get(ADMIN_COOKIE)?.value ?? "";
   return safeEqual(got, adminCookieValue(expected));

@@ -2,11 +2,11 @@
 // Accepts: ADMIN_API_OPEN=1 (dev) | x-admin-token header | ae_admin session cookie.
 
 import { safeEqual } from "./safe-equal";
-import { adminCookieValue, ADMIN_COOKIE } from "./admin-page-auth";
+import { adminCookieValue, ADMIN_COOKIE, getAdminToken } from "./admin-page-auth";
 
 export function isAdminRequest(request: Request): boolean {
   if (process.env.ADMIN_API_OPEN === "1") return true;
-  const expected = process.env.ADMIN_API_TOKEN;
+  const expected = getAdminToken();
   if (!expected) return false;
   // Token header (automation / CLI)
   const headerToken = request.headers.get("x-admin-token") ?? "";
