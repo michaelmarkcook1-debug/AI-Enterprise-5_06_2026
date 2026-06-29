@@ -14,12 +14,13 @@ interface Props {
   filters: BatchReviewFilters;
   paging: BatchReviewPaging;
   hasDatabase: boolean;
+  adminToken?: string;
 }
 
-export default function BatchReview({ result, filters, paging, hasDatabase }: Props) {
+export default function BatchReview({ result, filters, paging, hasDatabase, adminToken }: Props) {
   const router = useRouter();
   const [, startTransition] = useTransition();
-  const [token, setToken] = useState("");
+  const [token, setToken] = useState(adminToken ?? "");
   const [reviewerId, setReviewerId] = useState("admin@local");
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -172,16 +173,11 @@ export default function BatchReview({ result, filters, paging, hasDatabase }: Pr
           </div>
         )}
 
-        {/* Reviewer + token row */}
+        {/* Reviewer row */}
         <div className="mt-6 grid gap-3 sm:grid-cols-2">
           <label className="block">
             <div className="mb-1 text-xs font-medium text-[#4c5d75]">Reviewer ID</div>
             <input value={reviewerId} onChange={(e) => setReviewerId(e.target.value)}
-              className="w-full rounded-lg border border-[#d6c9a8] dark:border-[#2a4a6b] bg-white dark:bg-[#071827] px-3 py-2 text-sm" />
-          </label>
-          <label className="block">
-            <div className="mb-1 text-xs font-medium text-[#4c5d75]">x-admin-token (if not in dev mode)</div>
-            <input value={token} onChange={(e) => setToken(e.target.value)} type="password"
               className="w-full rounded-lg border border-[#d6c9a8] dark:border-[#2a4a6b] bg-white dark:bg-[#071827] px-3 py-2 text-sm" />
           </label>
         </div>
@@ -255,6 +251,7 @@ export default function BatchReview({ result, filters, paging, hasDatabase }: Pr
               <BulkAllMatchingButton
                 totalAfterFilter={totalAfterFilter}
                 filters={filters}
+                token={token}
                 onIdsResolved={(ids) => confirmAndBulk("approve", ids, `auto-process · ${ids.length} rows`)}
                 label={`⚡ Auto-process all ${totalAfterFilter} pending`}
                 tone="primary"
@@ -274,6 +271,7 @@ export default function BatchReview({ result, filters, paging, hasDatabase }: Pr
               <BulkAllMatchingButton
                 totalAfterFilter={totalAfterFilter}
                 filters={filters}
+                token={token}
                 onIdsResolved={(ids) => confirmAndBulk("approve", ids, `all matching filters · ${ids.length} rows`)}
               />
             )}
@@ -433,12 +431,14 @@ function FilterSelect({ label, value, onChange, options }: {
 function BulkAllMatchingButton({
   totalAfterFilter,
   filters,
+  token,
   onIdsResolved,
   label,
   tone = "secondary",
 }: {
   totalAfterFilter: number;
   filters: BatchReviewFilters;
+  token?: string;
   onIdsResolved: (ids: string[]) => void;
   /** Custom label override. Defaults to "Approve all matching filters (N)". */
   label?: string;
@@ -464,7 +464,9 @@ function BulkAllMatchingButton({
           if (filters.includeDeferred) u.set("includeDeferred", "1");
           if (filters.lane) u.set("lane", filters.lane); // resolve the lane the operator is viewing
           u.set("ids", "1"); // tell the server to return just ids
-          const res = await fetch(`/api/admin/evidence/batch-action/ids?${u.toString()}`);
+          const res = await fetch(`/api/admin/evidence/batch-action/ids?${u.toString()}`, {
+            headers: token ? { "x-admin-token": token } : {},
+          });
           if (!res.ok) throw new Error(`HTTP ${res.status}`);
           const body = (await res.json()) as { ids: string[] };
           onIdsResolved(body.ids);

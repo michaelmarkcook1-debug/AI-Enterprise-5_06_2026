@@ -179,6 +179,7 @@ export default async function BatchReviewPage({ searchParams }: PageProps) {
       filters={filters}
       paging={{ offset, limit: DEFAULT_BATCH_LIMIT }}
       hasDatabase
+      adminToken={process.env.ADMIN_API_TOKEN ?? ""}
     />
   );
 }
