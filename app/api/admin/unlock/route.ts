@@ -3,7 +3,7 @@
 // remain independently gated by their x-admin-token header.
 
 import { cookies } from "next/headers";
-import { ADMIN_COOKIE, adminCookieValue } from "@/lib/admin-page-auth";
+import { ADMIN_COOKIE, adminCookieValue, getAdminToken } from "@/lib/admin-page-auth";
 import { safeEqual } from "@/lib/safe-equal";
 import { rateLimit, rateLimitHeaders } from "@/lib/http/rate-limit";
 
@@ -32,7 +32,7 @@ export async function POST(request: Request): Promise<Response> {
   const token = typeof (body as { token?: unknown })?.token === "string" ? (body as { token: string }).token : "";
 
   const open = process.env.ADMIN_API_OPEN === "1";
-  const expected = process.env.ADMIN_API_TOKEN;
+  const expected = getAdminToken(); // ADMIN_API_TOKEN, falling back to CRON_SECRET
 
   if (!open) {
     if (!expected) return Response.json({ error: "not_configured" }, { status: 503 });
@@ -41,7 +41,7 @@ export async function POST(request: Request): Promise<Response> {
 
   // Store the HASH of the token, not the raw secret — cookie leak doesn't expose the key.
   const jar = await cookies();
-  jar.set(ADMIN_COOKIE, adminCookieValue(expected ?? "open"), {
+  jar.set(ADMIN_COOKIE, adminCookieValue(expected || "open"), {
     httpOnly: true,
     secure: true,
     sameSite: "lax",
