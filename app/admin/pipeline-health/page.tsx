@@ -15,6 +15,7 @@ import Link from "next/link";
 import { PageFrame } from "@/components/app-shell";
 import { Panel } from "@/components/intelligence-ui";
 import { getLastRefreshRun, listRefreshRuns } from "@/lib/system/daily-refresh-store";
+import TriggerDailyRefresh from "@/components/admin/TriggerDailyRefresh";
 
 export const dynamic = "force-dynamic";
 
@@ -80,10 +81,10 @@ export default async function PipelineHealthPage() {
         description="No refresh runs have been persisted yet. Check back after the next 03:00 UTC scheduled run."
       >
         <Panel title="No data">
-          <p className="text-sm text-[#475a72]">
+          <p className="mb-4 text-sm text-[#475a72]">
             The pipeline has not written any run to <code className="font-mono">daily_refresh_runs</code> yet.
-            Trigger one manually from <Link href="/admin/ingestion" className="underline font-semibold">Ingestion</Link>.
           </p>
+          <TriggerDailyRefresh />
         </Panel>
       </PageFrame>
     );
@@ -103,8 +104,12 @@ export default async function PipelineHealthPage() {
     <PageFrame
       title="Pipeline health"
       kicker={`Last run ${ago(last.startedAt)} · ${okSteps}/${steps.length} steps OK`}
-      description="Read-only view of the daily-refresh pipeline. Each step is independent — one failing does not block the others. Trigger a fresh run from /admin/ingestion if you need to."
+      description="Daily-refresh pipeline status. Each step is independent — one failing does not block the others."
     >
+      <div className="mb-6">
+        <TriggerDailyRefresh />
+      </div>
+
       {/* Headline status */}
       <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatusCard
