@@ -155,6 +155,53 @@ export function compareWeighted(a: RankableComposite, b: RankableComposite): num
   return a.vendorId.localeCompare(b.vendorId);
 }
 
+// ── Single source of ranking truth ───────────────────────────────────────────
+
+export interface RankedVendor {
+  vendorId: string;
+  composite: number; // 0–5 weighted composite
+  coverage: number; // RAW coverage 0–1 (evidenced domains / 12)
+  confidence: number; // 0–99
+  scoredCount: number;
+  /** Meets the coverage floor → ranked; otherwise held (shown, not ranked). */
+  ranked: boolean;
+}
+
+export interface VendorDomains {
+  vendorId: string;
+  domains: DomainScore[];
+}
+
+/**
+ * THE ranking function — the ONE source of truth both the static category
+ * ranking (category-composite) and the interactive re-rank (CategoryRerank)
+ * call. Identical inputs + weights ⇒ identical order, by construction (no
+ * parallel composite that can disagree). Ranked vendors (RAW coverage ≥ floor)
+ * sort by compareWeighted; held vendors trail, ordered by coverage then id.
+ * Pure; never mutates inputs.
+ */
+export function rankVendorsByComposite(vendors: VendorDomains[], weights: Partial<DomainWeights>): RankedVendor[] {
+  const rows: RankedVendor[] = vendors.map((v) => {
+    const r = computeWeightedComposite(v.domains, weights);
+    return {
+      vendorId: v.vendorId,
+      composite: r.composite,
+      coverage: r.rawCoverage,
+      confidence: r.confidence,
+      scoredCount: r.scoredCount,
+      ranked: r.scoredCount > 0 && r.rawCoverage >= ASSESSMENT_COVERAGE_FLOOR,
+    };
+  });
+  const ranked = rows.filter((r) => r.ranked).sort(compareWeighted);
+  const held = rows
+    .filter((r) => !r.ranked)
+    .sort((a, b) => {
+      const byCov = b.coverage - a.coverage;
+      return Math.abs(byCov) > 1e-9 ? byCov : a.vendorId.localeCompare(b.vendorId);
+    });
+  return [...ranked, ...held];
+}
+
 // ── W2-3 — "why this / why not the runner-up" (deterministic delta) ───────────
 
 export interface GapDriver {

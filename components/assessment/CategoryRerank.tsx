@@ -12,8 +12,7 @@ import Link from "next/link";
 import { DOMAIN_LABEL } from "@/lib/assessment/domain-labels";
 import { ASSESSMENT_DOMAINS, type DomainScore } from "@/lib/assessment/domain-rubric";
 import {
-  computeWeightedComposite,
-  compareWeighted,
+  rankVendorsByComposite,
   computeGap,
   normalizeWeights,
   DEFAULT_DOMAIN_WEIGHTS,
@@ -41,18 +40,20 @@ export default function CategoryRerank({ vendors }: { vendors: RerankVendor[] })
   const isDefault = ASSESSMENT_DOMAINS.every((d) => sliders[d] === Math.round(DEFAULT_DOMAIN_WEIGHTS[d] * 100));
 
   const computed = useMemo(() => {
-    const rows = vendors.map((v) => {
-      const r = computeWeightedComposite(v.domains, sliders as DomainWeights);
-      // RAW coverage (weight-independent) gates eligibility + tie-breaks + display,
-      // so you can't re-weight your way out of thin coverage — and the order matches
-      // the static ranking, which uses the same rule.
-      return { ...v, composite: r.composite, coverage: r.rawCoverage, confidence: r.confidence, scoredCount: r.scoredCount };
-    });
-    const ranked = rows
-      .filter((r) => r.scoredCount > 0 && r.coverage >= ASSESSMENT_COVERAGE_FLOOR)
-      .sort((a, b) => compareWeighted(a, b));
-    const held = rows.filter((r) => !(r.scoredCount > 0 && r.coverage >= ASSESSMENT_COVERAGE_FLOOR));
-    return { ranked, held };
+    // Single source of ranking truth — the SAME function the static category
+    // ranking calls. At default weights this reproduces the static order exactly
+    // (parity by construction); RAW coverage gates eligibility (can't re-weight
+    // out of thin coverage). Merge the ranker output back with name/slug/domains.
+    const byId = new Map(vendors.map((v) => [v.vendorId, v]));
+    const ordered = rankVendorsByComposite(vendors, sliders as DomainWeights);
+    const enrich = (r: { vendorId: string; composite: number; coverage: number; confidence: number }) => {
+      const v = byId.get(r.vendorId)!;
+      return { ...v, composite: r.composite, coverage: r.coverage, confidence: r.confidence };
+    };
+    return {
+      ranked: ordered.filter((r) => r.ranked).map(enrich),
+      held: ordered.filter((r) => !r.ranked).map(enrich),
+    };
   }, [vendors, sliders]);
 
   return (

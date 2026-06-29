@@ -17,7 +17,7 @@ import type { CategoryComposite, CategoryRankedVendor } from "./composite-types"
 import { getVendorScorecardsBatch, type VendorScorecard } from "../assessment/domain-scores";
 import {
   computeWeightedComposite,
-  compareWeighted,
+  rankVendorsByComposite,
   DEFAULT_DOMAIN_WEIGHTS,
   ASSESSMENT_COVERAGE_FLOOR,
 } from "../assessment/composite";
@@ -106,16 +106,21 @@ export async function getCategoryComposites(): Promise<CategoryComposite[]> {
       return [enrich(scoreVendorComposite(vendor, scoresByVendor.get(id) ?? [], share), scorecards.get(id))];
     });
 
-    // Sort by the assessment composite via the SAME comparator the re-rank uses
-    // (compareWeighted) → default-weight CategoryRerank produces this exact order.
+    // Order via THE shared ranker (the SAME function CategoryRerank calls), so the
+    // static ranking and the default-weight re-rank are identical by construction —
+    // not two implementations that happen to agree. Map the canonical order back
+    // onto the full CategoryRankedVendor objects.
+    const canonical = rankVendorsByComposite(
+      memberIds.flatMap((id) => {
+        const sc = scorecards.get(id);
+        return sc ? [{ vendorId: id, domains: sc.domains }] : [];
+      }),
+      DEFAULT_DOMAIN_WEIGHTS,
+    );
+    const orderIdx = new Map(canonical.map((r, i) => [r.vendorId, i] as const));
     const rankedSorted = scored
       .filter((x) => x.state === "ranked")
-      .sort((a, b) =>
-        compareWeighted(
-          { composite: a.assessmentComposite ?? 0, coverage: a.domainCoverage, confidence: a.compositeConfidence ?? 0, vendorId: a.vendorId },
-          { composite: b.assessmentComposite ?? 0, coverage: b.domainCoverage, confidence: b.compositeConfidence ?? 0, vendorId: b.vendorId },
-        ),
-      );
+      .sort((a, b) => (orderIdx.get(a.vendorId) ?? Number.MAX_SAFE_INTEGER) - (orderIdx.get(b.vendorId) ?? Number.MAX_SAFE_INTEGER));
 
     const adjustedDesc = rankedSorted.map((v) => v.assessmentComposite ?? 0);
     const tiers = assignTiers(adjustedDesc, ASSESSMENT_NOISE_BAND);

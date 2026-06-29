@@ -6,6 +6,7 @@ import {
   normalizeWeights,
   compareWeighted,
   computeGap,
+  rankVendorsByComposite,
   DEFAULT_DOMAIN_WEIGHTS,
   ASSESSMENT_COVERAGE_FLOOR,
   type DomainWeights,
@@ -133,44 +134,61 @@ describe("re-weighting re-ranks (compareWeighted)", () => {
   });
 });
 
-describe("default-weight parity (static ranking == interactive re-rank)", () => {
-  // The static category ranking (category-composite) and CategoryRerank both rank
-  // via the SAME recipe: filter coverage ≥ ASSESSMENT_COVERAGE_FLOOR, then sort by
-  // compareWeighted on computeWeightedComposite(domains, weights). This locks the
-  // contract so the two surfaces can't drift and reshuffle on load.
+describe("default-weight parity (static ranking == interactive re-rank), across categories", () => {
+  // BOTH surfaces — category-composite (static) and CategoryRerank (interactive) —
+  // call the SAME rankVendorsByComposite. So parity is by construction: at default
+  // weights the ranked order is identical. These fixtures stand in for SEVERAL
+  // categories with different evidence shapes (deep, thin, tied, mixed-coverage).
   interface V { vendorId: string; domains: DomainScore[] }
-  const order = (vendors: V[], weights: Partial<DomainWeights>): string[] =>
-    vendors
-      .map((v) => {
-        const r = computeWeightedComposite(v.domains, weights);
-        // RAW coverage gates eligibility + tie-breaks (ungameable), exactly as both
-        // the static ranking and the re-rank do.
-        return { vendorId: v.vendorId, composite: r.composite, coverage: r.rawCoverage, confidence: r.confidence };
-      })
-      .filter((r) => r.coverage >= ASSESSMENT_COVERAGE_FLOOR)
-      .sort(compareWeighted)
-      .map((r) => r.vendorId);
+  const rankedIds = (vendors: V[], weights: Partial<DomainWeights>): string[] =>
+    rankVendorsByComposite(vendors, weights).filter((r) => r.ranked).map((r) => r.vendorId);
 
-  const vendors: V[] = [
-    { vendorId: "a", domains: allScored(4.5) },
-    { vendorId: "b", domains: ASSESSMENT_DOMAINS.map((d, i) => (i < 10 ? scored(d, 3.8) : insufficient(d))) },
-    { vendorId: "c", domains: allScored(2.2) },
-    { vendorId: "thin", domains: ASSESSMENT_DOMAINS.map((d, i) => (i < 4 ? scored(d, 5) : insufficient(d))) },
-  ];
+  const CATEGORIES: Record<string, V[]> = {
+    // Deep field: clear separation.
+    frontier_model_api: [
+      { vendorId: "alpha", domains: allScored(4.6) },
+      { vendorId: "bravo", domains: allScored(3.4) },
+      { vendorId: "charlie", domains: ASSESSMENT_DOMAINS.map((d, i) => (i < 9 ? scored(d, 2.6) : insufficient(d))) },
+      { vendorId: "thin1", domains: ASSESSMENT_DOMAINS.map((d, i) => (i < 4 ? scored(d, 5) : insufficient(d))) },
+    ],
+    // Near-tied field (within the noise band).
+    rag_enterprise_search: [
+      { vendorId: "delta", domains: allScored(3.0) },
+      { vendorId: "echo", domains: allScored(3.05) },
+      { vendorId: "foxtrot", domains: allScored(2.98) },
+    ],
+    // Mixed coverage; one held.
+    ai_silicon: [
+      { vendorId: "golf", domains: ASSESSMENT_DOMAINS.map((d, i) => (i < 11 ? scored(d, 3.7) : insufficient(d))) },
+      { vendorId: "hotel", domains: allScored(3.9) },
+      { vendorId: "thin2", domains: ASSESSMENT_DOMAINS.map((d, i) => (i < 6 ? scored(d, 4) : insufficient(d))) },
+    ],
+  };
 
-  it("static and re-rank produce the identical order at default weights", () => {
-    const staticOrder = order(vendors, DEFAULT_DOMAIN_WEIGHTS);
-    const rerankOrder = order(vendors, DEFAULT_DOMAIN_WEIGHTS);
-    expect(rerankOrder).toEqual(staticOrder);
-  });
+  for (const [cat, vendors] of Object.entries(CATEGORIES)) {
+    it(`${cat}: static order == re-rank order at default weights (one shared ranker)`, () => {
+      const staticOrder = rankedIds(vendors, DEFAULT_DOMAIN_WEIGHTS);
+      const rerankOrder = rankedIds(vendors, DEFAULT_DOMAIN_WEIGHTS);
+      expect(rerankOrder).toEqual(staticOrder);
+      expect(staticOrder.length).toBeGreaterThan(0); // sanity: something ranks
+    });
 
-  it("holds sub-coverage-floor vendors out of BOTH (can't re-weight out of thin coverage)", () => {
-    // "thin" has 4/12 domains → coverage 0.33 < floor → never ranked, at any weights.
-    expect(order(vendors, DEFAULT_DOMAIN_WEIGHTS)).not.toContain("thin");
-    expect(order(vendors, equalWeights(1))).not.toContain("thin");
-    // Even pouring weight onto thin's 4 evidenced domains can't lift it past the floor.
-    const skew = { ...equalWeights(1), [ASSESSMENT_DOMAINS[0]]: 100 };
-    expect(order(vendors, skew)).not.toContain("thin");
+    it(`${cat}: ranking is deterministic (re-run identical)`, () => {
+      expect(rankVendorsByComposite(vendors, DEFAULT_DOMAIN_WEIGHTS)).toEqual(
+        rankVendorsByComposite(vendors, DEFAULT_DOMAIN_WEIGHTS),
+      );
+    });
+  }
+
+  it("sub-coverage-floor vendors are held in EVERY category, at any weights (ungameable)", () => {
+    for (const vendors of Object.values(CATEGORIES)) {
+      const skew = { ...equalWeights(1), [ASSESSMENT_DOMAINS[0]]: 100 };
+      for (const w of [DEFAULT_DOMAIN_WEIGHTS, equalWeights(1), skew]) {
+        const ids = rankedIds(vendors, w);
+        expect(ids).not.toContain("thin1");
+        expect(ids).not.toContain("thin2");
+      }
+    }
   });
 });
 
