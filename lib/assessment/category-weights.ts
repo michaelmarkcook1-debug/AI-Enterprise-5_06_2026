@@ -66,6 +66,157 @@ export const CATEGORY_DOMAIN_WEIGHTS: Record<string, CategoryWeightProfile> = {
     rationale:
       "A frontier model API is judged first on the model itself, so model quality (Arena human-preference Elo) and agentic capability lead, with governance/auditability and unit economics (cost/TCO) weighted heavily as the real enterprise-adoption gates; capital resilience is de-emphasised because at the API layer a buyer can switch models more readily than they can replace a platform.",
   },
+
+  // ── The remaining categories re-weight the SAME 12 framework domains (every
+  //    domain key is present, so coverage stays /12 exactly as the framework
+  //    default). model_quality stays frontier-only: the other categories are
+  //    largely platforms/wrappers over third-party models, so a vendor-owned
+  //    Arena score is not the right axis for them. Each profile is set by the
+  //    category's job-to-be-done, never to move a vendor. Sums ≈ 1.00 (renormalized).
+
+  // ENTERPRISE ASSISTANT — a people-facing assistant inside the work hub.
+  enterprise_assistant: {
+    weights: {
+      data_security_privacy: 0.13, governance_compliance: 0.13, identity_access: 0.12,
+      workforce_adoption: 0.12, integration_architecture: 0.11, security_threat: 0.09,
+      strategic_value: 0.08, agentic_autonomy: 0.06, vendor_maturity_lockin: 0.06,
+      model_reliability: 0.05, cost_finops: 0.03, capital_resilience: 0.02,
+    },
+    rationale:
+      "An assistant embedded in productivity/work hubs lives or dies on how it handles corporate content — data security, governance/permissions over that content, and identity/access lead — and on whether people actually adopt it (workforce adoption) and how deeply it integrates with the work hub. Raw model quality is less central because these are platforms over (often third-party) models.",
+  },
+
+  // DEVELOPER / CODING AGENT — autonomous coding in the dev loop.
+  developer_coding_agent: {
+    weights: {
+      agentic_autonomy: 0.14, integration_architecture: 0.13, model_reliability: 0.12,
+      data_security_privacy: 0.12, security_threat: 0.10, governance_compliance: 0.09,
+      identity_access: 0.08, strategic_value: 0.07, workforce_adoption: 0.06,
+      cost_finops: 0.04, vendor_maturity_lockin: 0.03, capital_resilience: 0.02,
+    },
+    rationale:
+      "A coding agent is judged on autonomous capability and the correctness/reliability of what it produces, on deep IDE/repo/CI integration, and on protecting source code (data security + supply-chain/secret-leakage threat). Broad corporate-platform concerns matter less than fit to the developer loop.",
+  },
+
+  // AGENT PLATFORM — build, govern, and operate agents.
+  agent_platform: {
+    weights: {
+      agentic_autonomy: 0.16, governance_compliance: 0.13, integration_architecture: 0.12,
+      security_threat: 0.11, identity_access: 0.11, data_security_privacy: 0.10,
+      model_reliability: 0.07, strategic_value: 0.07, vendor_maturity_lockin: 0.06,
+      cost_finops: 0.04, workforce_adoption: 0.02, capital_resilience: 0.01,
+    },
+    rationale:
+      "An agent platform is judged on agentic capability plus the controls to run agents safely — governance/guardrails, agent identity and permissions, and the agent attack surface (security) — and on the tool/connector ecosystem (integration). The platform's job is safe, capable, well-integrated agents.",
+  },
+
+  // RAG / ENTERPRISE SEARCH — permission-aware retrieval over enterprise knowledge.
+  rag_enterprise_search: {
+    weights: {
+      integration_architecture: 0.15, data_security_privacy: 0.15, identity_access: 0.13,
+      governance_compliance: 0.11, model_reliability: 0.11, security_threat: 0.09,
+      strategic_value: 0.06, agentic_autonomy: 0.06, vendor_maturity_lockin: 0.05,
+      cost_finops: 0.04, workforce_adoption: 0.03, capital_resilience: 0.02,
+    },
+    rationale:
+      "Enterprise search is won on the breadth of permission-aware connectors (integration), document-level access control (data security + identity), and grounded, faithful answers (model reliability). Retrieving the right content without leaking it across permission boundaries is the core job.",
+  },
+
+  // WORKFLOW AUTOMATION AI — reliable multi-step execution across systems.
+  workflow_automation_ai: {
+    weights: {
+      integration_architecture: 0.15, agentic_autonomy: 0.14, governance_compliance: 0.12,
+      data_security_privacy: 0.11, security_threat: 0.10, identity_access: 0.10,
+      model_reliability: 0.09, strategic_value: 0.06, vendor_maturity_lockin: 0.05,
+      cost_finops: 0.05, workforce_adoption: 0.02, capital_resilience: 0.01,
+    },
+    rationale:
+      "Workflow automation is judged on reliable multi-step execution (agentic) wired into many systems (integration), with strong governance and security/identity over the actions it takes on the business's behalf. Misfires here have real operational blast radius.",
+  },
+
+  // CRM / CUSTOMER AI — sales, service, and customer experience.
+  crm_customer_ai: {
+    weights: {
+      integration_architecture: 0.14, workforce_adoption: 0.12, data_security_privacy: 0.12,
+      governance_compliance: 0.11, model_reliability: 0.10, agentic_autonomy: 0.09,
+      identity_access: 0.09, strategic_value: 0.08, security_threat: 0.07,
+      cost_finops: 0.04, vendor_maturity_lockin: 0.03, capital_resilience: 0.01,
+    },
+    rationale:
+      "Customer/CRM AI succeeds on CRM and data integration, on frontline adoption, and on trustworthy customer-facing output (reliability + governance) over customer PII (data security). Fit to the revenue workflow and reliability matter more than raw model quality.",
+  },
+
+  // ITSM / HR / SERVICE AI — employee service automation.
+  itsm_hr_service_ai: {
+    weights: {
+      integration_architecture: 0.14, identity_access: 0.12, data_security_privacy: 0.12,
+      governance_compliance: 0.12, workforce_adoption: 0.11, security_threat: 0.09,
+      model_reliability: 0.09, agentic_autonomy: 0.07, strategic_value: 0.06,
+      cost_finops: 0.04, vendor_maturity_lockin: 0.03, capital_resilience: 0.01,
+    },
+    rationale:
+      "Employee-service AI is won on deep ITSM/HR system integration, identity/entitlement awareness, protection and governance of employee data, and actual self-service adoption. It must act correctly inside sensitive employee processes.",
+  },
+
+  // CLOUD AI PLATFORM — build/deploy/secure/operate, a deep platform commitment.
+  cloud_ai_platform: {
+    weights: {
+      integration_architecture: 0.13, security_threat: 0.12, governance_compliance: 0.12,
+      data_security_privacy: 0.12, identity_access: 0.11, capital_resilience: 0.09,
+      vendor_maturity_lockin: 0.09, cost_finops: 0.08, strategic_value: 0.06,
+      model_reliability: 0.04, agentic_autonomy: 0.02, workforce_adoption: 0.02,
+    },
+    rationale:
+      "A cloud AI platform is a deep, multi-year commitment, so security, governance, identity and integration lead, with capital resilience and vendor maturity/lock-in weighted up (you are betting on the platform's durability and your ability to exit) and total cost of ownership material.",
+  },
+
+  // REGULATED-INDUSTRY AI — legal, financial, healthcare, public sector.
+  regulated_industry_ai: {
+    weights: {
+      governance_compliance: 0.19, data_security_privacy: 0.16, security_threat: 0.12,
+      identity_access: 0.11, model_reliability: 0.10, integration_architecture: 0.08,
+      strategic_value: 0.06, vendor_maturity_lockin: 0.05, agentic_autonomy: 0.04,
+      cost_finops: 0.03, capital_resilience: 0.03, workforce_adoption: 0.03,
+    },
+    rationale:
+      "In regulated verticals, regulatory compliance/governance and data protection (residency, PII/PHI) dominate, with security, identity, and factual reliability close behind because errors are safety- and liability-critical. Cost and adoption are secondary to defensibility.",
+  },
+
+  // AI SILICON / ACCELERATORS — a capital- and supply-concentration market.
+  ai_silicon: {
+    weights: {
+      capital_resilience: 0.20, strategic_value: 0.16, vendor_maturity_lockin: 0.14,
+      integration_architecture: 0.12, cost_finops: 0.12, security_threat: 0.06,
+      governance_compliance: 0.05, model_reliability: 0.04, data_security_privacy: 0.04,
+      identity_access: 0.03, agentic_autonomy: 0.02, workforce_adoption: 0.02,
+    },
+    rationale:
+      "Silicon is a capital- and supply-concentration market: capital resilience (fab/capex durability), strategic supply position, ecosystem lock-in (e.g. toolchains), software-ecosystem integration, and performance-per-dollar dominate. The software-centric governance/identity domains apply only thinly here and are weighted down accordingly.",
+  },
+
+  // AI CLOUD & COMPUTE — hyperscaler / sovereign capacity.
+  ai_cloud_compute: {
+    weights: {
+      capital_resilience: 0.16, integration_architecture: 0.13, security_threat: 0.12,
+      data_security_privacy: 0.12, governance_compliance: 0.11, identity_access: 0.10,
+      cost_finops: 0.09, vendor_maturity_lockin: 0.08, strategic_value: 0.05,
+      model_reliability: 0.02, agentic_autonomy: 0.01, workforce_adoption: 0.01,
+    },
+    rationale:
+      "Cloud compute is a durability-and-trust commitment: capital resilience (capacity buildout and balance sheet), security, data protection, governance, identity and integration lead, with total cost of ownership and lock-in material. Model/agentic domains barely apply to raw capacity.",
+  },
+
+  // NEOCLOUD & INFERENCE — AI-specialist GPU/inference clouds (often young, leveraged).
+  neocloud_inference: {
+    weights: {
+      cost_finops: 0.16, capital_resilience: 0.15, integration_architecture: 0.12,
+      vendor_maturity_lockin: 0.11, security_threat: 0.10, data_security_privacy: 0.10,
+      identity_access: 0.08, governance_compliance: 0.06, strategic_value: 0.05,
+      model_reliability: 0.03, agentic_autonomy: 0.02, workforce_adoption: 0.02,
+    },
+    rationale:
+      "Neoclouds compete on price/performance (cost/TCO) and must prove capital durability (GPU financing is capital-intensive and often leveraged) and vendor maturity, since many are young; cost, capital resilience, integration depth and lock-in lead, with security and data protection close behind.",
+  },
 };
 
 /**
