@@ -19,8 +19,9 @@ export interface EloVendorEntry {
   models: number;
 }
 
-/** Normalised org/name string → roster vendor id. Unknown orgs are skipped. */
-const ORG_TO_VENDOR: Record<string, string> = {
+/** Normalised org/name string → roster vendor id. Unknown orgs are skipped.
+ *  Exported so the LMArena category fetcher maps orgs identically. */
+export const ORG_TO_VENDOR: Record<string, string> = {
   anthropic: "anthropic",
   openai: "openai",
   google: "google", googledeepmind: "google", deepmind: "google",
@@ -51,7 +52,7 @@ const ORG_TO_VENDOR: Record<string, string> = {
 function stripTags(s: string): string {
   return s.replace(/<[^>]+>/g, " ").replace(/&amp;/g, "&").replace(/\s+/g, " ").trim();
 }
-function normOrg(o: string): string {
+export function normOrg(o: string): string {
   return o.toLowerCase().replace(/[^a-z0-9]/g, "");
 }
 

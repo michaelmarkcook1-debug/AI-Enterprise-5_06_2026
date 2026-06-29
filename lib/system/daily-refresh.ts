@@ -63,6 +63,7 @@ import { fetchAllMacroSignals } from "../market-signals/live-macro";
 import { sweepMemberAuth } from "../member/auth";
 import { deriveVendorScores } from "./derive-scores";
 import { seedEloPillarScores } from "./elo-scores";
+import { seedModelQualityBenchmarks } from "./model-quality-seed";
 import { deriveMarketShareMovement } from "./derive-market-share";
 import { deriveDependencySignals } from "../graph/derive-dependencies";
 import { runDeliveryUpdateFromRecentNews } from "../delivery/news-update";
@@ -377,6 +378,25 @@ export async function runDailyRefresh(
       covered: r.covered,
       unmappedOrgs: r.unmappedOrgs,
       unmappedCount: r.unmappedOrgs.length,
+    };
+  });
+
+  // ── 4d. Model-quality capability benchmarks (broadened signal) ─────────
+  //     Persists the real per-category LMArena leaderboards (coding, hard-prompts,
+  //     overall, vision, instruction-following) → model_quality_benchmarks. These
+  //     are the cited inputs the broadened model_quality blends at read-time. Run
+  //     AFTER the Elo pillar (shared org→vendor mapping); read-time blend prefers
+  //     these rows and falls back to the single Elo pillar per vendor without them.
+  await trackedStep("model_quality_benchmarks", async () => {
+    if (!dbConfigured) return { skipped: "no_database" };
+    const r = await seedModelQualityBenchmarks(now);
+    return {
+      source: r.source,
+      rowsUpserted: r.rowsUpserted,
+      vendorsCovered: r.vendorsCovered,
+      configsLoaded: r.configsLoaded,
+      unmappedCount: r.unmappedOrgs.length,
+      notFound: r.notFound.length,
     };
   });
 

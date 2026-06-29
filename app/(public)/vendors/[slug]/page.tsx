@@ -30,7 +30,8 @@ import { getVendorCategoryStandings } from "@/lib/ranking/category-composite";
 import PillarContributionTable from "@/components/ranking/PillarContributionTable";
 import { getDeliveryPartnershipsForVendor } from "@/lib/delivery/repository";
 import ImplementationPartnersPanel from "@/components/vendor/ImplementationPartnersPanel";
-import { getVendorScorecard } from "@/lib/assessment/domain-scores";
+import { getVendorScorecard, getModelQualityBreakdown } from "@/lib/assessment/domain-scores";
+import { MODEL_QUALITY_CATEGORIES } from "@/lib/system/model-quality-blend";
 import DomainScorecard from "@/components/assessment/DomainScorecard";
 import WeightedScorecard from "@/components/assessment/WeightedScorecard";
 
@@ -524,37 +525,89 @@ export default async function VendorDeepDivePage({
   // frontier model APIs); here it is context. null when the vendor has no
   // Arena-ranked model (insufficient — never a default).
   const modelQuality = scorecard?.modelQuality?.state === "scored" ? scorecard.modelQuality : null;
+  // The per-category "why" behind the blended model-quality number (the real
+  // LMArena coding / reasoning / overall / vision / instruction-following Elos).
+  const mqBreakdown = modelQuality
+    ? await getModelQualityBreakdown([entity.id]).then((m) => m.get(entity.id) ?? null).catch(() => null)
+    : null;
   // Rendered on the profile whether or not the vendor has framework evidence — so
-  // a vendor surfaced on the frontier category by its Arena Elo never has that
+  // a vendor surfaced on the frontier category by its model quality never has that
   // cited signal hidden on its own page (consistency with the category surface).
   const modelQualityPanel = modelQuality ? (
     <div className="rounded-lg border border-[#d4af37]/40 bg-[#fbf6e4]/40 px-3 py-2 dark:border-[#d4af37]/30 dark:bg-[#1a1605]/20">
       <div className="flex flex-wrap items-baseline gap-2">
-        <span className="text-sm font-semibold text-[#13294b] dark:text-[#eef3f8]">Model quality (Arena Elo)</span>
+        <span className="text-sm font-semibold text-[#13294b] dark:text-[#eef3f8]">Model quality</span>
         <span className="font-mono text-lg font-semibold tabular-nums text-[#a07f1f] dark:text-[#d4af37]">
-          {modelQuality.score.toFixed(1)}<span className="text-xs text-[#7a8aa0]">/5</span>
+          {modelQuality.score.toFixed(2)}<span className="text-xs text-[#7a8aa0]">/5</span>
         </span>
         <span className="rounded bg-emerald-100 px-1.5 py-0.5 text-[10px] font-medium text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300">
           {modelQuality.bestGrade} benchmark
         </span>
-      </div>
-      <p className="mt-1 text-[11px] leading-5 text-[#5e6b7e] dark:text-[#a7bacd]">
-        Top-2 average human-preference Arena Elo — a capability proxy, not a factuality audit (band-capped at 4.0).
-        Weighted in model-category rankings (e.g. frontier model APIs); shown here as context.
-        {modelQuality.citations[0] && (
-          <>
-            {" "}
-            <a
-              href={modelQuality.citations[0].sourceUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sky-700 underline underline-offset-2 hover:no-underline dark:text-sky-400"
-            >
-              source
-            </a>
-          </>
+        {modelQuality.lowConfidence && (
+          <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-medium text-amber-800 dark:bg-amber-950/40 dark:text-amber-300">
+            limited coverage
+          </span>
         )}
-      </p>
+      </div>
+      {mqBreakdown ? (
+        <>
+          <p className="mt-1 text-[11px] leading-5 text-[#5e6b7e] dark:text-[#a7bacd]">
+            Weighted blend of LMArena capability leaderboards, each normalised within its own arena. A capability proxy
+            from community-preference benchmarks ({modelQuality.bestGrade}), not an independent audit — capped at 4.0.
+          </p>
+          <ul className="mt-2 space-y-1">
+            {mqBreakdown.contributions.map((c) => (
+              <li key={c.category} className="flex items-center gap-2 text-[11px]">
+                <span className="w-40 shrink-0 truncate text-[#3f5068] dark:text-[#a7bacd]" title={c.modelName}>
+                  {c.label} <span className="text-[#9aa7b8]">· {Math.round(c.weight * 100)}%</span>
+                </span>
+                <span className="h-1.5 flex-1 overflow-hidden rounded bg-black/5 dark:bg-white/10">
+                  <span
+                    className="block h-full rounded bg-[#b08d2f] dark:bg-[#d4af37]"
+                    style={{ width: `${Math.round(c.normalized * 100)}%` }}
+                  />
+                </span>
+                <span className="w-24 shrink-0 text-right font-mono tabular-nums text-[#7a8aa0]">
+                  {Math.round(c.rating)} Elo
+                </span>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-1.5 text-[10px] text-[#7a8aa0]">
+            {mqBreakdown.contributions.length} of {MODEL_QUALITY_CATEGORIES.length} categories · {modelQuality.confidence}% confidence
+            {modelQuality.citations[0] && (
+              <>
+                {" · "}
+                <a
+                  href={modelQuality.citations[0].sourceUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sky-700 underline underline-offset-2 hover:no-underline dark:text-sky-400"
+                >
+                  LMArena source
+                </a>
+              </>
+            )}
+          </p>
+        </>
+      ) : (
+        <p className="mt-1 text-[11px] leading-5 text-[#5e6b7e] dark:text-[#a7bacd]">
+          Human-preference Arena Elo — a capability proxy, not a factuality audit (band-capped at 4.0).
+          {modelQuality.citations[0] && (
+            <>
+              {" "}
+              <a
+                href={modelQuality.citations[0].sourceUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sky-700 underline underline-offset-2 hover:no-underline dark:text-sky-400"
+              >
+                source
+              </a>
+            </>
+          )}
+        </p>
+      )}
     </div>
   ) : null;
 

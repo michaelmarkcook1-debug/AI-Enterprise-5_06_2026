@@ -489,6 +489,7 @@ model IntelligenceVendor {
   capabilities        VendorCapability[]
   rankingSnapshots    VendorRankingSnapshot[]
   deliveryPartnerships DeliveryPartnership[]
+  modelQualityBenchmarks ModelQualityBenchmark[]
   createdAt           DateTime                @default(now()) @map("created_at")
   updatedAt           DateTime                @updatedAt @map("updated_at")
 
@@ -950,4 +951,28 @@ model DeliveryPartnership {
   @@index([aiVendorId, partnershipTier])
   @@index([provenance, partnershipTier])
   @@map("delivery_partnerships")
+}
+
+// One real, cited capability-benchmark row per (vendor, source, category) — the
+// raw inputs the broadened model_quality blends (lib/system/model-quality-blend).
+// e.g. LMArena coding/hard_prompts/overall/vision/instruction_following. Stores
+// the vendor's TOP ranked model per category at the published snapshot. Never a
+// default: a vendor with no ranked model in a category simply has no row → that
+// category does not contribute and confidence drops (honest absence).
+model ModelQualityBenchmark {
+  id          String             @id @default(cuid())
+  vendorId    String             @map("vendor_id")
+  source      String             @default("lmarena")
+  category    String
+  rating      Float
+  modelName   String             @map("model_name")
+  voteCount   Int?               @map("vote_count")
+  publishDate String?            @map("publish_date")
+  sourceUrl   String             @map("source_url")
+  capturedAt  DateTime           @default(now()) @map("captured_at")
+  vendor      IntelligenceVendor @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+
+  @@unique([vendorId, source, category])
+  @@index([source, category])
+  @@map("model_quality_benchmarks")
 }

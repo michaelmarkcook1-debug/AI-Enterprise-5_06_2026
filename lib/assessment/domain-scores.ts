@@ -15,6 +15,8 @@ import {
   type RubricEvidenceRow,
 } from "./domain-rubric";
 import { ARENA_ELO_SOURCE_URL } from "../system/elo-fetch";
+import { loadModelQualityDetails } from "./model-quality-score";
+import type { MqBlendResult } from "../system/model-quality-blend";
 
 export interface VendorScorecard {
   vendorId: string;
@@ -102,38 +104,58 @@ const EVIDENCE_SELECT = {
 } as const;
 
 /**
- * Synthesize the model_quality DomainScore for vendors with a live Arena Elo
- * (the model_quality pillar row written by seedEloPillarScores). Read-time,
- * deterministic, and run through the SAME scoreDomainFromEvidence rubric as every
- * other domain — E4 caps the band at 4.0 (a community-preference benchmark, not an
- * independent audit), cited to openlm.ai. Vendors with no Arena-ranked model are
- * simply absent from the returned map → model_quality stays insufficient wherever
- * it is active (no default, no fabrication). Never writes anything.
+ * Synthesize the model_quality DomainScore for each vendor.
+ * PRIMARY: the BROADENED, multi-benchmark blend from the cited ModelQualityBenchmark
+ * rows (LMArena coding / hard-prompts / overall / vision / instruction-following) —
+ * per-category normalised, weighted, E4-capped at 4.0 (model-quality-score.ts).
+ * FALLBACK (per vendor, only when it has NO benchmark rows yet): the legacy single
+ * Arena-Elo pillar through the rubric — so nothing regresses before the first
+ * benchmark seed runs. Vendors with neither are absent → model_quality stays
+ * insufficient wherever active (no default, no fabrication). Never writes anything.
  */
 async function fetchModelQualityScores(vendorIds: string[], now: Date): Promise<Map<string, DomainScore>> {
   const out = new Map<string, DomainScore>();
   if (!hasDatabase() || vendorIds.length === 0) return out;
-  try {
-    const rows = await getPrisma().intelligencePillarScore.findMany({
-      where: { vendorId: { in: vendorIds }, pillar: "model_quality" },
-      select: { vendorId: true, capabilityScore: true, evidenceGrade: true, confidence: true },
-    });
-    for (const r of rows) {
-      const evRow: RubricEvidenceRow = {
-        evidenceGrade: r.evidenceGrade,
-        rawScore: r.capabilityScore,
-        confidence: r.confidence,
-        // The pillar table has no timestamp; for a single evidence row the
-        // freshness factor cancels out of the rubric score (positionFrac =
-        // rawScore/100), so read-time `now` introduces zero score inflation.
-        capturedAt: now,
-        sourceUrl: ARENA_ELO_SOURCE_URL,
-      };
-      out.set(r.vendorId, scoreDomainFromEvidence("model_quality", [evRow], now));
+  // 1. Primary: broadened blend from cited benchmark rows.
+  const details = await loadModelQualityDetails(vendorIds, now);
+  for (const [vendorId, d] of details) out.set(vendorId, d.score);
+  // 2. Legacy fallback for vendors with no benchmark rows yet (single Arena Elo).
+  const missing = vendorIds.filter((id) => !out.has(id));
+  if (missing.length > 0) {
+    try {
+      const rows = await getPrisma().intelligencePillarScore.findMany({
+        where: { vendorId: { in: missing }, pillar: "model_quality" },
+        select: { vendorId: true, capabilityScore: true, evidenceGrade: true, confidence: true },
+      });
+      for (const r of rows) {
+        const evRow: RubricEvidenceRow = {
+          evidenceGrade: r.evidenceGrade,
+          rawScore: r.capabilityScore,
+          confidence: r.confidence,
+          // Single row: freshnessFactor(now,now) cancels → no inflation.
+          capturedAt: now,
+          sourceUrl: ARENA_ELO_SOURCE_URL,
+        };
+        out.set(r.vendorId, scoreDomainFromEvidence("model_quality", [evRow], now));
+      }
+    } catch {
+      // Honest absence on read failure — those vendors stay insufficient.
     }
-  } catch {
-    // Honest absence on read failure — model_quality simply stays insufficient.
   }
+  return out;
+}
+
+/**
+ * Per-category model-quality breakdown for the vendor profile (the cited "why"
+ * behind the blended 0–5). Empty for vendors with no benchmark rows. Read-time.
+ */
+export async function getModelQualityBreakdown(
+  vendorIds: string[],
+  now: Date = new Date(),
+): Promise<Map<string, MqBlendResult>> {
+  const details = await loadModelQualityDetails(vendorIds, now);
+  const out = new Map<string, MqBlendResult>();
+  for (const [vendorId, d] of details) out.set(vendorId, d.blend);
   return out;
 }
 

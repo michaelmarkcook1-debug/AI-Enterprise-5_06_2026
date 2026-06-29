@@ -17,7 +17,8 @@ export const EXPECTED_MIGRATIONS: readonly string[] = [
   "20260626000001_auth_token_requester_hash",
   "20260626000002_watchlists_email_userid_drift",
   "20260626000003_add_delivery_partnership_layer",
+  "20260629000000_add_model_quality_benchmarks",
 ];
 
 /** The newest migration the code ships with (last in chronological order). */
-export const LATEST_EXPECTED_MIGRATION = "20260626000003_add_delivery_partnership_layer" as const;
+export const LATEST_EXPECTED_MIGRATION = "20260629000000_add_model_quality_benchmarks" as const;
