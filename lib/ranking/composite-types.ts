@@ -8,6 +8,7 @@
 
 import type { EvidenceGrade, PillarId } from "../types";
 import type { MarketCategory } from "../intelligence/types";
+import type { DomainWeights } from "../assessment/composite";
 
 /** How completely a vendor's pillars are evidenced (by covered weight). */
 export type EvidenceCompleteness = "full" | "substantial" | "partial" | "insufficient";
@@ -90,8 +91,13 @@ export interface CategoryComposite {
   incomplete: CategoryRankedVendor[];
   /** Whole block gates on this (provenance live + real evidence). */
   isLive: boolean;
-  /** Deterministic, human-readable methodology (weights, floor, E2+ rule). */
+  /** Deterministic, human-readable methodology (per-category weighting + rationale,
+   *  coverage-discount, floor, tiers). */
   methodologyNote: string;
+  /** The resolved per-category DEFAULT domain weights driving BOTH the static
+   *  order above and the interactive re-rank — so they are identical at the
+   *  category default by construction. Serializable (raw; renormalized on use). */
+  resolvedDomainWeights: DomainWeights;
   /** RANK-FIX — true when the ranked vendors' adjusted composites sit inside the
    *  noise band (not statistically separable): the UI then leads with tier bands
    *  + a "thin evidence — limited discrimination" note instead of false-precision

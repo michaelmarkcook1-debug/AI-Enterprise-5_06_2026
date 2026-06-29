@@ -9,10 +9,12 @@ import { getPrisma, hasDatabase } from "../prisma";
 import type { DomainId } from "../types";
 import {
   scoreAllDomains,
+  scoreDomainFromEvidence,
   ASSESSMENT_DOMAINS,
   type DomainScore,
   type RubricEvidenceRow,
 } from "./domain-rubric";
+import { ARENA_ELO_SOURCE_URL } from "../system/elo-fetch";
 
 export interface VendorScorecard {
   vendorId: string;
@@ -21,6 +23,13 @@ export interface VendorScorecard {
   insufficientCount: number;
   hasAnyEvidence: boolean; // ≥1 analyst_verified row in any assessment domain
   totalEvidenceRows: number;
+  /** Category-scoped capability domain: the vendor's model quality scored from
+   *  its live Arena Elo (model_quality pillar), reusing the SAME rubric (E4 →
+   *  band-capped at 4.0), cited to openlm.ai. null when the vendor has no
+   *  Arena-ranked model (insufficient — never a default). NOT folded into the
+   *  12-domain `domains`/`scoredCount` above; categories that weight model_quality
+   *  (e.g. frontier_model_api) merge it into the ranked domain set explicitly. */
+  modelQuality: DomainScore | null;
 }
 
 const EMPTY_SCORECARD = (vendorId: string, now?: Date): VendorScorecard => {
@@ -32,10 +41,16 @@ const EMPTY_SCORECARD = (vendorId: string, now?: Date): VendorScorecard => {
     insufficientCount: domains.length,
     hasAnyEvidence: false,
     totalEvidenceRows: 0,
+    modelQuality: null,
   };
 };
 
-function summarise(vendorId: string, domains: DomainScore[], totalEvidenceRows: number): VendorScorecard {
+function summarise(
+  vendorId: string,
+  domains: DomainScore[],
+  totalEvidenceRows: number,
+  modelQuality: DomainScore | null,
+): VendorScorecard {
   const scoredCount = domains.filter((d) => d.state === "scored").length;
   return {
     vendorId,
@@ -44,6 +59,7 @@ function summarise(vendorId: string, domains: DomainScore[], totalEvidenceRows: 
     insufficientCount: domains.length - scoredCount,
     hasAnyEvidence: scoredCount > 0,
     totalEvidenceRows,
+    modelQuality,
   };
 }
 
@@ -86,6 +102,42 @@ const EVIDENCE_SELECT = {
 } as const;
 
 /**
+ * Synthesize the model_quality DomainScore for vendors with a live Arena Elo
+ * (the model_quality pillar row written by seedEloPillarScores). Read-time,
+ * deterministic, and run through the SAME scoreDomainFromEvidence rubric as every
+ * other domain — E4 caps the band at 4.0 (a community-preference benchmark, not an
+ * independent audit), cited to openlm.ai. Vendors with no Arena-ranked model are
+ * simply absent from the returned map → model_quality stays insufficient wherever
+ * it is active (no default, no fabrication). Never writes anything.
+ */
+async function fetchModelQualityScores(vendorIds: string[], now: Date): Promise<Map<string, DomainScore>> {
+  const out = new Map<string, DomainScore>();
+  if (!hasDatabase() || vendorIds.length === 0) return out;
+  try {
+    const rows = await getPrisma().intelligencePillarScore.findMany({
+      where: { vendorId: { in: vendorIds }, pillar: "model_quality" },
+      select: { vendorId: true, capabilityScore: true, evidenceGrade: true, confidence: true },
+    });
+    for (const r of rows) {
+      const evRow: RubricEvidenceRow = {
+        evidenceGrade: r.evidenceGrade,
+        rawScore: r.capabilityScore,
+        confidence: r.confidence,
+        // The pillar table has no timestamp; for a single evidence row the
+        // freshness factor cancels out of the rubric score (positionFrac =
+        // rawScore/100), so read-time `now` introduces zero score inflation.
+        capturedAt: now,
+        sourceUrl: ARENA_ELO_SOURCE_URL,
+      };
+      out.set(r.vendorId, scoreDomainFromEvidence("model_quality", [evRow], now));
+    }
+  } catch {
+    // Honest absence on read failure — model_quality simply stays insufficient.
+  }
+  return out;
+}
+
+/**
  * The 12-domain 0–5 scorecard for one vendor, from its analyst_verified
  * evidence. `vendorId` is the plain entity id (= EvidenceRecord.vendorId).
  * Returns an all-insufficient scorecard (hasAnyEvidence:false) when there is no
@@ -103,7 +155,8 @@ export async function getVendorScorecard(vendorId: string, now: Date = new Date(
     })) as RawEvidenceRow[];
     const domains = scoreAllDomains(groupByDomain(rows), now);
     const inScopeRows = rows.filter((r) => ASSESSMENT_DOMAIN_SET.has(r.domain)).length;
-    return summarise(vendorId, domains, inScopeRows);
+    const modelQuality = (await fetchModelQualityScores([vendorId], now)).get(vendorId) ?? null;
+    return summarise(vendorId, domains, inScopeRows, modelQuality);
   } catch {
     return EMPTY_SCORECARD(vendorId, now);
   }
@@ -129,6 +182,8 @@ export async function getVendorScorecardsBatch(
       take: 20000,
     })) as (RawEvidenceRow & { vendorId: string })[];
 
+    const mqByVendor = await fetchModelQualityScores(vendorIds, now);
+
     const byVendor = new Map<string, RawEvidenceRow[]>();
     for (const r of rows) {
       const list = byVendor.get(r.vendorId) ?? [];
@@ -138,7 +193,16 @@ export async function getVendorScorecardsBatch(
     for (const [vendorId, vendorRows] of byVendor) {
       const domains = scoreAllDomains(groupByDomain(vendorRows), now);
       const inScopeRows = vendorRows.filter((r) => ASSESSMENT_DOMAIN_SET.has(r.domain)).length;
-      result.set(vendorId, summarise(vendorId, domains, inScopeRows));
+      result.set(vendorId, summarise(vendorId, domains, inScopeRows, mqByVendor.get(vendorId) ?? null));
+    }
+    // Vendors with a model_quality Elo but NO analyst_verified evidence rows are
+    // still EMPTY_SCORECARD above — attach their model_quality so a category that
+    // weights it (frontier) still sees the real capability signal.
+    for (const [vendorId, mq] of mqByVendor) {
+      if (!byVendor.has(vendorId)) {
+        const base = result.get(vendorId);
+        if (base) result.set(vendorId, { ...base, modelQuality: mq });
+      }
     }
     return result;
   } catch {

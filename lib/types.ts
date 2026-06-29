@@ -20,11 +20,18 @@ export const PILLARS: { id: PillarId; label: string; defaultWeight: number }[] =
 ];
 
 // 12 backend domains (spec §9). Each maps to one primary pillar.
+// `model_quality` is a category-scoped capability domain (Arena human-preference
+// Elo), NOT part of the framework's even 12 — it is activated only by category
+// weight profiles that include it (e.g. frontier_model_api) and is SYNTHESIZED
+// at read-time from the model_quality pillar (never stored on EvidenceRecord, so
+// it needs no DB enum/migration). `market_position` is a market-share dimension,
+// also excluded from the 12 framework assessment domains.
 export type DomainId =
   | "strategic_value"
   | "data_security_privacy"
   | "identity_access"
   | "model_reliability"
+  | "model_quality"
   | "governance_compliance"
   | "security_threat"
   | "integration_architecture"
@@ -40,6 +47,7 @@ export const DOMAIN_TO_PILLAR: Record<DomainId, PillarId> = {
   data_security_privacy: "enterprise_control",
   identity_access: "enterprise_control",
   model_reliability: "reliability_safety",
+  model_quality: "reliability_safety",
   governance_compliance: "enterprise_control",
   security_threat: "reliability_safety",
   integration_architecture: "integration_ops",

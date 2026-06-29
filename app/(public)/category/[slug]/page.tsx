@@ -8,7 +8,10 @@ import DataUnavailable from "@/components/DataUnavailable";
 import PillarContributionTable from "@/components/ranking/PillarContributionTable";
 import TrackButton from "@/components/member/TrackButton";
 import { getVendorScorecardsBatch, type VendorScorecard } from "@/lib/assessment/domain-scores";
+import type { DomainScore } from "@/lib/assessment/domain-rubric";
 import { DOMAIN_LABEL } from "@/lib/assessment/domain-labels";
+import { activeDomains, type DomainWeights } from "@/lib/assessment/composite";
+import type { DomainId } from "@/lib/types";
 import { INTERACTIVE_ASSESSMENT_ENABLED } from "@/lib/availability";
 import CategoryRerank, { type RerankVendor } from "@/components/assessment/CategoryRerank";
 import { getRankMovements, type RankMovement } from "@/lib/intelligence/rank-movement";
@@ -44,7 +47,17 @@ export default async function CategoryPage({ params }: { params: Promise<Params>
   // otherwise the honest "insufficient evidence" state shows — never seed.
   const composite = await getCategoryComposite(slug);
   if (!composite) notFound();
-  const { category, ranked, incomplete, isLive, methodologyNote, lowDiscrimination } = composite;
+  const { category, ranked, incomplete, isLive, methodologyNote, lowDiscrimination, resolvedDomainWeights } =
+    composite;
+  // The category's ACTIVE domain set (canonical order) — the 12 framework domains
+  // plus model_quality where the category activates it. Drives the domain strip
+  // and the re-rank so both match the static ranking's coverage denominator.
+  const activeOrder: DomainId[] = activeDomains(resolvedDomainWeights);
+  const activatesModelQuality = (resolvedDomainWeights.model_quality ?? 0) > 0;
+  // A vendor's domain set for THIS category: framework domains + the synthesized
+  // model_quality score when active (else absent → shown as insufficient).
+  const effectiveDomains = (sc: VendorScorecard | undefined): DomainScore[] =>
+    !sc ? [] : activatesModelQuality && sc.modelQuality ? [...sc.domains, sc.modelQuality] : sc.domains;
 
   // Phase 3 — per-vendor 12-domain evidence scorecards (deterministic, no LLM,
   // batched into one query). Used for the compact domain strip under each vendor.
@@ -64,7 +77,9 @@ export default async function CategoryPage({ params }: { params: Promise<Params>
   const rerankVendors: RerankVendor[] = INTERACTIVE_ASSESSMENT_ENABLED
     ? [...ranked, ...incomplete].flatMap((v) => {
         const sc = scorecards.get(v.vendorId);
-        return sc ? [{ vendorId: v.vendorId, vendorName: v.vendorName, vendorSlug: v.vendorSlug, domains: sc.domains }] : [];
+        return sc
+          ? [{ vendorId: v.vendorId, vendorName: v.vendorName, vendorSlug: v.vendorSlug, domains: effectiveDomains(sc) }]
+          : [];
       })
     : [];
 
@@ -153,7 +168,7 @@ export default async function CategoryPage({ params }: { params: Promise<Params>
                     </p>
                   )}
                   <PillarContributionTable vendor={v} />
-                  <DomainStrip scorecard={scorecards.get(v.vendorId)} />
+                  <DomainStrip domains={effectiveDomains(scorecards.get(v.vendorId))} order={activeOrder} />
                 </li>
               ))}
             </ol>
@@ -176,7 +191,7 @@ export default async function CategoryPage({ params }: { params: Promise<Params>
                       <span className={`text-[11px] ${MUTED}`}>{v.excludedReason}</span>
                     </div>
                     <PillarContributionTable vendor={v} />
-                    <DomainStrip scorecard={scorecards.get(v.vendorId)} />
+                    <DomainStrip domains={effectiveDomains(scorecards.get(v.vendorId))} order={activeOrder} />
                   </li>
                 ))}
               </ul>
@@ -189,7 +204,7 @@ export default async function CategoryPage({ params }: { params: Promise<Params>
               YOUR ranking. Pure client-side maths, no network call. */}
           {INTERACTIVE_ASSESSMENT_ENABLED && rerankVendors.length > 1 && (
             <div className="mt-6 border-t border-black/5 pt-5 dark:border-white/10">
-              <CategoryRerank vendors={rerankVendors} />
+              <CategoryRerank vendors={rerankVendors} defaultWeights={resolvedDomainWeights} />
             </div>
           )}
         </section>
@@ -198,11 +213,16 @@ export default async function CategoryPage({ params }: { params: Promise<Params>
   );
 }
 
-// Compact 12-domain evidence strip: one cell per framework domain showing the
-// 0–5 score (or "—" for insufficient evidence). Deterministic, evidence-only —
-// the fuller scorecard with citations lives on the vendor profile.
-function DomainStrip({ scorecard }: { scorecard?: VendorScorecard }) {
-  if (!scorecard || scorecard.scoredCount === 0) return null;
+// Compact per-domain evidence strip: one cell per ACTIVE category domain showing
+// the 0–5 score (or "—" for insufficient evidence). `order` is the category's
+// active domain set (12, or 13 incl model_quality), so every vendor in a category
+// shows the same cells in the same order — a vendor missing an active domain reads
+// "—" rather than dropping the cell. Deterministic, evidence-only; the fuller
+// scorecard with citations lives on the vendor profile.
+function DomainStrip({ domains, order }: { domains: DomainScore[]; order: DomainId[] }) {
+  const byDomain = new Map<DomainId, DomainScore>(domains.map((d) => [d.domain, d]));
+  const anyScored = order.some((id) => byDomain.get(id)?.state === "scored");
+  if (!anyScored) return null;
   const tone = (band: number) =>
     band >= 4
       ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300"
@@ -211,19 +231,23 @@ function DomainStrip({ scorecard }: { scorecard?: VendorScorecard }) {
         : "bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300";
   return (
     <div className="mt-2 flex flex-wrap gap-1" aria-label="Per-domain evidence scores (0–5)">
-      {scorecard.domains.map((d) => (
-        <span
-          key={d.domain}
-          title={`${DOMAIN_LABEL[d.domain]}: ${d.state === "scored" ? `${d.score.toFixed(1)}/5` : "insufficient evidence"}`}
-          className={`inline-flex h-6 min-w-[2.1rem] items-center justify-center rounded px-1 font-mono text-[10px] tabular-nums ${
-            d.state === "scored"
-              ? tone(d.band)
-              : "bg-black/5 text-[#15263c]/40 dark:bg-white/5 dark:text-[#eef3f8]/40"
-          }`}
-        >
-          {d.state === "scored" ? d.score.toFixed(1) : "—"}
-        </span>
-      ))}
+      {order.map((id) => {
+        const d = byDomain.get(id);
+        const scored = d?.state === "scored";
+        return (
+          <span
+            key={id}
+            title={`${DOMAIN_LABEL[id]}: ${scored ? `${d!.score.toFixed(1)}/5` : "insufficient evidence"}`}
+            className={`inline-flex h-6 min-w-[2.1rem] items-center justify-center rounded px-1 font-mono text-[10px] tabular-nums ${
+              scored
+                ? tone(d!.band)
+                : "bg-black/5 text-[#15263c]/40 dark:bg-white/5 dark:text-[#eef3f8]/40"
+            }`}
+          >
+            {scored ? d!.score.toFixed(1) : "—"}
+          </span>
+        );
+      })}
     </div>
   );
 }

@@ -10,11 +10,12 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { DOMAIN_LABEL } from "@/lib/assessment/domain-labels";
-import { ASSESSMENT_DOMAINS, type DomainScore } from "@/lib/assessment/domain-rubric";
+import { type DomainScore } from "@/lib/assessment/domain-rubric";
 import {
   rankVendorsByComposite,
   computeGap,
   normalizeWeights,
+  activeDomains,
   DEFAULT_DOMAIN_WEIGHTS,
   ASSESSMENT_COVERAGE_FLOOR,
   type DomainWeights,
@@ -28,16 +29,30 @@ export interface RerankVendor {
   domains: DomainScore[];
 }
 
-const defaultSliders = (): Record<DomainId, number> =>
-  ASSESSMENT_DOMAINS.reduce((acc, d) => {
-    acc[d] = Math.round(DEFAULT_DOMAIN_WEIGHTS[d] * 100);
+// Percent-scaled slider seed from a resolved weight profile, over that profile's
+// ACTIVE domains only (default categories = the 12; frontier = 13 incl model_quality).
+const slidersFromWeights = (weights: DomainWeights): Record<DomainId, number> =>
+  activeDomains(weights).reduce((acc, d) => {
+    acc[d] = Math.round((weights[d] ?? 0) * 100);
     return acc;
   }, {} as Record<DomainId, number>);
 
-export default function CategoryRerank({ vendors }: { vendors: RerankVendor[] }) {
+export default function CategoryRerank({
+  vendors,
+  defaultWeights = DEFAULT_DOMAIN_WEIGHTS,
+}: {
+  vendors: RerankVendor[];
+  /** The per-category resolved default weights (the SAME ones the static ranking
+   *  used) — so the untouched re-rank reproduces the static order, and Reset
+   *  returns to this category's default, not the framework default. */
+  defaultWeights?: DomainWeights;
+}) {
+  // The category's active domains, in canonical order — what the sliders render.
+  const domainList = useMemo(() => activeDomains(defaultWeights), [defaultWeights]);
+  const defaultSliders = useMemo(() => slidersFromWeights(defaultWeights), [defaultWeights]);
   const [sliders, setSliders] = useState<Record<DomainId, number>>(defaultSliders);
   const norm = useMemo(() => normalizeWeights(sliders as DomainWeights), [sliders]);
-  const isDefault = ASSESSMENT_DOMAINS.every((d) => sliders[d] === Math.round(DEFAULT_DOMAIN_WEIGHTS[d] * 100));
+  const isDefault = domainList.every((d) => sliders[d] === defaultSliders[d]);
 
   const computed = useMemo(() => {
     // Single source of ranking truth — the SAME function the static category
@@ -63,7 +78,7 @@ export default function CategoryRerank({ vendors }: { vendors: RerankVendor[] })
         <button
           type="button"
           disabled={isDefault}
-          onClick={() => setSliders(defaultSliders())}
+          onClick={() => setSliders(defaultSliders)}
           className="rounded-full border border-[#d6c9a8] px-3 py-1 text-xs font-medium text-[#4c5d75] hover:bg-white disabled:opacity-40 dark:border-[#2a4a6b] dark:text-[#a7bacd] dark:hover:bg-[#0c2238]"
         >
           Reset to framework default
@@ -77,7 +92,7 @@ export default function CategoryRerank({ vendors }: { vendors: RerankVendor[] })
 
       {/* compact weight sliders */}
       <div className="mt-3 grid grid-cols-1 gap-x-4 gap-y-1 sm:grid-cols-2">
-        {ASSESSMENT_DOMAINS.map((d) => (
+        {domainList.map((d) => (
           <label key={d} className="flex items-center gap-2 text-[11px]">
             <span className="w-44 shrink-0 truncate text-[#3f5068] dark:text-[#a7bacd]" title={DOMAIN_LABEL[d]}>
               {DOMAIN_LABEL[d]}

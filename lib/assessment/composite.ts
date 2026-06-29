@@ -21,6 +21,44 @@ export const DEFAULT_DOMAIN_WEIGHTS: DomainWeights = ASSESSMENT_DOMAINS.reduce((
   return acc;
 }, {} as DomainWeights);
 
+/**
+ * Canonical iteration/display order across ALL rankable domains — the 12 framework
+ * domains in framework order, plus category-scoped domains (model_quality) inserted
+ * in a sensible slot. The composite never iterates this directly; it iterates the
+ * ACTIVE subset for a given weight profile (see activeDomains). For the framework
+ * default profile the active subset is byte-identical to ASSESSMENT_DOMAINS — so
+ * every category that does NOT opt into a category-scoped domain behaves exactly
+ * as before (same domains, same order, same /12 coverage).
+ */
+export const RANKABLE_DOMAIN_ORDER: DomainId[] = [
+  "strategic_value",
+  "data_security_privacy",
+  "identity_access",
+  "model_reliability",
+  "model_quality", // category-scoped — only active where the profile weights it
+  "governance_compliance",
+  "security_threat",
+  "integration_architecture",
+  "agentic_autonomy",
+  "cost_finops",
+  "workforce_adoption",
+  "vendor_maturity_lockin",
+  "capital_resilience",
+];
+
+/**
+ * The domains a weight profile ACTIVATES: those PRESENT as keys in the profile,
+ * in canonical order. Membership is by key presence, NOT by value — so a user who
+ * drags a slider to 0 keeps that domain in scope (it stays in the coverage
+ * denominator and contributes 0), and cannot re-weight their way out of thin
+ * coverage. To genuinely exclude a domain from a category, OMIT its key. For
+ * DEFAULT_DOMAIN_WEIGHTS this returns exactly the 12 framework domains
+ * (model_quality / market_position are absent keys → excluded).
+ */
+export function activeDomains(weights: Partial<DomainWeights>): DomainId[] {
+  return RANKABLE_DOMAIN_ORDER.filter((d) => weights[d] !== undefined);
+}
+
 /** A vendor below this share of weight-on-scored-domains is "held" rather than
  *  ranked — you cannot re-weight your way out of thin coverage. Matches the
  *  rankings engine's COVERAGE_FLOOR. */
@@ -41,11 +79,15 @@ function confidenceBlend(confidence: number): number {
  * (sliders express RELATIVE importance). All-zero → equal weights (no div-by-0).
  */
 export function normalizeWeights(weights: Partial<DomainWeights>): DomainWeights {
-  const raw = ASSESSMENT_DOMAINS.map((d) => Math.max(0, weights[d] ?? 0));
+  // Normalize over the profile's ACTIVE domains (default = the 12 framework
+  // domains). All-zero / empty → equal weights over the 12 (no div-by-0).
+  const active = activeDomains(weights);
+  const domains = active.length > 0 ? active : ASSESSMENT_DOMAINS;
+  const raw = domains.map((d) => Math.max(0, weights[d] ?? 0));
   const sum = raw.reduce((s, w) => s + w, 0);
   const out = {} as DomainWeights;
-  ASSESSMENT_DOMAINS.forEach((d, i) => {
-    out[d] = sum > 0 ? raw[i] / sum : 1 / ASSESSMENT_DOMAINS.length;
+  domains.forEach((d, i) => {
+    out[d] = sum > 0 ? raw[i] / sum : 1 / domains.length;
   });
   return out;
 }
@@ -73,7 +115,10 @@ export interface WeightedComposite {
   confidence: number; // 0–99
   scoredCount: number;
   insufficientCount: number;
-  contributions: DomainContribution[]; // all 12, canonical order
+  /** Number of domains ACTIVE for this weight profile (the coverage denominator):
+   *  12 for the framework default, 13 for a profile that activates model_quality. */
+  domainTotal: number;
+  contributions: DomainContribution[]; // all ACTIVE domains, canonical order
 }
 
 /**
@@ -85,12 +130,19 @@ export function computeWeightedComposite(domains: DomainScore[], weights: Partia
   const norm = normalizeWeights(weights);
   const byDomain = new Map<DomainId, DomainScore>(domains.map((d) => [d.domain, d]));
 
+  // Iterate the ACTIVE domain set for this profile (default = the 12 framework
+  // domains). A domain absent from the vendor's scorecard is treated as
+  // insufficient — so a profile that activates model_quality counts it in the
+  // denominator (/13) and a vendor with no Arena Elo contributes 0 there.
+  const active = activeDomains(weights);
+  const domainList = active.length > 0 ? active : ASSESSMENT_DOMAINS;
+
   let composite = 0;
   let coverage = 0;
   let confNumerator = 0;
   let scoredCount = 0;
 
-  const contributions: DomainContribution[] = ASSESSMENT_DOMAINS.map((domain) => {
+  const contributions: DomainContribution[] = domainList.map((domain) => {
     const weight = norm[domain];
     const d = byDomain.get(domain);
     if (d && d.state === "scored") {
@@ -128,10 +180,11 @@ export function computeWeightedComposite(domains: DomainScore[], weights: Partia
   return {
     composite: clamp(Math.round(composite * 100) / 100, 0, 5),
     coverage,
-    rawCoverage: ASSESSMENT_DOMAINS.length > 0 ? scoredCount / ASSESSMENT_DOMAINS.length : 0,
+    rawCoverage: domainList.length > 0 ? scoredCount / domainList.length : 0,
     confidence,
     scoredCount,
-    insufficientCount: ASSESSMENT_DOMAINS.length - scoredCount,
+    insufficientCount: domainList.length - scoredCount,
+    domainTotal: domainList.length,
     contributions,
   };
 }
@@ -237,8 +290,11 @@ export function computeGap(leader: DomainScore[], runner: DomainScore[], weights
   const leaderBy = new Map<DomainId, DomainScore>(leader.map((d) => [d.domain, d]));
   const runnerBy = new Map<DomainId, DomainScore>(runner.map((d) => [d.domain, d]));
 
+  const active = activeDomains(weights);
+  const domainList = active.length > 0 ? active : ASSESSMENT_DOMAINS;
+
   let compositeDelta = 0;
-  const drivers: GapDriver[] = ASSESSMENT_DOMAINS.map((domain) => {
+  const drivers: GapDriver[] = domainList.map((domain) => {
     const w = norm[domain];
     const l = leaderBy.get(domain);
     const r = runnerBy.get(domain);

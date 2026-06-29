@@ -51,6 +51,8 @@ export const DOMAIN_WEIGHT: Record<DomainId, number> = {
   workforce_adoption: 0.07,
   vendor_maturity_lockin: 0.07,
   capital_resilience: 0.07,
+  model_quality: 0.0, // category-scoped capability domain — 0 in the framework default,
+  //                     activated only by category weight profiles (e.g. frontier_model_api)
   market_position: 0.0, // not an assessment domain
 };
 

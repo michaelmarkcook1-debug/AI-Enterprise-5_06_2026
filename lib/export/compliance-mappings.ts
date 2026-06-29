@@ -40,6 +40,15 @@ export const DOMAIN_CROSSWALK: Record<DomainId, DomainCrosswalk> = {
     nistAiRmf: ["MEASURE 2.3", "MEASURE 2.6", "MEASURE 2.9"],
     iso42001: ["8.2", "9.1"],
   },
+  model_quality: {
+    // Capability/benchmark performance (Arena human-preference Elo). Maps to the
+    // accuracy/performance-measurement clauses, not the governance clauses.
+    domain: "model_quality",
+    euAiAct: ["Art 15 (accuracy)"],
+    iso27001: [],
+    nistAiRmf: ["MEASURE 2.3"],
+    iso42001: ["8.2", "9.1"],
+  },
   governance_compliance: {
     domain: "governance_compliance",
     euAiAct: ["Art 9 (risk management)", "Art 11 (technical documentation)", "Art 12 (record-keeping)", "Art 13 (transparency)"],
