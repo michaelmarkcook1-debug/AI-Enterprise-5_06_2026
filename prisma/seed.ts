@@ -9,7 +9,7 @@
 // everything else additively (createMany skipDuplicates / guarded inserts). It
 // never deletes. Safe to run repeatedly against production.
 
-import { EVIDENCE_MODIFIER } from "../lib/types";
+import { EVIDENCE_MODIFIER, type DomainId } from "../lib/types";
 import { SCORING_RULE_VERSION } from "../lib/engine";
 import { getPrisma } from "../lib/prisma";
 import { getIntelligenceAssessmentVendors } from "../lib/intelligence/assessment-adapter";
@@ -125,7 +125,10 @@ async function main() {
         sourceUrl: evidence.sourceUrl,
         capturedAt: new Date(evidence.capturedAt),
         excerpt: evidence.excerpt,
-        domain: evidence.domain,
+        // model_quality is a synthesized (read-time) capability domain, never a
+        // stored EvidenceRecord — it is not in the Prisma DomainId enum, and the
+        // seed/adapter never emits it. Narrow the TS union to the persisted set.
+        domain: evidence.domain as Exclude<DomainId, "model_quality">,
         subfactor: evidence.subfactor,
         evidenceGrade: evidence.grade,
         rawScore: evidence.rawScore,
@@ -142,7 +145,7 @@ async function main() {
         vendorId: vendor.id,
         severity: risk.severity,
         description: risk.description,
-        domain: risk.domain,
+        domain: risk.domain as Exclude<DomainId, "model_quality">,
         isFatalIfTriggered: risk.isFatalIfTriggered ?? false,
         fatalInIndustries: risk.fatalInIndustries ?? [],
       })),

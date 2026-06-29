@@ -45,7 +45,10 @@ export function getIntelligenceAssessmentVendors(): AssessmentVendor[] {
 
 function toAssessmentVendor(vendor: IntelligenceVendor): AssessmentVendor {
   const pillarScores = VENDOR_PILLAR_SCORES.filter((score) => score.vendorId === vendor.id);
-  const domains = Object.keys(DOMAIN_TO_PILLAR) as DomainId[];
+  // model_quality is a synthesized (read-time, Arena-Elo) capability domain — it
+  // must NEVER be fabricated as seed/adapter evidence (and is not a Prisma enum
+  // value). Exclude it here so the adapter only emits the persisted domains.
+  const domains = (Object.keys(DOMAIN_TO_PILLAR) as DomainId[]).filter((d) => d !== "model_quality");
 
   return {
     id: vendor.id,

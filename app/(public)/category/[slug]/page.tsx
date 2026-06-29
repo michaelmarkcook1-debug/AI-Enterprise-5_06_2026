@@ -148,7 +148,7 @@ export default async function CategoryPage({ params }: { params: Promise<Params>
                       )}
                     </span>
                     <span className="flex shrink-0 items-baseline gap-3">
-                      <span className="font-mono text-sm tabular-nums" title="12-domain weighted assessment composite (0–5), coverage-discounted">
+                      <span className="font-mono text-sm tabular-nums" title={`${v.domainTotal}-domain weighted assessment composite (0–5), coverage-discounted`}>
                         {(v.assessmentComposite ?? 0).toFixed(2)}
                         <span className={`ml-1 text-[10px] ${MUTED}`}>/5 composite</span>
                       </span>
@@ -178,7 +178,7 @@ export default async function CategoryPage({ params }: { params: Promise<Params>
             <div className="mt-5 border-t border-black/5 pt-4 dark:border-white/10">
               <h2 className="text-sm font-semibold">Held — insufficient evidence to rank ({incomplete.length})</h2>
               <p className={`mt-1 text-xs ${MUTED}`}>
-                These vendors compete in the category but lack enough reviewed evidence across the 12 assessment
+                These vendors compete in the category but lack enough reviewed evidence across the {activeOrder.length} assessment
                 domains to be ranked. We hold them rather than float them on partial data.
               </p>
               <ul className="mt-2 space-y-3">

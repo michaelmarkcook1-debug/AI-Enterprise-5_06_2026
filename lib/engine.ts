@@ -244,7 +244,9 @@ function missingEvidencePenalty(vendor: Vendor, weights: Record<PillarId, number
 } {
   const missing: string[] = [];
   let penalty = 0;
-  const allDomains = Object.keys(DOMAIN_TO_PILLAR) as DomainId[];
+  // Exclude model_quality (synthesized read-time capability domain) — the legacy
+  // engine scores only the persisted framework + market domains.
+  const allDomains = (Object.keys(DOMAIN_TO_PILLAR) as DomainId[]).filter((d) => d !== "model_quality");
   for (const d of allDomains) {
     const pillar = DOMAIN_TO_PILLAR[d];
     const w = weights[pillar];
@@ -317,7 +319,7 @@ function buildPillarBreakdown(
   weights: Record<PillarId, number>,
   industry: IndustryProfile,
 ): { breakdown: PillarBreakdown[]; pillarScores: Record<PillarId, number>; confidence: number } {
-  const allDomains = Object.keys(DOMAIN_TO_PILLAR) as DomainId[];
+  const allDomains = (Object.keys(DOMAIN_TO_PILLAR) as DomainId[]).filter((d) => d !== "model_quality");
   const byPillar: Record<PillarId, { domain: DomainId; score: number; evidenceCount: number; confidence: number }[]> = {
     business_fit: [], enterprise_control: [], reliability_safety: [], integration_ops: [], vendor_resilience: [], market_strength: [],
   };

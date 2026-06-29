@@ -524,6 +524,39 @@ export default async function VendorDeepDivePage({
   // frontier model APIs); here it is context. null when the vendor has no
   // Arena-ranked model (insufficient — never a default).
   const modelQuality = scorecard?.modelQuality?.state === "scored" ? scorecard.modelQuality : null;
+  // Rendered on the profile whether or not the vendor has framework evidence — so
+  // a vendor surfaced on the frontier category by its Arena Elo never has that
+  // cited signal hidden on its own page (consistency with the category surface).
+  const modelQualityPanel = modelQuality ? (
+    <div className="rounded-lg border border-[#d4af37]/40 bg-[#fbf6e4]/40 px-3 py-2 dark:border-[#d4af37]/30 dark:bg-[#1a1605]/20">
+      <div className="flex flex-wrap items-baseline gap-2">
+        <span className="text-sm font-semibold text-[#13294b] dark:text-[#eef3f8]">Model quality (Arena Elo)</span>
+        <span className="font-mono text-lg font-semibold tabular-nums text-[#a07f1f] dark:text-[#d4af37]">
+          {modelQuality.score.toFixed(1)}<span className="text-xs text-[#7a8aa0]">/5</span>
+        </span>
+        <span className="rounded bg-emerald-100 px-1.5 py-0.5 text-[10px] font-medium text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300">
+          {modelQuality.bestGrade} benchmark
+        </span>
+      </div>
+      <p className="mt-1 text-[11px] leading-5 text-[#5e6b7e] dark:text-[#a7bacd]">
+        Top-2 average human-preference Arena Elo — a capability proxy, not a factuality audit (band-capped at 4.0).
+        Weighted in model-category rankings (e.g. frontier model APIs); shown here as context.
+        {modelQuality.citations[0] && (
+          <>
+            {" "}
+            <a
+              href={modelQuality.citations[0].sourceUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sky-700 underline underline-offset-2 hover:no-underline dark:text-sky-400"
+            >
+              source
+            </a>
+          </>
+        )}
+      </p>
+    </div>
+  ) : null;
 
   // STRICT mode: the LEGACY full profile (hardcoded ENTITIES scores, momentum,
   // role breakdown, financials) stays held behind HARDCODED_SURFACES_WIRED — we
@@ -554,43 +587,17 @@ export default async function VendorDeepDivePage({
                 ) : (
                   <DomainScorecard scorecard={scorecard} />
                 )}
-                {modelQuality && (
-                  <div className="mt-4 rounded-lg border border-[#d4af37]/40 bg-[#fbf6e4]/40 px-3 py-2 dark:border-[#d4af37]/30 dark:bg-[#1a1605]/20">
-                    <div className="flex flex-wrap items-baseline gap-2">
-                      <span className="text-sm font-semibold text-[#13294b] dark:text-[#eef3f8]">Model quality (Arena Elo)</span>
-                      <span className="font-mono text-lg font-semibold tabular-nums text-[#a07f1f] dark:text-[#d4af37]">
-                        {modelQuality.score.toFixed(1)}<span className="text-xs text-[#7a8aa0]">/5</span>
-                      </span>
-                      <span className="rounded bg-emerald-100 px-1.5 py-0.5 text-[10px] font-medium text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300">
-                        {modelQuality.bestGrade} benchmark
-                      </span>
-                    </div>
-                    <p className="mt-1 text-[11px] leading-5 text-[#5e6b7e] dark:text-[#a7bacd]">
-                      Top-2 average human-preference Arena Elo — a capability proxy, not a factuality audit (band-capped at 4.0).
-                      Weighted in model-category rankings (e.g. frontier model APIs); shown here as context.
-                      {modelQuality.citations[0] && (
-                        <>
-                          {" "}
-                          <a
-                            href={modelQuality.citations[0].sourceUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-sky-700 underline underline-offset-2 hover:no-underline dark:text-sky-400"
-                          >
-                            source
-                          </a>
-                        </>
-                      )}
-                    </p>
-                  </div>
-                )}
+                {modelQualityPanel && <div className="mt-4">{modelQualityPanel}</div>}
               </Panel>
             </section>
           ) : (
-            <DataUnavailable
-              title={`${entity.name} — profile data unavailable`}
-              detail="Scores, momentum, role breakdown and financial signals appear only when backed by reviewed, source-backed evidence in our live data store. No reviewed evidence has been ingested for this vendor yet, so we hold the profile rather than show hardcoded figures as if measured."
-            />
+            <section className="mb-6">
+              {modelQualityPanel && <div className="mb-4">{modelQualityPanel}</div>}
+              <DataUnavailable
+                title={`${entity.name} — profile data unavailable`}
+                detail="Scores, momentum, role breakdown and financial signals appear only when backed by reviewed, source-backed evidence in our live data store. No reviewed evidence has been ingested for this vendor yet, so we hold the profile rather than show hardcoded figures as if measured."
+              />
+            </section>
           )}
           {deliveryPartnerships.length > 0 && (
             <section className="mt-6">

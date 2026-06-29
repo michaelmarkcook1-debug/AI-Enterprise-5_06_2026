@@ -81,11 +81,11 @@ export default function CategoryRerank({
           onClick={() => setSliders(defaultSliders)}
           className="rounded-full border border-[#d6c9a8] px-3 py-1 text-xs font-medium text-[#4c5d75] hover:bg-white disabled:opacity-40 dark:border-[#2a4a6b] dark:text-[#a7bacd] dark:hover:bg-[#0c2238]"
         >
-          Reset to framework default
+          Reset to category default
         </button>
       </div>
       <p className="mt-1 text-xs text-[#5e6b7e] dark:text-[#a7bacd]">
-        Weight the 12 domains to your priorities; vendors re-order live by their weighted 0–5 composite from reviewed,
+        Weight the {domainList.length} domains to your priorities; vendors re-order live by their weighted 0–5 composite from reviewed,
         source-backed evidence. Vendors below {Math.round(ASSESSMENT_COVERAGE_FLOOR * 100)}% domain coverage are held —
         re-weighting can’t mask thin evidence. Draft — pressure-test the sources on each profile.
       </p>
