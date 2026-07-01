@@ -84,8 +84,6 @@ export default async function UnderstandPage() {
   const configuredConnectors = connectors.filter((c) => c.configured).length;
   const totalConnectors = connectors.length;
 
-  const histories = await getRankingHistories(vendors, momentum);
-
   // Analyst insight — computed from the same strategic scores the page renders
   const insightScores = rankableVendors.slice(0, 12).map((v) => {
     const mom = momentumByVendor.get(v.id);
@@ -245,112 +243,29 @@ export default async function UnderstandPage() {
         </Panel>
       </section>
 
-      {/* 5. Strategic Intelligence — new scores from the implementation pack */}
+      {/* 5 + 6. RELOCATED (C7 — one vendor, one place). The per-vendor
+          "Strategic vendor intelligence" table and the "Vendor universe" list
+          used to live here and duplicated the Query ranking (Chris flagged the
+          same vendor showing twice). Those per-vendor scores — sustainability,
+          encroachment, dependency, optionality, viability — now render on each
+          vendor's own profile under "Strategic position", reached in one click
+          from the Query leaderboard. Nothing was deleted; it moved. The
+          aggregate views above (ecosystem map, coverage, capability matrix,
+          methodology) stay because they are genuinely market-wide, not
+          per-vendor. */}
       <section id="strategic" className="mb-8">
-        <Panel title="Strategic vendor intelligence">
-          <p className="mb-2 text-xs text-[#56657b] dark:text-[#a7bacd]">
-            Strategic sustainability, platform encroachment risk, dependency risk, and optionality
-            for the top tracked vendors. These scores are derived from existing pillar scores,
-            momentum, market position, and ecosystem data.
+        <Panel title="Per-vendor detail lives on the vendor profile">
+          <p className="text-sm leading-6 text-[#3f5068] dark:text-[#c2d1e0]">
+            Strategic sustainability, encroachment, dependency, optionality and viability — plus the
+            full vendor list — now sit on each vendor&apos;s own profile, so a vendor appears in{" "}
+            <strong>one place</strong> instead of being duplicated here and in Query. Open any vendor
+            from the{" "}
+            <Link href="/query" className="font-semibold text-[#13294b] underline underline-offset-2 hover:no-underline dark:text-[#eef3f8]">
+              Query leaderboard
+            </Link>{" "}
+            to see its Strategic position, scores, dependencies and live news together.
           </p>
-          <SeedDataBadge label="Estimated" provenance="seed" reason="Strategic scores are computed from seed pillar data. Will refine as live evidence deepens." />
-          <div className="mt-4 overflow-x-auto">
-            <table className="min-w-full text-sm">
-              <thead>
-                <tr className="border-b border-[#e6dcc3] text-left text-[10px] uppercase tracking-wide text-[#56657b]">
-                  <th className="py-2 pr-3">Vendor</th>
-                  <th className="py-2 pr-3">Trend</th>
-                  <th className="py-2 pr-3 text-right">Sustainability</th>
-                  <th className="py-2 pr-3 text-right">Encroachment risk</th>
-                  <th className="py-2 pr-3 text-right">Dependency risk</th>
-                  <th className="py-2 pr-3 text-right">Optionality</th>
-                  <th className="py-2 text-right">Viability</th>
-                </tr>
-              </thead>
-              <tbody>
-                {rankableVendors.slice(0, 12).map((vendor) => {
-                  const mom = momentumByVendor.get(vendor.id);
-                  // All five scores from the single canonical module —
-                  // formulas live in lib/intelligence/strategic-scores.ts
-                  const { sustainability, encroachment, dependency, optionality, viability } =
-                    strategicScores(vendor, mom?.momentumScore ?? 50);
-
-                  const riskTone = (v: number) => v >= 60 ? "text-rose-700 dark:text-rose-300" : v >= 35 ? "text-amber-700 dark:text-amber-300" : "text-emerald-700 dark:text-emerald-300";
-                  const scoreTone = (v: number) => v >= 70 ? "text-emerald-700 dark:text-emerald-300" : v >= 45 ? "text-amber-700 dark:text-amber-300" : "text-rose-700 dark:text-rose-300";
-
-                  return (
-                    <tr key={vendor.id} className="border-b border-[#efe9d9]/60">
-                      <td className="py-2.5 pr-3">
-                        <VendorNameWithOwnership name={vendor.name} ownershipType={vendor.ownershipType} />
-                      </td>
-                      <td className="py-2.5 pr-3">
-                        {(() => {
-                          const h = histories.get(vendor.id);
-                          return h && h.points.length >= 2 ? (
-                            <TrendSpark
-                              label={`${vendor.name} — overall score`}
-                              points={h.points.map((pt) => ({ date: pt.date, value: pt.score }))}
-                            />
-                          ) : <span className="text-[10px] text-[#7e8a99]">accumulating</span>;
-                        })()}
-                      </td>
-                      <td className={`py-2.5 pr-3 text-right font-mono font-semibold ${scoreTone(sustainability)}`}>{sustainability}</td>
-                      <td className={`py-2.5 pr-3 text-right font-mono font-semibold ${riskTone(encroachment)}`}>{encroachment}</td>
-                      <td className={`py-2.5 pr-3 text-right font-mono font-semibold ${riskTone(dependency)}`}>{dependency}</td>
-                      <td className={`py-2.5 pr-3 text-right font-mono font-semibold ${scoreTone(optionality)}`}>{optionality}</td>
-                      <td className={`py-2.5 text-right font-mono font-semibold ${scoreTone(viability)}`}>{viability}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-          <div className="mt-3 grid gap-3 text-[11px] text-[#56657b] dark:text-[#a7bacd] md:grid-cols-2 lg:grid-cols-3">
-            <div><strong>Sustainability:</strong> Likelihood the vendor&apos;s advantage remains defensible over 6–24 months.</div>
-            <div><strong>Encroachment risk:</strong> Risk that a frontier model or hyperscaler absorbs the vendor&apos;s differentiation.</div>
-            <div><strong>Dependency risk:</strong> Exposure to model, cloud, GPU, or platform dependencies.</div>
-            <div><strong>Optionality:</strong> Whether adopting this vendor increases or reduces future flexibility.</div>
-            <div><strong>Viability:</strong> Vendor health — funding, revenue maturity, customer base, delivery record.</div>
-          </div>
         </Panel>
-      </section>
-
-      {/* 6. Vendor universe */}
-      <section id="vendors" className="mb-8">
-        {/* No displayed rank numbers: the order is a deterministic score sort for
-            readability, but vendors are only RANKED within their own category /
-            layer — a flat all-market position number would mislead. */}
-        <CollapsiblePanel title="Vendor universe" summary={`${rankableVendors.length} vendors`}>
-          <div className="divide-y divide-[#efe9d9] dark:divide-[#1d3a57]">
-            {vendorsRanked.map((vendor) => {
-              const mom = momentumByVendor.get(vendor.id);
-              const depth = evidenceDepthByVendor.get(vendor.id) ?? 0;
-              return (
-                <Link
-                  key={vendor.id}
-                  href={`/vendors/${vendor.slug}`}
-                  className="grid gap-4 py-4 md:grid-cols-[1fr_160px_160px] md:items-center"
-                >
-                  <div>
-                    <div className="flex flex-wrap items-center gap-2 text-base font-semibold text-[#13294b] dark:text-[#eef3f8]">
-                      <VendorNameWithOwnership name={vendor.name} ownershipType={vendor.ownershipType} compactBadge={false} />
-                      {depth < 10 && <EvidenceDepthBadge depth={depth} />}
-                    </div>
-                    <div className="mt-1 text-sm text-[#54647a] dark:text-[#a7bacd]">{vendor.category} · {vendor.marketPosition}</div>
-                    <div className="mt-2 text-xs leading-5 text-[#5d6b80] dark:text-[#8fa5bb]">{vendor.description}</div>
-                  </div>
-                  <div className={depth < 10 ? (depth <= 0 ? "opacity-60" : "opacity-80") : ""}>
-                    <ScoreBar label="Overall" value={vendor.overallScore} />
-                  </div>
-                  <div className="md:text-right">
-                    <div className="text-xs text-[#5d6b80] dark:text-[#8fa5bb]">{depth > 0 ? `${depth}✓ evidence` : "0 evidence"}</div>
-                    <div className="mt-2 text-xs text-[#5d6b80] dark:text-[#8fa5bb]">Momentum {mom?.momentumScore ?? 0}/100</div>
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-        </CollapsiblePanel>
       </section>
 
       {/* 7. Methodology */}

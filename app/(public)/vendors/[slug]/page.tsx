@@ -17,6 +17,7 @@ import {
   lensesForRoles,
   tagsForRoles,
   primaryLayerForRoles,
+  isRankableVendor,
   LAYER_LABEL,
   LENS_LABEL,
   TAG_LABEL,
@@ -26,7 +27,8 @@ import { HARDCODED_SURFACES_WIRED, INTERACTIVE_ASSESSMENT_ENABLED, INTERROGATE_E
 import { getMember } from "@/lib/member/auth";
 import DataUnavailable from "@/components/DataUnavailable";
 import { getPrisma, hasDatabase } from "@/lib/prisma";
-import { Panel } from "@/components/intelligence-ui";
+import { Panel, SeedDataBadge } from "@/components/intelligence-ui";
+import { strategicScores } from "@/lib/intelligence/strategic-scores";
 import AnalystInsight from "@/components/analyst-insight";
 import { entityInsight } from "@/lib/insights/tab-insights";
 import { OwnershipBadge } from "@/components/ownership-indicator";
@@ -912,6 +914,62 @@ export default async function VendorDeepDivePage({
           </section>
         )}
 
+        {/* ── C7: Strategic position — folded here from the old /understand
+               per-vendor "Strategic vendor intelligence" table so a vendor lives
+               in ONE place. Reuses the canonical strategicScores() heuristic
+               (single source of truth). These are ESTIMATED from seed pillar
+               inputs, so the panel keeps the seed badge until live evidence
+               replaces the inputs. Shown only for rankable vendors — a pure
+               investor / sovereign / regulator lens has no vendor strategic
+               position (it is not a product tier). ── */}
+        {isRankableVendor(allRoles) && (
+          <section className="mb-6">
+            <Panel title="Strategic position">
+              <p className="mb-2 text-xs leading-5 text-[#54647a] dark:text-[#a7bacd]">
+                How defensible this vendor&apos;s position looks over 6–24 months — sustainability,
+                plus the risks a CIO underwrites by adopting it. Derived from this vendor&apos;s own
+                pillar scores, momentum and market signals via the shared strategic model.
+              </p>
+              <SeedDataBadge
+                label="Estimated"
+                provenance="seed"
+                reason="Strategic scores are computed from seed pillar data (overall score, momentum, confidence, role). They refine as live evidence deepens."
+              />
+              {(() => {
+                const s = strategicScores(
+                  {
+                    overallScore: entity.leadershipScore,
+                    confidenceScore: entity.confidence,
+                    ownershipType: entity.ownership,
+                    category: entity.primaryRole,
+                  },
+                  entity.momentum,
+                );
+                const good = (v: number) => (v >= 70 ? "text-emerald-700 dark:text-emerald-300" : v >= 45 ? "text-amber-700 dark:text-amber-300" : "text-rose-700 dark:text-rose-300");
+                const risk = (v: number) => (v >= 60 ? "text-rose-700 dark:text-rose-300" : v >= 35 ? "text-amber-700 dark:text-amber-300" : "text-emerald-700 dark:text-emerald-300");
+                const cells = [
+                  { label: "Sustainability", value: s.sustainability, tone: good(s.sustainability), note: "Advantage stays defensible over 6–24 months." },
+                  { label: "Encroachment risk", value: s.encroachment, tone: risk(s.encroachment), note: "Risk a frontier model or hyperscaler absorbs the differentiation." },
+                  { label: "Dependency risk", value: s.dependency, tone: risk(s.dependency), note: "Exposure to model, cloud, GPU or platform dependencies." },
+                  { label: "Optionality", value: s.optionality, tone: good(s.optionality), note: "Whether adopting this raises or lowers future flexibility." },
+                  { label: "Viability", value: s.viability, tone: good(s.viability), note: "Vendor health — funding, revenue maturity, delivery record." },
+                ];
+                return (
+                  <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+                    {cells.map((c) => (
+                      <div key={c.label} className="rounded-lg border border-[#e9e0c8] bg-white p-3 dark:border-[#1d3a57] dark:bg-[#0c2238]/50">
+                        <div className="text-[10px] font-semibold uppercase tracking-wide text-[#5b6b7f] dark:text-[#8fa5bb]">{c.label}</div>
+                        <div className={`mt-1 font-mono text-2xl font-bold tabular-nums ${c.tone}`}>{c.value}</div>
+                        <p className="mt-1 text-[10px] leading-4 text-[#5b6b7f] dark:text-[#8fa5bb]">{c.note}</p>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })()}
+            </Panel>
+          </section>
+        )}
+
         {/* ── Reputation (current composite + per-pillar breakdown) ───────── */}
         <section className="mb-6">
           <ReputationPanel reputation={reputation} vendorName={entity.name} />
@@ -1065,9 +1123,14 @@ export default async function VendorDeepDivePage({
           </Panel>
         </section>
 
-        {/* ── Data breadcrumb ───────────────────────────────────────────── */}
+        {/* ── Dependencies & ecosystem footprint (C7: "who they depend on") —
+               kept on the profile so a vendor's upstream reliances and what it
+               owns live in ONE place, not on a separate Understand tab. ── */}
         <section className="mb-6">
-          <Panel title="Entity data breadcrumb">
+          <Panel title="Dependencies & ecosystem footprint">
+            <p className="mb-3 text-xs leading-5 text-[#54647a] dark:text-[#a7bacd]">
+              What this vendor relies on and what it owns — models, hosting, hardware and capital.
+            </p>
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               <div>
                 <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-[#5b6b7f] dark:text-[#8fa5bb]">

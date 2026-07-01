@@ -7,8 +7,6 @@ import { generateWeeklyBriefing } from "@/lib/intelligence/briefings";
 import { getBreakingNews } from "@/lib/intelligence/repository";
 import QueryV2Client from "./QueryV2Client";
 import AnalystInsight from "@/components/analyst-insight";
-import CollapsiblePanel from "@/components/collapsible-panel";
-import BreakingNewsCard from "@/components/query/BreakingNewsCard";
 import { queryInsight } from "@/lib/insights/tab-insights";
 
 export const metadata: Metadata = {
@@ -52,37 +50,19 @@ export default async function QueryV2Page() {
     >
       <AnalystInsight paragraph={insightParagraph} />
 
-      {/* Market overview + breaking news, side by side. The weekly executive
-          briefing (relocated from Assess) explains the "why" behind the
-          rankings; the breaking-news card carries last-7-day, impact-filtered
-          market events. */}
-      {(brief || breakingNews) && (
-        <div className="mb-6 grid items-start gap-4 lg:grid-cols-[1.7fr_1fr]">
-          {brief && (
-            <CollapsiblePanel title="Market overview" summary={brief.title} defaultOpen>
-              <div className="space-y-4">
-                <ul className="space-y-3 pl-1">
-                  {brief.executiveSummary.map((item) => (
-                    <li key={item} className="flex gap-2.5 text-sm leading-6 font-semibold text-[#15263c] dark:text-[#eef3f8]">
-                      <span className="mt-1 shrink-0 text-[#a07f1f] dark:text-[#d4af37]">•</span>
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-                <div className="border-l-4 border-[#a07f1f] py-1 pl-3 text-sm font-semibold leading-6 text-[#13294b] dark:border-[#d4af37] dark:text-[#eef3f8]">
-                  {brief.boardTakeaway}
-                </div>
-              </div>
-            </CollapsiblePanel>
-          )}
-          {breakingNews && <BreakingNewsCard news={breakingNews} />}
-        </div>
-      )}
-
       <div className="mb-5">
         <OwnershipLegend />
       </div>
-      <QueryV2Client entities={entities} winningByLayer={winningByLayer} />
+      {/* C8 — the market overview + breaking news moved INTO QueryV2Client so the
+          top selector re-drives them together with the ranking. They are computed
+          here (server) and passed as data; the client scopes the news to the
+          chosen layer. */}
+      <QueryV2Client
+        entities={entities}
+        winningByLayer={winningByLayer}
+        brief={brief}
+        breakingNews={breakingNews}
+      />
     </PageFrame>
   );
 }

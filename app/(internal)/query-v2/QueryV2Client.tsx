@@ -15,10 +15,15 @@ import {
 import ExecutiveBrief from "@/components/query/ExecutiveBrief";
 import WatchButton from "@/components/query/WatchButton";
 import CollapsiblePanel from "@/components/collapsible-panel";
+import BreakingNewsCard from "@/components/query/BreakingNewsCard";
 import AnalystInsight from "@/components/analyst-insight";
 import { entityInsight } from "@/lib/insights/tab-insights";
+import type { BreakingNews } from "@/lib/intelligence/repository";
 
 type WinningLayer = { title: string; names: string[]; note: string };
+// Minimal structural shape of generateWeeklyBriefing()'s result — kept local so
+// this client component never imports the server-only briefings module.
+type QueryBrief = { title: string; executiveSummary: string[]; boardTakeaway: string };
 
 const INFRA_BANDS: Array<{ key: InfraBand; label: string; note: string }> = [
   { key: "silicon", label: "Silicon", note: "Chips, accelerators, networking and fabrication. Risk type: supply concentration." },
@@ -221,7 +226,7 @@ interface SnapshotPoint {
 
 const snapshotCache = new Map<string, SnapshotPoint[]>();
 
-export default function QueryV2Client({ entities, winningByLayer }: { entities: Entity[]; winningByLayer: WinningLayer[] }) {
+export default function QueryV2Client({ entities, winningByLayer, brief, breakingNews }: { entities: Entity[]; winningByLayer: WinningLayer[]; brief: QueryBrief | null; breakingNews: BreakingNews | null }) {
   const [category, setCategory] = useState<CategoryKey>("all");
   const [selectedId, setSelectedId] = useState(entities[0]?.id ?? "");
   const [hoverState, setHoverState] = useState<{ id: string; y: number; x: number } | null>(null);
@@ -289,6 +294,27 @@ export default function QueryV2Client({ entities, winningByLayer }: { entities: 
     entity,
     share: (entity.usageShare / filtered.reduce((sum, item) => sum + item.usageShare, 0)) * 100,
   }));
+
+  // C8 — the selector is the steering wheel: the breaking-news strip below it is
+  // scoped to the SELECTED category so news moves together with the ranking.
+  // "all" shows the whole-market feed. Match on normalised vendor id first, then
+  // vendor name (the ENTITIES roster and the news store can carry ids that differ
+  // only by prefix/casing, so a name fallback keeps the scoping robust). No data
+  // is invented — items are only filtered, never added.
+  const scopedNews = useMemo<BreakingNews | null>(() => {
+    if (!breakingNews) return null;
+    if (category === "all") return breakingNews;
+    const inCat = entities.filter((entity) => matchesCategory(entity, category));
+    const ids = new Set(inCat.map((entity) => entity.id.toLowerCase()));
+    const names = inCat.map((entity) => entity.name.toLowerCase());
+    const items = breakingNews.items.filter((n) => {
+      const id = (n.primaryVendorId ?? "").toLowerCase();
+      if (id && ids.has(id)) return true;
+      const nm = (n.primaryVendorName ?? "").toLowerCase();
+      return !!nm && names.some((x) => x === nm || nm.includes(x) || x.includes(nm));
+    });
+    return { ...breakingNews, items };
+  }, [breakingNews, category, entities]);
 
   function chooseCategory(nextCategory: CategoryKey) {
     // Clicking the active category deselects it → returns to grouped "all" view
@@ -388,16 +414,21 @@ export default function QueryV2Client({ entities, winningByLayer }: { entities: 
 
   return (
     <div className="min-w-0">
-      <ExecutiveBrief entities={entities} winningByLayer={winningByLayer} />
-
-      <section id="role-overview" className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-4 xl:grid-cols-7">
-        {kpis.map((kpi) => <Metric key={kpi.label} {...kpi} />)}
-      </section>
-
+      {/* ── C8: the steering wheel. This selector sits at the TOP and re-drives
+             the market read (news, below) and the ranking (further down)
+             together. "Why these categories matter" is spelled out so a CIO who
+             doesn't know the layers cold can still steer. ── */}
       <Panel
-        title="Entity role selector"
+        title="Steering wheel — pick a layer of the AI stack"
         action={<SeedDataBadge label="Directional estimate" provenance="seed" reason="Category roles and market signals are evidence-labelled directional intelligence for route /query-v2." />}
       >
+        <p className="mb-3 text-xs leading-5 text-[#54647a] dark:text-[#a7bacd]">
+          <strong className="text-[#13294b] dark:text-[#eef3f8]">Why these categories matter:</strong>{" "}
+          enterprise AI vendors do different jobs — platforms control distribution, models supply
+          intelligence, applications convert it to workflow, infrastructure and hardware carry it.
+          Pick one and the breaking news and the ranking below both re-focus on that layer. Click it
+          again to clear.
+        </p>
         <div className="flex flex-wrap gap-2">
           {/* "all" key is intentionally excluded — grouped view is the default state */}
           {CATEGORY_OPTIONS.filter((option) => option.key !== "all").map((option) => {
@@ -429,7 +460,9 @@ export default function QueryV2Client({ entities, winningByLayer }: { entities: 
         </div>
         <div className="mt-4 grid gap-4 lg:grid-cols-[0.8fr_1.2fr]">
           <div className="rounded-md border border-[#e9e0c8] bg-[#fdfaf1] p-3 dark:border-[#1d3a57] dark:bg-[#081c30]/40">
-            <div className="text-xs font-semibold uppercase tracking-wide text-[#5b6b7f] dark:text-[#8fa5bb]">Category summary</div>
+            <div className="text-xs font-semibold uppercase tracking-wide text-[#5b6b7f] dark:text-[#8fa5bb]">
+              {category === "all" ? "All layers" : "Now steering by"}
+            </div>
             <div className="mt-2 text-sm font-semibold text-[#13294b] dark:text-[#eef3f8]">{selectedOption.label}</div>
             <p className="mt-2 text-xs leading-5 text-[#54647a] dark:text-[#a7bacd]">{selectedOption.summary}</p>
           </div>
@@ -439,6 +472,53 @@ export default function QueryV2Client({ entities, winningByLayer }: { entities: 
           </div>
         </div>
       </Panel>
+
+      {/* ── Selector-driven market read: breaking news scoped to the chosen layer,
+             beside the market-wide weekly brief. The brief is whole-market BY
+             DESIGN and is labelled as such so it never reads as a disconnected
+             (or falsely category-specific) panel. ── */}
+      {(brief || breakingNews) && (
+        <div className="mt-6 mb-6 grid items-start gap-4 lg:grid-cols-[1.7fr_1fr]">
+          {brief && (
+            <CollapsiblePanel title="Market overview" summary={`${brief.title} · market-wide`} defaultOpen>
+              <div className="space-y-4">
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-[#8a6f2a] dark:text-[#d4af37]">
+                  Market-wide context — not filtered by the selected layer.
+                </p>
+                <ul className="space-y-3 pl-1">
+                  {brief.executiveSummary.map((item) => (
+                    <li key={item} className="flex gap-2.5 text-sm leading-6 font-semibold text-[#15263c] dark:text-[#eef3f8]">
+                      <span className="mt-1 shrink-0 text-[#a07f1f] dark:text-[#d4af37]">•</span>
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+                <div className="border-l-4 border-[#a07f1f] py-1 pl-3 text-sm font-semibold leading-6 text-[#13294b] dark:border-[#d4af37] dark:text-[#eef3f8]">
+                  {brief.boardTakeaway}
+                </div>
+              </div>
+            </CollapsiblePanel>
+          )}
+          {breakingNews && (
+            scopedNews && scopedNews.items.length > 0 ? (
+              <BreakingNewsCard news={scopedNews} />
+            ) : (
+              <Panel title={category === "all" ? "Breaking news" : `Breaking news — ${selectedOption.label}`}>
+                <p className="text-sm leading-6 text-[#54647a] dark:text-[#a7bacd]">
+                  No breaking news for <strong>{selectedOption.label}</strong> in the last{" "}
+                  {breakingNews.windowDays} days. Clear the filter to see the full market feed.
+                </p>
+              </Panel>
+            )
+          )}
+        </div>
+      )}
+
+      <ExecutiveBrief entities={entities} winningByLayer={winningByLayer} />
+
+      <section id="role-overview" className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-4 xl:grid-cols-7">
+        {kpis.map((kpi) => <Metric key={kpi.label} {...kpi} />)}
+      </section>
 
       {category === "infrastructure" && (
         <section id="infra-bands" className="mt-6">

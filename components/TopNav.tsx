@@ -117,14 +117,16 @@ function badgeLabel(health: IngestionHealth | null, iso: string): string {
   return `Refreshed ${relative}`;
 }
 
-// CIO Decision Lifecycle — five primary tabs.
-// Atlas and Leadership are accessible from Understand, not top nav.
-// Investor Tools is visually separated as a secondary workflow.
+// CIO Decision Lifecycle — four primary tabs. C7 folded "Understand" out of the
+// primary nav into this Library menu; its per-vendor detail moved onto the
+// vendor profile (one vendor, one place). Atlas and Leadership remain reachable
+// from the Understand market map. Investor Tools is a separated secondary workflow.
 const LIBRARY: { href: string; label: string }[] = [
   { href: "/market", label: "Market" },
   { href: "/news", label: "News" },
   { href: "/reputation", label: "Reputation" },
   { href: "/capabilities", label: "Capabilities" },
+  { href: "/understand", label: "Understand (market map)" },
   { href: "/vendors", label: "Vendors" },
   { href: "/watchlists", label: "Watchlists" },
   { href: "/briefings", label: "Briefings" },
@@ -136,7 +138,6 @@ const LIBRARY: { href: string; label: string }[] = [
 
 const NAV: { href: string; label: string }[] = [
   { href: "/query-v2", label: "Query" },
-  { href: "/understand", label: "Understand" },
   { href: "/assess", label: "Assess" },
   { href: "/demonstrate", label: "Demonstrate" },
   { href: "/decision-monitor", label: "Monitor" },
