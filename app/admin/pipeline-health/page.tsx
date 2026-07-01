@@ -17,6 +17,8 @@ import { Panel } from "@/components/intelligence-ui";
 import { getLastRefreshRun, listRefreshRuns } from "@/lib/system/daily-refresh-store";
 import TriggerDailyRefresh from "@/components/admin/TriggerDailyRefresh";
 
+import { adminPageGuard } from "@/components/admin/AdminPageGuard";
+
 export const dynamic = "force-dynamic";
 
 interface StepSummary {
@@ -68,6 +70,9 @@ function ago(iso: string): string {
 }
 
 export default async function PipelineHealthPage() {
+  const locked = await adminPageGuard();
+  if (locked) return locked;
+
   const [last, history] = await Promise.all([
     getLastRefreshRun(),
     listRefreshRuns(10),

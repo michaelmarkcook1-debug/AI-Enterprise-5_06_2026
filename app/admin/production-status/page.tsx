@@ -6,6 +6,8 @@ import { manifestSummary } from "@/lib/sourcing/manifest";
 // so the admin can audit what's wired without the LLM/DB needing to be reachable
 // (the page degrades gracefully when DB is missing).
 
+import { adminPageGuard } from "@/components/admin/AdminPageGuard";
+
 export const dynamic = "force-dynamic";
 
 interface Gate {
@@ -88,6 +90,9 @@ async function buildGates(): Promise<Gate[]> {
 }
 
 export default async function ProductionStatusPage() {
+  const locked = await adminPageGuard();
+  if (locked) return locked;
+
   const gates = await buildGates();
   const requiredFails = gates.filter((g) => !g.ok && g.severity === "required");
   const ready = requiredFails.length === 0;

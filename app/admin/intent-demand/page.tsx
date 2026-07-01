@@ -4,6 +4,8 @@ import { listIntelligenceVendors, listMarketCategories } from "@/lib/intelligenc
 
 // Internal demand dashboard — the aggregated, anonymous buyer-intent signal.
 // Read-only, always fresh. Auth is enforced via app/admin/layout.tsx (cookie gate).
+import { adminPageGuard } from "@/components/admin/AdminPageGuard";
+
 export const dynamic = "force-dynamic";
 
 const PANEL = "rounded-xl border border-[#e3d9c0] dark:border-[#1d3a57] bg-white/60 dark:bg-white/5 p-5";
@@ -42,6 +44,9 @@ function TopTable({ title, rows, label }: { title: string; rows: IntentTop[]; la
 }
 
 export default async function IntentDemandPage() {
+  const locked = await adminPageGuard();
+  if (locked) return locked;
+
   const [demand, vendors, categories] = await Promise.all([
     getIntentDemand(30),
     listIntelligenceVendors().catch(() => []),

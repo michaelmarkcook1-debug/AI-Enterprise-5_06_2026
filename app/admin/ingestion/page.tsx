@@ -7,6 +7,8 @@ import { getLatestAdminRun } from "@/lib/system/admin-run-log";
 import { listActiveJobs, type AdminJob } from "@/lib/system/admin-job-store";
 import Link from "next/link";
 
+import { adminPageGuard } from "@/components/admin/AdminPageGuard";
+
 export const dynamic = "force-dynamic";
 
 const CATEGORY_LABELS: Record<string, string> = {
@@ -89,6 +91,9 @@ async function countVerifiedSignals(): Promise<number | null> {
 }
 
 export default async function IngestionPage() {
+  const locked = await adminPageGuard();
+  if (locked) return locked;
+
   const [jobs, patches, lastRun, activeJobList, verifiedSignals] = await Promise.all([
     hasDatabase() ? listIngestionJobs() : Promise.resolve([]),
     listPendingManifestPatches(),

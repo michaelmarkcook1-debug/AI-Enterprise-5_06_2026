@@ -13,6 +13,8 @@ import {
 } from "@/lib/services/batch-review";
 import BatchReview from "./BatchReview";
 
+import { adminPageGuard } from "@/components/admin/AdminPageGuard";
+
 export const dynamic = "force-dynamic";
 
 interface PageProps {
@@ -29,6 +31,9 @@ interface PageProps {
 }
 
 export default async function BatchReviewPage({ searchParams }: PageProps) {
+  const locked = await adminPageGuard();
+  if (locked) return locked;
+
   const params = await searchParams;
   const filters: BatchReviewFilters = {
     vendorId: params.vendor || undefined,

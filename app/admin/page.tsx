@@ -6,10 +6,14 @@ import { listConnectorHealth, dashboardSummary } from "@/lib/connectors/registry
 import { getLastRefreshRun, listRefreshRuns, type StoredRefreshRun } from "@/lib/system/daily-refresh-store";
 import IngestionTrigger from "@/components/admin/IngestionTrigger";
 import BackfillSnapshotsButton from "@/components/admin/BackfillSnapshotsButton";
+import { adminPageGuard } from "@/components/admin/AdminPageGuard";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminHome() {
+  const locked = await adminPageGuard();
+  if (locked) return locked;
+
   // Pull the headline numbers in parallel so the page renders the
   // operator's actual queue state — not generic marketing copy.
   const [provenance, queueHealth, lastRun, recentRuns] = await Promise.all([

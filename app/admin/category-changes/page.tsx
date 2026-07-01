@@ -2,10 +2,15 @@ import CategoryChangeReview from "./CategoryChangeReview";
 import { listCategoryChangeProposals } from "@/lib/services/category-change";
 import { hasDatabase } from "@/lib/prisma";
 
+import { adminPageGuard } from "@/components/admin/AdminPageGuard";
+
 export const dynamic = "force-dynamic";
 
 // Admin queue for auto-detected vendor category / role-tag changes (Phase 2).
 export default async function CategoryChangesPage() {
+  const locked = await adminPageGuard();
+  if (locked) return locked;
+
   const proposals = hasDatabase() ? await listCategoryChangeProposals("pending") : [];
   return (
     <main className="mx-auto max-w-4xl px-4 py-8">

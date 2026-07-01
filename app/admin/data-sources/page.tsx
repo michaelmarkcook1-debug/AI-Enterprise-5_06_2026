@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { dashboardSummary, listConnectorHealth } from "@/lib/connectors/registry";
 import ReingestSourcesButton from "@/components/admin/ReingestSourcesButton";
+import { adminPageGuard } from "@/components/admin/AdminPageGuard";
 
 export const dynamic = "force-dynamic";
 
@@ -12,7 +13,10 @@ export const dynamic = "force-dynamic";
  * rate_limited. Nothing fakes "live" — env-vars not present == not_configured,
  * full stop.
  */
-export default function DataSourcesPage() {
+export default async function DataSourcesPage() {
+  const locked = await adminPageGuard();
+  if (locked) return locked;
+
   const summary = dashboardSummary();
   const connectors = listConnectorHealth();
 

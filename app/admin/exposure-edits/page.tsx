@@ -3,9 +3,14 @@ import { EXPOSURE_NODES, EXPOSURE_EDGES } from "@/lib/investing/exposure-map-dat
 import { listExposureEditProposals } from "@/lib/services/exposure-edit-audit";
 import ExposureEditClient from "./ExposureEditClient";
 
+import { adminPageGuard } from "@/components/admin/AdminPageGuard";
+
 export const dynamic = "force-dynamic";
 
 export default async function ExposureEditsPage() {
+  const locked = await adminPageGuard();
+  if (locked) return locked;
+
   const proposals = await listExposureEditProposals();
   return (
     <div className="min-h-screen bg-[#f6f1e3] text-[#15263c] dark:bg-[#071827] dark:text-[#eef3f8]">

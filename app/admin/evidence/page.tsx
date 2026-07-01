@@ -8,9 +8,14 @@ import { canonicaliseVendorId } from "@/lib/services/product-linkage-runner";
 import { PRODUCT_SCOPES } from "@/lib/investor-tools/product-scope";
 import { getQueueHealthSummary, EMPTY_QUEUE_HEALTH, STALE_PENDING_THRESHOLD_DAYS } from "@/lib/services/queue-health";
 
+import { adminPageGuard } from "@/components/admin/AdminPageGuard";
+
 export const dynamic = "force-dynamic";
 
 export default async function EvidenceReviewPage() {
+  const locked = await adminPageGuard();
+  if (locked) return locked;
+
   const proposals = hasDatabase() ? await listProposals({ status: "pending" }) : [];
   const queueHealth = hasDatabase()
     ? await getQueueHealthSummary(getPrisma())
