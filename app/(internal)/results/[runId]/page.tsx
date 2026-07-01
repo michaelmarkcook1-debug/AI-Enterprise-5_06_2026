@@ -6,6 +6,7 @@
 // The client ResultsView accepts `serverData` and skips sessionStorage
 // + API fetch when it's provided.
 
+import { adminPageGuard } from "@/components/admin/AdminPageGuard";
 import { getPersistedAssessmentResult } from "@/lib/services/assessment-service";
 import type { AssessmentResult } from "@/lib/types";
 import ResultsView from "./ResultsView";
@@ -13,6 +14,9 @@ import ResultsView from "./ResultsView";
 export const dynamic = "force-dynamic";
 
 export default async function ResultsPage({ params }: { params: Promise<{ runId: string }> }) {
+  const locked = await adminPageGuard();
+  if (locked) return locked;
+
   const { runId } = await params;
   const decoded = decodeURIComponent(runId);
 

@@ -66,8 +66,9 @@ describe("rankingLeadership", () => {
   });
 
   it("does not compress a capability-primary vendor", () => {
-    // blend(89,78,90)=86, Model Provider primary → no compression
-    expect(rankingLeadership(89, 78, 90, "Model Provider")).toBe(86);
+    // Model-Provider blend weights are 0.7/0.1/0.2 since the Jun-2026 readiness
+    // downgrade (entities.ts): 89*0.7 + 78*0.1 + 90*0.2 = 88.1 → 88; no compression.
+    expect(rankingLeadership(89, 78, 90, "Model Provider")).toBe(88);
   });
 
   it("carve-out: a frontier-model house keeps its blended score despite a scale primary tag", () => {

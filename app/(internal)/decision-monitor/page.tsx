@@ -14,6 +14,7 @@
 // data is not yet connected.
 
 import Link from "next/link";
+import { adminPageGuard } from "@/components/admin/AdminPageGuard";
 import { PageFrame } from "@/components/app-shell";
 import DataSourceRail from "@/components/data-source-rail";
 import AssessmentOutputsPanel from "@/components/assessment-outputs-panel";
@@ -39,6 +40,8 @@ import { monitorInsight } from "@/lib/insights/tab-insights";
 export const dynamic = "force-dynamic";
 
 export default async function MonitorPage() {
+  const locked = await adminPageGuard();
+  if (locked) return locked;
   const [dashboard, vendors, momentum, news, watchlists, provenance, latestAssessment, newVendorCapabilities] = await Promise.all([
     getMarketDashboard(),
     listIntelligenceVendors(),

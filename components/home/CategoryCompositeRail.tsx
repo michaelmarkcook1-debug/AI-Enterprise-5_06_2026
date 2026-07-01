@@ -45,7 +45,7 @@ export default function CategoryCompositeRail({ composites }: { composites: Cate
                   </span>
                   <span className="shrink-0 text-right">
                     <span className="block font-mono text-sm tabular-nums text-[#b08d2f] dark:text-[#d4af37]">
-                      {top.composite!.toFixed(0)}
+                      {top.assessmentComposite == null ? "—" : `${top.assessmentComposite.toFixed(2)}/5`}
                     </span>
                     <span className={`block text-[10px] tabular-nums ${MUTED}`}>{top.compositeConfidence}% conf</span>
                   </span>

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { adminPageGuard } from "@/components/admin/AdminPageGuard";
 import { AppShell } from "@/components/app-shell";
 import { Confidence, EstimatedNote, Metric, Panel, ScoreBar, SeedDataBadge, EvidenceDepthBadge, lowEvidenceClass } from "@/components/intelligence-ui";
 import { OwnershipLegend, VendorNameWithOwnership } from "@/components/ownership-indicator";
@@ -12,6 +13,8 @@ import VendorTrendHover from "@/components/dashboard/VendorTrendHover";
 export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {
+  const locked = await adminPageGuard();
+  if (locked) return locked;
   const [dashboard, provenance, vendors, momentum] = await Promise.all([
     getMarketDashboard(),
     getDataProvenance(),

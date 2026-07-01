@@ -7,11 +7,15 @@ import {
   REPUTATION_VENDOR_IDS,
 } from "@/lib/reputation/seed";
 import { listIntelligenceVendors } from "@/lib/intelligence/repository";
+import { adminPageGuard } from "@/components/admin/AdminPageGuard";
 import ReputationTabs from "./ReputationTabs";
 
 export const dynamic = "force-dynamic";
 
 export default async function ReputationPage() {
+  const locked = await adminPageGuard();
+  if (locked) return locked;
+
   const vendors = await listIntelligenceVendors();
   // Build a lookup of vendor metadata for the rows; fall back to a
   // bare label when no curated vendor exists yet (defensive).

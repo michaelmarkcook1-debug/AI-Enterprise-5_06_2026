@@ -1,3 +1,4 @@
+import { adminPageGuard } from "@/components/admin/AdminPageGuard";
 import { INDUSTRIES } from "@/lib/industries";
 import { PRIMARY_OBJECTIVES, ECOSYSTEMS, workflowsForTier } from "@/lib/use-cases";
 import { listVendorProfiles } from "@/lib/repositories/vendor-profiles";
@@ -14,6 +15,8 @@ interface PageProps {
 }
 
 export default async function AssessmentPage({ searchParams }: PageProps) {
+  const locked = await adminPageGuard();
+  if (locked) return locked;
   const { tier: tierParam } = await searchParams;
   const tier = parseTier(tierParam);
   const vendors = await listVendorProfiles();

@@ -20,10 +20,14 @@ import {
 import { IPO_PROFILES } from "@/lib/investing/seed";
 import { WarningStrip, label } from "../../investing-ui";
 import { WatchlistToggle } from "@/components/investor-tools/WatchlistToggle";
+import { adminPageGuard } from "@/components/admin/AdminPageGuard";
 
 export const dynamic = "force-dynamic";
 
 export default async function ProviderInvestmentPage({ params }: { params: Promise<{ slug: string }> }) {
+  const locked = await adminPageGuard();
+  if (locked) return locked;
+
   const { slug } = await params;
   const provider = getInvestmentProvider(slug);
   if (!provider) notFound();

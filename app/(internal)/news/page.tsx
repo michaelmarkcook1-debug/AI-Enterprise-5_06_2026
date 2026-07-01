@@ -5,10 +5,13 @@ import { OwnershipLegend, VendorNameWithOwnership } from "@/components/ownership
 import { listNewsItems, listIntelligenceVendors } from "@/lib/intelligence/repository";
 import { getDataProvenance } from "@/lib/intelligence/provenance";
 import { newsCategoryClasses } from "@/lib/ui/semantic-colors";
+import { adminPageGuard } from "@/components/admin/AdminPageGuard";
 
 export const dynamic = "force-dynamic";
 
 export default async function NewsPage() {
+  const locked = await adminPageGuard();
+  if (locked) return locked;
   const [news, vendors, provenance] = await Promise.all([
     listNewsItems(),
     listIntelligenceVendors(),

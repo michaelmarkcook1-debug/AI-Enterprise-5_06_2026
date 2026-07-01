@@ -3,10 +3,13 @@ import DataSourceRail from "@/components/data-source-rail";
 import { Confidence, EstimatedNote, Panel, ScoreBar } from "@/components/intelligence-ui";
 import { OwnershipLegend, VendorNameWithOwnership } from "@/components/ownership-indicator";
 import { listMarketCategories, listMarketShareEstimates, listVendorMomentum, listIntelligenceVendors } from "@/lib/intelligence/repository";
+import { adminPageGuard } from "@/components/admin/AdminPageGuard";
 
 export const dynamic = "force-dynamic";
 
 export default async function MarketPage() {
+  const locked = await adminPageGuard();
+  if (locked) return locked;
   const [categories, shares, momentum, vendors] = await Promise.all([
     listMarketCategories(),
     listMarketShareEstimates(),

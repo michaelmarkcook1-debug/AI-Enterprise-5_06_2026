@@ -53,7 +53,9 @@ export default function MarketByCategoryComposite({ composites }: { composites: 
                     <Link href={`/vendors/${v.vendorSlug}`} className="min-w-0 truncate underline-offset-2 hover:underline">
                       {v.vendorName}
                     </Link>
-                    <span className={`font-mono text-xs tabular-nums ${MUTED}`}>{v.composite!.toFixed(0)}</span>
+                    <span className={`font-mono text-xs tabular-nums ${MUTED}`}>
+                      {v.assessmentComposite == null ? "—" : `${v.assessmentComposite.toFixed(2)}/5`}
+                    </span>
                   </li>
                 ))}
               </ol>

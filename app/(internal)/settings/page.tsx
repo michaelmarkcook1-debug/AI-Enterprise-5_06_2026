@@ -12,6 +12,7 @@ import { SOURCE_MANIFEST } from "@/lib/sourcing/manifest";
 import { hasDatabase, getPrisma } from "@/lib/prisma";
 import { getQueueHealthSummary, EMPTY_QUEUE_HEALTH } from "@/lib/services/queue-health";
 import { getLastRefreshRun } from "@/lib/system/daily-refresh-store";
+import { adminPageGuard } from "@/components/admin/AdminPageGuard";
 
 export const dynamic = "force-dynamic";
 
@@ -46,6 +47,9 @@ function buildCategorySummary() {
 }
 
 export default async function SettingsPage() {
+  const locked = await adminPageGuard();
+  if (locked) return locked;
+
   const [vendors, queueHealth, lastRefresh] = await Promise.all([
     listIntelligenceVendors(),
     hasDatabase() ? getQueueHealthSummary(getPrisma()) : Promise.resolve(EMPTY_QUEUE_HEALTH),

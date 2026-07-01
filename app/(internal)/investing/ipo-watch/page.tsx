@@ -3,6 +3,7 @@ import { PageFrame } from "@/components/app-shell";
 import { Confidence, EvidenceBadge, Panel, SeedDataBadge } from "@/components/intelligence-ui";
 import { ipoForecastWarning, listIpoForecastRows } from "@/lib/investing/intelligence";
 import { WarningStrip, label } from "../investing-ui";
+import { adminPageGuard } from "@/components/admin/AdminPageGuard";
 
 export const dynamic = "force-dynamic";
 
@@ -15,7 +16,9 @@ const STAGE_LABEL: Record<string, string> = {
   R5: "S-1 / F-1 filed",
 };
 
-export default function IpoWatchPage() {
+export default async function IpoWatchPage() {
+  const locked = await adminPageGuard();
+  if (locked) return locked;
   const rows = listIpoForecastRows();
 
   return (

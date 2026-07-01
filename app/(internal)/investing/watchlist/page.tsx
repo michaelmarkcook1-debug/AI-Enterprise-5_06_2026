@@ -3,10 +3,14 @@ import { PageFrame } from "@/components/app-shell";
 import { Confidence, Panel } from "@/components/intelligence-ui";
 import { listInvestmentProviderScores, isWatchlistOnly } from "@/lib/investing/intelligence";
 import { WarningStrip, label } from "../investing-ui";
+import { adminPageGuard } from "@/components/admin/AdminPageGuard";
 
 export const dynamic = "force-dynamic";
 
-export default function InvestmentWatchlistPage() {
+export default async function InvestmentWatchlistPage() {
+  const locked = await adminPageGuard();
+  if (locked) return locked;
+
   const all = listInvestmentProviderScores();
   const ipoWatch = all.filter((row) => row.provider.investabilityStatus === "ipo_watch");
   const private_ = all.filter((row) =>

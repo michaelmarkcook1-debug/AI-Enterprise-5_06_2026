@@ -1,10 +1,13 @@
 import { PageFrame } from "@/components/app-shell";
 import { WarningStrip } from "../investing-ui";
 import ExposureMapHero from "@/components/dashboard/ExposureMapHero";
+import { adminPageGuard } from "@/components/admin/AdminPageGuard";
 
 export const dynamic = "force-dynamic";
 
-export default function ExposureMapPage() {
+export default async function ExposureMapPage() {
+  const locked = await adminPageGuard();
+  if (locked) return locked;
   return (
     <PageFrame
       title="AI Ecosystem Navigator"

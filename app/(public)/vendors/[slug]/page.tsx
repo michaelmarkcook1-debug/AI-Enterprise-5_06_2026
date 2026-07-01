@@ -128,6 +128,50 @@ function TaxoChip({ label, variant }: { label: string; variant: "layer" | "lens"
   );
 }
 
+// C7 — Strategic position panel (single formula source: strategicScores()).
+// The caller supplies the provenance badge matching its INPUTS: the strict
+// live-data branch feeds the latest score-writer snapshot (live, evidence-based);
+// the legacy flag-on branch feeds seed roster figures and must badge them as such.
+function StrategicPositionPanel({
+  badge,
+  inputs,
+  momentum,
+}: {
+  badge: React.ReactNode;
+  inputs: { overallScore: number; confidenceScore: number; ownershipType?: string; category: string };
+  momentum: number;
+}) {
+  const s = strategicScores(inputs, momentum);
+  const good = (v: number) => (v >= 70 ? "text-emerald-700 dark:text-emerald-300" : v >= 45 ? "text-amber-700 dark:text-amber-300" : "text-rose-700 dark:text-rose-300");
+  const risk = (v: number) => (v >= 60 ? "text-rose-700 dark:text-rose-300" : v >= 35 ? "text-amber-700 dark:text-amber-300" : "text-emerald-700 dark:text-emerald-300");
+  const cells = [
+    { label: "Sustainability", value: s.sustainability, tone: good(s.sustainability), note: "Advantage stays defensible over 6–24 months." },
+    { label: "Encroachment risk", value: s.encroachment, tone: risk(s.encroachment), note: "Risk a frontier model or hyperscaler absorbs the differentiation." },
+    { label: "Dependency risk", value: s.dependency, tone: risk(s.dependency), note: "Exposure to model, cloud, GPU or platform dependencies." },
+    { label: "Optionality", value: s.optionality, tone: good(s.optionality), note: "Whether adopting this raises or lowers future flexibility." },
+    { label: "Viability", value: s.viability, tone: good(s.viability), note: "Vendor health — funding, revenue maturity, delivery record." },
+  ];
+  return (
+    <Panel title="Strategic position">
+      <p className="mb-2 text-xs leading-5 text-[#54647a] dark:text-[#a7bacd]">
+        How defensible this vendor&apos;s position looks over 6–24 months — sustainability,
+        plus the risks a CIO underwrites by adopting it. A transparent heuristic model
+        (formulas in lib/intelligence/strategic-scores.ts), not a measured assessment.
+      </p>
+      {badge}
+      <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+        {cells.map((c) => (
+          <div key={c.label} className="rounded-lg border border-[#e9e0c8] bg-white p-3 dark:border-[#1d3a57] dark:bg-[#0c2238]/50">
+            <div className="text-[10px] font-semibold uppercase tracking-wide text-[#5b6b7f] dark:text-[#8fa5bb]">{c.label}</div>
+            <div className={`mt-1 font-mono text-2xl font-bold tabular-nums ${c.tone}`}>{c.value}</div>
+            <p className="mt-1 text-[10px] leading-4 text-[#5b6b7f] dark:text-[#8fa5bb]">{c.note}</p>
+          </div>
+        ))}
+      </div>
+    </Panel>
+  );
+}
+
 // ── Score tile colour ─────────────────────────────────────────────────────────
 
 function scoreTone(value: number) {
@@ -663,6 +707,18 @@ export default async function VendorDeepDivePage({
   // is real, so it renders here in place of the bare "profile data unavailable"
   // block whenever the vendor has verified evidence.
   if (!HARDCODED_SURFACES_WIRED) {
+    // C7 fix (2026-07 audit): the Strategic-position fold previously lived only in
+    // the flag-on legacy branch below — dead code on prod. Here it renders from
+    // LIVE inputs only: the latest score-writer snapshot (overall + momentum) and
+    // the mean confidence of the vendor's SCORED assessment domains. No snapshot
+    // or no evidence ⇒ the panel is honestly absent, never seeded.
+    const strictRoles: Role[] = [entity.primaryRole, ...entity.secondaryRoles];
+    const strictSnapshots = hasEvidence ? await fetchSnapshots(intelId).catch(() => []) : [];
+    const strictLast = strictSnapshots[strictSnapshots.length - 1];
+    const strictScored = (scorecard?.domains ?? []).filter((d) => d.state === "scored");
+    const strictConfidence = strictScored.length
+      ? Math.round(strictScored.reduce((s, d) => s + (d.state === "scored" ? d.confidence : 0), 0) / strictScored.length)
+      : 0;
     return (
       <div className="min-h-screen bg-white dark:bg-[#071827]">
         <main className="mx-auto max-w-3xl px-5 py-8">
@@ -708,6 +764,26 @@ export default async function VendorDeepDivePage({
               <DataUnavailable
                 title={`${entity.name} — profile data unavailable`}
                 detail="Scores, momentum, role breakdown and financial signals appear only when backed by reviewed, source-backed evidence in our live data store. No reviewed evidence has been ingested for this vendor yet, so we hold the profile rather than show hardcoded figures as if measured."
+              />
+            </section>
+          )}
+          {/* C7 — strategic position from LIVE snapshot + scored-domain confidence.
+                 Absent (never seeded) when there is no evidence or no snapshot. */}
+          {hasEvidence && strictLast && isRankableVendor(strictRoles) && (
+            <section className="mt-6">
+              <StrategicPositionPanel
+                badge={
+                  <span className="inline-flex rounded border border-sky-300/50 bg-sky-50 px-1.5 py-0.5 text-[10px] font-semibold text-sky-800 dark:border-sky-800/60 dark:bg-sky-950/40 dark:text-sky-300">
+                    Heuristic — derived from live evidence-based scores (snapshot {strictLast.date}), not a measured assessment
+                  </span>
+                }
+                inputs={{
+                  overallScore: strictLast.overallScore,
+                  confidenceScore: strictConfidence,
+                  ownershipType: entity.ownership,
+                  category: entity.primaryRole,
+                }}
+                momentum={strictLast.momentumScore}
               />
             </section>
           )}

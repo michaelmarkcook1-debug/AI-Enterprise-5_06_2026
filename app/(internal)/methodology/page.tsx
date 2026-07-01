@@ -1,6 +1,9 @@
 import Link from "next/link";
+import { adminPageGuard } from "@/components/admin/AdminPageGuard";
 
-export default function Methodology() {
+export default async function Methodology() {
+  const locked = await adminPageGuard();
+  if (locked) return locked;
   return (
     <div className="min-h-screen bg-white dark:bg-[#071827] text-[#15263c] dark:text-[#eef3f8]">
       <main className="mx-auto max-w-3xl px-6 py-16">

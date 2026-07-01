@@ -1,3 +1,4 @@
+import { adminPageGuard } from "@/components/admin/AdminPageGuard";
 import { PageFrame } from "@/components/app-shell";
 import { Panel } from "@/components/intelligence-ui";
 import { generateWeeklyBriefing } from "@/lib/intelligence/briefings";
@@ -5,6 +6,8 @@ import { generateWeeklyBriefing } from "@/lib/intelligence/briefings";
 export const dynamic = "force-dynamic";
 
 export default async function BriefingsPage() {
+  const locked = await adminPageGuard();
+  if (locked) return locked;
   const brief = await generateWeeklyBriefing();
 
   return (

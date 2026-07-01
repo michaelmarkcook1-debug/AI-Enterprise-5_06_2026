@@ -43,10 +43,14 @@ import { getRankingHistories } from "@/lib/intelligence/ranking-snapshots";
 import { understandInsight } from "@/lib/insights/tab-insights";
 import { SeedDataBadge } from "@/components/intelligence-ui";
 import { isRankable } from "@/lib/intelligence/roles";
+import { adminPageGuard } from "@/components/admin/AdminPageGuard";
 
 export const dynamic = "force-dynamic";
 
 export default async function UnderstandPage() {
+  const locked = await adminPageGuard();
+  if (locked) return locked;
+
   const [
     capabilities,
     vendorCapabilities,

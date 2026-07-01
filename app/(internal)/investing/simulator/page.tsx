@@ -29,6 +29,7 @@ import {
 } from "@/lib/investing/simulator";
 import { simulatePortfolioLive } from "@/lib/investing/simulator-live";
 import InvestmentSimulatorClient from "./InvestmentSimulatorClient";
+import { adminPageGuard } from "@/components/admin/AdminPageGuard";
 
 export const dynamic = "force-dynamic";
 
@@ -40,6 +41,9 @@ const QUADRANT_LABEL: Record<string, string> = {
 };
 
 export default async function InvestmentSimulatorPage() {
+  const locked = await adminPageGuard();
+  if (locked) return locked;
+
   const input = { ...getDefaultSimulationInput(), applyNewsOverlay: true };
   const portfolio = { ...getSeedPortfolio(input), applyNewsOverlay: true };
   const baseResult = simulatePortfolio(portfolio);

@@ -5,10 +5,13 @@ import { Confidence, EvidenceBadge, Metric, Panel, SeedDataBadge } from "@/compo
 import { getIpoForecastRow, ipoForecastWarning, postIpoModelDisabledReason } from "@/lib/investing/intelligence";
 import type { PostIPOFluctuationBand } from "@/lib/investing/types";
 import { WarningStrip, label } from "@/components/investor-tools-ui";
+import { adminPageGuard } from "@/components/admin/AdminPageGuard";
 
 export const dynamic = "force-dynamic";
 
 export default async function IpoForecastProviderPage({ params }: { params: Promise<{ providerSlug: string }> }) {
+  const locked = await adminPageGuard();
+  if (locked) return locked;
   const { providerSlug } = await params;
   const row = getIpoForecastRow(providerSlug);
   if (!row) notFound();

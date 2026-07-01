@@ -98,3 +98,13 @@ export const INTERROGATE_ENABLED: boolean = true;
  * lib/agents/prep-kit.ts and lib/assessment/prep-kit.ts read-only.
  */
 export const PREP_KIT_ENABLED: boolean = true;
+
+/**
+ * Investor-tools gate — PARKED per the Chris change-list CUT/PARK ("Investor
+ * tools — already parked by you; keep parked. Not part of the buyer's job.").
+ * Default OFF: the daily-refresh investor step (SEC financials, valuations,
+ * weekly Opus IPO forecasts + Sonnet analyst coverage) is skipped entirely, so
+ * parked scope burns zero LLM spend. Flip via INVESTOR_TOOLS_ENABLED=1 only if
+ * the investor surface is deliberately revived (an owner decision).
+ */
+export const INVESTOR_TOOLS_ENABLED: boolean = process.env.INVESTOR_TOOLS_ENABLED === "1";

@@ -6,10 +6,13 @@ import {
   scoreSignal,
 } from "@/lib/market-signals/engine";
 import MarketSignalsClient from "./MarketSignalsClient";
+import { adminPageGuard } from "@/components/admin/AdminPageGuard";
 
 export const dynamic = "force-dynamic";
 
-export default function MarketSignalsPage() {
+export default async function MarketSignalsPage() {
+  const locked = await adminPageGuard();
+  if (locked) return locked;
   const signals = listSignals();
   const regulatoryEvents = listRegulatoryEvents();
   const marketTalk = listMarketTalk();

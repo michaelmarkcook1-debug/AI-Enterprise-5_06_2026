@@ -12,6 +12,7 @@
 // Force-dynamic so the briefing reflects the latest refresh.
 
 import Link from "next/link";
+import { adminPageGuard } from "@/components/admin/AdminPageGuard";
 import { PageFrame } from "@/components/app-shell";
 import DataSourceRail from "@/components/data-source-rail";
 import { Confidence, Panel, SeedDataBadge } from "@/components/intelligence-ui";
@@ -40,6 +41,8 @@ interface PageProps {
 }
 
 export default async function AssessPage({ searchParams }: PageProps) {
+  const locked = await adminPageGuard();
+  if (locked) return locked;
   const { tier: tierParam } = await searchParams;
   const tier = parseTier(tierParam);
   const [brief, vendorProfiles, dashboard, provenance, watchlists, vendors] = await Promise.all([

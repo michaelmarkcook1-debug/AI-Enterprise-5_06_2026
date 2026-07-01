@@ -2,10 +2,13 @@ import { PageFrame } from "@/components/app-shell";
 import { Panel } from "@/components/intelligence-ui";
 import { getInvestmentBriefing } from "@/lib/investing/intelligence";
 import { WarningStrip } from "../investing-ui";
+import { adminPageGuard } from "@/components/admin/AdminPageGuard";
 
 export const dynamic = "force-dynamic";
 
-export default function InvestmentBriefingPage() {
+export default async function InvestmentBriefingPage() {
+  const locked = await adminPageGuard();
+  if (locked) return locked;
   const brief = getInvestmentBriefing();
 
   return (

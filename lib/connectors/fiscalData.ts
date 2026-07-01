@@ -33,7 +33,10 @@ export const fiscalDataConnector: Connector<FiscalQuery, FiscalRecord> = {
     try {
       const res = await fetch(url);
       if (!res.ok) {
-        const error = `HTTP ${res.status} ${res.statusText}`;
+        // Include the exact fetched URL in the error so the connector-health
+        // panel's DETAIL shows precisely what the server requested (surfaces
+        // stale-bundle / wrong-path issues instead of a bare status code).
+        const error = `HTTP ${res.status} ${res.statusText} · ${url}`;
         recordLastFetch("fiscalData", { ok: false, error });
         return { ok: false, status: "error", records: [], recordCount: 0, fetchedAt, error, sourceUrl: url };
       }

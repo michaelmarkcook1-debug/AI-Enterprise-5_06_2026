@@ -8,10 +8,13 @@ import { listNewsItems } from "@/lib/intelligence/repository";
 import { enrichInvestmentProviders } from "@/lib/investing/live-data";
 import { aggregateUptake } from "@/lib/intelligence/vendor-uptake-seed";
 import { InvestingCard, ProviderScoreTable, WarningStrip, label, ownershipFor } from "./investing-ui";
+import { adminPageGuard } from "@/components/admin/AdminPageGuard";
 
 export const dynamic = "force-dynamic";
 
 export default async function InvestingDashboardPage() {
+  const locked = await adminPageGuard();
+  if (locked) return locked;
   const dashboard = getInvestmentDashboard();
   const investmentNews = (await listNewsItems())
     .filter((item) => item.categories.some((category) => ["Market movement", "Infrastructure", "Partnership", "Pricing", "Risk event", "Strategy signal", "Product launch"].includes(category)))

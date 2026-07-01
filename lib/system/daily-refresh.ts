@@ -84,6 +84,7 @@ import { checkMigrationDrift } from "../db/migration-drift";
 import { notifyMigrationDriftIfNeeded } from "../db/migration-drift-alert";
 import { getKillSwitchState } from "./refresh-killswitch";
 import { makeSpendGuard, recordCycleSpend } from "./spend-ledger";
+import { INVESTOR_TOOLS_ENABLED } from "../availability";
 
 interface StepReport {
   step: string;
@@ -299,8 +300,15 @@ export async function runDailyRefresh(
   await trackedStep("web_evidence", async () => {
     if (!dbConfigured) return { skipped: "no_database" };
     if (!isWeekly) return { skipped: "weekly-only step (skipped on daily run)" };
+    // The single most expensive weekly step — it must respect the caps like every
+    // other LLM step (2026-07 audit: it was neither gated nor counted).
+    if (spend.exhausted()) return { skipped: "spend_cap", ...spend.status() };
     const vendors = await getPrisma().intelligenceVendor.findMany({ select: { id: true, name: true } });
     const r = await runWebEvidenceSweep(vendors);
+    // CONSERVATIVE ledger estimate until the runner is token-instrumented:
+    // web_search $0.01/call + per-vendor Haiku sweep (~8k in / ~1k out ⇒ ~$0.013
+    // at $1/$5 per MTok). Estimated, never displayed to users as measured cost.
+    const estimatedCostUsd = r.totalSearches * 0.01 + r.vendorsAttempted * 0.013;
     return {
       vendorsAttempted: r.vendorsAttempted,
       vendorsWithFindings: r.vendorsWithFindings,
@@ -308,6 +316,8 @@ export async function runDailyRefresh(
       totalSearches: r.totalSearches,
       errorCount: r.errors.length,
       firstError: r.errors[0]?.error,
+      costBasis: "estimated (runner not token-instrumented)",
+      estimatedCostUsd,
     };
   });
 
@@ -494,12 +504,17 @@ export async function runDailyRefresh(
   await trackedStep("market_news", async () => {
     if (spend.exhausted()) return { skipped: "spend_cap", ...spend.status() };
     const r = await runMarketNewsIngestion();
+    // CONSERVATIVE ledger estimate (runner not token-instrumented): Haiku scores
+    // items in batches of 10 (~4k in / ~0.5k out per batch ⇒ ~$0.0065 at $1/$5).
+    const estimatedCostUsd = Math.ceil(r.itemsScored / 10) * 0.0065;
     return {
       feedsFetched: r.feedsFetched,
       itemsScored: r.itemsScored,
       itemsUpserted: r.itemsUpserted,
       errorCount: r.errors.length,
       diagnostic: r.errors[0] ?? (r.itemsUpserted > 0 ? `${r.itemsUpserted} items upserted` : "no new relevant items"),
+      costBasis: "estimated (runner not token-instrumented)",
+      estimatedCostUsd,
     };
   });
 
@@ -515,11 +530,16 @@ export async function runDailyRefresh(
     const dayOfEpoch = Math.floor(now.getTime() / 86_400_000);
     const vendor = newsVendors[dayOfEpoch % newsVendors.length];
     const r = await runNewsSourcing(vendor);
+    // CONSERVATIVE ledger estimate (runner not token-instrumented): per ingested
+    // article one Haiku extraction (~8k in / ~1.2k out ⇒ ~$0.014 at $1/$5).
+    const estimatedCostUsd = r.totals.articlesIngested * 0.014;
     return {
       vendor,
       articlesDiscovered: r.totals.articlesDiscovered,
       articlesIngested: r.totals.articlesIngested,
       proposalsPersisted: r.totals.proposalsPersisted,
+      costBasis: "estimated (runner not token-instrumented)",
+      estimatedCostUsd,
     };
   });
 
@@ -541,6 +561,11 @@ export async function runDailyRefresh(
   //     Each sub-step records its own success/error count so the
   //     /admin/pipeline-health panel can surface which source failed.
   await trackedStep("investor_tools_refresh", async () => {
+    // PARKED per the Chris change-list CUT/PARK: investor tools are not part of
+    // the buyer's job — the step (incl. weekly Opus IPO forecasts + Sonnet
+    // analyst coverage) burns zero spend until deliberately revived via
+    // INVESTOR_TOOLS_ENABLED=1.
+    if (!INVESTOR_TOOLS_ENABLED) return { skipped: "parked (Chris CUT/PARK) — set INVESTOR_TOOLS_ENABLED=1 to revive" };
     if (!dbConfigured) return { skipped: "no_database" };
     const targets = INVESTMENT_PROVIDERS.filter((p) => p.exposureType !== "cash");
 

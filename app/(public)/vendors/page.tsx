@@ -29,7 +29,6 @@ export default async function VendorsPage() {
   const composites = isLive ? await getCategoryComposites().catch(() => []) : [];
   const withVendors = composites.filter((c) => c.ranked.length > 0 || c.incomplete.length > 0);
   const anyRanked = composites.some((c) => c.ranked.length > 0);
-  const methodology = composites[0]?.methodologyNote;
 
   return (
     <PageFrame
@@ -37,15 +36,6 @@ export default async function VendorsPage() {
       kicker="Provider intelligence"
       description="Ranked within each market category — never across them — by a weighted composite of all evidence-graded pillars. Not a single market-share proxy. Every position is explainable and tied to its evidence."
     >
-      {methodology && (
-        <details className="mb-5 text-sm">
-          <summary className="cursor-pointer text-[11px] font-medium underline-offset-2 hover:underline">
-            How these rankings are computed
-          </summary>
-          <p className={`mt-2 max-w-3xl text-xs leading-5 ${MUTED}`}>{methodology}</p>
-        </details>
-      )}
-
       {!anyRanked ? (
         <div className={CARD}>
           <p className="text-sm">
@@ -73,6 +63,26 @@ export default async function VendorsPage() {
               </div>
               <p className={`mb-3 max-w-2xl text-xs leading-5 ${MUTED}`}>{c.category.description}</p>
 
+              {/* Per-category methodology — weights are bespoke per category, so the
+                  note must never be presented as one global formula. */}
+              {c.methodologyNote && (
+                <details className="mb-3 text-sm">
+                  <summary className="cursor-pointer text-[11px] font-medium underline-offset-2 hover:underline">
+                    How this category&apos;s ranking is computed
+                  </summary>
+                  <p className={`mt-2 max-w-3xl text-xs leading-5 ${MUTED}`}>{c.methodologyNote}</p>
+                </details>
+              )}
+
+              {/* RANK-FIX — inside the noise band the 1-N order is not statistically
+                  separable; say so rather than implying false precision. */}
+              {c.lowDiscrimination && c.ranked.length > 1 && (
+                <p className="mb-3 rounded-md border border-amber-500/30 bg-amber-500/5 px-3 py-2 text-xs text-amber-900 dark:text-amber-200">
+                  <strong>Early / thin evidence — limited discrimination.</strong> These composites sit within the
+                  noise band; treat the order as tiers, not a precise 1–N ranking.
+                </p>
+              )}
+
               {c.ranked.length === 0 ? (
                 <p className={`text-sm ${MUTED}`}>No vendor has enough verified pillar evidence to rank here yet.</p>
               ) : (
@@ -88,8 +98,8 @@ export default async function VendorsPage() {
                         </span>
                         <span className="flex shrink-0 items-baseline gap-3">
                           <span className="font-mono text-sm tabular-nums">
-                            {(v.composite ?? 0).toFixed(0)}
-                            <span className={`ml-1 text-[10px] ${MUTED}`}>composite</span>
+                            {v.assessmentComposite == null ? "—" : v.assessmentComposite.toFixed(2)}
+                            <span className={`ml-1 text-[10px] ${MUTED}`}>/5 composite</span>
                           </span>
                           <span className={`font-mono text-[11px] tabular-nums ${MUTED}`}>{Math.round(v.coverage * 100)}% covered</span>
                           <span className={`font-mono text-[11px] tabular-nums ${MUTED}`}>{v.compositeConfidence}% conf</span>

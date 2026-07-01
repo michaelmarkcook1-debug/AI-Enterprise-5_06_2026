@@ -18,6 +18,7 @@ import { Confidence, Panel, SeedDataBadge } from "@/components/intelligence-ui";
 import { listInvestmentProviderScores } from "@/lib/investing/intelligence";
 import { enrichInvestmentProviders } from "@/lib/investing/live-data";
 import { WarningStrip, label } from "../investing-ui";
+import { adminPageGuard } from "@/components/admin/AdminPageGuard";
 
 export const dynamic = "force-dynamic";
 
@@ -47,6 +48,9 @@ function pctClass(pct: number | null): string {
 }
 
 export default async function PublicAiStocksPage() {
+  const locked = await adminPageGuard();
+  if (locked) return locked;
+
   const rows = listInvestmentProviderScores()
     .filter((row) =>
       row.provider.investabilityStatus === "public_direct"

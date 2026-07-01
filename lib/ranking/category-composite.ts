@@ -12,7 +12,7 @@ import {
 } from "../intelligence/repository";
 import { isLiveData } from "../intelligence/provenance";
 import type { MarketShareEstimate, VendorPillarScore } from "../intelligence/types";
-import { scoreVendorComposite, evidenceCompletenessBand } from "./composite-engine";
+import { scoreVendorComposite, evidenceCompletenessBand, MANDATORY_PILLARS } from "./composite-engine";
 import type { CategoryComposite, CategoryRankedVendor } from "./composite-types";
 import { getVendorScorecardsBatch, type VendorScorecard } from "../assessment/domain-scores";
 import type { DomainScore } from "../assessment/domain-rubric";
@@ -94,12 +94,23 @@ async function computeCategoryComposites(): Promise<CategoryComposite[]> {
     // eligibility and is what we display — so you can't re-weight your way out of
     // thin coverage, and a vendor never appears ranked here but held in the re-rank.
     const domainCoverage = wc?.rawCoverage ?? 0;
-    const ranked = !!wc && domainScored > 0 && domainCoverage >= ASSESSMENT_COVERAGE_FLOOR;
+    // MANDATORY pillar: at least one domain under each MANDATORY_PILLARS pillar
+    // (enterprise_control) must be evidenced for a vendor to hold a public rank —
+    // coverage alone can be met while the pillar enterprises care most about is
+    // dark. Framework rule, silently lost in the rank-fix unification; restored
+    // per the 2026-07 audit.
+    const mandatoryPillarsScored = MANDATORY_PILLARS.every(
+      (p) => eff?.some((d) => d.pillar === p && d.state === "scored") ?? false,
+    );
+    const ranked =
+      !!wc && domainScored > 0 && domainCoverage >= ASSESSMENT_COVERAGE_FLOOR && mandatoryPillarsScored;
     const excludedReason = ranked
       ? undefined
       : domainScored === 0
         ? `No reviewed evidence across the ${domainTotal} assessment domains yet`
-        : `Only ${domainScored}/${domainTotal} domains evidenced (need ≥${Math.round(ASSESSMENT_COVERAGE_FLOOR * domainTotal)})`;
+        : !mandatoryPillarsScored
+          ? `Enterprise Control has no reviewed evidence — mandatory pillar for a public rank`
+          : `Only ${domainScored}/${domainTotal} domains evidenced (need ≥${Math.round(ASSESSMENT_COVERAGE_FLOOR * domainTotal)})`;
     return {
       ...v,
       state: ranked ? "ranked" : "incomplete",

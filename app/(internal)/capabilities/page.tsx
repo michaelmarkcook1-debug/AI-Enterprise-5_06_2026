@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { adminPageGuard } from "@/components/admin/AdminPageGuard";
 import { PageFrame } from "@/components/app-shell";
 import { EvidenceBadge, Panel, ScoreBar } from "@/components/intelligence-ui";
 import { OwnershipLegend, VendorNameWithOwnership } from "@/components/ownership-indicator";
@@ -17,6 +18,8 @@ import type { VendorCapability } from "@/lib/intelligence/types";
 export const dynamic = "force-dynamic";
 
 export default async function CapabilitiesPage() {
+  const locked = await adminPageGuard();
+  if (locked) return locked;
   const [capabilities, vendorCapabilities, vendors, connectors, provenance] = await Promise.all([
     listCapabilities(),
     listVendorCapabilities(),

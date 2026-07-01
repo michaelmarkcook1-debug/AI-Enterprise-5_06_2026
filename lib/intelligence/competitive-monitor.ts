@@ -155,8 +155,10 @@ const ANALYSIS_SCHEMA = {
 
 /* ─── Pricing constants ─────────────────────────────────────────── */
 
-const HAIKU_PRICE_IN   = 0.80 / 1_000_000;
-const HAIKU_PRICE_OUT  = 4.00 / 1_000_000;
+// Haiku 4.5 published pricing — $1/$5 per MTok (was stale $0.80/$4.00, which
+// under-counted the pipeline's biggest tracked spender; 2026-07 audit).
+const HAIKU_PRICE_IN   = 1.00 / 1_000_000;
+const HAIKU_PRICE_OUT  = 5.00 / 1_000_000;
 const SONNET_PRICE_IN  = 3.00 / 1_000_000;
 const SONNET_PRICE_OUT = 15.00 / 1_000_000;
 const OPUS_PRICE_IN    = 5.00 / 1_000_000;

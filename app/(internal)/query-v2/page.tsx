@@ -8,6 +8,7 @@ import { getBreakingNews } from "@/lib/intelligence/repository";
 import QueryV2Client from "./QueryV2Client";
 import AnalystInsight from "@/components/analyst-insight";
 import { queryInsight } from "@/lib/insights/tab-insights";
+import { adminPageGuard } from "@/components/admin/AdminPageGuard";
 
 export const metadata: Metadata = {
   title: "Query V2 — AI Enterprise",
@@ -17,6 +18,8 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 export default async function QueryV2Page() {
+  const locked = await adminPageGuard();
+  if (locked) return locked;
   // Single source of truth: the live database spine. Numbers are derived from
   // live ingestion (scores, momentum, pillars, market share, ranking snapshots).
   const entities = await getEntities();
