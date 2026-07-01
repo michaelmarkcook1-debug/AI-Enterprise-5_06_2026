@@ -958,7 +958,7 @@ export default async function VendorDeepDivePage({
                 </>
               ) : (
                 <p className="text-sm leading-6 text-[#54647a] dark:text-[#a7bacd]">
-                  {entity.name} is tracked as a{" "}
+                  {entity.name} is tracked under the{" "}
                   <strong className="text-[#6b4fd0] dark:text-[#b8a6ff]">{layerRank.layerLabel} lens</strong> — a
                   cross-cutting axis (capital / geography / policy), not a vendor product tier. It appears in the
                   dependency graph and as a lens, and is deliberately <strong>not ranked among vendors</strong>.
