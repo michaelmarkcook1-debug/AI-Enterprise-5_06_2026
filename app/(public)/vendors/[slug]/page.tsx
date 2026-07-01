@@ -13,7 +13,7 @@ import { absoluteUrl } from "@/lib/site";
 
 import { ENTITIES, roleLeadership, type Entity, type Role } from "@/lib/intelligence/entities";
 import { listNewsItems } from "@/lib/intelligence/repository";
-import { HARDCODED_SURFACES_WIRED, INTERACTIVE_ASSESSMENT_ENABLED, INTERROGATE_ENABLED } from "@/lib/availability";
+import { HARDCODED_SURFACES_WIRED, INTERACTIVE_ASSESSMENT_ENABLED, INTERROGATE_ENABLED, PREP_KIT_ENABLED } from "@/lib/availability";
 import { getMember } from "@/lib/member/auth";
 import DataUnavailable from "@/components/DataUnavailable";
 import { getPrisma, hasDatabase } from "@/lib/prisma";
@@ -35,6 +35,7 @@ import { getVendorScorecard, getModelQualityBreakdown } from "@/lib/assessment/d
 import { MODEL_QUALITY_CATEGORIES } from "@/lib/system/model-quality-blend";
 import DomainScorecard from "@/components/assessment/DomainScorecard";
 import WeightedScorecard from "@/components/assessment/WeightedScorecard";
+import PrepKitPanel from "@/components/assessment/PrepKitPanel";
 
 export const dynamic = "force-dynamic";
 
@@ -523,7 +524,7 @@ export default async function VendorDeepDivePage({
   const hasEvidence = !!scorecard?.hasAnyEvidence;
   // Wave-3 Interrogate is the member-gated premium action; resolve identity only
   // when the flag is on so anonymous visitors keep the free Wave-2 experience.
-  const interrogateMember = INTERROGATE_ENABLED ? await getMember().catch(() => null) : null;
+  const interrogateMember = (INTERROGATE_ENABLED || PREP_KIT_ENABLED) ? await getMember().catch(() => null) : null;
   // Model quality (Arena Elo) — a real, cited capability signal shown on the
   // profile so a CIO can see it. It is WEIGHTED in model-category rankings (e.g.
   // frontier model APIs); here it is context. null when the vendor has no
@@ -653,6 +654,12 @@ export default async function VendorDeepDivePage({
                 )}
                 {modelQualityPanel && <div className="mt-4">{modelQualityPanel}</div>}
               </Panel>
+              {/* Wave 4 — vendor-meeting prep kit (member-gated premium action) */}
+              <PrepKitPanel
+                config={{ enabled: PREP_KIT_ENABLED, signedIn: !!interrogateMember }}
+                vendorId={entity.id}
+                vendorName={entity.name}
+              />
             </section>
           ) : (
             <section className="mb-6">
