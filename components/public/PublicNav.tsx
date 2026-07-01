@@ -14,6 +14,7 @@ import { usePortalTheme } from "@/lib/use-theme";
 import BrandLogo from "@/components/BrandLogo";
 
 const NAV: { href: string; label: string }[] = [
+  { href: "/use-cases", label: "Start here" },
   { href: "/vendors", label: "Rankings" },
   { href: "/models", label: "Models" },
   { href: "/dependencies", label: "Dependencies" },

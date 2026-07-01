@@ -1,0 +1,11 @@
+# C6 use-case Impact library — CURATION TEMPLATE. Fill with REAL, CITED figures only.
+# Rules: valueBand/upliftBand must come from a named source (no invented point numbers).
+#   useCaseId must exist in lib/use-cases.ts; industryTag must be a real IndustryTag or * (horizontal).
+#   valueBand   ∈ lt_250k | 250k_1m | 1m_5m | 5m_25m | gt_25m
+#   upliftBand  ∈ lt_10% | 10_25% | 25_50% | gt_50%
+#   evidenceGrade ∈ E2 (public claim) | E3 (vendor/case study) | E4 (multi-source) | E5 (independent/audited)
+#   No source for a cell? Leave the whole row out — it stays "impact not yet evidenced". Do NOT fabricate.
+# The two rows below are STRUCTURE EXAMPLES ONLY (placeholder sources) — delete them; they are NOT real data.
+useCaseId,industryTag,valueBand,upliftBand,sourceName,sourceUrl,evidenceGrade,confidence,asOf,note
+EXAMPLE_DELETE_ME,financial_services,1m_5m,25_50%,<<NAMED SOURCE REQUIRED>>,<<URL REQUIRED>>,E3,50,2026-01-01,EXAMPLE ROW — replace with a real cited estimate or delete
+EXAMPLE_DELETE_ME,*,250k_1m,10_25%,<<NAMED SOURCE REQUIRED>>,<<URL REQUIRED>>,E2,40,2026-01-01,EXAMPLE ROW — horizontal estimate; replace or delete
