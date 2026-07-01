@@ -90,6 +90,16 @@ describe("applyContextLens", () => {
     expect(out.model_quality).toBeUndefined();
     expect(activeDomains(out)).toEqual(activeDomains(DEFAULT_DOMAIN_WEIGHTS));
   });
+
+  it("APPLIES a model_quality delta when the profile activates it (frontier categories)", () => {
+    // Regression for the review finding: frontier profiles include model_quality
+    // in the active set, so the lens must be able to re-weight it.
+    const frontierBase = { ...DEFAULT_DOMAIN_WEIGHTS, model_quality: 0.08 } as DomainWeights;
+    expect(activeDomains(frontierBase)).toContain("model_quality");
+    const before = normalizeWeights(frontierBase).model_quality;
+    const after = applyContextLens(frontierBase, [adj("model_quality", 0.1, true)]).model_quality;
+    expect(after).toBeGreaterThan(before);
+  });
 });
 
 describe("buildSessionLens — the firewall", () => {
@@ -275,5 +285,17 @@ describe("parseContextLens — anti-fabrication guard", () => {
   it("empty adjustments ⇒ insufficientContext true (honest under-claim)", () => {
     const lens = parseContextLens({ adjustments: [], overallNote: "", insufficientContext: false }, active, snapshot);
     expect(lens.insufficientContext).toBe(true);
+  });
+
+  it("KEEPS a model_quality adjustment when model_quality is in the active set", () => {
+    // Regression: the tool enum now allows model_quality; parse must keep it when active.
+    const frontierActive = [...active, "model_quality" as DomainId];
+    const raw = {
+      adjustments: [{ domain: "model_quality", weightDelta: 0.05, decisive: true, rationale: "frontier", citations: [] }],
+      overallNote: "n",
+      insufficientContext: false,
+    };
+    const lens = parseContextLens(raw, frontierActive, snapshot);
+    expect(lens.adjustments.find((a) => a.domain === ("model_quality" as DomainId))).toBeDefined();
   });
 });

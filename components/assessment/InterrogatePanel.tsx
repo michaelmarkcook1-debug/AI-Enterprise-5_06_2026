@@ -87,6 +87,7 @@ export default function InterrogatePanel({
   const [error, setError] = useState("");
   const [lens, setLens] = useState<SessionLens | null>(null);
   const [stubbed, setStubbed] = useState(false);
+  const [truncated, setTruncated] = useState(false);
 
   if (!config.enabled) return null;
 
@@ -136,6 +137,7 @@ export default function InterrogatePanel({
       const sl = json.sessionLens as SessionLens;
       setLens(sl);
       setStubbed(json.source === "stub");
+      setTruncated(Boolean(json.truncated));
       onApplyLens(sl.adjustedSliders);
       setState("idle");
       setOpen(false);
@@ -284,6 +286,12 @@ export default function InterrogatePanel({
                 </div>
               )}
 
+              {truncated && (
+                <p className="mt-2 text-[10px] text-amber-700 dark:text-amber-400">
+                  Large shortlist — this lens was computed over the first {60} vendors; narrow the category for full
+                  per-vendor coverage.
+                </p>
+              )}
               <p className="mt-2 text-[10px] italic text-[#7a8aa0]">
                 A draft lens over the cited evidence — not a verdict. The 0–5 scores are unchanged; only their weight
                 is. Refine your context and re-run to pressure-test it.

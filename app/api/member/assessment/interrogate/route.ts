@@ -28,7 +28,10 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 30;
 
 // Cap the category fan-out so a crafted request can't force an unbounded batch.
-const MAX_CATEGORY_VENDORS = 40;
+// Set above the whole vendor universe (~47) so a real category is never
+// truncated — if it ever is, we surface `truncated` in the response rather than
+// silently computing the lens over a partial set.
+const MAX_CATEGORY_VENDORS = 60;
 
 type Scope =
   | { kind: "vendor"; vendorId: string }
@@ -80,6 +83,7 @@ export async function POST(request: Request): Promise<Response> {
   let vendors: SessionLensVendorInput[];
   let scopeLabel: string;
   let scopeRef: { kind: "vendor" | "category"; id: string };
+  let truncated = false; // set if a category exceeds MAX_CATEGORY_VENDORS
 
   if (scope?.kind === "vendor" && typeof scope.vendorId === "string") {
     baseWeights = DEFAULT_DOMAIN_WEIGHTS;
@@ -99,7 +103,9 @@ export async function POST(request: Request): Promise<Response> {
     if (!cat) return NextResponse.json({ error: "unknown_category" }, { status: 422 });
     baseWeights = resolveDomainWeights(scope.categoryId);
     const activatesModelQuality = (baseWeights.model_quality ?? 0) > 0;
-    const ids = scope.vendorIds.filter((v): v is string => typeof v === "string").slice(0, MAX_CATEGORY_VENDORS);
+    const allIds = scope.vendorIds.filter((v): v is string => typeof v === "string");
+    const ids = allIds.slice(0, MAX_CATEGORY_VENDORS);
+    truncated = ids.length < allIds.length;
     const cards = await getVendorScorecardsBatch(ids).catch(() => new Map<string, VendorScorecard>());
     vendors = ids
       .map((id) => ({ vendorId: id, domains: effectiveDomains(cards.get(id), activatesModelQuality) }))
@@ -140,5 +146,8 @@ export async function POST(request: Request): Promise<Response> {
     sessionLens,
     source: lens.source, // "anthropic" | "stub"
     model: lens.usage.model,
+    // Honesty: if a category ever exceeds the cap, the lens was computed over the
+    // first MAX_CATEGORY_VENDORS only — surfaced, never silent.
+    truncated,
   });
 }

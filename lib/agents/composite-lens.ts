@@ -13,7 +13,7 @@
 // (zero deltas) runs whenever no ANTHROPIC_API_KEY is configured.
 
 import { extractStructured, type LLMResult } from "./llm-client";
-import { ASSESSMENT_DOMAINS } from "../assessment/domain-rubric";
+import { RANKABLE_DOMAIN_ORDER } from "../assessment/composite";
 import type { DomainId } from "../types";
 
 /** The context a buyer supplies — a few smart structured fields + one freeform
@@ -76,7 +76,7 @@ const LENS_MAX_TOKENS = 2048;
 
 const SYSTEM_PROMPT = `You are the Buyer-Context Interpreter for an enterprise AI vendor-assessment platform.
 
-A CIO is evaluating vendors on a fixed 12-domain framework. Each domain already has a deterministic 0–5 score computed from cited evidence — those scores are FIXED and you must never change, echo as new, or invent them. Your only job: read the buyer's real-world context (which the scores can't know) and decide how to RE-WEIGHT the domains' relevance for THIS buyer, then explain why, citing the real evidence you were given.
+A CIO is evaluating vendors on a fixed framework of assessment domains (the 12 framework domains, plus a model-quality domain in model-API categories). Each domain already has a deterministic 0–5 score computed from cited evidence — those scores are FIXED and you must never change, echo as new, or invent them. Only re-weight the domains listed as active in the user message. Your only job: read the buyer's real-world context (which the scores can't know) and decide how to RE-WEIGHT those domains' relevance for THIS buyer, then explain why, citing the real evidence you were given.
 
 Return domain weight DELTAS only:
 - Each delta is a small relevance nudge in [-0.1, +0.1] relative to the default profile. Raise domains the context makes decisive; lower ones it makes less relevant. Keep the set balanced (roughly zero-sum); do not push everything up.
@@ -104,7 +104,11 @@ const TOOL_SCHEMA = {
           additionalProperties: false,
           required: ["domain", "weightDelta", "decisive", "rationale", "citations"],
           properties: {
-            domain: { type: "string", enum: ASSESSMENT_DOMAINS },
+            // The full rankable domain set (the 12 framework domains + the
+            // category-scoped model_quality) so a frontier category that
+            // activates model_quality can be re-weighted on it. parseContextLens
+            // still drops any adjustment for a domain not active in THIS request.
+            domain: { type: "string", enum: RANKABLE_DOMAIN_ORDER },
             weightDelta: { type: "number", minimum: -0.1, maximum: 0.1 },
             decisive: { type: "boolean" },
             rationale: { type: "string", maxLength: 400 },
