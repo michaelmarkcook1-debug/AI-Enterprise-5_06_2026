@@ -28,7 +28,9 @@ const PROBE_QUERIES: Record<string, unknown> = {
   bea: { datasetName: "NIPA", tableName: "T10101", frequency: "Q", year: "2023" },
   // NB: no `page[size]` — URLSearchParams encodes the brackets (page%5Bsize%5D),
   // which Treasury's router 404s on. A bracket-free query returns 200 + rows.
-  fiscalData: { endpoint: "/v1/accounting/od/debt_to_penny", params: { sort: "-record_date" } },
+  // Treasury deprecated the v1 path for this dataset (v1 → HTTP 404); v2 is the
+  // current endpoint and returns rows (verified against the live API 2026-07-01).
+  fiscalData: { endpoint: "/v2/accounting/od/debt_to_penny", params: { sort: "-record_date" } },
   // Energy
   eia: { route: "electricity/retail-sales/data", params: { frequency: "monthly", "data[0]": "price", length: 1 } },
   // Markets
