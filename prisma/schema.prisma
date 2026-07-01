@@ -599,6 +599,22 @@ model VendorRankingSnapshot {
   @@map("vendor_ranking_snapshots")
 }
 
+// C15 — per-sector materialised ranking cache. ONE row per market category,
+// written once per refresh cycle (lib/ranking/sector-cache.ts, from the
+// daily-refresh batch) and served to every subscriber covering that sector so
+// each sector is computed once, not per page load. `payload` is the computed
+// CategoryComposite; `capturedAt` is the HONEST as-of (never served as "live");
+// `isLive` mirrors isLiveData() at materialise time. Read-through cache only —
+// NEVER a source of scores; a live compute is always the fallback.
+model SectorRankingCache {
+  categoryId String   @id @map("category_id")
+  payload    Json     @db.JsonB
+  isLive     Boolean  @map("is_live")
+  capturedAt DateTime @default(now()) @map("captured_at")
+
+  @@map("sector_ranking_cache")
+}
+
 model IntelligenceNewsItem {
   id                   String   @id
   title                String

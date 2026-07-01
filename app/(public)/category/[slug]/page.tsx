@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { absoluteUrl } from "@/lib/site";
 import { listMarketCategories } from "@/lib/intelligence/repository";
-import { getCategoryComposite } from "@/lib/ranking/category-composite";
+import { getCategoryCompositeWithMeta } from "@/lib/ranking/category-composite";
 import DataUnavailable from "@/components/DataUnavailable";
 import PillarContributionTable from "@/components/ranking/PillarContributionTable";
 import TrackButton from "@/components/member/TrackButton";
@@ -46,7 +46,7 @@ export default async function CategoryPage({ params }: { params: Promise<Params>
   const { slug } = await params;
   // Within-category multi-pillar composite. Computed only on verified evidence;
   // otherwise the honest "insufficient evidence" state shows — never seed.
-  const composite = await getCategoryComposite(slug);
+  const { composite, asOf } = await getCategoryCompositeWithMeta(slug);
   if (!composite) notFound();
   const { category, ranked, incomplete, isLive, methodologyNote, lowDiscrimination, resolvedDomainWeights } =
     composite;
@@ -99,6 +99,15 @@ export default async function CategoryPage({ params }: { params: Promise<Params>
           <TrackButton item={`category:${category.id}`} label={category.name} />
         </div>
         <p className={`mt-2 max-w-2xl text-sm ${MUTED}`}>{category.description}</p>
+        {/* C15 — honest as-of: the sector ranking is materialised once per nightly
+            batch and served cached; never presented as "live" when it isn't. */}
+        {isLive && (
+          <p className={`mt-2 text-[11px] ${MUTED}`}>
+            {asOf
+              ? `Sector rankings as of ${asOf.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })} — refreshed nightly, computed once per sector`
+              : "Sector rankings computed live"}
+          </p>
+        )}
       </header>
 
       {!isLive ? (

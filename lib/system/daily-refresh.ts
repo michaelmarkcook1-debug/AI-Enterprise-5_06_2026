@@ -45,6 +45,7 @@ import {
   captureRankingSnapshots,
   backfillRankingSnapshots,
 } from "../intelligence/ranking-snapshots";
+import { materializeCategoryCache } from "../ranking/category-composite";
 import { runCompetitiveIntelMonitor } from "../intelligence/competitive-monitor";
 import { COMPETITIVE_CORE } from "../intelligence/competitive-targets";
 import { fetchFinancialsForProviders } from "../investing/financials-live";
@@ -443,6 +444,17 @@ export async function runDailyRefresh(
     }
     const capture = await captureRankingSnapshots(now);
     return { backfill, captured: capture.captured, snapshotDate: capture.snapshotDate };
+  });
+
+  // ── 6a. Sector ranking cache (C15) ─────────────────────────
+  //     Materialise the per-sector composite ONCE per cycle (after fresh scores +
+  //     snapshots) so page loads serve a cached copy with an honest as-of instead
+  //     of recomputing all 13 categories on every request. Read-through cache —
+  //     never a source of scores; non-fatal if it fails.
+  await trackedStep("sector_cache", async () => {
+    if (!dbConfigured) return { skipped: "no_database" };
+    const r = await materializeCategoryCache();
+    return { sectorsCached: r.written };
   });
 
   // ── 6b. Dependency / encroachment graph edges ──────────────

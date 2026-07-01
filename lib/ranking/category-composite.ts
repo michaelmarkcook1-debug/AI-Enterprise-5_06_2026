@@ -35,10 +35,14 @@ import {
   ASSESSMENT_NOISE_BAND,
   type RankRow,
 } from "./credibility";
+import { readSectorCache, materializeSectorCache, type CachedComposites } from "./sector-cache";
 
-/** All categories with their within-category composite rankings. Guarded:
- *  returns [] on read failure rather than throwing (mirrors category-rankings). */
-export async function getCategoryComposites(): Promise<CategoryComposite[]> {
+/** LIVE compute of all categories' within-category composite rankings. Guarded:
+ *  returns [] on read failure rather than throwing. INTERNAL — page reads go
+ *  through the cache-first getCategoryComposites() below; the daily-refresh batch
+ *  calls this (via materializeCategoryCache) to fill the per-sector cache once
+ *  per cycle, so it is never recomputed on every page load. */
+async function computeCategoryComposites(): Promise<CategoryComposite[]> {
   const [live, categories, estimates, vendors, pillarScores] = await Promise.all([
     isLiveData(),
     listMarketCategories().catch(() => []),
@@ -193,10 +197,38 @@ export async function getCategoryComposites(): Promise<CategoryComposite[]> {
   });
 }
 
-/** One category's composite (for /category/[slug]). */
+/** Cache-first: serve the per-sector materialised cache when fresh, else compute
+ *  live. ALL page reads go through here, so each sector is computed once per
+ *  refresh cycle (not per page load) and served to every subscriber. */
+export async function getCategoryComposites(): Promise<CategoryComposite[]> {
+  return (await readSectorCache(computeCategoryComposites)).composites;
+}
+
+/** Same, but exposes the honest as-of + whether it came from cache — for
+ *  surfaces that show a "sector rankings as of X" freshness label. */
+export async function getCategoryCompositesWithMeta(): Promise<CachedComposites> {
+  return readSectorCache(computeCategoryComposites);
+}
+
+/** Materialise the per-sector cache from a fresh live compute. Called ONCE per
+ *  refresh cycle by the daily-refresh batch — never on a page request. */
+export async function materializeCategoryCache(): Promise<{ written: number }> {
+  return materializeSectorCache(computeCategoryComposites);
+}
+
+/** One category's composite (for /category/[slug]). Cache-first via getCategoryComposites. */
 export async function getCategoryComposite(slug: string): Promise<CategoryComposite | null> {
   const all = await getCategoryComposites();
   return all.find((c) => c.category.id === slug) ?? null;
+}
+
+/** One category's composite + the honest as-of (drives the /category/[slug]
+ *  "sector rankings as of X" freshness label). */
+export async function getCategoryCompositeWithMeta(
+  slug: string,
+): Promise<{ composite: CategoryComposite | null; asOf: Date | null; source: "cache" | "live" }> {
+  const { composites, asOf, source } = await readSectorCache(computeCategoryComposites);
+  return { composite: composites.find((c) => c.category.id === slug) ?? null, asOf, source };
 }
 
 /** A vendor's standing across every category it competes in — for the profile.
