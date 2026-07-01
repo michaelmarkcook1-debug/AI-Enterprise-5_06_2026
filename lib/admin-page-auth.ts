@@ -1,37 +1,61 @@
-// Admin PAGE auth gate (cookie-based, server-only).
-// ──────────────────────────────────────────────────
-// The /api/admin/* ROUTES are gated by isAdminRequest (x-admin-token header).
-// Browser page navigations can't send that header, so admin PAGES were
-// previously ungated. This closes that gap: app/admin/layout.tsx requires a
-// signed-in cookie (set by /api/admin/unlock after the operator enters the
-// ADMIN_API_TOKEN). Safe default: with no token configured, admin is LOCKED.
+// Admin session auth — cookie gate for /admin/* pages and /api/admin/* routes.
+// Session token is HMAC-SHA256 signed with ADMIN_SESSION_SECRET (never CRON_SECRET).
+// Rotating ADMIN_SESSION_SECRET instantly invalidates all existing sessions.
 
 import { cookies } from "next/headers";
-import { createHash } from "node:crypto";
-import { safeEqual } from "./safe-equal";
+import { createHmac, timingSafeEqual } from "node:crypto";
 
 export const ADMIN_COOKIE = "ae_admin";
+const SESSION_LABEL = "ae:admin:session:v2";
 
-/** One-way derived cookie value — the raw ADMIN_API_TOKEN is never stored in
- * the cookie, so a cookie leak (logs, XSS on a sibling app) doesn't expose the
- * secret. Stateless (no session store) so it works across serverless instances. */
-export function adminCookieValue(token: string): string {
-  return createHash("sha256").update(`ae-admin:v1:${token}`).digest("hex");
+function getSessionSecret(): string {
+  return process.env.ADMIN_SESSION_SECRET ?? "";
 }
 
-/** Resolves the effective admin token — ADMIN_API_TOKEN, falling back to
- *  CRON_SECRET so no separate key needs to be configured or rotated. */
+/** The admin unlock password — ADMIN_API_TOKEN only; no CRON_SECRET fallback. */
 export function getAdminToken(): string {
-  return process.env.ADMIN_API_TOKEN || process.env.CRON_SECRET || "";
+  return process.env.ADMIN_API_TOKEN ?? "";
 }
 
-/** True when the current request may view admin pages. */
+/** HMAC-SHA256 session token derived from ADMIN_SESSION_SECRET.
+ *  Stateless — validity is proven by re-computing the HMAC on each request.
+ *  Returns "" when ADMIN_SESSION_SECRET is not configured. */
+export function adminSessionToken(): string {
+  const secret = getSessionSecret();
+  if (!secret) return "";
+  return createHmac("sha256", secret).update(SESSION_LABEL).digest("hex");
+}
+
+/** Timing-safe comparison of two hex strings. */
+function hexEqual(a: string, b: string): boolean {
+  if (!a || !b) return false;
+  try {
+    const ab = Buffer.from(a, "hex");
+    const bb = Buffer.from(b, "hex");
+    if (ab.length === 0 || ab.length !== bb.length) return false;
+    return timingSafeEqual(ab, bb);
+  } catch {
+    return false;
+  }
+}
+
+/** True when the current request carries a valid admin session cookie (Server Component). */
 export async function isAdminPageAuthed(): Promise<boolean> {
-  // Dev convenience — mirrors isAdminRequest. Never set in production.
   if (process.env.ADMIN_API_OPEN === "1") return true;
-  const expected = getAdminToken();
-  if (!expected) return false; // no secret configured → locked (safe default)
+  const expected = adminSessionToken();
+  if (!expected) return false;
   const jar = await cookies();
   const got = jar.get(ADMIN_COOKIE)?.value ?? "";
-  return safeEqual(got, adminCookieValue(expected));
+  return hexEqual(got, expected);
+}
+
+/** True when the Request carries a valid admin session cookie (Route Handler). */
+export function isAdminSessionRequest(request: Request): boolean {
+  if (process.env.ADMIN_API_OPEN === "1") return true;
+  const expected = adminSessionToken();
+  if (!expected) return false;
+  const cookieHeader = request.headers.get("cookie") ?? "";
+  const match = cookieHeader.match(new RegExp(`(?:^|;\\s*)${ADMIN_COOKIE}=([^;]+)`));
+  const got = match?.[1] ?? "";
+  return hexEqual(got, expected);
 }

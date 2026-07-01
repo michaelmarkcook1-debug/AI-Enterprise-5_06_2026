@@ -1,10 +1,10 @@
-// Cron-route auth.
+// Cron-route auth — header-only, never the human admin session cookie.
 // Vercel automatically attaches `Authorization: Bearer <CRON_SECRET>` to
-// scheduled invocations. We accept that OR the admin session cookie so
-// the admin panel can trigger cron endpoints without a manual token.
+// scheduled invocations. x-admin-token is accepted for CLI/manual calls.
+// The human ae_admin cookie is intentionally NOT accepted here — use
+// /api/admin/trigger-refresh (session-gated) to fire the pipeline from a browser.
 
 import { safeEqual } from "@/lib/safe-equal";
-import { adminCookieValue, ADMIN_COOKIE, getAdminToken } from "@/lib/admin-page-auth";
 
 export function isCronOrAdminRequest(request: Request): boolean {
   // 1. Vercel Cron — `Authorization: Bearer <CRON_SECRET>`
@@ -15,16 +15,11 @@ export function isCronOrAdminRequest(request: Request): boolean {
   }
   // 2. Local dev convenience
   if (process.env.ADMIN_API_OPEN === "1") return true;
-  // 3. x-admin-token header (automation / CLI)
-  const expected = getAdminToken();
-  if (!expected) return false;
+  // 3. x-admin-token header (CLI / service-to-service)
+  const adminToken = process.env.ADMIN_API_TOKEN ?? "";
+  if (!adminToken) return false;
   const headerToken = request.headers.get("x-admin-token") ?? "";
-  if (safeEqual(headerToken, expected)) return true;
-  // 4. ae_admin session cookie — browser sessions from /admin/* work without a manual token
-  const cookieHeader = request.headers.get("cookie") ?? "";
-  const match = cookieHeader.match(new RegExp(`(?:^|;\\s*)${ADMIN_COOKIE}=([^;]+)`));
-  const cookieVal = match?.[1] ?? "";
-  return safeEqual(cookieVal, adminCookieValue(expected));
+  return safeEqual(headerToken, adminToken);
 }
 
 export function cronUnauthorized() {
