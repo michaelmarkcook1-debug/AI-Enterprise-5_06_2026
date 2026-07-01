@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { absoluteUrl } from "@/lib/site";
 import { listPublishedArticles } from "@/lib/articles/repository";
+import FrameworkCrosswalk from "@/components/insights/FrameworkCrosswalk";
 
 export const revalidate = 3600;
 
@@ -102,6 +103,9 @@ export default async function InsightsPage() {
           &ldquo;mapping insufficient&rdquo; rather than a guessed number.
         </p>
       </section>
+
+      {/* C2 — framework-mapping / credibility crosswalk (NIST AI RMF · ISO/IEC 42001 · EU AI Act) */}
+      <FrameworkCrosswalk />
 
       <p className={`text-sm ${MUTED}`}>
         Coming soon: explainers on reading the dependency graph, why we rank within categories (never
