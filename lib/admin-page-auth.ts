@@ -2,11 +2,36 @@
 // Session token is HMAC-SHA256 signed with ADMIN_SESSION_SECRET (never CRON_SECRET).
 // Rotating ADMIN_SESSION_SECRET instantly invalidates all existing sessions.
 
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { createHmac, timingSafeEqual } from "node:crypto";
 
 export const ADMIN_COOKIE = "ae_admin";
 const SESSION_LABEL = "ae:admin:session:v2";
+
+// ── Passwordless admin via trusted-network IP allowlist ──────────────────────
+// So the operator never has to touch a token from their own network. ADMIN_ALLOWED_IPS
+// is a comma-separated list; a request from one of those IPs is admitted with NO token.
+// The IP is read from Vercel's platform-set x-real-ip / x-forwarded-for (a client can't
+// forge these — Vercel overwrites them at the edge), so this is a real gate, not the
+// spoofable auto-unlock we removed. The token/session remain as an off-network fallback,
+// so a changing IP can never lock the operator out permanently.
+function clientIp(get: (name: string) => string | null): string {
+  const real = get("x-real-ip");
+  if (real && real.trim()) return real.trim();
+  const xff = get("x-forwarded-for");
+  if (xff && xff.trim()) return xff.split(",")[0].trim();
+  return "";
+}
+
+/** True when `ip` is in the ADMIN_ALLOWED_IPS allowlist (empty allowlist ⇒ never). */
+export function isAllowedAdminIp(ip: string): boolean {
+  if (!ip) return false;
+  const allow = (process.env.ADMIN_ALLOWED_IPS ?? "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  return allow.length > 0 && allow.includes(ip);
+}
 
 function getSessionSecret(): string {
   return process.env.ADMIN_SESSION_SECRET ?? "";
@@ -42,6 +67,10 @@ function hexEqual(a: string, b: string): boolean {
 /** True when the current request carries a valid admin session cookie (Server Component). */
 export async function isAdminPageAuthed(): Promise<boolean> {
   if (process.env.ADMIN_API_OPEN === "1") return true;
+  // Passwordless: trusted network → in, no token.
+  const h = await headers();
+  if (isAllowedAdminIp(clientIp((n) => h.get(n)))) return true;
+  // Fallback: valid HMAC session cookie (off-network / break-glass token unlock).
   const expected = adminSessionToken();
   if (!expected) return false;
   const jar = await cookies();
@@ -52,6 +81,8 @@ export async function isAdminPageAuthed(): Promise<boolean> {
 /** True when the Request carries a valid admin session cookie (Route Handler). */
 export function isAdminSessionRequest(request: Request): boolean {
   if (process.env.ADMIN_API_OPEN === "1") return true;
+  // Passwordless: trusted network → in, no token.
+  if (isAllowedAdminIp(clientIp((n) => request.headers.get(n)))) return true;
   const expected = adminSessionToken();
   if (!expected) return false;
   const cookieHeader = request.headers.get("cookie") ?? "";
