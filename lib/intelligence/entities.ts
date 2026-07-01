@@ -17,6 +17,8 @@
 // from public reporting cited in the accompanying change notes.
 // ─────────────────────────────────────────────────────────────────────────
 
+import { STANDARD_LAYERS, LAYER_LABEL, LAYER_NOTE, roleToLayer, layersForRoles, type StandardLayer } from "./taxonomy";
+
 export type Role =
   | "Platform Vendor"
   | "Model Provider"
@@ -427,19 +429,30 @@ export function rolesFor(e: Entity): Role[] {
   return [e.primaryRole, ...e.secondaryRoles];
 }
 
-export const LAYER_DEFS: Array<{ title: string; role: Role; note: string; max: number }> = [
-  { title: "Platform Vendors", role: "Platform Vendor", note: "Distribution, cloud control and enterprise-governance depth.", max: 5 },
-  { title: "Model Providers", role: "Model Provider", note: "Quality, cadence, deployment paths and model economics.", max: 8 },
-  { title: "Application Vendors", role: "Application Vendor", note: "Workflow conversion, domain fit and business-user adoption.", max: 6 },
-  { title: "Infrastructure Players", role: "Infrastructure Player", note: "Hosting, scale, deployment and compute access.", max: 6 },
-  { title: "Hardware", role: "Hardware Provider", note: "Accelerators, networking, custom silicon and fabrication.", max: 5 },
-  { title: "Investors", role: "Investor", note: "Strategic capital, distribution rights and ecosystem influence.", max: 6 },
-  { title: "Sovereign / Regional AI", role: "Sovereign / Regional AI", note: "Jurisdiction, data residency and industrial-policy alternatives.", max: 6 },
-];
+// C13 — the rankable layers are now the STANDARD STACK (hardware → infra →
+// platform → model → application). Investors + Sovereign are cross-cutting LENSES
+// (a capital / geography axis, not a product tier — see taxonomy.ts) and are no
+// longer rankable layers; a pure investor drops out of the layer winners entirely.
+export const LAYER_DEFS: Array<{ layer: StandardLayer; title: string; note: string; max: number }> =
+  STANDARD_LAYERS.map((layer) => ({ layer, title: LAYER_LABEL[layer], note: LAYER_NOTE[layer], max: 8 }));
 
 /** Leadership score for an entity IN a specific role (AI-market scope). */
 export function roleLeadership(e: Entity, role: Role): number {
   return e.roleScores?.[role]?.leadership ?? e.leadershipScore;
+}
+
+/** An entity's leadership WITHIN a standard layer = the BEST role-score among the
+ *  entity's roles that map to that layer. This preserves the anti-inflation
+ *  property (a platform giant does NOT top Models on its 91 platform score) while
+ *  grouping by the standard stack — multi-membership shows a real per-layer
+ *  standing, never a single canonical score floated to the top of every layer.
+ *  Falls back to the canonical leadership only when no role maps to the layer. */
+export function layerLeadership(e: Entity, layer: StandardLayer): number {
+  let best = -Infinity;
+  for (const r of rolesFor(e)) {
+    if (roleToLayer(r) === layer) best = Math.max(best, roleLeadership(e, r));
+  }
+  return Number.isFinite(best) ? best : e.leadershipScore;
 }
 
 export const WINNING_BY_LAYER: Array<{ title: string; names: string[]; note: string }> =
@@ -447,10 +460,12 @@ export const WINNING_BY_LAYER: Array<{ title: string; names: string[]; note: str
     title: def.title,
     note: def.note,
     names: ENTITIES
-      .filter((e) => rolesFor(e).includes(def.role))
-      // Rank by role-specific leadership so a giant only "wins" a layer where it
-      // is genuinely strong (e.g. Microsoft does NOT top Models on its 91 composite).
-      .sort((a, b) => roleLeadership(b, def.role) - roleLeadership(a, def.role))
+      // Only entities that genuinely sit in this standard layer (a role maps to
+      // it). Pure investors / sovereigns / regulators have no layer → excluded.
+      .filter((e) => layersForRoles(rolesFor(e)).includes(def.layer))
+      // Rank by the entity's standing IN this layer (best mapping-role score), so
+      // a giant only "wins" a layer where it is genuinely strong.
+      .sort((a, b) => layerLeadership(b, def.layer) - layerLeadership(a, def.layer))
       .slice(0, def.max)
       .map((e) => e.name),
   }));

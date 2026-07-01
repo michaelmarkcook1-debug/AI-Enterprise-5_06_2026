@@ -23,7 +23,10 @@ import {
   roleLeadership,
   rankingLeadership,
   evidenceDepthBand,
+  LAYER_DEFS,
+  layerLeadership,
 } from "./entities";
+import { layersForRoles } from "./taxonomy";
 
 const KNOWN_ROLES: Role[] = [
   "Platform Vendor", "Model Provider", "Application Vendor", "Infrastructure Player",
@@ -220,26 +223,17 @@ async function getEntitiesFromDB(): Promise<Entity[]> {
 
 // ── Derived layer-winners (same logic as entities.ts WINNING_BY_LAYER, but
 //    computed over the live roster passed in). ──────────────────────────────
-const LAYER_DEFS: Array<{ title: string; role: Role; note: string; max: number }> = [
-  { title: "Platform Vendors", role: "Platform Vendor", note: "Distribution, cloud control and enterprise-governance depth.", max: 5 },
-  { title: "Model Providers", role: "Model Provider", note: "Quality, cadence, deployment paths and model economics.", max: 8 },
-  { title: "Application Vendors", role: "Application Vendor", note: "Workflow conversion, domain fit and business-user adoption.", max: 6 },
-  { title: "Infrastructure Players", role: "Infrastructure Player", note: "Hosting, scale, deployment and compute access.", max: 6 },
-  { title: "Hardware", role: "Hardware Provider", note: "Accelerators, networking, custom silicon and fabrication.", max: 5 },
-  { title: "Investors", role: "Investor", note: "Strategic capital, distribution rights and ecosystem influence.", max: 6 },
-  { title: "Sovereign / Regional AI", role: "Sovereign / Regional AI", note: "Jurisdiction, data residency and industrial-policy alternatives.", max: 6 },
-];
-
+// C13 — winners are derived over the imported STANDARD STACK LAYER_DEFS (hardware
+// → infra → platform → model → application). Investors + Sovereign are lenses, not
+// layers, so they no longer appear as winner sections; a pure investor has no
+// layer and is excluded. Same anti-inflation rule as entities.ts (layerLeadership).
 export function computeWinningByLayer(entities: Entity[]): Array<{ title: string; names: string[]; note: string }> {
   return LAYER_DEFS.map((def) => ({
     title: def.title,
     note: def.note,
     names: entities
-      .filter((e) => rolesFor(e).includes(def.role))
-      // Rank by the role-specific leadership score (falls back to the entity
-      // score when no role profile exists) so a multi-role giant only "wins"
-      // a layer where it is genuinely strong — same rule as entities.ts.
-      .sort((a, b) => roleLeadership(b, def.role) - roleLeadership(a, def.role))
+      .filter((e) => layersForRoles(rolesFor(e)).includes(def.layer))
+      .sort((a, b) => layerLeadership(b, def.layer) - layerLeadership(a, def.layer))
       .slice(0, def.max)
       .map((e) => e.name),
   }));

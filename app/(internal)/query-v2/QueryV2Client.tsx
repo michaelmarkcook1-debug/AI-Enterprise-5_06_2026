@@ -11,7 +11,6 @@ import {
   type RoleScore,
   rolesFor,
   roleLeadership,
-  LAYER_DEFS,
 } from "@/lib/intelligence/entities";
 import ExecutiveBrief from "@/components/query/ExecutiveBrief";
 import WatchButton from "@/components/query/WatchButton";
@@ -36,27 +35,33 @@ const INFRA_BAND_LABEL: Record<InfraBand, string> = {
   data_platform: "Data",
 };
 
+// C13 — Investors / Sovereign / Regulator are LENSES, not vendor rankings, so
+// they are NOT selectable ranking categories here (they live on the vendor
+// profile as a lens and in the dependency graph). Only rankable layers + the
+// cross-cutting "vertical" tag remain as filters.
 type CategoryKey =
   | "all"
   | "platforms"
   | "models"
   | "applications"
   | "infrastructure"
-  | "investors"
   | "hardware"
-  | "sovereign"
   | "vertical";
 
-// Models first, then Platforms, then remaining LAYER_DEFS order, then catch-all roles.
+// C13 — leaderboard sections follow the standard stack (Model → Platform →
+// Application → Infra/Compute → Hardware) plus cross-cutting tags. Investors,
+// Sovereign and Regulators are LENSES, not vendor rankings, so they are NOT
+// leaderboard sections. Model + Platform lead the order (highest buyer interest).
 const ALL_VIEW_SECTIONS: Array<{ title: string; role: Role; note: string }> = [
-  ...LAYER_DEFS.filter((d) => d.role === "Model Provider").map(({ title, role, note }) => ({ title, role, note })),
-  ...LAYER_DEFS.filter((d) => d.role === "Platform Vendor").map(({ title, role, note }) => ({ title, role, note })),
-  ...LAYER_DEFS.filter((d) => d.role !== "Model Provider" && d.role !== "Platform Vendor").map(({ title, role, note }) => ({ title, role, note })),
-  { title: "Data & Services Providers", role: "Data & Services Provider" as Role, note: "Governed data platforms and AI services layers." },
+  { title: "Model Providers", role: "Model Provider", note: "Quality, cadence, deployment paths and model economics." },
+  { title: "Platform Vendors", role: "Platform Vendor", note: "Distribution, cloud control and enterprise-governance depth." },
+  { title: "Application Vendors", role: "Application Vendor", note: "Workflow conversion, domain fit and business-user adoption." },
+  { title: "Infrastructure Players", role: "Infrastructure Player", note: "Hosting, scale, deployment and compute access." },
   { title: "Cloud / Hosting Providers", role: "Cloud / Hosting Provider" as Role, note: "Cloud and hosting capacity behind AI deployment." },
+  { title: "Data & Services Providers", role: "Data & Services Provider" as Role, note: "Governed data platforms and AI services layers." },
+  { title: "Hardware", role: "Hardware Provider", note: "Accelerators, networking, custom silicon and fabrication." },
   { title: "Vertical Specialists", role: "Vertical Specialist" as Role, note: "Domain-specific AI for legal, finance and regulated workflows." },
   { title: "Open-Source Ecosystem", role: "Open-Source Ecosystem" as Role, note: "Open-weight model and tooling ecosystems." },
-  { title: "Regulators / Policy Actors", role: "Regulator / Policy Actor" as Role, note: "Policy and regulatory actors shaping enterprise AI adoption." },
 ];
 
 // "all" is kept as an internal state key but its button is NOT rendered.
@@ -98,25 +103,11 @@ const CATEGORY_OPTIONS: Array<{ key: CategoryKey; label: string; roles: Role[]; 
     interpretation: "Infrastructure exposure is a resilience and dependency question: who hosts, who scales, who owns the data plane and who benefits from compute intensity.",
   },
   {
-    key: "investors",
-    label: "Investors",
-    roles: ["Investor"],
-    summary: "Strategic capital, ecosystem stakes and distribution-linked investment relationships.",
-    interpretation: "Investor-linked entities shape access, cloud commitments and model distribution. Separate capital influence from product fitness.",
-  },
-  {
     key: "hardware",
     label: "Hardware",
     roles: ["Hardware Provider"],
     summary: "GPU, accelerator, networking, fabrication and semiconductor ecosystem players.",
     interpretation: "Hardware leadership is an upstream dependency signal. It matters for supply assurance, training economics and pricing power, not only direct buyer selection.",
-  },
-  {
-    key: "sovereign",
-    label: "Sovereign AI",
-    roles: ["Sovereign / Regional AI"],
-    summary: "Regional model and deployment alternatives that change jurisdiction, data residency and industrial-policy choices.",
-    interpretation: "Sovereign AI is a risk-control and bargaining-leverage lens. It should be filtered by jurisdiction, data transfer policy and procurement eligibility.",
   },
   {
     key: "vertical",

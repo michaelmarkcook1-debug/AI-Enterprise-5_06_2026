@@ -11,7 +11,16 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { absoluteUrl } from "@/lib/site";
 
-import { ENTITIES, roleLeadership, type Entity, type Role } from "@/lib/intelligence/entities";
+import { ENTITIES, roleLeadership, layerLeadership, type Entity, type Role } from "@/lib/intelligence/entities";
+import {
+  layersForRoles,
+  lensesForRoles,
+  tagsForRoles,
+  primaryLayerForRoles,
+  LAYER_LABEL,
+  LENS_LABEL,
+  TAG_LABEL,
+} from "@/lib/intelligence/taxonomy";
 import { listNewsItems } from "@/lib/intelligence/repository";
 import { HARDCODED_SURFACES_WIRED, INTERACTIVE_ASSESSMENT_ENABLED, INTERROGATE_ENABLED, PREP_KIT_ENABLED } from "@/lib/availability";
 import { getMember } from "@/lib/member/auth";
@@ -91,6 +100,28 @@ function RoleBadge({ role }: { role: Role }) {
   return (
     <span className={`inline-flex rounded border border-current/20 px-1.5 py-0.5 text-[11px] font-semibold ${tone.bg} ${tone.text}`}>
       {role}
+    </span>
+  );
+}
+
+// C13 — the vendor's place in the taxonomy: standard-stack LAYER chips (what it
+// is), TAG chips (cross-cutting attributes), and LENS chips (investor / sovereign
+// / regulator — a different axis, shown dashed with a ◇ so they never read as a
+// vendor tier / ranking).
+function TaxoChip({ label, variant }: { label: string; variant: "layer" | "lens" | "tag" }) {
+  const cls =
+    variant === "layer"
+      ? "bg-[#e6f0ea] text-[#14503f] dark:bg-emerald-950/40 dark:text-emerald-300"
+      : variant === "lens"
+        ? "border border-dashed border-[#8a6df0]/50 bg-transparent text-[#6b4fd0] dark:text-[#b8a6ff]"
+        : "bg-[#ece3cb] text-[#3f5068] dark:bg-[#143049] dark:text-[#c2d1e0]";
+  return (
+    <span
+      className={`inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[11px] font-semibold ${cls}`}
+      title={variant === "lens" ? "Cross-cutting lens — a different axis, not a vendor tier" : variant === "tag" ? "Cross-cutting tag" : "Standard-stack layer"}
+    >
+      {variant === "lens" && <span aria-hidden>◇</span>}
+      {label}
     </span>
   );
 }
@@ -434,16 +465,24 @@ const ROLE_PLURAL: Record<Role, string> = {
   "Vertical Specialist": "Vertical Specialists",
 };
 
-function layerRankFor(entity: Entity): { rank: number; peers: number; layerLabel: string } {
-  const role = entity.primaryRole;
+// C13 — standing is computed WITHIN the standard-stack layer (not the raw role).
+// A pure investor / sovereign / regulator has no vendor layer → it is a LENS, not
+// ranked as a vendor (isVendorLayer:false); the UI shows the lens instead of a rank.
+function layerRankFor(entity: Entity): { rank: number; peers: number; layerLabel: string; isVendorLayer: boolean } {
+  const layer = primaryLayerForRoles(entity.primaryRole, entity.secondaryRoles);
+  if (!layer) {
+    const lens = lensesForRoles([entity.primaryRole, ...entity.secondaryRoles])[0];
+    return { rank: 0, peers: 0, layerLabel: lens ? LENS_LABEL[lens] : "", isVendorLayer: false };
+  }
   const peers = ENTITIES
-    .filter((e) => e.primaryRole === role)
-    .sort((a, b) => roleLeadership(b, role) - roleLeadership(a, role));
+    .filter((e) => layersForRoles([e.primaryRole, ...e.secondaryRoles]).includes(layer))
+    .sort((a, b) => layerLeadership(b, layer) - layerLeadership(a, layer));
   const idx = peers.findIndex((e) => e.id === entity.id);
   return {
     rank: idx >= 0 ? idx + 1 : peers.length,
     peers: peers.length,
-    layerLabel: ROLE_PLURAL[role] ?? `${role}s`,
+    layerLabel: LAYER_LABEL[layer],
+    isVendorLayer: true,
   };
 }
 
@@ -740,9 +779,15 @@ export default async function VendorDeepDivePage({
             </div>
           </div>
 
-          <div className="mt-3 flex flex-wrap gap-2">
-            {allRoles.map((role) => (
-              <RoleBadge key={role} role={role} />
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            {layersForRoles(allRoles).map((l) => (
+              <TaxoChip key={l} label={LAYER_LABEL[l]} variant="layer" />
+            ))}
+            {tagsForRoles(allRoles).map((t) => (
+              <TaxoChip key={t} label={TAG_LABEL[t]} variant="tag" />
+            ))}
+            {lensesForRoles(allRoles).map((l) => (
+              <TaxoChip key={l} label={LENS_LABEL[l]} variant="lens" />
             ))}
           </div>
         </div>
@@ -900,20 +945,32 @@ export default async function VendorDeepDivePage({
         <div className="mb-6 grid gap-5 lg:grid-cols-[1fr_0.55fr]">
           {/* ── Within-layer standing card — vendors are only ranked against
                  peers in their own layer; no all-market composite rank. ───── */}
-          <Panel title="Standing within layer">
+          <Panel title={layerRank.isVendorLayer ? "Standing within layer" : "Cross-cutting lens"}>
             <div className="flex flex-col gap-3">
-              <div className="flex items-baseline gap-3">
-                <span className="text-4xl font-bold tabular-nums text-[#13294b] dark:text-[#f6f9fc]">
-                  #{layerRank.rank}
-                </span>
-                <span className="text-sm text-[#54647a] dark:text-[#a7bacd]">
-                  of {layerRank.peers} {layerRank.layerLabel}
-                </span>
-              </div>
-              <p className="text-xs leading-5 text-[#5b6b7f] dark:text-[#8fa5bb]">
-                Ranked by {entity.primaryRole} leadership score, within this layer only.
-                Cross-layer composite rankings are not used — layers measure different things.
-              </p>
+              {layerRank.isVendorLayer ? (
+                <>
+                  <div className="flex items-baseline gap-3">
+                    <span className="text-4xl font-bold tabular-nums text-[#13294b] dark:text-[#f6f9fc]">
+                      #{layerRank.rank}
+                    </span>
+                    <span className="text-sm text-[#54647a] dark:text-[#a7bacd]">
+                      of {layerRank.peers} in the {layerRank.layerLabel} layer
+                    </span>
+                  </div>
+                  <p className="text-xs leading-5 text-[#5b6b7f] dark:text-[#8fa5bb]">
+                    Ranked within the {layerRank.layerLabel} layer by leadership, against the roles that map to
+                    it — within this layer only. Cross-layer composite rankings are not used; layers measure
+                    different things.
+                  </p>
+                </>
+              ) : (
+                <p className="text-sm leading-6 text-[#54647a] dark:text-[#a7bacd]">
+                  {entity.name} is tracked under the{" "}
+                  <strong className="text-[#6b4fd0] dark:text-[#b8a6ff]">{layerRank.layerLabel} lens</strong> — a
+                  cross-cutting axis (capital / geography / policy), not a vendor product tier. It appears in the
+                  dependency graph and as a lens, and is deliberately <strong>not ranked among vendors</strong>.
+                </p>
+              )}
               {lastSnapshot ? (
                 <div className="flex gap-6 text-sm">
                   <div>
