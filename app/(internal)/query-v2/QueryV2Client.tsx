@@ -35,15 +35,17 @@ const INFRA_BAND_LABEL: Record<InfraBand, string> = {
   data_platform: "Data",
 };
 
+// C13 — Investors / Sovereign / Regulator are LENSES, not vendor rankings, so
+// they are NOT selectable ranking categories here (they live on the vendor
+// profile as a lens and in the dependency graph). Only rankable layers + the
+// cross-cutting "vertical" tag remain as filters.
 type CategoryKey =
   | "all"
   | "platforms"
   | "models"
   | "applications"
   | "infrastructure"
-  | "investors"
   | "hardware"
-  | "sovereign"
   | "vertical";
 
 // C13 — leaderboard sections follow the standard stack (Model → Platform →
@@ -101,25 +103,11 @@ const CATEGORY_OPTIONS: Array<{ key: CategoryKey; label: string; roles: Role[]; 
     interpretation: "Infrastructure exposure is a resilience and dependency question: who hosts, who scales, who owns the data plane and who benefits from compute intensity.",
   },
   {
-    key: "investors",
-    label: "Investors",
-    roles: ["Investor"],
-    summary: "Strategic capital, ecosystem stakes and distribution-linked investment relationships.",
-    interpretation: "Investor-linked entities shape access, cloud commitments and model distribution. Separate capital influence from product fitness.",
-  },
-  {
     key: "hardware",
     label: "Hardware",
     roles: ["Hardware Provider"],
     summary: "GPU, accelerator, networking, fabrication and semiconductor ecosystem players.",
     interpretation: "Hardware leadership is an upstream dependency signal. It matters for supply assurance, training economics and pricing power, not only direct buyer selection.",
-  },
-  {
-    key: "sovereign",
-    label: "Sovereign AI",
-    roles: ["Sovereign / Regional AI"],
-    summary: "Regional model and deployment alternatives that change jurisdiction, data residency and industrial-policy choices.",
-    interpretation: "Sovereign AI is a risk-control and bargaining-leverage lens. It should be filtered by jurisdiction, data transfer policy and procurement eligibility.",
   },
   {
     key: "vertical",
