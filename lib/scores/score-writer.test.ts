@@ -143,6 +143,11 @@ describe("independence firewall — score writes are sanctioned-only", () => {
       "lib/assessment/domain-scores.ts",
       "lib/assessment/domain-labels.ts",
       "lib/assessment/composite.ts",
+      // Wave-3 Interrogate: the LLM context→weight lens and the pure session-lens
+      // builder. A buyer's context is a personal lens — weights + prose only. These
+      // must never write a canonical score or touch commercial data.
+      "lib/assessment/session-lens.ts",
+      "lib/agents/composite-lens.ts",
     ];
     const COMMERCIAL_USE_RE = /\.vendorCommercial\.|"vendor_commercial"|'vendor_commercial'/;
     for (const f of files) {

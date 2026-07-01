@@ -21,6 +21,7 @@ import {
   type DomainWeights,
 } from "@/lib/assessment/composite";
 import type { DomainId } from "@/lib/types";
+import InterrogatePanel, { type InterrogateConfig } from "@/components/assessment/InterrogatePanel";
 
 export interface RerankVendor {
   vendorId: string;
@@ -40,12 +41,16 @@ const slidersFromWeights = (weights: DomainWeights): Record<DomainId, number> =>
 export default function CategoryRerank({
   vendors,
   defaultWeights = DEFAULT_DOMAIN_WEIGHTS,
+  interrogate,
 }: {
   vendors: RerankVendor[];
   /** The per-category resolved default weights (the SAME ones the static ranking
    *  used) — so the untouched re-rank reproduces the static order, and Reset
    *  returns to this category's default, not the framework default. */
   defaultWeights?: DomainWeights;
+  /** Wave-3: when present + enabled, renders the member-gated Interrogate panel
+   *  whose context re-run drives these same sliders. Absent → Wave-2 behaviour. */
+  interrogate?: InterrogateConfig;
 }) {
   // The category's active domains, in canonical order — what the sliders render.
   const domainList = useMemo(() => activeDomains(defaultWeights), [defaultWeights]);
@@ -89,6 +94,17 @@ export default function CategoryRerank({
         source-backed evidence. Vendors below {Math.round(ASSESSMENT_COVERAGE_FLOOR * 100)}% domain coverage are held —
         re-weighting can’t mask thin evidence. Draft — pressure-test the sources on each profile.
       </p>
+
+      {interrogate && (
+        <div className="mt-3">
+          <InterrogatePanel
+            config={interrogate}
+            activeDomains={domainList}
+            vendorIds={vendors.map((v) => v.vendorId)}
+            onApplyLens={(next) => setSliders((s) => ({ ...s, ...next }))}
+          />
+        </div>
+      )}
 
       {/* compact weight sliders */}
       <div className="mt-3 grid grid-cols-1 gap-x-4 gap-y-1 sm:grid-cols-2">

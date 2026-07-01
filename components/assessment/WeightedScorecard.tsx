@@ -17,6 +17,7 @@ import {
 } from "@/lib/assessment/composite";
 import type { VendorScorecard } from "@/lib/assessment/domain-scores";
 import { PILLARS, type DomainId } from "@/lib/types";
+import InterrogatePanel, { type InterrogateConfig } from "@/components/assessment/InterrogatePanel";
 
 const PILLAR_LABEL = Object.fromEntries(PILLARS.map((p) => [p.id, p.label])) as Record<string, string>;
 
@@ -46,7 +47,15 @@ function GradeChip({ grade }: { grade: string }) {
   return <span className={`rounded px-1.5 py-0.5 text-[10px] font-medium ${cls}`}>{grade} {label}</span>;
 }
 
-export default function WeightedScorecard({ scorecard }: { scorecard: VendorScorecard }) {
+export default function WeightedScorecard({
+  scorecard,
+  interrogate,
+}: {
+  scorecard: VendorScorecard;
+  /** Wave-3: when present + enabled, renders the member-gated Interrogate panel
+   *  whose context re-run drives these same sliders. Absent → Wave-2 behaviour. */
+  interrogate?: InterrogateConfig;
+}) {
   const [sliders, setSliders] = useState<Record<DomainId, number>>(defaultSliders);
 
   const byDomain = useMemo(
@@ -65,6 +74,13 @@ export default function WeightedScorecard({ scorecard }: { scorecard: VendorScor
 
   return (
     <div>
+      {interrogate && (
+        <InterrogatePanel
+          config={interrogate}
+          activeDomains={ASSESSMENT_DOMAINS}
+          onApplyLens={(next) => setSliders((s) => ({ ...s, ...next }))}
+        />
+      )}
       <p className="mb-3 text-xs leading-5 text-[#5e6b7e] dark:text-[#a7bacd]">
         Weight the 12 domains to <strong>your</strong> priorities — the composite and coverage recompute live from
         reviewed, source-backed evidence. A domain only reaches 4–5 with audit-grade (E4/E5) evidence; domains with no

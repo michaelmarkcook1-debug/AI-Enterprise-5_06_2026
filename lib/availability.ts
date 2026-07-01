@@ -70,3 +70,20 @@ export const HARDCODED_SURFACES_WIRED: boolean = false;
  * data stay deterministic and seed-free regardless of this flag.
  */
 export const INTERACTIVE_ASSESSMENT_ENABLED: boolean = true;
+
+/**
+ * Interrogate (Phase 3 Wave 3) gate — the PREMIUM, member-only LLM action:
+ * a buyer feeds real context ("ServiceNow renewal in 3 months, EU-only") and the
+ * assessment re-runs through that lens. Unlike the free manual re-weighting
+ * (INTERACTIVE_ASSESSMENT_ENABLED), this spends an LLM call, so it is gated
+ * separately: member route group, server-guarded, metered (C16) but — like the
+ * rest of Phase 2/3 — SCAFFOLDED, NOT ENFORCED. Currently open so the depth is
+ * visible; the soft-paywall / credit meter hooks here later. Turning this off
+ * leaves the free sliders (INTERACTIVE_ASSESSMENT_ENABLED) untouched.
+ *
+ * FIREWALL: the re-run only adjusts the viewing buyer's domain WEIGHTS (a personal
+ * lens) + cites/explains. It can NEVER write a canonical 0–5 score — see the
+ * score-writer firewall test, which pins lib/agents/composite-lens.ts and
+ * lib/assessment/session-lens.ts read-only.
+ */
+export const INTERROGATE_ENABLED: boolean = true;

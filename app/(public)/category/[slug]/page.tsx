@@ -12,7 +12,8 @@ import type { DomainScore } from "@/lib/assessment/domain-rubric";
 import { DOMAIN_LABEL } from "@/lib/assessment/domain-labels";
 import { activeDomains, type DomainWeights } from "@/lib/assessment/composite";
 import type { DomainId } from "@/lib/types";
-import { INTERACTIVE_ASSESSMENT_ENABLED } from "@/lib/availability";
+import { INTERACTIVE_ASSESSMENT_ENABLED, INTERROGATE_ENABLED } from "@/lib/availability";
+import { getMember } from "@/lib/member/auth";
 import CategoryRerank, { type RerankVendor } from "@/components/assessment/CategoryRerank";
 import { getRankMovements, type RankMovement } from "@/lib/intelligence/rank-movement";
 import RankMovementIndicator from "@/components/ranking/RankMovementIndicator";
@@ -82,6 +83,10 @@ export default async function CategoryPage({ params }: { params: Promise<Params>
           : [];
       })
     : [];
+
+  // Wave-3 Interrogate — member-gated premium action; resolve identity only when
+  // the flag is on so anonymous visitors keep the free Wave-2 re-rank.
+  const interrogateMember = INTERROGATE_ENABLED ? await getMember().catch(() => null) : null;
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-10">
@@ -204,7 +209,15 @@ export default async function CategoryPage({ params }: { params: Promise<Params>
               YOUR ranking. Pure client-side maths, no network call. */}
           {INTERACTIVE_ASSESSMENT_ENABLED && rerankVendors.length > 1 && (
             <div className="mt-6 border-t border-black/5 pt-5 dark:border-white/10">
-              <CategoryRerank vendors={rerankVendors} defaultWeights={resolvedDomainWeights} />
+              <CategoryRerank
+                vendors={rerankVendors}
+                defaultWeights={resolvedDomainWeights}
+                interrogate={{
+                  enabled: INTERROGATE_ENABLED,
+                  signedIn: !!interrogateMember,
+                  scope: { kind: "category", categoryId: slug },
+                }}
+              />
             </div>
           )}
         </section>

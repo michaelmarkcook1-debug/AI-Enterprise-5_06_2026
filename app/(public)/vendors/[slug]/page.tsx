@@ -13,7 +13,8 @@ import { absoluteUrl } from "@/lib/site";
 
 import { ENTITIES, roleLeadership, type Entity, type Role } from "@/lib/intelligence/entities";
 import { listNewsItems } from "@/lib/intelligence/repository";
-import { HARDCODED_SURFACES_WIRED, INTERACTIVE_ASSESSMENT_ENABLED } from "@/lib/availability";
+import { HARDCODED_SURFACES_WIRED, INTERACTIVE_ASSESSMENT_ENABLED, INTERROGATE_ENABLED } from "@/lib/availability";
+import { getMember } from "@/lib/member/auth";
 import DataUnavailable from "@/components/DataUnavailable";
 import { getPrisma, hasDatabase } from "@/lib/prisma";
 import { Panel } from "@/components/intelligence-ui";
@@ -520,6 +521,9 @@ export default async function VendorDeepDivePage({
   // the "profile data unavailable" gate with the real scorecard.
   const scorecard = await getVendorScorecard(entity.id).catch(() => null);
   const hasEvidence = !!scorecard?.hasAnyEvidence;
+  // Wave-3 Interrogate is the member-gated premium action; resolve identity only
+  // when the flag is on so anonymous visitors keep the free Wave-2 experience.
+  const interrogateMember = INTERROGATE_ENABLED ? await getMember().catch(() => null) : null;
   // Model quality (Arena Elo) — a real, cited capability signal shown on the
   // profile so a CIO can see it. It is WEIGHTED in model-category rankings (e.g.
   // frontier model APIs); here it is context. null when the vendor has no
@@ -636,7 +640,14 @@ export default async function VendorDeepDivePage({
             <section className="mb-6">
               <Panel title="Enterprise assessment — evidence scorecard">
                 {INTERACTIVE_ASSESSMENT_ENABLED ? (
-                  <WeightedScorecard scorecard={scorecard} />
+                  <WeightedScorecard
+                    scorecard={scorecard}
+                    interrogate={{
+                      enabled: INTERROGATE_ENABLED,
+                      signedIn: !!interrogateMember,
+                      scope: { kind: "vendor", vendorId: entity.id },
+                    }}
+                  />
                 ) : (
                   <DomainScorecard scorecard={scorecard} />
                 )}
