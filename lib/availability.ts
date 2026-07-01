@@ -87,3 +87,14 @@ export const INTERACTIVE_ASSESSMENT_ENABLED: boolean = true;
  * lib/assessment/session-lens.ts read-only.
  */
 export const INTERROGATE_ENABLED: boolean = true;
+
+/**
+ * Vendor-meeting prep kit (Phase 3 Wave 4, C9) gate — the second premium,
+ * member-only LLM action: generate a take-into-the-meeting kit (8–12 tailored
+ * questions grounded in the vendor's real weak/thin domains + framework-derived
+ * RFP / POC / reference / readiness templates). Like Interrogate it is gated,
+ * SCAFFOLDED but NOT ENFORCED. The LLM writes questions/structure only — it never
+ * invents evidence, scores, or vendor facts; the score-writer firewall test pins
+ * lib/agents/prep-kit.ts and lib/assessment/prep-kit.ts read-only.
+ */
+export const PREP_KIT_ENABLED: boolean = true;

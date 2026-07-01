@@ -148,6 +148,11 @@ describe("independence firewall — score writes are sanctioned-only", () => {
       // must never write a canonical score or touch commercial data.
       "lib/assessment/session-lens.ts",
       "lib/agents/composite-lens.ts",
+      // Wave-4 prep kit: the LLM question generator + the pure assembler. Both
+      // read the scorecard and emit questions/templates — never a score or
+      // commercial data.
+      "lib/assessment/prep-kit.ts",
+      "lib/agents/prep-kit.ts",
     ];
     const COMMERCIAL_USE_RE = /\.vendorCommercial\.|"vendor_commercial"|'vendor_commercial'/;
     for (const f of files) {
