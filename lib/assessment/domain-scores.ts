@@ -67,7 +67,7 @@ function summarise(
 
 const ASSESSMENT_DOMAIN_SET = new Set<DomainId>(ASSESSMENT_DOMAINS);
 
-interface RawEvidenceRow {
+export interface RawEvidenceRow {
   domain: DomainId;
   evidenceGrade: RubricEvidenceRow["evidenceGrade"];
   rawScore: number;
@@ -76,7 +76,9 @@ interface RawEvidenceRow {
   sourceUrl: string | null;
 }
 
-function groupByDomain(rows: RawEvidenceRow[]): Map<DomainId, RubricEvidenceRow[]> {
+/** Exported for the confidence-scale regression test (lib/assessment/domain-scores.test.ts) —
+ *  pure, no DB access; groups + rescales raw DB rows into the rubric's row shape. */
+export function groupByDomain(rows: RawEvidenceRow[]): Map<DomainId, RubricEvidenceRow[]> {
   const byDomain = new Map<DomainId, RubricEvidenceRow[]>();
   for (const r of rows) {
     // Only the 12 framework domains feed the scorecard (market_position excluded).
@@ -85,7 +87,12 @@ function groupByDomain(rows: RawEvidenceRow[]): Map<DomainId, RubricEvidenceRow[
     list.push({
       evidenceGrade: r.evidenceGrade,
       rawScore: r.rawScore,
-      confidence: r.confidence,
+      // EvidenceRecord.confidence is written 0–1 (the classifier's Zod schema
+      // enforces min(0).max(1) — lib/agents/evidence-classifier.ts:45) but the
+      // rubric's confidence blend (domain-rubric.ts) is on a 0–100 scale, same
+      // as its own null-fallback branch (EVIDENCE_MODIFIER × freshness × 100).
+      // Scale here, the single read boundary, so every row lands on 0–100.
+      confidence: r.confidence == null ? null : r.confidence * 100,
       capturedAt: r.capturedAt,
       sourceUrl: r.sourceUrl,
     });
