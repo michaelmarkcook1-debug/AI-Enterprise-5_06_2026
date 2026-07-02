@@ -2,7 +2,8 @@
 // ───────────────────────────────────
 // Receiving end for the external AI-competitive-intelligence Routine.
 // Auth: admin (session / x-admin-token / allowlisted IP) OR `Authorization:
-// Bearer <CRON_SECRET>` for headless automation. Never open.
+// Bearer <ROUTINE_INGEST_TOKEN>` — a dedicated secret for THIS integration
+// only (never CRON_SECRET, so revoking one never breaks the other). Never open.
 //
 // Body: { source?: string, findings?: ExternalFinding[], proposals?: ExternalProposal[] }
 //   findings  → IntelligenceNewsItem (news feed; real https citation required)
@@ -30,15 +31,15 @@ export const maxDuration = 60;
 
 const MAX_ITEMS = 100; // per call, per channel — the routine batches beyond this
 
-function isCronAuthorized(request: Request): boolean {
-  const secret = process.env.CRON_SECRET ?? "";
+function isRoutineAuthorized(request: Request): boolean {
+  const secret = process.env.ROUTINE_INGEST_TOKEN ?? "";
   if (!secret) return false;
   const auth = request.headers.get("authorization") ?? "";
   return auth.startsWith("Bearer ") && safeEqual(auth.slice(7), secret);
 }
 
 export async function POST(request: Request) {
-  if (!isAdminRequest(request) && !isCronAuthorized(request)) return unauthorized();
+  if (!isAdminRequest(request) && !isRoutineAuthorized(request)) return unauthorized();
   if (!hasDatabase()) {
     return Response.json({ ok: false, error: "no database configured" }, { status: 503 });
   }
