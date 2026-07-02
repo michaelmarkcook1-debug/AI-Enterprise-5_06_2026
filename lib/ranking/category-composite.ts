@@ -19,6 +19,7 @@ import type { DomainScore } from "../assessment/domain-rubric";
 import {
   computeWeightedComposite,
   rankVendorsByComposite,
+  rollUpToPillars,
   activeDomains,
   ASSESSMENT_COVERAGE_FLOOR,
   type DomainWeights,
@@ -115,6 +116,10 @@ async function computeCategoryComposites(): Promise<CategoryComposite[]> {
       ...v,
       state: ranked ? "ranked" : "incomplete",
       assessmentComposite: wc ? wc.composite : null,
+      // "Why this rank" breakdown — the 6 pillars rolled up from the SAME domain
+      // contributions that produce assessmentComposite, so summing them matches
+      // the composite + the rank (fixes the pillar/domain divergence).
+      rankPillars: wc ? rollUpToPillars(wc.contributions, eff ?? []) : [],
       compositeConfidence: wc ? wc.confidence : v.compositeConfidence,
       domainScored,
       domainTotal,

@@ -69,42 +69,42 @@ export default function PillarContributionTable({
             <tr className={MUTED}>
               <th className="py-1 pr-3 font-medium">Pillar</th>
               <th className="py-1 pr-3 font-medium">Evidence</th>
-              <th className="py-1 pr-3 text-right font-medium tabular-nums">Score</th>
+              <th className="py-1 pr-3 text-right font-medium tabular-nums">Score /5</th>
               <th className="py-1 pr-3 text-right font-medium tabular-nums">Weight</th>
               <th className="py-1 pr-3 text-right font-medium tabular-nums">Conf.</th>
               <th className="py-1 text-right font-medium tabular-nums">Contribution</th>
             </tr>
           </thead>
           <tbody>
-            {vendor.pillars.map((p) => {
-              const evidenced = p.state === "scored";
+            {vendor.rankPillars.map((p) => {
+              const scored = p.state === "scored";
+              const context = p.state === "not_in_composite";
               return (
-                <tr key={p.pillar} className={`border-t border-black/5 align-top dark:border-white/10 ${evidenced ? "" : "opacity-70"}`}>
+                <tr key={p.pillar} className={`border-t border-black/5 align-top dark:border-white/10 ${scored ? "" : "opacity-70"}`}>
                   <td className="py-1.5 pr-3 font-medium">{p.label}</td>
                   <td className="py-1.5 pr-3">
-                    {evidenced ? (
-                      <GradeChip grade={p.evidenceGrade} />
+                    {scored && p.bestGrade ? (
+                      <GradeChip grade={p.bestGrade} />
+                    ) : context ? (
+                      <span className={`text-[10px] ${MUTED}`}>context only</span>
                     ) : (
-                      <span className="inline-flex items-center gap-1">
-                        <GradeChip grade={p.evidenceGrade} />
-                        <span className={`text-[10px] ${MUTED}`}>insufficient</span>
-                      </span>
+                      <span className={`text-[10px] ${MUTED}`}>insufficient</span>
                     )}
                   </td>
                   <td className="py-1.5 pr-3 text-right font-mono tabular-nums">
-                    {p.capabilityScore === null ? "—" : Math.round(p.capabilityScore)}
+                    {p.score === null ? "—" : p.score.toFixed(1)}
                   </td>
                   <td className="py-1.5 pr-3 text-right font-mono tabular-nums">
-                    {pct(p.baseWeight)}%
+                    {context ? "—" : `${pct(p.weight)}%`}
                   </td>
                   <td className="py-1.5 pr-3 text-right font-mono tabular-nums">
-                    {p.confidence === null ? "—" : `${Math.round(p.confidence)}%`}
+                    {p.confidence === null ? "—" : `${p.confidence}%`}
                   </td>
                   <td className="py-1.5 text-right font-mono tabular-nums">
                     {p.contribution === null ? (
-                      <span className={MUTED}>{evidenced ? "not counted" : "—"}</span>
+                      <span className={MUTED}>{context ? "not scored" : "not counted"}</span>
                     ) : (
-                      `+${p.contribution.toFixed(1)}`
+                      `+${p.contribution.toFixed(2)}`
                     )}
                   </td>
                 </tr>
@@ -114,23 +114,20 @@ export default function PillarContributionTable({
         </table>
       </div>
 
-      {/* What would lift the dark pillars (honest "what's missing"). */}
-      {vendor.pillars.some((p) => p.state === "insufficient_evidence" && p.missingEvidence.length > 0) && (
+      {/* Honest "what's held" — pillars with active domains but no reviewed evidence. */}
+      {vendor.rankPillars.some((p) => p.state === "insufficient_evidence") && (
         <div className="mt-2 text-[11px]">
-          <span className={`font-medium ${MUTED}`}>To lift the held pillars: </span>
+          <span className={`font-medium ${MUTED}`}>Held (no reviewed evidence yet): </span>
           <span className={MUTED}>
-            {vendor.pillars
-              .filter((p) => p.state === "insufficient_evidence" && p.missingEvidence.length > 0)
-              .map((p) => `${p.label} — ${p.missingEvidence[0]}`)
-              .join("; ")}
+            {vendor.rankPillars.filter((p) => p.state === "insufficient_evidence").map((p) => p.label).join(", ")}
           </span>
         </div>
       )}
 
       <p className={`mt-2 text-[10px] ${MUTED}`}>
-        Each pillar contributes score × rubric weight × a confidence blend (0.7 + 0.3×confidence);
-        a missing pillar contributes zero, so coverage discounts the composite — contributions sum to it.
-        Market share is context, not part of the score.
+        Each pillar rolls up its evidence domains: domain score (0–5) × weight × a confidence blend
+        (0.7 + 0.3×confidence). Contributions sum to the {vendor.assessmentComposite === null ? "composite" : `${vendor.assessmentComposite.toFixed(2)}/5 composite`} above.
+        Market share / position is context, not part of the score.
       </p>
     </details>
   );

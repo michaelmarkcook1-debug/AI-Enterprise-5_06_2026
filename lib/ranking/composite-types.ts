@@ -8,7 +8,7 @@
 
 import type { EvidenceGrade, PillarId } from "../types";
 import type { MarketCategory } from "../intelligence/types";
-import type { DomainWeights } from "../assessment/composite";
+import type { DomainWeights, RankPillar } from "../assessment/composite";
 
 /** How completely a vendor's pillars are evidenced (by covered weight). */
 export type EvidenceCompleteness = "full" | "substantial" | "partial" | "insufficient";
@@ -71,8 +71,15 @@ export interface CategoryRankedVendor {
   /** RANK-FIX — tier band (Leaders / Contenders / Emerging) for honest
    *  presentation when composites are within the noise band; null when incomplete. */
   tier: string | null;
-  /** ALL pillars in canonical order; dark ones state="insufficient_evidence". */
+  /** ALL pillars in canonical order; dark ones state="insufficient_evidence".
+   *  LEGACY (separate pillar-score composite) — retained for non-ranking uses;
+   *  the "Why this rank" table uses `rankPillars` below, which is derived from
+   *  the actual ranking composite and therefore consistent with the rank. */
   pillars: PillarContribution[];
+  /** UNIFIED "Why this rank" breakdown — the 6 pillars rolled up from the SAME
+   *  per-domain contributions that produce `assessmentComposite`, so summing the
+   *  contributions reproduces the composite and matches the rank order. */
+  rankPillars: RankPillar[];
   /** Market share shown as CONTEXT only — never the rank. */
   marketContext: {
     estimatedShare: number | null;

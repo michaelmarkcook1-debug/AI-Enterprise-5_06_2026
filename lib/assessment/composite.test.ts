@@ -7,6 +7,7 @@ import {
   compareWeighted,
   computeGap,
   rankVendorsByComposite,
+  rollUpToPillars,
   activeDomains,
   DEFAULT_DOMAIN_WEIGHTS,
   ASSESSMENT_COVERAGE_FLOOR,
@@ -374,5 +375,48 @@ describe("per-category methodology note (transparency)", () => {
     const note = buildMethodologyNote("some_unprofiled_category");
     expect(note).toContain("Framework default weighting");
     expect(note).not.toContain("Arena");
+  });
+});
+
+describe("rollUpToPillars — 'Why this rank' consistency (2026-07 fix)", () => {
+  it("pillar contributions SUM to the composite (never a divergent breakdown)", () => {
+    const domains = allScored(4);
+    const wc = computeWeightedComposite(domains, DEFAULT_DOMAIN_WEIGHTS);
+    const pillars = rollUpToPillars(wc.contributions, domains);
+    const sum = pillars.reduce((s, p) => s + (p.contribution ?? 0), 0);
+    expect(sum).toBeCloseTo(wc.composite, 2);
+  });
+
+  it("ranks two vendors the SAME way as the composite — summing contributions can't contradict the rank", () => {
+    // Vendor A stronger on the heavy enterprise_control domains; B stronger on a light domain.
+    const a = ASSESSMENT_DOMAINS.map((d) => scored(d, DOMAIN_TO_PILLAR[d] === "enterprise_control" ? 5 : 3));
+    const b = ASSESSMENT_DOMAINS.map((d) => scored(d, DOMAIN_TO_PILLAR[d] === "enterprise_control" ? 2 : 4));
+    const wcA = computeWeightedComposite(a, DEFAULT_DOMAIN_WEIGHTS);
+    const wcB = computeWeightedComposite(b, DEFAULT_DOMAIN_WEIGHTS);
+    const sumA = rollUpToPillars(wcA.contributions, a).reduce((s, p) => s + (p.contribution ?? 0), 0);
+    const sumB = rollUpToPillars(wcB.contributions, b).reduce((s, p) => s + (p.contribution ?? 0), 0);
+    // Whichever composite is higher, its summed pillar contributions must also be higher.
+    expect(Math.sign(sumA - sumB)).toBe(Math.sign(wcA.composite - wcB.composite));
+  });
+
+  it("Market Strength is 'not_in_composite' — market_position is excluded from the score", () => {
+    const domains = allScored(4);
+    const wc = computeWeightedComposite(domains, DEFAULT_DOMAIN_WEIGHTS);
+    const ms = rollUpToPillars(wc.contributions, domains).find((p) => p.pillar === "market_strength");
+    expect(ms?.state).toBe("not_in_composite");
+    expect(ms?.contribution).toBeNull();
+    expect(ms?.weight).toBe(0);
+  });
+
+  it("a pillar with active domains but no evidence is 'insufficient_evidence', not a default", () => {
+    // Everything scored EXCEPT the vendor_resilience domains → that pillar dark.
+    const domains = ASSESSMENT_DOMAINS.map((d) =>
+      DOMAIN_TO_PILLAR[d] === "vendor_resilience" ? insufficient(d) : scored(d, 4),
+    );
+    const wc = computeWeightedComposite(domains, DEFAULT_DOMAIN_WEIGHTS);
+    const vr = rollUpToPillars(wc.contributions, domains).find((p) => p.pillar === "vendor_resilience");
+    expect(vr?.state).toBe("insufficient_evidence");
+    expect(vr?.score).toBeNull();
+    expect(vr?.weight).toBeGreaterThan(0); // weight still counts in the denominator
   });
 });

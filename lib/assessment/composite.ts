@@ -10,7 +10,7 @@
 // insufficient-evidence domain contributes 0 but its weight still counts in the
 // denominator, so re-weighting can never conjure a score or hide thin coverage.
 
-import { DOMAIN_TO_PILLAR, type DomainId, type PillarId } from "../types";
+import { DOMAIN_TO_PILLAR, PILLARS, type DomainId, type PillarId, type EvidenceGrade } from "../types";
 import { ASSESSMENT_DOMAINS, DOMAIN_WEIGHT, type DomainScore } from "./domain-rubric";
 
 export type DomainWeights = Record<DomainId, number>;
@@ -187,6 +187,69 @@ export function computeWeightedComposite(domains: DomainScore[], weights: Partia
     domainTotal: domainList.length,
     contributions,
   };
+}
+
+// ── Pillar roll-up of the ranking composite ("Why this rank" breakdown) ───────
+// The 12/13 assessment domains roll up into the 6 user-facing PILLARS. This
+// aggregates the SAME per-domain contributions that drive the rank — so the
+// pillar contributions SUM to the composite and their order matches the rank,
+// by construction. (Previously the "Why this rank" table showed a SEPARATE
+// pillar-score composite that could — and did — disagree with the domain-driven
+// rank, e.g. sum-of-contributions putting a lower-ranked vendor above a higher
+// one.) `market_position` is excluded from the ranking domains, so the Market
+// Strength pillar is honestly "context, not in the score".
+
+export interface RankPillar {
+  pillar: PillarId;
+  label: string;
+  /** Sum of active-domain weights mapped to this pillar (0–1). 0 when the pillar
+   *  has no domain in the ranking composite (Market Strength). */
+  weight: number;
+  /** Weight-avg of scored domain scores (0–5); null when no scored domain. */
+  score: number | null;
+  confidence: number | null; // 0–99, weight-avg over scored domains
+  /** Sum of the pillar's scored-domain contributions (0–5 scale) — across all
+   *  pillars these SUM to the composite. null when nothing scored / not in composite. */
+  contribution: number | null;
+  bestGrade: EvidenceGrade | null; // strongest grade among scored domains
+  scoredCount: number;
+  activeCount: number; // domains of this pillar active in the profile
+  state: "scored" | "insufficient_evidence" | "not_in_composite";
+}
+
+const GRADE_RANK: Record<EvidenceGrade, number> = { E0: 0, E1: 1, E2: 2, E3: 3, E4: 4, E5: 5 };
+
+/**
+ * Roll a WeightedComposite's per-domain `contributions` up into the 6 pillars,
+ * pulling evidence grades from the vendor's `domains` scorecard. Pure. The
+ * returned contributions sum to the composite (rounding aside), so the ranking
+ * explanation can never contradict the rank it explains.
+ */
+export function rollUpToPillars(contributions: DomainContribution[], domains: DomainScore[]): RankPillar[] {
+  const gradeByDomain = new Map<DomainId, EvidenceGrade>();
+  for (const d of domains) if (d.state === "scored") gradeByDomain.set(d.domain, d.bestGrade);
+
+  return PILLARS.map(({ id, label }) => {
+    const inPillar = contributions.filter((c) => c.pillar === id);
+    if (inPillar.length === 0) {
+      return { pillar: id, label, weight: 0, score: null, confidence: null, contribution: null, bestGrade: null, scoredCount: 0, activeCount: 0, state: "not_in_composite" as const };
+    }
+    const weight = inPillar.reduce((s, c) => s + c.weight, 0);
+    const scored = inPillar.filter((c) => c.state === "scored");
+    if (scored.length === 0) {
+      return { pillar: id, label, weight, score: null, confidence: null, contribution: null, bestGrade: null, scoredCount: 0, activeCount: inPillar.length, state: "insufficient_evidence" as const };
+    }
+    const scoredWeight = scored.reduce((s, c) => s + c.weight, 0);
+    const score = scoredWeight > 0 ? scored.reduce((s, c) => s + (c.score ?? 0) * c.weight, 0) / scoredWeight : null;
+    const confidence = scoredWeight > 0 ? Math.round(scored.reduce((s, c) => s + (c.confidence ?? 0) * c.weight, 0) / scoredWeight) : null;
+    const contribution = scored.reduce((s, c) => s + (c.contribution ?? 0), 0);
+    let bestGrade: EvidenceGrade | null = null;
+    for (const c of scored) {
+      const g = gradeByDomain.get(c.domain);
+      if (g && (bestGrade === null || GRADE_RANK[g] > GRADE_RANK[bestGrade])) bestGrade = g;
+    }
+    return { pillar: id, label, weight, score, confidence, contribution, bestGrade, scoredCount: scored.length, activeCount: inPillar.length, state: "scored" as const };
+  });
 }
 
 export interface RankableComposite {

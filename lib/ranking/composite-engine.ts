@@ -162,6 +162,7 @@ export function scoreVendorComposite(
       assessmentComposite: null,
       tier: null,
       pillars,
+      rankPillars: [], // filled by the category layer's enrich() from the domain composite
       marketContext,
       excludedReason: reason,
     };
@@ -202,6 +203,7 @@ export function scoreVendorComposite(
     assessmentComposite: null,
     tier: null,
     pillars,
+    rankPillars: [], // filled by the category layer's enrich() from the domain composite
     marketContext,
   };
 }
