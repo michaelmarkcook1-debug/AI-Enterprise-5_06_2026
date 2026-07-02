@@ -9,8 +9,6 @@ import {
 } from "@/lib/graph/dependency-projection";
 import { deriveEncroachmentEdges, buildRolesByNodeId } from "@/lib/graph/encroachment";
 import { deriveGraphTakeaway } from "@/lib/graph/takeaway";
-import { HARDCODED_SURFACES_WIRED } from "@/lib/availability";
-import DataUnavailable from "@/components/DataUnavailable";
 
 // ISR: server-rendered + CDN-cached, revalidated hourly. STRICT mode: the graph
 // is curated/hardcoded (lib/investing/exposure-map-data.ts) — NOT live-DB
@@ -33,22 +31,11 @@ const CARD = "rounded-xl border border-black/10 dark:border-white/10 bg-white/60
 const MUTED = "text-[#15263c]/60 dark:text-[#eef3f8]/60";
 
 export default async function DependenciesPage() {
-  // STRICT: hold the hardcoded graph until the portal is backed by verified
-  // evidence — we never present curated relationships as if measured/live.
-  if (!HARDCODED_SURFACES_WIRED) {
-    return (
-      <main className="mx-auto max-w-6xl px-4 py-10">
-        <header className="mb-6">
-          <h1 className="font-[var(--font-display)] text-3xl font-extrabold tracking-tight">{TITLE}</h1>
-          <p className={`mt-2 max-w-3xl text-sm ${MUTED}`}>{DESCRIPTION}</p>
-        </header>
-        <DataUnavailable
-          title="Dependency graph unavailable"
-          detail="The dependency/encroachment graph appears only when backed by reviewed, source-backed evidence in our live data store. No reviewed evidence has been ingested yet, so we hold it rather than present curated relationships as if measured."
-        />
-      </main>
-    );
-  }
+  // UN-GATED 2026-07-02 (Mic ruling): the dependency/encroachment graph is
+  // CURATED ANALYST REFERENCE data — every edge carries a source + confidence,
+  // and the three-tier confidence partition below labels every edge (seed-tier
+  // edges render dashed, "plausible, not yet verified"). Same class as the
+  // taxonomy and the GSI delivery layer; never presented as live-DB fact.
 
   const edges = projectExposureToDependencyEdges();
   const byKind = summariseByKind(edges);
