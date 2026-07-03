@@ -12,6 +12,7 @@ import { NextResponse } from "next/server";
 import { getMember } from "@/lib/member/auth";
 import { isSameOrigin } from "@/lib/http/same-origin";
 import { PREP_KIT_ENABLED } from "@/lib/availability";
+import { reserveCredit } from "@/lib/billing/credits";
 import { getVendorScorecard } from "@/lib/assessment/domain-scores";
 import { ASSESSMENT_DOMAINS } from "@/lib/assessment/domain-rubric";
 import {
@@ -34,6 +35,15 @@ export async function POST(request: Request): Promise<Response> {
   const member = await getMember();
   if (!member) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   if (!PREP_KIT_ENABLED) return NextResponse.json({ error: "not_enabled" }, { status: 403 });
+
+  // C16 credit meter — inert unless BILLING_ENABLED (see interrogate route).
+  const reservation = await reserveCredit(member.subscriberId, "prep_kit");
+  if (!reservation.allowed) {
+    return NextResponse.json(
+      { error: "credit_limit", reason: reservation.reason, balance: reservation.balance },
+      { status: 402 },
+    );
+  }
 
   let body: unknown;
   try {
@@ -72,6 +82,9 @@ export async function POST(request: Request): Promise<Response> {
       { status: 502 },
     );
   }
+
+  // Commit one credit only for a REAL spend — a stub result (no API key) is free.
+  await reservation.commit(source === "anthropic");
 
   // Guarantee a useful kit (≥8 questions where possible): pad LLM output with the
   // deterministic fallback for any uncovered weak/insufficient/staple domain.
