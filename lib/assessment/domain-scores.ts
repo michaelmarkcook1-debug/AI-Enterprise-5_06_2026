@@ -14,6 +14,7 @@ import {
   type DomainScore,
   type RubricEvidenceRow,
 } from "./domain-rubric";
+import { accreditedCorrectedGrade } from "./accredited-sources";
 import { ARENA_ELO_SOURCE_URL } from "../system/elo-fetch";
 import { loadModelQualityDetails } from "./model-quality-score";
 import type { MqBlendResult } from "../system/model-quality-blend";
@@ -85,7 +86,11 @@ export function groupByDomain(rows: RawEvidenceRow[]): Map<DomainId, RubricEvide
     if (!ASSESSMENT_DOMAIN_SET.has(r.domain)) continue;
     const list = byDomain.get(r.domain) ?? [];
     list.push({
-      evidenceGrade: r.evidenceGrade,
+      // Accredited-certification grade floor (rubric-calibration correction,
+      // 2026-07 audit): an ISO/SOC 2/ISO 42001/FedRAMP/CSA-STAR source IS an
+      // independent audit per the rubric's own E5 definition — floor it at E4
+      // rather than leaving it mis-graded E2. Symmetric across all vendors.
+      evidenceGrade: accreditedCorrectedGrade(r.evidenceGrade, r.sourceUrl),
       rawScore: r.rawScore,
       // EvidenceRecord.confidence is written 0–1 (the classifier's Zod schema
       // enforces min(0).max(1) — lib/agents/evidence-classifier.ts:45) but the
