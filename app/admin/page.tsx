@@ -5,6 +5,7 @@ import { getQueueHealthSummary, EMPTY_QUEUE_HEALTH } from "@/lib/services/queue-
 import { listConnectorHealth, dashboardSummary } from "@/lib/connectors/registry";
 import { getLastRefreshRun, listRefreshRuns, type StoredRefreshRun } from "@/lib/system/daily-refresh-store";
 import IngestionTrigger from "@/components/admin/IngestionTrigger";
+import TriggerDailyRefresh from "@/components/admin/TriggerDailyRefresh";
 import BackfillSnapshotsButton from "@/components/admin/BackfillSnapshotsButton";
 import { adminPageGuard } from "@/components/admin/AdminPageGuard";
 
@@ -63,9 +64,17 @@ export default async function AdminHome() {
           </div>
         </div>
 
+        {/* Daily refresh — the cheap, day-to-day pipeline run (news, rankings,
+            derived scores). Distinct from the costly full-ingestion trigger
+            below: no cost gate, no token, live status bar via the same
+            polling pattern. */}
+        <div className="mt-6">
+          <TriggerDailyRefresh />
+        </div>
+
         {/* Manual ingestion control — automated ingestion is suspended; this
             is the only path that spends Anthropic credits, gated by a cost card. */}
-        <div className="mt-6">
+        <div className="mt-4">
           <IngestionTrigger />
         </div>
 

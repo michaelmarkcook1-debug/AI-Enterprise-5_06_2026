@@ -5,7 +5,7 @@
 import { after } from "next/server";
 import { isAdminRequest, unauthorized } from "@/lib/admin-auth";
 import { runDailyRefresh, DuplicateRunError } from "@/lib/system/daily-refresh";
-import { isRunActive } from "@/lib/system/daily-refresh-store";
+import { isRunActive, getLastRefreshRun } from "@/lib/system/daily-refresh-store";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -40,4 +40,16 @@ export async function POST(request: Request): Promise<Response> {
     ok: true,
     message: "Daily refresh started. Check /admin/pipeline-health for live status.",
   });
+}
+
+// GET ?status=1 — cookie-friendly status poll for the button's own status bar.
+// Mirrors /api/cron/daily-refresh?status=1 (same underlying run row) but gated
+// by isAdminRequest (accepts the ae_admin session cookie) instead of
+// isCronOrAdminRequest (header-only, deliberately excludes the human cookie) —
+// so the operator sees live progress with zero token friction while already on
+// an admin-gated page.
+export async function GET(request: Request): Promise<Response> {
+  if (!isAdminRequest(request)) return unauthorized();
+  const [run, active] = await Promise.all([getLastRefreshRun(), isRunActive()]);
+  return Response.json({ run, active });
 }
