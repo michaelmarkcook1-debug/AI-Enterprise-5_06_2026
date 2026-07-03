@@ -9,7 +9,13 @@ import { isRunActive } from "@/lib/system/daily-refresh-store";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-export const maxDuration = 30; // Fire-and-forget; pipeline runs in after()
+// The pipeline runs in after() AFTER the 202 response, but the function must
+// stay alive for the WHOLE run — after() is bounded by maxDuration, not by the
+// response. The full refresh takes ~8 min (good runs: 467–576s), so a 30s cap
+// killed it mid-`sourcing` (step 3), leaving the pipeline-health row frozen at
+// 2 steps / ok=false. Match the cron route's generous budget so the admin
+// "Run daily refresh now" button can actually complete a run. (2026-07-03 fix.)
+export const maxDuration = 800;
 
 export async function POST(request: Request): Promise<Response> {
   if (!isAdminRequest(request)) return unauthorized();
