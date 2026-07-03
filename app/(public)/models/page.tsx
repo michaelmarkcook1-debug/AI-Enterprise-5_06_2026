@@ -1,21 +1,17 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { absoluteUrl } from "@/lib/site";
-import {
-  getAllVendorSummaries,
-  getDashboardSummary,
-} from "@/lib/model-inventory/repository";
-import { HARDCODED_SURFACES_WIRED } from "@/lib/availability";
+import { getLiveModelInventory, type LiveModel } from "@/lib/model-inventory/live";
 import DataUnavailable from "@/components/DataUnavailable";
 
-// ISR: server-rendered + CDN-cached, revalidated hourly. STRICT mode: the model
-// inventory is hardcoded (lib/model-inventory/seed.ts), NOT live-DB verified
-// evidence, so it only renders when the portal is evidence-backed.
-export const revalidate = 3600;
+// Live, cited model inventory from ModelQualityBenchmark (LMArena Elo). Force-
+// dynamic so it always reflects the latest ingested benchmarks; no seed, no
+// hardcoded surface — a model shows ONLY when it has a real, source-linked row.
+export const dynamic = "force-dynamic";
 
 const TITLE = "AI Model Inventory";
 const DESCRIPTION =
-  "The commercial model inventory across enterprise AI vendors — first-party vs hosted, with explicit data-freshness and verification labels. No unlabelled estimates.";
+  "The commercial models across enterprise AI vendors, scored on independent, cited benchmarks — with explicit data-freshness. No unlabelled estimates.";
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -36,41 +32,53 @@ function Stat({ label, value }: { label: string; value: string | number }) {
   );
 }
 
+const CATEGORY_LABEL: Record<string, string> = {
+  overall: "Overall",
+  coding: "Coding",
+  hard_prompts: "Hard prompts",
+  vision: "Vision",
+  instruction_following: "Instruction",
+  math: "Math",
+  creative_writing: "Creative",
+};
+const catLabel = (c: string) => CATEGORY_LABEL[c] ?? c.replace(/_/g, " ");
+
+function freshness(m: LiveModel): string {
+  return m.publishDate ?? m.capturedAt.slice(0, 10);
+}
+
 export default async function ModelsPage() {
-  // STRICT: hold the hardcoded model inventory until evidence-backed.
-  if (!HARDCODED_SURFACES_WIRED) {
+  const inv = await getLiveModelInventory();
+
+  const header = (
+    <header className="mb-8">
+      <h1 className="font-[var(--font-display)] text-3xl font-extrabold tracking-tight">{TITLE}</h1>
+      <p className={`mt-2 max-w-2xl text-sm ${MUTED}`}>{DESCRIPTION}</p>
+    </header>
+  );
+
+  // Honest empty state — no benchmark evidence ingested (never a seed fallback).
+  if (inv.totalModels === 0) {
     return (
       <main className="mx-auto max-w-6xl px-4 py-10">
-        <header className="mb-8">
-          <h1 className="font-[var(--font-display)] text-3xl font-extrabold tracking-tight">{TITLE}</h1>
-          <p className={`mt-2 max-w-2xl text-sm ${MUTED}`}>{DESCRIPTION}</p>
-        </header>
+        {header}
         <DataUnavailable
           title="Model inventory unavailable"
-          detail="The commercial model inventory appears only when backed by reviewed, source-backed evidence in our live data store. No reviewed evidence has been ingested yet, so we hold it rather than show a hardcoded inventory as if current."
+          detail="The model inventory appears only when backed by reviewed, source-backed benchmark evidence in our live data store. None has been ingested yet, so we hold it rather than show a hardcoded inventory as if current."
         />
       </main>
     );
   }
 
-  const summary = getDashboardSummary();
-  const vendors = getAllVendorSummaries()
-    .slice()
-    .sort((a, b) => b.firstPartyActiveCount - a.firstPartyActiveCount || a.vendorName.localeCompare(b.vendorName));
-
   return (
     <main className="mx-auto max-w-6xl px-4 py-10">
-      <header className="mb-8">
-        <h1 className="font-[var(--font-display)] text-3xl font-extrabold tracking-tight">{TITLE}</h1>
-        <p className={`mt-2 max-w-2xl text-sm ${MUTED}`}>{DESCRIPTION}</p>
-      </header>
+      {header}
 
-      <section className="mb-10 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-        <Stat label="Vendors tracked" value={summary.totalTrackedVendors} />
-        <Stat label="With first-party models" value={summary.vendorsWithFirstPartyModels} />
-        <Stat label="Hosting third-party models" value={summary.vendorsWithHostedThirdPartyModels} />
-        <Stat label="Unknown / unverified" value={summary.vendorsUnknownOrUnverified} />
-        <Stat label="Stale inventories" value={summary.staleInventoryCount} />
+      <section className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <Stat label="Models scored" value={inv.totalModels} />
+        <Stat label="Vendors" value={inv.totalVendors} />
+        <Stat label="Benchmark source" value={inv.sources.map((s) => (s === "lmarena" ? "LMArena" : s)).join(", ")} />
+        <Stat label="Freshest data" value={inv.freshestPublishDate ?? "—"} />
       </section>
 
       <section className={CARD}>
@@ -78,40 +86,56 @@ export default async function ModelsPage() {
           <table className="w-full border-collapse text-sm">
             <thead>
               <tr className={`text-left ${MUTED}`}>
+                <th className="py-2 pr-4 font-medium">Model</th>
                 <th className="py-2 pr-4 font-medium">Vendor</th>
-                <th className="py-2 pr-4 font-medium tabular-nums">First-party</th>
-                <th className="py-2 pr-4 font-medium tabular-nums">Hosted 3P</th>
-                <th className="py-2 pr-4 font-medium">Primary families</th>
-                <th className="py-2 pr-4 font-medium">Data status</th>
-                <th className="py-2 pr-4 font-medium tabular-nums">Confidence</th>
+                <th className="py-2 pr-4 font-medium tabular-nums">Headline Elo</th>
+                <th className="py-2 pr-4 font-medium">Benchmarks</th>
+                <th className="py-2 pr-4 font-medium">As of</th>
+                <th className="py-2 pr-4 font-medium">Source</th>
               </tr>
             </thead>
             <tbody>
-              {vendors.map((v) => (
-                <tr key={v.vendorId} className="border-t border-black/5 dark:border-white/10 align-top">
-                  <td className="py-2 pr-4 font-medium">
-                    {v.vendorName}
-                    {v.uncertaintyBadge ? (
-                      <span className={`ml-2 text-xs ${MUTED}`}>· {v.uncertaintyBadge}</span>
-                    ) : null}
+              {inv.models.map((m) => (
+                <tr key={`${m.vendorId}-${m.modelName}`} className="border-t border-black/5 dark:border-white/10 align-top">
+                  <td className="py-2 pr-4 font-medium">{m.modelName}</td>
+                  <td className="py-2 pr-4">{m.vendorName}</td>
+                  <td className="py-2 pr-4 tabular-nums">
+                    {Math.round(m.headlineRating)}
+                    <span className={`ml-1 text-xs ${MUTED}`}>{catLabel(m.headlineCategory)}</span>
                   </td>
-                  <td className="py-2 pr-4 tabular-nums">{v.firstPartyActiveCount}</td>
-                  <td className="py-2 pr-4 tabular-nums">{v.hostedThirdPartyCount}</td>
-                  <td className="py-2 pr-4">{v.primaryModelFamilies.slice(0, 3).join(", ") || "—"}</td>
                   <td className="py-2 pr-4">
-                    <span className="rounded-full border border-black/10 dark:border-white/15 px-2 py-0.5 text-xs">
-                      {v.dataStatus}
+                    <span className="flex flex-wrap gap-1">
+                      {m.categories.slice(0, 5).map((c) => (
+                        <span
+                          key={c.category}
+                          className="rounded-full border border-black/10 dark:border-white/15 px-2 py-0.5 text-xs tabular-nums"
+                          title={c.voteCount ? `${c.voteCount.toLocaleString()} votes` : undefined}
+                        >
+                          {catLabel(c.category)} {Math.round(c.rating)}
+                        </span>
+                      ))}
                     </span>
                   </td>
-                  <td className="py-2 pr-4 tabular-nums">{Math.round(v.confidenceScore)}%</td>
+                  <td className="py-2 pr-4 whitespace-nowrap">{freshness(m)}</td>
+                  <td className="py-2 pr-4">
+                    <a
+                      href={m.sourceUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="underline underline-offset-2"
+                    >
+                      {m.source === "lmarena" ? "LMArena" : m.source}
+                    </a>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
         <p className={`mt-4 text-xs ${MUTED}`}>
-          Counts reflect source-backed records only. Vendors marked seed/unknown have insufficient
-          verified evidence and are reported as such rather than estimated upward.
+          Every rating is an independent LMArena Elo, linked to its leaderboard source and dated. Models
+          appear only when a cited benchmark row exists — none are estimated. A vendor&apos;s absence
+          means no benchmarked model, not a low score.
         </p>
       </section>
 
