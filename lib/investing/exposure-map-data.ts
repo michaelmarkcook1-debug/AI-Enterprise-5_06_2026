@@ -3,6 +3,9 @@
 // Hand-curated edge list for the dashboard hero map. Every edge here
 // is either source-backed (HIGH / MEDIUM) or explicitly marked SEED
 // when the relationship is plausible but not independently verified.
+// Since Evidence-Depth Job A the exported EXPOSURE_EDGES are the base list
+// MERGED with the cited-edge dataset (lib/graph/cited-edges.ts — imports only
+// TYPES from this file, so there is no runtime cycle).
 //
 // VERIFICATION RULES followed when building this file:
 //   1. Public investment relationships require documented funding-round
@@ -17,6 +20,8 @@
 //      They appear at SEED with a clear summary or are omitted entirely.
 //   5. Vague category buckets ("frontier labs", "AI infrastructure")
 //      are NOT used — every node is a named company.
+
+import { CITED_NEW_NODES, mergeCitedEdges } from "../graph/cited-edges";
 
 export type RelationshipType =
   | "investment"
@@ -173,6 +178,9 @@ export const EXPOSURE_NODES: ExposureMapNode[] = [
     category: "China · vertically integrated", logoDomain: "baidu.com", monogram: "Er", brandColor: "#2932E1" },
   { id: "hunyuan", label: "Tencent Hunyuan", side: "right", ownership: "subsidiary",
     category: "China · consumer + cloud", logoDomain: "tencent.com", monogram: "Hy", brandColor: "#1B73E8" },
+  // Evidence-Depth Job A — nodes required by the cited-edge dataset (real
+  // entities; structural identity only). Defined in lib/graph/cited-edges.ts.
+  ...CITED_NEW_NODES,
 ];
 
 /** Subset of right-side nodes shown only when "Extended ecosystem" is toggled on. */
@@ -197,7 +205,7 @@ export const EXTENDED_ECOSYSTEM_NODE_IDS: ReadonlySet<string> = new Set([]);
 //   SEED    — plausible but not independently verified. Operator
 //             should treat as a hypothesis.
 
-export const EXPOSURE_EDGES: ExposureMapEdge[] = [
+const BASE_EXPOSURE_EDGES: ExposureMapEdge[] = [
   // ─── Microsoft ─────────────────────────────────────────────
   {
     id: "msft-openai",
@@ -531,6 +539,13 @@ export const EXPOSURE_EDGES: ExposureMapEdge[] = [
   // ─── Microsoft — Falcon (Azure sovereign catalog) ──────────
   { id: "msft-falcon", sourceId: "MSFT", targetId: "falcon", relationshipType: "model_hosting", strengthScore: 0.45, confidence: "medium", estimatedValue: "Azure catalog", dateUpdated: "2024-05-22", summary: "Falcon family available in the Azure AI Foundry model catalog — sovereign + Microsoft distribution channel.", sourceUrls: ["https://learn.microsoft.com/en-us/azure/ai-foundry/foundry-models/"] },
 ];
+
+// Evidence-Depth Job A — the graph every consumer reads is the curated base
+// MERGED with the cited-edge dataset (lib/graph/cited-edges.ts): a cited edge
+// replaces its matching curated edge (dashed "plausible" → cited row with an
+// honest tier prefix), and new cited pairs append. LOI/Derived map to the
+// "seed" tier so they render dashed — never as done deals.
+export const EXPOSURE_EDGES: ExposureMapEdge[] = mergeCitedEdges(BASE_EXPOSURE_EDGES);
 
 // ──────────────── Sanity check ────────────────
 // Catch missing-target / missing-source IDs at import time so a stale
