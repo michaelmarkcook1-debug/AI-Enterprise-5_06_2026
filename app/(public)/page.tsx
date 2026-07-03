@@ -251,6 +251,10 @@ export default async function HomePage() {
                 </li>
               ))}
             </ul>
+            <p className={`mt-2 text-[10px] ${MUTED}`}>
+              Derived only for vendors with mapped market roles — absence here is
+              under-coverage, not an all-clear.
+            </p>
           </div>
         )}
       </section>

@@ -69,6 +69,9 @@ const GRADE_RANK: Record<string, number> = { E0: 0, E1: 1, E2: 2, E3: 3, E4: 4, 
 
 export interface ProjectorResult {
   scannedEvidenceRows: number;
+  /** Rows beyond the runaway-safety ceiling that were NOT projected (0 in
+   *  normal operation — nonzero is an operator alarm, never silent). */
+  truncatedEvidenceRows: number;
   vendorsResolved: number;
   vendorsSkipped: { vendorId: string; reason: string }[];
   capabilitiesUpserted: number;
@@ -128,27 +131,52 @@ export async function projectEvidenceToIntelligence(
   options: { newsLimit?: number; rowLimit?: number } = {},
 ): Promise<ProjectorResult> {
   const startedAt = new Date();
-  const rowLimit = options.rowLimit ?? 5000;
+  // 2026-07 fix: the old default (5,000, newest-first, single query) SILENTLY
+  // dropped the OLDEST rows once the corpus outgrew it — at 5,495 verified rows
+  // the 495 oldest signals simply stopped contributing to pillar scores. Now we
+  // page through ALL verified rows; the limit is a generous runaway-safety
+  // ceiling only, and hitting it is REPORTED (truncatedEvidenceRows), never
+  // silent. Rows are small (narrow select), so even 50k ≈ a few MB.
+  const rowLimit = options.rowLimit ?? 50_000;
   const newsLimit = options.newsLimit ?? 15;
 
-  // 1. Pull every verified evidence row (newest first so news projection
-  // gets the most recent items by default).
-  const rows: VerifiedRow[] = (await prisma.evidenceRecord.findMany({
-    where: { reviewStatus: "analyst_verified" },
-    orderBy: { capturedAt: "desc" },
-    take: rowLimit,
-    select: {
-      id: true,
-      vendorId: true,
-      domain: true,
-      subfactor: true,
-      excerpt: true,
-      evidenceGrade: true,
-      rawScore: true,
-      capturedAt: true,
-      sourceUrl: true,
-    },
-  })) as unknown as VerifiedRow[];
+  // 1. Pull every verified evidence row, newest first (stable cursor pagination
+  // — capturedAt has ties, so id is the cursor key).
+  const rows: VerifiedRow[] = [];
+  const PAGE_SIZE = 5_000;
+  let cursorId: string | undefined;
+  for (;;) {
+    const page = (await prisma.evidenceRecord.findMany({
+      where: { reviewStatus: "analyst_verified" },
+      orderBy: [{ capturedAt: "desc" }, { id: "desc" }],
+      take: Math.min(PAGE_SIZE, rowLimit - rows.length),
+      ...(cursorId ? { cursor: { id: cursorId }, skip: 1 } : {}),
+      select: {
+        id: true,
+        vendorId: true,
+        domain: true,
+        subfactor: true,
+        excerpt: true,
+        evidenceGrade: true,
+        rawScore: true,
+        capturedAt: true,
+        sourceUrl: true,
+      },
+    })) as unknown as (VerifiedRow & { id: string })[];
+    rows.push(...page);
+    if (page.length < PAGE_SIZE || rows.length >= rowLimit) break;
+    cursorId = page[page.length - 1].id;
+  }
+  // Loud, honest truncation signal — only possible at the safety ceiling.
+  const truncatedEvidenceRows =
+    rows.length >= rowLimit
+      ? Math.max(0, (await prisma.evidenceRecord.count({ where: { reviewStatus: "analyst_verified" } })) - rows.length)
+      : 0;
+  if (truncatedEvidenceRows > 0) {
+    console.error(
+      `[intelligence-projector] evidence corpus exceeds the ${rowLimit}-row safety ceiling — ${truncatedEvidenceRows} oldest rows NOT projected. Raise options.rowLimit.`,
+    );
+  }
 
   // 2. Build the plain → vendor_* map by looking up which
   // IntelligenceVendor ids actually exist (so we don't insert orphans).
@@ -368,6 +396,7 @@ impactScore: Math.max(75, Math.min(100, row.rawScore || 75)),
   const finishedAt = new Date();
   return {
     scannedEvidenceRows: rows.length,
+    truncatedEvidenceRows,
     vendorsResolved: plainToIntelligence.size,
     vendorsSkipped,
     capabilitiesUpserted,
@@ -433,11 +462,31 @@ export async function projectEvidenceToPillarScores(
   prisma: PrismaClient,
   now: Date = new Date(),
 ): Promise<PillarProjectionResult> {
-  const rows = (await prisma.evidenceRecord.findMany({
-    where: { reviewStatus: "analyst_verified" },
-    select: { vendorId: true, domain: true, evidenceGrade: true, rawScore: true, capturedAt: true },
-    take: 10000,
-  })) as Array<{ vendorId: string; domain: string; evidenceGrade: string; rawScore: number; capturedAt: Date }>;
+  // 2026-07 fix: was `take: 10000` with NO orderBy — an ARBITRARY subset once
+  // the corpus outgrew it. Page through ALL verified rows (stable id cursor);
+  // the ceiling is runaway-safety only and hitting it logs loudly.
+  const ROW_CEILING = 50_000;
+  const PAGE_SIZE = 5_000;
+  type PillarRow = { id: string; vendorId: string; domain: string; evidenceGrade: string; rawScore: number; capturedAt: Date };
+  const rows: PillarRow[] = [];
+  let cursorId: string | undefined;
+  for (;;) {
+    const page = (await prisma.evidenceRecord.findMany({
+      where: { reviewStatus: "analyst_verified" },
+      select: { id: true, vendorId: true, domain: true, evidenceGrade: true, rawScore: true, capturedAt: true },
+      orderBy: { id: "desc" },
+      take: Math.min(PAGE_SIZE, ROW_CEILING - rows.length),
+      ...(cursorId ? { cursor: { id: cursorId }, skip: 1 } : {}),
+    })) as PillarRow[];
+    rows.push(...page);
+    if (page.length < PAGE_SIZE || rows.length >= ROW_CEILING) break;
+    cursorId = page[page.length - 1].id;
+  }
+  if (rows.length >= ROW_CEILING) {
+    console.error(
+      `[intelligence-projector] pillar projection hit the ${ROW_CEILING}-row safety ceiling — oldest rows not projected; raise the ceiling.`,
+    );
+  }
 
   if (rows.length === 0) {
     return { scannedRows: 0, pillarRowsUpserted: 0, vendorsTouched: 0, shifts: [] };

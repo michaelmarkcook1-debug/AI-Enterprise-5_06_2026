@@ -34,7 +34,10 @@ const SOURCE_CATEGORIES = [
 
 // The projector caps each recompute at 5,000 evidence rows (see
 // intelligence-projector rowLimit) — surface that ceiling honestly if a run hits it.
-const RECOMPUTE_ROW_CAP = 5000;
+// 2026-07 fix: the recompute now pages through ALL verified rows — this is the
+// runaway-safety CEILING only (matches intelligence-projector.ts), not a per-run
+// cap. Was 5,000, which silently dropped the oldest rows once the corpus grew.
+const RECOMPUTE_ROW_CAP = 50000;
 
 export default function IngestionConsole({
   hasDatabase,
@@ -327,10 +330,10 @@ export default function IngestionConsole({
                 {verifiedSignals.toLocaleString()}
               </span>
               <span className="text-[#3f5068] dark:text-[#a7bacd]">
-                verified evidence signal{verifiedSignals === 1 ? "" : "s"} to process this run
+                verified evidence signal{verifiedSignals === 1 ? "" : "s"} to process this run — all of them
                 {verifiedSignals > RECOMPUTE_ROW_CAP && (
-                  <span className="ml-1 text-[#a07f1f] dark:text-[#d4af37]">
-                    · capped at {RECOMPUTE_ROW_CAP.toLocaleString()}/run (newest first)
+                  <span className="ml-1 text-rose-600 dark:text-rose-400">
+                    · exceeds the {RECOMPUTE_ROW_CAP.toLocaleString()}-row safety ceiling — oldest rows will be skipped and reported
                   </span>
                 )}
               </span>

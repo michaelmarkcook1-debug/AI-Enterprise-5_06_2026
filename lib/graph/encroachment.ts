@@ -37,11 +37,25 @@ export function buildRolesByNodeId(): Map<string, string[]> {
   return out;
 }
 
+// Roles too COARSE to imply head-to-head product competition (2026-07 audit):
+// a shared "Infrastructure Player" tag made data-centre operators (xAI, Oracle)
+// read as NVIDIA's silicon rivals, and "Investor" is a capital axis, not a
+// product layer. Overlap must be in a genuine product-competition layer.
+const OVERLAP_EXCLUDED_ROLES = new Set(["Infrastructure Player", "Investor"]);
+
 /**
  * Derive `threatens` edges from `depends_on` edges + role overlap. Each output
- * edge X→Y means "X (Y's supplier) is positioned to encroach on Y". Confidence
+ * edge X→Y means "X (Y's dependent) is positioned to encroach on Y". Confidence
  * is capped (it's an inference, not the dependency's own grade) and the source
  * URLs of the underlying dependency are carried through for traceability.
+ *
+ * 2026-07 audit hardening:
+ *  - subsidiary edges never derive encroachment (ownership ≠ competition);
+ *  - both sides resolve through NODE_TO_SLUG — same underlying entity ⇒ skip
+ *    (kills "Alphabet encroaches on Google DeepMind" self-edges);
+ *  - overlap must be in a product layer (see OVERLAP_EXCLUDED_ROLES);
+ *  - reciprocal pairs collapse to the single stronger direction, annotated as
+ *    mutual, instead of two independent max-strength arrows.
  */
 export function deriveEncroachmentEdges(
   dependencyEdges: DependencyEdge[],
@@ -53,14 +67,23 @@ export function deriveEncroachmentEdges(
 
   for (const dep of dependencyEdges) {
     if (dep.direction !== "depends_on") continue;
+    // Ownership is not competition — a parent/subsidiary link never encroaches.
+    if (dep.relationshipType === "subsidiary") continue;
     const dependent = dep.fromVendorId; // Y depends on…
     const provider = dep.toVendorId; // …X
     if (dependent === provider) continue;
+    // Same underlying entity under two node ids (deepmind→google, nemotron→
+    // nvidia): a firm cannot encroach on itself.
+    const slugA = NODE_TO_SLUG[dependent];
+    const slugB = NODE_TO_SLUG[provider];
+    if (slugA && slugB && slugA === slugB) continue;
 
     const rolesY = rolesByNodeId.get(dependent);
     const rolesX = rolesByNodeId.get(provider);
     if (!rolesX || !rolesY) continue;
-    const shared = rolesX.filter((r) => rolesY.includes(r));
+    const shared = rolesX.filter(
+      (r) => rolesY.includes(r) && !OVERLAP_EXCLUDED_ROLES.has(r),
+    );
     if (shared.length === 0) continue;
 
     // Direction: the DEPENDENT that also operates in its provider's layer is the
@@ -84,7 +107,32 @@ export function deriveEncroachmentEdges(
     if (!existing || edge.strength > existing.strength) seen.set(key, edge);
   }
 
-  return [...seen.values()].sort(
+  // Collapse reciprocal pairs (A→B and B→A): keep the stronger direction
+  // (deterministic tie-break), annotate it as mutual — one arrow per rivalry,
+  // never two independent "eating each other's lunch" claims at equal weight.
+  const out = new Map<string, DependencyEdge>();
+  for (const e of seen.values()) {
+    const reverseKey = `${e.toVendorId}->${e.fromVendorId}`;
+    const reverse = seen.get(reverseKey);
+    if (!reverse) {
+      out.set(`${e.fromVendorId}->${e.toVendorId}`, e);
+      continue;
+    }
+    // Reciprocal exists — keep the stronger (tie → lexicographic from-id).
+    const keep =
+      e.strength !== reverse.strength
+        ? e.strength > reverse.strength ? e : reverse
+        : e.fromVendorId < reverse.fromVendorId ? e : reverse;
+    const pairKey = `${keep.fromVendorId}->${keep.toVendorId}`;
+    if (!out.has(pairKey) && !out.has(`${keep.toVendorId}->${keep.fromVendorId}`)) {
+      out.set(pairKey, {
+        ...keep,
+        rationale: `${keep.rationale} (Reciprocal dependency exists — mutual encroachment potential; showing the stronger direction.)`,
+      });
+    }
+  }
+
+  return [...out.values()].sort(
     (a, b) => b.strength - a.strength || a.fromVendorId.localeCompare(b.fromVendorId),
   );
 }

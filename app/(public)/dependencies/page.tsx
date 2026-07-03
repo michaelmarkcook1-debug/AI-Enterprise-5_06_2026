@@ -125,8 +125,11 @@ export default async function DependenciesPage() {
         </p>
         <p className={`mb-4 text-xs ${MUTED}`}>
           Each line combines a <strong>source-backed dependency</strong> with a{" "}
-          <strong>role overlap</strong>: a supplier that also operates in its customer&apos;s layer
-          is positioned to compete. We show these only where both hold — never as a measured claim.
+          <strong>role overlap</strong> in a genuine product layer: a dependent that also operates
+          in its supplier&apos;s layer is positioned to compete. We show these only where both hold —
+          never as a measured claim — and only for vendors with mapped market roles, so absence
+          here is under-coverage, not an all-clear. Reciprocal rivalries render once, in the
+          stronger direction.
         </p>
         {encroachments.length === 0 ? (
           <p className={`text-sm ${MUTED}`}>No role-overlap encroachment signals in the current data.</p>
