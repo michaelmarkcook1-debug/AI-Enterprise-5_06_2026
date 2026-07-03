@@ -28,6 +28,10 @@ export type EnvKey =
   | "SOURCING_LOG_DIR"
   | "PRICING_ENABLED"
   | "BILLING_ENABLED"
+  | "GITHUB_INBOX_TOKEN"
+  | "GITHUB_INBOX_REPO"
+  | "GITHUB_INBOX_BRANCH"
+  | "GITHUB_INBOX_PATH"
   | "NODE_ENV"
   | "VERCEL_ENV";
 
@@ -205,6 +209,38 @@ export const ENV_SPEC: EnvVarSpec[] = [
     severity: "optional",
     enables: ["Entitlement enforcement + credit metering on the two premium LLM actions"],
     remediation: "Optional. Set to '1' ONLY when billing is truly live (terms, tax, refunds, payment processor wired). Never captures a card on its own.",
+    secret: false,
+  },
+  {
+    key: "GITHUB_INBOX_TOKEN",
+    description: "Read-only GitHub PAT for the routine-intel repo relay (2026-07-03: the AI-competitive-intel Routine's sandbox blocks outbound calls to our domain, so it drops JSON files in the repo instead and we PULL them via the GitHub API).",
+    severity: "optional",
+    enables: ["Pulling the competitive-intel routine's findings/proposals from its GitHub inbox branch"],
+    remediation: "Optional — only the routine-inbox pull step needs it; everything else works without it. Create a fine-grained PAT scoped to THIS repo only, Contents: Read-only, then `vercel env add GITHUB_INBOX_TOKEN production`.",
+    secret: true,
+  },
+  {
+    key: "GITHUB_INBOX_REPO",
+    description: "owner/repo for the routine-intel inbox. Defaults to this repo if unset.",
+    severity: "optional",
+    enables: ["Routine-inbox pull targeting"],
+    remediation: "Optional — defaults to michaelmarkcook1-debug/AI-Enterprise-5_06_2026.",
+    secret: false,
+  },
+  {
+    key: "GITHUB_INBOX_BRANCH",
+    description: "Git branch the routine pushes its JSON inbox files to. Defaults to 'routine-intel-inbox'. This branch is Vercel-ignored (vercel.json ignoreCommand) so it never triggers a preview build/Neon branch.",
+    severity: "optional",
+    enables: ["Routine-inbox pull targeting"],
+    remediation: "Optional — defaults to routine-intel-inbox.",
+    secret: false,
+  },
+  {
+    key: "GITHUB_INBOX_PATH",
+    description: "Directory (within the inbox branch) the routine drops JSON files into. Defaults to 'routine-inbox'.",
+    severity: "optional",
+    enables: ["Routine-inbox pull targeting"],
+    remediation: "Optional — defaults to routine-inbox.",
     secret: false,
   },
   {

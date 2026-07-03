@@ -34,6 +34,7 @@
 import { runSourcing } from "../sourcing/runner";
 import { submitExtractionBatch, collectExtractionBatches } from "../sourcing/batch-runner";
 import { runWebEvidenceSweep } from "../sourcing/web-evidence-runner";
+import { pullRoutineInbox } from "../ingest/github-inbox";
 import { ensureVendorProfilesForSpine } from "../services/vendor-id-bridge";
 import { runNewsSourcing } from "../sourcing/news-runner";
 import { runMarketNewsIngestion } from "../sourcing/market-news-runner";
@@ -318,6 +319,26 @@ export async function runDailyRefresh(
       firstError: r.errors[0]?.error,
       costBasis: "estimated (runner not token-instrumented)",
       estimatedCostUsd,
+    };
+  });
+
+  // ── 1c. Routine-intel GitHub inbox pull ─────────────────────
+  //     2026-07-03: the external AI-competitive-intel Routine's sandbox blocks
+  //     outbound calls to our domain, so it drops JSON files on a dedicated,
+  //     Vercel-ignored branch instead and we PULL them here via the GitHub API.
+  //     Non-LLM, cheap, honest no-op when GITHUB_INBOX_TOKEN is unset.
+  await trackedStep("routine_inbox_pull", async () => {
+    const r = await pullRoutineInbox(now);
+    return {
+      configured: r.configured,
+      filesProcessed: r.filesProcessed,
+      filesSkippedAlreadyProcessed: r.filesSkippedAlreadyProcessed,
+      findingsAccepted: r.findingsAccepted,
+      findingsRejectedCount: r.findingsRejected.length,
+      proposalsAccepted: r.proposalsAccepted,
+      proposalsRejectedCount: r.proposalsRejected.length,
+      firstRejectionReason: r.findingsRejected[0]?.reason ?? r.proposalsRejected[0]?.reason,
+      error: r.error,
     };
   });
 
