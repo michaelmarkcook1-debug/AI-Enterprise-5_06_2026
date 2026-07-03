@@ -45,22 +45,25 @@ export function deriveGraphTakeaway(
   const side = new Map(EXPOSURE_NODES.map((n) => [n.id, n.side] as const));
   const isLab = (id: string) => side.get(id) === "right";
 
-  // Chokepoints: distinct labs (right-side) that depend on each provider (the
-  // left-side source) across compute/cloud/capital. A lab depending on TSMC for
-  // fab or NVIDIA/AWS for compute is real leverage — that's the signal.
+  // Chokepoints: distinct labs (right-side) that depend on each provider across
+  // compute/cloud/capital. Since the 2026-07 direction fix the projection emits
+  // fromVendorId = DEPENDENT, toVendorId = PROVIDER (it used to be inverted and
+  // this module silently compensated) — so a lab depending on TSMC/NVIDIA/AWS is
+  // from=lab, to=provider. That dependency is real leverage — the signal.
   const labsByProvider = new Map<string, Set<string>>();
   for (const e of dependsOn) {
-    if (!LEVERAGE_KINDS.has(e.kind) || !isLab(e.toVendorId) || isLab(e.fromVendorId)) continue;
-    const set = labsByProvider.get(e.fromVendorId) ?? new Set<string>();
-    set.add(e.toVendorId);
-    labsByProvider.set(e.fromVendorId, set);
+    if (!LEVERAGE_KINDS.has(e.kind) || !isLab(e.fromVendorId) || isLab(e.toVendorId)) continue;
+    const set = labsByProvider.get(e.toVendorId) ?? new Set<string>();
+    set.add(e.fromVendorId);
+    labsByProvider.set(e.toVendorId, set);
   }
   const choke = rank(labsByProvider, 3);
 
-  // Ubiquity: how many counterparties are tied to each model (right-side node).
+  // Ubiquity: how many counterparties depend on each right-side MODEL owner —
+  // model-kind edges only (an infra tie between two labs is not model ubiquity).
   const tiesByModel = new Map<string, Set<string>>();
   for (const e of dependsOn) {
-    if (!isLab(e.toVendorId)) continue;
+    if (e.kind !== "model" || !isLab(e.toVendorId)) continue;
     const set = tiesByModel.get(e.toVendorId) ?? new Set<string>();
     set.add(e.fromVendorId);
     tiesByModel.set(e.toVendorId, set);

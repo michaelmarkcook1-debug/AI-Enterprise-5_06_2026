@@ -165,16 +165,16 @@ export const CITED_EDGES: CitedEdge[] = [
     sourceUrl: "https://www.cnbc.com/2025/09/24/microsoft-adds-anthropic-model-to-microsoft-365-copilot.html", strengthScore: 0.7 },
   // row 26 — four NAMED encroachers, one Derived edge each:
   { id: "cited-26a-googl-nvda", datasetRow: 26, sourceId: "GOOGL", targetId: "NVDA", relationshipType: "supply_chain", tier: "derived", asOf: "2026-07-01",
-    detail: "Google TPU: hyperscaler ASICs ~44.6% CAGR, targeting inference — structural threat to NVIDIA's ~80% share.",
+    detail: "Google TPU: hyperscaler ASICs eroding NVIDIA's accelerator share (86% → ~75%, 2024→2026E per the cited analysis; 40–65% TCO advantage on inference) — structural threat.",
     sourceUrl: "https://siliconanalysts.com/research/ai-data-center-value-chain", strengthScore: 0.5 },
   { id: "cited-26b-amzn-nvda", datasetRow: 26, sourceId: "AMZN", targetId: "NVDA", relationshipType: "supply_chain", tier: "derived", asOf: "2026-07-01",
-    detail: "AWS Trainium: hyperscaler ASICs ~44.6% CAGR, targeting inference — structural threat to NVIDIA's ~80% share.",
+    detail: "AWS Trainium: hyperscaler ASICs eroding NVIDIA's accelerator share (86% → ~75%, 2024→2026E per the cited analysis; 40–65% TCO advantage on inference) — structural threat.",
     sourceUrl: "https://siliconanalysts.com/research/ai-data-center-value-chain", strengthScore: 0.5 },
   { id: "cited-26c-msft-nvda", datasetRow: 26, sourceId: "MSFT", targetId: "NVDA", relationshipType: "supply_chain", tier: "derived", asOf: "2026-07-01",
-    detail: "Microsoft Maia: hyperscaler ASICs ~44.6% CAGR, targeting inference — structural threat to NVIDIA's ~80% share.",
+    detail: "Microsoft Maia: hyperscaler ASICs eroding NVIDIA's accelerator share (86% → ~75%, 2024→2026E per the cited analysis; 40–65% TCO advantage on inference) — structural threat.",
     sourceUrl: "https://siliconanalysts.com/research/ai-data-center-value-chain", strengthScore: 0.5 },
   { id: "cited-26d-meta-nvda", datasetRow: 26, sourceId: "meta", targetId: "NVDA", relationshipType: "supply_chain", tier: "derived", asOf: "2026-07-01",
-    detail: "Meta MTIA: hyperscaler ASICs ~44.6% CAGR, targeting inference — structural threat to NVIDIA's ~80% share.",
+    detail: "Meta MTIA: hyperscaler ASICs eroding NVIDIA's accelerator share (86% → ~75%, 2024→2026E per the cited analysis; 40–65% TCO advantage on inference) — structural threat.",
     sourceUrl: "https://siliconanalysts.com/research/ai-data-center-value-chain", strengthScore: 0.5 },
 ];
 
@@ -194,6 +194,12 @@ export function citedToExposureEdge(c: CitedEdge): ExposureMapEdge {
     dateUpdated: c.asOf,
     summary: `[${TIER_LABEL[c.tier]} · as-of ${c.asOf}] ${c.detail}${c.sourceNote ? ` (source: ${c.sourceNote})` : ""}`,
     sourceUrls: [c.sourceUrl],
+    // Explicit dependency semantics (the dataset is authored semantically):
+    // capital flows source→target ⇒ the recipient (target) depends; every other
+    // cited row is authored consumer→provider ⇒ the source depends (OpenAI
+    // depends on Azure/NVIDIA; the hyperscalers depend on NVIDIA today; MSFT
+    // Copilot depends on the models it hosts).
+    dependentId: c.relationshipType === "investment" ? c.targetId : c.sourceId,
   };
 }
 

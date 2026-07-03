@@ -71,6 +71,17 @@ export interface ExposureMapEdge {
   summary: string;
   /** Public URLs supporting the claim. */
   sourceUrls: string[];
+  /** Which node is the DEPENDENT in this relationship (who relies on whom).
+   *  The map's authoring convention is LAYOUT-driven (left column → right
+   *  column), NOT semantic — so the dependent varies by relationship type:
+   *  capital flows source→target (target depends), base cloud/supply edges are
+   *  authored provider→consumer (target depends), model_hosting is consumer→
+   *  model-owner (source depends). When absent, the projection resolves it via
+   *  the per-type default (see dependency-projection.ts); set it explicitly to
+   *  override (the cited-edge dataset always sets it). 2026-07 encroachment
+   *  audit: the old blanket "source depends on target" assumption produced
+   *  backwards rationales like "NVIDIA relies on xAI for capital". */
+  dependentId?: string;
 }
 
 // ──────────────── Node registry ────────────────

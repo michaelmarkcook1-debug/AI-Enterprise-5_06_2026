@@ -82,22 +82,55 @@ export interface DependencyEdge {
 }
 
 /**
+ * Which node DEPENDS in this relationship. 2026-07 encroachment audit: the old
+ * blanket "source depends on target" produced backwards dependencies (and thus
+ * backwards encroachment rationales like "NVIDIA relies on xAI for capital" —
+ * NVIDIA is xAI's INVESTOR). The base map is authored layout-first
+ * (left column → right column), so the semantic dependent varies by type:
+ *   investment / subsidiary — capital/ownership flows source→target ⇒ the
+ *     TARGET depends (the lab needs the investor's capital; the sub its parent).
+ *   cloud / supply_chain    — base edges are authored provider→consumer ⇒ the
+ *     TARGET depends (Meta depends on NVIDIA silicon; xAI on OCI).
+ *   model_hosting           — the platform consumes the lab's models for its
+ *     own products ⇒ the SOURCE depends (Microsoft depends on OpenAI models).
+ *   commercial_partnership  — roughly symmetric ⇒ keep SOURCE (status quo).
+ * An edge can override explicitly via `dependentId` (the cited dataset does).
+ */
+const TARGET_DEPENDS: ReadonlySet<RelationshipType> = new Set([
+  "investment",
+  "subsidiary",
+  "cloud",
+  "supply_chain",
+]);
+
+function dependentOf(e: (typeof EXPOSURE_EDGES)[number]): string {
+  if (e.dependentId === e.sourceId || e.dependentId === e.targetId) return e.dependentId;
+  return TARGET_DEPENDS.has(e.relationshipType) ? e.targetId : e.sourceId;
+}
+
+/**
  * Project the curated exposure edges into dependency-graph edges. Deterministic
  * and stable: same input → same output, ordered by source then target.
+ * fromVendorId is ALWAYS the dependent (direction "depends_on" is true by
+ * construction); toVendorId is the provider.
  */
 export function projectExposureToDependencyEdges(): DependencyEdge[] {
-  return EXPOSURE_EDGES.map((e) => ({
-    fromVendorId: e.sourceId,
-    toVendorId: e.targetId,
-    kind: KIND_MAP[e.relationshipType],
-    direction: "depends_on" as const,
-    strength: Math.round(Math.max(0, Math.min(1, e.strengthScore)) * 100),
-    rationale: e.summary,
-    sourceUrls: e.sourceUrls ?? [],
-    confidence: CONFIDENCE_MAP[e.confidence],
-    evidenceGrade: GRADE_MAP[e.confidence],
-    relationshipType: e.relationshipType,
-  })).sort((a, b) =>
+  return EXPOSURE_EDGES.map((e) => {
+    const dependent = dependentOf(e);
+    const provider = dependent === e.sourceId ? e.targetId : e.sourceId;
+    return {
+      fromVendorId: dependent,
+      toVendorId: provider,
+      kind: KIND_MAP[e.relationshipType],
+      direction: "depends_on" as const,
+      strength: Math.round(Math.max(0, Math.min(1, e.strengthScore)) * 100),
+      rationale: e.summary,
+      sourceUrls: e.sourceUrls ?? [],
+      confidence: CONFIDENCE_MAP[e.confidence],
+      evidenceGrade: GRADE_MAP[e.confidence],
+      relationshipType: e.relationshipType,
+    };
+  }).sort((a, b) =>
     a.fromVendorId.localeCompare(b.fromVendorId) || a.toVendorId.localeCompare(b.toVendorId),
   );
 }
