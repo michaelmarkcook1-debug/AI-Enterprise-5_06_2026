@@ -5,8 +5,9 @@
 // banner while BILLING_ENABLED is off so nobody mistakes it for a live checkout.
 
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { absoluteUrl } from "@/lib/site";
-import { BILLING_ENABLED } from "@/lib/availability";
+import { BILLING_ENABLED, PRICING_ENABLED } from "@/lib/availability";
 import { PLANS, annualMonthlyUsd, type Feature } from "@/lib/billing/plans";
 import PricingTable, { type PlanView, type MatrixRow } from "@/components/pricing/PricingTable";
 
@@ -37,6 +38,12 @@ const FEATURE_LABELS: { feature: Feature; label: string }[] = [
 ];
 
 export default function PricingPage() {
+  // Paywall/pricing surface is hidden until the owner deliberately reveals it
+  // (PRICING_ENABLED=1). While off, the page 404s — no pricing/paywall is visible
+  // anywhere on the live site (nav link already hidden, enforcement already off).
+  // The scaffold stays intact behind the flag; flip it to bring pricing back.
+  if (!PRICING_ENABLED) notFound();
+
   const plans: PlanView[] = PLANS.map((p) => ({
     id: p.id,
     name: p.name,
