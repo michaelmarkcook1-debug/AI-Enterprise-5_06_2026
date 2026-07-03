@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import PublicNav from "@/components/public/PublicNav";
+import { PRICING_ENABLED } from "@/lib/availability";
 import PublicFooter from "@/components/public/PublicFooter";
 import IntentBeacon from "@/components/IntentBeacon";
 import AmbientHeroBackdrop from "@/components/AmbientHeroBackdrop";
@@ -15,7 +16,7 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
       <AmbientHeroBackdrop />
       <IntentBeacon />
       <div className="relative z-10 flex min-h-screen flex-col">
-        <PublicNav />
+        <PublicNav pricingEnabled={PRICING_ENABLED} />
         <div className="flex-1">{children}</div>
         <PublicFooter />
       </div>

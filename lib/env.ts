@@ -26,6 +26,8 @@ export type EnvKey =
   | "REFRESH_DAY_CAP_USD"
   | "SOURCING_BATCH_MODE"
   | "SOURCING_LOG_DIR"
+  | "PRICING_ENABLED"
+  | "BILLING_ENABLED"
   | "NODE_ENV"
   | "VERCEL_ENV";
 
@@ -187,6 +189,22 @@ export const ENV_SPEC: EnvVarSpec[] = [
     severity: "optional",
     enables: ["Forensic tail of every fetch/extract/classify/promote step"],
     remediation: "Optional. Defaults to <cwd>/logs/sourcing. On Vercel, point to /tmp or ship logs via OTel.",
+    secret: false,
+  },
+  {
+    key: "PRICING_ENABLED",
+    description: "C16: reveal the pricing tier ladder / /pricing page + upgrade UI. Default OFF.",
+    severity: "optional",
+    enables: ["Public pricing page + nav entry + upgrade CTAs (shows plans; does not charge)"],
+    remediation: "Optional. Set to '1' only when the pricing surface should be visible. Charging is a separate switch (BILLING_ENABLED).",
+    secret: false,
+  },
+  {
+    key: "BILLING_ENABLED",
+    description: "C16: ENFORCE tier entitlements + meter credit hard-caps. Default OFF (owner-owned money switch).",
+    severity: "optional",
+    enables: ["Entitlement enforcement + credit metering on the two premium LLM actions"],
+    remediation: "Optional. Set to '1' ONLY when billing is truly live (terms, tax, refunds, payment processor wired). Never captures a card on its own.",
     secret: false,
   },
   {

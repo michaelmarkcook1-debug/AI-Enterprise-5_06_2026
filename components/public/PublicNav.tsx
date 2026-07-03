@@ -13,7 +13,7 @@ import { usePathname } from "next/navigation";
 import { usePortalTheme } from "@/lib/use-theme";
 import BrandLogo from "@/components/BrandLogo";
 
-const NAV: { href: string; label: string }[] = [
+const BASE_NAV: { href: string; label: string }[] = [
   { href: "/use-cases", label: "Start here" },
   { href: "/vendors", label: "Rankings" },
   { href: "/models", label: "Models" },
@@ -25,10 +25,14 @@ function isActive(pathname: string, href: string) {
   return href === "/" ? pathname === "/" : pathname.startsWith(href);
 }
 
-export default function PublicNav() {
+// `pricingEnabled` is resolved SERVER-SIDE (from PRICING_ENABLED) and passed in —
+// the C16 pricing flag is a server env var, so it must not be read in this client
+// component (it would strip to false in the browser bundle). Default off.
+export default function PublicNav({ pricingEnabled = false }: { pricingEnabled?: boolean }) {
   const pathname = usePathname();
   const [theme, setTheme] = usePortalTheme();
   const [open, setOpen] = useState(false);
+  const NAV = pricingEnabled ? [...BASE_NAV, { href: "/pricing", label: "Pricing" }] : BASE_NAV;
 
   return (
     <header className="sticky top-0 z-30 border-b border-[#d4af37]/30 bg-[#0a1f38]/[0.97] backdrop-blur dark:border-[#d4af37]/20 dark:bg-[#071827]/[0.97]">

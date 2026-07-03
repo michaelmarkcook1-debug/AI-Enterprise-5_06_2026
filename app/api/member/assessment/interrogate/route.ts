@@ -15,6 +15,7 @@ import { NextResponse } from "next/server";
 import { getMember } from "@/lib/member/auth";
 import { isSameOrigin } from "@/lib/http/same-origin";
 import { INTERROGATE_ENABLED } from "@/lib/availability";
+import { reserveCredit } from "@/lib/billing/credits";
 import { getVendorScorecard, getVendorScorecardsBatch, type VendorScorecard } from "@/lib/assessment/domain-scores";
 import { resolveDomainWeights } from "@/lib/assessment/category-weights";
 import { DEFAULT_DOMAIN_WEIGHTS, activeDomains, type DomainWeights } from "@/lib/assessment/composite";
@@ -66,6 +67,18 @@ export async function POST(request: Request): Promise<Response> {
   const member = await getMember();
   if (!member) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   if (!INTERROGATE_ENABLED) return NextResponse.json({ error: "not_enabled" }, { status: 403 });
+
+  // 4. C16 credit meter. INERT unless BILLING_ENABLED — when off, `reserve` is
+  // always allowed and commits nothing, so live behaviour is unchanged. When on,
+  // this blocks 402 if the plan doesn't include Interrogate or the hard cap is
+  // hit; the credit is committed below ONLY if a real (anthropic) LLM call ran.
+  const reservation = await reserveCredit(member.subscriberId, "interrogate");
+  if (!reservation.allowed) {
+    return NextResponse.json(
+      { error: "credit_limit", reason: reservation.reason, balance: reservation.balance },
+      { status: 402 },
+    );
+  }
 
   let body: unknown;
   try {
@@ -132,6 +145,9 @@ export async function POST(request: Request): Promise<Response> {
       { status: 502 },
     );
   }
+
+  // Commit one credit only for a REAL spend — a stub result (no API key) is free.
+  await reservation.commit(lens.source === "anthropic");
 
   const sessionLens = buildSessionLens({
     scope: scopeRef,

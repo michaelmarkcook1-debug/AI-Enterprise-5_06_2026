@@ -108,3 +108,25 @@ export const PREP_KIT_ENABLED: boolean = true;
  * the investor surface is deliberately revived (an owner decision).
  */
 export const INVESTOR_TOOLS_ENABLED: boolean = process.env.INVESTOR_TOOLS_ENABLED === "1";
+
+/**
+ * C16 pricing scaffold — SHOW the tier ladder / pricing page + upgrade UI.
+ * Default OFF: the /pricing page, nav entry, and any upgrade CTAs stay hidden
+ * until the owner deliberately reveals the pricing surface. This is the
+ * "shelves are being stocked" switch — turning it on shows the plans but does
+ * NOT by itself charge or enforce anything (see BILLING_ENABLED). Flip via
+ * PRICING_ENABLED=1. See remaining-roadmap/C16_Pricing-Scaffold.md.
+ */
+export const PRICING_ENABLED: boolean = process.env.PRICING_ENABLED === "1";
+
+/**
+ * C16 pricing scaffold — ENFORCE entitlements + meter credits (the money switch).
+ * Default OFF and OWNER-OWNED: while off, entitlement checks are permissive and
+ * the credit meter records nothing, so the app behaves exactly as it does today
+ * (the two premium LLM actions stay open, gated only by INTERROGATE_ENABLED /
+ * PREP_KIT_ENABLED). Turning this on makes the tier matrix + hard credit caps
+ * bite. It NEVER captures a card or charges on its own — real payment capture is
+ * a separate, deliberate switch-on the owner performs (terms, tax, refunds,
+ * payment processor). Flip via BILLING_ENABLED=1 only when billing is truly live.
+ */
+export const BILLING_ENABLED: boolean = process.env.BILLING_ENABLED === "1";
