@@ -536,14 +536,22 @@ export async function getBreakingNews(
     ? Math.floor((Date.now() - Date.parse(latestPublishedAt)) / 86_400_000)
     : null;
 
-  // Rank by importance (impact) first, then recency — so "top N" means the
-  // most consequential stories, and dedup keeps the strongest instance.
-  const ranked = [...all].sort(
-    (a, b) => b.impactScore - a.impactScore || (a.publishedAt < b.publishedAt ? 1 : -1),
-  );
+  // Rank by RECENCY-WEIGHTED importance — the freshest consequential stories
+  // lead, which is what "breaking" should mean. A raw impact-only sort pinned a
+  // headline to the top for its whole 14-day window purely on impact, so the
+  // panel felt frozen even as fresher news arrived. We decay impact by age
+  // (4-day half-life): a day-old 82 now outranks a five-day-old 97. Impact still
+  // dominates among same-day items; recency breaks the "why is last week still
+  // on top" problem. Ordering only — impact remains a directional estimate.
+  const HALF_LIFE_DAYS = 4;
+  const rankScore = (n: NewsItem): number => {
+    const ageDays = Math.max(0, (Date.now() - Date.parse(n.publishedAt)) / 86_400_000);
+    return n.impactScore * Math.pow(0.5, ageDays / HALF_LIFE_DAYS);
+  };
+  const ranked = [...all].sort((a, b) => rankScore(b) - rankScore(a));
 
   // Dedup the same story (re-ingested, multi-sourced, or machine-titled twins).
-  // `ranked` is impact-desc then recency, so the strongest instance is kept.
+  // `ranked` is recency-weighted-impact desc, so the strongest instance is kept.
   const dedupe = (list: NewsItem[]): NewsItem[] => {
     const seen = new Set<string>();
     const out: NewsItem[] = [];

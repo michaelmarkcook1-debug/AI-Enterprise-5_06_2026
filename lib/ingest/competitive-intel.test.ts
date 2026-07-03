@@ -5,6 +5,7 @@ import {
   validateFinding,
   validateProposal,
   newsItemId,
+  deriveExternalImpact,
   type ExternalFinding,
   type ExternalProposal,
 } from "./competitive-intel";
@@ -83,6 +84,34 @@ describe("validateProposal — model channel (triage queue)", () => {
   });
   it("rejects unknown vendors", () => {
     expect(validateProposal(proposal({ vendorId: "nope" }), VENDORS)).toMatch(/unknown vendorId/);
+  });
+});
+
+describe("deriveExternalImpact — importance so real intel reaches Breaking", () => {
+  it("a routine-supplied impactScore always wins", () => {
+    expect(deriveExternalImpact(finding({ impactScore: 12 }))).toBe(12);
+    expect(deriveExternalImpact(finding({ impactScore: 99 }))).toBe(99);
+  });
+  it("every cited item clears the Breaking floor (>=50) — no more silent 40 default", () => {
+    // A plain item with none of the boost keywords still ranks as newsworthy.
+    expect(deriveExternalImpact(finding({
+      title: "Cohere opens a new London office",
+      summary: "Cohere expands its European presence with a new central-London site.",
+      whyItMatters: "Signals continued European go-to-market investment by Cohere.",
+    }))).toBeGreaterThanOrEqual(50);
+  });
+  it("scores major market events higher than routine press", () => {
+    const funding = deriveExternalImpact(finding({ title: "Anthropic raises $65B Series H", category: "funding" }));
+    const launch = deriveExternalImpact(finding({ title: "OpenAI launches GPT-5.5", category: "model_release" }));
+    const press = deriveExternalImpact(finding({
+      title: "Mistral publishes a research blog post",
+      summary: "A short technical write-up on inference latency improvements in the API.",
+      whyItMatters: "Minor technical note, limited enterprise decision relevance for Mistral.",
+      category: "press_coverage",
+    }));
+    expect(funding).toBeGreaterThan(press);
+    expect(launch).toBeGreaterThan(press);
+    expect(funding).toBeGreaterThanOrEqual(80); // billion-dollar event
   });
 });
 

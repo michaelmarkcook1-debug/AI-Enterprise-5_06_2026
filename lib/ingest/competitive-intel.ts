@@ -89,6 +89,42 @@ function parsePublishedAt(s: string): Date | null {
 const clamp01to100 = (n: number | undefined, fallback: number) =>
   typeof n === "number" && Number.isFinite(n) ? Math.min(100, Math.max(0, Math.round(n))) : fallback;
 
+/**
+ * Directional importance (0–100) for an external finding that DIDN'T supply its
+ * own impactScore. This drives ordering only — the "Breaking" strip ranks by
+ * impact then recency and floors at 50 — and impact is already surfaced to users
+ * as a DIRECTIONAL estimate ("directional estimates, not measured market data"),
+ * never as a measured fact. So deriving it from the item's own text/category is
+ * honest signal, not fabrication.
+ *
+ * Before this, external findings fell back to a flat 40 — below the Breaking
+ * floor — so genuinely major stories (funding rounds, model launches) a routine
+ * surfaced never reached the headline strip. Now a cited competitive-intel item
+ * is at least Breaking-eligible (baseline 55), with big market events scored up.
+ */
+export function deriveExternalImpact(f: ExternalFinding): number {
+  if (typeof f.impactScore === "number" && Number.isFinite(f.impactScore)) {
+    return clamp01to100(f.impactScore, 55); // a routine-stated score always wins
+  }
+  const text = `${f.title} ${f.summary} ${f.whyItMatters}`.toLowerCase();
+  const cat = (f.category ?? "").toLowerCase();
+  let score = 55; // baseline: a real, cited competitive-intel item is newsworthy
+  if (/fund|raise|series|valuation|ipo/.test(cat) || /\braises?\b|\bfunding\b|series [a-h]\b|\bipo\b|valuation/.test(text)) {
+    score = 82; // funding rounds / IPOs / valuations — major market events
+  } else if (/launch|release|model|unveil|announce/.test(cat) || /\blaunch|\brelease|unveil|debut|rolls? out/.test(text)) {
+    score = 74; // product / model launches
+  } else if (/partner|acqui|merger|deal/.test(cat) || /partnership|acquir|acquisition|merger|joint venture/.test(text)) {
+    score = 66; // partnerships / M&A
+  } else if (/regulat|lawsuit|ban|investigat|antitrust/.test(text)) {
+    score = 62; // regulatory / legal
+  } else if (/hire|appoint|joins|departs|steps down|ceo|cto/.test(cat + " " + text)) {
+    score = 52; // key hires / leadership moves
+  }
+  // Big-money boost — a headline dollar figure signals a consequential story.
+  if (/\$\s?\d+(\.\d+)?\s?(b|bn|billion)\b|\bbillion\b/.test(text)) score = Math.max(score, 80);
+  return score;
+}
+
 /** null = valid; string = rejection reason. `knownVendors` = live roster ids. */
 export function validateFinding(f: ExternalFinding, knownVendors: Set<string>): string | null {
   if (!f || typeof f !== "object") return "not an object";
@@ -134,7 +170,7 @@ export function newsItemId(vendorId: string, sourceUrl: string, publishedAt: str
 export async function persistFinding(db: PrismaClient, f: ExternalFinding): Promise<void> {
   const publishedDay = f.publishedAt.slice(0, 10);
   const id = newsItemId(f.vendorId, f.sourceUrl, publishedDay);
-  const impact = clamp01to100(f.impactScore, 40); // conservative default — below the breaking-news floor
+  const impact = deriveExternalImpact(f); // content-derived importance (routine score wins if given)
   const confidence = clamp01to100(f.confidenceScore, 50);
   const categories = [f.category?.trim() || "market", "external_intel"];
   await db.intelligenceNewsItem.upsert({
