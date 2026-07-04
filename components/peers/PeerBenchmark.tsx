@@ -284,7 +284,7 @@ export default function PeerBenchmark({ companyIds }: { companyIds?: string[] } 
                     </p>
                   )}
                   <ul className={`mt-1.5 space-y-0.5 text-[11px] ${MUTED}`}>
-                    {s.citations.map((cite) => (
+                    {(s.citations ?? []).map((cite) => (
                       <li key={cite.url}>
                         <a href={cite.url} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-[#15263c] dark:hover:text-[#eef3f8]">
                           {cite.title}

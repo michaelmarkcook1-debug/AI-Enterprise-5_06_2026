@@ -34,7 +34,7 @@ export function disclosedAdoptersOf(vendorId: string): DisclosedAdopter[] {
       company: { id: c.id, name: c.name, industry: c.industry },
       summary: s.summary,
       status: s.status,
-      citations: s.citations,
+      citations: s.citations ?? [],
     });
   }
   return out;

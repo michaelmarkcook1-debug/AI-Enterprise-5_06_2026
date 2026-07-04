@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import CohortExplorer from "@/components/peers/CohortExplorer";
 import TabChat from "@/components/chat/TabChat";
 import { SIGNAL_KINDS } from "@/lib/peer/heatmap";
+import { RUBRIC_TEXT } from "@/lib/peer/rubric";
 import { absoluteUrl } from "@/lib/site";
 
 // Peer-AI benchmark — the demand-side twin of the vendor assessment.
@@ -48,11 +49,18 @@ export default function PeersPage() {
         <h2 className="font-[var(--font-display)] text-xl font-extrabold tracking-tight">
           How to read this
         </h2>
+        <p className={`mt-1 text-xs ${MUTED}`}>
+          Each band is <strong>computed from a documented rubric</strong> over observable
+          evidence — never assigned on judgment or graded by an LLM. The per-signal rule:
+        </p>
         <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {SIGNAL_KINDS.map((k) => (
             <div key={k.kind} className="rounded-lg border border-black/5 p-4 dark:border-white/10">
               <h3 className="text-sm font-semibold">{k.label}</h3>
               <p className={`mt-1 text-xs leading-5 ${MUTED}`}>{k.description}</p>
+              <p className="mt-1.5 text-[11px] leading-5 text-[#b08d2f] dark:text-[#d4af37]">
+                Rubric: {RUBRIC_TEXT[k.kind]}
+              </p>
             </div>
           ))}
           <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-4">
@@ -61,7 +69,7 @@ export default function PeersPage() {
               We show what a company has publicly disclosed or what is externally
               observable. We never claim how a company uses AI internally when that is
               private — those cells read “not disclosed”, and inferences carry an
-              explicit “est.” flag with the disclosed metrics they draw on.
+              explicit “est.” flag. Bands trace to real disclosed facts; nothing is invented.
             </p>
           </div>
         </div>

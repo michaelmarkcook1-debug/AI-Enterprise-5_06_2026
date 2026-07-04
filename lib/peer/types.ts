@@ -57,8 +57,11 @@ export interface PeerSignal {
   /** For inferred signals: what the inference is drawn FROM (disclosed usage
    *  stats etc.). Rendered next to the est. flag. */
   inferenceNote?: string;
-  /** ≥1 required for disclosed/inferred; MUST be empty for not_disclosed. */
-  citations: PeerCitation[];
+  /** Supporting citations. OPTIONAL by policy (owner ruling 2026-07-04: bands
+   *  are set by the rubric from real data — a per-cell citation is no longer
+   *  required). When present they MUST be real https sources; data is NEVER
+   *  invented regardless. Empty/absent for not_disclosed. */
+  citations?: PeerCitation[];
   /** platform_integration only: tracked vendor ids (bare, e.g. "openai") the
    *  peer has disclosed adopting — cross-linked to /vendors/{id}. Validated
    *  against TRACKED_VENDOR_NAMES by tests. */

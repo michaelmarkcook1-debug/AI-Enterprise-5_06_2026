@@ -170,7 +170,7 @@ export function buildPeersTabSnapshot(peerIds?: string[]): TabEvidenceSnapshot |
       const estFlag = s.status === "inferred" ? " [est. — inferred, not asserted]" : "";
       facts.push(`${label}: ${levelWord} (analyst-curated qualitative reading)${estFlag}. ${s.summary ?? ""}`.trim());
       if (s.status === "inferred" && s.inferenceNote) facts.push(`  ↳ ${s.inferenceNote}`);
-      for (const cite of s.citations) {
+      for (const cite of s.citations ?? []) {
         citations.push({ sourceUrl: cite.url, note: `${cite.publisher}${cite.publishedAt ? ` · ${cite.publishedAt}` : ""}` });
       }
     }

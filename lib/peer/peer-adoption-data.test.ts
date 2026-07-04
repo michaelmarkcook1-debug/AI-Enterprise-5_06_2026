@@ -23,12 +23,10 @@ describe("peer-adoption dataset integrity", () => {
     }
   });
 
-  it("every disclosed/inferred signal has ≥1 real https citation", () => {
+  it("citations are OPTIONAL (owner ruling) — but when present must be real https sources", () => {
     for (const c of PEER_COMPANIES) {
       for (const s of c.signals) {
-        if (s.status === "not_disclosed") continue;
-        expect(s.citations.length, `${c.id}/${s.kind}`).toBeGreaterThan(0);
-        for (const cite of s.citations) {
+        for (const cite of s.citations ?? []) {
           expect(cite.url, `${c.id}/${s.kind}`).toMatch(/^https:\/\/.+/);
           expect(cite.title.length, `${c.id}/${s.kind}`).toBeGreaterThan(0);
           expect(cite.publisher.length, `${c.id}/${s.kind}`).toBeGreaterThan(0);
@@ -44,7 +42,8 @@ describe("peer-adoption dataset integrity", () => {
         expect(s.level, `${c.id}/${s.kind}`).toBeUndefined();
         expect(s.rubricBasis, `${c.id}/${s.kind}`).toBeUndefined();
         expect(s.summary, `${c.id}/${s.kind}`).toBeUndefined();
-        expect(s.citations, `${c.id}/${s.kind}`).toEqual([]);
+        // citations optional now → must be absent or empty for not_disclosed.
+        expect(s.citations ?? [], `${c.id}/${s.kind}`).toEqual([]);
       }
     }
   });
