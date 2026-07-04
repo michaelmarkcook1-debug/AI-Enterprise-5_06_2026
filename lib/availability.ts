@@ -151,6 +151,23 @@ export const PREP_KIT_ENABLED: boolean = true;
 export const TAB_CHAT_ENABLED: boolean = true;
 
 /**
+ * Developer-sentiment AS A RANKING VARIABLE (dev-sentiment spec, consumer #2).
+ * OFF by default and deliberately so: the dev-sentiment SIGNAL is compiled,
+ * cited, and surfaced today (Developer-sentiment panel on coding-vendor
+ * profiles), but BLENDING it into the coding-model composite is a significant,
+ * public-methodology change gated on three locks from the spec:
+ *   1. the weight is set by category rationale + DOCUMENTED in the public
+ *      methodology, NEVER tuned to move a specific vendor (zero pay-to-play);
+ *   2. it is coverage/confidence-gated — a thin model is discounted and reads
+ *      "insufficient", never scored on noise;
+ *   3. scope: coding / developer-agent categories ONLY.
+ * Plus Mic sign-off + legal OK on any Reddit data (not used yet). Until this is
+ * true the composite is UNCHANGED — the signal is a distinct labelled panel,
+ * not folded into a score. Flip to true only after the weight is signed off.
+ */
+export const DEV_SENTIMENT_IN_RANKING: boolean = false;
+
+/**
  * Investor-tools gate — PARKED per the Chris change-list CUT/PARK ("Investor
  * tools — already parked by you; keep parked. Not part of the buyer's job.").
  * Default OFF: the daily-refresh investor step (SEC financials, valuations,

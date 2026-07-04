@@ -45,6 +45,8 @@ import ImplementationPartnersPanel from "@/components/vendor/ImplementationPartn
 import { disclosedAdoptersOf } from "@/lib/peer/adopters";
 import DisclosedAdoptersPanel from "@/components/peers/DisclosedAdoptersPanel";
 import TabChat from "@/components/chat/TabChat";
+import { aggregateDevSentiment } from "@/lib/dev-sentiment/aggregate";
+import DevSentimentPanel from "@/components/dev-sentiment/DevSentimentPanel";
 import { getVendorScorecard, getModelQualityBreakdown } from "@/lib/assessment/domain-scores";
 import { MODEL_QUALITY_CATEGORIES } from "@/lib/system/model-quality-blend";
 import DomainScorecard from "@/components/assessment/DomainScorecard";
@@ -607,6 +609,10 @@ export default async function VendorDeepDivePage({
   // vendor — curated cited reference data (lib/peer), same provenance class as
   // the delivery layer; renders independent of the score gating.
   const peerAdopters = disclosedAdoptersOf(intelId);
+  // Developer-community sentiment — SCOPED: null for non-coding vendors, so the
+  // panel only renders for the coding/developer models (hard "where applicable"
+  // rule). Cited tri-source signal, coverage-gated.
+  const devSentiment = aggregateDevSentiment(intelId);
 
   // Phase 3 Assessment scorecard — 12-domain 0–5 scores from REAL analyst_verified
   // evidence (deterministic, no LLM, never seed). Keyed on entity.id to match
@@ -810,6 +816,13 @@ export default async function VendorDeepDivePage({
             <section className="mt-6">
               <Panel title="Disclosed enterprise adopters">
                 <DisclosedAdoptersPanel vendorName={entity.name} adopters={peerAdopters} />
+              </Panel>
+            </section>
+          )}
+          {devSentiment && (
+            <section className="mt-6">
+              <Panel title="Developer sentiment">
+                <DevSentimentPanel agg={devSentiment} />
               </Panel>
             </section>
           )}
@@ -1084,6 +1097,15 @@ export default async function VendorDeepDivePage({
           <section className="mb-6">
             <Panel title="Disclosed enterprise adopters">
               <DisclosedAdoptersPanel vendorName={entity.name} adopters={peerAdopters} />
+            </Panel>
+          </section>
+        )}
+
+        {/* ── Developer sentiment (coding vendors ONLY — scoped, cited) ────── */}
+        {devSentiment && (
+          <section className="mb-6">
+            <Panel title="Developer sentiment">
+              <DevSentimentPanel agg={devSentiment} />
             </Panel>
           </section>
         )}
