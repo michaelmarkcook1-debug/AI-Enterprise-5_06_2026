@@ -217,7 +217,7 @@ export default function PeerBenchmark({ companyIds }: { companyIds?: string[] } 
 
         {/* Legend */}
         <div className={`mt-4 flex flex-wrap items-center gap-x-4 gap-y-1.5 border-t border-black/5 pt-3 text-[11px] dark:border-white/10 ${MUTED}`}>
-          <span className="font-semibold">Scale (qualitative, analyst-curated from the citations):</span>
+          <span className="font-semibold">Scale (computed from cited evidence via the documented rubric):</span>
           {(Object.keys(LEVEL_BG) as unknown as (1 | 2 | 3 | 4)[]).map((lvl) => (
             <span key={lvl} className="inline-flex items-center gap-1">
               <span className={`inline-block h-3 w-3 rounded ${LEVEL_BG[lvl]}`} aria-hidden />

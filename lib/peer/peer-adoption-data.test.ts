@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import { PEER_COMPANIES } from "./peer-adoption-data";
 import { buildPeerHeatmap, SIGNAL_KINDS } from "./heatmap";
 import { TRACKED_VENDOR_NAMES } from "../sourcing/ai-news-manifest";
+import { computePeerBand } from "./rubric";
 import type { PeerSignalKind } from "./types";
 
 // Fabrication guards — the dataset's honesty contract, enforced.
@@ -36,13 +37,25 @@ describe("peer-adoption dataset integrity", () => {
     }
   });
 
-  it("not_disclosed signals make NO claim: no level, no summary, no citations", () => {
+  it("not_disclosed signals make NO claim: no level, no rubricBasis, no summary, no citations", () => {
     for (const c of PEER_COMPANIES) {
       for (const s of c.signals) {
         if (s.status !== "not_disclosed") continue;
         expect(s.level, `${c.id}/${s.kind}`).toBeUndefined();
+        expect(s.rubricBasis, `${c.id}/${s.kind}`).toBeUndefined();
         expect(s.summary, `${c.id}/${s.kind}`).toBeUndefined();
         expect(s.citations, `${c.id}/${s.kind}`).toEqual([]);
+      }
+    }
+  });
+
+  it("STEP 0: every rated band is COMPUTED from its rubricBasis — never analyst-assigned", () => {
+    for (const c of PEER_COMPANIES) {
+      for (const s of c.signals) {
+        if (s.status === "not_disclosed") continue;
+        expect(s.rubricBasis, `${c.id}/${s.kind} needs a rubricBasis`).toBeDefined();
+        const computed = computePeerBand(s.kind, s.rubricBasis!, s.status);
+        expect(s.level, `${c.id}/${s.kind} band must equal the rubric output`).toBe(computed);
       }
     }
   });

@@ -44,9 +44,14 @@ export type PeerSignalStatus = "disclosed" | "inferred" | "not_disclosed";
 export interface PeerSignal {
   kind: PeerSignalKind;
   status: PeerSignalStatus;
-  /** Present ONLY when status !== "not_disclosed". Analyst-curated qualitative
-   *  reading of the citations below — labelled as such in the UI. */
+  /** Present ONLY when status !== "not_disclosed". COMPUTED from `rubricBasis`
+   *  via lib/peer/rubric.ts (Step 0 red line) — pinned by a test so it can never
+   *  drift from its cited evidence. Not an analyst-assigned number. */
   level?: PeerSignalLevel;
+  /** The countable cited evidence the band is computed from (# adoptions, #
+   *  products, patent/talent tier, or an est. inferred intensity). Required for
+   *  rated signals; absent for not_disclosed. See RubricBasis. */
+  rubricBasis?: import("./rubric").RubricBasis;
   /** What the citations actually say, plainly. Absent for not_disclosed. */
   summary?: string;
   /** For inferred signals: what the inference is drawn FROM (disclosed usage

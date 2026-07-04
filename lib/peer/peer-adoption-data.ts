@@ -3,11 +3,19 @@
 // CURATED ANALYST data (the lib/delivery/seed.ts class): every rated cell
 // traces to the real, named, web-verified citations attached to it — compiled
 // 2026-07-04 from company newsrooms, vendor case studies, reputable press and
-// the Evident AI Index. Levels are an analyst-curated qualitative reading OF
-// those citations (labelled as such in the UI), never a measured score.
+// the Evident AI Index.
+//
+// STEP 0 RED LINE (Adoption-Signal pipeline): the BAND is not analyst-assigned —
+// it is COMPUTED from the cell's `rubricBasis` (countable cited evidence: #
+// disclosed adoptions, # shipped products, patent/talent tier, or an est.
+// inferred intensity) via lib/peer/rubric.ts, and pinned by a test so it can
+// never drift from its evidence. The analyst compiles the FACTS + counts + the
+// citations; the documented rubric sets the band.
 //
 // HARD RULES (enforced by peer-adoption-data.test.ts):
-//   • disclosed/inferred → ≥1 real https citation; not_disclosed → none.
+//   • disclosed/inferred → ≥1 real https citation + a rubricBasis; the level
+//     EQUALS computePeerBand(kind, rubricBasis, status).
+//   • not_disclosed → no level, no rubricBasis, no citations.
 //   • automation_intensity is NEVER "disclosed" — it is an inference from
 //     disclosed usage/efficiency stats, always est-flagged.
 //   • No claim, anywhere, about private internal usage. Gaps read
@@ -34,7 +42,8 @@ export const PEER_COMPANIES: PeerCompany[] = [
       {
         kind: "platform_integration",
         status: "disclosed",
-        level: 4,
+        rubricBasis: { adoptions: 2 },
+        level: 3,
         summary:
           "LLM Suite — an internal portal wrapping frontier models — is disclosed as using OpenAI and Anthropic models, with ~250,000 employees (all but branch/call-centre staff) having access.",
         citations: [
@@ -58,6 +67,7 @@ export const PEER_COMPANIES: PeerCompany[] = [
       {
         kind: "talent_exposure",
         status: "disclosed",
+        rubricBasis: { talentTier: "top5" },
         level: 3,
         summary:
           "Ranked #1 overall in the Evident AI Index for the fourth consecutive time (first in Innovation, Leadership and Transparency; second in Talent), with roughly one in forty employees working on AI per Evident's tracking.",
@@ -79,6 +89,7 @@ export const PEER_COMPANIES: PeerCompany[] = [
       {
         kind: "patent_velocity",
         status: "disclosed",
+        rubricBasis: { patentTier: "significant" },
         level: 3,
         summary:
           "One of the three banks (with Capital One and Bank of America) that together account for ~75% of all AI patents across the 50 banks Evident tracks; Evident also credits its AI research team as the sector's strongest.",
@@ -100,6 +111,7 @@ export const PEER_COMPANIES: PeerCompany[] = [
       {
         kind: "product_footprint",
         status: "disclosed",
+        rubricBasis: { products: 1, flagshipScale: true },
         level: 4,
         summary:
           "LLM Suite shipped firm-wide (summer 2024; zero to 200,000 onboarded users in eight months) and was named American Banker's 2025 'Innovation of the Year'.",
@@ -122,6 +134,7 @@ export const PEER_COMPANIES: PeerCompany[] = [
       {
         kind: "automation_intensity",
         status: "inferred",
+        rubricBasis: { inferredIntensity: 3 },
         level: 3,
         summary:
           "Deep day-to-day penetration of AI into working practice, inferred from disclosed usage: ~half of the 250,000 enabled employees use LLM Suite roughly daily, and the firm cites tasks like drafting an investment-banking deck in ~30 seconds.",
@@ -150,7 +163,8 @@ export const PEER_COMPANIES: PeerCompany[] = [
       {
         kind: "platform_integration",
         status: "disclosed",
-        level: 3,
+        rubricBasis: { adoptions: 1 },
+        level: 2,
         summary:
           "A disclosed, multi-year OpenAI partnership powers three shipped tools: AI @ Morgan Stanley Assistant (GPT-4), Debrief (Whisper + GPT-4 meeting summaries) and AskResearchGPT (institutional securities).",
         citations: [
@@ -189,7 +203,8 @@ export const PEER_COMPANIES: PeerCompany[] = [
       {
         kind: "product_footprint",
         status: "disclosed",
-        level: 3,
+        rubricBasis: { products: 3 },
+        level: 4,
         summary:
           "Three OpenAI-powered tools shipped across Wealth Management and Institutional Securities: the Assistant (launched Sept 2023), Debrief (meeting notes with client consent) and AskResearchGPT (over 70,000 proprietary reports a year made queryable).",
         citations: [
@@ -210,6 +225,7 @@ export const PEER_COMPANIES: PeerCompany[] = [
       {
         kind: "automation_intensity",
         status: "inferred",
+        rubricBasis: { inferredIntensity: 3 },
         level: 3,
         summary:
           "High advisor-workflow penetration, inferred from disclosed adoption: 98% of advisor teams use the AI @ Morgan Stanley Assistant, and OpenAI's case study reports document-retrieval effectiveness rising from ~20% to ~80%.",
@@ -237,6 +253,7 @@ export const PEER_COMPANIES: PeerCompany[] = [
       {
         kind: "platform_integration",
         status: "disclosed",
+        rubricBasis: { adoptions: 3 },
         level: 3,
         summary:
           "The firm-wide GS AI Assistant is disclosed as multi-model: OpenAI's GPT-4o/o3-mini family, Google's Gemini 2.0 Flash and Anthropic's Claude 3.7 Sonnet, among others.",
@@ -269,7 +286,8 @@ export const PEER_COMPANIES: PeerCompany[] = [
       {
         kind: "product_footprint",
         status: "disclosed",
-        level: 3,
+        rubricBasis: { products: 1, flagshipScale: true },
+        level: 4,
         summary:
           "GS AI Assistant launched firm-wide across the ~46,500-person workforce (June 2025) after a 10,000-employee rollout, spanning Investment Banking and Wealth Management — document summarisation, drafting and data analysis.",
         citations: [
@@ -284,6 +302,7 @@ export const PEER_COMPANIES: PeerCompany[] = [
       {
         kind: "automation_intensity",
         status: "inferred",
+        rubricBasis: { inferredIntensity: 2 },
         level: 2,
         summary:
           "Growing but earlier-stage workflow penetration, inferred from the disclosed rollout arc: ~10,000 active users at the start of 2025 scaling to firm-wide availability by mid-2025.",
@@ -311,6 +330,7 @@ export const PEER_COMPANIES: PeerCompany[] = [
       {
         kind: "platform_integration",
         status: "disclosed",
+        rubricBasis: { adoptions: 1 },
         level: 2,
         summary:
           "A disclosed multi-year strategic agreement with Google Cloud (October 2024): workload migration plus Vertex AI to deliver generative-AI capabilities across the company — developer toolkits, document processing, and customer-servicing digitisation.",
@@ -344,6 +364,7 @@ export const PEER_COMPANIES: PeerCompany[] = [
       {
         kind: "product_footprint",
         status: "disclosed",
+        rubricBasis: { products: 2 },
         level: 3,
         summary:
           "Citi Assist (policy/procedure navigation) and Citi Stylus (multi-document create/summarise/compare) rolled out to ~140,000 employees across eight countries, with agentic capabilities added via Citi Stylus Workspaces (5,000-employee pilot first).",
@@ -365,6 +386,7 @@ export const PEER_COMPANIES: PeerCompany[] = [
       {
         kind: "automation_intensity",
         status: "inferred",
+        rubricBasis: { inferredIntensity: 2 },
         level: 2,
         summary:
           "Broad enablement with agentic execution still ramping, inferred from the disclosed rollout: 140,000 employees enabled on assistant tooling, while agentic Workspaces begins with a 5,000-employee pilot and staged expansion.",
@@ -392,7 +414,8 @@ export const PEER_COMPANIES: PeerCompany[] = [
       {
         kind: "platform_integration",
         status: "disclosed",
-        level: 4,
+        rubricBasis: { adoptions: 2 },
+        level: 3,
         summary:
           "A disclosed strategic Google Cloud partnership: Fargo runs on Gemini (Flash 2.0), with a bank-wide agentic expansion (Agentspace, Gemini Deep Research, NotebookLM); Meta's Llama is disclosed as used for internal workloads.",
         citations: [
@@ -433,7 +456,8 @@ export const PEER_COMPANIES: PeerCompany[] = [
       {
         kind: "product_footprint",
         status: "disclosed",
-        level: 3,
+        rubricBasis: { products: 1, flagshipScale: true },
+        level: 4,
         summary:
           "Fargo, the customer-facing assistant, grew from 21.3M interactions (2023) to 245M+ (2024), 336M+ cumulative, with Spanish usage a major disclosed driver; agentic tools are being extended to bankers, marketers and corporate teams.",
         citations: [
@@ -454,6 +478,7 @@ export const PEER_COMPANIES: PeerCompany[] = [
       {
         kind: "automation_intensity",
         status: "inferred",
+        rubricBasis: { inferredIntensity: 3 },
         level: 3,
         summary:
           "High customer-service automation, inferred from disclosed operating stats: 245M+ assistant interactions in 2024 handled with no human handoffs and a privacy pipeline that keeps PII away from the LLM.",
@@ -481,6 +506,7 @@ export const PEER_COMPANIES: PeerCompany[] = [
       {
         kind: "platform_integration",
         status: "disclosed",
+        rubricBasis: { adoptions: 0 },
         level: 1,
         summary:
           "Disclosed strategy is predominantly in-house: Erica is proprietary, and the bank discloses a ~$13B annual technology budget (over $4B to new initiatives including AI) rather than named external model-vendor adoptions.",
@@ -508,6 +534,7 @@ export const PEER_COMPANIES: PeerCompany[] = [
       {
         kind: "patent_velocity",
         status: "disclosed",
+        rubricBasis: { patentTier: "leader" },
         level: 4,
         summary:
           "~1,100 AI/ML patents and applications (94% growth since 2022, over half granted) within the largest patent portfolio of any US financial-services firm; one of the three banks holding ~75% of all bank AI patents per Evident.",
@@ -530,6 +557,7 @@ export const PEER_COMPANIES: PeerCompany[] = [
       {
         kind: "product_footprint",
         status: "disclosed",
+        rubricBasis: { products: 1, flagshipScale: true },
         level: 4,
         summary:
           "Erica — launched 2018, the first widely available virtual financial assistant — has surpassed 3.2B client interactions across ~50M users, averaging 58M+ interactions a month; AI/digital engagement disclosed at 30B client interactions overall.",
@@ -553,6 +581,7 @@ export const PEER_COMPANIES: PeerCompany[] = [
       {
         kind: "automation_intensity",
         status: "inferred",
+        rubricBasis: { inferredIntensity: 3 },
         level: 3,
         summary:
           "High client-service automation, inferred from disclosed effectiveness: more than 98% of Erica users find what they need in-assistant, materially deflecting call-centre volume toward specialists.",
@@ -581,6 +610,7 @@ export const PEER_COMPANIES: PeerCompany[] = [
       {
         kind: "platform_integration",
         status: "disclosed",
+        rubricBasis: { adoptions: 2 },
         level: 3,
         summary:
           "Disclosed as one of the only banks fully committed to public cloud (AWS), with Meta's open-source Llama disclosed as the customised base model for its Chat Concierge agentic system.",
@@ -604,6 +634,7 @@ export const PEER_COMPANIES: PeerCompany[] = [
       {
         kind: "talent_exposure",
         status: "disclosed",
+        rubricBasis: { talentTier: "rank1" },
         level: 4,
         summary:
           "Leads the Evident AI Index Talent pillar: roughly one in fifteen Capital One employees works on AI — the highest AI-talent density of the 50 banks tracked.",
@@ -625,6 +656,7 @@ export const PEER_COMPANIES: PeerCompany[] = [
       {
         kind: "patent_velocity",
         status: "disclosed",
+        rubricBasis: { patentTier: "leader" },
         level: 4,
         summary:
           "More than 1,700 AI patents filed — the most of the 50 banks Evident tracks — and one of the three banks holding ~75% of all bank AI patents.",
@@ -646,6 +678,7 @@ export const PEER_COMPANIES: PeerCompany[] = [
       {
         kind: "product_footprint",
         status: "disclosed",
+        rubricBasis: { products: 2 },
         level: 3,
         summary:
           "Chat Concierge — a proprietary multi-agent conversational AI for auto dealers (built in-house on a customised Llama base) — is disclosed as 55% more successful at converting leads, alongside the established Eno assistant.",
@@ -668,6 +701,7 @@ export const PEER_COMPANIES: PeerCompany[] = [
       {
         kind: "automation_intensity",
         status: "inferred",
+        rubricBasis: { inferredIntensity: 3 },
         level: 3,
         summary:
           "Substantial agentic automation in production, inferred from disclosed results: Chat Concierge's multi-agent workflow (plan → validate → execute) runs customer conversations end-to-end with a 55% lead-conversion lift and a disclosed 5× latency reduction since launch.",

@@ -37,7 +37,7 @@ export default function PeersPage() {
           honestly as “not disclosed”; thin segments read “limited data”.
         </p>
         <p className="mt-3 inline-block rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-[11px] font-medium">
-          Cited research + analyst-curated readings — never measured scores, never guesses
+          Bands computed from cited evidence via a documented rubric — never guesses, never LLM-graded
         </p>
       </header>
 
