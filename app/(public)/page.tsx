@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import ExposureMapHero from "@/components/dashboard/ExposureMapHero";
+import BreakingNewsHero from "@/components/home/BreakingNewsHero";
 import CategoryCompositeRail from "@/components/home/CategoryCompositeRail";
 import MarketByCategoryComposite from "@/components/home/MarketByCategoryComposite";
 import MarketTodayBand from "@/components/home/MarketTodayBand";
@@ -10,6 +11,7 @@ import { EXPOSURE_NODES } from "@/lib/investing/exposure-map-data";
 import { projectExposureToDependencyEdges, summariseByKind } from "@/lib/graph/dependency-projection";
 import { deriveEncroachmentEdges, buildRolesByNodeId } from "@/lib/graph/encroachment";
 import { deriveGraphTakeaway } from "@/lib/graph/takeaway";
+import { getBreakingNews } from "@/lib/intelligence/repository";
 import { getCachedProvenance } from "@/lib/intelligence/provenance";
 import { getLastRefreshedAt } from "@/lib/system/daily-refresh";
 import { listPublishedArticles } from "@/lib/articles/repository";
@@ -76,10 +78,11 @@ export default async function HomePage() {
   // Honest freshness + provenance (guarded — never fabricate a timestamp).
   // Rankings are loaded only when the portal is backed by verified evidence;
   // otherwise we hold the section rather than render directional/seed figures.
-  const [provenance, lastRefreshed, articles] = await Promise.all([
+  const [provenance, lastRefreshed, articles, news] = await Promise.all([
     getCachedProvenance().catch(() => null),
     getLastRefreshedAt().catch(() => null),
     listPublishedArticles().catch(() => []),
+    getBreakingNews({ days: 14, limit: 5 }).catch(() => null),
   ]);
   const isLive = provenance?.source === "live";
   // Rankings are a weighted multi-pillar composite, within category, computed only
@@ -89,7 +92,8 @@ export default async function HomePage() {
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-10">
-      {/* ── Hero: the dependency/encroachment graph IS the headline ── */}
+      {/* ── Masthead: brand line + tagline. Kept short — breaking news, not
+            this, is the hero (below). ── */}
       <header className="mb-4">
         <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-[#b08d2f] dark:text-[#d4af37]">
           Independent · evidence-based · source-cited
@@ -119,6 +123,10 @@ export default async function HomePage() {
           <span className={MUTED}>{isLive && updated ? `Updated ${updated}` : ""}</span>
         </div>
       </header>
+
+      {/* ── Hero: breaking news is the first substantial thing a visitor sees —
+            promoted here from the old mid-page "Market today" tile. ── */}
+      <BreakingNewsHero news={news} />
 
       {/* Derived "so what" — from the dependency graph. UN-GATED 2026-07-02
           (Mic ruling): the graph is CURATED ANALYST REFERENCE data — every edge
