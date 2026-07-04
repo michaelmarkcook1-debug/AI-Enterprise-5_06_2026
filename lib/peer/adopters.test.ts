@@ -11,7 +11,18 @@ describe("disclosedAdoptersOf", () => {
       const company = PEER_COMPANIES.find((c) => c.id === a.company.id)!;
       const sig = company.signals.find((s) => s.kind === "platform_integration")!;
       expect(sig.vendorIds ?? []).toContain("openai");
-      expect(sig.status).not.toBe("not_disclosed");
+      expect(sig.status).toBe("disclosed");
+    }
+  });
+
+  it("every adopter, for every vendor, has status disclosed — inferred can NEVER pass as disclosure", () => {
+    const allVendorIds = new Set(
+      PEER_COMPANIES.flatMap((c) => c.signals.flatMap((s) => s.vendorIds ?? [])),
+    );
+    for (const v of allVendorIds) {
+      for (const a of disclosedAdoptersOf(v)) {
+        expect(a.status, `${a.company.id} for ${v}`).toBe("disclosed");
+      }
     }
   });
 

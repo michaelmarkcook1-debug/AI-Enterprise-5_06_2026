@@ -19,13 +19,16 @@ export interface DisclosedAdopter {
 }
 
 /** Peers whose platform_integration signal cites `vendorId` (bare id, e.g.
- *  "openai"). Deterministic order (dataset order). */
+ *  "openai"). Deterministic order (dataset order).
+ *  STRICTLY status === "disclosed": an inferred signal must never surface
+ *  under "publicly disclosed adopters" (fabrication-audit WARN 2) — the panel
+ *  copy asserts disclosure, so only disclosure qualifies. */
 export function disclosedAdoptersOf(vendorId: string): DisclosedAdopter[] {
   const bare = vendorId.replace(/^vendor_/, "");
   const out: DisclosedAdopter[] = [];
   for (const c of PEER_COMPANIES) {
     const s = c.signals.find((x) => x.kind === "platform_integration");
-    if (!s || s.status === "not_disclosed") continue;
+    if (!s || s.status !== "disclosed") continue;
     if (!(s.vendorIds ?? []).includes(bare)) continue;
     out.push({
       company: { id: c.id, name: c.name, industry: c.industry },

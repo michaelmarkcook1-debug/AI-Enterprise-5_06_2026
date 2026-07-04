@@ -21,7 +21,7 @@
 import type { PeerCompany } from "./types";
 
 export const PEER_DATASET_SOURCE =
-  "Analyst-curated 2026-07-04 · citations web-verified at compile time";
+  "Analyst-curated · citations verified against live web sources, 2026-07-04";
 
 export const PEER_COMPANIES: PeerCompany[] = [
   // ── JPMorgan Chase ──────────────────────────────────────────────────────
@@ -306,8 +306,26 @@ export const PEER_COMPANIES: PeerCompany[] = [
     signals: [
       {
         kind: "platform_integration",
-        status: "not_disclosed",
-        citations: [],
+        status: "disclosed",
+        level: 2,
+        summary:
+          "A disclosed multi-year strategic agreement with Google Cloud (October 2024): workload migration plus Vertex AI to deliver generative-AI capabilities across the company — developer toolkits, document processing, and customer-servicing digitisation.",
+        citations: [
+          {
+            title: "Citi and Google Cloud announce strategic agreement to modernize Citi's technology infrastructure and drive innovation",
+            url: "https://www.citigroup.com/global/news/press-release/2024/citi-and-google-cloud-announce-strategic-agreement",
+            publisher: "Citigroup",
+            tier: "company_primary",
+            publishedAt: "2024-10-28",
+          },
+          {
+            title: "Citi taps Google Cloud for app migration, AI adoption",
+            url: "https://www.ciodive.com/news/citi-google-cloud-partnership-app-migration-ai-modernization/731260/",
+            publisher: "CIO Dive",
+            tier: "press",
+          },
+        ],
+        vendorIds: ["google"],
       },
       {
         kind: "talent_exposure",
@@ -371,7 +389,7 @@ export const PEER_COMPANIES: PeerCompany[] = [
         status: "disclosed",
         level: 4,
         summary:
-          "A disclosed strategic Google Cloud partnership: Fargo runs on Gemini (Flash 2.0), with a bank-wide agentic expansion (Agentspace, Gemini Deep Research, NotebookLM); Meta's Llama is disclosed for internal workloads, with OpenAI models tapped as needed.",
+          "A disclosed strategic Google Cloud partnership: Fargo runs on Gemini (Flash 2.0), with a bank-wide agentic expansion (Agentspace, Gemini Deep Research, NotebookLM); Meta's Llama is disclosed as used for internal workloads.",
         citations: [
           {
             title: "Wells Fargo's new virtual assistant, Fargo, to be powered by Google Cloud AI",
@@ -393,7 +411,9 @@ export const PEER_COMPANIES: PeerCompany[] = [
             tier: "vendor_disclosure",
           },
         ],
-        vendorIds: ["google", "meta", "openai"],
+        // "OpenAI models can be tapped as needed" (VentureBeat) is a CAPABILITY
+        // statement, not an adoption disclosure — deliberately NOT listed.
+        vendorIds: ["google", "meta"],
       },
       {
         kind: "talent_exposure",
