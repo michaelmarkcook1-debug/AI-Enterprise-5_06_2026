@@ -1,0 +1,394 @@
+{
+  "findings": [
+    {
+      "vendorId": "openai",
+      "title": "OpenAI raises $122B at $852B valuation led by Amazon, NVIDIA, SoftBank",
+      "summary": "OpenAI closed a mega-round with $122 billion in committed capital at a post-money valuation of $852 billion, anchored by Amazon, NVIDIA, and SoftBank with continued Microsoft participation. On July 1, 2026, SoftBank closed the second $10B tranche of a planned $30B follow-on at the $852B mark.",
+      "whyItMatters": "The largest private capital raise in AI history hardens OpenAI's compute war chest and resets frontier funding benchmarks, pressuring every rival's cost of capital.",
+      "sourceName": "OpenAI",
+      "sourceUrl": "https://openai.com/index/accelerating-the-next-phase-ai/",
+      "publishedAt": "2026-07-01"
+    },
+    {
+      "vendorId": "openai",
+      "title": "OpenAI begins limited preview of GPT-5.6 with new pricing tier",
+      "summary": "OpenAI opened a limited preview of GPT-5.6, introducing Sol, Terra and Luna variants with stronger reasoning, coding, biology and cybersecurity performance, a new 'ultra' mode, tougher safety protections, updated pricing, and more predictable prompt caching.",
+      "whyItMatters": "A rapid point-release cadence with an ultra tier and revised pricing keeps OpenAI ahead on the model treadmill and directly targets Anthropic and Google on coding and agentic workloads.",
+      "sourceName": "Releasebot (OpenAI updates)",
+      "sourceUrl": "https://releasebot.io/updates/openai",
+      "publishedAt": "2026-07-02"
+    },
+    {
+      "vendorId": "openai",
+      "title": "OpenAI launches Partner Network with $150M investment",
+      "summary": "OpenAI launched the OpenAI Partner Network with a $150M investment and a select group of global systems-integration, consulting, technology, and data partners, aiming to train and enable 300,000 certified consultants by the end of 2026.",
+      "whyItMatters": "A formal channel program mirrors enterprise-software go-to-market and accelerates OpenAI's push into large-account deployments where Anthropic, Cohere and IBM compete.",
+      "sourceName": "OpenAI",
+      "sourceUrl": "https://openai.com/index/introducing-openai-partner-network/",
+      "publishedAt": "2026-06-24"
+    },
+    {
+      "vendorId": "openai",
+      "title": "OpenAI in talks to give US government up to 5% equity via 'Public Wealth Fund'",
+      "summary": "On July 2, 2026, the Financial Times reported OpenAI is in talks to voluntarily hand the US government up to 5% of its equity — roughly $42.6B at the ~$852B valuation — through a proposed 'Public Wealth Fund' structure.",
+      "whyItMatters": "A government equity stake would be an unprecedented public-private entanglement that could reshape AI regulation, procurement, and competitive dynamics in Washington.",
+      "sourceName": "andrew.ooo (citing Financial Times)",
+      "sourceUrl": "https://andrew.ooo/answers/openai-5-percent-us-government-stake-public-wealth-fund-july-2026/",
+      "publishedAt": "2026-07-02"
+    },
+    {
+      "vendorId": "anthropic",
+      "title": "Anthropic launches Claude Sonnet 5 with aggressive introductory pricing",
+      "summary": "On June 30, 2026, Anthropic released Claude Sonnet 5, replacing Sonnet 4.6 as the default for Free and Pro plans and across Claude Code and the Platform. It launched with introductory pricing of $2/M input and $10/M output tokens through Aug 31, 2026, rising afterward to $3/M input and $15/M output.",
+      "whyItMatters": "Positioned by Anthropic as a cheaper way to run agents, Sonnet 5's pricing directly undercuts the agentic-workload economics that OpenAI and Google are chasing.",
+      "sourceName": "Anthropic",
+      "sourceUrl": "https://www.anthropic.com/news/claude-sonnet-5",
+      "publishedAt": "2026-06-30"
+    },
+    {
+      "vendorId": "anthropic",
+      "title": "California signs first-of-its-kind partnership for 50% off Claude",
+      "summary": "Governor Gavin Newsom announced a first-of-its-kind partnership giving California state agencies access to Claude at a 50% discount, plus free workforce training and GenAI technical assistance, with the same discounted offer extended to cities and counties.",
+      "whyItMatters": "A flagship US state standardizing on Claude at a deep discount is a landmark public-sector reference win and a template Anthropic can replicate against OpenAI and Google in government.",
+      "sourceName": "Office of the Governor of California",
+      "sourceUrl": "https://www.gov.ca.gov/2026/06/29/governor-newsom-announces-a-first-of-its-kind-partnership-providing-anthropic-tools-to-state-agencies-and-improving-services-for-californians/",
+      "publishedAt": "2026-06-29"
+    },
+    {
+      "vendorId": "anthropic",
+      "title": "Anthropic commits $100M to Claude Partner Network",
+      "summary": "Anthropic committed an initial $100M for 2026 to the Claude Partner Network and signaled it expects to invest more over time, building out an ecosystem of implementation and technology partners.",
+      "whyItMatters": "Directly counters OpenAI's $150M Partner Network launched the same month, escalating the channel-and-ecosystem arms race for enterprise deployment share.",
+      "sourceName": "Anthropic",
+      "sourceUrl": "https://www.anthropic.com/news/claude-partner-network",
+      "publishedAt": "2026-06-25"
+    },
+    {
+      "vendorId": "anthropic",
+      "title": "Anthropic opens Claude Science beta workbench for researchers",
+      "summary": "Anthropic launched Claude Science, a beta AI workbench for scientists that unifies research tools, generates auditable scientific artifacts, and supports reproducible analysis across macOS, Linux, and remote compute for Pro, Max, Team, and Enterprise users.",
+      "whyItMatters": "A dedicated scientific vertical product deepens Anthropic's enterprise/research moat and competes with OpenAI's GeneBench-oriented biology push.",
+      "sourceName": "Releasebot (Anthropic updates)",
+      "sourceUrl": "https://releasebot.io/updates/anthropic",
+      "publishedAt": "2026-06-30"
+    },
+    {
+      "vendorId": "xai",
+      "title": "xAI raises $20B Series E amid Grok content controversy",
+      "summary": "xAI raised roughly $20B in a Series E round backed by a16z, BlackRock, Fidelity, Kingdom Holdings, Lightspeed, MGX, Morgan Stanley, QIA, Sequoia, Valor and Vy Capital, closing despite intensifying controversy over Grok's adult-content outputs.",
+      "whyItMatters": "A fresh $20B keeps xAI in the frontier-compute race even as reputational risk from Grok's content moderation failures mounts with regulators and advertisers.",
+      "sourceName": "Capacity Media",
+      "sourceUrl": "https://capacityglobal.com/news/xai-elon-musk-funding-round-grok-controversy/",
+      "publishedAt": "2026-06-18"
+    },
+    {
+      "vendorId": "xai",
+      "title": "Grok models go native on Databricks Agent Bricks",
+      "summary": "At the Databricks 2026 Data + AI Summit, xAI's Grok models became natively available on Databricks Agent Bricks, letting enterprises run Grok alongside other frontier and open-source models inside a single governed platform.",
+      "whyItMatters": "Distribution through Databricks (and, separately, Amazon Bedrock) puts Grok where enterprise data already lives, a channel land-grab against OpenAI and Anthropic in the data-platform layer.",
+      "sourceName": "xAI",
+      "sourceUrl": "https://x.ai/news/grok-databricks",
+      "publishedAt": "2026-06-11"
+    },
+    {
+      "vendorId": "xai",
+      "title": "xAI ships /goal autonomous mode for Grok Build coding tool",
+      "summary": "xAI added a /goal mode to its agentic command-line coding tool Grok Build on June 22, 2026, enabling long-running autonomous tasks, following the tool's May 2026 launch and continued reliability improvements through late June.",
+      "whyItMatters": "Extends xAI into the autonomous coding-agent arena dominated by Claude Code and OpenAI, broadening Grok's developer surface beyond chat.",
+      "sourceName": "xAI",
+      "sourceUrl": "https://x.ai/news",
+      "publishedAt": "2026-06-22"
+    },
+    {
+      "vendorId": "xai",
+      "title": "Grok adult-content moderation failures draw scrutiny",
+      "summary": "Reporting in late June 2026 said Grok's adult image generation topped 10 billion images monthly, with xAI engineers reportedly acknowledging unresolved CSAM safeguards, escalating safety and legal scrutiny of the product.",
+      "whyItMatters": "Severe trust-and-safety exposure is a competitive liability that could invite regulatory action and enterprise avoidance, contrasting with rivals' safety positioning.",
+      "sourceName": "Tech Times",
+      "sourceUrl": "https://www.techtimes.com/articles/319142/20260626/grok-adult-content-tops-10-billion-images-monthly-xai-engineers-admit-csam-has-no-fix.htm",
+      "publishedAt": "2026-06-26"
+    },
+    {
+      "vendorId": "meta",
+      "title": "Meta poaches five Thinking Machines Lab founders in talent raid",
+      "summary": "Meta hired five founders from Mira Murati's Thinking Machines Lab, including co-founder Andrew Tulloch on a reported ~$1.5B, six-year package, with prior offers to researchers reaching $250M — part of Superintelligence Labs' aggressive recruiting under CAO Alexandr Wang.",
+      "whyItMatters": "The most expensive AI talent raid on record signals Meta is buying its way back to the frontier, draining rival labs of senior research leadership.",
+      "sourceName": "The Next Web",
+      "sourceUrl": "https://thenextweb.com/news/meta-thinking-machines-lab-talent-raid",
+      "publishedAt": "2026-06-15"
+    },
+    {
+      "vendorId": "meta",
+      "title": "Meta Superintelligence Labs ships closed-source Muse Spark model",
+      "summary": "Meta Superintelligence Labs released Muse Spark, a natively multimodal reasoning model and its first major model since the $14.3B Scale AI deal that brought in Alexandr Wang. Muse Spark is closed-source, breaking with Meta's open-source Llama tradition.",
+      "whyItMatters": "Meta abandoning open weights for its flagship marks a strategic reversal that reshapes the open-vs-closed model landscape and Meta's developer relationships.",
+      "sourceName": "CNBC",
+      "sourceUrl": "https://www.cnbc.com/2026/04/08/meta-debuts-first-major-ai-model-since-14-billion-deal-to-bring-in-alexandr-wang.html",
+      "publishedAt": "2026-04-08"
+    },
+    {
+      "vendorId": "meta",
+      "title": "Meta guides 2026 AI capex to $115B-$135B",
+      "summary": "Meta said its AI-related capital expenditures in 2026 will land between $115 billion and $135 billion — nearly double 2025 — to fund data-center and compute buildout for Superintelligence Labs.",
+      "whyItMatters": "A capex step-change on this scale intensifies the infrastructure spending war and pressures peers to match compute investment or fall behind on model scale.",
+      "sourceName": "CNBC",
+      "sourceUrl": "https://www.cnbc.com/2026/04/08/meta-debuts-first-major-ai-model-since-14-billion-deal-to-bring-in-alexandr-wang.html",
+      "publishedAt": "2026-04-08"
+    },
+    {
+      "vendorId": "perplexity",
+      "title": "Docusign integrates Perplexity for enterprise contract workflows",
+      "summary": "On June 24, 2026, Docusign made its Intelligent Agreement Management platform available inside Perplexity 'Computer' and 'Computer for Counsel', letting in-house legal teams draft, review, sign, and manage contracts end-to-end via natural language.",
+      "whyItMatters": "Moves Perplexity beyond search into agentic enterprise workflows and legal tech, a vertical where Harvey and incumbents compete, validating its 'answer engine + agent' pivot.",
+      "sourceName": "PR Newswire",
+      "sourceUrl": "https://www.prnewswire.com/news-releases/docusign--perplexity-help-legal-teams-automate-enterprise-wide-contract-workflows-302809598.html",
+      "publishedAt": "2026-06-24"
+    },
+    {
+      "vendorId": "perplexity",
+      "title": "Perplexity valuation climbs toward $22.6B as user base scales",
+      "summary": "Perplexity's valuation reached roughly $22.6B in early 2026 (up from a $20B round in late 2025), with ~45M active users and heavy infrastructure commitments including a $750M three-year Azure/Foundry deal for multi-model access.",
+      "whyItMatters": "Rapid valuation and usage growth, plus its subscription-first pivot away from ads, position Perplexity as the leading independent challenger in AI search against Google and OpenAI.",
+      "sourceName": "AI Business Weekly",
+      "sourceUrl": "https://aibusinessweekly.net/p/perplexity-ai-valuation-2026",
+      "publishedAt": "2026-01-09"
+    },
+    {
+      "vendorId": "cohere",
+      "title": "Bell, Cohere partner on sovereign Canadian AI infrastructure",
+      "summary": "In June 2026, Bell Canada, Cohere, Hypertec and BUZZ HPC announced a deal to build sovereign Canadian AI infrastructure at Bell's Merritt, BC data center using Hypertec hardware and NVIDIA's platform to run Cohere's enterprise models.",
+      "whyItMatters": "Sovereign-AI infrastructure is Cohere's core differentiator; a domestic telecom-backed buildout deepens its enterprise and public-sector moat against US frontier labs.",
+      "sourceName": "CBC News",
+      "sourceUrl": "https://www.cbc.ca/news/business/bell-cohere-ai-infrastructure-deal-9.7240577",
+      "publishedAt": "2026-06-15"
+    },
+    {
+      "vendorId": "cohere",
+      "title": "S&P Global taps Cohere for agentic financial workflows",
+      "summary": "In June 2026, S&P Global expanded its AI ecosystem with Cohere to power trusted, agentic workflows for financial institutions, building on Cohere's Command A models and North agentic platform.",
+      "whyItMatters": "A marquee financial-data partner adopting Cohere strengthens its regulated-industry enterprise footprint where trust and data governance win deals.",
+      "sourceName": "PSP Investments (Cohere news hub)",
+      "sourceUrl": "https://www.investpsp.com/en/news/fresh-funding-enables-cohere-to-accelerate-its-global-expansion-and-build-the-next-generation-of-secure-enterprise-and-sovereign-ai-solutions/",
+      "publishedAt": "2026-06-10"
+    },
+    {
+      "vendorId": "mistral",
+      "title": "Mistral in talks to raise ~€3B at ~€20B valuation",
+      "summary": "Mistral AI is in early discussions to raise about €3 billion ($3.5B) at a valuation near €20 billion — nearly double its €11.7B Series C — to fund infrastructure and expansion, targeting €1B in 2026 revenue (up from €200M in 2025).",
+      "whyItMatters": "A doubled valuation keeps Europe's frontier champion capitalized against far larger US labs and signals investor confidence in its enterprise and sovereign-AI positioning.",
+      "sourceName": "Tech Funding News",
+      "sourceUrl": "https://techfundingnews.com/mistral-ai-3b-euro-20b-valuation-data-centres/",
+      "publishedAt": "2026-06-20"
+    },
+    {
+      "vendorId": "mistral",
+      "title": "Mistral launches OCR 4 to expand document-extraction enterprise play",
+      "summary": "Mistral released OCR 4, turning document extraction into a full enterprise AI offering, alongside a unified 'Vibe' agent for long-running productivity and coding work and a new 10 MW Les Ulis inference data center opening Q3 2026.",
+      "whyItMatters": "Moving up the stack from models to document-intelligence products and owned inference capacity broadens Mistral's enterprise revenue base and reduces cloud dependence.",
+      "sourceName": "VentureBeat",
+      "sourceUrl": "https://venturebeat.com/data/mistral-launches-ocr-4-turning-document-extraction-into-a-full-enterprise-ai-play",
+      "publishedAt": "2026-06-16"
+    },
+    {
+      "vendorId": "mistral",
+      "title": "Mistral signs Airbus and Ericsson strategic partnerships",
+      "summary": "Mistral partnered with Airbus to embed AI across design, aircraft, defence and space operations, and with Ericsson to deploy AI across telecom networks, extending its footprint into flagship European industrial accounts.",
+      "whyItMatters": "Anchor deals with European industrial giants validate Mistral's sovereign-AI pitch and lock in large, sticky enterprise references against US competitors.",
+      "sourceName": "Mistral AI",
+      "sourceUrl": "https://mistral.ai/news/",
+      "publishedAt": "2026-06-05"
+    },
+    {
+      "vendorId": "googledeepmind",
+      "title": "Google broadly releases Gemini 3.5 Flash for low-cost agents and coding",
+      "summary": "In July 2026, Gemini 3.5 Flash became the newest broadly available Gemini release, positioned for faster, lower-cost coding, agents, multimodal, and long-document work, and reported to outperform Gemini 3.1 Pro on key benchmarks and lead in multimodal understanding.",
+      "whyItMatters": "A cheaper, faster Flash tier that beats the prior Pro model pressures Anthropic's Sonnet 5 and OpenAI on the price/performance frontier for high-volume agentic workloads.",
+      "sourceName": "Google Blog",
+      "sourceUrl": "https://blog.google/innovation-and-ai/technology/ai/google-ai-updates-june-2026/",
+      "publishedAt": "2026-07-02"
+    },
+    {
+      "vendorId": "googledeepmind",
+      "title": "Google ships Gemini 3.5 Live Translate, Nano Banana 2 Lite, and Omni Flash",
+      "summary": "In June 2026 Google launched Gemini 3.5 Live Translate (real-time speech-to-speech across 70+ languages), the Google Home Speaker built for Gemini, Nano Banana 2 Lite image model, and Gemini Omni Flash in API public preview.",
+      "whyItMatters": "A broad multimodal and hardware push embeds Gemini deeper into consumer and developer surfaces, widening Google's distribution advantage over pure-play labs.",
+      "sourceName": "Google Blog",
+      "sourceUrl": "https://blog.google/innovation-and-ai/technology/ai/google-ai-updates-june-2026/",
+      "publishedAt": "2026-06-25"
+    },
+    {
+      "vendorId": "googledeepmind",
+      "title": "Google DeepMind and A24 launch AI research partnership for filmmakers",
+      "summary": "Google DeepMind announced a first-of-its-kind research partnership with film studio A24 to help artists develop new workflows and techniques using DeepMind's generative video and creative tools.",
+      "whyItMatters": "A credibility-building alliance with a prestige studio stakes out the creative/media vertical for DeepMind against OpenAI's Sora and other generative-video rivals.",
+      "sourceName": "Google Blog",
+      "sourceUrl": "https://blog.google/innovation-and-ai/models-and-research/google-deepmind/deepmind-a24-research-partnership/",
+      "publishedAt": "2026-06-30"
+    },
+    {
+      "vendorId": "moveworks",
+      "title": "ServiceNow folds Moveworks into new EmployeeWorks and Autonomous Workforce",
+      "summary": "Following its $2.85B acquisition, ServiceNow launched EmployeeWorks — combining Moveworks' conversational AI and enterprise search with ServiceNow's portal and autonomous workflows for ~200M employees — and an Autonomous Workforce initiative led by a Level 1 Service Desk AI Specialist.",
+      "whyItMatters": "Moveworks' tech is now the front end of ServiceNow's agentic strategy, turning a former standalone vendor into a distribution powerhouse against Microsoft and Salesforce in employee AI.",
+      "sourceName": "GlobeNewswire",
+      "sourceUrl": "https://www.globenewswire.com/news-release/2026/07/02/3321176/28124/en/ServiceNow-s-2-85-Billion-Moveworks-Acquisition-Set-to-Revolutionize-AI-Powered-Workflow-Automations.html",
+      "publishedAt": "2026-07-02"
+    },
+    {
+      "vendorId": "harvey",
+      "title": "Harvey opens Singapore and Chicago offices in global expansion",
+      "summary": "Harvey continued rapid international expansion with offices in Dublin (March), Paris (May), Singapore (opening June 2026) and Chicago (opening July 2026), scaling its go-to-market for law firms and enterprises across regions.",
+      "whyItMatters": "Aggressive geographic expansion signals Harvey is racing to lock in global law-firm accounts before OpenAI, Perplexity and incumbents deepen their legal-AI offerings.",
+      "sourceName": "Harvey",
+      "sourceUrl": "https://www.harvey.ai/blog/harvey-raises-at-dollar11-billion-valuation-to-scale-agents-across-law-firms-and-enterprises",
+      "publishedAt": "2026-06-30"
+    },
+    {
+      "vendorId": "harvey",
+      "title": "Harvey and LexisNexis launch 'Ask LexisNexis' citation-backed research",
+      "summary": "Harvey deepened its content layer via a strategic alliance with LexisNexis, launching Ask LexisNexis — letting users pose natural-language legal questions inside Harvey and get citation-backed answers grounded in US federal/state case law, statutes, codes, and Shepard's Citations.",
+      "whyItMatters": "Authoritative, cited legal content addresses hallucination risk that gates enterprise legal adoption, strengthening Harvey's moat as Perplexity/Docusign enter the space.",
+      "sourceName": "Harvey",
+      "sourceUrl": "https://www.harvey.ai/blog/harvey-raises-at-dollar11-billion-valuation-to-scale-agents-across-law-firms-and-enterprises",
+      "publishedAt": "2026-06-01"
+    },
+    {
+      "vendorId": "harvey",
+      "title": "Harvey raised $200M at $11B valuation to scale legal agents",
+      "summary": "Harvey raised $200M co-led by GIC and Sequoia at an $11B valuation (Andreessen Horowitz, Coatue, Kleiner Perkins and others participating), crossing $1B total funding, with 25,000+ custom agents and 100,000+ lawyers across 1,300 organizations now on the platform.",
+      "whyItMatters": "An $11B valuation and deep enterprise penetration make Harvey the clear vertical-AI leader in legal, a benchmark for how far ahead a focused application layer can get.",
+      "sourceName": "CNBC",
+      "sourceUrl": "https://www.cnbc.com/2026/03/25/legal-ai-startup-harvey-raises-200-million-at-11-billion-valuation.html",
+      "publishedAt": "2026-03-25"
+    },
+    {
+      "vendorId": "ibm",
+      "title": "IBM ships watsonx.ai v2.4 with expanded governed AI development",
+      "summary": "IBM released watsonx.ai v2.4 in June 2026, adding more model choice, stronger governance, modernized runtimes and greater hybrid-environment flexibility; older IBM Runtime 24.1 notebook creation ends June 11 with support removed July 9, 2026.",
+      "whyItMatters": "Governance and hybrid flexibility are IBM's enterprise wedge; the release keeps watsonx competitive as regulated buyers weigh it against OpenAI, Anthropic and cloud-native platforms.",
+      "sourceName": "IBM",
+      "sourceUrl": "https://www.ibm.com/new/announcements/ibm-watsonx-ai-v2-4-expanding-governed-ai-development-for-the-enterprise",
+      "publishedAt": "2026-06-11"
+    },
+    {
+      "vendorId": "ibm",
+      "title": "IBM and ServiceNow deepen watsonx-plus-AI-Platform tie-up",
+      "summary": "IBM expanded its partnership with ServiceNow to blend watsonx, Red Hat, Instana, and Ansible with the ServiceNow AI Platform, targeting large-scale enterprise automation and legacy modernization solutions for launch in 2H 2026.",
+      "whyItMatters": "Aligning with ServiceNow's agentic platform embeds watsonx in high-value enterprise workflows and stakes IBM's position in the agentic-automation land grab.",
+      "sourceName": "AI Magazine",
+      "sourceUrl": "https://aimagazine.com/articles/ibms-salesforce-partnership-shows-watsonx-making-inroads-wi",
+      "publishedAt": "2026-06-15"
+    },
+    {
+      "vendorId": "ibm",
+      "title": "IBM integrates ElevenLabs voice AI into watsonx Orchestrate",
+      "summary": "IBM partnered with ElevenLabs to bring advanced voice AI into watsonx Orchestrate, enabling multilingual, natural-sounding agents across 70+ languages and 10,000+ voices with PCI compliance, Zero Retention Mode, and data-residency controls.",
+      "whyItMatters": "Enterprise-grade voice agents extend watsonx Orchestrate into contact-center and voice workflows, a fast-growing agentic segment contested by Google and startups.",
+      "sourceName": "Futurum Group",
+      "sourceUrl": "https://futurumgroup.com/insights/ibm-pushes-voice-ai-into-watsonx-can-it-drive-enterprise-adoption/",
+      "publishedAt": "2026-06-20"
+    },
+    {
+      "vendorId": "ibm",
+      "title": "IBM acquires Seek AI and launches Watsonx Labs",
+      "summary": "IBM acquired data-query startup Seek AI and launched Watsonx Labs, a program to help enterprises build and scale AI, deepening its agentic and data-to-insight capabilities within the watsonx portfolio.",
+      "whyItMatters": "Bolt-on M&A plus a customer co-innovation lab signals IBM buying and building to keep watsonx relevant in a market moving toward autonomous agents.",
+      "sourceName": "CIO",
+      "sourceUrl": "https://www.cio.com/article/4000760/ibm-acquires-seek-ai-launches-watsonx-labs-to-scale-enterprise-ai.html",
+      "publishedAt": "2026-06-18"
+    },
+    {
+      "vendorId": "rogo",
+      "title": "Rogo raises $160M Series D at $2B valuation for finance AI agents",
+      "summary": "Rogo raised $160M in Series D led by Kleiner Perkins (Sequoia, Thrive, Khosla, J.P. Morgan Growth Equity and others participating), lifting its valuation to $2B from $750M post-Series C in January and pushing total funding past $300M. Over 35,000 finance professionals at 250+ institutions use Rogo.",
+      "whyItMatters": "Rogo's rapid valuation jump marks investment-banking AI as a high-value vertical, paralleling Harvey in legal and signaling where application-layer money is flowing.",
+      "sourceName": "PR Newswire",
+      "sourceUrl": "https://www.prnewswire.com/news-releases/rogo-raises-160m-series-d-to-scale-the-agentic-platform-for-finance-302756546.html",
+      "publishedAt": "2026-04-29"
+    },
+    {
+      "vendorId": "rogo",
+      "title": "Rogo launches Felix agentic AI and acquires Offset for modeling",
+      "summary": "Rogo introduced Felix, an agentic AI that autonomously executes multi-step finance processes from deal screening and CIM generation to buyer outreach and data-room diligence, and acquired Offset Inc. to auto-update financial models as new information arrives.",
+      "whyItMatters": "Moving from copilot to autonomous execution and acquiring modeling tech expands Rogo's wallet share in banking workflows and raises the bar for finance-vertical rivals.",
+      "sourceName": "SiliconANGLE",
+      "sourceUrl": "https://siliconangle.com/2026/04/29/rogo-raises-160m-speed-financial-analysis-ai-agents/",
+      "publishedAt": "2026-04-29"
+    },
+    {
+      "vendorId": "writer",
+      "title": "Writer launches event-triggered AI agents that act without prompts",
+      "summary": "Writer rolled out event-based triggers for its Writer Agent platform, letting Palmyra-powered agents autonomously detect business signals across Gmail, Gong, Google Calendar, Drive, SharePoint and Slack and take action, with governance controls including bring-your-own encryption keys and Datadog observability.",
+      "whyItMatters": "Autonomous, event-driven enterprise agents put Writer in direct competition with Amazon, Microsoft and Salesforce for agentic work, moving beyond generation to execution.",
+      "sourceName": "VentureBeat",
+      "sourceUrl": "https://venturebeat.com/technology/writer-launches-ai-agents-that-can-act-without-prompts-taking-on-amazon-microsoft-and-salesforce",
+      "publishedAt": "2026-05-15"
+    },
+    {
+      "vendorId": "writer",
+      "title": "Writer scales Palmyra X5 1M-context model via Amazon Bedrock",
+      "summary": "Writer's Palmyra X5 adaptive-reasoning LLM offers a 1M-token context window with industry-leading speed and cost efficiency and is distributed through Amazon Bedrock, underpinning its enterprise agent platform used by 300+ customers including Accenture, Intuit, L'Oréal, Salesforce, Uber and Vanguard.",
+      "whyItMatters": "A cost-efficient long-context model on Bedrock lets Writer compete on enterprise agent economics while riding AWS distribution against larger foundation labs.",
+      "sourceName": "Writer",
+      "sourceUrl": "https://writer.com/blog/long-context-palmyra-x5/",
+      "publishedAt": "2026-05-01"
+    },
+    {
+      "vendorId": "alibaba",
+      "title": "Alibaba's Qwen team releases multimodal Qwen3.7-Plus on Bailian",
+      "summary": "On June 2, 2026, Alibaba's Qwen team released Qwen3.7-Plus, a multimodal model that understands images and video, performs deep reasoning, writes and revises its own code, invokes external tools/APIs, and iterates autonomously — available via Alibaba Cloud's Bailian platform.",
+      "whyItMatters": "A lower-cost, vision-enabled agentic tier broadens Alibaba's enterprise reach and keeps its open/closed model lineup competitive with Western frontier labs on price.",
+      "sourceName": "MarkTechPost",
+      "sourceUrl": "https://www.marktechpost.com/2026/06/02/alibabas-qwen-team-launches-qwen3-7-plus-adding-vision-deep-reasoning-tool-invocation-and-autonomous-iteration-on-the-bailian-platform/",
+      "publishedAt": "2026-06-02"
+    },
+    {
+      "vendorId": "alibaba",
+      "title": "Alibaba debuts Qwen Robot Suite for embodied AI",
+      "summary": "In mid-June 2026, Alibaba's Tongyi Lab launched its first suite of AI models for robots — Qwen-RobotNav (navigation), Qwen-RobotWorld (video world model), and Qwen-RobotManip (generalist vision-language-action) — already piloting with select Alibaba Cloud enterprise clients; Qwen-RobotManip topped the RoboChallenge generalist track.",
+      "whyItMatters": "Alibaba's push into embodied/physical AI opens a new robotics growth vector and stakes an early claim in a frontier where Western labs are less established.",
+      "sourceName": "South China Morning Post",
+      "sourceUrl": "https://www.scmp.com/tech/big-tech/article/3357260/alibaba-eyes-physical-world-its-first-suite-ai-models-robots",
+      "publishedAt": "2026-06-16"
+    },
+    {
+      "vendorId": "alibaba",
+      "title": "Alibaba forms 'Token Foundry' unit to consolidate AI efforts",
+      "summary": "Alibaba created a new business unit, Token Foundry, led by CEO Eddie Wu, combining Tongyi Lab and Future Life units under the newly created Alibaba Token Hub as it reorganizes to strengthen its AI strategy.",
+      "whyItMatters": "A CEO-led reorg concentrating model and product teams signals Alibaba treating frontier AI as a core corporate priority, sharpening its competitive posture in China and abroad.",
+      "sourceName": "TechNode",
+      "sourceUrl": "https://technode.com/2026/03/02/alibaba-unifies-ai-branding-under-qwen/",
+      "publishedAt": "2026-06-10"
+    }
+  ],
+  "proposals": [
+    {
+      "type": "theme",
+      "title": "Formal partner/channel programs are the new frontier-lab battleground",
+      "evidence": "Within days of each other, OpenAI launched a $150M Partner Network (targeting 300k certified consultants) and Anthropic committed $100M to its Claude Partner Network — both mirroring classic enterprise-software go-to-market.",
+      "vendorIds": ["openai", "anthropic"],
+      "suggestedAction": "Track partner-network certification counts and named SI/consulting partners quarterly as a leading indicator of enterprise deployment share."
+    },
+    {
+      "type": "theme",
+      "title": "Vertical application layer is compounding value fastest (legal, finance)",
+      "evidence": "Harvey hit an $11B valuation with 100k+ lawyers, and Rogo jumped to a $2B valuation with 35k+ finance professionals — both shipping autonomous agents (Ask LexisNexis, Felix) rather than chat copilots.",
+      "vendorIds": ["harvey", "rogo", "perplexity"],
+      "suggestedAction": "Add Harvey and Rogo to the priority watch tier; monitor Perplexity's Docusign move as a horizontal player encroaching on legal verticals."
+    },
+    {
+      "type": "risk",
+      "title": "xAI trust-and-safety exposure is a competitive and regulatory liability",
+      "evidence": "Reports of 10B+ monthly adult images and unresolved CSAM safeguards on Grok coincide with a $20B raise, creating a gap between capital access and reputational risk.",
+      "vendorIds": ["xai"],
+      "suggestedAction": "Flag any enterprise/government procurement guidance that cites Grok safety concerns; contrast with Anthropic/OpenAI safety positioning in sales enablement."
+    },
+    {
+      "type": "theme",
+      "title": "Price compression at the agentic tier is accelerating",
+      "evidence": "Anthropic's Sonnet 5 introductory pricing ($2/$10), Google's Gemini 3.5 Flash (Flash beating prior Pro), Mistral Small 4 at $0.15/M, and Alibaba Qwen3.7-Plus all target cheaper high-volume agent workloads.",
+      "vendorIds": ["anthropic", "googledeepmind", "mistral", "alibaba", "openai"],
+      "suggestedAction": "Maintain a live per-model input/output price table; recompute agentic cost-per-task benchmarks as intro pricing expires (e.g., Sonnet 5 on Aug 31, 2026)."
+    }
+  ]
+}
