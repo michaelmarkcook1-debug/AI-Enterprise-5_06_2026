@@ -25,13 +25,22 @@ import {
   type CompetitiveTarget,
 } from "./competitive-targets";
 
-// Three-tier model pipeline. Each tier has a dedicated env knob.
-// ANTHROPIC_EXTRACT_MODEL   → Haiku (ingestion / web-search extraction)
-// ANTHROPIC_MODEL           → Sonnet (classification / scoring)
-// ANTHROPIC_INTEL_MODEL     → Opus   (analyst commentary / "why it matters")
+// Three-tier model pipeline. Each tier has a dedicated env knob so the
+// cost/quality mix can be dialled without a code change.
+// ANTHROPIC_EXTRACT_MODEL   → Haiku 4.5 (ingestion / web-search extraction — cheapest, carries the bulk of tokens)
+// ANTHROPIC_MODEL           → Sonnet    (classification / scoring). Defaults to Sonnet 4.6 to match the
+//                             shared ANTHROPIC_MODEL default used elsewhere in the repo; set it to
+//                             "claude-sonnet-5" for a same-price ($3/$15), near-Opus-quality upgrade.
+// ANTHROPIC_INTEL_MODEL     → Opus 4.8  (analyst commentary / "why it matters" — priciest tier, shortest output)
+// ANTHROPIC_INTEL_EFFORT    → effort for the Opus tier (low|medium|high|max). "medium" is the cost/quality
+//                             sweet spot for the short (≤360 char) whyItMatters output — it trims the
+//                             adaptive-thinking spend on the most expensive tier without a meaningful
+//                             quality drop. Raise to "high" only when the analyst voice needs more
+//                             reasoning per finding.
 const HAIKU_MODEL  = process.env.ANTHROPIC_EXTRACT_MODEL ?? "claude-haiku-4-5";
 const SONNET_MODEL = process.env.ANTHROPIC_MODEL         ?? "claude-sonnet-4-6";
 const OPUS_MODEL   = process.env.ANTHROPIC_INTEL_MODEL   ?? "claude-opus-4-8";
+const INTEL_EFFORT = process.env.ANTHROPIC_INTEL_EFFORT  ?? "medium";
 const WEB_SEARCH_TOOL_TYPE = "web_search_20260209" as const;
 const MAX_SEARCHES_PER_VENDOR = 3;
 const LOOKBACK_DAYS = 14;
@@ -47,7 +56,7 @@ function getClient(): Anthropic | null {
 
 /* ─── Intermediate pipeline types ────────────────────────────── */
 
-interface RawFinding {
+export interface RawFinding {
   title: string;
   sourceName: string;
   sourceUrl: string;
@@ -55,7 +64,7 @@ interface RawFinding {
   snippet: string;     // verbatim excerpt, max 500 chars
 }
 
-interface ClassifiedFinding {
+export interface ClassifiedFinding {
   idx: number; // 0-based index into the raw findings array
   dimension: CompetitiveDimension;
   impactScore: number;
@@ -64,7 +73,7 @@ interface ClassifiedFinding {
   summary: string;
 }
 
-interface MonitorFinding {
+export interface MonitorFinding {
   dimension: CompetitiveDimension;
   title: string;
   summary: string;
@@ -187,6 +196,11 @@ export interface VendorMonitorResult {
   noFindingsReason?: string;
   /** stop_reason from the Stage-1 (web-search) response, for diagnosis. */
   stopReason?: string;
+  /** Batch path only: set when monitorVendor is called with {deferAnalyst:true}.
+   *  Carries the Stage-1/2 output so the caller can submit the Stage-3 (Opus
+   *  analyst) request through the Batch API at 50% cost. */
+  deferredClassified?: ClassifiedFinding[];
+  deferredRawItems?: RawFinding[];
 }
 
 export interface MonitorRunResult {
@@ -223,9 +237,139 @@ function newsItemId(vendorId: string, url: string, publishedAt: string): string 
   return `compintel_${h.slice(0, 24)}`;
 }
 
+/* ─── Stage 3 (Opus analyst) — shared by the sync and Batch API paths ── */
+// Extracted so the synchronous monitor and the Batch API path build the exact
+// same request, parse it the same way, and assemble identical findings — they
+// can never drift on what Opus is asked to do (same convention as the sourcing
+// batch runner importing its extractor prompt/schema).
+
+const ANALYST_MAX_TOKENS = 3000;
+const ANALYST_SYSTEM = `You are a senior competitive-intelligence analyst (Gartner/Forrester calibre). For each finding, write "whyItMatters": 1-2 sentences (max 360 chars) on the SO-WHAT for an enterprise buyer or competing service provider — who gains leverage, what shifts in vendor selection/pricing power/switching cost, and what the reader should DO next. Be specific and falsifiable. No filler ("this is significant", "remains to be seen").`;
+
+/** Build the exact Messages-API params for the Opus analyst stage. */
+export function buildAnalystParams(
+  target: CompetitiveTarget,
+  classified: ClassifiedFinding[],
+  rawItems: RawFinding[],
+): Anthropic.MessageCreateParamsNonStreaming {
+  const clList = classified
+    .map((c) => `[${c.idx}] ${rawItems[c.idx]!.title} (${c.dimension}, impact=${c.impactScore})\n${c.summary}`)
+    .join("\n\n");
+  return {
+    model: OPUS_MODEL,
+    max_tokens: ANALYST_MAX_TOKENS,
+    thinking: { type: "adaptive" },
+    output_config: { effort: INTEL_EFFORT },
+    system: ANALYST_SYSTEM,
+    tools: [ANALYSIS_SCHEMA as unknown as Anthropic.Tool],
+    // tool_choice MUST be "auto" (not a forced tool) whenever `thinking` is
+    // enabled — the API rejects forced tool use + thinking with a 400
+    // ("Thinking may not be enabled when tool_choice forces tool use"). With a
+    // single tool + an explicit instruction Opus reliably calls it after
+    // thinking; parseAnalyst/assembleFindings tolerate a missed call.
+    tool_choice: { type: "auto" } as unknown as Anthropic.ToolChoice,
+    messages: [{
+      role: "user",
+      content: `Vendor: ${target.name}\n\nClassified findings:\n${clList}\n\nWrite whyItMatters for each (by index). You MUST call report_analysis with one entry per index — do not answer in prose.`,
+    }],
+  } as unknown as Anthropic.MessageCreateParamsNonStreaming;
+}
+
+/** Parse an analyst (Stage 3) message into an idx → whyItMatters map. */
+export function parseAnalyst(content: Anthropic.ContentBlock[]): Map<number, string> {
+  const block = content.find((b): b is Anthropic.ToolUseBlock => b.type === "tool_use" && b.name === "report_analysis");
+  const analyses: { idx: number; whyItMatters: string }[] =
+    (block?.input as { findings?: { idx: number; whyItMatters: string }[] })?.findings ?? [];
+  return new Map(analyses.map((a) => [a.idx, a.whyItMatters]));
+}
+
+/** Assemble final findings from classified items + the analyst whyItMatters map.
+ *  Keeps every classified finding even if Stage 3 (tool_choice:auto) missed one,
+ *  falling back to a generic whyItMatters rather than discarding it. */
+export function assembleFindings(
+  vendorName: string,
+  classified: ClassifiedFinding[],
+  rawItems: RawFinding[],
+  whyMap: Map<number, string>,
+): MonitorFinding[] {
+  return classified
+    .slice(0, MAX_ITEMS_PER_VENDOR)
+    .map((c) => {
+      const raw = rawItems[c.idx]!;
+      return {
+        dimension: c.dimension,
+        title: raw.title,
+        summary: c.summary,
+        sourceName: raw.sourceName,
+        sourceUrl: raw.sourceUrl,
+        publishedAt: raw.publishedAt,
+        impactScore: c.impactScore,
+        confidenceScore: c.confidenceScore,
+        sentiment: c.sentiment,
+        whyItMatters: whyMap.get(c.idx)
+          ?? `Assess the impact on ${vendorName}'s competitive position, pricing leverage, and vendor selection.`,
+      };
+    });
+}
+
+/** Idempotent upsert of one vendor's findings into IntelligenceNewsItem.
+ *  Shared by the synchronous monitor and the Batch API collector so both persist
+ *  identically. Returns the count upserted; per-row failures are pushed onto
+ *  `errors` rather than thrown. */
+export async function upsertVendorFindings(
+  prisma: ReturnType<typeof getPrisma>,
+  vendorId: string,
+  findings: MonitorFinding[],
+  errors: { vendorId: string; error: string }[],
+): Promise<number> {
+  let upserted = 0;
+  for (const f of findings) {
+    const id = newsItemId(vendorId, f.sourceUrl, f.publishedAt);
+    const category = DIMENSION_TO_NEWS_CATEGORY[f.dimension];
+    try {
+      await prisma.intelligenceNewsItem.upsert({
+        where: { id },
+        create: {
+          id,
+          title: f.title,
+          summary: f.summary,
+          sourceName: f.sourceName,
+          sourceUrl: f.sourceUrl,
+          publishedAt: new Date(`${f.publishedAt}T00:00:00.000Z`),
+          vendors: [vendorId],
+          categories: [category],
+          impactScore: f.impactScore,
+          confidenceScore: f.confidenceScore,
+          affectedPillars: [],
+          whyItMatters: `[${f.dimension.replace(/_/g, " ")}] ${f.whyItMatters}`,
+          suggestedScoreImpact: [],
+          relatedVendors: [],
+          sentiment: f.sentiment,
+        },
+        update: {
+          title: f.title,
+          summary: f.summary,
+          impactScore: f.impactScore,
+          confidenceScore: f.confidenceScore,
+          whyItMatters: `[${f.dimension.replace(/_/g, " ")}] ${f.whyItMatters}`,
+          sentiment: f.sentiment,
+        },
+      });
+      upserted += 1;
+    } catch (err) {
+      errors.push({ vendorId, error: `upsert: ${(err as Error).message}` });
+    }
+  }
+  return upserted;
+}
+
 /* ─── 3-stage vendor monitor ────────────────────────────────────── */
 
-async function monitorVendor(target: CompetitiveTarget, today: Date): Promise<VendorMonitorResult> {
+export async function monitorVendor(
+  target: CompetitiveTarget,
+  today: Date,
+  opts: { deferAnalyst?: boolean } = {},
+): Promise<VendorMonitorResult> {
   const client = getClient();
   const zeroTokens: StageTokens = {
     haiku:  { in: 0, out: 0 },
@@ -346,64 +490,40 @@ Use up to ${MAX_SEARCHES_PER_VENDOR} web_search calls. Return up to 6 items via 
       return { ...stub, searchesUsed, stageTokens: stage, source: "anthropic", tokensIn, tokensOut };
     }
 
+    // Batch path (INTEL_BATCH_MODE): stop after classification and hand the
+    // classified findings + raw items back so the caller can submit Stage 3 (the
+    // Opus analyst tier) through the Batch API at 50% cost. The synchronous path
+    // (deferAnalyst falsy) runs Stage 3 inline below via the same shared helpers.
+    if (opts.deferAnalyst) {
+      return {
+        ...stub,
+        vendorId: target.vendorId,
+        vendorName: target.name,
+        searchesUsed,
+        stageTokens: stage,
+        source: "anthropic",
+        tokensIn: stage.haiku.in + stage.sonnet.in,
+        tokensOut: stage.haiku.out + stage.sonnet.out,
+        deferredClassified: classified,
+        deferredRawItems: rawItems,
+      };
+    }
+
     // ── Stage 3: Opus — analyst commentary ───────────────────────
     // Opus receives pre-structured, pre-filtered findings and writes the
     // "whyItMatters" analyst brief for each. Adaptive thinking lets Opus
     // reason about leverage and implications before committing to text.
-    const clList = classified
-      .map((c) => `[${c.idx}] ${rawItems[c.idx]!.title} (${c.dimension}, impact=${c.impactScore})\n${c.summary}`)
-      .join("\n\n");
-
-    const s3 = await client.messages.create({
-      model: OPUS_MODEL,
-      max_tokens: 3000,
-      thinking: { type: "adaptive" },
-      output_config: { effort: "high" },
-      system: `You are a senior competitive-intelligence analyst (Gartner/Forrester calibre). For each finding, write "whyItMatters": 1-2 sentences (max 360 chars) on the SO-WHAT for an enterprise buyer or competing service provider — who gains leverage, what shifts in vendor selection/pricing power/switching cost, and what the reader should DO next. Be specific and falsifiable. No filler ("this is significant", "remains to be seen").`,
-      tools: [ANALYSIS_SCHEMA as unknown as Anthropic.Tool],
-      // tool_choice MUST be "auto" (not a forced tool) whenever `thinking` is
-      // enabled — the API rejects forced tool use + thinking with a 400
-      // ("Thinking may not be enabled when tool_choice forces tool use"), which
-      // was zeroing out EVERY vendor that reached Stage 3. With a single tool +
-      // an explicit instruction Opus reliably calls it after thinking; the
-      // assembly below tolerates a missed call so a vendor run is never lost.
-      tool_choice: { type: "auto" } as unknown as Anthropic.ToolChoice,
-      messages: [{
-        role: "user",
-        content: `Vendor: ${target.name}\n\nClassified findings:\n${clList}\n\nWrite whyItMatters for each (by index). You MUST call report_analysis with one entry per index — do not answer in prose.`,
-      }],
-    } as unknown as Anthropic.MessageCreateParamsNonStreaming);
+    const s3 = await client.messages.create(buildAnalystParams(target, classified, rawItems));
 
     stage.opus.in  += s3.usage.input_tokens;
     stage.opus.out += s3.usage.output_tokens;
 
-    const s3block = s3.content.find((b): b is Anthropic.ToolUseBlock => b.type === "tool_use" && b.name === "report_analysis");
-    const analyses: { idx: number; whyItMatters: string }[] =
-      (s3block?.input as { findings?: { idx: number; whyItMatters: string }[] })?.findings ?? [];
-    const whyMap = new Map(analyses.map((a) => [a.idx, a.whyItMatters]));
-
-    // Keep every classified finding even if Stage 3 (analyst commentary) missed
-    // one. Stage 3 uses tool_choice:auto (required alongside thinking), so an
-    // occasional missing whyItMatters is possible — but it must NOT discard an
-    // otherwise-complete finding (real title, source, dimension, scores).
-    const findings: MonitorFinding[] = classified
-      .slice(0, MAX_ITEMS_PER_VENDOR)
-      .map((c) => {
-        const raw = rawItems[c.idx]!;
-        return {
-          dimension: c.dimension,
-          title: raw.title,
-          summary: c.summary,
-          sourceName: raw.sourceName,
-          sourceUrl: raw.sourceUrl,
-          publishedAt: raw.publishedAt,
-          impactScore: c.impactScore,
-          confidenceScore: c.confidenceScore,
-          sentiment: c.sentiment,
-          whyItMatters: whyMap.get(c.idx)
-            ?? `Assess the impact on ${target.name}'s competitive position, pricing leverage, and vendor selection.`,
-        };
-      });
+    const findings: MonitorFinding[] = assembleFindings(
+      target.name,
+      classified,
+      rawItems,
+      parseAnalyst(s3.content),
+    );
 
     const tokensIn  = stage.haiku.in  + stage.sonnet.in  + stage.opus.in;
     const tokensOut = stage.haiku.out + stage.sonnet.out + stage.opus.out;
@@ -510,43 +630,7 @@ export async function runCompetitiveIntelMonitor(
   if (hasDatabase()) {
     const prisma = getPrisma();
     for (const r of results) {
-      for (const f of r.findings) {
-        const id = newsItemId(r.vendorId, f.sourceUrl, f.publishedAt);
-        const category = DIMENSION_TO_NEWS_CATEGORY[f.dimension];
-        try {
-          await prisma.intelligenceNewsItem.upsert({
-            where: { id },
-            create: {
-              id,
-              title: f.title,
-              summary: f.summary,
-              sourceName: f.sourceName,
-              sourceUrl: f.sourceUrl,
-              publishedAt: new Date(`${f.publishedAt}T00:00:00.000Z`),
-              vendors: [r.vendorId],
-              categories: [category],
-              impactScore: f.impactScore,
-              confidenceScore: f.confidenceScore,
-              affectedPillars: [],
-              whyItMatters: `[${f.dimension.replace(/_/g, " ")}] ${f.whyItMatters}`,
-              suggestedScoreImpact: [],
-              relatedVendors: [],
-              sentiment: f.sentiment,
-            },
-            update: {
-              title: f.title,
-              summary: f.summary,
-              impactScore: f.impactScore,
-              confidenceScore: f.confidenceScore,
-              whyItMatters: `[${f.dimension.replace(/_/g, " ")}] ${f.whyItMatters}`,
-              sentiment: f.sentiment,
-            },
-          });
-          itemsUpserted += 1;
-        } catch (err) {
-          errors.push({ vendorId: r.vendorId, error: `upsert: ${(err as Error).message}` });
-        }
-      }
+      itemsUpserted += await upsertVendorFindings(prisma, r.vendorId, r.findings, errors);
     }
   }
 

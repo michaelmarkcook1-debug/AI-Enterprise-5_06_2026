@@ -48,6 +48,7 @@ import {
 } from "../intelligence/ranking-snapshots";
 import { materializeCategoryCache } from "../ranking/category-composite";
 import { runCompetitiveIntelMonitor } from "../intelligence/competitive-monitor";
+import { submitIntelAnalystBatch, collectIntelAnalystBatches } from "../intelligence/competitive-monitor-batch";
 import { COMPETITIVE_CORE } from "../intelligence/competitive-targets";
 import { fetchFinancialsForProviders } from "../investing/financials-live";
 import { fetchValuationForProviders } from "../investing/valuation-live";
@@ -500,6 +501,37 @@ export async function runDailyRefresh(
   // ── 7. Competitive-intel monitor ───────────────────────────
   await trackedStep("competitive_intel", async () => {
     if (spend.exhausted()) return { skipped: "spend_cap", ...spend.status() };
+
+    // Two-phase Batch API mode (opt-in via INTEL_BATCH_MODE=1). Stage 3 (the Opus
+    // analyst tier) runs ~50% cheaper but async: collect any analyst batches
+    // submitted in prior cycles (assemble + upsert), then run Stage 1/2 for THIS
+    // cycle and submit its analyst batch for collection next cycle. Default OFF →
+    // the proven synchronous monitor below is used as-is.
+    if (process.env.INTEL_BATCH_MODE === "1") {
+      const collected = await collectIntelAnalystBatches();
+      const submitted = await submitIntelAnalystBatch({
+        now,
+        targets: isWeekly ? undefined : COMPETITIVE_CORE,
+      });
+      return {
+        mode: "batch",
+        cadence: isWeekly ? "weekly_full" : "daily_core",
+        vendorsScanned: submitted.vendorsScanned,
+        vendorsBatched: submitted.vendorsBatched,
+        batchId: submitted.batchId,
+        submitSkipped: submitted.skipped,
+        stage12CostUsd: submitted.stage12CostUsd,
+        batchesCollected: collected.batchesCollected,
+        stillPending: collected.stillPending,
+        itemsUpserted: collected.itemsUpserted,
+        failedAnalyses: collected.failedAnalyses,
+        collectErrors: collected.errors.length,
+        tokensIn: collected.tokensIn,
+        tokensOut: collected.tokensOut,
+        estimatedCostUsd: collected.estimatedCostUsd,
+      };
+    }
+
     // Daily: core vendors only. Weekly (Monday): full universe.
     const r = await runCompetitiveIntelMonitor(now, isWeekly ? {} : { targets: COMPETITIVE_CORE });
     return {
