@@ -25,13 +25,22 @@ import {
   type CompetitiveTarget,
 } from "./competitive-targets";
 
-// Three-tier model pipeline. Each tier has a dedicated env knob.
-// ANTHROPIC_EXTRACT_MODEL   → Haiku (ingestion / web-search extraction)
-// ANTHROPIC_MODEL           → Sonnet (classification / scoring)
-// ANTHROPIC_INTEL_MODEL     → Opus   (analyst commentary / "why it matters")
+// Three-tier model pipeline. Each tier has a dedicated env knob so the
+// cost/quality mix can be dialled without a code change.
+// ANTHROPIC_EXTRACT_MODEL   → Haiku 4.5 (ingestion / web-search extraction — cheapest, carries the bulk of tokens)
+// ANTHROPIC_MODEL           → Sonnet    (classification / scoring). Defaults to Sonnet 4.6 to match the
+//                             shared ANTHROPIC_MODEL default used elsewhere in the repo; set it to
+//                             "claude-sonnet-5" for a same-price ($3/$15), near-Opus-quality upgrade.
+// ANTHROPIC_INTEL_MODEL     → Opus 4.8  (analyst commentary / "why it matters" — priciest tier, shortest output)
+// ANTHROPIC_INTEL_EFFORT    → effort for the Opus tier (low|medium|high|max). "medium" is the cost/quality
+//                             sweet spot for the short (≤360 char) whyItMatters output — it trims the
+//                             adaptive-thinking spend on the most expensive tier without a meaningful
+//                             quality drop. Raise to "high" only when the analyst voice needs more
+//                             reasoning per finding.
 const HAIKU_MODEL  = process.env.ANTHROPIC_EXTRACT_MODEL ?? "claude-haiku-4-5";
 const SONNET_MODEL = process.env.ANTHROPIC_MODEL         ?? "claude-sonnet-4-6";
 const OPUS_MODEL   = process.env.ANTHROPIC_INTEL_MODEL   ?? "claude-opus-4-8";
+const INTEL_EFFORT = process.env.ANTHROPIC_INTEL_EFFORT  ?? "medium";
 const WEB_SEARCH_TOOL_TYPE = "web_search_20260209" as const;
 const MAX_SEARCHES_PER_VENDOR = 3;
 const LOOKBACK_DAYS = 14;
@@ -358,7 +367,7 @@ Use up to ${MAX_SEARCHES_PER_VENDOR} web_search calls. Return up to 6 items via 
       model: OPUS_MODEL,
       max_tokens: 3000,
       thinking: { type: "adaptive" },
-      output_config: { effort: "high" },
+      output_config: { effort: INTEL_EFFORT },
       system: `You are a senior competitive-intelligence analyst (Gartner/Forrester calibre). For each finding, write "whyItMatters": 1-2 sentences (max 360 chars) on the SO-WHAT for an enterprise buyer or competing service provider — who gains leverage, what shifts in vendor selection/pricing power/switching cost, and what the reader should DO next. Be specific and falsifiable. No filler ("this is significant", "remains to be seen").`,
       tools: [ANALYSIS_SCHEMA as unknown as Anthropic.Tool],
       // tool_choice MUST be "auto" (not a forced tool) whenever `thinking` is
