@@ -125,10 +125,11 @@ async function main() {
         sourceUrl: evidence.sourceUrl,
         capturedAt: new Date(evidence.capturedAt),
         excerpt: evidence.excerpt,
-        // model_quality is a synthesized (read-time) capability domain, never a
-        // stored EvidenceRecord — it is not in the Prisma DomainId enum, and the
-        // seed/adapter never emits it. Narrow the TS union to the persisted set.
-        domain: evidence.domain as Exclude<DomainId, "model_quality">,
+        // model_quality AND dev_sentiment are synthesized (read-time) category-
+        // scoped domains, never stored EvidenceRecords — neither is in the Prisma
+        // DomainId enum, and the seed/adapter never emits them. Narrow the TS
+        // union to the persisted set.
+        domain: evidence.domain as Exclude<DomainId, "model_quality" | "dev_sentiment">,
         subfactor: evidence.subfactor,
         evidenceGrade: evidence.grade,
         rawScore: evidence.rawScore,
@@ -145,7 +146,7 @@ async function main() {
         vendorId: vendor.id,
         severity: risk.severity,
         description: risk.description,
-        domain: risk.domain as Exclude<DomainId, "model_quality">,
+        domain: risk.domain as Exclude<DomainId, "model_quality" | "dev_sentiment">,
         isFatalIfTriggered: risk.isFatalIfTriggered ?? false,
         fatalInIndustries: risk.fatalInIndustries ?? [],
       })),
