@@ -290,10 +290,10 @@ export default function CohortExplorer() {
             disclosure-only, never private usage.
           </p>
         </div>
+        {/* key = the segment → full remount on segment switch, so selection
+            state (org / scope / drilldown) can NEVER leak another cohort's
+            companies into this heatmap (the "banks showing under pharma" bug). */}
         {exemplars.length > 0 ? (
-          {/* key = the segment → full remount on segment switch, so selection
-              state (org / scope / drilldown) can NEVER leak another cohort's
-              companies into this heatmap (the "banks showing under pharma" bug). */}
           <PeerBenchmark
             key={segmentId(segment)}
             companyIds={exemplars.map((c) => c.id)}
