@@ -17,6 +17,7 @@ import { getMember } from "@/lib/member/auth";
 import CategoryRerank, { type RerankVendor } from "@/components/assessment/CategoryRerank";
 import { getRankMovements, type RankMovement } from "@/lib/intelligence/rank-movement";
 import RankMovementIndicator from "@/components/ranking/RankMovementIndicator";
+import TabChat from "@/components/chat/TabChat";
 
 // force-dynamic (not ISR): rankings are DB-backed + recalculated each pipeline
 // run, so the page must reflect the live data immediately — never serve a stale
@@ -230,6 +231,19 @@ export default async function CategoryPage({ params }: { params: Promise<Params>
             </div>
           )}
         </section>
+      )}
+
+      {/* Piece 3 — Ask AI, grounded in THIS category's live composite only. */}
+      {isLive && (
+        <TabChat
+          tab={{ kind: "category", id: slug }}
+          label={category.name}
+          chips={[
+            "Why is the top vendor ranked first?",
+            "Which vendors are held for insufficient evidence?",
+            "How is this ranking computed?",
+          ]}
+        />
       )}
     </main>
   );

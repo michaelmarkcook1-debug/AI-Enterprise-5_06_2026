@@ -100,6 +100,18 @@ export const INTERROGATE_ENABLED: boolean = true;
 export const PREP_KIT_ENABLED: boolean = true;
 
 /**
+ * Per-tab grounded chat (AnalystGenius batch, piece 3) gate — the third premium
+ * LLM action: an "Ask AI" assistant on each surface, grounded EXCLUSIVELY in
+ * that tab's cited evidence snapshot (built server-side from canonical reads).
+ * Like Interrogate/prep-kit: SCAFFOLDED, member-gated, credit-metered but NOT
+ * enforced while BILLING_ENABLED is off — open during test per the batch spec.
+ * FIREWALL: answers cite only snapshot URLs (fabricated citations dropped by
+ * the parser), a question beyond the evidence returns an honest "no evidence"
+ * — and the route writes nothing canonical, ever.
+ */
+export const TAB_CHAT_ENABLED: boolean = true;
+
+/**
  * Investor-tools gate — PARKED per the Chris change-list CUT/PARK ("Investor
  * tools — already parked by you; keep parked. Not part of the buyer's job.").
  * Default OFF: the daily-refresh investor step (SEC financials, valuations,

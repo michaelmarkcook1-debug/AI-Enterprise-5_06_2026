@@ -36,8 +36,9 @@ describe("tier ladder shape", () => {
     }
   });
 
-  it("the metered actions are exactly interrogate + prep_kit and are real features", () => {
-    expect([...METERED_ACTIONS].sort()).toEqual(["interrogate", "prep_kit"]);
+  it("the metered actions are exactly interrogate + prep_kit + tab_chat and are real features", () => {
+    // tab_chat added by the AnalystGenius batch piece 3 (per-tab grounded chat).
+    expect([...METERED_ACTIONS].sort()).toEqual(["interrogate", "prep_kit", "tab_chat"]);
     const paidFeatures = new Set<Feature>(byId("individual").features);
     for (const a of METERED_ACTIONS) expect(paidFeatures.has(a)).toBe(true);
   });

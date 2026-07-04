@@ -42,6 +42,9 @@ import { getVendorCategoryStandings } from "@/lib/ranking/category-composite";
 import PillarContributionTable from "@/components/ranking/PillarContributionTable";
 import { getDeliveryPartnershipsForVendor } from "@/lib/delivery/repository";
 import ImplementationPartnersPanel from "@/components/vendor/ImplementationPartnersPanel";
+import { disclosedAdoptersOf } from "@/lib/peer/adopters";
+import DisclosedAdoptersPanel from "@/components/peers/DisclosedAdoptersPanel";
+import TabChat from "@/components/chat/TabChat";
 import { getVendorScorecard, getModelQualityBreakdown } from "@/lib/assessment/domain-scores";
 import { MODEL_QUALITY_CATEGORIES } from "@/lib/system/model-quality-blend";
 import DomainScorecard from "@/components/assessment/DomainScorecard";
@@ -600,6 +603,10 @@ export default async function VendorDeepDivePage({
   const deliveryPartnerships = await getDeliveryPartnershipsForVendor(intelId).catch(() => []);
   const partnerIndustries = [...new Set(deliveryPartnerships.flatMap((p) => p.industries))].sort();
   const partnerRegions = [...new Set(deliveryPartnerships.flatMap((p) => p.regions))].sort();
+  // Demand-side twin (piece 2): peers that have publicly DISCLOSED adopting this
+  // vendor — curated cited reference data (lib/peer), same provenance class as
+  // the delivery layer; renders independent of the score gating.
+  const peerAdopters = disclosedAdoptersOf(intelId);
 
   // Phase 3 Assessment scorecard — 12-domain 0–5 scores from REAL analyst_verified
   // evidence (deterministic, no LLM, never seed). Keyed on entity.id to match
@@ -796,6 +803,13 @@ export default async function VendorDeepDivePage({
                   industries={partnerIndustries}
                   regions={partnerRegions}
                 />
+              </Panel>
+            </section>
+          )}
+          {peerAdopters.length > 0 && (
+            <section className="mt-6">
+              <Panel title="Disclosed enterprise adopters">
+                <DisclosedAdoptersPanel vendorName={entity.name} adopters={peerAdopters} />
               </Panel>
             </section>
           )}
@@ -1065,6 +1079,15 @@ export default async function VendorDeepDivePage({
           </section>
         )}
 
+        {/* ── Disclosed enterprise adopters (demand side — cited peer data) ── */}
+        {peerAdopters.length > 0 && (
+          <section className="mb-6">
+            <Panel title="Disclosed enterprise adopters">
+              <DisclosedAdoptersPanel vendorName={entity.name} adopters={peerAdopters} />
+            </Panel>
+          </section>
+        )}
+
         {/* ── Financial profile (ownership + sourced capital signals) ─────── */}
         <section className="mb-6">
           <FinancialsPanel
@@ -1275,6 +1298,17 @@ export default async function VendorDeepDivePage({
             )}
           </div>
         </section>
+
+        {/* Piece 3 — Ask AI, grounded in THIS vendor's cited scorecard only. */}
+        <TabChat
+          tab={{ kind: "vendor", id: entity.id }}
+          label={entity.name}
+          chips={[
+            "Where is the evidence thin for this vendor?",
+            "What is the strongest-evidenced domain?",
+            "Is the model-quality score an independent audit?",
+          ]}
+        />
       </main>
     </div>
   );

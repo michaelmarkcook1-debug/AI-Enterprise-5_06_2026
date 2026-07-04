@@ -18,6 +18,7 @@ const BASE_NAV: { href: string; label: string }[] = [
   { href: "/vendors", label: "Rankings" },
   { href: "/models", label: "Models" },
   { href: "/dependencies", label: "Dependencies" },
+  { href: "/peers", label: "Peer AI" },
   { href: "/insights", label: "Insights" },
 ];
 
