@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import PeerBenchmark from "@/components/peers/PeerBenchmark";
+import CohortExplorer from "@/components/peers/CohortExplorer";
 import TabChat from "@/components/chat/TabChat";
 import { SIGNAL_KINDS } from "@/lib/peer/heatmap";
 import { absoluteUrl } from "@/lib/site";
@@ -7,9 +7,9 @@ import { absoluteUrl } from "@/lib/site";
 // Peer-AI benchmark — the demand-side twin of the vendor assessment.
 // Pure curated/cited data (lib/peer/*), zero DB, zero LLM at request time.
 
-const TITLE = "Peer AI benchmark — what are my peers doing with AI?";
+const TITLE = "Peer AI benchmark — what are enterprises like mine doing with AI?";
 const DESCRIPTION =
-  "Your organisation vs peers on observable, cited AI-adoption signals: disclosed platform adoption, shipped AI products, talent, patents. Private usage is never asserted — undisclosed reads as undisclosed.";
+  "Your cohort (vertical × size × region) on cited AI-adoption research: adoption benchmarks, deployed use-cases, disclosed platforms, and named exemplar deployments. Private usage is never asserted; thin segments read as limited data.";
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -28,20 +28,20 @@ export default function PeersPage() {
           Observable · cited · never guessed
         </p>
         <h1 className="font-display mt-2 max-w-3xl text-4xl font-semibold leading-[1.05] tracking-tight sm:text-5xl">
-          Are we behind our peers on AI?
+          What are enterprises like mine doing with AI?
         </h1>
         <p className={`mt-3 max-w-2xl text-sm ${MUTED}`}>
-          Benchmark your organisation against peers on the AI signals that are publicly
-          observable — disclosed platform adoption, shipped AI products, talent and patent
-          velocity. Every rated cell carries its citations; anything private reads
-          honestly as “not disclosed”.
+          State your segment — vertical, size, region — and see how your cohort adopts AI:
+          cited survey benchmarks, the use-cases and platforms they deploy, where you stand,
+          and named exemplars with publicly disclosed deployments. Anything private reads
+          honestly as “not disclosed”; thin segments read “limited data”.
         </p>
         <p className="mt-3 inline-block rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-[11px] font-medium">
-          Analyst-curated qualitative readings of cited sources — not measured scores
+          Cited research + analyst-curated readings — never measured scores, never guesses
         </p>
       </header>
 
-      <PeerBenchmark />
+      <CohortExplorer />
 
       {/* ── Methodology — what each signal means and where the red line is ── */}
       <section className="mt-10 rounded-xl border border-black/10 bg-white/60 p-5 dark:border-white/10 dark:bg-white/5">

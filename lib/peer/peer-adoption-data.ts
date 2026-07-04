@@ -29,6 +29,7 @@ export const PEER_COMPANIES: PeerCompany[] = [
     id: "jpmorgan-chase",
     name: "JPMorgan Chase",
     industry: "Banking & capital markets",
+    segment: { vertical: "financial_services", sizeBand: "global_enterprise", region: "north_america" },
     signals: [
       {
         kind: "platform_integration",
@@ -144,6 +145,7 @@ export const PEER_COMPANIES: PeerCompany[] = [
     id: "morgan-stanley",
     name: "Morgan Stanley",
     industry: "Banking & capital markets",
+    segment: { vertical: "financial_services", sizeBand: "global_enterprise", region: "north_america" },
     signals: [
       {
         kind: "platform_integration",
@@ -230,6 +232,7 @@ export const PEER_COMPANIES: PeerCompany[] = [
     id: "goldman-sachs",
     name: "Goldman Sachs",
     industry: "Banking & capital markets",
+    segment: { vertical: "financial_services", sizeBand: "global_enterprise", region: "north_america" },
     signals: [
       {
         kind: "platform_integration",
@@ -303,6 +306,7 @@ export const PEER_COMPANIES: PeerCompany[] = [
     id: "citigroup",
     name: "Citigroup",
     industry: "Banking & capital markets",
+    segment: { vertical: "financial_services", sizeBand: "global_enterprise", region: "north_america" },
     signals: [
       {
         kind: "platform_integration",
@@ -383,6 +387,7 @@ export const PEER_COMPANIES: PeerCompany[] = [
     id: "wells-fargo",
     name: "Wells Fargo",
     industry: "Banking & capital markets",
+    segment: { vertical: "financial_services", sizeBand: "global_enterprise", region: "north_america" },
     signals: [
       {
         kind: "platform_integration",
@@ -471,6 +476,7 @@ export const PEER_COMPANIES: PeerCompany[] = [
     id: "bank-of-america",
     name: "Bank of America",
     industry: "Banking & capital markets",
+    segment: { vertical: "financial_services", sizeBand: "global_enterprise", region: "north_america" },
     signals: [
       {
         kind: "platform_integration",
@@ -570,6 +576,7 @@ export const PEER_COMPANIES: PeerCompany[] = [
     id: "capital-one",
     name: "Capital One",
     industry: "Banking & capital markets",
+    segment: { vertical: "financial_services", sizeBand: "global_enterprise", region: "north_america" },
     signals: [
       {
         kind: "platform_integration",

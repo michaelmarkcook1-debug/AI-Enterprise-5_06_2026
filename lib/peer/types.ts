@@ -64,6 +64,12 @@ export interface PeerCompany {
   id: string; // kebab-case slug
   name: string;
   industry: string;
+  /** CORRECTED peer model (2 Jul 2026): exemplars are matched to the user by
+   *  segment — vertical (C6 IndustryTag) × size band × region — so a company
+   *  only ever appears as a named, publicly-disclosed exemplar within its own
+   *  cohort. Ids reference lib/peer/segments.ts vocab (typed there; kept as
+   *  strings here to avoid a cycle — validated by tests). */
+  segment: { vertical: string; sizeBand: string; region: string };
   /** Exactly one signal per PeerSignalKind — enforced by tests. */
   signals: PeerSignal[];
 }

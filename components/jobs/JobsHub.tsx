@@ -11,14 +11,13 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { getPeerById } from "@/lib/peer/heatmap";
+import { VERTICALS, SIZE_BANDS, REGIONS, type Segment } from "@/lib/peer/segments";
 
 const MUTED = "text-[#15263c]/60 dark:text-[#eef3f8]/60";
 const CARD =
   "group block rounded-xl border border-black/10 dark:border-white/10 bg-white/60 dark:bg-white/5 p-4 transition-colors hover:border-[#d4af37]/60";
 
-const ORG_KEY = "ae_peer_primary_org";
-const SCOPE_KEY = "ae_peer_scope";
+const SEGMENT_KEY = "ae_peer_segment";
 
 interface JobDef {
   href: string;
@@ -52,16 +51,18 @@ const JOBS: JobDef[] = [
 ];
 
 export default function JobsHub() {
-  // Saved benchmark state — hydrated after mount (SSR-safe).
-  const [resume, setResume] = useState<{ orgName: string; peers: number } | null>(null);
+  // Saved benchmark state (the user's segment) — hydrated after mount (SSR-safe).
+  const [resume, setResume] = useState<string | null>(null);
 
   useEffect(() => {
     try {
-      const org = window.localStorage.getItem(ORG_KEY);
-      const scopeRaw = window.localStorage.getItem(SCOPE_KEY);
-      const peers = scopeRaw ? (JSON.parse(scopeRaw) as string[]).length : 0;
-      const company = org ? getPeerById(org) : undefined;
-      if (company) setResume({ orgName: company.name, peers });
+      const raw = window.localStorage.getItem(SEGMENT_KEY);
+      if (!raw) return;
+      const s = JSON.parse(raw) as Segment;
+      const v = VERTICALS.find((x) => x.id === s.vertical)?.label;
+      const b = SIZE_BANDS.find((x) => x.id === s.sizeBand)?.label;
+      const r = REGIONS.find((x) => x.id === s.region)?.label;
+      if (v && b && r) setResume(`${v} · ${b.split(" (")[0]} · ${r}`);
     } catch {
       /* resume chip is a convenience — never let saved state break the hub */
     }
@@ -88,7 +89,7 @@ export default function JobsHub() {
             <p className={`mt-1 text-xs leading-5 ${MUTED}`}>{job.detail}</p>
             {job.href === "/peers" && resume && (
               <p className="mt-2 inline-block rounded-full border border-[#d4af37]/50 bg-[#d4af37]/10 px-2 py-0.5 text-[10px] font-medium">
-                Resume: {resume.orgName} vs {Math.max(0, resume.peers - 1)} peers
+                Resume: {resume}
               </p>
             )}
           </Link>

@@ -14,6 +14,7 @@ import { getBreakingNews } from "../intelligence/repository";
 import { EXPOSURE_EDGES, EXPOSURE_NODES } from "../investing/exposure-map-data";
 import { PEER_COMPANIES } from "../peer/peer-adoption-data";
 import { LEVEL_LABELS, SIGNAL_KINDS } from "../peer/heatmap";
+import { SEGMENT_BENCHMARKS, GLOBAL_STATS, REGION_STATS, VERTICAL_STATS, SIZE_STATS, type SegmentStat } from "../peer/segment-benchmarks";
 
 export interface TabCitation {
   sourceUrl: string;
@@ -146,6 +147,34 @@ export function buildPeersTabSnapshot(peerIds?: string[]): TabEvidenceSnapshot |
     }
     return { label: c.name, facts, citations };
   });
+
+  // Segment-level cohort benchmarks (corrected peer model): every cited layer
+  // — exact segments, verticals, size bands, regions, global — each fact
+  // carrying its honest population-fit note.
+  const statFact = (s: SegmentStat) => `${s.headline} [population fit: ${s.segmentFitNote}]`;
+  const statCite = (s: SegmentStat) => ({ sourceUrl: s.source.url, note: `${s.source.publisher} · ${s.source.surveyDate}` });
+  const layerSections: TabSnapshotSection[] = [];
+  for (const b of Object.values(SEGMENT_BENCHMARKS)) {
+    layerSections.push({
+      label: `Cohort benchmark (exact segment): ${b.segment.vertical} × ${b.segment.sizeBand} × ${b.segment.region}`,
+      facts: [
+        ...b.stats.map(statFact),
+        `Cohort maturity anchor (analyst-curated, directional): ${b.cohortMaturityAnchor} — ${b.anchorRationale}`,
+      ],
+      citations: b.stats.map(statCite),
+    });
+  }
+  for (const [vertical, stats] of Object.entries(VERTICAL_STATS)) {
+    if (stats?.length) layerSections.push({ label: `Vertical benchmark: ${vertical}`, facts: stats.map(statFact), citations: stats.map(statCite) });
+  }
+  for (const [band, stats] of Object.entries(SIZE_STATS)) {
+    if (stats?.length) layerSections.push({ label: `Size-band benchmark: ${band}`, facts: stats.map(statFact), citations: stats.map(statCite) });
+  }
+  for (const [region, stats] of Object.entries(REGION_STATS)) {
+    if (stats?.length) layerSections.push({ label: `Region benchmark: ${region}`, facts: stats.map(statFact), citations: stats.map(statCite) });
+  }
+  layerSections.push({ label: "Global baseline", facts: GLOBAL_STATS.map(statFact), citations: GLOBAL_STATS.map(statCite) });
+  sections.unshift(...layerSections);
 
   return { tabLabel: "Peer AI benchmark (observable, cited signals only)", sections };
 }

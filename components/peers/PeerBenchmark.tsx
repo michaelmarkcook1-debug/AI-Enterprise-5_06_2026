@@ -56,8 +56,15 @@ function CellChip({ signal }: { signal: PeerSignal }) {
   );
 }
 
-export default function PeerBenchmark() {
-  const allIds = useMemo(() => PEER_COMPANIES.map((c) => c.id), []);
+export default function PeerBenchmark({ companyIds }: { companyIds?: string[] } = {}) {
+  // Optional segment scoping (corrected peer model): when the parent passes the
+  // cohort's exemplar ids, the heatmap only ever shows companies from the
+  // user's own segment. No ids = the full starter set (legacy behaviour).
+  const COMPANIES = useMemo(
+    () => (companyIds && companyIds.length > 0 ? PEER_COMPANIES.filter((c) => companyIds.includes(c.id)) : PEER_COMPANIES),
+    [companyIds],
+  );
+  const allIds = useMemo(() => COMPANIES.map((c) => c.id), [COMPANIES]);
   const [orgId, setOrgId] = useState<string>("");
   const [scope, setScope] = useState<string[]>(allIds);
   const [focusId, setFocusId] = useState<string>("");
@@ -119,18 +126,18 @@ export default function PeerBenchmark() {
               className="rounded-md border border-black/15 bg-white/80 px-2 py-1.5 text-sm dark:border-white/15 dark:bg-[#0a1f38]"
             >
               <option value="">— not selected —</option>
-              {PEER_COMPANIES.map((c) => (
+              {COMPANIES.map((c) => (
                 <option key={c.id} value={c.id}>{c.name}</option>
               ))}
             </select>
           </label>
           <p className={`text-[11px] ${MUTED}`}>
-            Starter peer set: banking (the most heavily disclosed industry for AI adoption).
+            Named exemplars with publicly disclosed AI deployments — never private usage.
             Your selection is saved in this browser only.
           </p>
         </div>
         <div className="mt-3 flex flex-wrap gap-1.5">
-          {PEER_COMPANIES.map((c) => {
+          {COMPANIES.map((c) => {
             const on = scope.includes(c.id);
             return (
               <button
