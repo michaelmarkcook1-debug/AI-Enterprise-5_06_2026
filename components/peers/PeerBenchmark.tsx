@@ -104,11 +104,16 @@ export default function PeerBenchmark({ companyIds }: { companyIds?: string[] } 
     });
   };
 
-  // Primary org always shows, first; then the rest of the scope.
+  // Primary org always shows, first; then the rest of the scope. HARD-CLAMPED
+  // to the scoped cohort (allIds): selection state can survive a segment switch
+  // (saved prefs / stale state), and a company from another cohort must never
+  // render in this heatmap — the clamp guarantees it structurally.
   const columnsIds = useMemo(() => {
-    const rest = scope.filter((id) => id !== orgId);
-    return orgId ? [orgId, ...rest] : rest;
-  }, [orgId, scope]);
+    const inCohort = (id: string) => allIds.includes(id);
+    const rest = scope.filter((id) => id !== orgId && inCohort(id));
+    const cols = orgId && inCohort(orgId) ? [orgId, ...rest] : rest;
+    return cols.length > 0 ? cols : allIds;
+  }, [orgId, scope, allIds]);
 
   const heatmap = useMemo(() => buildPeerHeatmap(columnsIds), [columnsIds]);
   const focus = heatmap.columns.find((c) => c.id === focusId) ?? null;

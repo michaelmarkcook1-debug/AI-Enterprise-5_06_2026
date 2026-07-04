@@ -19,6 +19,7 @@ import {
   VERTICALS,
   SIZE_BANDS,
   REGIONS,
+  segmentId,
   exemplarsForSegment,
   disclosedPlatformsForSegment,
   type Segment,
@@ -290,7 +291,13 @@ export default function CohortExplorer() {
           </p>
         </div>
         {exemplars.length > 0 ? (
-          <PeerBenchmark companyIds={exemplars.map((c) => c.id)} />
+          {/* key = the segment → full remount on segment switch, so selection
+              state (org / scope / drilldown) can NEVER leak another cohort's
+              companies into this heatmap (the "banks showing under pharma" bug). */}
+          <PeerBenchmark
+            key={segmentId(segment)}
+            companyIds={exemplars.map((c) => c.id)}
+          />
         ) : (
           <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-5" role="status">
             <p className={`text-sm ${MUTED}`}>
