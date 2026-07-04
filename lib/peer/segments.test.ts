@@ -35,9 +35,17 @@ describe("segment vocabulary + exemplar tagging", () => {
     }
   });
 
-  it("the fs × global-enterprise × NA cohort resolves all current exemplars", () => {
+  it("the fs × global-enterprise × NA cohort resolves exactly its tagged exemplars", () => {
     const ex = exemplarsForSegment(FS_NA);
-    expect(ex.map((c) => c.id).sort()).toEqual(PEER_COMPANIES.map((c) => c.id).sort());
+    const tagged = PEER_COMPANIES.filter(
+      (c) =>
+        c.segment.vertical === FS_NA.vertical &&
+        c.segment.sizeBand === FS_NA.sizeBand &&
+        c.segment.region === FS_NA.region,
+    );
+    expect(ex.map((c) => c.id).sort()).toEqual(tagged.map((c) => c.id).sort());
+    // Multi-segment dataset now: FS_NA is a strict subset of all companies.
+    expect(ex.length).toBeLessThan(PEER_COMPANIES.length);
   });
 
   it("an unseeded segment has NO exemplars and NO exact benchmark — but still composes cited layers", () => {
@@ -70,9 +78,11 @@ describe("segment vocabulary + exemplar tagging", () => {
   it("disclosed platforms are derived from DISCLOSED exemplar cells only, with counts", () => {
     const platforms = disclosedPlatformsForSegment(FS_NA);
     expect(platforms.length).toBeGreaterThan(0);
-    // Every vendor must trace back to a disclosed platform_integration cell.
+    // Every vendor must trace back to a disclosed platform_integration cell —
+    // scoped to THIS segment's exemplars (the dataset is now multi-segment).
+    const cohort = exemplarsForSegment(FS_NA);
     for (const p of platforms) {
-      const adopters = PEER_COMPANIES.filter((c) => {
+      const adopters = cohort.filter((c) => {
         const s = c.signals.find((x) => x.kind === "platform_integration");
         return s?.status === "disclosed" && (s.vendorIds ?? []).includes(p.vendorId);
       });

@@ -719,4 +719,401 @@ export const PEER_COMPANIES: PeerCompany[] = [
       },
     ],
   },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // SEGMENT 2 — Pharma / Life Sciences (large-cap). Bands rubric-computed
+  // (lib/peer/rubric.ts); citations web-verified 2026-07-04. NVIDIA is the
+  // dominant AI-compute partner here (vs hyperscalers in banking) — the cross-
+  // segment insight. Dense on patent/R&D velocity; GSK is the honest thin case.
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  // ── Pfizer (US) ──
+  {
+    id: "pfizer",
+    name: "Pfizer",
+    industry: "Pharmaceuticals",
+    segment: { vertical: "pharma_life_sciences", sizeBand: "global_enterprise", region: "north_america" },
+    signals: [
+      {
+        kind: "platform_integration",
+        status: "disclosed",
+        rubricBasis: { adoptions: 2 },
+        level: 3,
+        summary:
+          "The Pfizer–Amazon Collaboration Team (PACT) runs 14 GenAI/ML projects on AWS; its VOX platform accesses Anthropic's Claude via Amazon Bedrock — two disclosed AI platforms (AWS, Anthropic).",
+        citations: [
+          { title: "Driving Patient-Centric Innovation in Life Sciences Using Generative AI with Pfizer (PACT)", url: "https://aws.amazon.com/solutions/case-studies/pfizer-PACT-case-study/", publisher: "AWS", tier: "vendor_disclosure" },
+        ],
+        vendorIds: ["aws", "anthropic"],
+      },
+      {
+        kind: "product_footprint",
+        status: "disclosed",
+        rubricBasis: { products: 2 },
+        level: 3,
+        summary:
+          "Shipped R&D AI products include VOX (voice/chatbot search over the Scientific Data Cloud via Bedrock) and the PACT tool suite — cited as saving ~16,000 scientist-hours/year and cutting infra cost ~55%.",
+        citations: [
+          { title: "Pfizer PACT — generative AI case study (VOX, Scientific Data Cloud)", url: "https://aws.amazon.com/solutions/case-studies/pfizer-PACT-case-study/", publisher: "AWS", tier: "vendor_disclosure" },
+        ],
+      },
+      { kind: "talent_exposure", status: "not_disclosed", citations: [] },
+      { kind: "patent_velocity", status: "not_disclosed", citations: [] },
+      {
+        kind: "automation_intensity",
+        status: "inferred",
+        rubricBasis: { inferredIntensity: 3 },
+        level: 3,
+        summary:
+          "Substantial R&D automation, inferred from disclosed PACT efficiency: ~16,000 scientist-hours saved annually and ~55% infrastructure-cost reduction across the 14 GenAI projects.",
+        inferenceNote: "Inferred from AWS-disclosed PACT efficiency figures — Pfizer publishes no automation metric.",
+        citations: [
+          { title: "Pfizer PACT — disclosed efficiency (16,000 hours, 55% cost)", url: "https://aws.amazon.com/solutions/case-studies/pfizer-PACT-case-study/", publisher: "AWS", tier: "vendor_disclosure" },
+        ],
+      },
+    ],
+  },
+
+  // ── Roche (Switzerland/EU) ──
+  {
+    id: "roche",
+    name: "Roche",
+    industry: "Pharmaceuticals",
+    segment: { vertical: "pharma_life_sciences", sizeBand: "global_enterprise", region: "europe" },
+    signals: [
+      {
+        kind: "platform_integration",
+        status: "disclosed",
+        rubricBasis: { adoptions: 1 },
+        level: 2,
+        summary:
+          "A deep single-vendor commitment: an NVIDIA AI Factory with 3,500+ Blackwell GPUs (Mar 2026) — the largest disclosed AI compute footprint in pharma — extending a Roche/Genentech–NVIDIA partnership since 2023. One disclosed platform vendor, exceptional depth.",
+        citations: [
+          { title: "Roche launches NVIDIA AI factory to accelerate therapeutics and diagnostics", url: "https://www.roche.com/media/releases/med-cor-2026-03-16", publisher: "Roche", tier: "company_primary", publishedAt: "2026-03-16" },
+          { title: "Roche Scales NVIDIA AI Factories Globally", url: "https://blogs.nvidia.com/blog/roche-ai-factories-omniverse/", publisher: "NVIDIA", tier: "vendor_disclosure" },
+        ],
+        vendorIds: ["nvidia"],
+      },
+      {
+        kind: "product_footprint",
+        status: "disclosed",
+        rubricBasis: { flagshipScale: true },
+        level: 4,
+        summary:
+          "An enterprise-scale flagship: the NVIDIA AI Factory (3,500+ GPUs, largest hybrid-cloud AI infrastructure in pharma) applied across drug discovery, diagnostics and manufacturing.",
+        citations: [
+          { title: "Roche launches NVIDIA AI factory", url: "https://www.roche.com/media/releases/med-cor-2026-03-16", publisher: "Roche", tier: "company_primary", publishedAt: "2026-03-16" },
+        ],
+      },
+      { kind: "talent_exposure", status: "not_disclosed", citations: [] },
+      {
+        kind: "patent_velocity",
+        status: "disclosed",
+        rubricBasis: { patentTier: "significant" },
+        level: 3,
+        summary:
+          "Significant AI research velocity — Genentech–NVIDIA generative-AI drug-discovery research running since 2023, now scaled on the AI Factory.",
+        citations: [
+          { title: "Roche Scales NVIDIA AI Factories Globally (research since 2023)", url: "https://blogs.nvidia.com/blog/roche-ai-factories-omniverse/", publisher: "NVIDIA", tier: "vendor_disclosure" },
+        ],
+      },
+      {
+        kind: "automation_intensity",
+        status: "inferred",
+        rubricBasis: { inferredIntensity: 3 },
+        level: 3,
+        summary:
+          "Substantial R&D-compute automation, inferred from the disclosed 3,500-GPU AI-factory scale aimed at massively scaling R&D productivity.",
+        inferenceNote: "Inferred from disclosed AI-factory scale/intent — Roche publishes no automation metric.",
+        citations: [
+          { title: "Roche NVIDIA AI factory (R&D productivity intent)", url: "https://www.roche.com/media/releases/med-cor-2026-03-16", publisher: "Roche", tier: "company_primary", publishedAt: "2026-03-16" },
+        ],
+      },
+    ],
+  },
+
+  // ── Eli Lilly (US) ──
+  {
+    id: "eli-lilly",
+    name: "Eli Lilly",
+    industry: "Pharmaceuticals",
+    segment: { vertical: "pharma_life_sciences", sizeBand: "global_enterprise", region: "north_america" },
+    signals: [
+      {
+        kind: "platform_integration",
+        status: "disclosed",
+        rubricBasis: { adoptions: 1 },
+        level: 2,
+        summary:
+          "A disclosed NVIDIA partnership powering LillyPod — the world's first DGX SuperPOD with DGX B300 systems (1,016 Blackwell Ultra GPUs), the most powerful AI factory wholly owned by a pharma company. One vendor, exceptional depth.",
+        citations: [
+          { title: "Lilly partners with NVIDIA to build the industry's most powerful AI supercomputer", url: "https://investor.lilly.com/news-releases/news-release-details/lilly-partners-nvidia-build-industrys-most-powerful-ai", publisher: "Eli Lilly", tier: "company_primary" },
+          { title: "Lilly Deploys World's Largest AI Factory (LillyPod, DGX SuperPOD)", url: "https://blogs.nvidia.com/blog/lilly-ai-factory-nvidia-blackwell-dgx-superpod/", publisher: "NVIDIA", tier: "vendor_disclosure" },
+        ],
+        vendorIds: ["nvidia"],
+      },
+      {
+        kind: "product_footprint",
+        status: "disclosed",
+        rubricBasis: { flagshipScale: true },
+        level: 4,
+        summary:
+          "Enterprise-scale flagship: LillyPod (1,016 Blackwell Ultra GPUs, 9,000+ petaflops) plus Lilly TuneLab — an ML platform giving biotechs access to drug-discovery models built on $1B of Lilly's proprietary data.",
+        citations: [
+          { title: "Lilly Launches LillyPod NVIDIA DGX SuperPOD (TuneLab, $1B data)", url: "https://blogs.nvidia.com/blog/lilly-ai-factory-nvidia-blackwell-dgx-superpod/", publisher: "NVIDIA", tier: "vendor_disclosure" },
+        ],
+      },
+      { kind: "talent_exposure", status: "not_disclosed", citations: [] },
+      { kind: "patent_velocity", status: "not_disclosed", citations: [] },
+      {
+        kind: "automation_intensity",
+        status: "inferred",
+        rubricBasis: { inferredIntensity: 3 },
+        level: 3,
+        summary:
+          "Substantial R&D automation, inferred from disclosed scale: training AI models on millions of experiments to expand drug-discovery scope, on a 9,000-petaflop factory built in four months.",
+        inferenceNote: "Inferred from disclosed LillyPod scale/use — Lilly publishes no automation metric.",
+        citations: [
+          { title: "Lilly LillyPod (scale + drug-discovery use)", url: "https://blogs.nvidia.com/blog/lilly-ai-factory-nvidia-blackwell-dgx-superpod/", publisher: "NVIDIA", tier: "vendor_disclosure" },
+        ],
+      },
+    ],
+  },
+
+  // ── Merck (US; Merck & Co.) ──
+  {
+    id: "merck",
+    name: "Merck",
+    industry: "Pharmaceuticals",
+    segment: { vertical: "pharma_life_sciences", sizeBand: "global_enterprise", region: "north_america" },
+    signals: [
+      {
+        kind: "platform_integration",
+        status: "disclosed",
+        rubricBasis: { adoptions: 2 },
+        level: 3,
+        summary:
+          "Two disclosed AI platforms: an NVIDIA collaboration (the KERMT open small-molecule model) and a $1B Google Cloud agentic-AI drug-development deal, alongside the internal GPTeal LLM.",
+        citations: [
+          { title: "Our AI model KERMT is helping to advance drug discovery", url: "https://www.merck.com/stories/our-ai-model-kermt-is-helping-to-advance-drug-discovery/", publisher: "Merck", tier: "company_primary" },
+          { title: "Merck inks $1 billion AI drug development deal with Google Cloud", url: "https://www.techtarget.com/pharmalifesciences/news/366642021/Merck-inks-1-billion-AI-drug-development-deal-with-Google-Cloud", publisher: "TechTarget", tier: "press" },
+        ],
+        vendorIds: ["nvidia", "google"],
+      },
+      {
+        kind: "product_footprint",
+        status: "disclosed",
+        rubricBasis: { products: 2 },
+        level: 3,
+        summary:
+          "Shipped: GPTeal (internal GenAI for R&D) and KERMT — an open-source ADMET small-molecule model pretrained on 11M+ molecules (with the TEDDY genomics model in the same programme).",
+        citations: [
+          { title: "Merck KERMT (open ADMET model, 11M molecules)", url: "https://www.merck.com/stories/our-ai-model-kermt-is-helping-to-advance-drug-discovery/", publisher: "Merck", tier: "company_primary" },
+        ],
+      },
+      { kind: "talent_exposure", status: "not_disclosed", citations: [] },
+      {
+        kind: "patent_velocity",
+        status: "disclosed",
+        rubricBasis: { patentTier: "significant" },
+        level: 3,
+        summary:
+          "Significant AI research output: the KERMT ADMET model (with NVIDIA) plus a Feb-2026 Mayo Clinic collaboration applying AI + multimodal clinical data to drug discovery.",
+        citations: [
+          { title: "Merck and Mayo Clinic team up on AI-driven drug discovery", url: "https://www.healthcare-brew.com/stories/2026/02/18/merck-mayo-clinic-drug-discovery", publisher: "Healthcare Brew", tier: "press", publishedAt: "2026-02-18" },
+        ],
+      },
+      {
+        kind: "automation_intensity",
+        status: "inferred",
+        rubricBasis: { inferredIntensity: 3 },
+        level: 3,
+        summary:
+          "Substantial R&D automation, inferred from deploying specialised foundation models (KERMT, TEDDY) directly into scientists' workflows to pre-empt months of lab work.",
+        inferenceNote: "Inferred from disclosed model-in-workflow deployment — no automation metric published.",
+        citations: [
+          { title: "Merck KERMT in drug-discovery workflows", url: "https://www.merck.com/stories/our-ai-model-kermt-is-helping-to-advance-drug-discovery/", publisher: "Merck", tier: "company_primary" },
+        ],
+      },
+    ],
+  },
+
+  // ── AstraZeneca (UK/EU) ──
+  {
+    id: "astrazeneca",
+    name: "AstraZeneca",
+    industry: "Pharmaceuticals",
+    segment: { vertical: "pharma_life_sciences", sizeBand: "global_enterprise", region: "europe" },
+    signals: [
+      {
+        kind: "platform_integration",
+        status: "disclosed",
+        rubricBasis: { adoptions: 1 },
+        level: 2,
+        summary:
+          "A disclosed AI-drug-discovery partnership with Algen Biotechnologies worth up to $555M (Oct 2025), using Algen's CRISPR+AI AlgenBrain platform to find immunology targets. (Additional partners cited in the source dataset are not individually re-verified here.)",
+        citations: [
+          { title: "Algen Biotechnologies Announces Multi-Target Partnership with AstraZeneca ($555M)", url: "https://www.businesswire.com/news/home/20251006056468/en/Algen-Biotechnologies-Announces-Multi-Target-Partnership-to-Advance-AI-Powered-Drug-Discovery-in-Immunology-with-AstraZeneca", publisher: "Business Wire", tier: "press", publishedAt: "2025-10-06" },
+        ],
+      },
+      { kind: "product_footprint", status: "not_disclosed", citations: [] },
+      { kind: "talent_exposure", status: "not_disclosed", citations: [] },
+      {
+        kind: "patent_velocity",
+        status: "disclosed",
+        rubricBasis: { patentTier: "significant" },
+        level: 3,
+        summary:
+          "Significant AI research velocity via the Algen partnership — single-cell gene modulation + causal disease-trajectory mapping to discover novel immunology targets.",
+        citations: [
+          { title: "AstraZeneca–Algen $555M AI target-discovery pact", url: "https://www.fiercebiotech.com/biotech/astrazeneca-algen-biotechnolgies-pen-555m-ai-pact-immunology-targets", publisher: "Fierce Biotech", tier: "press" },
+        ],
+      },
+      {
+        kind: "automation_intensity",
+        status: "inferred",
+        rubricBasis: { inferredIntensity: 2 },
+        level: 2,
+        summary:
+          "Developing AI-discovery automation, inferred from the disclosed target-discovery partnership (milestone-gated, immunology-scoped) rather than a firm-wide deployment.",
+        inferenceNote: "Inferred from the disclosed partnership scope — no automation metric published.",
+        citations: [
+          { title: "AstraZeneca–Algen partnership scope", url: "https://www.fiercebiotech.com/biotech/astrazeneca-algen-biotechnolgies-pen-555m-ai-pact-immunology-targets", publisher: "Fierce Biotech", tier: "press" },
+        ],
+      },
+    ],
+  },
+
+  // ── Johnson & Johnson (US) ── (source-dataset "AWS GenAI" claim NOT verified → dropped)
+  {
+    id: "johnson-and-johnson",
+    name: "Johnson & Johnson",
+    industry: "Pharmaceuticals",
+    segment: { vertical: "pharma_life_sciences", sizeBand: "global_enterprise", region: "north_america" },
+    signals: [
+      {
+        kind: "platform_integration",
+        status: "disclosed",
+        rubricBasis: { adoptions: 1 },
+        level: 2,
+        summary:
+          "A disclosed partnership with Isomorphic Labs (Alphabet/DeepMind) for AI-driven, multi-modality drug discovery — Isomorphic runs in-silico design (AlphaFold 3-based), J&J leads experimental validation.",
+        citations: [
+          { title: "Isomorphic Labs and Johnson & Johnson Partner on AI-Driven Drug Discovery", url: "https://www.biopharmatrend.com/news/isomorphic-labs-and-johnson-johnson-partner-on-ai-driven-multi-modality-drug-discovery-1472/", publisher: "BioPharmaTrend", tier: "press" },
+        ],
+      },
+      { kind: "product_footprint", status: "not_disclosed", citations: [] },
+      { kind: "talent_exposure", status: "not_disclosed", citations: [] },
+      {
+        kind: "patent_velocity",
+        status: "disclosed",
+        rubricBasis: { patentTier: "significant" },
+        level: 3,
+        summary:
+          "Significant AI research via Isomorphic's drug-design engine (IsoDDE) — protein–ligand structure, antibody–antigen modelling and binding-affinity prediction beyond AlphaFold 3.",
+        citations: [
+          { title: "Isomorphic Labs AI drug design engine (beyond AlphaFold 3)", url: "https://www.biopharmatrend.com/news/isomorphic-labs-presents-an-ai-drug-design-engine-that-goes-beyond-alphafold-3-1493/", publisher: "BioPharmaTrend", tier: "press" },
+        ],
+      },
+      {
+        kind: "automation_intensity",
+        status: "inferred",
+        rubricBasis: { inferredIntensity: 2 },
+        level: 2,
+        summary:
+          "Developing AI-discovery automation, inferred from the outsourced in-silico design model (Isomorphic designs; J&J validates) rather than an internal firm-wide deployment.",
+        inferenceNote: "Inferred from the disclosed partnership structure — no automation metric published.",
+        citations: [
+          { title: "Isomorphic–J&J partnership structure", url: "https://www.biopharmatrend.com/news/isomorphic-labs-and-johnson-johnson-partner-on-ai-driven-multi-modality-drug-discovery-1472/", publisher: "BioPharmaTrend", tier: "press" },
+        ],
+      },
+    ],
+  },
+
+  // ── Sanofi (France/EU) ──
+  {
+    id: "sanofi",
+    name: "Sanofi",
+    industry: "Pharmaceuticals",
+    segment: { vertical: "pharma_life_sciences", sizeBand: "global_enterprise", region: "europe" },
+    signals: [
+      { kind: "platform_integration", status: "not_disclosed", citations: [] },
+      {
+        kind: "product_footprint",
+        status: "disclosed",
+        rubricBasis: { products: 1 },
+        level: 2,
+        summary:
+          "Sanofi has disclosed embedding AI agents into its drug-development committee and an internal ML/data-integration push under a responsible-AI governance model (CEO has positioned Sanofi as 'the first AI-powered pharma company').",
+        citations: [
+          { title: "Sanofi CEO on becoming an AI-powered pharma company", url: "https://fortune.com/2023/06/22/sanofi-ai-first-pharma-company-paul-hudson/", publisher: "Fortune", tier: "press" },
+        ],
+      },
+      { kind: "talent_exposure", status: "not_disclosed", citations: [] },
+      { kind: "patent_velocity", status: "not_disclosed", citations: [] },
+      {
+        kind: "automation_intensity",
+        status: "inferred",
+        rubricBasis: { inferredIntensity: 2 },
+        level: 2,
+        summary:
+          "Developing AI decision-support automation, inferred from disclosed use of AI agents inside the drug-development committee.",
+        inferenceNote: "Inferred from disclosed AI-in-committee framing — no automation metric published.",
+        citations: [
+          { title: "Sanofi AI-first framing (CEO)", url: "https://fortune.com/2023/06/22/sanofi-ai-first-pharma-company-paul-hudson/", publisher: "Fortune", tier: "press" },
+        ],
+      },
+    ],
+  },
+
+  // ── Novartis (Switzerland/EU) ──
+  {
+    id: "novartis",
+    name: "Novartis",
+    industry: "Pharmaceuticals",
+    segment: { vertical: "pharma_life_sciences", sizeBand: "global_enterprise", region: "europe" },
+    signals: [
+      {
+        kind: "platform_integration",
+        status: "disclosed",
+        rubricBasis: { adoptions: 1 },
+        level: 2,
+        summary:
+          "A disclosed Isomorphic Labs partnership for AI drug design (Isomorphic names Novartis among its pharma partners), alongside internal AI centres. Specific hyperscaler deployments were not individually re-verified.",
+        citations: [
+          { title: "Isomorphic Labs strategic pharma partnerships (incl. Novartis)", url: "https://www.prnewswire.com/news-releases/isomorphic-labs-secures-2-1-billion-funding-to-scale-its-ai-drug-design-engine-302769674.html", publisher: "PR Newswire", tier: "press" },
+        ],
+      },
+      { kind: "product_footprint", status: "not_disclosed", citations: [] },
+      { kind: "talent_exposure", status: "not_disclosed", citations: [] },
+      { kind: "patent_velocity", status: "not_disclosed", citations: [] },
+      {
+        kind: "automation_intensity",
+        status: "inferred",
+        rubricBasis: { inferredIntensity: 2 },
+        level: 2,
+        summary:
+          "Developing AI-discovery automation, inferred from the disclosed external AI-design partnership rather than a disclosed internal firm-wide deployment.",
+        inferenceNote: "Inferred from the disclosed partnership — no automation metric published.",
+        citations: [
+          { title: "Isomorphic pharma partnerships (Novartis)", url: "https://www.prnewswire.com/news-releases/isomorphic-labs-secures-2-1-billion-funding-to-scale-its-ai-drug-design-engine-302769674.html", publisher: "PR Newswire", tier: "press" },
+        ],
+      },
+    ],
+  },
+
+  // ── GSK (UK/EU) — the HONEST THIN CASE ──
+  {
+    id: "gsk",
+    name: "GSK",
+    industry: "Pharmaceuticals",
+    segment: { vertical: "pharma_life_sciences", sizeBand: "global_enterprise", region: "europe" },
+    signals: [
+      { kind: "platform_integration", status: "not_disclosed", citations: [] },
+      { kind: "product_footprint", status: "not_disclosed", citations: [] },
+      { kind: "talent_exposure", status: "not_disclosed", citations: [] },
+      { kind: "patent_velocity", status: "not_disclosed", citations: [] },
+      { kind: "automation_intensity", status: "not_disclosed", citations: [] },
+    ],
+  },
 ];
