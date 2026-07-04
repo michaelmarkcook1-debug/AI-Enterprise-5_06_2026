@@ -15,6 +15,7 @@ import { EXPOSURE_EDGES, EXPOSURE_NODES } from "../investing/exposure-map-data";
 import { PEER_COMPANIES } from "../peer/peer-adoption-data";
 import { LEVEL_LABELS, SIGNAL_KINDS } from "../peer/heatmap";
 import { SEGMENT_BENCHMARKS, GLOBAL_STATS, REGION_STATS, VERTICAL_STATS, SIZE_STATS, type SegmentStat } from "../peer/segment-benchmarks";
+import { aggregateDevSentiment } from "../dev-sentiment/aggregate";
 
 export interface TabCitation {
   sourceUrl: string;
@@ -42,13 +43,18 @@ export function snapshotUrlAllowlist(s: TabEvidenceSnapshot): Set<string> {
   return set;
 }
 
-/** Vendor profile tab: the 12-domain evidence scorecard + model quality. */
+/** Vendor profile tab: the 12-domain evidence scorecard + model quality +
+ *  (for coding vendors only) the cited developer-sentiment signal. */
 export async function buildVendorTabSnapshot(vendorId: string): Promise<TabEvidenceSnapshot | null> {
   const sc = await getVendorScorecard(vendorId).catch(() => null);
-  if (!sc || !sc.hasAnyEvidence) return null;
+  // Dev-sentiment is scoped (null for non-coding vendors) and curated (available
+  // even when the vendor is dark on the live-DB scorecard).
+  const devAgg = aggregateDevSentiment(vendorId);
+  const hasScorecard = !!sc && sc.hasAnyEvidence;
+  if (!hasScorecard && !devAgg) return null;
 
   const sections: TabSnapshotSection[] = [];
-  for (const d of sc.domains) {
+  for (const d of sc?.domains ?? []) {
     if (d.state === "scored") {
       sections.push({
         label: `Domain: ${d.domain}`,
@@ -68,7 +74,7 @@ export async function buildVendorTabSnapshot(vendorId: string): Promise<TabEvide
       });
     }
   }
-  if (sc.modelQuality && sc.modelQuality.state === "scored") {
+  if (sc?.modelQuality && sc.modelQuality.state === "scored") {
     const mq = sc.modelQuality;
     sections.push({
       label: "Model quality (benchmark-derived)",
@@ -80,6 +86,29 @@ export async function buildVendorTabSnapshot(vendorId: string): Promise<TabEvide
         note: c.evidenceGrade,
       })),
     });
+  }
+  // Developer-sentiment (coding vendors only, curated cited signal). Facts carry
+  // the coverage/tier honesty; citations are the real HN/GitHub/SO source URLs.
+  if (devAgg) {
+    const facts: string[] = [];
+    if (devAgg.state === "rated" && devAgg.reading) {
+      facts.push(
+        `Developer sentiment (${devAgg.tier} signal, ${devAgg.countingSources.length} independent sources): ${devAgg.reading.tag} — ${devAgg.reading.rationale} [analyst-curated reading of the cited sources, directional, not a measured score].`,
+      );
+    } else {
+      facts.push(`Developer sentiment: ${devAgg.coverageNote}`);
+    }
+    for (const s of devAgg.record.sources) facts.push(`  • ${s.metric} (${s.measures})`);
+    const citations: TabCitation[] = [];
+    const seen = new Set<string>();
+    for (const s of devAgg.record.sources) {
+      for (const c of s.citations) {
+        if (seen.has(c.url)) continue;
+        seen.add(c.url);
+        citations.push({ sourceUrl: c.url, note: `${c.publisher}${c.date ? ` · ${c.date}` : ""}` });
+      }
+    }
+    sections.push({ label: "Developer sentiment (coding/dev signal)", facts, citations });
   }
   return { tabLabel: `Vendor assessment: ${vendorId}`, sections };
 }

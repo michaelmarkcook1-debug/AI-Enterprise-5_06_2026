@@ -613,6 +613,16 @@ export default async function VendorDeepDivePage({
   // panel only renders for the coding/developer models (hard "where applicable"
   // rule). Cited tri-source signal, coverage-gated.
   const devSentiment = aggregateDevSentiment(intelId);
+  // Ask-AI chips shared by both profile paths. The dev-sentiment question only
+  // appears for in-scope coding vendors with real signal — never implied for
+  // enterprise/RAG/infra vendors where it doesn't apply.
+  const vendorChatChips = [
+    ...(devSentiment && devSentiment.state === "rated"
+      ? ["What does the developer community say about this vendor?"]
+      : []),
+    "Where is the evidence thin for this vendor?",
+    "Is the model-quality score an independent audit?",
+  ];
 
   // Phase 3 Assessment scorecard — 12-domain 0–5 scores from REAL analyst_verified
   // evidence (deterministic, no LLM, never seed). Keyed on entity.id to match
@@ -831,11 +841,7 @@ export default async function VendorDeepDivePage({
           <TabChat
             tab={{ kind: "vendor", id: entity.id }}
             label={entity.name}
-            chips={[
-              "What developer sentiment is compiled for this vendor?",
-              "Where is the evidence thin for this vendor?",
-              "Is the model-quality score an independent audit?",
-            ]}
+            chips={vendorChatChips}
           />
         </main>
       </div>
@@ -1336,11 +1342,7 @@ export default async function VendorDeepDivePage({
         <TabChat
           tab={{ kind: "vendor", id: entity.id }}
           label={entity.name}
-          chips={[
-            "Where is the evidence thin for this vendor?",
-            "What is the strongest-evidenced domain?",
-            "Is the model-quality score an independent audit?",
-          ]}
+          chips={vendorChatChips}
         />
       </main>
     </div>
