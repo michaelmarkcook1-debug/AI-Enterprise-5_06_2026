@@ -14,6 +14,7 @@ import { rateLimit } from "@/lib/http/rate-limit";
 import { anonSessionHash } from "@/lib/http/anon-session";
 import { trustedOrigin } from "@/lib/site";
 import { toggleTrack, safeReturnTo } from "@/lib/member/track";
+import { MEMBER_AUTH_ENABLED } from "@/lib/availability";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -21,6 +22,9 @@ export const dynamic = "force-dynamic";
 export async function GET(request: Request): Promise<Response> {
   // Redirect targets use a TRUSTED origin, never the client Host header.
   const origin = trustedOrigin();
+
+  // Sign-in disabled → don't consume tokens or mint sessions; bounce home.
+  if (!MEMBER_AUTH_ENABLED) return NextResponse.redirect(`${origin}/`, 303);
 
   const rl = rateLimit(`auth-callback:${anonSessionHash(request)}`, { limit: 30, windowMs: 60 * 60 * 1000 });
   if (!rl.allowed) return NextResponse.redirect(`${origin}/signin?error=rate`, 303);

@@ -10,6 +10,7 @@
 
 import { useRef, useState } from "react";
 import Link from "next/link";
+import { MEMBER_AUTH_ENABLED } from "@/lib/availability";
 
 const MUTED = "text-[#15263c]/60 dark:text-[#eef3f8]/60";
 
@@ -45,6 +46,11 @@ export default function TabChat({ tab, label, chips }: TabChatProps) {
   const [messages, setMessages] = useState<ChatMsg[]>([]);
   const [signedOut, setSignedOut] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
+
+  // Ask AI is member-gated; with sign-in disabled there's no way to authenticate,
+  // so hide the launcher entirely rather than dead-end at a 401. (After all hooks
+  // so the Rules of Hooks hold.)
+  if (!MEMBER_AUTH_ENABLED) return null;
 
   const ask = async (question: string) => {
     const q = question.trim();

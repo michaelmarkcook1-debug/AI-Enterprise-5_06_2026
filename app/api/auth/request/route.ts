@@ -10,6 +10,7 @@ import { sendEmail, emailConfigured } from "@/lib/email/mailer";
 import { rateLimit, rateLimitHeaders } from "@/lib/http/rate-limit";
 import { anonSessionHash } from "@/lib/http/anon-session";
 import { SITE_NAME, trustedOrigin } from "@/lib/site";
+import { MEMBER_AUTH_ENABLED } from "@/lib/availability";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -34,6 +35,9 @@ function magicLinkHtml(url: string): string {
 }
 
 export async function POST(request: Request): Promise<Response> {
+  // Sign-in disabled (MEMBER_AUTH_ENABLED) → no new magic links can be minted.
+  if (!MEMBER_AUTH_ENABLED) return Response.json({ error: "signin_disabled" }, { status: 404 });
+
   // Rate-limit per anon session (IP-derived) first.
   const ipRl = rateLimit(`auth-request:${anonSessionHash(request)}`, { limit: 5, windowMs: HOUR });
   if (!ipRl.allowed) {

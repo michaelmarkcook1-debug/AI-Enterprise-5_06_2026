@@ -12,6 +12,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { usePortalTheme } from "@/lib/use-theme";
 import BrandLogo from "@/components/BrandLogo";
+import { MEMBER_AUTH_ENABLED } from "@/lib/availability";
 
 const BASE_NAV: { href: string; label: string }[] = [
   { href: "/use-cases", label: "Start here" },
@@ -67,12 +68,14 @@ export default function PublicNav({ pricingEnabled = false }: { pricingEnabled?:
           >
             Get the market read
           </Link>
-          <Link
-            href="/signin"
-            className="hidden text-xs font-medium text-[#c8d7e9] transition-colors hover:text-white md:inline-block"
-          >
-            Sign in
-          </Link>
+          {MEMBER_AUTH_ENABLED && (
+            <Link
+              href="/signin"
+              className="hidden text-xs font-medium text-[#c8d7e9] transition-colors hover:text-white md:inline-block"
+            >
+              Sign in
+            </Link>
+          )}
           <button
             type="button"
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
@@ -124,13 +127,15 @@ export default function PublicNav({ pricingEnabled = false }: { pricingEnabled?:
               >
                 Get the market read
               </Link>
-              <Link
-                href="/signin"
-                onClick={() => setOpen(false)}
-                className="rounded-full border border-white/20 px-3 py-1.5 text-xs font-semibold text-[#d8e2ec]"
-              >
-                Sign in
-              </Link>
+              {MEMBER_AUTH_ENABLED && (
+                <Link
+                  href="/signin"
+                  onClick={() => setOpen(false)}
+                  className="rounded-full border border-white/20 px-3 py-1.5 text-xs font-semibold text-[#d8e2ec]"
+                >
+                  Sign in
+                </Link>
+              )}
             </li>
             <li className="flex items-center justify-end pt-1">
               <button

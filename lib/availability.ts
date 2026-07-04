@@ -72,6 +72,22 @@ export const HARDCODED_SURFACES_WIRED: boolean = false;
 export const INTERACTIVE_ASSESSMENT_ENABLED: boolean = true;
 
 /**
+ * Member sign-in (passwordless magic-link identity) master switch.
+ * DISABLED for now (owner request, 2026-07-04) — a plain boolean literal (NOT
+ * an env read) so it inlines correctly in client bundles too. When false, the
+ * sign-in surface is removed end-to-end and no NEW sessions can be minted:
+ *   • /signin page 404s; the (member) area redirects to "/";
+ *   • POST /api/auth/request and GET /api/auth/callback are turned off;
+ *   • the "Sign in" nav link and every member-feature entry point that would
+ *     otherwise dead-end at /signin (Ask AI chat, TrackButton, the Interrogate
+ *     / prep-kit upsells) are hidden.
+ * Existing valid session cookies are NOT force-revoked — flipping this back to
+ * true restores the full flow with one line + a redeploy. The member data
+ * model, tables, and firewall are untouched.
+ */
+export const MEMBER_AUTH_ENABLED: boolean = false;
+
+/**
  * Interrogate (Phase 3 Wave 3) gate — the PREMIUM, member-only LLM action:
  * a buyer feeds real context ("ServiceNow renewal in 3 months, EU-only") and the
  * assessment re-runs through that lens. Unlike the free manual re-weighting

@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import SignInForm from "@/components/member/SignInForm";
 import { getMember } from "@/lib/member/auth";
 import { parseTrackItem, safeReturnTo, trackItemLabel } from "@/lib/member/track";
+import { MEMBER_AUTH_ENABLED } from "@/lib/availability";
 
 // Lean public page (no poller). Reads the session cookie only to bounce a
 // signed-in visitor straight back to where they came from.
@@ -22,6 +23,9 @@ export default async function SignInPage({
 }: {
   searchParams: Promise<{ track?: string; returnTo?: string }>;
 }) {
+  // Sign-in disabled for now → the route does not exist.
+  if (!MEMBER_AUTH_ENABLED) notFound();
+
   const sp = await searchParams;
   const track = parseTrackItem(sp.track) ? String(sp.track) : undefined;
   const returnTo = typeof sp.returnTo === "string" ? safeReturnTo(sp.returnTo) : undefined;

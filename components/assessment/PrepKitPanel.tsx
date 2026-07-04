@@ -10,6 +10,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { DOMAIN_LABEL } from "@/lib/assessment/domain-labels";
 import type { PrepKit, KitSection } from "@/lib/assessment/prep-kit";
+import { MEMBER_AUTH_ENABLED } from "@/lib/availability";
 
 export interface PrepKitConfig {
   enabled: boolean;
@@ -61,7 +62,9 @@ export default function PrepKitPanel({
 
   if (!config.enabled) return null;
 
+  // With sign-in disabled the upsell would dead-end at /signin — hide it.
   if (!config.signedIn) {
+    if (!MEMBER_AUTH_ENABLED) return null;
     return (
       <div className={`${CARD} mt-6`}>
         <div className={KICKER}>Vendor-meeting prep kit — premium</div>

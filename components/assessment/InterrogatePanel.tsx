@@ -15,6 +15,7 @@ import Link from "next/link";
 import { DOMAIN_LABEL } from "@/lib/assessment/domain-labels";
 import type { DomainId } from "@/lib/types";
 import type { SessionLens } from "@/lib/assessment/session-lens";
+import { MEMBER_AUTH_ENABLED } from "@/lib/availability";
 
 export interface InterrogateConfig {
   /** Paid-depth flag (INTERROGATE_ENABLED) resolved server-side. */
@@ -91,8 +92,10 @@ export default function InterrogatePanel({
 
   if (!config.enabled) return null;
 
-  // Anonymous → upsell teaser, never the action.
+  // Anonymous → upsell teaser, never the action. With sign-in disabled the
+  // upsell would dead-end at /signin, so hide the panel entirely.
   if (!config.signedIn) {
+    if (!MEMBER_AUTH_ENABLED) return null;
     return (
       <div className={`${CARD} mb-4`}>
         <div className={KICKER}>Interrogate — premium</div>
