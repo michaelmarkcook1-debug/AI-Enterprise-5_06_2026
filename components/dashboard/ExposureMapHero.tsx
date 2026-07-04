@@ -149,17 +149,24 @@ export default function ExposureMapHero(_: { edges?: unknown } = {}) {
     return EXPOSURE_NODES.filter((n) => !EXTENDED_ECOSYSTEM_NODE_IDS.has(n.id));
   }, [showExtended]);
   const visibleNodeIds = useMemo(() => new Set(visibleNodes.map((n) => n.id)), [visibleNodes]);
+  const nodeSideById = useMemo(() => new Map(EXPOSURE_NODES.map((n) => [n.id, n.side])), []);
 
   // Filter edges by relationship type + confidence + visible-nodes set.
   const visibleEdges = useMemo(() => {
-    return EXPOSURE_EDGES.filter(
-      (e) =>
-        activeRelTypes.has(e.relationshipType) &&
-        activeConfTiers.has(e.confidence) &&
-        visibleNodeIds.has(e.sourceId) &&
-        visibleNodeIds.has(e.targetId),
-    );
-  }, [activeRelTypes, activeConfTiers, visibleNodeIds]);
+    return EXPOSURE_EDGES.filter((e) => {
+      if (!activeRelTypes.has(e.relationshipType)) return false;
+      if (!activeConfTiers.has(e.confidence)) return false;
+      if (!visibleNodeIds.has(e.sourceId) || !visibleNodeIds.has(e.targetId)) return false;
+      // Bipartite guard: this hero lays out left(owners) → right(labs). An edge
+      // must span the two columns. A SAME-SIDE edge (lab↔lab e.g. anthropic→xai,
+      // or owner↔owner e.g. GOOGL→NVDA) can't be positioned here and would draw
+      // a stray line across the top of the canvas (leftY/rightY findIndex → -1).
+      // Those relationships surface on /dependencies instead.
+      const ss = nodeSideById.get(e.sourceId);
+      const ts = nodeSideById.get(e.targetId);
+      return ss !== undefined && ts !== undefined && ss !== ts;
+    });
+  }, [activeRelTypes, activeConfTiers, visibleNodeIds, nodeSideById]);
 
   // Layout: row index per side based on edges-present-in-view to avoid
   // empty rows when a vendor's only edge has been filtered out.
@@ -175,8 +182,11 @@ export default function ExposureMapHero(_: { edges?: unknown } = {}) {
     return { leftNodes: left, rightNodes: right, height: PAD_Y * 2 + rows * ROW_H };
   }, [visibleEdges, visibleNodes]);
 
-  const leftY = (id: string) => PAD_Y + leftNodes.findIndex((n) => n.id === id) * ROW_H;
-  const rightY = (id: string) => PAD_Y + rightNodes.findIndex((n) => n.id === id) * ROW_H;
+  // Clamp a missing id (findIndex → -1) to the first row rather than PAD_Y-ROW_H
+  // (above the canvas) — a defensive floor so a stray edge can never again paint
+  // a line across the top; correctness is already handled by the bipartite guard.
+  const leftY = (id: string) => PAD_Y + Math.max(0, leftNodes.findIndex((n) => n.id === id)) * ROW_H;
+  const rightY = (id: string) => PAD_Y + Math.max(0, rightNodes.findIndex((n) => n.id === id)) * ROW_H;
 
   // Active = pinned ∪ hovered; the pinned set persists, hovered is transient.
   const activeIds = useMemo(() => {
@@ -422,8 +432,13 @@ export default function ExposureMapHero(_: { edges?: unknown } = {}) {
           {visibleEdges.map((e) => {
             const src = EXPOSURE_NODES.find((n) => n.id === e.sourceId)!;
             const tgt = EXPOSURE_NODES.find((n) => n.id === e.targetId)!;
-            const ay = leftY(src.id);
-            const by = rightY(tgt.id);
+            // Lay out by NODE SIDE, not source/target order — a reversed edge
+            // (lab→owner) still draws left→right. visibleEdges guarantees one of
+            // each side, so both lookups always resolve (never findIndex → -1).
+            const leftNode = src.side === "left" ? src : tgt;
+            const rightNode = src.side === "left" ? tgt : src;
+            const ay = leftY(leftNode.id);
+            const by = rightY(rightNode.id);
             const baseStroke = thicknessFor(e.strengthScore);
             const color = REL_COLOR[e.relationshipType];
             const dim = connectedIds !== null;
