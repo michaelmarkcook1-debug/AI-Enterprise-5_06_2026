@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import { MEMBER_AUTH_ENABLED } from "@/lib/availability";
+import { MEMBER_FEATURES_VISIBLE } from "@/lib/availability";
 
 // In-context "Track" CTA — a small client island (NOT a page-wide provider, no
 // poller). One memoized fetch per page load learns sign-in + tracked state so the
@@ -77,7 +77,7 @@ export default function TrackButton({
 
   // Tracking requires a member session; with sign-in disabled there's no path to
   // one, so hide the CTA rather than bounce to a dead /signin. (After all hooks.)
-  if (!MEMBER_AUTH_ENABLED) return null;
+  if (!MEMBER_FEATURES_VISIBLE) return null;
 
   async function onClick() {
     setError(false);

@@ -11,6 +11,7 @@ import { cookies } from "next/headers";
 import { createHash, randomBytes } from "node:crypto";
 import { getPrisma, hasDatabase } from "../prisma";
 import { captureSubscriber } from "../subscribers/service";
+import { MEMBER_TEST_OPEN } from "../availability";
 
 export const MEMBER_COOKIE = "ae_member";
 /** Per-request browser nonce cookie — binds a magic link to the browser that
@@ -143,6 +144,39 @@ export async function getMember(): Promise<Member | null> {
   });
   if (!session || session.expiresAt.getTime() < Date.now()) return null;
   return { subscriberId: session.subscriberId, email: session.subscriber.email };
+}
+
+// ── TEST-OPEN member (MEMBER_TEST_OPEN) ──────────────────────────────────────
+// A single shared, auto-provisioned "test member" so every member-gated feature
+// is exercisable without sign-in during testing. Backed by a REAL Subscriber row
+// (the watchlist has an FK to it), created once and cached in-module so we don't
+// write on every request. NEVER used unless MEMBER_TEST_OPEN is true.
+const TEST_MEMBER_EMAIL = "tester@ai-enterprise.local";
+let testMemberCache: Member | null = null;
+
+async function ensureTestMember(): Promise<Member | null> {
+  if (!MEMBER_TEST_OPEN || !hasDatabase()) return null;
+  if (testMemberCache) return testMemberCache;
+  try {
+    // Idempotent: creates the subscriber if absent, then we read its id.
+    await captureSubscriber({ email: TEST_MEMBER_EMAIL, source: "test_open" });
+    const sub = await getPrisma().subscriber.findUnique({ where: { email: TEST_MEMBER_EMAIL } });
+    if (!sub) return null;
+    testMemberCache = { subscriberId: sub.id, email: sub.email };
+    return testMemberCache;
+  } catch {
+    return null;
+  }
+}
+
+/** Resolve the current member, falling back to the shared TEST member when
+ *  MEMBER_TEST_OPEN is on and there's no real session. This is the resolver the
+ *  member features use so they work with sign-in disabled but test-open on. A
+ *  real session always wins (existing signed-in members are unaffected). */
+export async function getMemberOrTest(): Promise<Member | null> {
+  const real = await getMember();
+  if (real) return real;
+  return ensureTestMember();
 }
 
 /** Revoke a session by its raw cookie token (DB only). The caller clears the

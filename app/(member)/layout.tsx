@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { redirect } from "next/navigation";
-import { getMember } from "@/lib/member/auth";
+import { getMemberOrTest } from "@/lib/member/auth";
 import { MEMBER_AUTH_ENABLED } from "@/lib/availability";
 import MemberNav from "@/components/member/MemberNav";
 import PublicFooter from "@/components/public/PublicFooter";
@@ -12,10 +12,11 @@ import PublicFooter from "@/components/public/PublicFooter";
 export const dynamic = "force-dynamic";
 
 export default async function MemberLayout({ children }: { children: ReactNode }) {
-  const member = await getMember();
-  // Sign-in disabled → send everyone to the public home rather than a dead
-  // /signin route. Existing valid sessions still resolve and are allowed
-  // through (we don't force-revoke), so members mid-session aren't ejected.
+  // Test-open resolves a shared test member so /monitor + /watchlist are
+  // testable with sign-in off; a real session still wins.
+  const member = await getMemberOrTest();
+  // Still nothing (auth off AND test-open off) → send to public home rather
+  // than a dead /signin route. Existing valid sessions always pass through.
   if (!member) redirect(MEMBER_AUTH_ENABLED ? "/signin" : "/");
 
   return (

@@ -11,10 +11,12 @@
 // performs zero canonical writes.
 
 import { NextResponse } from "next/server";
-import { getMember } from "@/lib/member/auth";
+import { getMemberOrTest } from "@/lib/member/auth";
 import { isSameOrigin } from "@/lib/http/same-origin";
 import { TAB_CHAT_ENABLED } from "@/lib/availability";
 import { reserveCredit } from "@/lib/billing/credits";
+import { rateLimit, rateLimitHeaders } from "@/lib/http/rate-limit";
+import { anonSessionHash } from "@/lib/http/anon-session";
 import { answerTabQuestion, type TabChatTurn } from "@/lib/agents/tab-chat";
 import {
   buildCategoryTabSnapshot,
@@ -68,7 +70,13 @@ async function buildSnapshot(tab: TabRef): Promise<TabEvidenceSnapshot | null> {
 
 export async function POST(request: Request): Promise<Response> {
   if (!isSameOrigin(request)) return NextResponse.json({ error: "forbidden" }, { status: 403 });
-  const member = await getMember();
+  // Spend guard: the chat is an LLM route reachable without a real session under
+  // test-open, so cap it per anon-session (IP-derived). Generous for testing.
+  const rl = rateLimit(`tabchat:${anonSessionHash(request)}`, { limit: 40, windowMs: 60 * 60 * 1000 });
+  if (!rl.allowed) {
+    return NextResponse.json({ error: "rate_limited" }, { status: 429, headers: rateLimitHeaders(rl) });
+  }
+  const member = await getMemberOrTest();
   if (!member) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   if (!TAB_CHAT_ENABLED) return NextResponse.json({ error: "not_enabled" }, { status: 403 });
 

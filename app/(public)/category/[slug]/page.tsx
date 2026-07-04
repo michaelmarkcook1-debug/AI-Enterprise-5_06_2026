@@ -13,7 +13,7 @@ import { DOMAIN_LABEL } from "@/lib/assessment/domain-labels";
 import { activeDomains, type DomainWeights } from "@/lib/assessment/composite";
 import type { DomainId } from "@/lib/types";
 import { INTERACTIVE_ASSESSMENT_ENABLED, INTERROGATE_ENABLED } from "@/lib/availability";
-import { getMember } from "@/lib/member/auth";
+import { getMemberOrTest } from "@/lib/member/auth";
 import CategoryRerank, { type RerankVendor } from "@/components/assessment/CategoryRerank";
 import { getRankMovements, type RankMovement } from "@/lib/intelligence/rank-movement";
 import RankMovementIndicator from "@/components/ranking/RankMovementIndicator";
@@ -87,7 +87,7 @@ export default async function CategoryPage({ params }: { params: Promise<Params>
 
   // Wave-3 Interrogate — member-gated premium action; resolve identity only when
   // the flag is on so anonymous visitors keep the free Wave-2 re-rank.
-  const interrogateMember = INTERROGATE_ENABLED ? await getMember().catch(() => null) : null;
+  const interrogateMember = INTERROGATE_ENABLED ? await getMemberOrTest().catch(() => null) : null;
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-10">

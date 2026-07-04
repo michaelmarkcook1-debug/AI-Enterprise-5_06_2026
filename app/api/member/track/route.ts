@@ -3,7 +3,7 @@
 // scoped strictly to the caller's subscriberId.
 
 import { NextResponse } from "next/server";
-import { getMember } from "@/lib/member/auth";
+import { getMemberOrTest } from "@/lib/member/auth";
 import { isSameOrigin } from "@/lib/http/same-origin";
 import { toggleTrack } from "@/lib/member/track";
 
@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic";
 
 export async function POST(request: Request): Promise<Response> {
   if (!isSameOrigin(request)) return NextResponse.json({ error: "forbidden" }, { status: 403 });
-  const member = await getMember();
+  const member = await getMemberOrTest();
   if (!member) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
 
   let body: unknown;

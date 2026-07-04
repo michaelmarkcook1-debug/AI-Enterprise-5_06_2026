@@ -9,10 +9,12 @@
 // questions only — never a vendor fact or score.
 
 import { NextResponse } from "next/server";
-import { getMember } from "@/lib/member/auth";
+import { getMemberOrTest } from "@/lib/member/auth";
 import { isSameOrigin } from "@/lib/http/same-origin";
 import { PREP_KIT_ENABLED } from "@/lib/availability";
 import { reserveCredit } from "@/lib/billing/credits";
+import { rateLimit, rateLimitHeaders } from "@/lib/http/rate-limit";
+import { anonSessionHash } from "@/lib/http/anon-session";
 import { getVendorScorecard } from "@/lib/assessment/domain-scores";
 import { ASSESSMENT_DOMAINS } from "@/lib/assessment/domain-rubric";
 import {
@@ -32,7 +34,12 @@ const DOMAIN_SET = new Set<DomainId>(ASSESSMENT_DOMAINS);
 
 export async function POST(request: Request): Promise<Response> {
   if (!isSameOrigin(request)) return NextResponse.json({ error: "forbidden" }, { status: 403 });
-  const member = await getMember();
+  // Spend guard (LLM route, reachable without a session under test-open).
+  const rl = rateLimit(`prepkit:${anonSessionHash(request)}`, { limit: 20, windowMs: 60 * 60 * 1000 });
+  if (!rl.allowed) {
+    return NextResponse.json({ error: "rate_limited" }, { status: 429, headers: rateLimitHeaders(rl) });
+  }
+  const member = await getMemberOrTest();
   if (!member) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   if (!PREP_KIT_ENABLED) return NextResponse.json({ error: "not_enabled" }, { status: 403 });
 

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { getMember } from "@/lib/member/auth";
+import { getMemberOrTest } from "@/lib/member/auth";
 import { getMemberWatchlist } from "@/lib/member/watchlist";
 import { ENTITIES } from "@/lib/intelligence/entities";
 import { MARKET_CATEGORIES } from "@/lib/intelligence/seed";
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 const MUTED = "text-[#15263c]/60 dark:text-[#eef3f8]/60";
 
 export default async function WatchlistPage() {
-  const member = await getMember();
+  const member = await getMemberOrTest();
   if (!member) return null; // the (member) layout guards this; belt-and-suspenders.
 
   const watchlist = await getMemberWatchlist(member.subscriberId);

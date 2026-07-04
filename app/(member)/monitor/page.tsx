@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getMember } from "@/lib/member/auth";
+import { getMemberOrTest } from "@/lib/member/auth";
 import { getMemberWatchlist } from "@/lib/member/watchlist";
 import { buildMonitor } from "@/lib/member/monitor";
 import { ENTITIES } from "@/lib/intelligence/entities";
@@ -21,7 +21,7 @@ const TIER_CLS: Record<string, string> = {
 const TIER_LABEL: Record<string, string> = { high: "high confidence", medium: "medium", seed: "seed" };
 
 export default async function MonitorPage() {
-  const member = await getMember();
+  const member = await getMemberOrTest();
   if (!member) return null; // the (member) layout guards this; belt-and-suspenders.
 
   const watchlist = await getMemberWatchlist(member.subscriberId);

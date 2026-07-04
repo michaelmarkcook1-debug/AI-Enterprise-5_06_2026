@@ -12,10 +12,12 @@
 // altered. The buyer's context is a personal, session-local lens.
 
 import { NextResponse } from "next/server";
-import { getMember } from "@/lib/member/auth";
+import { getMemberOrTest } from "@/lib/member/auth";
 import { isSameOrigin } from "@/lib/http/same-origin";
 import { INTERROGATE_ENABLED } from "@/lib/availability";
 import { reserveCredit } from "@/lib/billing/credits";
+import { rateLimit, rateLimitHeaders } from "@/lib/http/rate-limit";
+import { anonSessionHash } from "@/lib/http/anon-session";
 import { getVendorScorecard, getVendorScorecardsBatch, type VendorScorecard } from "@/lib/assessment/domain-scores";
 import { resolveDomainWeights } from "@/lib/assessment/category-weights";
 import { DEFAULT_DOMAIN_WEIGHTS, activeDomains, type DomainWeights } from "@/lib/assessment/composite";
@@ -64,7 +66,13 @@ function parseContext(raw: unknown): BuyerContext {
 export async function POST(request: Request): Promise<Response> {
   // 1. CSRF (fail-closed) → 2. authz → 3. paid-depth flag.
   if (!isSameOrigin(request)) return NextResponse.json({ error: "forbidden" }, { status: 403 });
-  const member = await getMember();
+  // Spend guard: this route calls an LLM. With test-open it's reachable without a
+  // real session, so cap it per anon-session (IP-derived) regardless of who calls.
+  const rl = rateLimit(`interrogate:${anonSessionHash(request)}`, { limit: 20, windowMs: 60 * 60 * 1000 });
+  if (!rl.allowed) {
+    return NextResponse.json({ error: "rate_limited" }, { status: 429, headers: rateLimitHeaders(rl) });
+  }
+  const member = await getMemberOrTest();
   if (!member) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   if (!INTERROGATE_ENABLED) return NextResponse.json({ error: "not_enabled" }, { status: 403 });
 

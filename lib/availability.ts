@@ -88,6 +88,29 @@ export const INTERACTIVE_ASSESSMENT_ENABLED: boolean = true;
 export const MEMBER_AUTH_ENABLED: boolean = false;
 
 /**
+ * TEST-OPEN mode (owner request, 2026-07-04) — open ALL member-gated features
+ * for testing WITHOUT requiring sign-in. Plain boolean literal (client-safe).
+ * When true, an unauthenticated visitor is transparently treated as a shared
+ * "test member" (a real, auto-provisioned Subscriber row, so the watchlist FK
+ * holds), so the per-tab Ask AI chat, watchlist Track, Interrogate and prep-kit
+ * all render and function. Sign-in itself stays disabled (no /signin, no login
+ * link) — this is purely a testing bypass.
+ *
+ * SPEND GUARD: because this opens the LLM endpoints (chat / interrogate /
+ * prep-kit) to unauthenticated callers on prod, those routes carry a per-IP
+ * rate limit (see each route). Still, this is a TEST posture — before a real
+ * launch set MEMBER_TEST_OPEN=false and turn MEMBER_AUTH_ENABLED back on so the
+ * features are members-only again. The shared test watchlist is intentionally
+ * common across anonymous testers.
+ */
+export const MEMBER_TEST_OPEN: boolean = true;
+
+/** Member-feature UI visibility: shown when real auth is on OR test-open is on.
+ *  Client-safe (both operands are plain literals). The "Sign in" nav link is
+ *  gated on MEMBER_AUTH_ENABLED alone — test-open does NOT resurrect sign-in. */
+export const MEMBER_FEATURES_VISIBLE: boolean = MEMBER_AUTH_ENABLED || MEMBER_TEST_OPEN;
+
+/**
  * Interrogate (Phase 3 Wave 3) gate — the PREMIUM, member-only LLM action:
  * a buyer feeds real context ("ServiceNow renewal in 3 months, EU-only") and the
  * assessment re-runs through that lens. Unlike the free manual re-weighting
