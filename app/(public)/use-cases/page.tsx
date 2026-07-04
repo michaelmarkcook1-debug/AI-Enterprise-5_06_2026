@@ -4,6 +4,7 @@
 // curated use-case library (no DB, no LLM at request time; deterministic model).
 import type { Metadata } from "next";
 import UseCaseFrontDoorClient from "./UseCaseFrontDoorClient";
+import JobsHub from "@/components/jobs/JobsHub";
 
 export const metadata: Metadata = {
   title: "Where to start with enterprise AI",
@@ -15,9 +16,12 @@ export const metadata: Metadata = {
 export default function UseCaseFrontDoorPage() {
   return (
     <main className="mx-auto max-w-5xl px-4 py-10">
+      {/* C5 jobs hub — the user picks the JOB they're in; the C6 guided flow
+          below is the "find my use-case" job's content. */}
+      <JobsHub />
       <header className="mb-6">
         <p className="text-xs font-semibold uppercase tracking-wider text-[#b08d2f] dark:text-[#d4af37]">
-          Start here
+          Find my use-case
         </p>
         <h1 className="mt-1 font-[var(--font-display)] text-3xl font-extrabold tracking-tight">
           Where&apos;s your low-hanging fruit?
