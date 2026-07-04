@@ -18,6 +18,7 @@ import CategoryRerank, { type RerankVendor } from "@/components/assessment/Categ
 import { getRankMovements, type RankMovement } from "@/lib/intelligence/rank-movement";
 import RankMovementIndicator from "@/components/ranking/RankMovementIndicator";
 import TabChat from "@/components/chat/TabChat";
+import CompetitiveIntelHeatmap from "@/components/assessment/CompetitiveIntelHeatmap";
 
 // force-dynamic (not ISR): rankings are DB-backed + recalculated each pipeline
 // run, so the page must reflect the live data immediately — never serve a stale
@@ -238,6 +239,23 @@ export default async function CategoryPage({ params }: { params: Promise<Params>
             </div>
           )}
         </section>
+      )}
+
+      {/* Vendor-tabs · Competitive Intel — a cross-vendor capability heatmap,
+          a VIEW of the live composites (rows = domains, cols = vendors). Reuses
+          the scorecards already fetched above; insufficient stays insufficient. */}
+      {isLive && (
+        <CompetitiveIntelHeatmap
+          domainOrder={activeOrder}
+          vendors={ranked
+            .map((v) => {
+              const sc = scorecards.get(v.vendorId);
+              return sc
+                ? { vendorId: v.vendorId, vendorName: v.vendorName, vendorSlug: v.vendorSlug, domains: effectiveDomains(sc) }
+                : null;
+            })
+            .filter((v): v is NonNullable<typeof v> => v !== null)}
+        />
       )}
 
       {/* Piece 3 — Ask AI, grounded in THIS category's live composite only. */}
