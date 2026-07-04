@@ -826,6 +826,17 @@ export default async function VendorDeepDivePage({
               </Panel>
             </section>
           )}
+          {/* Ask AI — grounded in this vendor's cited data (also on the dark
+              path so coding profiles showing dev-sentiment carry the chat). */}
+          <TabChat
+            tab={{ kind: "vendor", id: entity.id }}
+            label={entity.name}
+            chips={[
+              "What developer sentiment is compiled for this vendor?",
+              "Where is the evidence thin for this vendor?",
+              "Is the model-quality score an independent audit?",
+            ]}
+          />
         </main>
       </div>
     );
