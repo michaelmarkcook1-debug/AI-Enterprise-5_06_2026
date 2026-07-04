@@ -1,4 +1,6 @@
 import { describe, it, expect } from "vitest";
+import { redditConnector } from "../connectors/reddit";
+import { CONNECTORS } from "../connectors/registry";
 import { DEV_SENTIMENT_DATA } from "./data";
 import { aggregateDevSentiment, aggregateAllDevSentiment } from "./aggregate";
 import { isDevSentimentVendor, isDevSentimentCategory, DEV_SENTIMENT_VENDORS } from "./scope";
@@ -39,6 +41,27 @@ describe("dev-sentiment dataset integrity", () => {
         }
       }
     }
+  });
+});
+
+describe("Reddit source (wired, gated on credentials — never fabricated)", () => {
+  it("is registered as a connector and reports not_configured without creds", () => {
+    expect(CONNECTORS.reddit).toBeTruthy();
+    const h = redditConnector.health();
+    // In test env (no REDDIT_CLIENT_ID/SECRET) it must be honest not_configured.
+    if (!process.env.REDDIT_CLIENT_ID || !process.env.REDDIT_CLIENT_SECRET) {
+      expect(h.status).toBe("not_configured");
+      expect(h.configured).toBe(false);
+    }
+    expect(h.envVars).toContain("REDDIT_CLIENT_ID");
+  });
+
+  it("fetch returns nothing (no fabricated rows) when unconfigured", async () => {
+    if (process.env.REDDIT_CLIENT_ID && process.env.REDDIT_CLIENT_SECRET) return;
+    const r = await redditConnector.fetch({ subreddit: "LocalLLaMA", q: "claude" });
+    expect(r.ok).toBe(false);
+    expect(r.status).toBe("not_configured");
+    expect(r.records).toEqual([]);
   });
 });
 

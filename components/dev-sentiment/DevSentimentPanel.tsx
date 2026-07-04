@@ -26,6 +26,7 @@ const SOURCE_LABEL: Record<string, string> = {
   hackernews: "Hacker News",
   github: "GitHub",
   stackoverflow_survey: "Stack Overflow survey",
+  reddit: "Reddit",
 };
 
 export default function DevSentimentPanel({ agg }: { agg: DevSentimentAggregate }) {

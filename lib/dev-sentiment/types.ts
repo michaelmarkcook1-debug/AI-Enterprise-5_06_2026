@@ -16,8 +16,12 @@
 //     Applying it to enterprise / RAG / infra vendors is a category error.
 // Reads nothing canonical, writes nothing (firewall).
 
-/** ToS-compliant official sources only. */
-export type DevSource = "hackernews" | "github" | "stackoverflow_survey";
+/** ToS-compliant official sources only. `reddit` is wired (lib/connectors/
+ *  reddit.ts, official OAuth API) but only populates once REDDIT_CLIENT_ID/
+ *  SECRET are set — until then no reddit rows exist (never fabricated). Reddit
+ *  is the most gameable source, so it carries the highest volume floor +
+ *  brigading dedup (see aggregate.ts). */
+export type DevSource = "hackernews" | "github" | "stackoverflow_survey" | "reddit";
 
 /** Qualitative sentiment reading (analyst-curated from the cited signals). */
 export type DevSentimentTag = "positive" | "leaning_positive" | "mixed" | "leaning_negative" | "negative";

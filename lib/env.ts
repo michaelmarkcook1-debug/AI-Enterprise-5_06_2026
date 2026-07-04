@@ -32,6 +32,8 @@ export type EnvKey =
   | "GITHUB_INBOX_REPO"
   | "GITHUB_INBOX_BRANCH"
   | "GITHUB_INBOX_PATH"
+  | "REDDIT_CLIENT_ID"
+  | "REDDIT_CLIENT_SECRET"
   | "NODE_ENV"
   | "VERCEL_ENV";
 
@@ -104,6 +106,22 @@ export const ENV_SPEC: EnvVarSpec[] = [
     enables: ["Pin the analyst-synthesis model"],
     remediation: "Defaults to claude-opus-4-8. Override only for reproducibility.",
     secret: false,
+  },
+  {
+    key: "REDDIT_CLIENT_ID",
+    description: "Reddit app client id — enables the OAuth Reddit connector (4th developer-sentiment source).",
+    severity: "optional",
+    enables: ["Developer-subreddit sentiment ingestion for coding models"],
+    remediation: "Register a 'script'/'web' app at reddit.com/prefs/apps, set the id here + REDDIT_CLIENT_SECRET. Without both, the connector reports not_configured and ingests nothing (never fabricated).",
+    secret: false,
+  },
+  {
+    key: "REDDIT_CLIENT_SECRET",
+    description: "Reddit app client secret — pairs with REDDIT_CLIENT_ID for the OAuth Reddit connector.",
+    severity: "optional",
+    enables: ["Developer-subreddit sentiment ingestion for coding models"],
+    remediation: "From the same reddit.com/prefs/apps registration. Reddit's commercial data terms are the owner's to accept.",
+    secret: true,
   },
   {
     key: "CRON_SECRET",

@@ -23,6 +23,9 @@ const SOURCE_FLOOR: Record<DevSource, number> = {
   hackernews: 1500, // total HN points across coding threads
   github: 10000, // stars on the flagship coding repo
   stackoverflow_survey: 50, // present = counts
+  // Reddit is the most brigadeable source → a deliberately HIGH floor (net
+  // upvotes across dedup'd threads) so an astroturf spike can't clear it.
+  reddit: 3000,
 };
 
 export type DevSentimentState = "rated" | "insufficient_evidence";
