@@ -153,6 +153,11 @@ describe("independence firewall — score writes are sanctioned-only", () => {
       // commercial data.
       "lib/assessment/prep-kit.ts",
       "lib/agents/prep-kit.ts",
+      // Per-tab grounded chat (AnalystGenius piece 3): snapshot builders + the
+      // grounded answer engine. Read canonical data, emit prose + snapshot-only
+      // citations — never a score or commercial data.
+      "lib/agents/tab-snapshots.ts",
+      "lib/agents/tab-chat.ts",
     ];
     const COMMERCIAL_USE_RE = /\.vendorCommercial\.|"vendor_commercial"|'vendor_commercial'/;
     for (const f of files) {
