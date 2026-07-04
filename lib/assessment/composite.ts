@@ -44,6 +44,7 @@ export const RANKABLE_DOMAIN_ORDER: DomainId[] = [
   "workforce_adoption",
   "vendor_maturity_lockin",
   "capital_resilience",
+  "dev_sentiment", // category-scoped — only active where a coding profile weights it
 ];
 
 /**

@@ -18,6 +18,7 @@ import { accreditedCorrectedGrade } from "./accredited-sources";
 import { ARENA_ELO_SOURCE_URL } from "../system/elo-fetch";
 import { loadModelQualityDetails } from "./model-quality-score";
 import type { MqBlendResult } from "../system/model-quality-blend";
+import { synthesizeDevSentimentDomain } from "../dev-sentiment/ranking-signal";
 
 export interface VendorScorecard {
   vendorId: string;
@@ -33,6 +34,12 @@ export interface VendorScorecard {
    *  12-domain `domains`/`scoredCount` above; categories that weight model_quality
    *  (e.g. frontier_model_api) merge it into the ranked domain set explicitly. */
   modelQuality: DomainScore | null;
+  /** Category-scoped developer-community signal (coding models), synthesized
+   *  from the cited tri-source dev-sentiment aggregate. null for non-coding
+   *  vendors OR when the signal is insufficient (coverage-discounted, never
+   *  faked). Merged into the ranked domain set ONLY by coding categories when
+   *  DEV_SENTIMENT_IN_RANKING is on — same pattern as modelQuality. */
+  devSentiment: DomainScore | null;
 }
 
 const EMPTY_SCORECARD = (vendorId: string, now?: Date): VendorScorecard => {
@@ -45,6 +52,9 @@ const EMPTY_SCORECARD = (vendorId: string, now?: Date): VendorScorecard => {
     hasAnyEvidence: false,
     totalEvidenceRows: 0,
     modelQuality: null,
+    // Curated + pure — present even for a vendor with no evidence rows (a coding
+    // model dark on the live scorecard can still have a developer-sentiment signal).
+    devSentiment: synthesizeDevSentimentDomain(vendorId),
   };
 };
 
@@ -63,6 +73,7 @@ function summarise(
     hasAnyEvidence: scoredCount > 0,
     totalEvidenceRows,
     modelQuality,
+    devSentiment: synthesizeDevSentimentDomain(vendorId),
   };
 }
 

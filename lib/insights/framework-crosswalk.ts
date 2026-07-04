@@ -162,6 +162,7 @@ const CROSSWALK: Record<DomainId, Omit<DomainCrosswalk, "domain" | "label">> = {
   // Category-scoped domains — not part of the 12 framework domains, so no crosswalk row.
   model_quality: { nist: [], iso: [], euAiAct: [], cioLine: "", note: "", strength: "gap" },
   market_position: { nist: [], iso: [], euAiAct: [], cioLine: "", note: "", strength: "gap" },
+  dev_sentiment: { nist: [], iso: [], euAiAct: [], cioLine: "", note: "", strength: "gap" },
 };
 
 /** The full crosswalk over the 12 framework domains, in canonical order. */

@@ -112,4 +112,11 @@ export const DOMAIN_CROSSWALK: Record<DomainId, DomainCrosswalk> = {
     nistAiRmf: [],
     iso42001: [],
   },
+  dev_sentiment: {
+    domain: "dev_sentiment",
+    euAiAct: [],
+    iso27001: [],
+    nistAiRmf: [],
+    iso42001: [],
+  },
 };

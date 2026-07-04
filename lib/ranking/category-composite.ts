@@ -27,6 +27,7 @@ import {
 import {
   resolveDomainWeights,
   categoryActivatesModelQuality,
+  categoryActivatesDevSentiment,
   buildMethodologyNote,
 } from "../assessment/category-weights";
 import {
@@ -136,6 +137,7 @@ async function computeCategoryComposites(): Promise<CategoryComposite[]> {
     // construction at the category default.
     const catWeights = resolveDomainWeights(category.id);
     const activatesMQ = categoryActivatesModelQuality(category.id);
+    const activatesDevSentiment = categoryActivatesDevSentiment(category.id);
     // A vendor's domain set for THIS category: the 12 framework domains, plus the
     // synthesized model_quality score when the category activates it and the
     // vendor has a real Arena Elo (else model_quality is simply absent → counted
@@ -143,7 +145,12 @@ async function computeCategoryComposites(): Promise<CategoryComposite[]> {
     const effFor = (id: string): DomainScore[] | null => {
       const sc = scorecards.get(id);
       if (!sc) return null;
-      return activatesMQ && sc.modelQuality ? [...sc.domains, sc.modelQuality] : sc.domains;
+      const extra: DomainScore[] = [];
+      if (activatesMQ && sc.modelQuality) extra.push(sc.modelQuality);
+      // dev_sentiment: coding categories only, flag-gated, coverage-discounted
+      // (absent → counted as an unscored domain), same pattern as model_quality.
+      if (activatesDevSentiment && sc.devSentiment) extra.push(sc.devSentiment);
+      return extra.length > 0 ? [...sc.domains, ...extra] : sc.domains;
     };
 
     // Membership: a vendor is in this category iff it has an estimate row here.

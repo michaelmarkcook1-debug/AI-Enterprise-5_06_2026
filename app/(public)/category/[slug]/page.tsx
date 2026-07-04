@@ -56,10 +56,17 @@ export default async function CategoryPage({ params }: { params: Promise<Params>
   // and the re-rank so both match the static ranking's coverage denominator.
   const activeOrder: DomainId[] = activeDomains(resolvedDomainWeights);
   const activatesModelQuality = (resolvedDomainWeights.model_quality ?? 0) > 0;
+  const activatesDevSentiment = (resolvedDomainWeights.dev_sentiment ?? 0) > 0;
   // A vendor's domain set for THIS category: framework domains + the synthesized
-  // model_quality score when active (else absent → shown as insufficient).
-  const effectiveDomains = (sc: VendorScorecard | undefined): DomainScore[] =>
-    !sc ? [] : activatesModelQuality && sc.modelQuality ? [...sc.domains, sc.modelQuality] : sc.domains;
+  // model_quality / dev_sentiment scores when active (else absent → insufficient).
+  // Must match category-composite's effFor so the static order and the re-rank agree.
+  const effectiveDomains = (sc: VendorScorecard | undefined): DomainScore[] => {
+    if (!sc) return [];
+    const extra: DomainScore[] = [];
+    if (activatesModelQuality && sc.modelQuality) extra.push(sc.modelQuality);
+    if (activatesDevSentiment && sc.devSentiment) extra.push(sc.devSentiment);
+    return extra.length > 0 ? [...sc.domains, ...extra] : sc.domains;
+  };
 
   // Phase 3 — per-vendor 12-domain evidence scorecards (deterministic, no LLM,
   // batched into one query). Used for the compact domain strip under each vendor.

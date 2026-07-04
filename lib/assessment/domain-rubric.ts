@@ -54,6 +54,8 @@ export const DOMAIN_WEIGHT: Record<DomainId, number> = {
   model_quality: 0.0, // category-scoped capability domain — 0 in the framework default,
   //                     activated only by category weight profiles (e.g. frontier_model_api)
   market_position: 0.0, // not an assessment domain
+  dev_sentiment: 0.0, // category-scoped (coding models) — 0 in the framework default,
+  //                     activated only by the coding category profiles when DEV_SENTIMENT_IN_RANKING
 };
 
 // Best evidence grade present → maximum achievable 0–5 band. This is the

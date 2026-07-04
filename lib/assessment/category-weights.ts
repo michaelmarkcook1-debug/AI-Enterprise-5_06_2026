@@ -26,6 +26,8 @@
 import { DEFAULT_DOMAIN_WEIGHTS, ASSESSMENT_COVERAGE_FLOOR, type DomainWeights } from "./composite";
 import { DOMAIN_LABEL } from "./domain-labels";
 import { ARENA_ELO_SOURCE_URL } from "../system/elo-fetch";
+import { DEV_SENTIMENT_IN_RANKING } from "../availability";
+import { isDevSentimentCategory } from "../dev-sentiment/scope";
 
 export interface CategoryWeightProfile {
   /** Raw per-domain weights for this category (renormalized on use). May include
@@ -225,10 +227,24 @@ export const CATEGORY_DOMAIN_WEIGHTS: Record<string, CategoryWeightProfile> = {
  * (callers renormalize). This is the single resolver every ranking surface uses
  * so the static order and the interactive re-rank share one category default.
  */
+/** The dev-sentiment ranking weight for coding categories — a SIGNIFICANT,
+ *  co-leading variable, set by rationale and published, NEVER tuned per vendor
+ *  (see the spec's zero-pay-to-play lock). Applied only when
+ *  DEV_SENTIMENT_IN_RANKING is on. */
+export const DEV_SENTIMENT_WEIGHT = 0.18;
+
 export function resolveDomainWeights(categoryId: string): DomainWeights {
   const profile = CATEGORY_DOMAIN_WEIGHTS[categoryId];
-  if (!profile) return DEFAULT_DOMAIN_WEIGHTS;
-  return profile.weights as DomainWeights;
+  const base = profile ? (profile.weights as DomainWeights) : DEFAULT_DOMAIN_WEIGHTS;
+  // Consumer #2 — blend developer sentiment into the CODING categories only,
+  // gated behind DEV_SENTIMENT_IN_RANKING (off → the composite is unchanged).
+  // Adding the key activates the synthesized dev_sentiment domain in BOTH the
+  // static ranking and the interactive re-rank (both read this resolver), so
+  // they stay identical by construction. Renormalized downstream.
+  if (DEV_SENTIMENT_IN_RANKING && isDevSentimentCategory(categoryId)) {
+    return { ...base, dev_sentiment: DEV_SENTIMENT_WEIGHT };
+  }
+  return base;
 }
 
 /** True when the category's profile is a bespoke override (not the framework default). */
@@ -239,6 +255,12 @@ export function categoryHasCustomWeights(categoryId: string): boolean {
 /** True when the category activates the (category-scoped) model_quality domain. */
 export function categoryActivatesModelQuality(categoryId: string): boolean {
   return (resolveDomainWeights(categoryId).model_quality ?? 0) > 0;
+}
+
+/** True when the category activates the (category-scoped) dev_sentiment domain —
+ *  i.e. a coding category AND DEV_SENTIMENT_IN_RANKING is on. */
+export function categoryActivatesDevSentiment(categoryId: string): boolean {
+  return (resolveDomainWeights(categoryId).dev_sentiment ?? 0) > 0;
 }
 
 /** The category's documented rationale, or null when it uses the framework default. */

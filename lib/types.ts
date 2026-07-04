@@ -40,7 +40,8 @@ export type DomainId =
   | "workforce_adoption"
   | "vendor_maturity_lockin"
   | "capital_resilience"
-  | "market_position";
+  | "market_position"
+  | "dev_sentiment"; // category-scoped (coding models) — developer-community signal
 
 export const DOMAIN_TO_PILLAR: Record<DomainId, PillarId> = {
   strategic_value: "business_fit",
@@ -57,6 +58,7 @@ export const DOMAIN_TO_PILLAR: Record<DomainId, PillarId> = {
   vendor_maturity_lockin: "vendor_resilience",
   capital_resilience: "vendor_resilience",
   market_position: "market_strength",
+  dev_sentiment: "market_strength", // developer mindshare is a market-strength signal
 };
 
 // Evidence grading (spec §12.3)
