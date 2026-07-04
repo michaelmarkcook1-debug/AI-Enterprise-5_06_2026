@@ -27,13 +27,14 @@ export type Feature =
   | "citations_inline" // inline evidence citations on the scorecard
   | "interrogate" // W3 premium LLM action (context lens re-run) — credit-metered
   | "prep_kit" // W4 premium LLM action (vendor-meeting prep kit) — credit-metered
+  | "tab_chat" // per-tab grounded chat (Ask AI) — credit-metered
   | "watchlist_alerts" // saved-watchlist change alerts
   | "exports"; // scorecard / shortlist export
 
-/** The two premium LLM actions that CONSUME credits. Kept as a subset of
+/** The premium LLM actions that CONSUME credits. Kept as a subset of
  *  Feature so the meter and the entitlement matrix can't drift apart. */
-export type MeteredAction = Extract<Feature, "interrogate" | "prep_kit">;
-export const METERED_ACTIONS: readonly MeteredAction[] = ["interrogate", "prep_kit"] as const;
+export type MeteredAction = Extract<Feature, "interrogate" | "prep_kit" | "tab_chat">;
+export const METERED_ACTIONS: readonly MeteredAction[] = ["interrogate", "prep_kit", "tab_chat"] as const;
 
 export type PlanId = "free" | "individual" | "pro" | "team" | "enterprise";
 
@@ -69,6 +70,7 @@ const INDIVIDUAL_FEATURES: readonly Feature[] = [
   "citations_inline",
   "interrogate",
   "prep_kit",
+  "tab_chat",
 ];
 const PRO_FEATURES: readonly Feature[] = [...INDIVIDUAL_FEATURES, "watchlist_alerts", "exports"];
 

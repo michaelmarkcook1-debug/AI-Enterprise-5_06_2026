@@ -9,6 +9,7 @@ import {
 } from "@/lib/graph/dependency-projection";
 import { deriveEncroachmentEdges, buildRolesByNodeId } from "@/lib/graph/encroachment";
 import { deriveGraphTakeaway } from "@/lib/graph/takeaway";
+import TabChat from "@/components/chat/TabChat";
 
 // ISR: server-rendered + CDN-cached, revalidated hourly. STRICT mode: the graph
 // is curated/hardcoded (lib/investing/exposure-map-data.ts) — NOT live-DB
@@ -155,6 +156,17 @@ export default async function DependenciesPage() {
         <Link href="/vendors" className="underline underline-offset-2">vendor leaderboard</Link>, or
         the <Link href="/models" className="underline underline-offset-2">model inventory</Link>.
       </p>
+
+      {/* Piece 3 — Ask AI, grounded in the cited dependency edges only. */}
+      <TabChat
+        tab={{ kind: "dependencies" }}
+        label="Dependency graph"
+        chips={[
+          "Who is the biggest chokepoint in the graph?",
+          "What does OpenAI depend on?",
+          "Are encroachment edges stated facts?",
+        ]}
+      />
     </main>
   );
 }

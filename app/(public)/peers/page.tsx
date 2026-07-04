@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import PeerBenchmark from "@/components/peers/PeerBenchmark";
+import TabChat from "@/components/chat/TabChat";
 import { SIGNAL_KINDS } from "@/lib/peer/heatmap";
 import { absoluteUrl } from "@/lib/site";
 
@@ -65,6 +66,17 @@ export default function PeersPage() {
           </div>
         </div>
       </section>
+
+      {/* Piece 3 — Ask AI, grounded in the cited peer dataset only. */}
+      <TabChat
+        tab={{ kind: "peers" }}
+        label="Peer AI benchmark"
+        chips={[
+          "Who leads on disclosed AI adoption?",
+          "What has JPMorgan disclosed?",
+          "Which of these signals are estimates?",
+        ]}
+      />
     </main>
   );
 }

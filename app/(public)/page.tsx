@@ -13,6 +13,7 @@ import { deriveGraphTakeaway } from "@/lib/graph/takeaway";
 import { getCachedProvenance } from "@/lib/intelligence/provenance";
 import { getLastRefreshedAt } from "@/lib/system/daily-refresh";
 import { listPublishedArticles } from "@/lib/articles/repository";
+import TabChat from "@/components/chat/TabChat";
 import { absoluteUrl } from "@/lib/site";
 import DataUnavailable from "@/components/DataUnavailable";
 import { buildDeliveryGraph } from "@/lib/graph/delivery-projection";
@@ -362,6 +363,17 @@ export default async function HomePage() {
           <SubscribeForm source="home" className="w-full max-w-sm" />
         </div>
       </section>
+
+      {/* Piece 3 — Ask AI, grounded in the verified breaking-news feed only. */}
+      <TabChat
+        tab={{ kind: "news" }}
+        label="Market today"
+        chips={[
+          "What's the biggest verified story this week?",
+          "Which vendors are in the news right now?",
+          "Is the impact score a measured fact?",
+        ]}
+      />
     </main>
   );
 }

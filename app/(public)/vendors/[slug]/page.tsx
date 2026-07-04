@@ -44,6 +44,7 @@ import { getDeliveryPartnershipsForVendor } from "@/lib/delivery/repository";
 import ImplementationPartnersPanel from "@/components/vendor/ImplementationPartnersPanel";
 import { disclosedAdoptersOf } from "@/lib/peer/adopters";
 import DisclosedAdoptersPanel from "@/components/peers/DisclosedAdoptersPanel";
+import TabChat from "@/components/chat/TabChat";
 import { getVendorScorecard, getModelQualityBreakdown } from "@/lib/assessment/domain-scores";
 import { MODEL_QUALITY_CATEGORIES } from "@/lib/system/model-quality-blend";
 import DomainScorecard from "@/components/assessment/DomainScorecard";
@@ -1297,6 +1298,17 @@ export default async function VendorDeepDivePage({
             )}
           </div>
         </section>
+
+        {/* Piece 3 — Ask AI, grounded in THIS vendor's cited scorecard only. */}
+        <TabChat
+          tab={{ kind: "vendor", id: entity.id }}
+          label={entity.name}
+          chips={[
+            "Where is the evidence thin for this vendor?",
+            "What is the strongest-evidenced domain?",
+            "Is the model-quality score an independent audit?",
+          ]}
+        />
       </main>
     </div>
   );
