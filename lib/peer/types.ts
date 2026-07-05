@@ -66,6 +66,13 @@ export interface PeerSignal {
    *  peer has disclosed adopting — cross-linked to /vendors/{id}. Validated
    *  against TRACKED_VENDOR_NAMES by tests. */
   vendorIds?: string[];
+  /** Honest interim state (owner-approved 2026-07-06): the underlying fact +
+   *  band are real and rubric-computed, but per-cell citation URLs have not
+   *  been found/verified yet (source lookup pending, e.g. a rate-limited
+   *  search pass) — never omit this label while citations is empty for a
+   *  signal that isn't not_disclosed. Absent = fully sourced (the default,
+   *  existing dataset's state). Cleared once real citations land. */
+  citationStatus?: "pending_enrichment";
 }
 
 export interface PeerCompany {

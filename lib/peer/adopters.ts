@@ -16,6 +16,10 @@ export interface DisclosedAdopter {
   summary?: string;
   status: PeerSignal["status"];
   citations: PeerCitation[];
+  /** Set when the fact is real + rubric-computed but citation URLs haven't
+   *  been found/verified yet — render an honest "sources being linked" note,
+   *  never let an empty citations[] read as silently unsourced. */
+  citationStatus?: PeerSignal["citationStatus"];
 }
 
 /** Peers whose platform_integration signal cites `vendorId` (bare id, e.g.
@@ -35,6 +39,7 @@ export function disclosedAdoptersOf(vendorId: string): DisclosedAdopter[] {
       summary: s.summary,
       status: s.status,
       citations: s.citations ?? [],
+      citationStatus: s.citationStatus,
     });
   }
   return out;

@@ -70,6 +70,11 @@ export default function DisclosedAdoptersPanel({
                 </li>
               ))}
             </ul>
+            {a.citations.length === 0 && a.citationStatus === "pending_enrichment" && (
+              <p className="mt-1.5 text-[11px] italic text-amber-700 dark:text-amber-300">
+                Fact is real and rubric-computed from named public reporting — sources being linked.
+              </p>
+            )}
           </li>
         ))}
       </ul>

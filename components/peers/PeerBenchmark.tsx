@@ -299,6 +299,11 @@ export default function PeerBenchmark({ companyIds }: { companyIds?: string[] } 
                       </li>
                     ))}
                   </ul>
+                  {(s.citations ?? []).length === 0 && s.citationStatus === "pending_enrichment" && (
+                    <p className="mt-1.5 text-[11px] italic text-amber-700 dark:text-amber-300">
+                      Fact is real and rubric-computed from named public reporting — sources being linked.
+                    </p>
+                  )}
                 </div>
               );
             })}

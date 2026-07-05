@@ -3,15 +3,24 @@ import { disclosedAdoptersOf } from "./adopters";
 import { PEER_COMPANIES } from "./peer-adoption-data";
 
 describe("disclosedAdoptersOf", () => {
-  it("returns only peers whose platform_integration cites the vendor, with citations", () => {
+  it("returns only peers whose platform_integration cites the vendor, cited or explicitly pending", () => {
     const adopters = disclosedAdoptersOf("openai");
     expect(adopters.length).toBeGreaterThan(0);
     for (const a of adopters) {
-      expect(a.citations.length).toBeGreaterThan(0);
       const company = PEER_COMPANIES.find((c) => c.id === a.company.id)!;
       const sig = company.signals.find((s) => s.kind === "platform_integration")!;
       expect(sig.vendorIds ?? []).toContain("openai");
       expect(sig.status).toBe("disclosed");
+      // Citations are optional (owner ruling 2026-07-04). An entry with ZERO
+      // citations must be EXPLICITLY labelled pending_enrichment — an empty
+      // citations array can never pass silently as "fully sourced".
+      if (a.citations.length === 0) {
+        expect(a.citationStatus, `${a.company.id} has no citations but no pending_enrichment label`).toBe(
+          "pending_enrichment",
+        );
+      } else {
+        expect(a.citationStatus, `${a.company.id} has citations but is still labelled pending`).toBeUndefined();
+      }
     }
   });
 

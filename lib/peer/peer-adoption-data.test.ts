@@ -111,6 +111,21 @@ describe("peer-adoption dataset integrity", () => {
     expect(new Set(ids).size).toBe(ids.length);
     for (const id of ids) expect(id).toMatch(/^[a-z0-9]+(-[a-z0-9]+)*$/);
   });
+
+  it("a rated signal with ZERO citations must be explicitly labelled pending_enrichment — never silently unsourced", () => {
+    for (const c of PEER_COMPANIES) {
+      for (const s of c.signals) {
+        if (s.status === "not_disclosed") continue;
+        if ((s.citations ?? []).length === 0) {
+          expect(s.citationStatus, `${c.id}/${s.kind} has 0 citations with no pending label`).toBe(
+            "pending_enrichment",
+          );
+        } else {
+          expect(s.citationStatus, `${c.id}/${s.kind} has citations but is still labelled pending`).toBeUndefined();
+        }
+      }
+    }
+  });
 });
 
 describe("buildPeerHeatmap", () => {

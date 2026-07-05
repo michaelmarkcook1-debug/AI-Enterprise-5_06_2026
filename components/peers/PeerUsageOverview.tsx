@@ -46,6 +46,22 @@ export default function PeerUsageOverview({
     return rows.filter((r) => set.has(r.verticalId));
   }, [rows, useCases, useCase]);
 
+  // Industries the USE-CASE VOCABULARY itself covers (has ANY cited top-use-case
+  // for) — distinct from industries with disclosed vendor usage. Today this is
+  // thin (compiled for financial services first), so a use-case filter can drop
+  // industries — e.g. pharma — that DO have real disclosed vendor data but no
+  // cited use-case label yet. Surfaced explicitly so that absence never reads as
+  // "this industry doesn't do this" when the honest reading is "not catalogued yet".
+  const useCaseCoveredVerticals = useMemo(() => {
+    const set = new Set<string>();
+    for (const u of useCases) for (const v of u.verticals) set.add(v);
+    return set;
+  }, [useCases]);
+  const uncoveredWithVendorUsage = useMemo(
+    () => rows.filter((r) => !useCaseCoveredVerticals.has(r.verticalId) && r.vendorUsage.length > 0),
+    [rows, useCaseCoveredVerticals],
+  );
+
   const vendorLink = (id: string) => (
     <Link
       key={id}
@@ -102,11 +118,23 @@ export default function PeerUsageOverview({
       )}
 
       {useCase && (
-        <p className={`mt-3 text-[11px] ${MUTED}`}>
-          Showing industries where <strong className="text-[#13294b] dark:text-[#eef3f8]">{useCase}</strong> is a
-          top cited deployed use-case. This filters industries — it is not a claim that a specific vendor
-          is used for this use-case.
-        </p>
+        <div className="mt-3 space-y-1">
+          <p className={`text-[11px] ${MUTED}`}>
+            Showing industries where <strong className="text-[#13294b] dark:text-[#eef3f8]">{useCase}</strong> is a
+            top cited deployed use-case. This filters industries — it is not a claim that a specific vendor
+            is used for this use-case.
+          </p>
+          <p className="text-[11px] leading-4 text-amber-700 dark:text-amber-300">
+            Use-case labels are currently catalogued for {useCaseCoveredVerticals.size === 1 ? "one industry" : `${useCaseCoveredVerticals.size} industries`} only
+            {uncoveredWithVendorUsage.length > 0 && (
+              <>
+                {" "}— {uncoveredWithVendorUsage.map((r) => r.label).join(", ")} has real disclosed AI-vendor
+                adoption but no cited use-case label yet, so it drops out of this filter. Absence here means
+                &quot;not catalogued yet,&quot; never &quot;this industry doesn&apos;t do this.&quot;
+              </>
+            )}
+          </p>
+        </div>
       )}
 
       {/* Industry rows: adoption breadth + disclosed vendor usage */}
