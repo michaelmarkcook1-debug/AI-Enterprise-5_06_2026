@@ -10,6 +10,7 @@
 import { useMemo, useState, type ReactNode } from "react";
 import Link from "next/link";
 import type { IndustryUsageRow, UseCaseOption, VendorUsageCell } from "@/lib/peer/aggregate-usage";
+import { SimpleBarChart, StackedUsageBarChart, VendorColorLegend, assignVendorColors } from "./UsageBarChart";
 
 const MUTED = "text-[#15263c]/60 dark:text-[#eef3f8]/60";
 const CARD = "rounded-xl border border-black/10 dark:border-white/10 bg-white/60 dark:bg-white/5";
@@ -72,6 +73,27 @@ export default function PeerUsageOverview({
     </Link>
   );
 
+  // ONE color per vendor, stable across the whole-base chart AND every
+  // industry's stacked bar — assigned in whole-base usage order (topVendors is
+  // already sorted desc) so the biggest, most-recurring vendors get the most
+  // distinguishable colors first.
+  const vendorColors = useMemo(() => assignVendorColors(topVendors.map((v) => v.vendorId)), [topVendors]);
+  const stackedRows = useMemo(
+    () =>
+      rows
+        .filter((r) => r.vendorUsage.length > 0)
+        .map((r) => ({
+          key: r.verticalId,
+          label: r.label,
+          segments: r.vendorUsage.map((v) => ({
+            vendorId: v.vendorId,
+            vendorName: vendorNames[v.vendorId] ?? prettyVendor(v.vendorId),
+            count: v.adopters,
+          })),
+        })),
+    [rows, vendorNames],
+  );
+
   return (
     <section className={`${CARD} p-5`}>
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -100,20 +122,32 @@ export default function PeerUsageOverview({
         </label>
       </div>
 
-      {/* Most-adopted vendors across the disclosed base */}
+      {/* Most-adopted vendors across the disclosed base — colored bar chart */}
       {topVendors.length > 0 && !useCase && (
         <div className="mt-4 rounded-lg border border-black/5 p-3 dark:border-white/10">
           <div className={`mb-1.5 text-[10px] font-semibold uppercase tracking-wide ${MUTED}`}>
             Most-adopted across disclosed peers
           </div>
-          <div className="flex flex-wrap items-center gap-1.5">
-            {topVendors.map((v) => (
-              <span key={v.vendorId} className="inline-flex items-center gap-1">
-                {vendorLink(v.vendorId)}
-                <span className={`text-[11px] tabular-nums ${MUTED}`}>{v.adopters}</span>
-              </span>
-            ))}
+          <SimpleBarChart
+            data={topVendors.map((v) => ({ vendorId: v.vendorId, label: vendorNames[v.vendorId] ?? prettyVendor(v.vendorId), value: v.adopters }))}
+            colors={vendorColors}
+            vendorHref={(id) => `/vendors/${id}`}
+          />
+        </div>
+      )}
+
+      {/* Industry usage BY vendor — stacked colored bar chart, one bar per
+          industry, segmented by vendor. The visual answer to "who's used where". */}
+      {stackedRows.length > 0 && !useCase && (
+        <div className="mt-4 rounded-lg border border-black/5 p-3 dark:border-white/10">
+          <div className={`mb-1.5 text-[10px] font-semibold uppercase tracking-wide ${MUTED}`}>
+            Disclosed AI-vendor usage by industry
           </div>
+          <StackedUsageBarChart rows={stackedRows} colors={vendorColors} vendorHref={(id) => `/vendors/${id}`} />
+          <VendorColorLegend
+            vendors={topVendors.map((v) => ({ vendorId: v.vendorId, name: vendorNames[v.vendorId] ?? prettyVendor(v.vendorId) }))}
+            colors={vendorColors}
+          />
         </div>
       )}
 
