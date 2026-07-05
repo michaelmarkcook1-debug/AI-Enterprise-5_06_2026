@@ -8,6 +8,20 @@ import type { DisclosedAdopter } from "@/lib/peer/adopters";
 
 const MUTED = "text-[#15263c]/60 dark:text-[#eef3f8]/60";
 
+/** Industry-usage rollup — a straight group-by-count over the SAME cited
+ *  adopter list rendered below, no new data or fetch. Deliberately thin: the
+ *  peer-AI benchmark currently covers a small curated company set, so this
+ *  reads as a real-but-sparse signal, never a market-wide claim. */
+function industryBreakdown(adopters: DisclosedAdopter[]): { industry: string; count: number }[] {
+  const counts = new Map<string, number>();
+  for (const a of adopters) {
+    counts.set(a.company.industry, (counts.get(a.company.industry) ?? 0) + 1);
+  }
+  return [...counts.entries()]
+    .map(([industry, count]) => ({ industry, count }))
+    .sort((a, b) => b.count - a.count || a.industry.localeCompare(b.industry));
+}
+
 export default function DisclosedAdoptersPanel({
   vendorName,
   adopters,
@@ -16,6 +30,7 @@ export default function DisclosedAdoptersPanel({
   adopters: DisclosedAdopter[];
 }) {
   if (adopters.length === 0) return null;
+  const byIndustry = industryBreakdown(adopters);
   return (
     <div>
       <div className="mb-2 flex flex-wrap items-center gap-2">
@@ -27,6 +42,11 @@ export default function DisclosedAdoptersPanel({
           Analyst-curated
         </span>
       </div>
+      {byIndustry.length > 1 && (
+        <p className={`mb-2 text-[11px] ${MUTED}`}>
+          By industry (disclosed count): {byIndustry.map((b) => `${b.industry} (${b.count})`).join(" · ")}
+        </p>
+      )}
       <ul className="space-y-3">
         {adopters.map((a) => (
           <li key={a.company.id} className="rounded-lg border border-black/5 p-3 dark:border-white/10">
