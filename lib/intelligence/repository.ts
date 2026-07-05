@@ -586,12 +586,19 @@ export async function getBreakingNews(
   // Rank by RECENCY-WEIGHTED importance — the freshest consequential stories
   // lead, which is what "breaking" should mean. A raw impact-only sort pinned a
   // headline to the top for its whole 14-day window, so the panel felt frozen
-  // even as fresher news arrived. We subtract a small per-day age penalty from
-  // impact (LINEAR decay, ~2.5/day): a major story stays near the top for a few
-  // days then yields to newer news, while a minor-but-fresh item still can't
-  // leap over a genuinely big one (an exponential half-life over-rotated to
-  // trivia). Ordering only — impact remains a directional estimate.
-  const AGE_PENALTY_PER_DAY = 2.5;
+  // even as fresher news arrived. We subtract a per-day age penalty from impact
+  // (LINEAR decay): a major story stays near the top for a day or two then yields
+  // to newer news, while a minor-but-fresh item still can't leap over a genuinely
+  // big SAME-day story (an exponential half-life over-rotated to trivia). Ordering
+  // only — impact remains a directional estimate.
+  //
+  // 2026-07-06 (owner: "lean more recent"): raised 2.5 → 6/day. At 2.5, a 3-day-old
+  // $100B-partnership headline (impact 97) still buried a same-week ServiceNow
+  // story (impact 85, 1.7 days old) — a 12-point impact gap needs > 6/day to close
+  // over that 2-day age gap, so 6 is the empirically-checked threshold (verified
+  // against live DB rows) where genuinely fresh news can overtake an older major
+  // story instead of it camping the lead for its whole window.
+  const AGE_PENALTY_PER_DAY = 6;
   const rankScore = (n: NewsItem): number => {
     const ageDays = Math.max(0, (Date.now() - Date.parse(n.publishedAt)) / 86_400_000);
     return n.impactScore - ageDays * AGE_PENALTY_PER_DAY;
