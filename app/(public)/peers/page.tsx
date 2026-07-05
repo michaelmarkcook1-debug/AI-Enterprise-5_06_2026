@@ -1,8 +1,17 @@
 import type { Metadata } from "next";
 import CohortExplorer from "@/components/peers/CohortExplorer";
+import PeerUsageOverview from "@/components/peers/PeerUsageOverview";
 import TabChat from "@/components/chat/TabChat";
 import { SIGNAL_KINDS } from "@/lib/peer/heatmap";
 import { RUBRIC_TEXT } from "@/lib/peer/rubric";
+import {
+  getBaseUsageAggregate,
+  getTopVendorsAcrossBase,
+  getBaseUseCases,
+  getUsageAsOf,
+  getUsageCoverage,
+} from "@/lib/peer/aggregate-usage";
+import { TRACKED_VENDOR_NAMES } from "@/lib/sourcing/ai-news-manifest";
 import { absoluteUrl } from "@/lib/site";
 
 // Peer-AI benchmark — the demand-side twin of the vendor assessment.
@@ -42,7 +51,28 @@ export default function PeersPage() {
         </p>
       </header>
 
-      <CohortExplorer />
+      {/* ── DEFAULT view: the whole tracked base, aggregated (redesign 2026-07-06).
+             Real cited data only — BTOS adoption breadth + disclosed vendor usage. ── */}
+      <PeerUsageOverview
+        rows={getBaseUsageAggregate()}
+        topVendors={getTopVendorsAcrossBase()}
+        useCases={getBaseUseCases()}
+        asOf={getUsageAsOf()}
+        coverage={getUsageCoverage()}
+        vendorNames={TRACKED_VENDOR_NAMES}
+      />
+
+      {/* ── Narrow to your own cohort (the prior default, now a drill-down). ── */}
+      <section className="mt-8">
+        <h2 className="text-sm font-semibold">Narrow to your own cohort</h2>
+        <p className="mt-1 max-w-2xl text-sm text-[#15263c]/60 dark:text-[#eef3f8]/60">
+          State your segment — vertical, size, region — to see cited benchmarks, disclosed platforms
+          and named exemplars scoped to enterprises like yours.
+        </p>
+        <div className="mt-4">
+          <CohortExplorer />
+        </div>
+      </section>
 
       {/* ── Methodology — what each signal means and where the red line is ── */}
       <section className="mt-10 rounded-xl border border-black/10 bg-white/60 p-5 dark:border-white/10 dark:bg-white/5">
