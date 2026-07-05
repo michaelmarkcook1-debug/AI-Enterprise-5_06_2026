@@ -37,7 +37,7 @@ import VendorPulsePanel from "@/components/vendor/VendorPulsePanel";
 import { reviewsConnector } from "@/lib/connectors/reviews";
 import FinancialsPanel from "@/components/vendor/FinancialsPanel";
 import TrackButton from "@/components/member/TrackButton";
-import { getVendorReputation } from "@/lib/reputation/vendor-reputation";
+import { getVendorReputation, type VendorReputation } from "@/lib/reputation/vendor-reputation";
 import { getReputationSnapshots, type ReputationSnapshotPoint } from "@/lib/reputation/reputation-snapshots";
 import { intelVendorId } from "@/lib/intelligence/vendor-id";
 import { getVendorCategoryStandings } from "@/lib/ranking/category-composite";
@@ -877,6 +877,48 @@ export default async function VendorDeepDivePage({
               </Panel>
             </section>
           )}
+          {/* ── Reputation Tracker — the "Sources & independence" disclosure is
+                genuinely live (connector health + a fixed policy statement), so
+                it always renders. The scored pillars themselves are seed-sourced
+                (lib/reputation/seed.ts) and stay held per the strict-mode rule —
+                reputation is force-passed as hasData:false, never the real seed
+                read, so no curated number can ever surface here regardless of
+                what the seed file contains. */}
+          <section className="mt-6">
+            <Panel title="Reputation">
+              <ReputationPanel
+                reputation={
+                  {
+                    developer: null,
+                    employee: null,
+                    customer: null,
+                    combined: null,
+                    asOf: null,
+                    hasData: false,
+                  } satisfies VendorReputation
+                }
+                vendorName={entity.name}
+                reviewSources={(() => {
+                  const h = reviewsConnector.health();
+                  return { configured: h.configured, contributing: h.status === "ok" && h.lastFetchOk === true };
+                })()}
+              />
+            </Panel>
+          </section>
+          {/* ── Financial Snapshot — held honestly dark. Ownership/capital-signal
+                fields on `entity` are hardcoded (lib/intelligence/entities.ts),
+                so FinancialsPanel (which renders them as analyst-sourced context)
+                stays out of the strict path; this states the absence plainly
+                instead of presenting nothing with no explanation. */}
+          <section className="mt-6">
+            <Panel title="Financial Snapshot">
+              <p className="text-sm text-[#54647a] dark:text-[#a7bacd]">
+                No live-sourced financial profile for {entity.name} yet — ownership, capital-raise
+                and valuation signals require a verified filing or press citation before we show
+                them here. We report that absence rather than estimate a figure.
+              </p>
+            </Panel>
+          </section>
           {/* Ask AI — grounded in this vendor's cited data (also on the dark
               path so coding profiles showing dev-sentiment carry the chat). */}
           <TabChat
