@@ -63,6 +63,38 @@ async function fetchRepoStats(repo: string): Promise<GitHubRepoStats | null> {
   }
 }
 
+/** True when this vendor has a mapped flagship repo — call before fetching to
+ *  skip the network round-trip for vendors with no GitHub signal (Harvey,
+ *  Hebbia, Rogo, Moveworks, etc.). */
+export function hasLiveGitHubRepo(vendorId: string): boolean {
+  return vendorId in VENDOR_REPOS;
+}
+
+/**
+ * Fetch the live GitHub signal for ONE vendor. Used on the public vendor
+ * profile — deliberately single-repo (not fetchLiveGitHubSignals' all-vendor
+ * loop) so a single page view costs exactly one GitHub call, not ~15; the
+ * underlying fetch() already sets `next: { revalidate: 3600 }`, so Next's
+ * data cache absorbs repeat views within the hour. null when unmapped,
+ * rate-limited, or the repo lookup fails — never a fabricated fallback.
+ */
+export async function fetchLiveGitHubSignalForVendor(vendorId: string): Promise<LiveGitHubSignal | null> {
+  const repo = VENDOR_REPOS[vendorId];
+  if (!repo) return null;
+  const stats = await fetchRepoStats(repo);
+  if (!stats) return null;
+  return {
+    vendorId,
+    repo,
+    stars: stats.stargazers_count,
+    forks: stats.forks_count,
+    openIssues: stats.open_issues_count,
+    watchers: stats.subscribers_count,
+    lastUpdated: stats.updated_at,
+    fetchedAt: new Date().toISOString(),
+  };
+}
+
 /**
  * Fetch live GitHub signals for all mapped vendors.
  * Returns null entries for vendors without repos or on rate limit.

@@ -1,5 +1,6 @@
 import { Panel } from "@/components/intelligence-ui";
 import type { VendorReputation } from "@/lib/reputation/vendor-reputation";
+import type { LiveGitHubSignal } from "@/lib/reputation/live-github";
 
 // Current reputation composite + per-pillar breakdown. Each pillar carries its
 // own dataStatus (verified = live API, documented = partial real, seed =
@@ -72,6 +73,47 @@ function Pillar({
   );
 }
 
+function ageLabel(iso: string): string {
+  const days = Math.floor((Date.now() - Date.parse(iso)) / 86_400_000);
+  if (Number.isNaN(days)) return "";
+  if (days <= 0) return "today";
+  if (days === 1) return "1 day ago";
+  return `${days} days ago`;
+}
+
+/** The one genuinely-live reputation signal: real-time GitHub repo stats
+ *  (lib/reputation/live-github.ts) — a real API read, no seed involved.
+ *  Rendered whenever a signal is present, independent of the pillar
+ *  composite's hasData state (which stays gated per the strict-mode rule). */
+function GithubSignal({ signal }: { signal: LiveGitHubSignal }) {
+  return (
+    <div className="mt-3 rounded-lg border border-emerald-500/30 bg-emerald-500/5 p-2.5">
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="rounded-full border border-emerald-500/40 bg-emerald-500/10 px-1.5 py-0.5 text-[10px] font-medium text-emerald-700 dark:text-emerald-300">
+          verified · live
+        </span>
+        <span className={`text-[11px] ${MUTED}`}>GitHub developer signal</span>
+      </div>
+      <p className="mt-1.5 text-sm text-[#13294b] dark:text-[#eef3f8]">
+        <span className="font-mono font-semibold tabular-nums">{signal.stars.toLocaleString()}</span> stars ·{" "}
+        <span className="font-mono font-semibold tabular-nums">{signal.forks.toLocaleString()}</span> forks ·{" "}
+        <span className="font-mono font-semibold tabular-nums">{signal.openIssues.toLocaleString()}</span> open issues
+      </p>
+      <p className={`mt-1 text-[11px] ${MUTED}`}>
+        <a
+          href={`https://github.com/${signal.repo}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline underline-offset-2 hover:text-[#13294b] dark:hover:text-[#eef3f8]"
+        >
+          github.com/{signal.repo}
+        </a>{" "}
+        · repo last updated {ageLabel(signal.lastUpdated)} · GitHub API, refreshed hourly
+      </p>
+    </div>
+  );
+}
+
 /** The Sources & independence disclosure — genuinely live (connector health +
  *  a fixed policy statement), never seed-derived. Rendered regardless of
  *  whether pillar-level reputation data is present, so a vendor with zero
@@ -105,11 +147,14 @@ export default function ReputationPanel({
   reputation,
   vendorName,
   reviewSources,
+  liveGithub,
 }: {
   reputation: VendorReputation;
   vendorName: string;
   /** Live status of the paid customer-review connector (G2/TrustRadius/Trustpilot). */
   reviewSources?: { configured: boolean; contributing: boolean };
+  /** Real-time GitHub repo stats — genuinely live, independent of `reputation`. */
+  liveGithub?: LiveGitHubSignal | null;
 }) {
   if (!reputation.hasData) {
     return (
@@ -118,6 +163,7 @@ export default function ReputationPanel({
           Insufficient verified reputation evidence for {vendorName} yet. We report the absence of
           data rather than estimate it.
         </p>
+        {liveGithub && <GithubSignal signal={liveGithub} />}
         <SourcesFooter reviewSources={reviewSources} />
       </Panel>
     );
@@ -203,6 +249,7 @@ export default function ReputationPanel({
         back-filled).
       </p>
 
+      {liveGithub && <GithubSignal signal={liveGithub} />}
       <SourcesFooter reviewSources={reviewSources} />
     </Panel>
   );

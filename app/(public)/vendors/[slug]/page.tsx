@@ -38,6 +38,7 @@ import { reviewsConnector } from "@/lib/connectors/reviews";
 import FinancialsPanel from "@/components/vendor/FinancialsPanel";
 import TrackButton from "@/components/member/TrackButton";
 import { getVendorReputation, type VendorReputation } from "@/lib/reputation/vendor-reputation";
+import { hasLiveGitHubRepo, fetchLiveGitHubSignalForVendor } from "@/lib/reputation/live-github";
 import { getReputationSnapshots, type ReputationSnapshotPoint } from "@/lib/reputation/reputation-snapshots";
 import { intelVendorId } from "@/lib/intelligence/vendor-id";
 import { getVendorCategoryStandings } from "@/lib/ranking/category-composite";
@@ -879,11 +880,17 @@ export default async function VendorDeepDivePage({
           )}
           {/* ── Reputation Tracker — the "Sources & independence" disclosure is
                 genuinely live (connector health + a fixed policy statement), so
-                it always renders. The scored pillars themselves are seed-sourced
-                (lib/reputation/seed.ts) and stay held per the strict-mode rule —
-                reputation is force-passed as hasData:false, never the real seed
-                read, so no curated number can ever surface here regardless of
-                what the seed file contains. */}
+                it always renders. The scored PILLARS (developer/employee/
+                customer composites) are seed-sourced (lib/reputation/seed.ts)
+                and stay held per the strict-mode rule — reputation is force-
+                passed as hasData:false, never the real seed read, so no
+                curated number can ever surface here regardless of what the
+                seed file contains. The ONE exception: GitHub stars/forks are a
+                genuinely live API read (lib/reputation/live-github.ts, no key,
+                cellStatus "verified") — scoped to just this vendor's repo (not
+                the all-vendor loop) so a single page view costs one GitHub
+                call, cached 1h by Next's fetch cache. null for vendors with no
+                mapped flagship repo (Harvey, Hebbia, Rogo, Moveworks, …). */}
           <section className="mt-6">
             <Panel title="Reputation">
               <ReputationPanel
@@ -902,6 +909,11 @@ export default async function VendorDeepDivePage({
                   const h = reviewsConnector.health();
                   return { configured: h.configured, contributing: h.status === "ok" && h.lastFetchOk === true };
                 })()}
+                liveGithub={
+                  hasLiveGitHubRepo(intelId)
+                    ? await fetchLiveGitHubSignalForVendor(intelId).catch(() => null)
+                    : null
+                }
               />
             </Panel>
           </section>
