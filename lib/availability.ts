@@ -164,8 +164,14 @@ export const TAB_CHAT_ENABLED: boolean = true;
  * Plus Mic sign-off + legal OK on any Reddit data (not used yet). Until this is
  * true the composite is UNCHANGED — the signal is a distinct labelled panel,
  * not folded into a score. Flip to true only after the weight is signed off.
+ *
+ * FLIPPED ON 2026-07-04: owner approved the 0.18 weight informed (Arena=0.13
+ * shown), reviewed the projected before/after order (OpenAI stays #1 in both
+ * coding categories; Anthropic's gap narrows; DeepSeek passes Snowflake), and
+ * gave the go ("build all 4"). Weight + mapping + gates documented in the
+ * public methodology (buildMethodologyNote).
  */
-export const DEV_SENTIMENT_IN_RANKING: boolean = false;
+export const DEV_SENTIMENT_IN_RANKING: boolean = true;
 
 /**
  * Investor-tools gate — PARKED per the Chris change-list CUT/PARK ("Investor

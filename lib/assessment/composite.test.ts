@@ -249,6 +249,14 @@ describe("computeGap (why this / why not the runner-up)", () => {
 
 const FRONTIER = "frontier_model_api";
 const frontierWeights = (): DomainWeights => resolveDomainWeights(FRONTIER);
+// Frontier profile with the (now-active) dev_sentiment domain stripped — lets the
+// model_quality-mechanics tests below stay isolated at /13 instead of tangling
+// with the dev-sentiment ranking variable (tested separately in dev-sentiment/).
+const mqWeights = (): DomainWeights => {
+  const w = { ...resolveDomainWeights(FRONTIER) } as Record<string, number>;
+  delete w.dev_sentiment;
+  return w as DomainWeights;
+};
 
 describe("category-aware default weights", () => {
   it("resolves the frontier profile (incl model_quality) and the framework default otherwise", () => {
@@ -274,11 +282,14 @@ describe("category-aware default weights", () => {
     expect(w.capital_resilience!).toBeLessThan(DEFAULT_DOMAIN_WEIGHTS.capital_resilience);
   });
 
-  it("activeDomains: framework default = the 12 (no model_quality); frontier = 13 (incl model_quality)", () => {
+  it("activeDomains: framework default = 12; frontier = 14 (incl model_quality + dev_sentiment)", () => {
     expect(activeDomains(DEFAULT_DOMAIN_WEIGHTS)).toEqual(ASSESSMENT_DOMAINS);
     const active = activeDomains(frontierWeights());
+    // Frontier activates BOTH category-scoped domains: model_quality (Arena) and
+    // dev_sentiment (developer-community signal, weight 0.18, flag on).
     expect(active).toContain("model_quality");
-    expect(active.length).toBe(13);
+    expect(active).toContain("dev_sentiment");
+    expect(active.length).toBe(14);
     // market_position is never an assessment domain in either set.
     expect(active).not.toContain("market_position");
     expect(RANKABLE_DOMAIN_ORDER).not.toContain("market_position");
@@ -301,7 +312,7 @@ describe("model_quality domain (Arena Elo) under the frontier profile", () => {
   const withMQ = (s: number): DomainScore[] => [...base(4), scored("model_quality", s)];
 
   it("is counted in the composite + coverage when present (denominator /13)", () => {
-    const r = computeWeightedComposite(withMQ(3.9), frontierWeights());
+    const r = computeWeightedComposite(withMQ(3.9), mqWeights());
     expect(r.domainTotal).toBe(13);
     expect(r.scoredCount).toBe(13);
     expect(r.rawCoverage).toBeCloseTo(1, 9);
@@ -309,14 +320,14 @@ describe("model_quality domain (Arena Elo) under the frontier profile", () => {
   });
 
   it("a higher Arena Elo score raises the frontier composite (it actually feeds the rank)", () => {
-    const hi = computeWeightedComposite(withMQ(4.0), frontierWeights()).composite;
-    const lo = computeWeightedComposite(withMQ(1.0), frontierWeights()).composite;
+    const hi = computeWeightedComposite(withMQ(4.0), mqWeights()).composite;
+    const lo = computeWeightedComposite(withMQ(1.0), mqWeights()).composite;
     expect(hi).toBeGreaterThan(lo);
   });
 
   it("insufficient stays insufficient: a vendor with no Arena Elo is /13 with model_quality contributing 0", () => {
     // No model_quality entry at all (vendor has no Arena-ranked model).
-    const r = computeWeightedComposite(base(4), frontierWeights());
+    const r = computeWeightedComposite(base(4), mqWeights());
     expect(r.domainTotal).toBe(13); // still counted in the denominator
     expect(r.scoredCount).toBe(12); // model_quality is NOT scored into existence
     expect(r.rawCoverage).toBeCloseTo(12 / 13, 9);
@@ -353,10 +364,10 @@ describe("frontier parity + ungameable coverage", () => {
   it("zeroing a domain's weight does NOT shrink the coverage denominator (ungameable)", () => {
     // A vendor scored on the 12 base but with NO Arena Elo: 12/13 under frontier.
     const thin = base(4);
-    const full = computeWeightedComposite(thin, frontierWeights());
+    const full = computeWeightedComposite(thin, mqWeights());
     expect(full.rawCoverage).toBeCloseTo(12 / 13, 9);
     // User drags model_quality to 0 — the KEY remains, so it stays in the denominator.
-    const zeroed = computeWeightedComposite(thin, { ...frontierWeights(), model_quality: 0 });
+    const zeroed = computeWeightedComposite(thin, { ...mqWeights(), model_quality: 0 });
     expect(zeroed.domainTotal).toBe(13);
     expect(zeroed.rawCoverage).toBeCloseTo(12 / 13, 9); // NOT lifted to 12/12
   });

@@ -6,7 +6,7 @@ describe("connectors: registry", () => {
     const ids = Object.keys(CONNECTORS).sort();
     expect(ids).toEqual([
       "alphaVantage", "bea", "bls", "congress", "eia",
-      "federalRegister", "fiscalData", "fred", "gdelt", "github", "reddit", "sec",
+      "federalRegister", "fiscalData", "fred", "gdelt", "github", "reddit", "reviews", "sec",
       "vendorDocs", "yahooFinance",
     ].sort());
   });
@@ -53,7 +53,7 @@ describe("connectors: registry", () => {
 
   it("dashboardSummary counts roll up correctly", () => {
     const s = dashboardSummary();
-    expect(s.total).toBe(14);
+    expect(s.total).toBe(15);
     expect(s.configured + s.notConfigured).toBeLessThanOrEqual(s.total);
   });
 

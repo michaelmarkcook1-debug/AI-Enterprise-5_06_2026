@@ -3,6 +3,7 @@ import {
   CATEGORY_DOMAIN_WEIGHTS,
   resolveDomainWeights,
   categoryActivatesModelQuality,
+  categoryActivatesDevSentiment,
   getCategoryWeightRationale,
   buildMethodologyNote,
 } from "./category-weights";
@@ -43,13 +44,14 @@ describe("category weight profiles — every category has a principled profile",
   });
 });
 
-describe("coverage denominator stays /12 for non-frontier (no gaming)", () => {
-  it("non-frontier profiles include EVERY framework domain (so coverage matches the default)", () => {
+describe("coverage denominator: /12 framework + category-scoped domains", () => {
+  it("every category includes ALL 12 framework domains; coding categories add dev_sentiment", () => {
     for (const c of NON_FRONTIER) {
       const order = activeDomains(resolveDomainWeights(c));
-      // identical active set to the framework default → same /12 denominator
-      expect(order.length, c).toBe(activeDomains(DEFAULT_DOMAIN_WEIGHTS).length);
       for (const d of ASSESSMENT_DOMAINS) expect(order, `${c} missing ${d}`).toContain(d);
+      // Length = 12 framework + dev_sentiment for the coding categories (flag on).
+      const extra = categoryActivatesDevSentiment(c) ? 1 : 0;
+      expect(order.length, c).toBe(ASSESSMENT_DOMAINS.length + extra);
     }
   });
 
@@ -58,8 +60,17 @@ describe("coverage denominator stays /12 for non-frontier (no gaming)", () => {
     for (const c of NON_FRONTIER) {
       expect(categoryActivatesModelQuality(c), `${c} should not activate model_quality`).toBe(false);
     }
-    // frontier ranks over 13 domains, the rest over 12
-    expect(activeDomains(resolveDomainWeights("frontier_model_api")).length).toBe(13);
+    // frontier ranks over 14 domains (12 framework + model_quality + dev_sentiment).
+    expect(activeDomains(resolveDomainWeights("frontier_model_api")).length).toBe(14);
+  });
+
+  it("dev_sentiment is activated ONLY for the coding categories", () => {
+    expect(categoryActivatesDevSentiment("frontier_model_api")).toBe(true);
+    expect(categoryActivatesDevSentiment("developer_coding_agent")).toBe(true);
+    for (const c of ALL_CATEGORIES) {
+      if (c === "frontier_model_api" || c === "developer_coding_agent") continue;
+      expect(categoryActivatesDevSentiment(c), `${c} should not activate dev_sentiment`).toBe(false);
+    }
   });
 });
 

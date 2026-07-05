@@ -33,6 +33,8 @@ import AnalystInsight from "@/components/analyst-insight";
 import { entityInsight } from "@/lib/insights/tab-insights";
 import { OwnershipBadge } from "@/components/ownership-indicator";
 import ReputationPanel from "@/components/vendor/ReputationPanel";
+import VendorPulsePanel from "@/components/vendor/VendorPulsePanel";
+import { reviewsConnector } from "@/lib/connectors/reviews";
 import FinancialsPanel from "@/components/vendor/FinancialsPanel";
 import TrackButton from "@/components/member/TrackButton";
 import { getVendorReputation } from "@/lib/reputation/vendor-reputation";
@@ -869,6 +871,21 @@ export default async function VendorDeepDivePage({
   // Last snapshot metadata
   const lastSnapshot = snapshots[snapshots.length - 1];
 
+  // ── The Pulse (vendor tab #1) — view over the news feed + composite delta ──
+  // Standing: the vendor's best live category rank. Momentum: signed overall-
+  // score delta from the earliest→latest snapshot (real data; null if <2).
+  const pulseStanding = (() => {
+    const live = categoryStandings.find((s) => s.isLive && s.standing.rank != null);
+    return live ? { rank: live.standing.rank as number, peers: live.rankedCount, categoryName: live.categoryName } : null;
+  })();
+  const pulseMomentum = (() => {
+    if (snapshots.length < 2) return null;
+    const first = snapshots[0];
+    const last = snapshots[snapshots.length - 1];
+    const days = Math.max(1, Math.round((Date.parse(last.date) - Date.parse(first.date)) / 86_400_000));
+    return { overallDelta: last.overallScore - first.overallScore, days };
+  })();
+
   // All roles (primary + secondary)
   const allRoles: Role[] = [entity.primaryRole, ...entity.secondaryRoles];
 
@@ -987,6 +1004,29 @@ export default async function VendorDeepDivePage({
           </section>
         )}
 
+        {/* ── The Pulse (AnalystGenius vendor-tab #1) — what moved + the read ─ */}
+        <section className="mb-6">
+          <Panel title="The Pulse">
+            <VendorPulsePanel
+              vendorName={entity.name}
+              news={vendorNews
+                // The Pulse states cited items as "what moved" — hold it to source-backed
+                // rows only, stricter than the seed [MOCK]-label convention used elsewhere.
+                .filter((n) => n.sourceKind === "real")
+                .map((n) => ({
+                  title: n.title,
+                  whyItMatters: n.whyItMatters ?? undefined,
+                  sourceName: n.sourceName,
+                  sourceUrl: n.sourceUrl ?? undefined,
+                  publishedAt: n.publishedAt,
+                  impactScore: n.impactScore ?? 0,
+                }))}
+              standing={pulseStanding}
+              momentum={pulseMomentum}
+            />
+          </Panel>
+        </section>
+
         {/* ── Score history chart (with forward-tracked reputation line) ──── */}
         <section className="mb-6">
           <Panel title="Score history">
@@ -1092,7 +1132,14 @@ export default async function VendorDeepDivePage({
 
         {/* ── Reputation (current composite + per-pillar breakdown) ───────── */}
         <section className="mb-6">
-          <ReputationPanel reputation={reputation} vendorName={entity.name} />
+          <ReputationPanel
+            reputation={reputation}
+            vendorName={entity.name}
+            reviewSources={(() => {
+              const h = reviewsConnector.health();
+              return { configured: h.configured, contributing: h.status === "ok" && h.lastFetchOk === true };
+            })()}
+          />
         </section>
 
         {/* ── Implementation partners (IT-services / GSI delivery layer) ──── */}

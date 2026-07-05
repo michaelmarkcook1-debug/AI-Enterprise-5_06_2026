@@ -75,9 +75,12 @@ function Pillar({
 export default function ReputationPanel({
   reputation,
   vendorName,
+  reviewSources,
 }: {
   reputation: VendorReputation;
   vendorName: string;
+  /** Live status of the paid customer-review connector (G2/TrustRadius/Trustpilot). */
+  reviewSources?: { configured: boolean; contributing: boolean };
 }) {
   if (!reputation.hasData) {
     return (
@@ -169,6 +172,28 @@ export default function ReputationPanel({
         line on the score-history chart tracks this forward from the day capture began (never
         back-filled).
       </p>
+
+      {/* Sources & independence — the Reputation-Tracker red line, stated plainly. */}
+      <div className="mt-3 rounded-lg border border-[#e9e0c8] bg-[#faf6ec] p-2.5 dark:border-[#1d3a57] dark:bg-[#0c2238]/40">
+        <p className={`text-[11px] leading-4 ${MUTED}`}>
+          <span className="font-semibold text-[#13294b] dark:text-[#d8e2ec]">Sources: </span>
+          reputation blends developer, employee and customer signals from public and operational
+          evidence.{" "}
+          {reviewSources?.contributing ? (
+            <>Dedicated customer-review platforms (G2 · TrustRadius · Trustpilot) are connected and contributing.</>
+          ) : reviewSources?.configured ? (
+            <>A customer-review provider key is set, but the fetch adapter is not wired yet — those ratings are <span className="font-medium">not yet contributing</span>.</>
+          ) : (
+            <>Dedicated customer-review platforms (G2 · TrustRadius · Trustpilot) are <span className="font-medium">not connected</span> — they need paid partner APIs, so customer reputation here is provisional until licensed. No scraping, no estimated ratings.</>
+          )}
+        </p>
+        <p className={`mt-1.5 text-[11px] leading-4 ${MUTED}`}>
+          <span className="font-semibold text-[#13294b] dark:text-[#d8e2ec]">Independence: </span>
+          analyst-house recognition (Gartner · Forrester · IDC) is deliberately <span className="font-medium">excluded</span> as a
+          scored reputation signal. This tracker is the independent alternative to the paywalled
+          houses — it does not launder their verdicts into a score.
+        </p>
+      </div>
     </Panel>
   );
 }
