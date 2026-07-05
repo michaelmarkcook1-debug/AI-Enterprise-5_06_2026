@@ -425,7 +425,20 @@ export async function listNewsItems(): Promise<NewsItem[]> {
       // intelligence, homepage band) is protected at one chokepoint.
       const merged = [...dbRows, ...seedFallback].filter((n) => !isSuppressedNewsItem(n));
       merged.sort((a, b) => (a.publishedAt < b.publishedAt ? 1 : -1));
-      return merged;
+      // Collapse the SAME article re-ingested under a reworded title + fresh
+      // machine why-it-matters (same canonical source URL) — keep the NEWEST
+      // instance (merged is newest-first). Fixes duplicate cards on the homepage
+      // feed, The Pulse and Recent intelligence at one chokepoint. Items without a
+      // usable URL fall through to the title/content dedup in getBreakingNews.
+      const seenUrl = new Set<string>();
+      const deduped = merged.filter((n) => {
+        const k = newsUrlKey(n.sourceUrl);
+        if (!k) return true;
+        if (seenUrl.has(k)) return false;
+        seenUrl.add(k);
+        return true;
+      });
+      return deduped;
     },
     () => newsMockRepository.list(),
   );
@@ -491,6 +504,22 @@ function newsDedupKey(n: NewsItem): string {
     .trim()
     .slice(0, 80);
   return `${vendor}|${content}`;
+}
+
+/** Canonical source-URL key: host (sans www) + path, lowercased, query/fragment/
+ *  trailing-slash stripped. The SAME article re-ingested on different days gets a
+ *  fresh LLM why-it-matters + a slightly reworded title ("10 Gigawatts" vs "10GW"),
+ *  so title/content keys miss it — but the source URL is identical. This collapses
+ *  those re-ingestion twins. null when there is no usable URL. */
+function newsUrlKey(url?: string | null): string | null {
+  if (!url) return null;
+  try {
+    const u = new URL(url);
+    return `${u.hostname.replace(/^www\./, "").toLowerCase()}${u.pathname.replace(/\/+$/, "").toLowerCase()}`;
+  } catch {
+    const s = url.trim().toLowerCase();
+    return s || null;
+  }
 }
 
 /** Normalise a vendor id so prefixed/bare variants (vendor_openai / openai)

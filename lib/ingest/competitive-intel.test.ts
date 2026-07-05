@@ -49,7 +49,7 @@ describe("validateFinding — news channel", () => {
     expect(validateFinding(finding({ sourceName: "[MOCK] feed" }), VENDORS)).not.toBeNull();
     expect(validateFinding(finding({ title: "placeholder title for testing here" }), VENDORS)).not.toBeNull();
   });
-  it("rejects retail/affiliate deal advertorials (title or deal URL)", () => {
+  it("rejects retail/affiliate deal advertorials (title or /deals/ path)", () => {
     // The real prod leak: a ZDNet "…30% off on Amazon" deal article mis-tagged to OpenAI.
     expect(
       validateFinding(
@@ -57,10 +57,13 @@ describe("validateFinding — news channel", () => {
         VENDORS,
       ),
     ).toMatch(/advertorial/);
+    // A retail-deals SECTION path is rejected.
     expect(
-      validateFinding(finding({ sourceUrl: "https://www.zdnet.com/article/tcl-nxtpaper-11-plus-july-4-deal/" }), VENDORS),
+      validateFinding(finding({ sourceUrl: "https://www.zdnet.com/deals/best-tablet-deals" }), VENDORS),
     ).toMatch(/advertorial/);
-    // A real story with a percentage but no retail-deal phrasing is NOT rejected here.
+    // Real stories are NOT rejected: a bare "-deal" business/M&A URL, or a real
+    // pricing story with a percentage but no retail-deal phrasing.
+    expect(validateFinding(finding({ sourceUrl: "https://www.bloomberg.com/news/microsoft-chevron-power-deal" }), VENDORS)).toBeNull();
     expect(validateFinding(finding({ title: "Anthropic cuts Claude API prices 30% for batch workloads" }), VENDORS)).toBeNull();
   });
   it("rejects future publishedAt and invalid dates", () => {
