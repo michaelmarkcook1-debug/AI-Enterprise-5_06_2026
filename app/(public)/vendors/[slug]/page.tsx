@@ -744,6 +744,27 @@ export default async function VendorDeepDivePage({
     const strictConfidence = strictScored.length
       ? Math.round(strictScored.reduce((s, d) => s + (d.state === "scored" ? d.confidence : 0), 0) / strictScored.length)
       : 0;
+
+    // The Pulse (AnalystGenius vendor-tab #1) — safe for strict mode: every
+    // input is a live-DB read (category standings, ranking snapshots, news
+    // filtered to sourceKind "real"), none of the held-back hardcoded/seed data.
+    const strictCategoryStandings = await getVendorCategoryStandings(intelId).catch(() => []);
+    const strictNews = (await listNewsItems().catch(() => []))
+      .filter((n) => n.vendors.includes(entity.id) && n.sourceKind === "real")
+      .sort((a, b) => (a.publishedAt < b.publishedAt ? 1 : -1))
+      .slice(0, 8);
+    const pulseStanding = (() => {
+      const live = strictCategoryStandings.find((s) => s.isLive && s.standing.rank != null);
+      return live ? { rank: live.standing.rank as number, peers: live.rankedCount, categoryName: live.categoryName } : null;
+    })();
+    const pulseMomentum = (() => {
+      if (strictSnapshots.length < 2) return null;
+      const first = strictSnapshots[0];
+      const last = strictSnapshots[strictSnapshots.length - 1];
+      const days = Math.max(1, Math.round((Date.parse(last.date) - Date.parse(first.date)) / 86_400_000));
+      return { overallDelta: last.overallScore - first.overallScore, days };
+    })();
+
     return (
       <div className="min-h-screen bg-white dark:bg-[#071827]">
         <main className="mx-auto max-w-3xl px-5 py-8">
@@ -759,6 +780,24 @@ export default async function VendorDeepDivePage({
           <h1 className="mb-4 text-3xl font-semibold tracking-tight text-[#13294b] dark:text-[#f6f9fc]">
             {entity.name}
           </h1>
+          {/* ── The Pulse — what moved + the live read, before the deep dive ── */}
+          <section className="mb-6">
+            <Panel title="The Pulse">
+              <VendorPulsePanel
+                vendorName={entity.name}
+                news={strictNews.map((n) => ({
+                  title: n.title,
+                  whyItMatters: n.whyItMatters ?? undefined,
+                  sourceName: n.sourceName,
+                  sourceUrl: n.sourceUrl ?? undefined,
+                  publishedAt: n.publishedAt,
+                  impactScore: n.impactScore ?? 0,
+                }))}
+                standing={pulseStanding}
+                momentum={pulseMomentum}
+              />
+            </Panel>
+          </section>
           {hasEvidence && scorecard ? (
             <section className="mb-6">
               <Panel title="Enterprise assessment — evidence scorecard">
@@ -870,21 +909,6 @@ export default async function VendorDeepDivePage({
 
   // Last snapshot metadata
   const lastSnapshot = snapshots[snapshots.length - 1];
-
-  // ── The Pulse (vendor tab #1) — view over the news feed + composite delta ──
-  // Standing: the vendor's best live category rank. Momentum: signed overall-
-  // score delta from the earliest→latest snapshot (real data; null if <2).
-  const pulseStanding = (() => {
-    const live = categoryStandings.find((s) => s.isLive && s.standing.rank != null);
-    return live ? { rank: live.standing.rank as number, peers: live.rankedCount, categoryName: live.categoryName } : null;
-  })();
-  const pulseMomentum = (() => {
-    if (snapshots.length < 2) return null;
-    const first = snapshots[0];
-    const last = snapshots[snapshots.length - 1];
-    const days = Math.max(1, Math.round((Date.parse(last.date) - Date.parse(first.date)) / 86_400_000));
-    return { overallDelta: last.overallScore - first.overallScore, days };
-  })();
 
   // All roles (primary + secondary)
   const allRoles: Role[] = [entity.primaryRole, ...entity.secondaryRoles];
@@ -1003,29 +1027,6 @@ export default async function VendorDeepDivePage({
             </Panel>
           </section>
         )}
-
-        {/* ── The Pulse (AnalystGenius vendor-tab #1) — what moved + the read ─ */}
-        <section className="mb-6">
-          <Panel title="The Pulse">
-            <VendorPulsePanel
-              vendorName={entity.name}
-              news={vendorNews
-                // The Pulse states cited items as "what moved" — hold it to source-backed
-                // rows only, stricter than the seed [MOCK]-label convention used elsewhere.
-                .filter((n) => n.sourceKind === "real")
-                .map((n) => ({
-                  title: n.title,
-                  whyItMatters: n.whyItMatters ?? undefined,
-                  sourceName: n.sourceName,
-                  sourceUrl: n.sourceUrl ?? undefined,
-                  publishedAt: n.publishedAt,
-                  impactScore: n.impactScore ?? 0,
-                }))}
-              standing={pulseStanding}
-              momentum={pulseMomentum}
-            />
-          </Panel>
-        </section>
 
         {/* ── Score history chart (with forward-tracked reputation line) ──── */}
         <section className="mb-6">
