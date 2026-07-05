@@ -54,7 +54,7 @@ import {
   watchlistsMockRepository,
 } from "./mock-repositories";
 import { calculateRiskPenalty, riskStatusForVendor } from "./metrics";
-import { isDataVendorSource } from "./source-quality";
+import { isDataVendorSource, isSuppressedNewsItem } from "./source-quality";
 import { isSeedSignedSource } from "./provenance";
 import { DataUnavailableError, seedFallbackAllowed } from "../availability";
 import { evidenceDepthBand } from "./entities";
@@ -418,7 +418,12 @@ export async function listNewsItems(): Promise<NewsItem[]> {
       const seed = await newsMockRepository.list();
       const dbIds = new Set(dbRows.map((r) => r.id));
       const seedFallback = seed.filter((s) => !dbIds.has(s.id));
-      const merged = [...dbRows, ...seedFallback];
+      // Suppress items we can't honestly show as vendor competitive-intel — data-
+      // vendor "sources" and commerce/affiliate advertorials that slipped into a
+      // generic feed (e.g. a "…30% off on Amazon" deal article mis-tagged to a
+      // vendor). Applied HERE so every display surface (The Pulse, Recent
+      // intelligence, homepage band) is protected at one chokepoint.
+      const merged = [...dbRows, ...seedFallback].filter((n) => !isSuppressedNewsItem(n));
       merged.sort((a, b) => (a.publishedAt < b.publishedAt ? 1 : -1));
       return merged;
     },

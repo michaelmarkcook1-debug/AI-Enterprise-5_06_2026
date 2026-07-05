@@ -230,8 +230,11 @@ export const CATEGORY_DOMAIN_WEIGHTS: Record<string, CategoryWeightProfile> = {
 /** The dev-sentiment ranking weight for coding categories — a SIGNIFICANT,
  *  co-leading variable, set by rationale and published, NEVER tuned per vendor
  *  (see the spec's zero-pay-to-play lock). Applied only when
- *  DEV_SENTIMENT_IN_RANKING is on. */
-export const DEV_SENTIMENT_WEIGHT = 0.18;
+ *  DEV_SENTIMENT_IN_RANKING is on. Owner-set 0.25 (2026-07-05, raised from 0.18):
+ *  developer mindshare is a top-tier signal for coding/agent models. Added RAW to
+ *  the category profile then renormalized, so its EFFECTIVE share is ~0.25/(1+0.25)
+ *  ≈ 20% of the composite — strong but still a minority of the evidence domains. */
+export const DEV_SENTIMENT_WEIGHT = 0.25;
 
 export function resolveDomainWeights(categoryId: string): DomainWeights {
   const profile = CATEGORY_DOMAIN_WEIGHTS[categoryId];

@@ -26,6 +26,17 @@ import type { CategoryComposite } from "./composite-types";
 // so 48h tolerates one missed cycle before falling back to live.
 const CACHE_MAX_AGE_MS = 48 * 60 * 60 * 1000;
 
+// Compute-version stamp. Time-freshness alone does NOT invalidate a cache when the
+// RANKING LOGIC changes (a new/removed domain, a weight change, a flag flip): the
+// old composite stays "fresh" for up to CACHE_MAX_AGE_MS and silently masks the new
+// compute. Every materialised row carries this version; a row stamped with a
+// different version is treated as stale → live recompute → repopulated on the next
+// materialise. BUMP THIS whenever a change alters what getCategoryComposites
+// produces, so the new ranking reaches pages on the next load instead of ~48h later.
+//   2 (2026-07-05): dev_sentiment blended into coding-category composites @ 0.25.
+export const RANKING_COMPUTE_VERSION = "2-dev_sentiment@0.25";
+const VERSION_KEY = "__computeVersion";
+
 export interface CachedComposites {
   composites: CategoryComposite[];
   /** Honest as-of: when the batch materialised this cache. null ⇒ computed live now. */
@@ -46,7 +57,9 @@ export async function materializeSectorCache(compute: ComputeFn): Promise<{ writ
     const now = new Date();
     let written = 0;
     for (const c of composites) {
-      const payload = c as unknown as object;
+      // Stamp the compute version so a later ranking-logic change invalidates this
+      // row even while it is still time-fresh (see RANKING_COMPUTE_VERSION).
+      const payload = { ...(c as unknown as object), [VERSION_KEY]: RANKING_COMPUTE_VERSION };
       await prisma.sectorRankingCache.upsert({
         where: { categoryId: c.category.id },
         create: { categoryId: c.category.id, payload, isLive: c.isLive, capturedAt: now },
@@ -69,7 +82,14 @@ export async function readSectorCache(compute: ComputeFn): Promise<CachedComposi
       const rows = await getPrisma().sectorRankingCache.findMany();
       if (rows.length > 0) {
         const newest = rows.reduce((max, r) => (r.capturedAt > max ? r.capturedAt : max), rows[0].capturedAt);
-        if (Date.now() - newest.getTime() <= CACHE_MAX_AGE_MS) {
+        // Serve the cache only when EVERY row was materialised by the current
+        // compute version AND is inside the freshness window. A version mismatch
+        // (ranking logic changed since materialise) falls through to a live compute
+        // rather than serving a stale composite for up to CACHE_MAX_AGE_MS.
+        const allCurrentVersion = rows.every(
+          (r) => (r.payload as Record<string, unknown>)?.[VERSION_KEY] === RANKING_COMPUTE_VERSION,
+        );
+        if (allCurrentVersion && Date.now() - newest.getTime() <= CACHE_MAX_AGE_MS) {
           return {
             composites: rows.map((r) => r.payload as unknown as CategoryComposite),
             asOf: newest,

@@ -13,7 +13,7 @@
 //   • an INSUFFICIENT aggregate yields NO domain (null) → counted as an unscored
 //     domain in the category's coverage denominator (coverage-discounted), never
 //     a fabricated score.
-// The weight (0.18) and scope (coding categories) live in category-weights.ts,
+// The weight (0.25) and scope (coding categories) live in category-weights.ts,
 // gated by DEV_SENTIMENT_IN_RANKING — this module only shapes the score.
 
 import { DOMAIN_BAND_LABEL, type DomainBand, type DomainScore } from "../assessment/domain-rubric";

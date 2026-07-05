@@ -23,7 +23,7 @@ import { createHash } from "node:crypto";
 import type { PrismaClient } from "../../generated/prisma/client";
 import type { DomainId as PrismaDomainId } from "../../generated/prisma/enums";
 import { DOMAIN_TO_PILLAR, type DomainId } from "../types";
-import { isDataVendorSource } from "../intelligence/source-quality";
+import { isDataVendorSource, isAdvertorialNews } from "../intelligence/source-quality";
 
 // ── Wire types (the contract the Routine POSTs) ───────────────────────────────
 
@@ -134,6 +134,7 @@ export function validateFinding(f: ExternalFinding, knownVendors: Set<string>): 
   if (!f.whyItMatters || f.whyItMatters.trim().length < 20) return "whyItMatters too short (min 20 chars)";
   if (!f.sourceName || f.sourceName.trim().length < 3) return "sourceName required (named source)";
   if (isDataVendorSource(f.sourceName)) return `sourceName "${f.sourceName}" is a data-vendor feed, not a primary source`;
+  if (isAdvertorialNews(f.title, f.sourceUrl)) return "reads as a retail/affiliate deal advertorial, not vendor competitive-intel";
   if (SEEDY.test(f.sourceName) || SEEDY.test(f.title) || SEEDY.test(f.summary)) return "placeholder/seed content rejected";
   if (!f.sourceUrl || !isRealHttpsUrl(f.sourceUrl)) return "sourceUrl must be a real https URL";
   if (!parsePublishedAt(f.publishedAt)) return "publishedAt invalid or in the future";

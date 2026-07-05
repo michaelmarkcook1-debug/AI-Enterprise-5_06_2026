@@ -170,6 +170,7 @@ export const TAB_CHAT_ENABLED: boolean = true;
  * coding categories; Anthropic's gap narrows; DeepSeek passes Snowflake), and
  * gave the go ("build all 4"). Weight + mapping + gates documented in the
  * public methodology (buildMethodologyNote).
+ * 2026-07-05: owner raised the weight 0.18 → 0.25 (see DEV_SENTIMENT_WEIGHT).
  */
 export const DEV_SENTIMENT_IN_RANKING: boolean = true;
 

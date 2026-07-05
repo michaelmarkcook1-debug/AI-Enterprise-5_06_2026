@@ -286,7 +286,7 @@ describe("category-aware default weights", () => {
     expect(activeDomains(DEFAULT_DOMAIN_WEIGHTS)).toEqual(ASSESSMENT_DOMAINS);
     const active = activeDomains(frontierWeights());
     // Frontier activates BOTH category-scoped domains: model_quality (Arena) and
-    // dev_sentiment (developer-community signal, weight 0.18, flag on).
+    // dev_sentiment (developer-community signal, weight 0.25, flag on).
     expect(active).toContain("model_quality");
     expect(active).toContain("dev_sentiment");
     expect(active.length).toBe(14);

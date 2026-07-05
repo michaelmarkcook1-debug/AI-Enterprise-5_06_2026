@@ -54,7 +54,7 @@ describe("resolveDomainWeights + the DEV_SENTIMENT_IN_RANKING flag", () => {
     expect(categoryActivatesDevSentiment("rag_enterprise_search")).toBe(false);
   });
 
-  it("the fixed weight is 0.18 (documented, not tuned per vendor)", () => {
-    expect(DEV_SENTIMENT_WEIGHT).toBe(0.18);
+  it("the fixed weight is 0.25 (documented, owner-set, not tuned per vendor)", () => {
+    expect(DEV_SENTIMENT_WEIGHT).toBe(0.25);
   });
 });

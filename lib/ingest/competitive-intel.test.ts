@@ -49,6 +49,20 @@ describe("validateFinding — news channel", () => {
     expect(validateFinding(finding({ sourceName: "[MOCK] feed" }), VENDORS)).not.toBeNull();
     expect(validateFinding(finding({ title: "placeholder title for testing here" }), VENDORS)).not.toBeNull();
   });
+  it("rejects retail/affiliate deal advertorials (title or deal URL)", () => {
+    // The real prod leak: a ZDNet "…30% off on Amazon" deal article mis-tagged to OpenAI.
+    expect(
+      validateFinding(
+        finding({ title: "This E Ink tablet replaced my iPad and Kindle - and it's 30% off on Amazon right now" }),
+        VENDORS,
+      ),
+    ).toMatch(/advertorial/);
+    expect(
+      validateFinding(finding({ sourceUrl: "https://www.zdnet.com/article/tcl-nxtpaper-11-plus-july-4-deal/" }), VENDORS),
+    ).toMatch(/advertorial/);
+    // A real story with a percentage but no retail-deal phrasing is NOT rejected here.
+    expect(validateFinding(finding({ title: "Anthropic cuts Claude API prices 30% for batch workloads" }), VENDORS)).toBeNull();
+  });
   it("rejects future publishedAt and invalid dates", () => {
     expect(validateFinding(finding({ publishedAt: "2099-01-01" }), VENDORS)).toMatch(/future|invalid/);
     expect(validateFinding(finding({ publishedAt: "not-a-date" }), VENDORS)).toMatch(/invalid/);
