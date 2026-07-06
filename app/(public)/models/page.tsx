@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { absoluteUrl } from "@/lib/site";
 import { getLiveModelInventory, type LiveModel } from "@/lib/model-inventory/live";
+import { buildFrontierComparison, summarizeFrontierComparison } from "@/lib/model-inventory/frontier";
+import FrontierFaceOff from "@/components/models/FrontierFaceOff";
 import DataUnavailable from "@/components/DataUnavailable";
 
 // Live, cited model inventory from ModelQualityBenchmark (LMArena Elo). Force-
@@ -49,6 +51,8 @@ function freshness(m: LiveModel): string {
 
 export default async function ModelsPage() {
   const inv = await getLiveModelInventory();
+  const frontier = buildFrontierComparison(inv);
+  const frontierSummary = summarizeFrontierComparison(frontier);
 
   const header = (
     <header className="mb-8">
@@ -73,6 +77,8 @@ export default async function ModelsPage() {
   return (
     <main className="mx-auto max-w-6xl px-4 py-10">
       {header}
+
+      <FrontierFaceOff comparison={frontier} summary={frontierSummary} />
 
       <section className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
         <Stat label="Models scored" value={inv.totalModels} />
