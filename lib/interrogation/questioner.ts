@@ -22,12 +22,16 @@ export const MIN_QUESTIONS = 2;
  *  force conclusion so a logic bug can't loop the model (and its cost) forever. */
 export const MAX_TURNS = 12;
 
-const VERTICAL_IDS = new Set(VERTICALS.map((v) => v.id));
-const SIZE_IDS = new Set(SIZE_BANDS.map((b) => b.id));
-const REGION_IDS = new Set(REGIONS.map((r) => r.id));
+// Explicitly typed as Set<string> (not the narrower literal-union Set the ids'
+// own types would infer): these check membership of an ARBITRARY incoming
+// string from the model's JSON output, which is the whole point — a plain
+// string is what's being validated against the real taxonomy.
+const VERTICAL_IDS: Set<string> = new Set(VERTICALS.map((v) => v.id));
+const SIZE_IDS: Set<string> = new Set(SIZE_BANDS.map((b) => b.id));
+const REGION_IDS: Set<string> = new Set(REGIONS.map((r) => r.id));
 /** The real taxonomy chip labels — the only categorical suggested-answer text
  *  parseQuestionerResponse will accept (see `options` filtering below). */
-const CHIP_LABELS = new Set([...VERTICALS, ...SIZE_BANDS, ...REGIONS].map((r) => r.label));
+const CHIP_LABELS: Set<string> = new Set([...VERTICALS, ...SIZE_BANDS, ...REGIONS].map((r) => r.label));
 
 /** The raw, always-both-branches shape the model returns each turn. */
 export interface QuestionerResponse {
