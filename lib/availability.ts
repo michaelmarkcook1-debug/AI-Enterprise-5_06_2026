@@ -128,6 +128,17 @@ export const MEMBER_FEATURES_VISIBLE: boolean = MEMBER_AUTH_ENABLED || MEMBER_TE
 export const INTERROGATE_ENABLED: boolean = true;
 
 /**
+ * AIE-05 interrogation ENGINE (Phase 2) gate — the adaptive Q&A → tailored
+ * written finding. DISTINCT from INTERROGATE_ENABLED above (that is the older
+ * weight-reweighting tool that shares the name). Open by default for the test
+ * site (single default seat, no auth gate). The engine is grounded by
+ * construction: the reasoning-tier synthesizer can only cite URLs on the
+ * deterministic evidence bundle, so it cannot invent a fact — see
+ * lib/interrogation/synthesis.ts. Per-seat inference cost is attributed live.
+ */
+export const INTERROGATION_ENGINE_ENABLED: boolean = true;
+
+/**
  * Vendor-meeting prep kit (Phase 3 Wave 4, C9) gate — the second premium,
  * member-only LLM action: generate a take-into-the-meeting kit (8–12 tailored
  * questions grounded in the vendor's real weak/thin domains + framework-derived
