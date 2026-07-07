@@ -18,15 +18,21 @@
 import { DOMAIN_TO_PILLAR, EVIDENCE_MODIFIER, type DomainId, type EvidenceGrade, type PillarId } from "../types";
 import { freshnessFactor } from "../engine";
 
-// ── The 12 framework assessment domains (canonical order = framework weight
-//    table). `market_position` is the 13th DomainId — a market-share dimension,
-//    NOT a framework assessment domain — so it is deliberately excluded here.
+// ── The 13 framework assessment domains (canonical order = framework weight
+//    table). `market_position` is category-scoped (a market-share dimension,
+//    see market-position-rubric.ts) — deliberately excluded here.
+//    `sovereignty_residency` (added 2026-07-08) IS a full framework domain —
+//    universal, scored from real EvidenceRecord rows via the SAME rubric as
+//    every other domain below (scoreDomainFromEvidence), so it needs no
+//    special-cased synthesis path the way model_quality/dev_sentiment/
+//    market_position do.
 export const ASSESSMENT_DOMAINS: DomainId[] = [
   "strategic_value",
   "data_security_privacy",
   "identity_access",
   "model_reliability",
   "governance_compliance",
+  "sovereignty_residency", // grouped with the other enterprise_control domains — same position as RANKABLE_DOMAIN_ORDER
   "security_threat",
   "integration_architecture",
   "agentic_autonomy",
@@ -36,8 +42,13 @@ export const ASSESSMENT_DOMAINS: DomainId[] = [
   "capital_resilience",
 ];
 
-// Framework default domain weights (sum = 1.0). Static reference data from the
-// framework doc — shown for context now; the live re-weighting UI is Wave 2.
+// Framework default domain weights. The 12 original domains sum to 1.00 by
+// design (static reference data from the framework doc). sovereignty_residency
+// is added RAW on top (0.08, ~"an 8th-ish share" before renormalization) —
+// same additive-then-renormalize mechanism as market_position/dev_sentiment
+// (composite.ts normalizeWeights renormalizes the ACTIVE set at every point of
+// use), so this hand-designed base object keeps its original, readable values
+// rather than being manually rescaled into odd decimals.
 export const DOMAIN_WEIGHT: Record<DomainId, number> = {
   strategic_value: 0.09,
   data_security_privacy: 0.11,
@@ -53,9 +64,12 @@ export const DOMAIN_WEIGHT: Record<DomainId, number> = {
   capital_resilience: 0.07,
   model_quality: 0.0, // category-scoped capability domain — 0 in the framework default,
   //                     activated only by category weight profiles (e.g. frontier_model_api)
-  market_position: 0.0, // not an assessment domain
+  market_position: 0.0, // category-scoped — activated via category profiles (frontier_model_api, developer_coding_agent)
   dev_sentiment: 0.0, // category-scoped (coding models) — 0 in the framework default,
   //                     activated only by the coding category profiles when DEV_SENTIMENT_IN_RANKING
+  // Universal — every category, every vendor. Renormalized proportionally
+  // against the 12 above wherever weights are actually used (normalizeWeights).
+  sovereignty_residency: 0.08,
 };
 
 // Best evidence grade present → maximum achievable 0–5 band. This is the
@@ -222,12 +236,116 @@ export function scoreDomainFromEvidence(
 }
 
 /**
- * Score all 12 framework domains. Always returns one entry per ASSESSMENT_DOMAIN
+ * Sovereignty & Data Residency — purpose-built rubric, NOT scoreDomainFromEvidence.
+ * ─────────────────────────────────────────────────────────────────────────────
+ * A RISK-shaped domain: every OTHER domain is "more/stronger evidence of a
+ * capability → higher score." This one is different by nature — real, cited
+ * evidence of an ADVERSE jurisdiction fact (e.g. a government-confirmed
+ * compelled-disclosure regime) must score LOW, not high, no matter how
+ * well-verified that fact is. scoreDomainFromEvidence() cannot be reused: its
+ * grade-caps-a-band formula always floors the score at (grade_cap − 1), so a
+ * well-evidenced BAD fact would score erroneously HIGH — exactly backwards.
+ * This function decouples the two dimensions cleanly:
+ *   • evidenceGrade (E0–E5) — ONLY how well-verified/citable the fact is.
+ *   • rawScore (0–100) — ONLY how safe/controlled the fact makes the vendor,
+ *     per the published tiers below. Higher = safer, same "higher is better"
+ *     convention as every other domain, so it composes correctly into the
+ *     weighted-sum composite with no special-casing downstream.
+ * Grade still bounds CONFIDENCE (weak evidence → lower confidence either way,
+ * same discipline as every other domain) — just not the score's direction.
+ *
+ * Published tiers (documented rationale, SAME criteria for every vendor —
+ * never tuned to a target):
+ *   HIGH (75–100): home/hosting jurisdiction requires judicial or legal
+ *                  process for state data-access requests; no documented
+ *                  third-party government restriction tied to data-security
+ *                  or sovereignty concerns; a genuine sovereign/in-region
+ *                  hosting option is a bonus toward the top of this band.
+ *   MID  (40–74):  due-process-gated jurisdiction, but no dedicated
+ *                  sovereign/in-region hosting guarantee (a baseline
+ *                  hyperscaler-style default).
+ *   LOW  (0–39):   credible, cited reporting that the vendor's data is
+ *                  processed under a legal regime with broad, non-recourse
+ *                  compelled state-disclosure authority, and/or a documented
+ *                  pattern of adverse third-party government action
+ *                  specifically citing data-security/sovereignty concerns.
+ * NOT a blanket nationality penalty: every vendor is scored against the SAME
+ * three criteria (due process, documented restrictions, sovereign-hosting
+ * option) regardless of country. A due-process-gated jurisdiction with no
+ * adverse action scores HIGH whether that's the US, EU, Canada, or elsewhere;
+ * the US's own CLOUD Act / FISA 702 reach is a real, citable fact reflected in
+ * the tier, not waved away.
+ */
+export function scoreSovereigntyDomain(rows: RubricEvidenceRow[], now: Date = new Date()): DomainScore {
+  const domain: DomainId = "sovereignty_residency";
+  const pillar = DOMAIN_TO_PILLAR[domain];
+
+  if (rows.length === 0) {
+    return { domain, pillar, state: "insufficient_evidence" };
+  }
+
+  const bestGrade = rows.reduce<EvidenceGrade>(
+    (best, r) => (GRADE_RANK[r.evidenceGrade] > GRADE_RANK[best] ? r.evidenceGrade : best),
+    "E0",
+  );
+
+  // Weighted position, 0–1 — same weighting (grade × freshness) as every other
+  // domain, but mapped DIRECTLY to the final score, with no grade-band floor.
+  let weightSum = 0;
+  let weightedRaw = 0;
+  let rawMean = 0;
+  for (const r of rows) {
+    const w = EVIDENCE_MODIFIER[r.evidenceGrade] * freshnessFactor(r.capturedAt.toISOString(), now);
+    weightSum += w;
+    weightedRaw += r.rawScore * w;
+    rawMean += r.rawScore;
+  }
+  rawMean /= rows.length;
+  const positionFrac = clamp((weightSum > 0 ? weightedRaw / weightSum : rawMean) / 100, 0, 1);
+
+  const score = Math.round(positionFrac * 5 * 10) / 10;
+  const band = clamp(Math.round(score), 0, 5) as DomainBand;
+  // bandLabel is derived from the SCORE's own band, not the grade's cap — for
+  // this domain a high evidence grade does not imply a favorable outcome, so
+  // anchoring the label to grade would misleadingly read as positive next to
+  // a low number (e.g. a well-evidenced compelled-disclosure finding showing
+  // "enterprise-grade, independently verified").
+  const bandLabel = DOMAIN_BAND_LABEL[band];
+
+  const depthConf = 40 + 45 * (1 - Math.exp(-rows.length / 5));
+  const rowConfs = rows.map((r) =>
+    r.confidence != null
+      ? r.confidence
+      : EVIDENCE_MODIFIER[r.evidenceGrade] * freshnessFactor(r.capturedAt.toISOString(), now) * 100,
+  );
+  const avgRowConf = rowConfs.reduce((s, c) => s + c, 0) / rowConfs.length;
+  const confidence = Math.round(clamp(0.6 * depthConf + 0.4 * avgRowConf, 0, 99));
+  const lowConfidence = confidence < LOW_CONFIDENCE_FLOOR || GRADE_BAND_CAP[bestGrade] <= 2 || rows.length === 1;
+
+  const citations: DomainCitation[] = [];
+  const seen = new Set<string>();
+  for (const r of [...rows].sort((a, b) => b.capturedAt.getTime() - a.capturedAt.getTime())) {
+    if (!r.sourceUrl || seen.has(r.sourceUrl)) continue;
+    seen.add(r.sourceUrl);
+    citations.push({ sourceUrl: r.sourceUrl, evidenceGrade: r.evidenceGrade, capturedAt: r.capturedAt.toISOString() });
+  }
+
+  return { domain, pillar, state: "scored", score, band, bandLabel, confidence, lowConfidence, bestGrade, evidenceCount: rows.length, citations };
+}
+
+/**
+ * Score all 13 framework domains. Always returns one entry per ASSESSMENT_DOMAIN
  * in canonical order (scored or insufficient) — the scorecard never hides a gap.
+ * sovereignty_residency uses its own purpose-built rubric above (see comment
+ * there); every other domain uses the standard scoreDomainFromEvidence.
  */
 export function scoreAllDomains(
   rowsByDomain: Map<DomainId, RubricEvidenceRow[]>,
   now: Date = new Date(),
 ): DomainScore[] {
-  return ASSESSMENT_DOMAINS.map((domain) => scoreDomainFromEvidence(domain, rowsByDomain.get(domain) ?? [], now));
+  return ASSESSMENT_DOMAINS.map((domain) =>
+    domain === "sovereignty_residency"
+      ? scoreSovereigntyDomain(rowsByDomain.get(domain) ?? [], now)
+      : scoreDomainFromEvidence(domain, rowsByDomain.get(domain) ?? [], now),
+  );
 }

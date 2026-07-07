@@ -129,8 +129,8 @@ describe("buildSessionLens — the firewall", () => {
       insufficientContext: false,
     });
     const v = lens.vendorLens[0];
-    // rawCoverage is weight-independent → still 8/12, unchanged by the lens.
-    expect(v.rawCoverage).toBeCloseTo(8 / 12, 9);
+    // rawCoverage is weight-independent → still 8/N, unchanged by the lens.
+    expect(v.rawCoverage).toBeCloseTo(8 / ASSESSMENT_DOMAINS.length, 9);
   });
 
   it("a decisive + thin domain surfaces as 'ask the vendor', never a guess", () => {

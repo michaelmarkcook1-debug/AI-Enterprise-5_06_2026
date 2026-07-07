@@ -50,11 +50,11 @@ describe("normalizeWeights", () => {
     const n = normalizeWeights(equalWeights(50));
     const sum = ASSESSMENT_DOMAINS.reduce((s, d) => s + n[d], 0);
     expect(sum).toBeCloseTo(1, 9);
-    expect(n[ASSESSMENT_DOMAINS[0]]).toBeCloseTo(1 / 12, 9);
+    expect(n[ASSESSMENT_DOMAINS[0]]).toBeCloseTo(1 / ASSESSMENT_DOMAINS.length, 9);
   });
   it("all-zero falls back to equal weights (no div-by-zero)", () => {
     const n = normalizeWeights(equalWeights(0));
-    expect(n[ASSESSMENT_DOMAINS[0]]).toBeCloseTo(1 / 12, 9);
+    expect(n[ASSESSMENT_DOMAINS[0]]).toBeCloseTo(1 / ASSESSMENT_DOMAINS.length, 9);
   });
 });
 
@@ -69,17 +69,18 @@ describe("computeWeightedComposite", () => {
   it("full coverage with framework defaults → coverage 1, composite in 0–5", () => {
     const r = computeWeightedComposite(allScored(4), DEFAULT_DOMAIN_WEIGHTS);
     expect(r.coverage).toBeCloseTo(1, 9);
-    expect(r.scoredCount).toBe(12);
+    expect(r.scoredCount).toBe(ASSESSMENT_DOMAINS.length);
     expect(r.composite).toBeGreaterThan(0);
     expect(r.composite).toBeLessThanOrEqual(5);
   });
 
   it("coverage-discounts: insufficient domains contribute 0 and drop coverage", () => {
-    // 6 scored, 6 insufficient, equal weights → coverage 0.5.
-    const domains = ASSESSMENT_DOMAINS.map((d, i) => (i < 6 ? scored(d, 4) : insufficient(d)));
+    // Half scored, half insufficient, equal weights → coverage 0.5.
+    const half = Math.floor(ASSESSMENT_DOMAINS.length / 2);
+    const domains = ASSESSMENT_DOMAINS.map((d, i) => (i < half ? scored(d, 4) : insufficient(d)));
     const r = computeWeightedComposite(domains, equalWeights(1));
-    expect(r.coverage).toBeCloseTo(0.5, 9);
-    expect(r.insufficientCount).toBe(6);
+    expect(r.coverage).toBeCloseTo(half / ASSESSMENT_DOMAINS.length, 9);
+    expect(r.insufficientCount).toBe(ASSESSMENT_DOMAINS.length - half);
     // Every insufficient domain contributes null (0), never a number.
     for (const c of r.contributions) {
       if (c.state === "insufficient_evidence") expect(c.contribution).toBeNull();
@@ -282,14 +283,17 @@ describe("category-aware default weights", () => {
     expect(w.capital_resilience!).toBeLessThan(DEFAULT_DOMAIN_WEIGHTS.capital_resilience);
   });
 
-  it("activeDomains: framework default = 12; frontier = 14 (incl model_quality + dev_sentiment)", () => {
+  it("activeDomains: framework default = N (12 + sovereignty_residency); frontier = N+2 (incl model_quality + dev_sentiment)", () => {
     expect(activeDomains(DEFAULT_DOMAIN_WEIGHTS)).toEqual(ASSESSMENT_DOMAINS);
+    expect(activeDomains(DEFAULT_DOMAIN_WEIGHTS)).toContain("sovereignty_residency");
     const active = activeDomains(frontierWeights());
     // Frontier activates BOTH category-scoped domains: model_quality (Arena) and
-    // dev_sentiment (developer-community signal, weight 0.25, flag on).
+    // dev_sentiment (developer-community signal, weight 0.25, flag on) — on top
+    // of the now-universal sovereignty_residency.
     expect(active).toContain("model_quality");
     expect(active).toContain("dev_sentiment");
-    expect(active.length).toBe(14);
+    expect(active).toContain("sovereignty_residency");
+    expect(active.length).toBe(ASSESSMENT_DOMAINS.length + 2);
     // market_position is never an assessment domain in either set.
     expect(active).not.toContain("market_position");
     expect(RANKABLE_DOMAIN_ORDER).not.toContain("market_position");
@@ -297,24 +301,25 @@ describe("category-aware default weights", () => {
 
   it("default-category behaviour is byte-identical to the pre-category-aware path", () => {
     // The active set for the framework default is exactly ASSESSMENT_DOMAINS, in
-    // order — so coverage stays /12 and the composite is unchanged for every
+    // order — so coverage stays /N and the composite is unchanged for every
     // category that does not opt into model_quality.
     const r = computeWeightedComposite(allScored(4), DEFAULT_DOMAIN_WEIGHTS);
-    expect(r.domainTotal).toBe(12);
-    expect(r.scoredCount).toBe(12);
+    expect(r.domainTotal).toBe(ASSESSMENT_DOMAINS.length);
+    expect(r.scoredCount).toBe(ASSESSMENT_DOMAINS.length);
     expect(r.rawCoverage).toBeCloseTo(1, 9);
   });
 });
 
 describe("model_quality domain (Arena Elo) under the frontier profile", () => {
-  // 12 framework domains + an optional model_quality score.
+  // The N framework domains (12 + sovereignty_residency) + an optional model_quality score.
+  const N = ASSESSMENT_DOMAINS.length;
   const base = (s = 4): DomainScore[] => ASSESSMENT_DOMAINS.map((d) => scored(d, s));
   const withMQ = (s: number): DomainScore[] => [...base(4), scored("model_quality", s)];
 
-  it("is counted in the composite + coverage when present (denominator /13)", () => {
+  it("is counted in the composite + coverage when present", () => {
     const r = computeWeightedComposite(withMQ(3.9), mqWeights());
-    expect(r.domainTotal).toBe(13);
-    expect(r.scoredCount).toBe(13);
+    expect(r.domainTotal).toBe(N + 1);
+    expect(r.scoredCount).toBe(N + 1);
     expect(r.rawCoverage).toBeCloseTo(1, 9);
     expect(r.contributions.some((c) => c.domain === "model_quality" && c.state === "scored")).toBe(true);
   });
@@ -325,12 +330,12 @@ describe("model_quality domain (Arena Elo) under the frontier profile", () => {
     expect(hi).toBeGreaterThan(lo);
   });
 
-  it("insufficient stays insufficient: a vendor with no Arena Elo is /13 with model_quality contributing 0", () => {
+  it("insufficient stays insufficient: a vendor with no Arena Elo has model_quality contributing 0", () => {
     // No model_quality entry at all (vendor has no Arena-ranked model).
     const r = computeWeightedComposite(base(4), mqWeights());
-    expect(r.domainTotal).toBe(13); // still counted in the denominator
-    expect(r.scoredCount).toBe(12); // model_quality is NOT scored into existence
-    expect(r.rawCoverage).toBeCloseTo(12 / 13, 9);
+    expect(r.domainTotal).toBe(N + 1); // still counted in the denominator
+    expect(r.scoredCount).toBe(N); // model_quality is NOT scored into existence
+    expect(r.rawCoverage).toBeCloseTo(N / (N + 1), 9);
     const mq = r.contributions.find((c) => c.domain === "model_quality");
     expect(mq?.state).toBe("insufficient_evidence");
     expect(mq?.contribution).toBeNull();
@@ -338,9 +343,9 @@ describe("model_quality domain (Arena Elo) under the frontier profile", () => {
 
   it("does NOT leak into non-frontier categories (framework default never scores model_quality)", () => {
     // Even if a model_quality score is somehow present, the framework-default
-    // profile does not activate it → it is ignored, coverage stays /12.
+    // profile does not activate it → it is ignored, coverage stays /N.
     const r = computeWeightedComposite(withMQ(5), DEFAULT_DOMAIN_WEIGHTS);
-    expect(r.domainTotal).toBe(12);
+    expect(r.domainTotal).toBe(N);
     expect(r.contributions.some((c) => c.domain === "model_quality")).toBe(false);
   });
 });
@@ -362,14 +367,15 @@ describe("frontier parity + ungameable coverage", () => {
   });
 
   it("zeroing a domain's weight does NOT shrink the coverage denominator (ungameable)", () => {
-    // A vendor scored on the 12 base but with NO Arena Elo: 12/13 under frontier.
+    // A vendor scored on the N base but with NO Arena Elo: N/(N+1) under frontier.
+    const N = ASSESSMENT_DOMAINS.length;
     const thin = base(4);
     const full = computeWeightedComposite(thin, mqWeights());
-    expect(full.rawCoverage).toBeCloseTo(12 / 13, 9);
+    expect(full.rawCoverage).toBeCloseTo(N / (N + 1), 9);
     // User drags model_quality to 0 — the KEY remains, so it stays in the denominator.
     const zeroed = computeWeightedComposite(thin, { ...mqWeights(), model_quality: 0 });
-    expect(zeroed.domainTotal).toBe(13);
-    expect(zeroed.rawCoverage).toBeCloseTo(12 / 13, 9); // NOT lifted to 12/12
+    expect(zeroed.domainTotal).toBe(N + 1);
+    expect(zeroed.rawCoverage).toBeCloseTo(N / (N + 1), 9); // NOT lifted to N/N
   });
 });
 

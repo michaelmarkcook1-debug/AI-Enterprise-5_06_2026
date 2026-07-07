@@ -19,13 +19,18 @@ export const PILLARS: { id: PillarId; label: string; defaultWeight: number }[] =
   { id: "market_strength", label: "Market Strength", defaultWeight: 0.15 },
 ];
 
-// 12 backend domains (spec §9). Each maps to one primary pillar.
-// `model_quality` is a category-scoped capability domain (Arena human-preference
-// Elo), NOT part of the framework's even 12 — it is activated only by category
-// weight profiles that include it (e.g. frontier_model_api) and is SYNTHESIZED
-// at read-time from the model_quality pillar (never stored on EvidenceRecord, so
-// it needs no DB enum/migration). `market_position` is a market-share dimension,
-// also excluded from the 12 framework assessment domains.
+// 13 backend framework domains (spec §9, +sovereignty_residency 2026-07-08).
+// Each maps to one primary pillar. `model_quality` is a category-scoped
+// capability domain (Arena human-preference Elo), NOT part of the framework's
+// even 12/13 — it is activated only by category weight profiles that include
+// it (e.g. frontier_model_api) and is SYNTHESIZED at read-time from the
+// model_quality pillar (never stored on EvidenceRecord, so it needs no DB
+// enum/migration). `market_position` is a market-share dimension, also
+// excluded from the framework assessment domains (category-scoped, see
+// lib/assessment/market-position-rubric.ts). `sovereignty_residency` (added
+// 2026-07-08) IS a full framework domain — universal, all categories, scored
+// from real analyst-curated EvidenceRecord rows via the standard rubric, same
+// as the other 12 (see lib/assessment/domain-rubric.ts ASSESSMENT_DOMAINS).
 export type DomainId =
   | "strategic_value"
   | "data_security_privacy"
@@ -41,7 +46,8 @@ export type DomainId =
   | "vendor_maturity_lockin"
   | "capital_resilience"
   | "market_position"
-  | "dev_sentiment"; // category-scoped (coding models) — developer-community signal
+  | "dev_sentiment" // category-scoped (coding models) — developer-community signal
+  | "sovereignty_residency"; // universal — jurisdiction / data-residency risk (13th framework domain)
 
 export const DOMAIN_TO_PILLAR: Record<DomainId, PillarId> = {
   strategic_value: "business_fit",
@@ -59,6 +65,11 @@ export const DOMAIN_TO_PILLAR: Record<DomainId, PillarId> = {
   capital_resilience: "vendor_resilience",
   market_position: "market_strength",
   dev_sentiment: "market_strength", // developer mindshare is a market-strength signal
+  // A vendor's jurisdiction/hosting posture is a real enterprise-control
+  // question — can this vendor be compelled to disclose data with no due
+  // process, and does the buyer have a genuine sovereign-hosting option —
+  // not a market-facing signal.
+  sovereignty_residency: "enterprise_control",
 };
 
 // Evidence grading (spec §12.3)

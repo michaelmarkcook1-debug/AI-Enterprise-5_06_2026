@@ -37,6 +37,7 @@ export const RANKABLE_DOMAIN_ORDER: DomainId[] = [
   "model_reliability",
   "model_quality", // category-scoped — only active where the profile weights it
   "governance_compliance",
+  "sovereignty_residency", // universal (13th framework domain) — grouped with the other enterprise_control domains
   "security_threat",
   "integration_architecture",
   "agentic_autonomy",

@@ -119,4 +119,14 @@ export const DOMAIN_CROSSWALK: Record<DomainId, DomainCrosswalk> = {
     nistAiRmf: [],
     iso42001: [],
   },
+  sovereignty_residency: {
+    domain: "sovereignty_residency",
+    euAiAct: [],
+    // A.5.31 (legal/statutory/regulatory/contractual requirements) is the one
+    // ISO 27001:2022 Annex A control confidently on-point; left otherwise
+    // conservative rather than guess at additional clause numbers.
+    iso27001: ["A.5.31"],
+    nistAiRmf: [],
+    iso42001: [],
+  },
 };

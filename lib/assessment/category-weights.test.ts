@@ -4,11 +4,14 @@ import {
   resolveDomainWeights,
   categoryActivatesModelQuality,
   categoryActivatesDevSentiment,
+  categoryHasCustomWeights,
   getCategoryWeightRationale,
   buildMethodologyNote,
+  SOVEREIGNTY_RESIDENCY_WEIGHT,
 } from "./category-weights";
 import { ASSESSMENT_DOMAINS } from "./domain-rubric";
 import { activeDomains, DEFAULT_DOMAIN_WEIGHTS } from "./composite";
+import { DOMAIN_TO_PILLAR } from "../types";
 
 // The full category roster (lib/intelligence/seed.ts MARKET_CATEGORIES).
 const ALL_CATEGORIES = [
@@ -60,8 +63,9 @@ describe("coverage denominator: /12 framework + category-scoped domains", () => 
     for (const c of NON_FRONTIER) {
       expect(categoryActivatesModelQuality(c), `${c} should not activate model_quality`).toBe(false);
     }
-    // frontier ranks over 14 domains (12 framework + model_quality + dev_sentiment).
-    expect(activeDomains(resolveDomainWeights("frontier_model_api")).length).toBe(14);
+    // frontier ranks over N+2 domains (13 framework incl. sovereignty_residency,
+    // + model_quality + dev_sentiment).
+    expect(activeDomains(resolveDomainWeights("frontier_model_api")).length).toBe(ASSESSMENT_DOMAINS.length + 2);
   });
 
   it("dev_sentiment is activated ONLY for the coding categories", () => {
@@ -71,6 +75,23 @@ describe("coverage denominator: /12 framework + category-scoped domains", () => 
       if (c === "frontier_model_api" || c === "developer_coding_agent") continue;
       expect(categoryActivatesDevSentiment(c), `${c} should not activate dev_sentiment`).toBe(false);
     }
+  });
+
+  it("sovereignty_residency is TRULY universal — active for every category, including every bespoke profile", () => {
+    // Regression: every one of the 13 categories has a hand-authored bespoke
+    // weights object that predates this domain, so simply falling back to
+    // DEFAULT_DOMAIN_WEIGHTS (framework default) is NOT enough — resolveDomainWeights
+    // must add it unconditionally, or it silently never activates anywhere real.
+    for (const c of ALL_CATEGORIES) {
+      expect(categoryHasCustomWeights(c), `expected ${c} to have a bespoke profile`).toBe(true);
+      const resolved = resolveDomainWeights(c);
+      expect(resolved.sovereignty_residency, `${c} missing sovereignty_residency`).toBe(SOVEREIGNTY_RESIDENCY_WEIGHT);
+      expect(activeDomains(resolved), `${c} activeDomains missing sovereignty_residency`).toContain("sovereignty_residency");
+    }
+  });
+
+  it("sovereignty_residency maps to enterprise_control for display (DOMAIN_TO_PILLAR)", () => {
+    expect(DOMAIN_TO_PILLAR.sovereignty_residency).toBe("enterprise_control");
   });
 });
 

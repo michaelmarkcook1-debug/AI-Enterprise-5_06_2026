@@ -236,16 +236,32 @@ export const CATEGORY_DOMAIN_WEIGHTS: Record<string, CategoryWeightProfile> = {
  *  ≈ 20% of the composite — strong but still a minority of the evidence domains. */
 export const DEV_SENTIMENT_WEIGHT = 0.25;
 
+/** Universal weight for sovereignty_residency (13th framework domain — every
+ *  category, every vendor). DEFAULT_DOMAIN_WEIGHTS (derived from
+ *  ASSESSMENT_DOMAINS) already carries this for categories with NO bespoke
+ *  profile; every category WITH one (nearly all of them) has a hand-authored
+ *  static weights object that predates this domain and simply lacks the key —
+ *  so it must be added here too, unconditionally, or it silently never
+ *  activates for any bespoke-profile category. Fixed, published, never tuned
+ *  per vendor — same mechanism as dev_sentiment/market_position above, minus
+ *  any category gate (this one applies everywhere). */
+export const SOVEREIGNTY_RESIDENCY_WEIGHT = 0.08;
+
 export function resolveDomainWeights(categoryId: string): DomainWeights {
   const profile = CATEGORY_DOMAIN_WEIGHTS[categoryId];
-  const base = profile ? (profile.weights as DomainWeights) : DEFAULT_DOMAIN_WEIGHTS;
+  let base = profile ? (profile.weights as DomainWeights) : DEFAULT_DOMAIN_WEIGHTS;
   // Consumer #2 — blend developer sentiment into the CODING categories only,
   // gated behind DEV_SENTIMENT_IN_RANKING (off → the composite is unchanged).
   // Adding the key activates the synthesized dev_sentiment domain in BOTH the
   // static ranking and the interactive re-rank (both read this resolver), so
   // they stay identical by construction. Renormalized downstream.
   if (DEV_SENTIMENT_IN_RANKING && isDevSentimentCategory(categoryId)) {
-    return { ...base, dev_sentiment: DEV_SENTIMENT_WEIGHT };
+    base = { ...base, dev_sentiment: DEV_SENTIMENT_WEIGHT };
+  }
+  // Universal — every category. A bespoke profile that already declares the
+  // key (shouldn't happen today, but future-proof) is left alone.
+  if (base.sovereignty_residency === undefined) {
+    base = { ...base, sovereignty_residency: SOVEREIGNTY_RESIDENCY_WEIGHT };
   }
   return base;
 }

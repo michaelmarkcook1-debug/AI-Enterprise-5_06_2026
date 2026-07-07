@@ -49,6 +49,7 @@ enum DomainId {
   vendor_maturity_lockin
   capital_resilience
   market_position
+  sovereignty_residency
 }
 
 enum EvidenceGrade {

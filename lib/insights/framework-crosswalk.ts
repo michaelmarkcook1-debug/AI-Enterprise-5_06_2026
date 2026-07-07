@@ -159,10 +159,24 @@ const CROSSWALK: Record<DomainId, Omit<DomainCrosswalk, "domain" | "label">> = {
     note: "Honest gap — no clean NIST AI RMF or ISO/IEC 42001 equivalent. This is a commercial-viability domain we add; it loosely relates to third-party/supply-chain concerns (NIST GOVERN 6 / ISO A.10) but is not itself a governance-framework control.",
     strength: "gap",
   },
-  // Category-scoped domains — not part of the 12 framework domains, so no crosswalk row.
+  // Category-scoped domains — not part of the 13 framework domains, so no crosswalk row.
   model_quality: { nist: [], iso: [], euAiAct: [], cioLine: "", note: "", strength: "gap" },
   market_position: { nist: [], iso: [], euAiAct: [], cioLine: "", note: "", strength: "gap" },
   dev_sentiment: { nist: [], iso: [], euAiAct: [], cioLine: "", note: "", strength: "gap" },
+  // sovereignty_residency IS a full framework domain (2026-07-08), but honestly
+  // has no clean mapping into NIST/ISO/EU-AI-Act specifically — the frameworks
+  // that actually govern cross-border data transfer and compelled-disclosure
+  // exposure (GDPR Ch. V, sector export-control regimes) sit outside this
+  // three-framework crosswalk. Accurate-or-absent: left a gap rather than
+  // stretching an EU AI Act/ISO/NIST clause to cover it.
+  sovereignty_residency: {
+    nist: [],
+    iso: [],
+    euAiAct: [],
+    cioLine: "Evidence of jurisdiction, compelled-disclosure exposure and sovereign-hosting options — not covered by NIST/ISO/EU AI Act; see GDPR Ch. V and export-control regimes separately.",
+    note: "Real, cited domain (see the assessment scorecard) — this crosswalk's three frameworks don't cleanly cover it.",
+    strength: "gap",
+  },
 };
 
 /** The full crosswalk over the 12 framework domains, in canonical order. */

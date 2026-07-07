@@ -19,4 +19,5 @@ export const DOMAIN_LABEL: Record<DomainId, string> = {
   capital_resilience: "Capital Resilience & Strategic Dependency",
   market_position: "Market Position",
   dev_sentiment: "Developer Sentiment (HN · GitHub · SO survey)",
+  sovereignty_residency: "Sovereignty & Data Residency",
 };

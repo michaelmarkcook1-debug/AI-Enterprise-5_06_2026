@@ -22,6 +22,7 @@ export const EvidenceProposalSchema = z.object({
     "vendor_maturity_lockin",
     "capital_resilience",
     "market_position",
+    "sovereignty_residency",
   ]),
   subfactor: z.string().min(2).max(80),
   excerpt: z.string().min(20).max(800),
