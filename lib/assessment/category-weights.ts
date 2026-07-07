@@ -66,7 +66,7 @@ export const CATEGORY_DOMAIN_WEIGHTS: Record<string, CategoryWeightProfile> = {
       workforce_adoption: 0.04, // ↓ least relevant to a raw model-API choice (a deployment concern)
     },
     rationale:
-      "A frontier model API is judged first on the model itself, so model quality (Arena human-preference Elo) and agentic capability lead, with governance/auditability and unit economics (cost/TCO) weighted heavily as the real enterprise-adoption gates; capital resilience is de-emphasised because at the API layer a buyer can switch models more readily than they can replace a platform.",
+      "A frontier model API is judged first on the model itself, so model quality (Arena human-preference Elo) and agentic capability lead, with governance/auditability and unit economics (cost/TCO) weighted heavily as the real enterprise-adoption gates; capital resilience is de-emphasised because at the API layer a buyer can switch models more readily than they can replace a platform. Market position (category share + disclosed named enterprise adopters — see resolveDomainWeights) is a modest, evidence-capped addition on top — real adoption, not developer buzz.",
   },
 
   // ── The remaining categories re-weight the SAME 12 framework domains (every
@@ -97,7 +97,7 @@ export const CATEGORY_DOMAIN_WEIGHTS: Record<string, CategoryWeightProfile> = {
       cost_finops: 0.04, vendor_maturity_lockin: 0.03, capital_resilience: 0.02,
     },
     rationale:
-      "A coding agent is judged on autonomous capability and the correctness/reliability of what it produces, on deep IDE/repo/CI integration, and on protecting source code (data security + supply-chain/secret-leakage threat). Broad corporate-platform concerns matter less than fit to the developer loop.",
+      "A coding agent is judged on autonomous capability and the correctness/reliability of what it produces, on deep IDE/repo/CI integration, and on protecting source code (data security + supply-chain/secret-leakage threat). Broad corporate-platform concerns matter less than fit to the developer loop. Market position (category share + disclosed named enterprise adopters — see resolveDomainWeights) is a modest, evidence-capped addition on top — real adoption, not developer buzz.",
   },
 
   // AGENT PLATFORM — build, govern, and operate agents.
@@ -236,16 +236,44 @@ export const CATEGORY_DOMAIN_WEIGHTS: Record<string, CategoryWeightProfile> = {
  *  ≈ 20% of the composite — strong but still a minority of the evidence domains. */
 export const DEV_SENTIMENT_WEIGHT = 0.25;
 
+/** Categories where market_position (real category-share + disclosed-adopter
+ *  evidence) is activated. Same rollout scope as dev_sentiment today — the two
+ *  categories where the "Market Strength = developer buzz" problem was found
+ *  and reported — kept as an INDEPENDENT set (not literally reused from
+ *  dev_sentiment's scope) so either can evolve without silently dragging the
+ *  other along. */
+const MARKET_POSITION_CATEGORIES = new Set<string>(["frontier_model_api", "developer_coding_agent"]);
+
+/** Market-position weight — modest by design vs dev_sentiment's 0.25: this
+ *  domain is architecturally capped below E4/4.0 unless BOTH inputs (share +
+ *  disclosed adopters) are present (lib/assessment/market-position-rubric.ts),
+ *  so a thinner-evidence signal earns a smaller weight. Added RAW to the
+ *  category profile (like dev_sentiment) then renormalized downstream. Fixed,
+ *  published, never tuned per vendor. */
+export const MARKET_POSITION_WEIGHT = 0.08;
+
+function isMarketPositionCategory(categoryId: string): boolean {
+  return MARKET_POSITION_CATEGORIES.has(categoryId);
+}
+
 export function resolveDomainWeights(categoryId: string): DomainWeights {
   const profile = CATEGORY_DOMAIN_WEIGHTS[categoryId];
-  const base = profile ? (profile.weights as DomainWeights) : DEFAULT_DOMAIN_WEIGHTS;
+  let base = profile ? (profile.weights as DomainWeights) : DEFAULT_DOMAIN_WEIGHTS;
   // Consumer #2 — blend developer sentiment into the CODING categories only,
   // gated behind DEV_SENTIMENT_IN_RANKING (off → the composite is unchanged).
   // Adding the key activates the synthesized dev_sentiment domain in BOTH the
   // static ranking and the interactive re-rank (both read this resolver), so
   // they stay identical by construction. Renormalized downstream.
   if (DEV_SENTIMENT_IN_RANKING && isDevSentimentCategory(categoryId)) {
-    return { ...base, dev_sentiment: DEV_SENTIMENT_WEIGHT };
+    base = { ...base, dev_sentiment: DEV_SENTIMENT_WEIGHT };
+  }
+  // Market Strength split (2026-07-08): real adoption evidence, additive on
+  // top of the category's designed profile — same mechanism as dev_sentiment
+  // above, so the static ranking and the interactive re-rank agree by
+  // construction. Unconditional (no rollout flag): the design is approved,
+  // not staged.
+  if (isMarketPositionCategory(categoryId)) {
+    base = { ...base, market_position: MARKET_POSITION_WEIGHT };
   }
   return base;
 }
@@ -266,6 +294,12 @@ export function categoryActivatesDevSentiment(categoryId: string): boolean {
   return (resolveDomainWeights(categoryId).dev_sentiment ?? 0) > 0;
 }
 
+/** True when the category activates the (category-scoped) market_position
+ *  domain — real category-share + disclosed-adopter evidence. */
+export function categoryActivatesMarketPosition(categoryId: string): boolean {
+  return (resolveDomainWeights(categoryId).market_position ?? 0) > 0;
+}
+
 /** The category's documented rationale, or null when it uses the framework default. */
 export function getCategoryWeightRationale(categoryId: string): string | null {
   return CATEGORY_DOMAIN_WEIGHTS[categoryId]?.rationale ?? null;
@@ -282,8 +316,7 @@ const GENERIC_METHODOLOGY =
   `can never conjure a score or hide thin evidence. A vendor must have at least ` +
   `${Math.round(ASSESSMENT_COVERAGE_FLOOR * 100)}% domain coverage to be ranked; below that it is ` +
   `held as "insufficient evidence", never floated on a default. When composites sit within the ` +
-  `noise band the order is shown as tiers, not a false-precision 1–N list. Market share is context, ` +
-  `not the rank.`;
+  `noise band the order is shown as tiers, not a false-precision 1–N list.`;
 
 /**
  * The public methodology note for a category — documents the per-category
@@ -320,8 +353,23 @@ export function buildMethodologyNote(categoryId: string): string {
       `GitHub, the Stack Overflow Developer Survey${""}) — mapped to a 0–5 level by a fixed published ` +
       `table, coverage-gated (a model needs ≥2 independent sources over volume floors; a thin signal ` +
       `reads insufficient and is coverage-discounted, never scored on noise), and anti-gaming-floored. ` +
-      `The weight is set by category rationale, never tuned to move a specific vendor.`
+      `The weight is set by category rationale, never tuned to move a specific vendor. This is a ` +
+      `developer-community signal, not a market-position measure — it does not feed Market Strength.`
     : "";
 
-  return `${header}${modelQualityNote}${devSentimentNote} ${GENERIC_METHODOLOGY}`;
+  // Market Strength: real adoption evidence where this category activates
+  // market_position (category share + disclosed adopters); otherwise the
+  // honest fallback — a raw share figure may be SHOWN as context, but never
+  // silently substitutes for a scored, cited domain.
+  const marketPositionNote = categoryActivatesMarketPosition(categoryId)
+    ? ` Market Strength is scored from real adoption evidence in this category: a category-share ` +
+      `estimate (directional, evidence-derived — never measured revenue share) plus disclosed named ` +
+      `enterprise adopters (real, cited, public disclosures). Revenue/customer-scale is a documented ` +
+      `future input, contributing nothing until a real source exists. Neither input alone reaches ` +
+      `independent-audit-grade evidence, so this domain is capped below 4.0/5 unless both are present ` +
+      `— an honest ceiling. A vendor with no real adoption evidence on either input reads insufficient, ` +
+      `never a proxy stand-in.`
+    : ` Market share, where shown, is context — not a scored, ranked domain in this category.`;
+
+  return `${header}${modelQualityNote}${devSentimentNote}${marketPositionNote} ${GENERIC_METHODOLOGY}`;
 }

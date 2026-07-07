@@ -185,8 +185,11 @@ export default async function CategoryPage({ params }: { params: Promise<Params>
                     <p className={`mt-1 text-[10px] ${MUTED}`}>Market Share Est.: insufficient real-sourced estimate</p>
                   ) : (
                     <p className={`mt-1 text-[10px] ${MUTED}`}>
-                      Market Share Est.: ~{Math.round(v.marketContext.estimatedShare)}% category share · context only, not the rank ·{" "}
-                      <Link href="/insights#market-share-est" className="underline underline-offset-2">how this is estimated</Link>
+                      Market Share Est.: ~{Math.round(v.marketContext.estimatedShare)}% category share ·{" "}
+                      {v.rankPillars.find((p) => p.pillar === "market_strength")?.state === "scored"
+                        ? "one input to the cited Market Position domain below"
+                        : "context only, not the rank"}{" "}
+                      · <Link href="/insights#market-share-est" className="underline underline-offset-2">how this is estimated</Link>
                     </p>
                   )}
                   <PillarContributionTable vendor={v} />

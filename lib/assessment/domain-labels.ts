@@ -17,6 +17,6 @@ export const DOMAIN_LABEL: Record<DomainId, string> = {
   workforce_adoption: "Workforce Adoption & Change Management",
   vendor_maturity_lockin: "Vendor Maturity, Lock-In & Exit",
   capital_resilience: "Capital Resilience & Strategic Dependency",
-  market_position: "Market Position",
+  market_position: "Market Position (category share + disclosed adopters)",
   dev_sentiment: "Developer Sentiment (HN · GitHub · SO survey)",
 };

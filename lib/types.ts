@@ -57,8 +57,15 @@ export const DOMAIN_TO_PILLAR: Record<DomainId, PillarId> = {
   workforce_adoption: "business_fit",
   vendor_maturity_lockin: "vendor_resilience",
   capital_resilience: "vendor_resilience",
+  // Market Strength now traces to REAL adoption evidence (market_position:
+  // category-share estimate + disclosed named enterprise adopters — see
+  // lib/assessment/market-position-rubric.ts), not developer buzz. dev_sentiment
+  // is a real, separately-weighted signal in its own right — it stays fully
+  // live, just rolls up under business_fit for display (2026-07-08 structural
+  // correction; was market_strength, which let it stand in for a market-
+  // position signal it was never designed to measure).
   market_position: "market_strength",
-  dev_sentiment: "market_strength", // developer mindshare is a market-strength signal
+  dev_sentiment: "business_fit",
 };
 
 // Evidence grading (spec §12.3)

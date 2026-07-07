@@ -4,11 +4,15 @@ import { resolveDomainWeights, DEV_SENTIMENT_WEIGHT, categoryActivatesDevSentime
 import { DEV_SENTIMENT_IN_RANKING } from "../availability";
 
 describe("synthesizeDevSentimentDomain", () => {
-  it("maps a strong/positive vendor to a scored dev_sentiment domain (market_strength pillar)", () => {
+  it("maps a strong/positive vendor to a scored dev_sentiment domain (business_fit pillar)", () => {
     const d = synthesizeDevSentimentDomain("anthropic");
     expect(d).not.toBeNull();
     expect(d!.domain).toBe("dev_sentiment");
-    expect(d!.pillar).toBe("market_strength");
+    // 2026-07-08 market-strength-split: dev_sentiment no longer feeds
+    // Market Strength (that's now market_position — real adoption evidence).
+    // Score/weight/composite contribution are unchanged; only the pillar
+    // rollup used for display moves.
+    expect(d!.pillar).toBe("business_fit");
     expect(d!.state).toBe("scored");
     if (d!.state === "scored") {
       expect(d!.score).toBe(5.0); // positive → 5.0 (fixed table, never tuned)

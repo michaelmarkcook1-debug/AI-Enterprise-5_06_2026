@@ -249,12 +249,15 @@ describe("computeGap (why this / why not the runner-up)", () => {
 
 const FRONTIER = "frontier_model_api";
 const frontierWeights = (): DomainWeights => resolveDomainWeights(FRONTIER);
-// Frontier profile with the (now-active) dev_sentiment domain stripped — lets the
-// model_quality-mechanics tests below stay isolated at /13 instead of tangling
-// with the dev-sentiment ranking variable (tested separately in dev-sentiment/).
+// Frontier profile with the (now-active) dev_sentiment AND market_position
+// domains stripped — lets the model_quality-mechanics tests below stay
+// isolated at /13 instead of tangling with the dev-sentiment ranking variable
+// (tested separately in dev-sentiment/) or the market-position rubric (tested
+// separately in market-position-rubric.test.ts).
 const mqWeights = (): DomainWeights => {
   const w = { ...resolveDomainWeights(FRONTIER) } as Record<string, number>;
   delete w.dev_sentiment;
+  delete w.market_position;
   return w as DomainWeights;
 };
 
@@ -268,6 +271,11 @@ describe("category-aware default weights", () => {
   });
 
   it("the frontier profile honours the brief (↑ model quality/governance/agentic/cost, ↓ capital) and sums to ~1", () => {
+    // CATEGORY_DOMAIN_WEIGHTS is the hand-designed STATIC profile (12 base +
+    // model_quality, sums to exactly 1.00). market_position is deliberately
+    // NOT baked in here — resolveDomainWeights() layers it on additively at
+    // resolve-time (0.08, renormalized on use), same mechanism as dev_sentiment,
+    // so this static object's own "designed to sum to 1" invariant holds.
     const w = CATEGORY_DOMAIN_WEIGHTS[FRONTIER].weights;
     const sum = Object.values(w).reduce((s, x) => s + (x ?? 0), 0);
     expect(sum).toBeCloseTo(1, 9);
@@ -282,17 +290,21 @@ describe("category-aware default weights", () => {
     expect(w.capital_resilience!).toBeLessThan(DEFAULT_DOMAIN_WEIGHTS.capital_resilience);
   });
 
-  it("activeDomains: framework default = 12; frontier = 14 (incl model_quality + dev_sentiment)", () => {
+  it("activeDomains: framework default = 12; frontier = 15 (incl model_quality + dev_sentiment + market_position)", () => {
     expect(activeDomains(DEFAULT_DOMAIN_WEIGHTS)).toEqual(ASSESSMENT_DOMAINS);
     const active = activeDomains(frontierWeights());
-    // Frontier activates BOTH category-scoped domains: model_quality (Arena) and
-    // dev_sentiment (developer-community signal, weight 0.25, flag on).
+    // Frontier activates THREE category-scoped domains: model_quality (Arena),
+    // dev_sentiment (developer-community signal, weight 0.25, flag on), and
+    // market_position (real adoption evidence, weight 0.08, 2026-07-08).
     expect(active).toContain("model_quality");
     expect(active).toContain("dev_sentiment");
-    expect(active.length).toBe(14);
-    // market_position is never an assessment domain in either set.
-    expect(active).not.toContain("market_position");
-    expect(RANKABLE_DOMAIN_ORDER).not.toContain("market_position");
+    expect(active).toContain("market_position");
+    expect(active.length).toBe(15);
+    // market_position IS a rankable domain now (2026-07-08 structural
+    // correction) — never one of the 12 framework ASSESSMENT_DOMAINS, but a
+    // real, category-scoped, evidence-graded one, same status as model_quality.
+    expect(RANKABLE_DOMAIN_ORDER).toContain("market_position");
+    expect(ASSESSMENT_DOMAINS).not.toContain("market_position" as never);
   });
 
   it("default-category behaviour is byte-identical to the pre-category-aware path", () => {

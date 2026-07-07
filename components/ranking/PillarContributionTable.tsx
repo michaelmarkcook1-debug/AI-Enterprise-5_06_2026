@@ -126,9 +126,22 @@ export default function PillarContributionTable({
 
       <p className={`mt-2 text-[10px] ${MUTED}`}>
         Each pillar rolls up its evidence domains: domain score (0–5) × weight × a confidence blend
-        (0.7 + 0.3×confidence). Contributions sum to the {vendor.assessmentComposite === null ? "composite" : `${vendor.assessmentComposite.toFixed(2)}/5 composite`} above.
-        Market share / position is context, not part of the score.
+        (0.7 + 0.3×confidence). Contributions sum to the {vendor.assessmentComposite === null ? "composite" : `${vendor.assessmentComposite.toFixed(2)}/5 composite`} above.{" "}
+        {marketStrengthNote(vendor.rankPillars)}
       </p>
     </details>
   );
+}
+
+/** Market Strength's own note — accurate either way, per vendor: where
+ *  market_position (real category-share + disclosed-adopter evidence)
+ *  actually contributes, say so; elsewhere the pillar genuinely has nothing
+ *  in the composite and the raw share figure shown as context is exactly
+ *  that — context, not part of the score. */
+function marketStrengthNote(rankPillars: CategoryRankedVendor["rankPillars"]): string {
+  const ms = rankPillars.find((p) => p.pillar === "market_strength");
+  if (ms?.state === "scored") {
+    return "Market Strength traces to cited category-share + disclosed-adopter evidence (market_position), not developer sentiment or a raw share figure.";
+  }
+  return "Market share / position is context, not part of the score.";
 }

@@ -28,8 +28,11 @@ import {
   resolveDomainWeights,
   categoryActivatesModelQuality,
   categoryActivatesDevSentiment,
+  categoryActivatesMarketPosition,
   buildMethodologyNote,
 } from "../assessment/category-weights";
+import { scoreMarketPosition } from "../assessment/market-position-rubric";
+import { disclosedAdoptersOf } from "../peer/adopters";
 import {
   assessDiscrimination,
   assignTiers,
@@ -138,6 +141,13 @@ async function computeCategoryComposites(): Promise<CategoryComposite[]> {
     const catWeights = resolveDomainWeights(category.id);
     const activatesMQ = categoryActivatesModelQuality(category.id);
     const activatesDevSentiment = categoryActivatesDevSentiment(category.id);
+    const activatesMarketPosition = categoryActivatesMarketPosition(category.id);
+
+    // Membership: a vendor is in this category iff it has an estimate row here.
+    const memberIds = [
+      ...new Set(estimates.filter((e) => e.categoryId === category.id).map((e) => e.vendorId)),
+    ];
+
     // A vendor's domain set for THIS category: the 12 framework domains, plus the
     // synthesized model_quality score when the category activates it and the
     // vendor has a real Arena Elo (else model_quality is simply absent → counted
@@ -149,14 +159,26 @@ async function computeCategoryComposites(): Promise<CategoryComposite[]> {
       if (activatesMQ && sc.modelQuality) extra.push(sc.modelQuality);
       // dev_sentiment: coding categories only, flag-gated, coverage-discounted
       // (absent → counted as an unscored domain), same pattern as model_quality.
+      // Real market-strength signal, not developer buzz — dev_sentiment no
+      // longer feeds Market Strength (see DOMAIN_TO_PILLAR, lib/types.ts).
       if (activatesDevSentiment && sc.devSentiment) extra.push(sc.devSentiment);
+      // market_position: category-share + disclosed named enterprise adopters.
+      // Always pushed when active — scoreMarketPosition itself returns an
+      // honest insufficient_evidence state (never null) when neither input has
+      // real signal, so a vendor with zero disclosed adopters and no share
+      // estimate reads insufficient here, same coverage-discount treatment as
+      // every other domain — never a dev-sentiment stand-in.
+      if (activatesMarketPosition) {
+        extra.push(
+          scoreMarketPosition({
+            share: shareByVendorCat.get(`${id}__${category.id}`),
+            adopters: disclosedAdoptersOf(id),
+            categoryMemberCount: memberIds.length,
+          }),
+        );
+      }
       return extra.length > 0 ? [...sc.domains, ...extra] : sc.domains;
     };
-
-    // Membership: a vendor is in this category iff it has an estimate row here.
-    const memberIds = [
-      ...new Set(estimates.filter((e) => e.categoryId === category.id).map((e) => e.vendorId)),
-    ];
 
     const scored = memberIds.flatMap((id) => {
       const vendor = vendorById.get(id);
