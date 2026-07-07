@@ -25,6 +25,7 @@ import {
 import { composeBenchmark, type ComposedBenchmark } from "../peer/segment-benchmarks";
 import { exemplarsForSegment } from "../peer/segments";
 import type { PeerCompany } from "../peer/types";
+import { getPoolAggregate, poolAggregateToEvidence } from "../pool/aggregate";
 import {
   intentSegment,
   type IntentProfile,
@@ -158,11 +159,27 @@ export function assembleEvidenceBundle(
   return { intent, items, coverage };
 }
 
-/** Private anonymised contribution pool (AIE-07). Not built yet → always empty.
- *  When AIE-06/07 land, this returns cited, k-anonymity-floored pool items and
- *  NOTHING else about the interrogation flow changes. */
-async function retrievePoolEvidence(_intent: IntentProfile): Promise<EvidenceItem[]> {
-  return [];
+/** Private anonymised contribution pool (AIE-07). Below the minimum-count
+ *  floor for a segment, getPoolAggregate returns null and this stays empty —
+ *  the exact same "honest absence" path this module already used before the
+ *  pool existed. NOTHING else about the interrogation flow needed to change.
+ *
+ *  Never throws: a pool-subsystem failure (DB unavailable, transient error)
+ *  must not take down the whole interrogation engine — AIE-05's model +
+ *  peer_public layers must keep working even if the newer pool layer can't be
+ *  reached. This mirrors the same never-throws contract every other reader in
+ *  this file already honors (see live.ts's getLiveModelInventory). */
+export async function retrievePoolEvidence(
+  intent: IntentProfile,
+  // Injectable for tests — proves the never-throws contract without a DB.
+  getAggregate: typeof getPoolAggregate = getPoolAggregate,
+): Promise<EvidenceItem[]> {
+  try {
+    const agg = await getAggregate(intentSegment(intent));
+    return agg ? poolAggregateToEvidence(agg) : [];
+  } catch {
+    return [];
+  }
 }
 
 /** Async wrapper: fetch the live model comparison + compose the peer benchmark

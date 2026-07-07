@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { assembleEvidenceBundle } from "./retrieval";
+import { assembleEvidenceBundle, retrievePoolEvidence } from "./retrieval";
 import { bundleAllowlist, type IntentProfile } from "./types";
 import type { FrontierComparison } from "../model-inventory/frontier";
 import type { ComposedBenchmark } from "../peer/segment-benchmarks";
@@ -116,5 +116,19 @@ describe("assembleEvidenceBundle — deterministic, honest, cited", () => {
     expect(allow.has("https://lmarena.ai/leaderboard")).toBe(true);
     expect(allow.has("https://www.census.gov/btos")).toBe(true);
     expect(allow.has("https://www.cnbc.com/ms")).toBe(true);
+  });
+});
+
+describe("retrievePoolEvidence — a pool-subsystem failure must NEVER crash the core engine", () => {
+  it("swallows a rejection from getPoolAggregate and returns an empty array, not a throw", async () => {
+    const failing = async () => {
+      throw new Error("pool: no database configured");
+    };
+    await expect(retrievePoolEvidence(intent, failing)).resolves.toEqual([]);
+  });
+
+  it("still returns real evidence when the aggregate resolves normally", async () => {
+    const ok = async () => null; // below the floor — the honest empty case
+    await expect(retrievePoolEvidence(intent, ok)).resolves.toEqual([]);
   });
 });

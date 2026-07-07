@@ -9,6 +9,7 @@
 // driver over /api/interrogate/{start,answer,finding}.
 
 import { useState, type ReactNode } from "react";
+import ContributePrompt from "./ContributePrompt";
 
 const CARD = "rounded-xl border border-black/10 dark:border-white/10 bg-white/60 dark:bg-white/5 p-5";
 const MUTED = "text-[#15263c]/60 dark:text-[#eef3f8]/60";
@@ -263,9 +264,15 @@ export default function InterrogationFlow() {
               <ul className="space-y-1">
                 {finding.citedSourceUrls.map((u) => (
                   <li key={u} className="text-xs">
-                    <a href={u} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2">
-                      {publisherFor(u)}
-                    </a>
+                    {/^https?:\/\//.test(u) ? (
+                      <a href={u} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2">
+                        {publisherFor(u)}
+                      </a>
+                    ) : (
+                      // Our own pool aggregate, not a third-party link — never
+                      // rendered as a clickable (and non-navigable) anchor.
+                      <span className={MUTED}>{publisherFor(u)}</span>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -279,6 +286,7 @@ export default function InterrogationFlow() {
               Start another
             </button>
           </div>
+          <ContributePrompt sessionId={sessionId} />
         </section>
       )}
 
