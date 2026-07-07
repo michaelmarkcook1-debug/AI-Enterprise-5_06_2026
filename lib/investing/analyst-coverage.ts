@@ -15,7 +15,7 @@
 // API usage well-behaved across the ~35-provider universe.
 
 import Anthropic from "@anthropic-ai/sdk";
-import { hasLLM } from "../agents/llm-client";
+import { hasLLM, cachedSystemBlock, logCacheUsage } from "../agents/llm-client";
 import { saveAnalystCoverage } from "./live-cache";
 import { INVESTMENT_PROVIDERS } from "./seed";
 import type { InvestmentProviderProfile } from "./types";
@@ -189,7 +189,12 @@ async function fetchCoverageForProvider(
     const s1 = await client.messages.create({
       model: HAIKU_MODEL,
       max_tokens: 4000,
-      system: `You are a web-scraping agent. Search analyst-house websites for publicly available coverage of a specific vendor. Extract raw facts only — do not interpret, score, or paraphrase. Report verbatim text from each page you find.`,
+      // Static instruction (~55 tokens) — well under Haiku 4.5's ~4,096-token
+      // cacheable-prefix minimum, so this is a correct no-op today, not a
+      // current cost saving (see cachedSystemBlock's doc-comment).
+      system: cachedSystemBlock(
+        `You are a web-scraping agent. Search analyst-house websites for publicly available coverage of a specific vendor. Extract raw facts only — do not interpret, score, or paraphrase. Report verbatim text from each page you find.`,
+      ),
       tools: [
         // allowed_callers: ["direct"] — the 2026-02 web_search tool defaults to
         // requiring programmatic tool calling, unsupported on Haiku (400). Force direct.
@@ -219,6 +224,7 @@ Omit a house entirely if you find NO public coverage. Do NOT fabricate. Call rep
       }],
     } as unknown as Anthropic.MessageCreateParamsNonStreaming);
 
+    logCacheUsage(`analyst-coverage:${provider.id}:stage1`, s1.usage);
     const s1block = s1.content.find((b): b is Anthropic.ToolUseBlock => b.type === "tool_use" && b.name === "report_raw_coverage");
     const rawHouses: RawHouseItem[] = ((s1block?.input as { houses?: RawHouseItem[] })?.houses ?? [])
       .filter((h) => HOUSE_IDS.includes(h.houseId) && typeof h.reportTitle === "string");
@@ -237,7 +243,10 @@ Omit a house entirely if you find NO public coverage. Do NOT fabricate. Call rep
     const s2 = await client.messages.create({
       model: SONNET_MODEL,
       max_tokens: 1500,
-      system: "You are a data normalisation agent. Clean and validate analyst-coverage items: score confidence, deduplicate and limit strengths/cautions to 4 items each. No interpretation.",
+      // Static instruction (~45 tokens) — below the cacheable floor today.
+      system: cachedSystemBlock(
+        "You are a data normalisation agent. Clean and validate analyst-coverage items: score confidence, deduplicate and limit strengths/cautions to 4 items each. No interpretation.",
+      ),
       tools: [NORMALISE_SCHEMA as unknown as Anthropic.Tool],
       tool_choice: { type: "tool", name: "report_normalised_coverage" } as unknown as Anthropic.ToolChoice,
       messages: [{
@@ -246,6 +255,7 @@ Omit a house entirely if you find NO public coverage. Do NOT fabricate. Call rep
       }],
     } as unknown as Anthropic.MessageCreateParamsNonStreaming);
 
+    logCacheUsage(`analyst-coverage:${provider.id}:stage2`, s2.usage);
     const s2block = s2.content.find((b): b is Anthropic.ToolUseBlock => b.type === "tool_use" && b.name === "report_normalised_coverage");
     const normalised: NormalisedHouseItem[] = ((s2block?.input as { houses?: NormalisedHouseItem[] })?.houses ?? [])
       .filter((n) => rawHouses[n.idx] !== undefined);
@@ -270,7 +280,12 @@ Omit a house entirely if you find NO public coverage. Do NOT fabricate. Call rep
       max_tokens: 3000,
       thinking: { type: "adaptive" },
       output_config: { effort: "high" },
-      system: `You are a senior analyst (Gartner/Forrester/IDC calibre) writing decision-useful coverage summaries. For each house item, write 1-2 sentences explaining what the house's positioning MEANS for an enterprise buyer: capability gaps to probe, commercial leverage to expect, risks to mitigate, who this vendor is right for. Not a restatement of the label. Make "strengths" and "cautions" decision-useful (capability, delivery, commercial).`,
+      // Static instruction (~100 tokens) — below the cacheable floor today;
+      // the highest-list-price tier here, so the first candidate worth
+      // enriching if crossing the threshold is ever worth the effort.
+      system: cachedSystemBlock(
+        `You are a senior analyst (Gartner/Forrester/IDC calibre) writing decision-useful coverage summaries. For each house item, write 1-2 sentences explaining what the house's positioning MEANS for an enterprise buyer: capability gaps to probe, commercial leverage to expect, risks to mitigate, who this vendor is right for. Not a restatement of the label. Make "strengths" and "cautions" decision-useful (capability, delivery, commercial).`,
+      ),
       tools: [SUMMARY_SCHEMA as unknown as Anthropic.Tool],
       // tool_choice MUST be "auto" with `thinking` enabled — forcing a tool +
       // thinking is a 400 ("Thinking may not be enabled when tool_choice forces
@@ -283,6 +298,7 @@ Omit a house entirely if you find NO public coverage. Do NOT fabricate. Call rep
       }],
     } as unknown as Anthropic.MessageCreateParamsNonStreaming);
 
+    logCacheUsage(`analyst-coverage:${provider.id}:stage3`, s3.usage);
     const s3block = s3.content.find((b): b is Anthropic.ToolUseBlock => b.type === "tool_use" && b.name === "report_coverage_summaries");
     const summaries: { idx: number; summary: string }[] =
       (s3block?.input as { houses?: { idx: number; summary: string }[] })?.houses ?? [];

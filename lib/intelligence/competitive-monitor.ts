@@ -15,6 +15,7 @@
 
 import Anthropic from "@anthropic-ai/sdk";
 import { createHash } from "node:crypto";
+import { cachedSystemBlock, logCacheUsage } from "../agents/llm-client";
 import { getPrisma, hasDatabase } from "../prisma";
 import { listIntelligenceVendors } from "./repository";
 import {
@@ -279,11 +280,17 @@ Use up to ${MAX_SEARCHES_PER_VENDOR} web_search calls. Return up to 6 items via 
       const s1 = await client.messages.create({
         model: HAIKU_MODEL,
         max_tokens: 3000,
-        system: s1System,
+        // Cache the static instruction prefix (see cachedSystemBlock's own
+        // doc-comment for the minimum-length gotcha — s1System is ~70 tokens,
+        // well under Haiku 4.5's ~4,096-token floor, so this cache_control
+        // marker is a correct no-op today, not a current cost saving; it
+        // costs nothing to leave in and helps if this prompt ever grows.
+        system: cachedSystemBlock(s1System),
         tools: s1Tools,
         messages: s1Messages,
       } as unknown as Anthropic.MessageCreateParamsNonStreaming);
 
+      logCacheUsage(`competitive-monitor:${target.vendorId}:stage1`, s1.usage);
       stage.haiku.in  += s1.usage.input_tokens;
       stage.haiku.out += s1.usage.output_tokens;
       searchesUsed    += (s1.usage as { server_tool_use?: { web_search_requests?: number } }).server_tool_use?.web_search_requests ?? 0;
@@ -324,7 +331,11 @@ Use up to ${MAX_SEARCHES_PER_VENDOR} web_search calls. Return up to 6 items via 
     const s2 = await client.messages.create({
       model: SONNET_MODEL,
       max_tokens: 2000,
-      system: "You are a competitive-intelligence classifier. Classify each raw news item into the correct competitive dimension with scores. Neutral and factual — no analyst commentary or interpretation.",
+      // Static instruction (~50 tokens) — see the stage-1 comment above on the
+      // minimum-cacheable-length gotcha; this is also below the floor today.
+      system: cachedSystemBlock(
+        "You are a competitive-intelligence classifier. Classify each raw news item into the correct competitive dimension with scores. Neutral and factual — no analyst commentary or interpretation.",
+      ),
       tools: [CLASSIFY_SCHEMA as unknown as Anthropic.Tool],
       tool_choice: { type: "tool", name: "report_classified_findings" } as unknown as Anthropic.ToolChoice,
       messages: [{
@@ -333,6 +344,7 @@ Use up to ${MAX_SEARCHES_PER_VENDOR} web_search calls. Return up to 6 items via 
       }],
     } as unknown as Anthropic.MessageCreateParamsNonStreaming);
 
+    logCacheUsage(`competitive-monitor:${target.vendorId}:stage2`, s2.usage);
     stage.sonnet.in  += s2.usage.input_tokens;
     stage.sonnet.out += s2.usage.output_tokens;
 
@@ -359,7 +371,13 @@ Use up to ${MAX_SEARCHES_PER_VENDOR} web_search calls. Return up to 6 items via 
       max_tokens: 3000,
       thinking: { type: "adaptive" },
       output_config: { effort: "high" },
-      system: `You are a senior competitive-intelligence analyst (Gartner/Forrester calibre). For each finding, write "whyItMatters": 1-2 sentences (max 360 chars) on the SO-WHAT for an enterprise buyer or competing service provider — who gains leverage, what shifts in vendor selection/pricing power/switching cost, and what the reader should DO next. Be specific and falsifiable. No filler ("this is significant", "remains to be seen").`,
+      // Static instruction (~90 tokens) — below the cacheable floor today (see
+      // the stage-1 comment above), but this is the highest-list-price tier,
+      // so this is the first prompt worth lengthening/enriching if the goal
+      // is to actually cross the caching threshold later.
+      system: cachedSystemBlock(
+        `You are a senior competitive-intelligence analyst (Gartner/Forrester calibre). For each finding, write "whyItMatters": 1-2 sentences (max 360 chars) on the SO-WHAT for an enterprise buyer or competing service provider — who gains leverage, what shifts in vendor selection/pricing power/switching cost, and what the reader should DO next. Be specific and falsifiable. No filler ("this is significant", "remains to be seen").`,
+      ),
       tools: [ANALYSIS_SCHEMA as unknown as Anthropic.Tool],
       // tool_choice MUST be "auto" (not a forced tool) whenever `thinking` is
       // enabled — the API rejects forced tool use + thinking with a 400
@@ -374,6 +392,7 @@ Use up to ${MAX_SEARCHES_PER_VENDOR} web_search calls. Return up to 6 items via 
       }],
     } as unknown as Anthropic.MessageCreateParamsNonStreaming);
 
+    logCacheUsage(`competitive-monitor:${target.vendorId}:stage3`, s3.usage);
     stage.opus.in  += s3.usage.input_tokens;
     stage.opus.out += s3.usage.output_tokens;
 

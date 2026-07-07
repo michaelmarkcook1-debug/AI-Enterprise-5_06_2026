@@ -34,6 +34,38 @@ export interface LLMResult<T> {
   source: "anthropic" | "stub";
 }
 
+/** Wrap a STATIC system-prompt string in Anthropic's ephemeral prompt-cache
+ *  block shape. Only ever pass content here that is byte-identical across
+ *  calls — anything that varies per-request (a vendor name, a document
+ *  excerpt, a timestamp) must stay in the user message, never here, or the
+ *  cached prefix changes every call and nothing is ever reused.
+ *
+ *  Gotcha (not an error, just a silent no-op): each model has a minimum
+ *  cacheable prefix length — Haiku 4.5 requires ~4,096 tokens; below that the
+ *  API ignores cache_control with no warning. A short static prompt gains
+ *  nothing from this wrapper until it (plus any cached tool definitions)
+ *  crosses that floor. Do not pad content to reach it — a prompt that's
+ *  genuinely short just doesn't benefit from caching yet. */
+export function cachedSystemBlock(text: string): { type: "text"; text: string; cache_control: { type: "ephemeral" } }[] {
+  return [{ type: "text", text, cache_control: { type: "ephemeral" } }];
+}
+
+/** Best-effort visibility into whether caching actually fired on a call.
+ *  cache_creation_input_tokens > 0 means this call WROTE the cache;
+ *  cache_read_input_tokens > 0 means a later call within the ~5-minute TTL
+ *  REUSED it at ~10% of input price. Both fields are simply absent (not an
+ *  error) on stub results or when the prefix is under the model's minimum. */
+export function logCacheUsage(label: string, usage: Anthropic.Message["usage"]): void {
+  const u = usage as Anthropic.Message["usage"] & {
+    cache_creation_input_tokens?: number;
+    cache_read_input_tokens?: number;
+  };
+  console.log(
+    `[cache] ${label}: input=${usage.input_tokens} output=${usage.output_tokens} ` +
+      `cache_creation=${u.cache_creation_input_tokens ?? 0} cache_read=${u.cache_read_input_tokens ?? 0}`,
+  );
+}
+
 let _client: Anthropic | null = null;
 function getClient(): Anthropic | null {
   if ((process.env.NODE_ENV === "test" || process.env.VITEST) && process.env.ALLOW_LIVE_LLM_TESTS !== "1") return null;
@@ -69,13 +101,7 @@ export async function extractStructured<T>(params: ExtractParams<T>): Promise<LL
       // minimum cacheable length the directive is simply ignored — safe either
       // way. The shared central refresh is the only caller, so this is a direct
       // cost win on the pipeline that has to scale cheaply.
-      system: [
-        {
-          type: "text",
-          text: params.systemPrompt,
-          cache_control: { type: "ephemeral" },
-        },
-      ],
+      system: cachedSystemBlock(params.systemPrompt),
       tools: [
         {
           name: params.schema.name,
@@ -99,6 +125,8 @@ export async function extractStructured<T>(params: ExtractParams<T>): Promise<LL
     );
     throw Object.assign(enriched, { status, anthropicType: apiType, cause: err });
   }
+
+  logCacheUsage(`extractStructured:${params.schema.name}`, message.usage);
 
   const toolUse = message.content.find((b): b is Anthropic.ToolUseBlock => b.type === "tool_use");
   if (!toolUse) throw new Error("LLM returned no tool_use block");

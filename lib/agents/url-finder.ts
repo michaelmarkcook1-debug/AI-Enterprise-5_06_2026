@@ -20,6 +20,7 @@
  */
 
 import Anthropic from "@anthropic-ai/sdk";
+import { cachedSystemBlock, logCacheUsage } from "./llm-client";
 
 const DEFAULT_MODEL = process.env.ANTHROPIC_MODEL ?? "claude-sonnet-4-6";
 const WEB_SEARCH_TOOL_TYPE = "web_search_20260209" as const;
@@ -166,7 +167,12 @@ Find the current canonical ${input.category.replace(/_/g, " ")} page on ${input.
   const message = await client.messages.create({
     model: DEFAULT_MODEL,
     max_tokens: 2048,
-    system: SYSTEM_PROMPT,
+    // Static instruction (~280 tokens incl. the numbered rubric) — the
+    // largest of the mechanical pipeline prompts, but still below typical
+    // cacheable-prefix minimums, so this is a correct no-op today (see
+    // cachedSystemBlock's doc-comment), not a current cost saving. Low call
+    // volume (bursty dead-URL repairs) makes the dollar impact small either way.
+    system: cachedSystemBlock(SYSTEM_PROMPT),
     tools: [
       {
         type: WEB_SEARCH_TOOL_TYPE,
@@ -179,6 +185,8 @@ Find the current canonical ${input.category.replace(/_/g, " ")} page on ${input.
     // first and only call our reporter tool at the end.
     messages: [{ role: "user", content: userPrompt }],
   });
+
+  logCacheUsage(`url-finder:${input.vendorId}:${input.category}`, message.usage);
 
   // Count web searches actually used (server tool reports them in usage).
   const searchesUsed = (message.usage as { server_tool_use?: { web_search_requests?: number } }).server_tool_use?.web_search_requests ?? 0;

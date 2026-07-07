@@ -15,6 +15,7 @@
 // 400 / silent-zero-findings failure modes.
 
 import Anthropic from "@anthropic-ai/sdk";
+import { cachedSystemBlock, logCacheUsage } from "../agents/llm-client";
 import { getPrisma, hasDatabase } from "../prisma";
 import { classifyEvidence } from "../agents/evidence-classifier";
 import type { ExtractedProposal } from "../agents/evidence-extractor";
@@ -126,10 +127,16 @@ Use up to ${MAX_SEARCHES_PER_VENDOR} web_search calls to find real enterprise-AI
       const r = await client.messages.create({
         model: HAIKU_MODEL,
         max_tokens: 4000,
-        system: SYSTEM,
+        // Static instruction (~350 tokens incl. the dimension list + grading
+        // rubric) — the largest static prompt in this pipeline, but still
+        // well under Haiku 4.5's ~4,096-token cacheable-prefix minimum, so
+        // this is a correct no-op today (see cachedSystemBlock's doc-comment),
+        // not a current cost saving.
+        system: cachedSystemBlock(SYSTEM),
         tools,
         messages,
       } as unknown as Anthropic.MessageCreateParamsNonStreaming);
+      logCacheUsage(`web-evidence-runner:${vendorId}:attempt${attempt}`, r.usage);
       searchesUsed += (r.usage as { server_tool_use?: { web_search_requests?: number } }).server_tool_use?.web_search_requests ?? 0;
       stopReason = r.stop_reason ?? "";
       for (const b of r.content) {
