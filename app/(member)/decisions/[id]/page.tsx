@@ -13,12 +13,14 @@ import {
   rankVendorsByComposite,
   normalizeWeights,
   activeDomains,
+  effectiveDomains,
   type DomainWeights,
 } from "@/lib/assessment/composite";
 import type { DomainId } from "@/lib/types";
 import DataUnavailable from "@/components/DataUnavailable";
 import DecisionNameEditor from "@/components/member/DecisionNameEditor";
 import DeleteDecisionButton from "@/components/member/DeleteDecisionButton";
+import ExportPackLinks from "@/components/export/ExportPackLinks";
 
 export const dynamic = "force-dynamic";
 
@@ -64,20 +66,13 @@ export default async function DecisionDetailPage({ params }: { params: Promise<P
       ? await getVendorScorecardsBatch(shortlistIds).catch(() => new Map<string, VendorScorecard>())
       : new Map<string, VendorScorecard>();
 
-  const activatesModelQuality = composite ? (composite.resolvedDomainWeights.model_quality ?? 0) > 0 : false;
-  const activatesDevSentiment = composite ? (composite.resolvedDomainWeights.dev_sentiment ?? 0) > 0 : false;
-  const effectiveDomains = (sc: VendorScorecard | undefined): DomainScore[] => {
-    if (!sc) return [];
-    const extra: DomainScore[] = [];
-    if (activatesModelQuality && sc.modelQuality) extra.push(sc.modelQuality);
-    if (activatesDevSentiment && sc.devSentiment) extra.push(sc.devSentiment);
-    return extra.length > 0 ? [...sc.domains, ...extra] : sc.domains;
-  };
+  const effectiveDomainsFor = (sc: VendorScorecard | undefined): DomainScore[] =>
+    sc && composite ? effectiveDomains(sc.domains, sc, composite.resolvedDomainWeights) : [];
 
   const noteByVendor = new Map(decision.shortlist.map((s) => [s.vendorId, s.note]));
   const ranked = composite
     ? rankVendorsByComposite(
-        shortlistIds.map((vid) => ({ vendorId: vid, domains: effectiveDomains(scorecards.get(vid)) })),
+        shortlistIds.map((vid) => ({ vendorId: vid, domains: effectiveDomainsFor(scorecards.get(vid)) })),
         decision.weights,
       )
     : [];
@@ -126,6 +121,10 @@ export default async function DecisionDetailPage({ params }: { params: Promise<P
                   : `Showing current data as of ${fmtDate(asOfIso)}.`}
             </p>
           )}
+
+          <div className="mb-4">
+            <ExportPackLinks href={`/api/member/decisions/${decision.id}/export`} />
+          </div>
 
           <section className={CARD}>
             <h2 className="text-sm font-semibold text-[#13294b] dark:text-[#eef3f8]">Your saved weights</h2>

@@ -10,7 +10,7 @@ import TrackButton from "@/components/member/TrackButton";
 import { getVendorScorecardsBatch, type VendorScorecard } from "@/lib/assessment/domain-scores";
 import type { DomainScore } from "@/lib/assessment/domain-rubric";
 import { DOMAIN_LABEL } from "@/lib/assessment/domain-labels";
-import { activeDomains, type DomainWeights } from "@/lib/assessment/composite";
+import { activeDomains, effectiveDomains, type DomainWeights } from "@/lib/assessment/composite";
 import type { DomainId } from "@/lib/types";
 import { INTERACTIVE_ASSESSMENT_ENABLED, INTERROGATE_ENABLED } from "@/lib/availability";
 import { getMemberOrTest } from "@/lib/member/auth";
@@ -19,6 +19,7 @@ import { getRankMovements, type RankMovement } from "@/lib/intelligence/rank-mov
 import RankMovementIndicator from "@/components/ranking/RankMovementIndicator";
 import TabChat from "@/components/chat/TabChat";
 import CompetitiveIntelHeatmap from "@/components/assessment/CompetitiveIntelHeatmap";
+import ExportPackLinks from "@/components/export/ExportPackLinks";
 
 // force-dynamic (not ISR): rankings are DB-backed + recalculated each pipeline
 // run, so the page must reflect the live data immediately — never serve a stale
@@ -56,18 +57,11 @@ export default async function CategoryPage({ params }: { params: Promise<Params>
   // plus model_quality where the category activates it. Drives the domain strip
   // and the re-rank so both match the static ranking's coverage denominator.
   const activeOrder: DomainId[] = activeDomains(resolvedDomainWeights);
-  const activatesModelQuality = (resolvedDomainWeights.model_quality ?? 0) > 0;
-  const activatesDevSentiment = (resolvedDomainWeights.dev_sentiment ?? 0) > 0;
   // A vendor's domain set for THIS category: framework domains + the synthesized
   // model_quality / dev_sentiment scores when active (else absent → insufficient).
   // Must match category-composite's effFor so the static order and the re-rank agree.
-  const effectiveDomains = (sc: VendorScorecard | undefined): DomainScore[] => {
-    if (!sc) return [];
-    const extra: DomainScore[] = [];
-    if (activatesModelQuality && sc.modelQuality) extra.push(sc.modelQuality);
-    if (activatesDevSentiment && sc.devSentiment) extra.push(sc.devSentiment);
-    return extra.length > 0 ? [...sc.domains, ...extra] : sc.domains;
-  };
+  const effectiveDomainsFor = (sc: VendorScorecard | undefined): DomainScore[] =>
+    sc ? effectiveDomains(sc.domains, sc, resolvedDomainWeights) : [];
 
   // Phase 3 — per-vendor 12-domain evidence scorecards (deterministic, no LLM,
   // batched into one query). Used for the compact domain strip under each vendor.
@@ -88,7 +82,7 @@ export default async function CategoryPage({ params }: { params: Promise<Params>
     ? [...ranked, ...incomplete].flatMap((v) => {
         const sc = scorecards.get(v.vendorId);
         return sc
-          ? [{ vendorId: v.vendorId, vendorName: v.vendorName, vendorSlug: v.vendorSlug, domains: effectiveDomains(sc) }]
+          ? [{ vendorId: v.vendorId, vendorName: v.vendorName, vendorSlug: v.vendorSlug, domains: effectiveDomainsFor(sc) }]
           : [];
       })
     : [];
@@ -116,6 +110,11 @@ export default async function CategoryPage({ params }: { params: Promise<Params>
               ? `Sector rankings as of ${asOf.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })} — refreshed nightly, computed once per sector`
               : "Sector rankings computed live"}
           </p>
+        )}
+        {isLive && (
+          <div className="mt-3">
+            <ExportPackLinks href={`/api/export/procurement-pack?category=${slug}`} />
+          </div>
         )}
       </header>
 
@@ -191,7 +190,7 @@ export default async function CategoryPage({ params }: { params: Promise<Params>
                     </p>
                   )}
                   <PillarContributionTable vendor={v} />
-                  <DomainStrip domains={effectiveDomains(scorecards.get(v.vendorId))} order={activeOrder} />
+                  <DomainStrip domains={effectiveDomainsFor(scorecards.get(v.vendorId))} order={activeOrder} />
                 </li>
               ))}
             </ol>
@@ -214,7 +213,7 @@ export default async function CategoryPage({ params }: { params: Promise<Params>
                       <span className={`text-[11px] ${MUTED}`}>{v.excludedReason}</span>
                     </div>
                     <PillarContributionTable vendor={v} />
-                    <DomainStrip domains={effectiveDomains(scorecards.get(v.vendorId))} order={activeOrder} />
+                    <DomainStrip domains={effectiveDomainsFor(scorecards.get(v.vendorId))} order={activeOrder} />
                   </li>
                 ))}
               </ul>
@@ -252,7 +251,7 @@ export default async function CategoryPage({ params }: { params: Promise<Params>
             .map((v) => {
               const sc = scorecards.get(v.vendorId);
               return sc
-                ? { vendorId: v.vendorId, vendorName: v.vendorName, vendorSlug: v.vendorSlug, domains: effectiveDomains(sc) }
+                ? { vendorId: v.vendorId, vendorName: v.vendorName, vendorSlug: v.vendorSlug, domains: effectiveDomainsFor(sc) }
                 : null;
             })
             .filter((v): v is NonNullable<typeof v> => v !== null)}

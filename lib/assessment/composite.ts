@@ -60,6 +60,25 @@ export function activeDomains(weights: Partial<DomainWeights>): DomainId[] {
   return RANKABLE_DOMAIN_ORDER.filter((d) => weights[d] !== undefined);
 }
 
+/**
+ * A vendor's domain set for a given weight profile: the 12 framework domains
+ * plus the category-scoped model_quality/dev_sentiment scores ONLY when the
+ * profile activates them (weight > 0) AND the vendor actually has that score —
+ * else the framework 12 alone. Single source of truth for this merge so the
+ * static ranking, the interactive re-rank, and any export/derived view can
+ * never quietly disagree about which domains are in scope for a vendor.
+ */
+export function effectiveDomains(
+  domains: DomainScore[],
+  extras: { modelQuality?: DomainScore | null; devSentiment?: DomainScore | null },
+  resolvedWeights: Partial<DomainWeights>,
+): DomainScore[] {
+  const extra: DomainScore[] = [];
+  if ((resolvedWeights.model_quality ?? 0) > 0 && extras.modelQuality) extra.push(extras.modelQuality);
+  if ((resolvedWeights.dev_sentiment ?? 0) > 0 && extras.devSentiment) extra.push(extras.devSentiment);
+  return extra.length > 0 ? [...domains, ...extra] : domains;
+}
+
 /** A vendor below this share of weight-on-scored-domains is "held" rather than
  *  ranked — you cannot re-weight your way out of thin coverage. Matches the
  *  rankings engine's COVERAGE_FLOOR. */

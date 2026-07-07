@@ -54,6 +54,7 @@ import { getVendorScorecard, getModelQualityBreakdown } from "@/lib/assessment/d
 import { MODEL_QUALITY_CATEGORIES } from "@/lib/system/model-quality-blend";
 import DomainScorecard from "@/components/assessment/DomainScorecard";
 import WeightedScorecard from "@/components/assessment/WeightedScorecard";
+import ExportPackLinks from "@/components/export/ExportPackLinks";
 import PrepKitPanel from "@/components/assessment/PrepKitPanel";
 
 export const dynamic = "force-dynamic";
@@ -801,7 +802,10 @@ export default async function VendorDeepDivePage({
           </section>
           {hasEvidence && scorecard ? (
             <section className="mb-6">
-              <Panel title="Enterprise assessment — evidence scorecard">
+              <Panel
+                title="Enterprise assessment — evidence scorecard"
+                action={<ExportPackLinks href={`/api/export/procurement-pack?vendor=${entity.slug}`} label="Export" />}
+              >
                 {INTERACTIVE_ASSESSMENT_ENABLED ? (
                   <WeightedScorecard
                     scorecard={scorecard}
