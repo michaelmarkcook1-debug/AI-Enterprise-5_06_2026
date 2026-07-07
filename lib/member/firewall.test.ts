@@ -26,12 +26,22 @@ describe("member firewall", () => {
     expect(block!).not.toMatch(/IntelligenceVendor|IntelligencePillarScore|VendorRankingSnapshot/);
   });
 
+  it("MemberDecisionShare relates only to MemberDecision/Subscriber — no link to any score/ranking table", () => {
+    const schema = readFileSync(join(ROOT, "prisma/schema.prisma"), "utf8");
+    const block = schema.match(/model MemberDecisionShare \{[\s\S]*?\n\}/)?.[0];
+    expect(block).toBeTruthy();
+    expect(block!).toMatch(/subscriber\s+Subscriber/);
+    expect(block!).toMatch(/decision\s+MemberDecision/);
+    expect(block!).not.toMatch(/IntelligenceVendor|IntelligencePillarScore|VendorRankingSnapshot/);
+  });
+
   it("no member module writes a vendor score or imports the score writer", () => {
     const files = [
       "lib/member/auth.ts",
       "lib/member/watchlist.ts",
       "lib/member/track.ts",
       "lib/member/decisions.ts",
+      "lib/member/decision-shares.ts",
       "app/api/auth/request/route.ts",
       "app/api/auth/callback/route.ts",
       "app/api/auth/signout/route.ts",
@@ -39,6 +49,8 @@ describe("member firewall", () => {
       "app/api/member/track/route.ts",
       "app/api/member/decisions/route.ts",
       "app/api/member/decisions/[id]/route.ts",
+      "app/api/member/decisions/[id]/shares/route.ts",
+      "app/api/member/decisions/[id]/shares/[shareId]/route.ts",
     ];
     const SCORE_WRITE = /\.(intelligenceVendor|intelligencePillarScore)\.(update|upsert|create|updateMany|createMany)/;
     const SCORE_FIELD = /overallScore|confidenceScore|capabilityScore/;
@@ -49,5 +61,17 @@ describe("member firewall", () => {
       expect(src, `${f} must not touch a score field`).not.toMatch(SCORE_FIELD);
       expect(src, `${f} must not import the score writer`).not.toMatch(SCORE_WRITER_IMPORT);
     }
+  });
+
+  it("the public shared-decision page has no dependency on member session machinery and takes no decisionId param", () => {
+    const src = readFileSync(join(ROOT, "app/(public)/shared/[token]/page.tsx"), "utf8");
+    // Must not import the member session resolver at all — a token alone is
+    // the authorization; this page must never be able to fall back to "am I
+    // logged in" logic.
+    expect(src).not.toMatch(/getMemberOrTest|getMember\(/);
+    // The only route param this page declares is `token` — no decisionId
+    // slot for a caller to smuggle a different decision's id through.
+    expect(src).toMatch(/type Params = \{ token: string \}/);
+    expect(src).not.toMatch(/decisionId/);
   });
 });

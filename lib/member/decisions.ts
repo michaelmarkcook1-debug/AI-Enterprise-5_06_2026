@@ -104,7 +104,11 @@ export function sanitizeDecision(input: unknown): SanitizeResult {
   return { ok: true, data: { name, category, weights, shortlist, asOfDate } };
 }
 
-function toView(row: {
+/** Exported so lib/member/decision-shares.ts's PUBLIC (unauthenticated) read
+ *  path can render a MemberDecision row fetched by id — via the share token,
+ *  never via getMemberDecision (which requires a subscriberId the visitor
+ *  doesn't have) — without a second hand-copy of this row→view mapping. */
+export function toView(row: {
   id: string;
   name: string;
   category: string;

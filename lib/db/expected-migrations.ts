@@ -20,7 +20,8 @@ export const EXPECTED_MIGRATIONS: readonly string[] = [
   "20260629000000_add_model_quality_benchmarks",
   "20260701000000_add_sector_ranking_cache",
   "20260707000000_add_member_decisions",
+  "20260707010000_add_member_decision_shares",
 ];
 
 /** The newest migration the code ships with (last in chronological order). */
-export const LATEST_EXPECTED_MIGRATION = "20260707000000_add_member_decisions" as const;
+export const LATEST_EXPECTED_MIGRATION = "20260707010000_add_member_decision_shares" as const;

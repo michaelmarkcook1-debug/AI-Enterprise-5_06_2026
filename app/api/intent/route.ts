@@ -7,6 +7,7 @@
 import { z } from "zod";
 import { anonSessionHash } from "@/lib/http/anon-session";
 import { rateLimit } from "@/lib/http/rate-limit";
+import { redactTokens } from "@/lib/http/redact-tokens";
 import { getPrisma, hasDatabase } from "@/lib/prisma";
 
 export const runtime = "nodejs";
@@ -44,8 +45,8 @@ export async function POST(request: Request): Promise<Response> {
         targetId: parsed.data.targetId ?? null,
         targetType: parsed.data.targetType ?? null,
         sessionHash: session,
-        referrer: parsed.data.referrer ?? null,
-        path: parsed.data.path ?? null,
+        referrer: redactTokens(parsed.data.referrer),
+        path: redactTokens(parsed.data.path),
       },
     });
   } catch {
