@@ -1,8 +1,9 @@
 // Procurement-pack CSV — one row per (vendor × domain). PURE string builder,
 // no I/O. An insufficient-evidence domain prints the literal string
-// "insufficient evidence" in every evidence-derived column — never a blank
+// "Insufficient evidence" in every evidence-derived column — never a blank
 // cell, never a zero standing in for "unscored" (0 would misread as a real
-// score of 0/5, which is not what "insufficient evidence" means).
+// score of 0/5, which is not what "Insufficient evidence" means). Same casing
+// as the live page's DomainScorecard.tsx badge — not a separate label.
 
 import type { ProcurementPackData } from "./procurement-pack";
 
@@ -20,7 +21,7 @@ const COLUMNS = [
   "insufficient_evidence",
 ] as const;
 
-const INSUFFICIENT = "insufficient evidence";
+const INSUFFICIENT = "Insufficient evidence";
 
 function csvField(value: string | number | boolean): string {
   const s = String(value);

@@ -195,7 +195,15 @@ export async function getVendorScorecard(vendorId: string, now: Date = new Date(
     const rows = (await getPrisma().evidenceRecord.findMany({
       where: { vendorId, reviewStatus: "analyst_verified" },
       select: EVIDENCE_SELECT,
-      orderBy: { capturedAt: "desc" },
+      // capturedAt alone is not a unique key — rows sharing the exact same
+      // timestamp (common when a batch of evidence lands in one ingestion
+      // run) have no guaranteed relative order from Postgres, and that order
+      // was observed to vary with how many OTHER vendors were in the same
+      // `IN (...)` query (e.g. a 1-vendor export vs. a 40-vendor category
+      // page could show a different "top"/first citation for the same
+      // domain). sourceUrl then id make the ordering fully deterministic
+      // regardless of batch size.
+      orderBy: [{ capturedAt: "desc" }, { sourceUrl: "desc" }, { id: "desc" }],
       take: 5000,
     })) as RawEvidenceRow[];
     const domains = scoreAllDomains(groupByDomain(rows), now);
@@ -223,7 +231,15 @@ export async function getVendorScorecardsBatch(
     const rows = (await getPrisma().evidenceRecord.findMany({
       where: { vendorId: { in: vendorIds }, reviewStatus: "analyst_verified" },
       select: { ...EVIDENCE_SELECT, vendorId: true },
-      orderBy: { capturedAt: "desc" },
+      // capturedAt alone is not a unique key — rows sharing the exact same
+      // timestamp (common when a batch of evidence lands in one ingestion
+      // run) have no guaranteed relative order from Postgres, and that order
+      // was observed to vary with how many OTHER vendors were in the same
+      // `IN (...)` query (e.g. a 1-vendor export vs. a 40-vendor category
+      // page could show a different "top"/first citation for the same
+      // domain). sourceUrl then id make the ordering fully deterministic
+      // regardless of batch size.
+      orderBy: [{ capturedAt: "desc" }, { sourceUrl: "desc" }, { id: "desc" }],
       take: 20000,
     })) as (RawEvidenceRow & { vendorId: string })[];
 

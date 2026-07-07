@@ -61,6 +61,13 @@ export async function GET(request: Request, ctx: { params: Promise<unknown> }): 
     asOfDate: asOf ? asOf.toISOString().slice(0, 10) : decision.asOfDate,
     generatedAt: new Date().toISOString(),
     weights: decision.weights,
+    // decision.weights can never carry model_quality/dev_sentiment
+    // (sanitizeDecision only persists the 12 framework domains) — pass the
+    // category's live resolved weights as the separate "which extra domains
+    // does this category activate" signal, same as the decision detail page's
+    // own effectiveDomains() call, so the pack never silently drops a domain
+    // the live page shows.
+    activationWeights: composite.resolvedDomainWeights,
     weightingLabel: `Saved decision weighting — "${decision.name}"`,
     vendorRefs,
   });

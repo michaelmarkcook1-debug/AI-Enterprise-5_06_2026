@@ -99,11 +99,12 @@ describe("procurementPackToCsv", () => {
     expect(row).toBeTruthy();
     const cells = parseCsvRow(row);
     // vendor,domain,score,band,weight_pct,evidence_count,top_source,evidence_grade,confidence,low_confidence,insufficient_evidence
-    expect(cells[2]).toBe("insufficient evidence"); // score
-    expect(cells[3]).toBe("insufficient evidence"); // band
-    expect(cells[6]).toBe("insufficient evidence"); // top_source
-    expect(cells[7]).toBe("insufficient evidence"); // evidence_grade
-    expect(cells[8]).toBe("insufficient evidence"); // confidence
+    // Casing matches the live page's DomainScorecard.tsx badge exactly — not a separate label.
+    expect(cells[2]).toBe("Insufficient evidence"); // score
+    expect(cells[3]).toBe("Insufficient evidence"); // band
+    expect(cells[6]).toBe("Insufficient evidence"); // top_source
+    expect(cells[7]).toBe("Insufficient evidence"); // evidence_grade
+    expect(cells[8]).toBe("Insufficient evidence"); // confidence
     expect(cells[10]).toBe("true"); // insufficient_evidence flag
     expect(row).not.toMatch(/,,/); // no empty (blank) cell anywhere
   });

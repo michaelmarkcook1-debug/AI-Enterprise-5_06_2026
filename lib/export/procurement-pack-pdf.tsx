@@ -159,7 +159,7 @@ function DomainBlock({ d }: { d: PackDomainRow }) {
       <View style={styles.domainBlock} wrap={false}>
         <View style={styles.domainHeaderRow}>
           <Text style={styles.domainName}>{d.label}</Text>
-          <Text style={[styles.badge, styles.badgeInsufficient]}>INSUFFICIENT EVIDENCE</Text>
+          <Text style={[styles.badge, styles.badgeInsufficient]}>Insufficient evidence</Text>
         </View>
         <Text style={[styles.small, styles.muted, { marginTop: 2 }]}>
           Weight in this pack: {d.weightPct}% (framework default: {d.defaultWeightPct}%). No reviewed evidence — this
@@ -177,7 +177,7 @@ function DomainBlock({ d }: { d: PackDomainRow }) {
         </View>
         <View style={{ alignItems: "flex-end" }}>
           <Text style={styles.scoreNum}>{d.score!.toFixed(1)}/5</Text>
-          {d.lowConfidence && <Text style={[styles.badge, styles.badgeLowConf]}>LOW CONFIDENCE</Text>}
+          {d.lowConfidence && <Text style={[styles.badge, styles.badgeLowConf]}>Low confidence</Text>}
         </View>
       </View>
       <Text style={[styles.small, { marginTop: 2 }]}>

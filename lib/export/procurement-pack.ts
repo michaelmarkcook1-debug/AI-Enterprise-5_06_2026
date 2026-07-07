@@ -17,6 +17,7 @@ import {
   computeWeightedComposite,
   normalizeWeights,
   activeDomains,
+  effectiveDomains,
   DEFAULT_DOMAIN_WEIGHTS,
   type DomainWeights,
 } from "../assessment/composite";
@@ -90,6 +91,15 @@ export interface BuildPackInput {
   asOfDate?: string | null;
   generatedAt: string;
   weights: Partial<DomainWeights>;
+  /** Which extra domains (model_quality/dev_sentiment) this category activates
+   *  — same signal app/(member)/decisions/[id]/page.tsx passes as the third
+   *  argument to effectiveDomains(). Defaults to `weights` itself, which is
+   *  correct for the category/vendor-view pathways (weights IS already the
+   *  category's own resolved profile there). A saved decision's weights
+   *  structurally cannot carry model_quality/dev_sentiment — sanitizeDecision
+   *  only ever persists the 12 framework domains — so the decision-export
+   *  route passes the category's live resolvedDomainWeights here explicitly. */
+  activationWeights?: Partial<DomainWeights>;
   weightingLabel: string;
   vendors: PackVendorInput[];
 }
@@ -130,16 +140,25 @@ function buildDomainRow(d: DomainScore, weightPct: number, defaultWeightPct: num
  * object drives every vendor's composite AND every domain's printed weight%,
  * so the PDF's "weighting used" column and its composite numbers can never
  * silently disagree with each other.
+ *
+ * Uses the SAME effectiveDomains() merge as the category and decision-detail
+ * pages: a vendor's domain list includes model_quality/dev_sentiment whenever
+ * this pack's activationWeights calls for them, so the pack can never silently
+ * drop a domain the live page shows (and its own summary text — "N domains"
+ * in the methodology note — can never disagree with the vendor pages' own
+ * domain count, the bug this fixed).
  */
 export function buildProcurementPackData(input: BuildPackInput): ProcurementPackData {
   const norm = normalizeWeights(input.weights);
   const defaultNorm = normalizeWeights(DEFAULT_DOMAIN_WEIGHTS);
+  const activationWeights = input.activationWeights ?? input.weights;
   const active = activeDomains(input.weights);
   const weightingIsDefault = active.every((d) => Math.abs((norm[d] ?? 0) - (defaultNorm[d] ?? 0)) < 1e-9);
 
   const vendors: PackVendorRow[] = input.vendors.map((v) => {
-    const weighted = computeWeightedComposite(v.scorecard.domains, input.weights);
-    const domains = v.scorecard.domains.map((d) =>
+    const effectiveDomainList = effectiveDomains(v.scorecard.domains, v.scorecard, activationWeights);
+    const weighted = computeWeightedComposite(effectiveDomainList, input.weights);
+    const domains = effectiveDomainList.map((d) =>
       buildDomainRow(d, Math.round((norm[d.domain] ?? 0) * 1000) / 10, Math.round((defaultNorm[d.domain] ?? 0) * 1000) / 10),
     );
     return {

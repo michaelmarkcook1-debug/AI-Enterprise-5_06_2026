@@ -125,4 +125,71 @@ describe("buildProcurementPackData", () => {
     const pack = buildProcurementPackData(baseInput({ generatedAt: "2020-01-01T00:00:00.000Z" }));
     expect(pack.generatedAt).toBe("2020-01-01T00:00:00.000Z");
   });
+
+  // Finding A regression: for a category that activates model_quality/dev_
+  // sentiment, the pack must include them — same effectiveDomains() merge as
+  // the category and decision-detail pages — never silently drop a domain
+  // the live page shows.
+  describe("effectiveDomains merge (Finding A)", () => {
+    const modelQuality = scored("model_quality", 4.5, [CIT_A]);
+    const devSentiment = scored("dev_sentiment", 3.8, [CIT_B]);
+
+    function scorecardWithExtras(): VendorScorecard {
+      return {
+        vendorId: "v1",
+        domains: ASSESSMENT_DOMAINS.map((d) => scored(d, 4)),
+        scoredCount: 12,
+        insufficientCount: 0,
+        hasAnyEvidence: true,
+        totalEvidenceRows: 20,
+        modelQuality,
+        devSentiment,
+      };
+    }
+
+    it("category/vendor-view pathway: weights alone activates the extra domains (no activationWeights needed)", () => {
+      const activating: Partial<DomainWeights> = { ...DEFAULT_DOMAIN_WEIGHTS, model_quality: 0.1, dev_sentiment: 0.2 };
+      const pack = buildProcurementPackData(
+        baseInput({ weights: activating, vendors: [{ vendorId: "v1", vendorName: "Acme AI", vendorSlug: "acme-ai", scorecard: scorecardWithExtras() }] }),
+      );
+      const domainIds = pack.vendors[0]!.domains.map((d) => d.domain);
+      expect(domainIds).toContain("model_quality");
+      expect(domainIds).toContain("dev_sentiment");
+      expect(pack.vendors[0]!.domains).toHaveLength(14);
+      // The composite must actually USE the extra domains, not just list them.
+      expect(pack.vendors[0]!.domainTotal).toBe(14);
+    });
+
+    it("saved-decision pathway: weights alone (12 keys) does NOT activate extras without activationWeights", () => {
+      const pack = buildProcurementPackData(
+        baseInput({ weights: DEFAULT_DOMAIN_WEIGHTS, vendors: [{ vendorId: "v1", vendorName: "Acme AI", vendorSlug: "acme-ai", scorecard: scorecardWithExtras() }] }),
+      );
+      const domainIds = pack.vendors[0]!.domains.map((d) => d.domain);
+      expect(domainIds).not.toContain("model_quality");
+      expect(domainIds).not.toContain("dev_sentiment");
+      expect(pack.vendors[0]!.domains).toHaveLength(12);
+    });
+
+    it("saved-decision pathway: activationWeights (the category's live resolvedDomainWeights) brings the extra domains in, even though weights (decision.weights) itself lacks those keys", () => {
+      const categoryResolvedWeights: Partial<DomainWeights> = { ...DEFAULT_DOMAIN_WEIGHTS, model_quality: 0.1, dev_sentiment: 0.2 };
+      const pack = buildProcurementPackData(
+        baseInput({
+          weights: DEFAULT_DOMAIN_WEIGHTS, // decision.weights — 12 keys only, as sanitizeDecision persists
+          activationWeights: categoryResolvedWeights, // composite.resolvedDomainWeights — has the extra keys
+          vendors: [{ vendorId: "v1", vendorName: "Acme AI", vendorSlug: "acme-ai", scorecard: scorecardWithExtras() }],
+        }),
+      );
+      const domainIds = pack.vendors[0]!.domains.map((d) => d.domain);
+      expect(domainIds).toContain("model_quality");
+      expect(domainIds).toContain("dev_sentiment");
+      expect(pack.vendors[0]!.domains).toHaveLength(14);
+    });
+
+    it("never merges in an extra domain the category doesn't activate, even if the vendor has a modelQuality score", () => {
+      const pack = buildProcurementPackData(
+        baseInput({ weights: DEFAULT_DOMAIN_WEIGHTS, vendors: [{ vendorId: "v1", vendorName: "Acme AI", vendorSlug: "acme-ai", scorecard: scorecardWithExtras() }] }),
+      );
+      expect(pack.vendors[0]!.domains).toHaveLength(12);
+    });
+  });
 });
