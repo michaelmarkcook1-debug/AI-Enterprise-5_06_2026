@@ -1,14 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { headers } from "next/headers";
 import { notFound } from "next/navigation";
-import { getMemberOrTest } from "@/lib/member/auth";
-import { getMemberDecision } from "@/lib/member/decisions";
+import { getSharedDecisionView } from "@/lib/member/decision-shares";
+import { rateLimit } from "@/lib/http/rate-limit";
+import { anonSessionHash } from "@/lib/http/anon-session";
 import { getCategoryCompositeWithMeta } from "@/lib/ranking/category-composite";
 import { getVendorScorecardsBatch, type VendorScorecard } from "@/lib/assessment/domain-scores";
 import { ENTITIES } from "@/lib/intelligence/entities";
 import { MARKET_CATEGORIES } from "@/lib/intelligence/seed";
 import { DOMAIN_LABEL } from "@/lib/assessment/domain-labels";
-import type { DomainScore } from "@/lib/assessment/domain-rubric";
 import {
   rankVendorsByComposite,
   normalizeWeights,
@@ -17,18 +18,22 @@ import {
 } from "@/lib/assessment/composite";
 import type { DomainId } from "@/lib/types";
 import DataUnavailable from "@/components/DataUnavailable";
-import DecisionNameEditor from "@/components/member/DecisionNameEditor";
-import DeleteDecisionButton from "@/components/member/DeleteDecisionButton";
-import ShareManager from "@/components/member/ShareManager";
 
+// PUBLIC, unauthenticated, read-only — no session, no cookie, no member/admin
+// chrome (this route lives under app/(public), which applies neither the
+// (member) login-redirect nor the (internal) admin gate). The share TOKEN is
+// the only credential; see lib/member/decision-shares.ts for the security
+// model. Deliberately NOT sharing JSX with the owner's decision page — a
+// separate, narrower implementation is the safer way to guarantee no
+// rename/delete/export owner control can ever leak into this view.
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Decision",
+  title: "Shared decision",
   robots: { index: false, follow: false },
 };
 
-type Params = { id: string };
+type Params = { token: string };
 
 const CARD = "rounded-xl border border-black/10 dark:border-white/10 bg-white/60 dark:bg-white/5 p-5";
 const MUTED = "text-[#15263c]/60 dark:text-[#eef3f8]/60";
@@ -38,28 +43,27 @@ function fmtDate(iso: string): string {
   return Number.isNaN(d.getTime()) ? iso : d.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
 }
 
-export default async function DecisionDetailPage({ params }: { params: Promise<Params> }) {
-  const { id } = await params;
-  const member = await getMemberOrTest();
-  if (!member) return null; // the (member) layout guards this; belt-and-suspenders.
+export default async function SharedDecisionPage({ params }: { params: Promise<Params> }) {
+  // Public route, no login required — rate-limited so it can't be hammered
+  // into DB/compute cost, or used to mass-confirm candidate tokens leaked via
+  // another channel. A limit hit renders the identical notFound() as any
+  // other failure — never a distinguishing 429, preserving "no error reveals
+  // existence" even under load.
+  const session = anonSessionHash({ headers: await headers() } as unknown as Request);
+  const rl = rateLimit(`shared-decision:${session}`, { limit: 30, windowMs: 60_000 });
+  if (!rl.allowed) notFound();
 
-  const decision = await getMemberDecision(member.subscriberId, id);
-  if (!decision) notFound();
+  const { token } = await params;
+  const shared = await getSharedDecisionView(token);
+  if (!shared) notFound();
+  const { decision, displayName } = shared;
 
   const categoryName = MARKET_CATEGORIES.find((c) => c.id === decision.category)?.name ?? decision.category;
-
-  // Re-apply the SAVED weights to CURRENT live scores — never a frozen snapshot.
-  // Same composite function the live category page and re-rank use, so this is
-  // an exact reproduction of what the member would see re-running their weights
-  // today, not a parallel calculation that could quietly disagree.
   const { composite, asOf } = await getCategoryCompositeWithMeta(decision.category);
-
   const asOfIso = asOf ? asOf.toISOString().slice(0, 10) : null;
-  const refreshedSince = !!(decision.asOfDate && asOfIso && decision.asOfDate !== asOfIso);
 
   const entityById = new Map(ENTITIES.map((e) => [e.id, e]));
   const shortlistIds = decision.shortlist.map((s) => s.vendorId).filter((vid) => entityById.has(vid));
-
   const scorecards: Map<string, VendorScorecard> =
     composite && shortlistIds.length > 0
       ? await getVendorScorecardsBatch(shortlistIds).catch(() => new Map<string, VendorScorecard>())
@@ -67,9 +71,9 @@ export default async function DecisionDetailPage({ params }: { params: Promise<P
 
   const activatesModelQuality = composite ? (composite.resolvedDomainWeights.model_quality ?? 0) > 0 : false;
   const activatesDevSentiment = composite ? (composite.resolvedDomainWeights.dev_sentiment ?? 0) > 0 : false;
-  const effectiveDomains = (sc: VendorScorecard | undefined): DomainScore[] => {
+  const effectiveDomains = (sc: VendorScorecard | undefined) => {
     if (!sc) return [];
-    const extra: DomainScore[] = [];
+    const extra = [];
     if (activatesModelQuality && sc.modelQuality) extra.push(sc.modelQuality);
     if (activatesDevSentiment && sc.devSentiment) extra.push(sc.devSentiment);
     return extra.length > 0 ? [...sc.domains, ...extra] : sc.domains;
@@ -83,57 +87,37 @@ export default async function DecisionDetailPage({ params }: { params: Promise<P
       )
     : [];
 
-  const droppedCount = decision.shortlist.length - shortlistIds.length;
   const weightDomains = activeDomains(decision.weights as Partial<DomainWeights>);
   const normWeights = normalizeWeights(decision.weights as Partial<DomainWeights>);
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-10">
-      <nav className={`mb-3 text-xs ${MUTED}`}>
-        <Link href="/decisions" className="underline underline-offset-2">My decisions</Link> · {categoryName}
-      </nav>
-
-      <header className="mb-6">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <DecisionNameEditor
-            id={decision.id}
-            name={decision.name}
-            category={decision.category}
-            weights={decision.weights}
-            shortlist={decision.shortlist}
-            asOfDate={decision.asOfDate}
-          />
-          <DeleteDecisionButton id={decision.id} name={decision.name} redirectTo="/decisions" />
-        </div>
-        <p className={`mt-2 text-sm ${MUTED}`}>
-          {categoryName} · {decision.shortlist.length} vendor{decision.shortlist.length === 1 ? "" : "s"} · saved{" "}
-          {fmtDate(decision.createdAt)}, updated {fmtDate(decision.updatedAt)}
-        </p>
-      </header>
-
-      <div className="mb-4">
-        <ShareManager decisionId={decision.id} />
-      </div>
+      <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-[#b08d2f] dark:text-[#d4af37]">
+        Shared decision — read only
+      </p>
+      <h1 className="font-display mt-2 text-3xl font-semibold tracking-tight">{decision.name}</h1>
+      <p className={`mt-2 text-sm ${MUTED}`}>
+        {categoryName} · {decision.shortlist.length} vendor{decision.shortlist.length === 1 ? "" : "s"}
+        {displayName ? ` · shared by ${displayName}` : ""}
+      </p>
+      <p className={`mt-1 text-xs ${MUTED}`}>
+        You&apos;re viewing a private weighting someone shared with you — no account needed, and you can&apos;t edit it.{" "}
+        <Link href="/" className="underline underline-offset-2">Explore AI Enterprise</Link> to build your own.
+      </p>
 
       {!composite ? (
-        <DataUnavailable
-          title="Live rankings unavailable for this category"
-          detail="This decision is saved and safe, but we can't currently recompute it against live data — this category has no eligible ranking right now. Your saved name, weights and shortlist are unaffected."
-        />
+        <div className="mt-6">
+          <DataUnavailable
+            title="Live rankings unavailable for this category"
+            detail="This shared decision is valid, but we can't currently recompute it against live data — this category has no eligible ranking right now."
+          />
+        </div>
       ) : (
         <>
-          {asOfIso && (
-            <p className={`mb-4 text-xs ${MUTED}`}>
-              {refreshedSince
-                ? `Evidence has been refreshed since you saved this decision — saved against data as of ${fmtDate(decision.asOfDate!)}, now showing data as of ${fmtDate(asOfIso)}.`
-                : decision.asOfDate
-                  ? `Live data is unchanged since you saved this decision (as of ${fmtDate(asOfIso)}).`
-                  : `Showing current data as of ${fmtDate(asOfIso)}.`}
-            </p>
-          )}
+          {asOfIso && <p className={`mt-4 mb-4 text-xs ${MUTED}`}>Showing current data as of {fmtDate(asOfIso)}.</p>}
 
           <section className={CARD}>
-            <h2 className="text-sm font-semibold text-[#13294b] dark:text-[#eef3f8]">Your saved weights</h2>
+            <h2 className="text-sm font-semibold text-[#13294b] dark:text-[#eef3f8]">Weighting used</h2>
             <div className="mt-3 grid grid-cols-1 gap-x-4 gap-y-1 sm:grid-cols-2">
               {weightDomains.map((d: DomainId) => (
                 <div key={d} className="flex items-center justify-between gap-2 text-[11px]">
@@ -147,13 +131,7 @@ export default async function DecisionDetailPage({ params }: { params: Promise<P
           </section>
 
           <section className={`${CARD} mt-4`}>
-            <h2 className="text-sm font-semibold text-[#13294b] dark:text-[#eef3f8]">Shortlist — re-ranked on current scores</h2>
-            {droppedCount > 0 && (
-              <p className={`mt-1 text-[11px] ${MUTED}`}>
-                {droppedCount} vendor{droppedCount === 1 ? "" : "s"} from the original shortlist could not be re-resolved and{" "}
-                {droppedCount === 1 ? "is" : "are"} omitted below.
-              </p>
-            )}
+            <h2 className="text-sm font-semibold text-[#13294b] dark:text-[#eef3f8]">Shortlist</h2>
             {ranked.length === 0 ? (
               <p className={`mt-2 text-sm ${MUTED}`}>No shortlisted vendors could be re-ranked.</p>
             ) : (
