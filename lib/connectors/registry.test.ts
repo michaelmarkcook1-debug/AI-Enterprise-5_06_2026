@@ -6,7 +6,7 @@ describe("connectors: registry", () => {
     const ids = Object.keys(CONNECTORS).sort();
     expect(ids).toEqual([
       "alphaVantage", "bea", "bls", "congress", "eia",
-      "federalRegister", "fiscalData", "fred", "gdelt", "github", "reddit", "reviews", "sec",
+      "federalRegister", "fiscalData", "fred", "gdelt", "github", "huggingface", "reddit", "reviews", "sec",
       "vendorDocs", "yahooFinance",
     ].sort());
   });
@@ -45,7 +45,7 @@ describe("connectors: registry", () => {
   });
 
   it("no-key connectors are always configured", () => {
-    for (const id of ["fiscalData", "gdelt", "federalRegister", "bls", "github"]) {
+    for (const id of ["fiscalData", "gdelt", "federalRegister", "bls", "github", "huggingface"]) {
       const h = CONNECTORS[id].health();
       expect(h.configured).toBe(true);
     }
@@ -53,7 +53,7 @@ describe("connectors: registry", () => {
 
   it("dashboardSummary counts roll up correctly", () => {
     const s = dashboardSummary();
-    expect(s.total).toBe(15);
+    expect(s.total).toBe(16);
     expect(s.configured + s.notConfigured).toBeLessThanOrEqual(s.total);
   });
 

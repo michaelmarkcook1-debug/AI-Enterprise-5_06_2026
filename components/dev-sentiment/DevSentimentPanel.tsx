@@ -3,7 +3,8 @@ import { DEV_SENTIMENT_COMPILED_AT } from "@/lib/dev-sentiment/data";
 
 // Developer-sentiment panel (Reputation-Tracker style) — coding vendors ONLY.
 // Server-safe (pure props). Shows the analyst-curated reading + tier + the
-// three cited sources + top cited threads, or an honest "insufficient" state.
+// cited sources (up to 4: HN, GitHub, SO survey, Hugging Face) + top cited
+// threads, or an honest "insufficient" state.
 // Never rendered for out-of-scope vendors (caller gates on aggregate !== null).
 
 const MUTED = "text-[#15263c]/60 dark:text-[#eef3f8]/60";
@@ -27,6 +28,7 @@ const SOURCE_LABEL: Record<string, string> = {
   github: "GitHub",
   stackoverflow_survey: "Stack Overflow survey",
   reddit: "Reddit",
+  huggingface: "Hugging Face",
 };
 
 export default function DevSentimentPanel({ agg }: { agg: DevSentimentAggregate }) {
@@ -37,7 +39,7 @@ export default function DevSentimentPanel({ agg }: { agg: DevSentimentAggregate 
       <div className="mb-2 flex flex-wrap items-center gap-2">
         <p className={`text-xs ${MUTED}`}>
           What developers actually say about {agg.subject} — from official dev sources (Hacker News,
-          GitHub, the Stack Overflow survey). Scoped to coding/developer models only.
+          GitHub, the Stack Overflow survey, Hugging Face). Scoped to coding/developer models only.
         </p>
         <span className="rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-800 dark:text-amber-200">
           Analyst-curated · directional
@@ -112,10 +114,12 @@ export default function DevSentimentPanel({ agg }: { agg: DevSentimentAggregate 
       </div>
 
       <p className={`mt-2 text-[11px] ${MUTED}`}>
-        Compiled {DEV_SENTIMENT_COMPILED_AT} from official APIs (HN Algolia, GitHub REST) + the
-        Stack Overflow Developer Survey. Engagement/adoption metrics are factual; the sentiment
-        reading is an analyst interpretation, tier- and coverage-gated — a labelled input, never
-        an authoritative score.
+        Compiled {DEV_SENTIMENT_COMPILED_AT} from official APIs (HN Algolia, GitHub REST, Hugging
+        Face Hub) + the Stack Overflow Developer Survey. Engagement/adoption metrics are factual;
+        the sentiment reading is an analyst interpretation of those cited metrics, graded and
+        weighted the same way as every other assessment domain — evidence-capped, tier- and
+        coverage-gated, contributing to the ranked composite where it clears the bar, and reading
+        honestly "insufficient" where it doesn't.
       </p>
     </div>
   );

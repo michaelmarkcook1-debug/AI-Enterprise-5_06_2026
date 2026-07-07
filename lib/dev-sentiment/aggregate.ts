@@ -26,6 +26,13 @@ const SOURCE_FLOOR: Record<DevSource, number> = {
   // Reddit is the most brigadeable source → a deliberately HIGH floor (net
   // upvotes across dedup'd threads) so an astroturf spike can't clear it.
   reddit: 3000,
+  // Hugging Face: floor is on LIKES (an authenticated account click — hard to
+  // mass-fake, the same friction profile as a GitHub star), not raw downloads
+  // (downloads can be inflated by mirrors / CI pulls, so they're reported as
+  // context but never gate the floor). 5,000 sits comfortably below every real
+  // open-weight vendor observed (smallest was ~10,300 cumulative org likes)
+  // while still requiring a genuinely substantial catalog, not one small repo.
+  huggingface: 5000,
 };
 
 export type DevSentimentState = "rated" | "insufficient_evidence";
@@ -103,7 +110,7 @@ export function aggregateDevSentiment(vendorId: string): DevSentimentAggregate |
     coverageNote:
       tier === "strong"
         ? "Strong, source-diverse signal — all three independent sources clear the volume floor."
-        : "Moderate signal — two independent sources clear the floor; directional, not authoritative.",
+        : "Moderate signal — two independent sources clear the floor; contributes at a discounted confidence, same as any moderately-evidenced domain.",
   };
 }
 

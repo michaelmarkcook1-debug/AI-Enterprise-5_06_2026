@@ -19,6 +19,7 @@ import { vendorDocsConnector } from "./vendorDocs";
 import { yahooFinanceConnector } from "./yahooFinance";
 import { redditConnector } from "./reddit";
 import { reviewsConnector } from "./reviews";
+import { huggingFaceConnector } from "./huggingface";
 
 // Loose typing here is deliberate — connectors take different query shapes.
 // The registry only needs the common health()/fetch() surface for listing.
@@ -38,6 +39,7 @@ export const CONNECTORS: Record<string, Connector<unknown, unknown>> = {
   yahooFinance: yahooFinanceConnector as unknown as Connector<unknown, unknown>,
   reddit: redditConnector as unknown as Connector<unknown, unknown>,
   reviews: reviewsConnector as unknown as Connector<unknown, unknown>,
+  huggingface: huggingFaceConnector as unknown as Connector<unknown, unknown>,
 };
 
 export function listConnectorHealth() {

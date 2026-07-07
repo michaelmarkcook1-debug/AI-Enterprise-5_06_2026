@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { redditConnector } from "../connectors/reddit";
+import { huggingFaceConnector } from "../connectors/huggingface";
 import { CONNECTORS } from "../connectors/registry";
 import { DEV_SENTIMENT_DATA } from "./data";
 import { aggregateDevSentiment, aggregateAllDevSentiment } from "./aggregate";
@@ -65,6 +66,34 @@ describe("Reddit source (wired, gated on credentials — never fabricated)", () 
   });
 });
 
+describe("Hugging Face source (real open-model adoption, no credentials required)", () => {
+  it("is registered as a connector and reports configured/ok (public API, no key needed)", () => {
+    expect(CONNECTORS.huggingface).toBeTruthy();
+    const h = huggingFaceConnector.health();
+    expect(h.configured).toBe(true);
+    expect(h.status).toBe("ok");
+    expect(h.requiresKey).toBe(false);
+  });
+
+  it("every huggingface DevSourceSignal cites the real https org URL and reports likes as signalWeight", () => {
+    for (const r of DEV_SENTIMENT_DATA) {
+      const hf = r.sources.find((s) => s.source === "huggingface");
+      if (!hf) continue;
+      expect(hf.measures, r.vendorId).toBe("adoption");
+      expect(hf.citations.length, r.vendorId).toBeGreaterThan(0);
+      for (const c of hf.citations) expect(c.url).toMatch(/^https:\/\/huggingface\.co\//);
+      expect(hf.signalWeight, r.vendorId).toBeGreaterThan(0);
+    }
+  });
+
+  it("closed-weight vendors never carry a fabricated huggingface entry", () => {
+    // Anthropic, OpenAI and Google are all in scope, but only vendors that
+    // genuinely publish open weights on Hugging Face may have this source.
+    const anthropic = DEV_SENTIMENT_DATA.find((r) => r.vendorId === "anthropic")!;
+    expect(anthropic.sources.find((s) => s.source === "huggingface")).toBeUndefined();
+  });
+});
+
 describe("scope is a hard rule", () => {
   it("out-of-scope vendors return null (never render the signal)", () => {
     expect(aggregateDevSentiment("salesforce")).toBeNull();
@@ -85,25 +114,43 @@ describe("scope is a hard rule", () => {
 
 describe("anti-gaming + coverage gates", () => {
   it("a source below its volume floor does not count toward diversity", () => {
-    // Mistral: single ageing HN source (~1,200 pts) below the 1,500 floor → insufficient.
+    // Mistral: single ageing HN source (~1,200 pts, below the 1,500 floor) +
+    // one real Hugging Face source (clears its floor) → still only 1 counting
+    // source → insufficient. Real HF adoption alone can't manufacture a 2nd
+    // independent source for THIS vendor — an honest, evidenced gap.
     const mistral = aggregateDevSentiment("mistral")!;
     expect(mistral.state).toBe("insufficient_evidence");
     expect(mistral.countingSources.length).toBeLessThan(2);
+    expect(mistral.countingSources).toContain("huggingface");
   });
 
-  it("one large source alone is still 'insufficient' (diversity required)", () => {
-    // Meta: HN below floor + one GitHub source → 1 counting source → insufficient.
+  it("Meta: real Hugging Face adoption (Llama family) closes the coverage gap GitHub alone couldn't", () => {
+    // HN stays below floor (665 < 1,500); GitHub (16,300★) + Hugging Face
+    // (56,053 likes, well above the 5,000 floor) → 2 counting sources → rated.
     const meta = aggregateDevSentiment("meta")!;
-    expect(meta.state).toBe("insufficient_evidence");
-    expect(meta.reading).toBeUndefined();
+    expect(meta.state).toBe("rated");
+    expect(meta.countingSources).toContain("github");
+    expect(meta.countingSources).toContain("huggingface");
+    expect(meta.countingSources).not.toContain("hackernews");
+    expect(meta.reading).toBeTruthy();
+    expect(meta.tier).toBe("moderate"); // 2 counting sources, not 3
   });
 
-  it("three floor-clearing sources → strong; two → moderate", () => {
+  it("four floor-clearing sources (openai/google) or three (deepseek/alibaba) → strong; Anthropic (no HF org) stays at its original three → strong", () => {
     expect(aggregateDevSentiment("anthropic")!.tier).toBe("strong");
     expect(aggregateDevSentiment("openai")!.tier).toBe("strong");
     expect(aggregateDevSentiment("google")!.tier).toBe("strong");
-    expect(aggregateDevSentiment("deepseek")!.tier).toBe("moderate");
-    expect(aggregateDevSentiment("alibaba")!.tier).toBe("moderate");
+    // DeepSeek + Alibaba upgrade from moderate (2 sources) to strong (3) now
+    // that a real, evidenced Hugging Face signal is included — not tuned, the
+    // same uniform HF methodology applied to every open-weight vendor.
+    expect(aggregateDevSentiment("deepseek")!.tier).toBe("strong");
+    expect(aggregateDevSentiment("alibaba")!.tier).toBe("strong");
+  });
+
+  it("Anthropic has no Hugging Face org (closed-weight vendor) — honestly omitted, never a fabricated zero", () => {
+    const anthropic = aggregateDevSentiment("anthropic")!;
+    const hf = anthropic.record.sources.find((s) => s.source === "huggingface");
+    expect(hf).toBeUndefined();
   });
 
   it("a rated vendor always carries a reading; an insufficient one never does", () => {

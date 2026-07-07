@@ -317,10 +317,12 @@ export function buildMethodologyNote(categoryId: string): string {
   const devSentimentNote = categoryActivatesDevSentiment(categoryId)
     ? ` Developer sentiment carries a fixed ${Math.round(DEV_SENTIMENT_WEIGHT * 100)}% weight in this ` +
       `coding category: what developers actually say, from official community sources (Hacker News, ` +
-      `GitHub, the Stack Overflow Developer Survey${""}) — mapped to a 0–5 level by a fixed published ` +
-      `table, coverage-gated (a model needs ≥2 independent sources over volume floors; a thin signal ` +
-      `reads insufficient and is coverage-discounted, never scored on noise), and anti-gaming-floored. ` +
-      `The weight is set by category rationale, never tuned to move a specific vendor.`
+      `GitHub, the Stack Overflow Developer Survey, Hugging Face Hub download/like data for open-weight ` +
+      `models — Reddit is wired but only activates once the owner registers API credentials) — mapped ` +
+      `to a 0–5 level by a fixed published table, coverage-gated (a model needs ≥2 independent sources ` +
+      `over volume floors; a thin signal reads insufficient and is coverage-discounted, never scored on ` +
+      `noise), and anti-gaming-floored. The weight is set by category rationale, never tuned to move a ` +
+      `specific vendor.`
     : "";
 
   return `${header}${modelQualityNote}${devSentimentNote} ${GENERIC_METHODOLOGY}`;

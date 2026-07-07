@@ -1,22 +1,35 @@
-// Developer-sentiment STARTER dataset — coding models.
+// Developer-sentiment dataset — coding models.
 // ──────────────────────────────────────────────────────
-// CURATED ANALYST data compiled 2026-07-04 from THREE ToS-compliant official
-// sources, every figure real and cited:
+// CURATED ANALYST data from FOUR ToS-compliant official sources, every figure
+// real and cited. Original three compiled 2026-07-04; Hugging Face added
+// 2026-07-07 (see lib/connectors/huggingface.ts):
 //   • Hacker News — via the Algolia public API (engagement / mindshare):
 //     thread counts + points, top threads linked to the real HN item.
 //   • GitHub — via the REST API (adoption): stars / forks / open issues on the
 //     vendor's flagship coding repo.
 //   • Stack Overflow 2025 Developer Survey (admiration): where the survey
 //     separately reports the model; omitted where it does not (honest gap).
-// Numbers are point-in-time (2026-07-04) — this space moves weekly; re-pull
-// before publish. The per-vendor `reading` is an analyst-curated qualitative
-// interpretation OF these cited signals (labelled directional in the UI), never
-// a measured score. HN metrics = ENGAGEMENT, not sentiment — never presented as
+//   • Hugging Face Hub API (adoption): cumulative downloads + likes across a
+//     vendor's official org, filtered to text-generation-capable models
+//     (pipeline_tag = text-generation, OR untagged with a recognized LLM-
+//     family tag — HF's auto-inferred pipeline_tag is unreliable for some
+//     vendors' repos, e.g. Mistral's own instruct models were mistagged
+//     `null`; a naive text-generation-only filter would have silently
+//     undercounted them by ~5x — fixed by also matching known architecture
+//     tags, applied identically to every vendor). Valid ONLY for vendors that
+//     publish open weights; closed-weight vendors (Anthropic) genuinely have
+//     no Hugging Face org and honestly omit the source, never a zero.
+// Numbers are point-in-time — this space moves weekly; re-pull before publish.
+// The per-vendor `reading` is an analyst-curated qualitative interpretation OF
+// these cited signals, tier- and coverage-gated exactly like every other
+// assessment domain (E-grade, confidence, coverage) — a graded, weighted
+// input like the rest of the framework, not a hedge-everything caveat on top
+// of one. HN metrics = ENGAGEMENT, not sentiment — never presented as
 // sentiment. Coverage-gating + volume floors live in aggregate.ts.
 
 import type { DevSentimentRecord } from "./types";
 
-export const DEV_SENTIMENT_COMPILED_AT = "2026-07-04";
+export const DEV_SENTIMENT_COMPILED_AT = "2026-07-07";
 
 const SO_2025 = {
   title: "AI — 2025 Stack Overflow Developer Survey",
@@ -103,6 +116,13 @@ export const DEV_SENTIMENT_DATA: DevSentimentRecord[] = [
         metric: "OpenAI GPT models top the SO survey for usage — 82% of developers used them for development work in the past year",
         citations: [SO_2025],
       },
+      {
+        source: "huggingface",
+        measures: "adoption",
+        signalWeight: 10268,
+        metric: "11,467,499 cumulative downloads · 10,268 cumulative likes across 5 text-generation models (the gpt-oss family) on the official openai Hugging Face org — OpenAI's first open-weight release line",
+        citations: [{ title: "openai on Hugging Face", url: "https://huggingface.co/openai", publisher: "Hugging Face", date: "2026-07-07" }],
+      },
     ],
     reading: {
       tag: "leaning_positive",
@@ -144,11 +164,18 @@ export const DEV_SENTIMENT_DATA: DevSentimentRecord[] = [
         metric: "Gemini Reasoning ranked the most-admired LLM in the SO survey (ahead of Claude Sonnet)",
         citations: [SO_2025],
       },
+      {
+        source: "huggingface",
+        measures: "adoption",
+        signalWeight: 18501,
+        metric: "10,714,017 cumulative downloads · 18,501 cumulative likes across 105 text-generation models (the Gemma family) on the official google Hugging Face org",
+        citations: [{ title: "google on Hugging Face", url: "https://huggingface.co/google", publisher: "Hugging Face", date: "2026-07-07" }],
+      },
     ],
     reading: {
       tag: "leaning_positive",
       rationale:
-        "Strong adoption (106k★ CLI) and the top SO admiration rank for Gemini Reasoning, with solid HN engagement. Developer coding mindshare on HN trails Anthropic but the signal is genuinely positive and source-diverse.",
+        "Strong adoption (106k★ CLI) and the top SO admiration rank for Gemini Reasoning, with solid HN engagement and real open-weight adoption via the Gemma family on Hugging Face. Developer coding mindshare on HN trails Anthropic but the signal is genuinely positive and source-diverse.",
     },
   },
 
@@ -178,11 +205,18 @@ export const DEV_SENTIMENT_DATA: DevSentimentRecord[] = [
         metric: "deepseek-ai/DeepSeek-Coder — 23,804★ · 2,870 forks · 166 open issues",
         citations: [{ title: "deepseek-ai/DeepSeek-Coder", url: "https://github.com/deepseek-ai/DeepSeek-Coder", publisher: "GitHub", date: "2026-07-04" }],
       },
+      {
+        source: "huggingface",
+        measures: "adoption",
+        signalWeight: 52641,
+        metric: "26,841,009 cumulative downloads · 52,641 cumulative likes across 81 text-generation models (V3 / R1 families) on the official deepseek-ai Hugging Face org — among the largest real open-model adoption footprints tracked",
+        citations: [{ title: "deepseek-ai on Hugging Face", url: "https://huggingface.co/deepseek-ai", publisher: "Hugging Face", date: "2026-07-07" }],
+      },
     ],
     reading: {
       tag: "leaning_positive",
       rationale:
-        "Consistent, engaged HN discussion around open-weight releases and solid repo adoption; developers rate it well on cost-per-quality. Two-source signal (no separate SO-survey line) → moderate, not strong.",
+        "Consistent, engaged HN discussion around open-weight releases, solid repo adoption, and a very large real Hugging Face adoption footprint (26.8M downloads, 52.6k likes across the V3/R1 catalog). Three independent sources → strong, not merely moderate.",
     },
   },
 
@@ -212,11 +246,18 @@ export const DEV_SENTIMENT_DATA: DevSentimentRecord[] = [
         metric: "QwenLM/Qwen3-Coder — 16,667★ · 1,211 forks · 108 open issues",
         citations: [{ title: "QwenLM/Qwen3-Coder", url: "https://github.com/QwenLM/Qwen3-Coder", publisher: "GitHub", date: "2026-07-04" }],
       },
+      {
+        source: "huggingface",
+        measures: "adoption",
+        signalWeight: 50431,
+        metric: "182,013,941 cumulative downloads · 50,431 cumulative likes across 305 text-generation models (the Qwen family) on the official Qwen Hugging Face org — the largest cumulative download count of any tracked vendor",
+        citations: [{ title: "Qwen on Hugging Face", url: "https://huggingface.co/Qwen", publisher: "Hugging Face", date: "2026-07-07" }],
+      },
     ],
     reading: {
       tag: "leaning_positive",
       rationale:
-        "Strong, growing HN mindshare for the open-weight Qwen-Coder line (repeated flagship-coding launches well received) plus real repo adoption. Two-source signal → moderate; developers praise open-weight coding quality.",
+        "Strong, growing HN mindshare for the open-weight Qwen-Coder line (repeated flagship-coding launches well received), real repo adoption, and by far the largest Hugging Face download footprint of any tracked vendor (182M+ across the Qwen catalog). Three independent sources → strong; developers praise open-weight coding quality.",
     },
   },
 
@@ -239,25 +280,37 @@ export const DEV_SENTIMENT_DATA: DevSentimentRecord[] = [
           { title: "Codestral Mamba", points: 485, comments: 138, date: "2024-07-16", url: "https://news.ycombinator.com/item?id=40977103" },
         ],
       },
+      {
+        source: "huggingface",
+        measures: "adoption",
+        signalWeight: 25755,
+        metric: "10,580,671 cumulative downloads · 25,755 cumulative likes across 36 text-generation models on the official mistralai Hugging Face org — real open-model adoption, but HN discussion of the coding-specific Codestral line has not kept pace",
+        citations: [{ title: "mistralai on Hugging Face", url: "https://huggingface.co/mistralai", publisher: "Hugging Face", date: "2026-07-07" }],
+      },
     ],
-    // Single-source, older + modest → aggregate.ts will read this "insufficient".
+    // HN is below its floor and HF, while real, is one source alone → still only
+    // 1 counting source (need ≥2) → aggregate.ts correctly reads "insufficient".
+    // Genuine open-model adoption exists (Hugging Face); it's the coding-specific
+    // developer-forum discussion that remains thin — an honest, evidenced gap,
+    // not one Hugging Face alone can close for THIS vendor.
     reading: {
       tag: "mixed",
       rationale:
-        "Codestral drew interest at its 2024 launches but HN discussion has since thinned and there is no separate flagship coding-agent repo or SO-survey line — a single, ageing source. Directional at best.",
+        "Codestral drew interest at its 2024 launches but HN discussion has since thinned, and there is no separate flagship coding-agent repo or SO-survey line. Real open-model adoption is visible on Hugging Face (10.6M downloads across the Mistral catalog), but that alone doesn't clear the 2-source diversity bar. Directional at best.",
     },
   },
 
-  // ── Meta / Code Llama — honestly thin ──────────────────────────────────────
+  // ── Meta / Llama family — previously read "insufficient" on HN+GitHub alone;
+  //    real Hugging Face adoption (added 2026-07-07) clears the gap honestly ──
   {
     vendorId: "meta",
-    subject: "Meta (Code Llama)",
+    subject: "Meta (Llama family / Code Llama)",
     sources: [
       {
         source: "hackernews",
         measures: "engagement",
         signalWeight: 665,
-        metric: "2 HN stories ≥50 points, both early-2024 · ~665 total points — Code Llama has since been effectively superseded",
+        metric: "2 HN stories ≥50 points, both early-2024 · ~665 total points — Code Llama has since been effectively superseded; general Llama releases draw less dedicated HN coding-thread discussion than the model's real-world adoption would suggest",
         citations: [
           { title: "Meta AI releases Code Llama 70B", url: "https://news.ycombinator.com/item?id=39178886", publisher: "Hacker News", date: "2024-01-29" },
         ],
@@ -272,7 +325,18 @@ export const DEV_SENTIMENT_DATA: DevSentimentRecord[] = [
         metric: "meta-llama/codellama — 16,300★ but a low-velocity, effectively archived repo (116 open issues, minimal recent activity)",
         citations: [{ title: "meta-llama/codellama", url: "https://github.com/meta-llama/codellama", publisher: "GitHub", date: "2026-07-04" }],
       },
+      {
+        source: "huggingface",
+        measures: "adoption",
+        signalWeight: 56053,
+        metric: "31,263,314 cumulative downloads · 56,053 cumulative likes across 56 text-generation models (the Llama family) on the official meta-llama Hugging Face org — the highest cumulative like-count of any tracked vendor, reflecting the Llama family's real weight as the de facto open-model base for local/self-hosted developer use",
+        citations: [{ title: "meta-llama on Hugging Face", url: "https://huggingface.co/meta-llama", publisher: "Hugging Face", date: "2026-07-07" }],
+      },
     ],
-    // Thin + stale → aggregate.ts reads "insufficient developer-sentiment data".
+    reading: {
+      tag: "leaning_positive",
+      rationale:
+        "Code Llama specifically is stale and effectively superseded, and dedicated coding-thread HN discussion of Meta's models remains thin. But the broader Llama family shows real, substantial developer adoption on Hugging Face — the highest cumulative like-count (56,053) of any tracked vendor and 31.3M downloads across 56 models — the clearest real-world signal that Llama is a widely-used open-weight base for coding and general developer workloads. GitHub + Hugging Face are two independent, floor-clearing sources; HN alone stays thin.",
+    },
   },
 ];

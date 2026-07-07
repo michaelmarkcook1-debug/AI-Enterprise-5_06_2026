@@ -17,7 +17,9 @@ describe("synthesizeDevSentimentDomain", () => {
   });
 
   it("moderate tier → lower confidence (engine-native discount), still scored", () => {
-    const d = synthesizeDevSentimentDomain("deepseek");
+    // Meta: GitHub + Hugging Face clear their floors (2 counting sources) but
+    // HN doesn't → moderate, not strong.
+    const d = synthesizeDevSentimentDomain("meta");
     expect(d!.state).toBe("scored");
     if (d!.state === "scored") {
       expect(d!.confidence).toBe(60);
@@ -25,8 +27,28 @@ describe("synthesizeDevSentimentDomain", () => {
     }
   });
 
+  it("real Hugging Face evidence upgrades an already-rated vendor's tier (deepseek/alibaba: moderate → strong)", () => {
+    // Not a coverage-gate flip like Meta — these were already "rated"; adding a
+    // real 3rd independent source raises confidence, same engine-native rule
+    // every other domain follows.
+    const deepseek = synthesizeDevSentimentDomain("deepseek");
+    const alibaba = synthesizeDevSentimentDomain("alibaba");
+    expect(deepseek!.state).toBe("scored");
+    expect(alibaba!.state).toBe("scored");
+    if (deepseek!.state === "scored") {
+      expect(deepseek!.confidence).toBe(90);
+      expect(deepseek!.lowConfidence).toBe(false);
+    }
+    if (alibaba!.state === "scored") {
+      expect(alibaba!.confidence).toBe(90);
+      expect(alibaba!.lowConfidence).toBe(false);
+    }
+  });
+
   it("insufficient vendors → null (coverage-discounted, never fabricated)", () => {
-    expect(synthesizeDevSentimentDomain("meta")).toBeNull();
+    // Mistral: HN below floor + one real Hugging Face source alone → still
+    // only 1 counting source (need ≥2) → stays insufficient even with real
+    // HF adoption evidence — an honest, evidenced gap, not fabricated relief.
     expect(synthesizeDevSentimentDomain("mistral")).toBeNull();
   });
 

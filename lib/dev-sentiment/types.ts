@@ -2,8 +2,8 @@
 // ─────────────────────────────────────────
 // A "what developers actually say" signal for CODING / developer models only,
 // from ToS-compliant official sources (Hacker News Algolia API, GitHub REST
-// API, the Stack Overflow Developer Survey). Same honesty contract as the rest
-// of the platform:
+// API, the Stack Overflow Developer Survey, the Hugging Face Hub API). Same
+// honesty contract as the rest of the platform:
 //   • every rated signal traces to a real, cited, dated source;
 //   • sentiment is an analyst-curated qualitative reading OF those cited signals
 //     — labelled as such, NEVER a measured score;
@@ -20,8 +20,13 @@
  *  reddit.ts, official OAuth API) but only populates once REDDIT_CLIENT_ID/
  *  SECRET are set — until then no reddit rows exist (never fabricated). Reddit
  *  is the most gameable source, so it carries the highest volume floor +
- *  brigading dedup (see aggregate.ts). */
-export type DevSource = "hackernews" | "github" | "stackoverflow_survey" | "reddit";
+ *  brigading dedup (see aggregate.ts). `huggingface` (lib/connectors/
+ *  huggingface.ts, public Hub API, no credentials required) measures real
+ *  open-model adoption — cumulative downloads + likes across a vendor's
+ *  official org — and is valid ONLY for vendors that publish open weights;
+ *  closed-weight vendors (e.g. Anthropic) honestly omit this source rather
+ *  than showing a zero. */
+export type DevSource = "hackernews" | "github" | "stackoverflow_survey" | "reddit" | "huggingface";
 
 /** Qualitative sentiment reading (analyst-curated from the cited signals). */
 export type DevSentimentTag = "positive" | "leaning_positive" | "mixed" | "leaning_negative" | "negative";
