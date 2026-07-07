@@ -834,6 +834,7 @@ model Subscriber {
   authTokens AuthToken[]
   sessions   MemberSession[]
   watchlist  MemberWatchlist?
+  decisions  MemberDecision[]
 
   @@index([status])
   @@index([email])
@@ -893,6 +894,38 @@ model MemberWatchlist {
   subscriber   Subscriber @relation(fields: [subscriberId], references: [id], onDelete: Cascade)
 
   @@map("member_watchlists")
+}
+
+/// Phase 2 — a member's private saved "decision": a named 12-domain weighting
+/// profile + shortlist for one category, so a re-weighted view can be reopened
+/// later instead of resetting on every visit. Sibling to MemberWatchlist, same
+/// firewall: NO foreign key to any score/ranking table, ids stored as plain
+/// strings/JSON, one-way reads only. UNLIKE MemberWatchlist (one row per
+/// subscriber), this is one-to-MANY — a member can save several named decisions.
+/// A saved weighting is a PRIVATE LENS: it is read back and recomputed against
+/// current live scores at view time, never written into any shared/global
+/// weight or the published composite.
+model MemberDecision {
+  id           String     @id @default(cuid())
+  subscriberId String     @map("subscriber_id")
+  name         String
+  category     String
+  /// Record<DomainId, number> — the 12-domain weighting, exactly the shape the
+  /// Interrogate sliders already use client-side.
+  weights      Json
+  /// { vendorId: string; note?: string }[] — validated against real vendor
+  /// ids before persist (see lib/member/decisions.ts sanitizeDecision).
+  shortlist    Json       @default("[]")
+  /// The freshest evidence/publish date the weighting profile was built
+  /// against (plain string, e.g. "2026-07-06") — compared against current data
+  /// freshness at reopen time to show "refreshed since <date>", never a live join.
+  asOfDate     String?    @map("as_of_date")
+  createdAt    DateTime   @default(now()) @map("created_at")
+  updatedAt    DateTime   @updatedAt @map("updated_at")
+  subscriber   Subscriber @relation(fields: [subscriberId], references: [id], onDelete: Cascade)
+
+  @@index([subscriberId])
+  @@map("member_decisions")
 }
 
 // ── IT-services / GSI delivery-partnership layer ─────────────────────────────

@@ -235,6 +235,7 @@ export default async function CategoryPage({ params }: { params: Promise<Params>
                   signedIn: !!interrogateMember,
                   scope: { kind: "category", categoryId: slug },
                 }}
+                asOfDate={asOf ? asOf.toISOString().slice(0, 10) : null}
               />
             </div>
           )}

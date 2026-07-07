@@ -42,6 +42,7 @@ export default function CategoryRerank({
   vendors,
   defaultWeights = DEFAULT_DOMAIN_WEIGHTS,
   interrogate,
+  asOfDate,
 }: {
   vendors: RerankVendor[];
   /** The per-category resolved default weights (the SAME ones the static ranking
@@ -51,6 +52,10 @@ export default function CategoryRerank({
   /** Wave-3: when present + enabled, renders the member-gated Interrogate panel
    *  whose context re-run drives these same sliders. Absent → Wave-2 behaviour. */
   interrogate?: InterrogateConfig;
+  /** The category's evidence freshness date (YYYY-MM-DD) — threaded through to
+   *  "Save this weighting as a decision" so a saved decision knows what data it
+   *  was computed against, for a later "refreshed since" comparison. */
+  asOfDate?: string | null;
 }) {
   // The category's active domains, in canonical order — what the sliders render.
   const domainList = useMemo(() => activeDomains(defaultWeights), [defaultWeights]);
@@ -102,6 +107,9 @@ export default function CategoryRerank({
             activeDomains={domainList}
             vendorIds={vendors.map((v) => v.vendorId)}
             onApplyLens={(next) => setSliders((s) => ({ ...s, ...next }))}
+            currentSliders={sliders}
+            rankedVendorIds={computed.ranked.map((v) => v.vendorId)}
+            asOfDate={asOfDate}
           />
         </div>
       )}

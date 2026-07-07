@@ -18,16 +18,27 @@ describe("member firewall", () => {
     expect(block!).not.toMatch(/\bWatchlist\b(?!s")/);
   });
 
+  it("MemberDecision relates only to Subscriber — no link to any score/ranking table", () => {
+    const schema = readFileSync(join(ROOT, "prisma/schema.prisma"), "utf8");
+    const block = schema.match(/model MemberDecision \{[\s\S]*?\n\}/)?.[0];
+    expect(block).toBeTruthy();
+    expect(block!).toMatch(/subscriber\s+Subscriber/);
+    expect(block!).not.toMatch(/IntelligenceVendor|IntelligencePillarScore|VendorRankingSnapshot/);
+  });
+
   it("no member module writes a vendor score or imports the score writer", () => {
     const files = [
       "lib/member/auth.ts",
       "lib/member/watchlist.ts",
       "lib/member/track.ts",
+      "lib/member/decisions.ts",
       "app/api/auth/request/route.ts",
       "app/api/auth/callback/route.ts",
       "app/api/auth/signout/route.ts",
       "app/api/member/watchlist/route.ts",
       "app/api/member/track/route.ts",
+      "app/api/member/decisions/route.ts",
+      "app/api/member/decisions/[id]/route.ts",
     ];
     const SCORE_WRITE = /\.(intelligenceVendor|intelligencePillarScore)\.(update|upsert|create|updateMany|createMany)/;
     const SCORE_FIELD = /overallScore|confidenceScore|capabilityScore/;

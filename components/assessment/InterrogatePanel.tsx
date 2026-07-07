@@ -16,6 +16,7 @@ import { DOMAIN_LABEL } from "@/lib/assessment/domain-labels";
 import type { DomainId } from "@/lib/types";
 import type { SessionLens } from "@/lib/assessment/session-lens";
 import { MEMBER_FEATURES_VISIBLE } from "@/lib/availability";
+import SaveDecisionButton from "./SaveDecisionButton";
 
 export interface InterrogateConfig {
   /** Paid-depth flag (INTERROGATE_ENABLED) resolved server-side. */
@@ -73,6 +74,9 @@ export default function InterrogatePanel({
   activeDomains,
   vendorIds,
   onApplyLens,
+  currentSliders,
+  rankedVendorIds,
+  asOfDate,
 }: {
   config: InterrogateConfig;
   /** The island's active domain set — labels the delta explanation. */
@@ -81,6 +85,17 @@ export default function InterrogatePanel({
   vendorIds?: string[];
   /** Feed the returned adjusted weights into the island's slider state. */
   onApplyLens: (sliders: Record<DomainId, number>) => void;
+  /** The island's LIVE slider values right now (may differ from any applied
+   *  lens — the member can drag sliders after a re-run). Required to save a
+   *  decision; the save button hides without it. */
+  currentSliders?: Record<DomainId, number>;
+  /** The vendors currently RANKED (not held) — what "Save as decision" snapshots
+   *  as the shortlist. Distinct from `vendorIds` (the full in-scope set fed to
+   *  the interrogate re-rank call). */
+  rankedVendorIds?: string[];
+  /** The category's evidence freshness date (YYYY-MM-DD) at render time —
+   *  stored on the decision so a later reopen can show "refreshed since". */
+  asOfDate?: string | null;
 }) {
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<ContextForm>(EMPTY_FORM);
@@ -166,13 +181,23 @@ export default function InterrogatePanel({
     <div className={`${CARD} mb-4`}>
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <div className={KICKER}>Interrogate — re-run through your context</div>
-        <button
-          type="button"
-          onClick={() => setOpen((o) => !o)}
-          className="rounded-full border border-[#d6c9a8] px-3 py-1 text-xs font-medium text-[#4c5d75] hover:bg-white dark:border-[#2a4a6b] dark:text-[#a7bacd] dark:hover:bg-[#0c2238]"
-        >
-          {open ? "Hide" : lens ? "Refine context & re-run" : "Add your context"}
-        </button>
+        <div className="flex items-center gap-2">
+          {config.scope.kind === "category" && currentSliders && rankedVendorIds && (
+            <SaveDecisionButton
+              category={config.scope.categoryId}
+              weights={currentSliders}
+              shortlist={rankedVendorIds}
+              asOfDate={asOfDate ?? null}
+            />
+          )}
+          <button
+            type="button"
+            onClick={() => setOpen((o) => !o)}
+            className="rounded-full border border-[#d6c9a8] px-3 py-1 text-xs font-medium text-[#4c5d75] hover:bg-white dark:border-[#2a4a6b] dark:text-[#a7bacd] dark:hover:bg-[#0c2238]"
+          >
+            {open ? "Hide" : lens ? "Refine context & re-run" : "Add your context"}
+          </button>
+        </div>
       </div>
 
       {!open && !lens && (

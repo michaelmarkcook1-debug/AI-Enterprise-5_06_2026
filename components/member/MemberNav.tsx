@@ -33,6 +33,9 @@ export default function MemberNav({ email }: { email: string }) {
           <Link href="/watchlist" className="rounded-md px-3 py-1.5 font-medium text-[#c8d7e9] hover:text-white">
             My watchlist
           </Link>
+          <Link href="/decisions" className="rounded-md px-3 py-1.5 font-medium text-[#c8d7e9] hover:text-white">
+            My decisions
+          </Link>
           <Link href="/vendors" className="rounded-md px-3 py-1.5 font-medium text-[#c8d7e9] hover:text-white">
             Rankings
           </Link>
