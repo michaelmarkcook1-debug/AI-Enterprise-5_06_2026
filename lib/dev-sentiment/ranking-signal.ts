@@ -37,6 +37,15 @@ const TIER_TO_CONFIDENCE: Record<string, number> = {
   moderate: 60,
 };
 
+/** Human-readable source names for the dynamic per-vendor label. */
+const SOURCE_SHORT_LABEL: Record<string, string> = {
+  hackernews: "HN",
+  github: "GitHub",
+  stackoverflow_survey: "Stack Overflow",
+  reddit: "Reddit",
+  huggingface: "Hugging Face",
+};
+
 /** Synthesize the `dev_sentiment` DomainScore for a vendor, or null when the
  *  aggregate is out-of-scope OR insufficient (→ coverage-discounted, not faked). */
 export function synthesizeDevSentimentDomain(
@@ -54,6 +63,12 @@ export function synthesizeDevSentimentDomain(
     .slice(0, 3)
     .map((c) => ({ sourceUrl: c.url, evidenceGrade: "E3" as const, capturedAt: `${DEV_SENTIMENT_COMPILED_AT}T00:00:00.000Z` }));
 
+  // Dynamic label: the sources that ACTUALLY cleared the floor for THIS
+  // vendor, not a static "every possible source" list — the static label is
+  // wrong for e.g. a vendor scored via GitHub + Hugging Face alone.
+  const sourceNames = agg.countingSources.map((s) => SOURCE_SHORT_LABEL[s] ?? s).join(" · ");
+  const label = `Developer Sentiment (${sourceNames})`;
+
   const band = Math.round(score) as DomainBand;
   return {
     domain: "dev_sentiment",
@@ -67,5 +82,6 @@ export function synthesizeDevSentimentDomain(
     bestGrade: "E3", // curated tri-source community signal — directional, capped
     evidenceCount: agg.countingSources.length,
     citations,
+    label,
   };
 }

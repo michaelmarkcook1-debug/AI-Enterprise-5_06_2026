@@ -45,6 +45,27 @@ describe("synthesizeDevSentimentDomain", () => {
     }
   });
 
+  it("label reflects the ACTUAL counting sources per vendor, not a static full-list claim", () => {
+    // Meta: GitHub + Hugging Face counted; HN did NOT (below floor) — the label
+    // must not claim HN as if it drove the score.
+    const meta = synthesizeDevSentimentDomain("meta");
+    expect(meta!.state).toBe("scored");
+    if (meta!.state === "scored") {
+      expect(meta!.label).toBe("Developer Sentiment (GitHub · Hugging Face)");
+      expect(meta!.label).not.toMatch(/HN/);
+    }
+    // Anthropic: three original sources, no Hugging Face org → unaffected.
+    const anthropic = synthesizeDevSentimentDomain("anthropic");
+    if (anthropic!.state === "scored") {
+      expect(anthropic!.label).toBe("Developer Sentiment (HN · GitHub · Stack Overflow)");
+    }
+    // DeepSeek: now GitHub + HN + Hugging Face (3 sources, upgraded to strong).
+    const deepseek = synthesizeDevSentimentDomain("deepseek");
+    if (deepseek!.state === "scored") {
+      expect(deepseek!.label).toBe("Developer Sentiment (HN · GitHub · Hugging Face)");
+    }
+  });
+
   it("insufficient vendors → null (coverage-discounted, never fabricated)", () => {
     // Mistral: HN below floor + one real Hugging Face source alone → still
     // only 1 counting source (need ≥2) → stays insufficient even with real

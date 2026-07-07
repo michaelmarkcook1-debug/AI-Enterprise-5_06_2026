@@ -134,6 +134,12 @@ export interface ScoredDomainScore {
   bestGrade: EvidenceGrade;
   evidenceCount: number;
   citations: DomainCitation[];
+  /** Optional per-vendor display-name override. Most domains use the static
+   *  DOMAIN_LABEL[domain] everywhere; dev_sentiment sets this dynamically to
+   *  the sources that ACTUALLY cleared the floor for THIS vendor (e.g. "GitHub
+   *  · Hugging Face" vs "HN · GitHub · Stack Overflow") — the static label
+   *  can't be per-vendor accurate since which sources count varies by vendor. */
+  label?: string;
 }
 
 export type DomainScore = ScoredDomainScore | InsufficientDomainScore;

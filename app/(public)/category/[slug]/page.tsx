@@ -298,7 +298,7 @@ function DomainStrip({ domains, order }: { domains: DomainScore[]; order: Domain
         return (
           <span
             key={id}
-            title={`${DOMAIN_LABEL[id]}: ${scored ? `${d!.score.toFixed(1)}/5` : "insufficient evidence"}`}
+            title={`${(scored && d!.label) || DOMAIN_LABEL[id]}: ${scored ? `${d!.score.toFixed(1)}/5` : "insufficient evidence"}`}
             className={`inline-flex h-6 min-w-[2.1rem] items-center justify-center rounded px-1 font-mono text-[10px] tabular-nums ${
               scored
                 ? tone(d!.band)

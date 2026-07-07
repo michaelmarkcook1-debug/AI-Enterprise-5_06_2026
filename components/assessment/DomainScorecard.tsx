@@ -25,7 +25,10 @@ function barTone(band: number): string {
 }
 
 function ScoreRow({ d }: { d: DomainScore }) {
-  const name = DOMAIN_LABEL[d.domain];
+  // Most domains use the static framework label; dev_sentiment (and any future
+  // domain with a per-vendor-varying named-source set) sets `label` dynamically
+  // so this never shows a source that didn't actually clear the bar for THIS vendor.
+  const name = (d.state === "scored" && d.label) || DOMAIN_LABEL[d.domain];
   const pillar = PILLAR_LABEL[d.pillar] ?? d.pillar;
 
   if (d.state === "insufficient_evidence") {
