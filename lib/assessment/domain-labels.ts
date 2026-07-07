@@ -18,5 +18,5 @@ export const DOMAIN_LABEL: Record<DomainId, string> = {
   vendor_maturity_lockin: "Vendor Maturity, Lock-In & Exit",
   capital_resilience: "Capital Resilience & Strategic Dependency",
   market_position: "Market Position",
-  dev_sentiment: "Developer Sentiment (HN · GitHub · SO survey)",
+  dev_sentiment: "Developer Sentiment (HN · GitHub · SO survey · Hugging Face)",
 };
