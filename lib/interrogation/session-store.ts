@@ -16,7 +16,8 @@
 
 import { getPrisma, hasDatabase } from "../prisma";
 import type { CostColumns } from "./cost";
-import type { IntentProfile, Finding, EvidenceItem } from "./types";
+import type { IntentProfile, Finding, EvidenceItem, InterrogationMode } from "./types";
+import { DEFAULT_INTERROGATION_MODE } from "./types";
 
 export const DEFAULT_ORG_ID = "org_default";
 export const DEFAULT_SEAT_ID = "seat_default";
@@ -81,10 +82,19 @@ CREATE TABLE IF NOT EXISTS "ai_finding" (
 );
 `;
 
+// Additive column on the table above (Prompt: quick/comprehensive toggle).
+// CREATE TABLE IF NOT EXISTS is a no-op once the table already exists in
+// prod, so a new column needs its own idempotent ALTER — same pattern
+// lib/pool/incentive.ts already established for this table family.
+const ALTER_SQL = `
+ALTER TABLE "ai_interrogation_session" ADD COLUMN IF NOT EXISTS "mode" TEXT NOT NULL DEFAULT 'comprehensive';
+`;
+
 let tablesEnsured = false;
 async function ensureTables(): Promise<void> {
   if (tablesEnsured) return;
   await getPrisma().$executeRawUnsafe(CREATE_SQL);
+  await getPrisma().$executeRawUnsafe(ALTER_SQL);
   tablesEnsured = true;
 }
 
@@ -127,6 +137,7 @@ export interface SessionRow {
   seatId: string;
   orgId: string;
   status: SessionStatus;
+  mode: InterrogationMode;
   intentProfile: IntentProfile | null;
   turns: TurnRow[];
 }
@@ -136,6 +147,7 @@ export async function createSession(input: {
   openingText: string;
   seatId?: string;
   orgId?: string;
+  mode?: InterrogationMode;
 }): Promise<string> {
   requireDb();
   await ensureDefaults();
@@ -143,9 +155,10 @@ export async function createSession(input: {
   const sessionId = id("sess");
   const seatId = input.seatId ?? DEFAULT_SEAT_ID;
   const orgId = input.orgId ?? DEFAULT_ORG_ID;
+  const mode = input.mode ?? DEFAULT_INTERROGATION_MODE;
   await db.$executeRaw`
-    INSERT INTO "ai_interrogation_session" ("id", "seat_id", "org_id", "status")
-    VALUES (${sessionId}, ${seatId}, ${orgId}, 'in_progress')`;
+    INSERT INTO "ai_interrogation_session" ("id", "seat_id", "org_id", "status", "mode")
+    VALUES (${sessionId}, ${seatId}, ${orgId}, 'in_progress', ${mode})`;
   await db.$executeRaw`
     INSERT INTO "ai_interrogation_turn" ("id", "session_id", "ordinal", "role", "content")
     VALUES (${id("turn")}, ${sessionId}, 0, 'answer', ${input.openingText.slice(0, 4000)})`;
@@ -157,8 +170,8 @@ export async function getSession(sessionId: string): Promise<SessionRow | null> 
   await ensureTables();
   const db = getPrisma();
   const rows = await db.$queryRaw<
-    Array<{ id: string; seat_id: string; org_id: string; status: string; intent_profile: unknown }>
-  >`SELECT "id", "seat_id", "org_id", "status", "intent_profile"
+    Array<{ id: string; seat_id: string; org_id: string; status: string; mode: string; intent_profile: unknown }>
+  >`SELECT "id", "seat_id", "org_id", "status", "mode", "intent_profile"
       FROM "ai_interrogation_session" WHERE "id" = ${sessionId}`;
   const s = rows[0];
   if (!s) return null;
@@ -170,6 +183,7 @@ export async function getSession(sessionId: string): Promise<SessionRow | null> 
     seatId: s.seat_id,
     orgId: s.org_id,
     status: s.status as SessionStatus,
+    mode: (s.mode as InterrogationMode) || DEFAULT_INTERROGATION_MODE,
     intentProfile: (s.intent_profile as IntentProfile | null) ?? null,
     turns: turnRows.map((t) => ({ ordinal: Number(t.ordinal), role: t.role as TurnRow["role"], content: t.content })),
   };

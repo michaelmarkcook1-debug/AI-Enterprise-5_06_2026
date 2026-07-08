@@ -4,6 +4,7 @@ import {
   parseQuestionerResponse,
   MIN_QUESTIONS,
   MAX_TURNS,
+  QUICK_MODE_MAX_QUESTIONS,
   type QuestionerResponse,
 } from "./questioner";
 import type { IntentProfile } from "./types";
@@ -53,6 +54,40 @@ describe("decideAction — the stopping rule, enforced in code not the prompt", 
   it("bug-guard: force-concludes at MAX_TURNS regardless of the model's judgement", () => {
     const a = decideAction(MAX_TURNS, resp({ readyToConclude: false }));
     expect(a.action).toBe("ready");
+  });
+});
+
+describe("decideAction — maxQuestions (quick-response mode's real UX ceiling)", () => {
+  it("is a no-op when omitted — comprehensive mode behaves exactly as before", () => {
+    // No third arg at all: keeps asking past MIN_QUESTIONS when not ready,
+    // matching the pre-existing "uncapped" test above.
+    const a = decideAction(7, resp({ readyToConclude: false }));
+    expect(a.action).toBe("ask");
+  });
+
+  it("force-concludes once questionsAsked reaches maxQuestions, even mid-conversation", () => {
+    const a = decideAction(QUICK_MODE_MAX_QUESTIONS, resp({ readyToConclude: false }), QUICK_MODE_MAX_QUESTIONS);
+    expect(a.action).toBe("ready");
+  });
+
+  it("still asks below maxQuestions when the model isn't ready yet", () => {
+    const a = decideAction(QUICK_MODE_MAX_QUESTIONS - 1, resp({ readyToConclude: false }), QUICK_MODE_MAX_QUESTIONS);
+    expect(a.action).toBe("ask");
+  });
+
+  it("is unconditional — force-concludes at the cap even with an invalid profile, same reasoning as MAX_TURNS", () => {
+    const a = decideAction(QUICK_MODE_MAX_QUESTIONS, resp({ readyToConclude: false, profileValid: false }), QUICK_MODE_MAX_QUESTIONS);
+    expect(a.action).toBe("ready");
+  });
+
+  it("still respects the MIN_QUESTIONS floor when maxQuestions is above it", () => {
+    const a = decideAction(0, resp({ readyToConclude: true, profileValid: true }), QUICK_MODE_MAX_QUESTIONS);
+    expect(a.action).toBe("ask"); // MIN_QUESTIONS floor still applies below the cap
+  });
+
+  it("QUICK_MODE_MAX_QUESTIONS is a real, sane number: above MIN_QUESTIONS, below MAX_TURNS", () => {
+    expect(QUICK_MODE_MAX_QUESTIONS).toBeGreaterThan(MIN_QUESTIONS);
+    expect(QUICK_MODE_MAX_QUESTIONS).toBeLessThan(MAX_TURNS);
   });
 });
 

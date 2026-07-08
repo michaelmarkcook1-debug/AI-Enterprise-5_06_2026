@@ -34,9 +34,11 @@ export async function POST(request: Request): Promise<Response> {
   if (opening.length < 8 || opening.length > 2000) {
     return NextResponse.json({ error: "invalid_opening", detail: "Describe your situation in a sentence or two." }, { status: 400 });
   }
+  const rawMode = (body as { mode?: unknown })?.mode;
+  const mode = rawMode === "quick" ? "quick" : "comprehensive"; // any other/missing value → the existing default
 
   try {
-    const result = await startInterrogation({ openingText: opening });
+    const result = await startInterrogation({ openingText: opening, mode });
     return NextResponse.json(result);
   } catch (err) {
     const e = err as { status?: number; anthropicType?: string; message?: string };

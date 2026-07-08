@@ -8,6 +8,14 @@
 import type { IndustryTag } from "../use-cases";
 import type { SizeBandId, RegionId, Segment } from "../peer/segments";
 
+// ── Mode ──────────────────────────────────────────────────────────────────────
+/** Chosen once, at session start. "quick" caps the question count (see
+ *  QUICK_MODE_MAX_QUESTIONS in questioner.ts) — a real UX ceiling, distinct
+ *  from MAX_TURNS' bug-guard. "comprehensive" is the original behaviour: the
+ *  model decides when it has enough signal, MIN_QUESTIONS floor only. */
+export type InterrogationMode = "quick" | "comprehensive";
+export const DEFAULT_INTERROGATION_MODE: InterrogationMode = "comprehensive";
+
 // ── Intent profile ───────────────────────────────────────────────────────────
 // What the questioner distils the conversation down to before synthesis. The
 // three categorical dimensions are the REAL peer-taxonomy ids (chips are sourced
