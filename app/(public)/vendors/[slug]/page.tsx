@@ -60,7 +60,7 @@ import VendorPageShell, { type VendorTabKey } from "@/components/vendor/VendorPa
 import type { VerdictStanding } from "@/components/vendor/VerdictCard";
 import EvidenceTrail from "@/components/vendor/EvidenceTrail";
 import VendorDependencies from "@/components/vendor/VendorDependencies";
-import { summariseVerdict, verdictWhySentence } from "@/lib/assessment/verdict-summary";
+import { summariseVerdict, verdictWhySentence, verdictHeadline } from "@/lib/assessment/verdict-summary";
 
 export const dynamic = "force-dynamic";
 
@@ -773,9 +773,7 @@ export default async function VendorDeepDivePage({
     })();
 
     // Verdict card inputs (Prompt 2). Same strictCategoryStandings/scorecard
-    // reads above — no new query. summariseVerdict() is computeWeightedComposite
-    // under the framework default weights, the same pure function
-    // WeightedScorecard itself calls; the verdict shows the stable global read.
+    // reads above — no new query.
     const liveStanding = strictCategoryStandings.find((s) => s.isLive && s.standing.rank != null);
     const verdictStanding: VerdictStanding | null = liveStanding
       ? {
@@ -785,7 +783,16 @@ export default async function VendorDeepDivePage({
           rankedCount: liveStanding.rankedCount,
         }
       : null;
+    // summariseVerdict() is computeWeightedComposite under the framework DEFAULT
+    // weights (the global 12-domain read) — the source of the strengths/weaknesses
+    // ("strong on X, thin on Z"), which are per-domain score facts independent of
+    // basis. But the HEADLINE composite/confidence/coverage must be the in-category
+    // number when the vendor is ranked (verdictHeadline picks it), so the big number
+    // and the "#N of M in <category>" rank beside it agree — and match the identical
+    // assessmentComposite the category / compare / list / homepage surfaces render.
+    // Only an evidenced-but-unranked vendor falls back to the global number.
     const verdictSummary = scorecard ? summariseVerdict(scorecard.domains) : null;
+    const headline = verdictHeadline(liveStanding?.standing ?? null, verdictSummary);
 
     const availableTabs: VendorTabKey[] = [
       "assessment",
@@ -816,9 +823,9 @@ export default async function VendorDeepDivePage({
               vendorName={entity.name}
               vendorSlug={entity.slug}
               standing={verdictStanding}
-              composite={verdictSummary.composite}
-              confidence={verdictSummary.confidence}
-              coverage={verdictSummary.coverage}
+              composite={headline.composite}
+              confidence={headline.confidence}
+              coverage={headline.coverage}
               momentum={strictLast?.momentumScore ?? null}
               whySentence={verdictWhySentence(verdictSummary)}
               availableTabs={availableTabs}

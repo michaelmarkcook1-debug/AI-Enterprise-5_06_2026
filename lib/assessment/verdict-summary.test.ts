@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { ASSESSMENT_DOMAINS, type DomainScore, type DomainBand, type DomainBandLabel } from "./domain-rubric";
 import { DOMAIN_TO_PILLAR, type EvidenceGrade } from "../types";
-import { summariseVerdict, verdictWhySentence } from "./verdict-summary";
+import { summariseVerdict, verdictWhySentence, verdictHeadline, type VerdictSummary } from "./verdict-summary";
 
 function scored(domain: (typeof ASSESSMENT_DOMAINS)[number], score: number): DomainScore {
   const grade: EvidenceGrade = "E4";
@@ -41,6 +41,54 @@ describe("summariseVerdict", () => {
     const snapshot = JSON.stringify(domains);
     summariseVerdict(domains);
     expect(JSON.stringify(domains)).toBe(snapshot);
+  });
+});
+
+describe("verdictHeadline — the profile headline must match the category surfaces, never a shadow number", () => {
+  // A global 12-domain summary whose composite/order DISAGREES with the category
+  // basis — the exact real-world shape that caused the prod contradiction:
+  //   category:  Anthropic 3.39 > OpenAI 3.34   (winner: Anthropic)
+  //   global:    OpenAI 3.31   > Anthropic 2.87  (winner: OpenAI  ← flipped)
+  const anthropicGlobal: VerdictSummary = { composite: 2.87, coverage: 1, confidence: 80, strengths: [], weaknesses: [] };
+  const openaiGlobal: VerdictSummary = { composite: 3.31, coverage: 1, confidence: 78, strengths: [], weaknesses: [] };
+
+  it("uses the in-category composite (not the global fallback) when the vendor is ranked", () => {
+    const h = verdictHeadline({ assessmentComposite: 3.39, compositeConfidence: 82, domainCoverage: 1 }, anthropicGlobal);
+    expect(h.composite).toBe(3.39); // the category number every other surface shows
+    expect(h.composite).not.toBe(anthropicGlobal.composite); // NOT the global 2.87
+    expect(h.basis).toBe("category");
+  });
+
+  it("preserves the category winner across two profiles — the flipped global order can never surface", () => {
+    const anthropic = verdictHeadline({ assessmentComposite: 3.39, compositeConfidence: 82, domainCoverage: 1 }, anthropicGlobal);
+    const openai = verdictHeadline({ assessmentComposite: 3.34, compositeConfidence: 79, domainCoverage: 1 }, openaiGlobal);
+    // Both headlines are on the category basis → Anthropic > OpenAI, matching /category and /compare.
+    expect(anthropic.composite! > openai.composite!).toBe(true);
+    // Guard against the regression: had we used the global fallback, OpenAI (3.31) would beat Anthropic (2.87).
+    expect(openaiGlobal.composite > anthropicGlobal.composite).toBe(true);
+  });
+
+  it("takes confidence AND coverage from the SAME (category) basis — never a mixed-basis header", () => {
+    const h = verdictHeadline({ assessmentComposite: 3.39, compositeConfidence: 82, domainCoverage: 0.92 }, anthropicGlobal);
+    expect(h.confidence).toBe(82); // category confidence, not the global 80
+    expect(h.coverage).toBe(0.92); // category coverage
+  });
+
+  it("falls back to the global summary only when the vendor has NO live category ranking", () => {
+    const h = verdictHeadline(null, anthropicGlobal);
+    expect(h.composite).toBe(2.87);
+    expect(h.basis).toBe("global"); // no category number exists to contradict here
+  });
+
+  it("falls back to global when a standing exists but its composite is null (held/incomplete)", () => {
+    const h = verdictHeadline({ assessmentComposite: null, compositeConfidence: null, domainCoverage: 0 }, anthropicGlobal);
+    expect(h.composite).toBe(2.87);
+    expect(h.basis).toBe("global");
+  });
+
+  it("returns honest nulls when neither a category standing nor a global summary is available", () => {
+    const h = verdictHeadline(null, null);
+    expect(h).toEqual({ composite: null, confidence: null, coverage: null, basis: "none" });
   });
 });
 
