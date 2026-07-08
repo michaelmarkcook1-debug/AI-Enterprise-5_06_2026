@@ -3,6 +3,7 @@ import Link from "next/link";
 import { absoluteUrl } from "@/lib/site";
 import { getLiveModelInventory, type LiveModel } from "@/lib/model-inventory/live";
 import { buildFrontierComparison, summarizeFrontierComparison } from "@/lib/model-inventory/frontier";
+import { freshnessBadge, type FreshnessLevel } from "@/lib/model-inventory/freshness";
 import FrontierFaceOff from "@/components/models/FrontierFaceOff";
 import DataUnavailable from "@/components/DataUnavailable";
 
@@ -25,12 +26,35 @@ export const metadata: Metadata = {
 const CARD = "rounded-xl border border-black/10 dark:border-white/10 bg-white/60 dark:bg-white/5 p-5";
 const MUTED = "text-[#15263c]/60 dark:text-[#eef3f8]/60";
 
-function Stat({ label, value }: { label: string; value: string | number }) {
+const FRESHNESS_COLOR: Record<FreshnessLevel, string> = {
+  fresh: MUTED,
+  aging: MUTED,
+  stale: "text-amber-600 dark:text-amber-400",
+};
+
+function Stat({ label, value, hint }: { label: string; value: string | number; hint?: React.ReactNode }) {
   return (
     <div className={CARD}>
       <div className="text-2xl font-semibold tabular-nums">{value}</div>
-      <div className={`mt-1 text-xs ${MUTED}`}>{label}</div>
+      <div className={`mt-1 text-xs ${MUTED}`}>
+        {label}
+        {hint && <span className="ml-1">{hint}</span>}
+      </div>
     </div>
+  );
+}
+
+function FreshnessHint({ dateStr, now }: { dateStr: string | null | undefined; now: Date }) {
+  const badge = freshnessBadge(dateStr, now);
+  if (!badge) return null;
+  return (
+    <span
+      className={FRESHNESS_COLOR[badge.level]}
+      title="No newer LMArena leaderboard snapshot has been published yet — the app re-checks daily."
+    >
+      {" "}
+      ({badge.label})
+    </span>
   );
 }
 
@@ -50,6 +74,7 @@ function freshness(m: LiveModel): string {
 }
 
 export default async function ModelsPage() {
+  const now = new Date();
   const inv = await getLiveModelInventory();
   const frontier = buildFrontierComparison(inv);
   const frontierSummary = summarizeFrontierComparison(frontier);
@@ -78,13 +103,17 @@ export default async function ModelsPage() {
     <main className="mx-auto max-w-6xl px-4 py-10">
       {header}
 
-      <FrontierFaceOff comparison={frontier} summary={frontierSummary} />
+      <FrontierFaceOff comparison={frontier} summary={frontierSummary} now={now} />
 
       <section className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
         <Stat label="Models scored" value={inv.totalModels} />
         <Stat label="Vendors" value={inv.totalVendors} />
         <Stat label="Benchmark source" value={inv.sources.map((s) => (s === "lmarena" ? "LMArena" : s)).join(", ")} />
-        <Stat label="Freshest data" value={inv.freshestPublishDate ?? "—"} />
+        <Stat
+          label="Freshest data"
+          value={inv.freshestPublishDate ?? "—"}
+          hint={<FreshnessHint dateStr={inv.freshestPublishDate} now={now} />}
+        />
       </section>
 
       <section className={CARD}>
@@ -122,7 +151,10 @@ export default async function ModelsPage() {
                       ))}
                     </span>
                   </td>
-                  <td className="py-2 pr-4 whitespace-nowrap">{freshness(m)}</td>
+                  <td className="py-2 pr-4 whitespace-nowrap">
+                    {freshness(m)}
+                    <FreshnessHint dateStr={m.publishDate} now={now} />
+                  </td>
                   <td className="py-2 pr-4">
                     <a
                       href={m.sourceUrl}

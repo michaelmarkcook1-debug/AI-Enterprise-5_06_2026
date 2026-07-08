@@ -10,12 +10,29 @@
 import Link from "next/link";
 import type { FrontierColumn, FrontierComparison } from "@/lib/model-inventory/frontier";
 import { COMPARE_CATEGORIES } from "@/lib/model-inventory/frontier";
+import { freshnessBadge, type FreshnessLevel } from "@/lib/model-inventory/freshness";
 
 const CARD = "rounded-xl border border-black/10 dark:border-white/10 bg-white/60 dark:bg-white/5 p-5";
 const MUTED = "text-[#15263c]/60 dark:text-[#eef3f8]/60";
+const FRESHNESS_COLOR: Record<FreshnessLevel, string> = {
+  fresh: MUTED,
+  aging: MUTED,
+  stale: "text-amber-600 dark:text-amber-400",
+};
 
 function fmt(n: number | undefined): string {
   return typeof n === "number" ? Math.round(n).toLocaleString() : "—";
+}
+
+function Freshness({ dateStr, now }: { dateStr: string | null | undefined; now: Date }) {
+  const badge = freshnessBadge(dateStr, now);
+  if (!badge) return null;
+  return (
+    <span className={FRESHNESS_COLOR[badge.level]} title="No newer LMArena leaderboard snapshot has been published yet — the app re-checks daily.">
+      {" "}
+      ({badge.label})
+    </span>
+  );
 }
 
 function ColumnHead({ col }: { col: FrontierColumn }) {
@@ -32,7 +49,14 @@ function ColumnHead({ col }: { col: FrontierColumn }) {
       <Link href={`/vendors/${col.vendorId}`} className="text-sm font-semibold hover:underline underline-offset-2">
         {col.vendorName}
       </Link>
-      <div className={`mt-0.5 text-xs ${MUTED}`}>{col.modelName}</div>
+      <div className={`mt-0.5 text-xs ${MUTED}`} title="The vendor's highest-Elo model on this leaderboard — not necessarily their newest release, since a just-released model can rank below an established one until it accumulates enough arena votes.">
+        {col.modelName} <span className="italic">(highest-rated)</span>
+      </div>
+      {col.otherModels && col.otherModels.length > 0 && (
+        <p className={`mt-0.5 text-[10px] leading-tight ${MUTED}`}>
+          Also tracked: {col.otherModels.map((m) => m.modelName).join(", ")}
+        </p>
+      )}
       <div className="mt-1 flex flex-wrap items-center gap-1">
         {col.overallRank && (
           <span
@@ -58,9 +82,11 @@ function ColumnHead({ col }: { col: FrontierColumn }) {
 export default function FrontierFaceOff({
   comparison,
   summary,
+  now,
 }: {
   comparison: FrontierComparison;
   summary?: string | null;
+  now: Date;
 }) {
   const c = comparison;
   if (c.presentCount === 0) return null;
@@ -71,7 +97,12 @@ export default function FrontierFaceOff({
         <h2 className="font-[var(--font-display)] text-xl font-extrabold tracking-tight">
           Frontier model face-off
         </h2>
-        {c.asOf && <span className={`text-xs ${MUTED}`}>As of {c.asOf}</span>}
+        {c.asOf && (
+          <span className={`text-xs ${MUTED}`}>
+            As of {c.asOf}
+            <Freshness dateStr={c.asOf} now={now} />
+          </span>
+        )}
       </div>
       <p className={`${summary ? "mb-1" : "mb-4"} text-xs ${MUTED}`}>
         The four tracked frontier models, each vendor&apos;s single highest-rated model on independent
@@ -128,14 +159,17 @@ export default function FrontierFaceOff({
               {c.columns.map((col) => (
                 <td key={col.vendorId} className="pt-3 px-3 text-xs">
                   {col.present && col.sourceUrl ? (
-                    <a
-                      href={col.sourceUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="underline underline-offset-2"
-                    >
-                      LMArena{col.publishDate ? ` · ${col.publishDate}` : ""}
-                    </a>
+                    <>
+                      <a
+                        href={col.sourceUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="underline underline-offset-2"
+                      >
+                        LMArena{col.publishDate ? ` · ${col.publishDate}` : ""}
+                      </a>
+                      <Freshness dateStr={col.publishDate} now={now} />
+                    </>
                   ) : (
                     <span className={MUTED}>—</span>
                   )}
@@ -147,9 +181,15 @@ export default function FrontierFaceOff({
       </div>
 
       <p className={`mt-4 text-[11px] leading-4 ${MUTED}`}>
-        Every rating is an independent LMArena Elo score, cited and dated. A vendor shows only its single
-        highest-overall-Elo model — categories are never mixed in from a different model of the same
-        vendor. A missing vendor means no benchmarked model yet, never a low or zero score.
+        Every rating is an independent LMArena Elo score, cited and dated. A vendor&apos;s main column is
+        its single highest-overall-Elo model, chosen by rating — LMArena publishes no per-model release
+        date, so this is never a claim about which model is newest. A vendor can (and often does) have a
+        more recently released model still climbing the leaderboard below its established flagship; those
+        are listed under &quot;Also tracked&quot; rather than hidden. Categories are never mixed in from a
+        different model of the same vendor. A missing vendor means no benchmarked model yet, never a low
+        or zero score. We re-check this leaderboard daily; the date above is LMArena&apos;s own
+        last-published snapshot, not a delay on our side — an amber date means LMArena hasn&apos;t
+        published a newer one yet.
         {c.columns.some((col) => col.uncoveredWithOtherModel?.length) && (
           <>
             {" "}

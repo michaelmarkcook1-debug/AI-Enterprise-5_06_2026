@@ -65,6 +65,13 @@ export interface FrontierColumn {
   leadsCategory?: string;
   publishDate?: string | null;
   sourceUrl?: string;
+  /** The vendor's OTHER tracked models (real cited rows, same leaderboard),
+   *  by Elo descending — same ordering as the flagship pick, no recency claim
+   *  either way (LMArena publishes no per-model release date, so we never
+   *  guess one). Exists so a newly-released model that hasn't yet out-scored
+   *  the current flagship on Elo is still visible here, rather than silently
+   *  missing because it lost the "highest Elo" pick. */
+  otherModels?: { modelName: string; overall?: number }[];
 }
 
 export interface FrontierComparison {
@@ -127,6 +134,12 @@ export function buildFrontierComparison(inv: LiveModelInventory): FrontierCompar
         if (elsewhere) uncoveredWithOtherModel.push(c.key);
       }
     }
+    const otherModels = models
+      .filter((m) => m.modelName !== flagship.modelName)
+      .sort((a, b) => b.headlineRating - a.headlineRating)
+      .slice(0, 5)
+      .map((m) => ({ modelName: m.modelName, overall: m.categories.find((c) => c.category === "overall")?.rating }));
+
     return {
       vendorId,
       vendorName,
@@ -137,6 +150,7 @@ export function buildFrontierComparison(inv: LiveModelInventory): FrontierCompar
       overall: ratings.overall,
       publishDate: flagship.publishDate,
       sourceUrl: flagship.sourceUrl,
+      otherModels: otherModels.length ? otherModels : undefined,
     };
   });
 

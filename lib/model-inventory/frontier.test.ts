@@ -126,6 +126,42 @@ describe("buildFrontierComparison — honest, cited, no fabrication", () => {
     expect(anthropic.uncoveredWithOtherModel).toBeUndefined();
   });
 
+  it("surfaces a vendor's OTHER tracked models (never hides a newer-but-lower-Elo release)", () => {
+    // A vendor can have a just-released model still climbing the leaderboard
+    // below its established flagship — the flagship pick alone would make it
+    // invisible, so buildFrontierComparison must list it under otherModels.
+    const c = buildFrontierComparison(
+      inv([
+        model("anthropic", "claude-established-flagship", { overall: 1501 }),
+        model("anthropic", "claude-just-released", { overall: 1454 }),
+        model("openai", "gpt-x", { overall: 1470 }),
+      ]),
+    );
+    const anthropic = c.columns.find((x) => x.vendorId === "anthropic")!;
+    expect(anthropic.modelName).toBe("claude-established-flagship"); // still the highest-Elo pick
+    expect(anthropic.otherModels).toEqual([{ modelName: "claude-just-released", overall: 1454 }]);
+    const openai = c.columns.find((x) => x.vendorId === "openai")!;
+    expect(openai.otherModels).toBeUndefined(); // no other models → no empty array noise
+  });
+
+  it("caps otherModels at 5, by Elo descending", () => {
+    const c = buildFrontierComparison(
+      inv([
+        model("anthropic", "flagship", { overall: 1501 }),
+        ...Array.from({ length: 7 }, (_, i) => model("anthropic", `variant-${i}`, { overall: 1400 + i })),
+      ]),
+    );
+    const anthropic = c.columns.find((x) => x.vendorId === "anthropic")!;
+    expect(anthropic.otherModels).toHaveLength(5);
+    expect(anthropic.otherModels).toEqual([
+      { modelName: "variant-6", overall: 1406 },
+      { modelName: "variant-5", overall: 1405 },
+      { modelName: "variant-4", overall: 1404 },
+      { modelName: "variant-3", overall: 1403 },
+      { modelName: "variant-2", overall: 1402 },
+    ]);
+  });
+
   it("carries a real as-of date + cited source url, or null when no data", () => {
     const empty = buildFrontierComparison(inv([]));
     expect(empty.asOf).toBeNull();
