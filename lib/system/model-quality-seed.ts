@@ -2,14 +2,14 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // Fetches the live per-model indices (artificial-analysis-fetch.ts) and, for
 // each roster vendor, upserts one cited row per index category (intelligence /
-// coding / agentic) from that vendor's FLAGSHIP model only — the highest
-// Intelligence Index among its tracked models. All three rows for a vendor
-// always come from the same model (never mixed — that would misattribute a
-// score), and a model with no Intelligence Index is never eligible as
-// flagship. Idempotent; BARE vendor ids; skips vendors absent from the DB. On
-// fetch failure or missing API key, writes NOTHING (keeps the last good rows)
-// — never a fabricated value. Wired into the daily refresh in place of the
-// former LMArena-category seed.
+// coding / agentic) — each from the vendor's BEST model on THAT index, with
+// that model's own name on the row. Per-index best is the honest leaderboard
+// read (verified live: Cohere's best coding model is not its best overall
+// model), and because every row names its own model, a rating is never
+// attributed to a model that didn't earn it. Idempotent; BARE vendor ids;
+// skips vendors absent from the DB. On fetch failure or missing API key,
+// writes NOTHING (keeps the last good rows) — never a fabricated value.
+// Wired into the daily refresh in place of the former LMArena-category seed.
 
 import { getPrisma, hasDatabase } from "../prisma";
 import { fetchArtificialAnalysisModels, type AaModel } from "./artificial-analysis-fetch";
@@ -34,12 +34,19 @@ const EMPTY: ModelQualityBenchmarkSeedResult = {
   notFound: [],
 };
 
-/** This vendor's flagship: the model with the highest Intelligence Index.
- *  A model with no Intelligence Index can never be picked (nothing to score). */
-function flagshipFor(models: AaModel[]): AaModel | null {
-  const withIndex = models.filter((m) => m.intelligenceIndex != null);
+type IndexCategory = "intelligence" | "coding" | "agentic";
+const INDEX_OF: Record<IndexCategory, (m: AaModel) => number | null> = {
+  intelligence: (m) => m.intelligenceIndex,
+  coding: (m) => m.codingIndex,
+  agentic: (m) => m.agenticIndex,
+};
+
+/** The vendor's best model ON THIS INDEX (its own name goes on the row). */
+function bestOn(models: AaModel[], category: IndexCategory): AaModel | null {
+  const read = INDEX_OF[category];
+  const withIndex = models.filter((m) => read(m) != null);
   if (withIndex.length === 0) return null;
-  return withIndex.sort((a, b) => (b.intelligenceIndex ?? 0) - (a.intelligenceIndex ?? 0))[0];
+  return withIndex.sort((a, b) => (read(b) ?? 0) - (read(a) ?? 0))[0];
 }
 
 export async function seedModelQualityBenchmarks(
@@ -68,8 +75,10 @@ export async function seedModelQualityBenchmarks(
   }
 
   for (const [vendorId, models] of byVendor) {
-    const flagship = flagshipFor(models);
-    if (!flagship) continue;
+    const perIndexBest = (["intelligence", "coding", "agentic"] as const)
+      .map((category) => ({ category, model: bestOn(models, category) }))
+      .filter((x): x is { category: IndexCategory; model: AaModel } => x.model !== null);
+    if (perIndexBest.length === 0) continue;
 
     const existing = await prisma.intelligenceVendor.findUnique({
       where: { id: vendorId },
@@ -80,14 +89,10 @@ export async function seedModelQualityBenchmarks(
       continue;
     }
 
-    const indices: { category: "intelligence" | "coding" | "agentic"; rating: number | null }[] = [
-      { category: "intelligence", rating: flagship.intelligenceIndex },
-      { category: "coding", rating: flagship.codingIndex },
-      { category: "agentic", rating: flagship.agenticIndex },
-    ];
     let n = 0;
-    for (const { category, rating } of indices) {
-      if (rating == null) continue; // honest absence — never write a fabricated 0
+    for (const { category, model } of perIndexBest) {
+      const rating = INDEX_OF[category](model);
+      if (rating == null) continue; // unreachable after bestOn, kept as a guard
       await prisma.modelQualityBenchmark.upsert({
         where: { vendorId_source_category: { vendorId, source: "artificial_analysis", category } },
         create: {
@@ -95,16 +100,16 @@ export async function seedModelQualityBenchmarks(
           source: "artificial_analysis",
           category,
           rating,
-          modelName: flagship.modelName,
+          modelName: model.modelName,
           voteCount: null,
-          publishDate: flagship.releaseDate,
+          publishDate: model.releaseDate,
           sourceUrl: outcome.result.sourceUrl,
           capturedAt: now,
         },
         update: {
           rating,
-          modelName: flagship.modelName,
-          publishDate: flagship.releaseDate,
+          modelName: model.modelName,
+          publishDate: model.releaseDate,
           sourceUrl: outcome.result.sourceUrl,
           capturedAt: now,
         },

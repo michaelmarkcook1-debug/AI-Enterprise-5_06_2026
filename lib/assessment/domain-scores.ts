@@ -27,13 +27,21 @@ export interface VendorScorecard {
   insufficientCount: number;
   hasAnyEvidence: boolean; // ≥1 analyst_verified row in any assessment domain
   totalEvidenceRows: number;
-  /** Category-scoped capability domain: the vendor's model quality scored from
-   *  its live Arena Elo (model_quality pillar), reusing the SAME rubric (E4 →
-   *  band-capped at 4.0), cited to openlm.ai. null when the vendor has no
-   *  Arena-ranked model (insufficient — never a default). NOT folded into the
-   *  12-domain `domains`/`scoredCount` above; categories that weight model_quality
-   *  (e.g. frontier_model_api) merge it into the ranked domain set explicitly. */
+  /** Category-scoped capability domain: the vendor's model quality driven by
+   *  its best model's Artificial Analysis INTELLIGENCE Index (E4 →
+   *  band-capped at 4.0, cited; legacy Arena-Elo pillar as per-vendor
+   *  fallback). null when the vendor has neither (insufficient — never a
+   *  default). NOT folded into the 12-domain `domains`/`scoredCount` above;
+   *  categories that weight model_quality (e.g. frontier_model_api) merge it
+   *  into the ranked domain set explicitly. */
   modelQuality: DomainScore | null;
+  /** The CODING-Index-driven variant of the same domain — the score the
+   *  developer_coding_agent category ranks on (a coding buyer is buying
+   *  coding capability; Artificial Analysis publishes a purpose-built
+   *  measure). null when the vendor has no coding-indexed model — NO legacy
+   *  fallback here: the old Elo pillar has no coding measure, and a coding
+   *  score must never be inferred from an overall reading. */
+  modelQualityCoding: DomainScore | null;
   /** Category-scoped developer-community signal (coding models), synthesized
    *  from the cited tri-source dev-sentiment aggregate. null for non-coding
    *  vendors OR when the signal is insufficient (coverage-discounted, never
@@ -52,6 +60,7 @@ const EMPTY_SCORECARD = (vendorId: string, now?: Date): VendorScorecard => {
     hasAnyEvidence: false,
     totalEvidenceRows: 0,
     modelQuality: null,
+    modelQualityCoding: null,
     // Curated + pure — present even for a vendor with no evidence rows (a coding
     // model dark on the live scorecard can still have a developer-sentiment signal).
     devSentiment: synthesizeDevSentimentDomain(vendorId),
@@ -63,6 +72,7 @@ function summarise(
   domains: DomainScore[],
   totalEvidenceRows: number,
   modelQuality: DomainScore | null,
+  modelQualityCoding: DomainScore | null,
 ): VendorScorecard {
   const scoredCount = domains.filter((d) => d.state === "scored").length;
   return {
@@ -73,6 +83,7 @@ function summarise(
     hasAnyEvidence: scoredCount > 0,
     totalEvidenceRows,
     modelQuality,
+    modelQualityCoding,
     devSentiment: synthesizeDevSentimentDomain(vendorId),
   };
 }
@@ -127,25 +138,32 @@ const EVIDENCE_SELECT = {
 } as const;
 
 /**
- * Synthesize the model_quality DomainScore for each vendor.
- * PRIMARY: the Artificial Analysis Intelligence Index blend from the cited
- * ModelQualityBenchmark rows (that vendor's flagship model's Intelligence /
- * Coding / Agentic indices) — fixed-window normalised, E4-capped at 4.0
- * (model-quality-score.ts).
- * FALLBACK (per vendor, only when it has NO benchmark rows yet — e.g.
+ * Synthesize the model_quality DomainScores (both drivers) for each vendor.
+ * PRIMARY: the Artificial Analysis index blends from the cited
+ * ModelQualityBenchmark rows — intelligence-driven (frontier ranking, vendor
+ * profile) and coding-driven (developer_coding_agent ranking), each from the
+ * vendor's best model on THAT index (model-quality-score.ts).
+ * FALLBACK (INTELLIGENCE driver only, per vendor with no rows yet — e.g.
  * Artificial Analysis doesn't track it): the legacy single Arena-Elo pillar
  * through the rubric, so nothing regresses before the first benchmark seed
- * runs. Vendors with neither are absent → model_quality stays insufficient
- * wherever active (no default, no fabrication). Never writes anything.
+ * runs. The coding driver has NO fallback — the Elo pillar has no coding
+ * measure, and a coding score must never be inferred from an overall reading.
+ * Vendors with neither are absent → model_quality stays insufficient wherever
+ * active (no default, no fabrication). Never writes anything.
  */
-async function fetchModelQualityScores(vendorIds: string[], now: Date): Promise<Map<string, DomainScore>> {
-  const out = new Map<string, DomainScore>();
+async function fetchModelQualityScores(
+  vendorIds: string[],
+  now: Date,
+): Promise<Map<string, { intelligence: DomainScore | null; coding: DomainScore | null }>> {
+  const out = new Map<string, { intelligence: DomainScore | null; coding: DomainScore | null }>();
   if (!hasDatabase() || vendorIds.length === 0) return out;
-  // 1. Primary: broadened blend from cited benchmark rows.
+  // 1. Primary: index blends from cited benchmark rows (one query, both drivers).
   const details = await loadModelQualityDetails(vendorIds, now);
-  for (const [vendorId, d] of details) out.set(vendorId, d.score);
-  // 2. Legacy fallback for vendors with no benchmark rows yet (single Arena Elo).
-  const missing = vendorIds.filter((id) => !out.has(id));
+  for (const [vendorId, d] of details) {
+    out.set(vendorId, { intelligence: d.intelligence?.score ?? null, coding: d.coding?.score ?? null });
+  }
+  // 2. Legacy fallback for vendors with no INTELLIGENCE score yet (single Arena Elo).
+  const missing = vendorIds.filter((id) => !out.get(id)?.intelligence);
   if (missing.length > 0) {
     try {
       const rows = await getPrisma().intelligencePillarScore.findMany({
@@ -161,7 +179,9 @@ async function fetchModelQualityScores(vendorIds: string[], now: Date): Promise<
           capturedAt: now,
           sourceUrl: ARENA_ELO_SOURCE_URL,
         };
-        out.set(r.vendorId, scoreDomainFromEvidence("model_quality", [evRow], now));
+        const cur = out.get(r.vendorId) ?? { intelligence: null, coding: null };
+        cur.intelligence = scoreDomainFromEvidence("model_quality", [evRow], now);
+        out.set(r.vendorId, cur);
       }
     } catch {
       // Honest absence on read failure — those vendors stay insufficient.
@@ -171,8 +191,9 @@ async function fetchModelQualityScores(vendorIds: string[], now: Date): Promise<
 }
 
 /**
- * Per-category model-quality breakdown for the vendor profile (the cited "why"
- * behind the blended 0–5). Empty for vendors with no benchmark rows. Read-time.
+ * Per-index model-quality breakdown for the vendor profile (the cited "why"
+ * behind the 0–5) — the intelligence-driven blend, whose contributions list
+ * every present index. Empty for vendors with no benchmark rows. Read-time.
  */
 export async function getModelQualityBreakdown(
   vendorIds: string[],
@@ -180,7 +201,9 @@ export async function getModelQualityBreakdown(
 ): Promise<Map<string, MqBlendResult>> {
   const details = await loadModelQualityDetails(vendorIds, now);
   const out = new Map<string, MqBlendResult>();
-  for (const [vendorId, d] of details) out.set(vendorId, d.blend);
+  for (const [vendorId, d] of details) {
+    if (d.intelligence) out.set(vendorId, d.intelligence.blend);
+  }
   return out;
 }
 
@@ -202,8 +225,8 @@ export async function getVendorScorecard(vendorId: string, now: Date = new Date(
     })) as RawEvidenceRow[];
     const domains = scoreAllDomains(groupByDomain(rows), now);
     const inScopeRows = rows.filter((r) => ASSESSMENT_DOMAIN_SET.has(r.domain)).length;
-    const modelQuality = (await fetchModelQualityScores([vendorId], now)).get(vendorId) ?? null;
-    return summarise(vendorId, domains, inScopeRows, modelQuality);
+    const mq = (await fetchModelQualityScores([vendorId], now)).get(vendorId);
+    return summarise(vendorId, domains, inScopeRows, mq?.intelligence ?? null, mq?.coding ?? null);
   } catch {
     return EMPTY_SCORECARD(vendorId, now);
   }
@@ -240,15 +263,16 @@ export async function getVendorScorecardsBatch(
     for (const [vendorId, vendorRows] of byVendor) {
       const domains = scoreAllDomains(groupByDomain(vendorRows), now);
       const inScopeRows = vendorRows.filter((r) => ASSESSMENT_DOMAIN_SET.has(r.domain)).length;
-      result.set(vendorId, summarise(vendorId, domains, inScopeRows, mqByVendor.get(vendorId) ?? null));
+      const mq = mqByVendor.get(vendorId);
+      result.set(vendorId, summarise(vendorId, domains, inScopeRows, mq?.intelligence ?? null, mq?.coding ?? null));
     }
-    // Vendors with a model_quality Elo but NO analyst_verified evidence rows are
-    // still EMPTY_SCORECARD above — attach their model_quality so a category that
-    // weights it (frontier) still sees the real capability signal.
+    // Vendors with a model_quality signal but NO analyst_verified evidence rows
+    // are still EMPTY_SCORECARD above — attach their model_quality so a category
+    // that weights it (frontier/coding) still sees the real capability signal.
     for (const [vendorId, mq] of mqByVendor) {
       if (!byVendor.has(vendorId)) {
         const base = result.get(vendorId);
-        if (base) result.set(vendorId, { ...base, modelQuality: mq });
+        if (base) result.set(vendorId, { ...base, modelQuality: mq.intelligence, modelQualityCoding: mq.coding });
       }
     }
     return result;

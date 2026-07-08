@@ -38,14 +38,18 @@ async function main() {
     const byVendor = new Map<string, typeof outcome.result.models>();
     for (const m of outcome.result.models) byVendor.set(m.vendorId, [...(byVendor.get(m.vendorId) ?? []), m]);
     for (const [vid, models] of byVendor) {
-      const flagship = models
-        .filter((m) => m.intelligenceIndex != null)
-        .sort((a, b) => (b.intelligenceIndex ?? 0) - (a.intelligenceIndex ?? 0))[0];
-      if (!flagship) continue;
-      const blend = blendModelQuality(flagship);
+      // Same per-index-best rows the seed writes (mirrors model-quality-seed.ts).
+      const rows = (["intelligence", "coding", "agentic"] as const).flatMap((category) => {
+        const read = (m: (typeof models)[number]) =>
+          category === "intelligence" ? m.intelligenceIndex : category === "coding" ? m.codingIndex : m.agenticIndex;
+        const best = models.filter((m) => read(m) != null).sort((a, b) => (read(b) ?? 0) - (read(a) ?? 0))[0];
+        return best ? [{ category, rating: read(best) as number, modelName: best.modelName, sourceUrl: outcome.result.sourceUrl }] : [];
+      });
+      const blend = blendModelQuality(rows, "intelligence");
       if (blend) {
         blendedMQ.set(vid, blendToDomainScore(blend, now));
-        mqMeta.set(vid, { score: blend.score, cov: blend.contributions.length, model: flagship.modelName });
+        const driverModel = blend.contributions.find((c) => c.weight === 1)?.modelName ?? "";
+        mqMeta.set(vid, { score: blend.score, cov: blend.contributions.length, model: driverModel });
       }
     }
   }

@@ -11,6 +11,7 @@ import { getVendorScorecardsBatch, type VendorScorecard } from "@/lib/assessment
 import type { DomainScore } from "@/lib/assessment/domain-rubric";
 import { DOMAIN_LABEL } from "@/lib/assessment/domain-labels";
 import { activeDomains, effectiveDomains, type DomainWeights } from "@/lib/assessment/composite";
+import { categoryModelQualityDriver } from "@/lib/assessment/category-weights";
 import type { DomainId } from "@/lib/types";
 import { INTERACTIVE_ASSESSMENT_ENABLED, INTERROGATE_ENABLED } from "@/lib/availability";
 import { getMemberOrTest } from "@/lib/member/auth";
@@ -61,7 +62,7 @@ export default async function CategoryPage({ params }: { params: Promise<Params>
   // model_quality / dev_sentiment scores when active (else absent → insufficient).
   // Must match category-composite's effFor so the static order and the re-rank agree.
   const effectiveDomainsFor = (sc: VendorScorecard | undefined): DomainScore[] =>
-    sc ? effectiveDomains(sc.domains, sc, resolvedDomainWeights) : [];
+    sc ? effectiveDomains(sc.domains, sc, resolvedDomainWeights, categoryModelQualityDriver(slug)) : [];
 
   // Phase 3 — per-vendor 12-domain evidence scorecards (deterministic, no LLM,
   // batched into one query). Used for the compact domain strip under each vendor.

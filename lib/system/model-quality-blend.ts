@@ -1,45 +1,50 @@
-// Model-quality scoring — from Artificial Analysis's Intelligence Index.
+// Model-quality scoring — from Artificial Analysis's published indices.
 // ─────────────────────────────────────────────────────────────────────────────
 // Replaces the earlier LMArena-based blend. That system combined SEVERAL
-// separate LMArena arena leaderboards (coding, hard prompts, overall, vision,
-// instruction-following) ourselves, because each arena is an independently
-// computed Elo pool with no natural combined number — LMArena never gives you
-// "the" score for a model, only per-arena rankings you have to blend yourself.
+// separate LMArena arena leaderboards ourselves, because each arena is an
+// independently computed Elo pool with no natural combined number. Artificial
+// Analysis publishes real composite indices directly:
+//   • Intelligence Index — a documented, versioned weighted composite of 9
+//     evaluations (Agents 34% / Coding 24% / Scientific Reasoning 24% /
+//     General 18% as of v4.1 — see
+//     https://artificialanalysis.ai/methodology/intelligence-benchmarking),
+//     mostly independent third-party benchmarks (HLE, GPQA Diamond,
+//     Terminal-Bench, SciCode) plus some of Artificial Analysis's own
+//     implementations (GDPval-AA, AA-Omniscience).
+//   • Coding Index / Agentic Index — the same suite's capability-scoped
+//     composites.
 //
-// Artificial Analysis already does that combining for us: the Intelligence
-// Index is ITS OWN documented, versioned, weighted composite (Agents 34% /
-// Coding 24% / Scientific Reasoning 24% / General 18% as of v4.1 — see
-// https://artificialanalysis.ai/methodology/intelligence-benchmarking) built
-// from 9 evaluations, mostly independent third-party benchmarks (HLE, GPQA
-// Diamond, Terminal-Bench, SciCode) with some of Artificial Analysis's own
-// implementations (GDPval-AA, AA-Omniscience, etc.). So model_quality here is
-// driven by Intelligence Index ALONE — re-blending their separately published
-// Coding Index / Agentic Index on top would double-count dimensions the
-// Intelligence Index already weights in. Those two indices are still real,
-// cited, and shown (as informational context, zero score-weight), never
-// silently dropped.
+// ONE index drives a given score (the `driver`): re-blending the others on
+// top would double-count dimensions the Intelligence Index already weights
+// in. Which index drives is a CATEGORY decision made by the caller
+// (category-weights.ts): frontier model APIs are judged on the Intelligence
+// Index; the developer-coding-agent category on the Coding Index — a coding
+// buyer is buying coding capability, and Artificial Analysis publishes a
+// purpose-built measure of exactly that. Non-driver indices are still real,
+// cited, and shown (informational context, zero score-weight).
 //
-// Kept at the E4 evidence-grade cap (never 5.0/"audit-grade"): the Index mixes
-// in Artificial Analysis's own self-run evaluations alongside third-party
-// ones, so it is not a fully independent third-party audit — same "under-claim
-// rather than over-claim" standard already applied to accredited-cert sources
-// elsewhere in this codebase.
+// Kept at the E4 evidence-grade cap (never 5.0/"audit-grade"): the indices
+// mix third-party benchmarks with Artificial Analysis's own self-run
+// evaluations, so they are not fully independent audits — same "under-claim
+// rather than over-claim" standard as the accredited-cert sources.
 //
-// ANCHOR WINDOW — calibrated against the FULL live roster (2026-07-08 pull:
-// 548 models, 535 with an Intelligence Index; per-vendor flagship IIs across
-// the 19 mapped roster vendors span 3–59.9). Same philosophy as the old Elo
+// ANCHOR WINDOWS — calibrated against the FULL live roster (2026-07-08 pull:
+// 548 models; 535 with an Intelligence Index; the three indices are on
+// DIFFERENT scales — intelligence tops at 59.9, coding at 76.5, agentic at
+// 52.8 — so each gets its own window). Same philosophy as the old Elo
 // anchors: a fixed competitive window below a frozen frontier reference, so
-// the score answers "how close is this vendor's best model to the current
+// a score answers "how close is this vendor's best model to the current
 // frontier" and stays stable as the field churns.
-//   hi = 62 — just above the observed frontier max (Claude Fable 5 @ 59.9),
-//        headroom for drift without instant re-anchoring.
-//   lo = 15 — below the competitive pack (every flagship a buyer would
-//        shortlist sits ≥ 17.8) and above the clearly-noncompetitive tail
-//        (3–8.9: legacy/small models); those floor to ~0, which matches how
-//        the old Arena window treated off-frontier vendors.
-// Refresh when the frontier moves materially (same maintenance posture as
-// the old Arena Elo snapshot); note Intelligence Index is itself versioned
-// (v4.1 today) — a major version bump upstream is also a re-anchor trigger.
+//   intelligence lo=15/hi=62 — hi just above the frontier max (59.9);
+//     lo below the competitive pack (every shortlistable flagship ≥ 17.8)
+//     and above the clearly-noncompetitive tail (3–8.9), which floors to ~0
+//     exactly as the old Arena window treated off-frontier vendors.
+//   coding lo=20/hi=80 — same construction against the coding distribution
+//     (competitive pack 34–76.5; tail ≤ 10.4).
+//   agentic lo=10/hi=55 — likewise (pack 19–52.8; tail ≤ 9.2).
+// Refresh when the frontier moves materially; the indices are themselves
+// versioned upstream (v4.1 today) — a major version bump is a re-anchor
+// trigger too.
 
 export type MqCategory = "intelligence" | "coding" | "agentic";
 
@@ -49,40 +54,40 @@ export const MODEL_QUALITY_CAP = 4.0;
 /** intelligence, coding, agentic — the maximum possible contributions[] length. */
 export const MODEL_QUALITY_CATEGORY_COUNT = 3;
 
-const INTELLIGENCE_ANCHOR_LO = 15;
-const INTELLIGENCE_ANCHOR_HI = 62;
-
-// The three indices are on DIFFERENT scales (verified live 2026-07-08:
-// coding tops at 76.5, agentic at 52.8, intelligence at 59.9), so each gets
-// its own display window — normalising coding inside the intelligence window
-// would clamp frontier coding bars to a misleading 100%. Coding/agentic
-// windows are DISPLAY-ONLY (weight 0); only intelligence drives the score.
-const DISPLAY_ANCHORS: Record<MqCategory, { lo: number; hi: number }> = {
-  intelligence: { lo: INTELLIGENCE_ANCHOR_LO, hi: INTELLIGENCE_ANCHOR_HI },
+const ANCHORS: Record<MqCategory, { lo: number; hi: number }> = {
+  intelligence: { lo: 15, hi: 62 },
   coding: { lo: 20, hi: 80 },
   agentic: { lo: 10, hi: 55 },
 };
 
+const CATEGORY_LABEL: Record<MqCategory, string> = {
+  intelligence: "Intelligence Index",
+  coding: "Coding Index",
+  agentic: "Agentic Index",
+};
+
+/** Canonical display order — driver or not, contributions always render in this order. */
+const CANONICAL_ORDER: MqCategory[] = ["intelligence", "coding", "agentic"];
+
 const clamp01 = (n: number) => Math.max(0, Math.min(1, n));
 
-/** Normalise a raw Intelligence Index to 0..1 within the fixed anchor window. */
-export function normalizeIntelligence(index: number): number {
-  return clamp01((index - INTELLIGENCE_ANCHOR_LO) / (INTELLIGENCE_ANCHOR_HI - INTELLIGENCE_ANCHOR_LO));
-}
-
-/** Normalise any index to 0..1 within ITS OWN category's window (display bars). */
+/** Normalise an index value to 0..1 within ITS OWN category's fixed window. */
 export function normalizeIndex(category: MqCategory, value: number): number {
-  const { lo, hi } = DISPLAY_ANCHORS[category];
+  const { lo, hi } = ANCHORS[category];
   return clamp01((value - lo) / (hi - lo));
 }
 
-/** One vendor's flagship model's real Artificial Analysis indices — all three
- *  MUST come from the SAME model (never mix indices across a vendor's
- *  different models, which would misattribute a score). */
-export interface MqModelInput {
-  intelligenceIndex: number | null;
-  codingIndex: number | null;
-  agenticIndex: number | null;
+/** Back-compat alias for the intelligence window (frontier scoring). */
+export function normalizeIntelligence(index: number): number {
+  return normalizeIndex("intelligence", index);
+}
+
+/** One real, cited index reading. Each row carries ITS OWN model name — a
+ *  vendor's best coding model may differ from its best overall model, and a
+ *  rating must never be attributed to a model that didn't earn it. */
+export interface MqIndexRow {
+  category: MqCategory;
+  rating: number;
   modelName?: string;
   sourceUrl?: string;
 }
@@ -91,73 +96,62 @@ export interface MqContribution {
   category: MqCategory;
   label: string;
   rating: number; // raw index value
-  normalized: number; // 0..1 within the fixed window (informational categories still normalized for display)
-  weight: number; // 1 for intelligence (the only score driver), 0 for coding/agentic (informational)
+  normalized: number; // 0..1 within the category's own window
+  weight: number; // 1 for the driver (sole score input), 0 for context rows
   modelName?: string;
   sourceUrl?: string;
 }
 
 export interface MqBlendResult {
-  score: number; // 0..MODEL_QUALITY_CAP, 2 decimals — driven ENTIRELY by intelligenceIndex
+  score: number; // 0..MODEL_QUALITY_CAP, 2 decimals — driven ENTIRELY by the driver index
   normalized: number; // 0..1, same basis as score
+  driver: MqCategory; // which index drove the score
   coverage: number; // how many of the 3 indices are present (0..1) — completeness, not score weight
-  presentWeight: number; // always 1 when scored (intelligence is the sole driver)
+  presentWeight: number; // always 1 when scored (the driver is the sole driver)
   confidence: number; // 0..99
-  contributions: MqContribution[]; // intelligence first, then any present informational categories
+  contributions: MqContribution[]; // canonical order (intelligence, coding, agentic)
 }
 
 /**
- * Score a vendor's flagship model from its real Artificial Analysis indices.
- * Returns null when intelligenceIndex itself is absent — the PRIMARY signal
- * this score is built on — even if coding/agentic are present (honest
- * absence; those two alone are not a basis for a score). Deterministic.
+ * Score a vendor from its real Artificial Analysis index rows, driven by ONE
+ * index (default: intelligence). Returns null when the driver index itself is
+ * absent — even if other indices are present (honest absence; a coding score
+ * cannot be inferred from an intelligence reading, or vice versa).
+ * Deterministic; keeps the best rating per category when duplicates appear.
  */
-export function blendModelQuality(input: MqModelInput): MqBlendResult | null {
-  if (input.intelligenceIndex == null) return null;
+export function blendModelQuality(rows: MqIndexRow[], driver: MqCategory = "intelligence"): MqBlendResult | null {
+  const byCat = new Map<MqCategory, MqIndexRow>();
+  for (const r of rows) {
+    if (!(r.category in ANCHORS)) continue;
+    const cur = byCat.get(r.category);
+    if (!cur || r.rating > cur.rating) byCat.set(r.category, r);
+  }
+  const driverRow = byCat.get(driver);
+  if (!driverRow) return null;
 
-  const normalized = normalizeIntelligence(input.intelligenceIndex);
+  const normalized = normalizeIndex(driver, driverRow.rating);
   const score = Math.round(normalized * MODEL_QUALITY_CAP * 100) / 100;
 
-  const contributions: MqContribution[] = [
-    {
-      category: "intelligence",
-      label: "Intelligence Index",
-      rating: input.intelligenceIndex,
-      normalized,
-      weight: 1,
-      modelName: input.modelName,
-      sourceUrl: input.sourceUrl,
-    },
-  ];
-  if (input.codingIndex != null) {
+  const contributions: MqContribution[] = [];
+  for (const cat of CANONICAL_ORDER) {
+    const row = byCat.get(cat);
+    if (!row) continue;
     contributions.push({
-      category: "coding",
-      label: "Coding Index",
-      rating: input.codingIndex,
-      normalized: normalizeIndex("coding", input.codingIndex), // own scale; informational only
-      weight: 0,
-      modelName: input.modelName,
-      sourceUrl: input.sourceUrl,
-    });
-  }
-  if (input.agenticIndex != null) {
-    contributions.push({
-      category: "agentic",
-      label: "Agentic Index",
-      rating: input.agenticIndex,
-      normalized: normalizeIndex("agentic", input.agenticIndex),
-      weight: 0,
-      modelName: input.modelName,
-      sourceUrl: input.sourceUrl,
+      category: cat,
+      label: CATEGORY_LABEL[cat],
+      rating: row.rating,
+      normalized: normalizeIndex(cat, row.rating),
+      weight: cat === driver ? 1 : 0,
+      modelName: row.modelName,
+      sourceUrl: row.sourceUrl,
     });
   }
 
-  const coverage = contributions.length / 3;
-  // Confidence: intelligence alone is a real, complete score (not partial),
-  // so the floor is higher than the old multi-arena blend's partial-coverage
-  // case — full 3-index coverage nudges it up further. Never above 95
-  // (benchmark composite, not an independent audit).
+  const coverage = contributions.length / MODEL_QUALITY_CATEGORY_COUNT;
+  // Confidence: the driver alone is a real, complete score (not partial), so
+  // the floor sits at 57; corroborating context indices nudge it up. Never
+  // above 95 (benchmark composite, not an independent audit).
   const confidence = Math.round(clamp01(0.62 + 0.1 * (coverage - 1 / 3)) * 100) - 5;
 
-  return { score, normalized, coverage, presentWeight: 1, confidence, contributions };
+  return { score, normalized, driver, coverage, presentWeight: 1, confidence, contributions };
 }

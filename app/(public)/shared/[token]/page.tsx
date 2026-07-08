@@ -10,6 +10,7 @@ import { getVendorScorecardsBatch, type VendorScorecard } from "@/lib/assessment
 import { ENTITIES } from "@/lib/intelligence/entities";
 import { MARKET_CATEGORIES } from "@/lib/intelligence/seed";
 import { DOMAIN_LABEL } from "@/lib/assessment/domain-labels";
+import { categoryModelQualityDriver } from "@/lib/assessment/category-weights";
 import {
   rankVendorsByComposite,
   normalizeWeights,
@@ -71,10 +72,14 @@ export default async function SharedDecisionPage({ params }: { params: Promise<P
 
   const activatesModelQuality = composite ? (composite.resolvedDomainWeights.model_quality ?? 0) > 0 : false;
   const activatesDevSentiment = composite ? (composite.resolvedDomainWeights.dev_sentiment ?? 0) > 0 : false;
+  // Same category-scoped driver pick as the category page/ranking (coding
+  // category ranks on the Coding-Index-driven model_quality).
+  const mqDriver = categoryModelQualityDriver(decision.category);
   const effectiveDomains = (sc: VendorScorecard | undefined) => {
     if (!sc) return [];
     const extra = [];
-    if (activatesModelQuality && sc.modelQuality) extra.push(sc.modelQuality);
+    const mq = mqDriver === "coding" ? sc.modelQualityCoding : sc.modelQuality;
+    if (activatesModelQuality && mq) extra.push(mq);
     if (activatesDevSentiment && sc.devSentiment) extra.push(sc.devSentiment);
     return extra.length > 0 ? [...sc.domains, ...extra] : sc.domains;
   };

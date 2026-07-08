@@ -194,6 +194,7 @@ export async function assembleProcurementPack(
       hasAnyEvidence: false,
       totalEvidenceRows: 0,
       modelQuality: null,
+      modelQualityCoding: null,
       devSentiment: null,
     },
   }));

@@ -236,16 +236,30 @@ export const CATEGORY_DOMAIN_WEIGHTS: Record<string, CategoryWeightProfile> = {
  *  ≈ 20% of the composite — strong but still a minority of the evidence domains. */
 export const DEV_SENTIMENT_WEIGHT = 0.25;
 
+/** Coding-driven model_quality weight for the developer_coding_agent category —
+ *  the vendor's best model's Artificial Analysis CODING Index (a purpose-built
+ *  measured capability signal for exactly what a coding-agent buyer is buying),
+ *  set by rationale and published, never tuned per vendor. Added RAW then
+ *  renormalized (same additive pattern as dev_sentiment). Sits below dev
+ *  sentiment (0.25): the index is one benchmark suite; sentiment aggregates
+ *  broad real-world usage across three independent community sources. */
+export const MODEL_QUALITY_CODING_WEIGHT = 0.12;
+
 export function resolveDomainWeights(categoryId: string): DomainWeights {
   const profile = CATEGORY_DOMAIN_WEIGHTS[categoryId];
-  const base = profile ? (profile.weights as DomainWeights) : DEFAULT_DOMAIN_WEIGHTS;
+  let base = profile ? (profile.weights as DomainWeights) : DEFAULT_DOMAIN_WEIGHTS;
   // Consumer #2 — blend developer sentiment into the CODING categories only,
   // gated behind DEV_SENTIMENT_IN_RANKING (off → the composite is unchanged).
   // Adding the key activates the synthesized dev_sentiment domain in BOTH the
   // static ranking and the interactive re-rank (both read this resolver), so
   // they stay identical by construction. Renormalized downstream.
   if (DEV_SENTIMENT_IN_RANKING && isDevSentimentCategory(categoryId)) {
-    return { ...base, dev_sentiment: DEV_SENTIMENT_WEIGHT };
+    base = { ...base, dev_sentiment: DEV_SENTIMENT_WEIGHT };
+  }
+  // Coding-driven model_quality for the developer-coding category (the frontier
+  // category's model_quality is already in its bespoke static profile).
+  if (categoryId === "developer_coding_agent" && base.model_quality === undefined) {
+    base = { ...base, model_quality: MODEL_QUALITY_CODING_WEIGHT };
   }
   return base;
 }
@@ -258,6 +272,15 @@ export function categoryHasCustomWeights(categoryId: string): boolean {
 /** True when the category activates the (category-scoped) model_quality domain. */
 export function categoryActivatesModelQuality(categoryId: string): boolean {
   return (resolveDomainWeights(categoryId).model_quality ?? 0) > 0;
+}
+
+/** WHICH Artificial Analysis index drives model_quality for this category.
+ *  Frontier model APIs are judged on the Intelligence Index; the developer-
+ *  coding category on the Coding Index (a coding buyer is buying coding
+ *  capability, and a purpose-built published measure of it exists). Uniform
+ *  rule per category — never varied per vendor. */
+export function categoryModelQualityDriver(categoryId: string): "intelligence" | "coding" {
+  return categoryId === "developer_coding_agent" ? "coding" : "intelligence";
 }
 
 /** True when the category activates the (category-scoped) dev_sentiment domain —
@@ -305,12 +328,19 @@ export function buildMethodologyNote(categoryId: string): string {
     ? `Category-specific weighting (${entries.length} domains): ${weightList}. Why this weighting: ${rationale}`
     : `Framework default weighting (${entries.length} domains, evenly tiered): ${weightList}.`;
 
+  const mqDriver = categoryModelQualityDriver(categoryId);
   const modelQualityNote = categoryActivatesModelQuality(categoryId)
-    ? ` Model quality is a real, source-cited signal here: each vendor's flagship model's Artificial ` +
-      `Analysis Intelligence Index (artificialanalysis.ai), graded E4 and band-capped — a weighted composite ` +
-      `of 9 evaluations, not a fully independent audit, and vendors with no Artificial-Analysis-tracked ` +
-      `model fall back to a legacy Arena Elo pillar (${ARENA_ELO_SOURCE_URL}) or show insufficient evidence ` +
-      `rather than a default.`
+    ? mqDriver === "coding"
+      ? ` Model quality is a real, source-cited signal here, driven by each vendor's best coding model's ` +
+        `Artificial Analysis Coding Index (artificialanalysis.ai) — a purpose-built measured coding-capability ` +
+        `composite, graded E4 and band-capped; not a fully independent audit. A vendor with no ` +
+        `coding-indexed model shows insufficient evidence on this domain — never a default, and never a ` +
+        `score inferred from a general-capability reading.`
+      : ` Model quality is a real, source-cited signal here: each vendor's flagship model's Artificial ` +
+        `Analysis Intelligence Index (artificialanalysis.ai), graded E4 and band-capped — a weighted composite ` +
+        `of 9 evaluations, not a fully independent audit, and vendors with no Artificial-Analysis-tracked ` +
+        `model fall back to a legacy Arena Elo pillar (${ARENA_ELO_SOURCE_URL}) or show insufficient evidence ` +
+        `rather than a default.`
     : "";
 
   // Public documentation of the dev-sentiment ranking variable (spec lock #1:

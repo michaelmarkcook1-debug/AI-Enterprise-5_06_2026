@@ -19,7 +19,7 @@ import { reserveCredit } from "@/lib/billing/credits";
 import { rateLimit, rateLimitHeaders } from "@/lib/http/rate-limit";
 import { anonSessionHash } from "@/lib/http/anon-session";
 import { getVendorScorecard, getVendorScorecardsBatch, type VendorScorecard } from "@/lib/assessment/domain-scores";
-import { resolveDomainWeights } from "@/lib/assessment/category-weights";
+import { resolveDomainWeights, categoryModelQualityDriver } from "@/lib/assessment/category-weights";
 import { DEFAULT_DOMAIN_WEIGHTS, activeDomains, type DomainWeights } from "@/lib/assessment/composite";
 import { type DomainScore } from "@/lib/assessment/domain-rubric";
 import { computeContextLens, type BuyerContext } from "@/lib/agents/composite-lens";
@@ -41,11 +41,17 @@ type Scope =
   | { kind: "category"; categoryId: string; vendorIds: string[] };
 
 /** Fold the synthesized model_quality score into the domain set exactly as the
- *  category page does, so the lens ranks on the same active-domain set the buyer
- *  sees. Framework-default (vendor) scope never activates it. */
-function effectiveDomains(sc: VendorScorecard | undefined, activatesModelQuality: boolean): DomainScore[] {
+ *  category page does (same per-category driver pick), so the lens ranks on the
+ *  same active-domain set the buyer sees. Framework-default (vendor) scope
+ *  never activates it. */
+function effectiveDomains(
+  sc: VendorScorecard | undefined,
+  activatesModelQuality: boolean,
+  mqDriver: "intelligence" | "coding",
+): DomainScore[] {
   if (!sc) return [];
-  return activatesModelQuality && sc.modelQuality ? [...sc.domains, sc.modelQuality] : sc.domains;
+  const mq = mqDriver === "coding" ? sc.modelQualityCoding : sc.modelQuality;
+  return activatesModelQuality && mq ? [...sc.domains, mq] : sc.domains;
 }
 
 function parseContext(raw: unknown): BuyerContext {
@@ -124,12 +130,13 @@ export async function POST(request: Request): Promise<Response> {
     if (!cat) return NextResponse.json({ error: "unknown_category" }, { status: 422 });
     baseWeights = resolveDomainWeights(scope.categoryId);
     const activatesModelQuality = (baseWeights.model_quality ?? 0) > 0;
+    const mqDriver = categoryModelQualityDriver(scope.categoryId);
     const allIds = scope.vendorIds.filter((v): v is string => typeof v === "string");
     const ids = allIds.slice(0, MAX_CATEGORY_VENDORS);
     truncated = ids.length < allIds.length;
     const cards = await getVendorScorecardsBatch(ids).catch(() => new Map<string, VendorScorecard>());
     vendors = ids
-      .map((id) => ({ vendorId: id, domains: effectiveDomains(cards.get(id), activatesModelQuality) }))
+      .map((id) => ({ vendorId: id, domains: effectiveDomains(cards.get(id), activatesModelQuality, mqDriver) }))
       .filter((v) => v.domains.length > 0);
     if (vendors.length === 0) return NextResponse.json({ error: "no_evidence" }, { status: 422 });
     scopeLabel = `the ${cat.name} shortlist`;

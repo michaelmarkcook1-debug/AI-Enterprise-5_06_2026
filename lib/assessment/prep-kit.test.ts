@@ -34,7 +34,7 @@ function scorecardOf(domains: DomainScore[]): VendorScorecard {
   return {
     vendorId: "v", domains, scoredCount,
     insufficientCount: domains.length - scoredCount,
-    hasAnyEvidence: scoredCount > 0, totalEvidenceRows: scoredCount * 2, modelQuality: null, devSentiment: null,
+    hasAnyEvidence: scoredCount > 0, totalEvidenceRows: scoredCount * 2, modelQuality: null, modelQualityCoding: null, devSentiment: null,
   };
 }
 
