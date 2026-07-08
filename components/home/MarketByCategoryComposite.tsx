@@ -6,7 +6,7 @@ import type { CategoryComposite } from "@/lib/ranking/composite-types";
 // multi-pillar composite (not market share). Honest "insufficient evidence"
 // where no vendor has enough verified pillar coverage to rank.
 const CARD = "rounded-xl border border-black/10 dark:border-white/10 bg-white/60 dark:bg-white/5 p-5";
-const MUTED = "text-[#15263c]/60 dark:text-[#eef3f8]/60";
+const MUTED = "text-[#15263c]/65 dark:text-[#eef3f8]/60";
 
 export default function MarketByCategoryComposite({ composites }: { composites: CategoryComposite[] }) {
   if (composites.length === 0) return null;

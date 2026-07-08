@@ -4,7 +4,7 @@ import type { CategoryComposite } from "@/lib/ranking/composite-types";
 // Hero rail — a category NAVIGATOR. Each row is one market category with its
 // best-EVIDENCED vendor (top of the within-category multi-pillar composite),
 // not the biggest by market share. Links into the full per-category ranking.
-const MUTED = "text-[#15263c]/60 dark:text-[#eef3f8]/60";
+const MUTED = "text-[#15263c]/65 dark:text-[#eef3f8]/60";
 
 export default function CategoryCompositeRail({ composites }: { composites: CategoryComposite[] }) {
   const withRanked = composites.filter((c) => c.ranked.length > 0);

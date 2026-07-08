@@ -6,7 +6,7 @@
 import type { CategoryRankedVendor, EvidenceCompleteness } from "@/lib/ranking/composite-types";
 import type { EvidenceGrade } from "@/lib/types";
 
-const MUTED = "text-[#15263c]/60 dark:text-[#eef3f8]/60";
+const MUTED = "text-[#15263c]/65 dark:text-[#eef3f8]/60";
 
 const GRADE_TONE: Record<EvidenceGrade, string> = {
   E0: "border-rose-400/40 bg-rose-500/10 text-rose-700 dark:text-rose-300",

@@ -173,7 +173,7 @@ export function VendorColorLegend({
 }) {
   if (vendors.length === 0) return null;
   return (
-    <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-[#15263c]/60 dark:text-[#eef3f8]/60">
+    <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-[#15263c]/65 dark:text-[#eef3f8]/60">
       {vendors.map((v) => (
         <span key={v.vendorId} className="inline-flex items-center gap-1.5">
           <span className="inline-block h-2.5 w-2.5 rounded-sm" style={{ backgroundColor: colors[v.vendorId] ?? "#78716c" }} />

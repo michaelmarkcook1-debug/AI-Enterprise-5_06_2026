@@ -12,7 +12,7 @@
 
 import { useState } from "react";
 
-const MUTED = "text-[#15263c]/60 dark:text-[#eef3f8]/60";
+const MUTED = "text-[#15263c]/65 dark:text-[#eef3f8]/60";
 
 type Status = "asking" | "submitting" | "done" | "error";
 

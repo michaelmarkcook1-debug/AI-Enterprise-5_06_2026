@@ -13,7 +13,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { VERTICALS, SIZE_BANDS, REGIONS, type Segment } from "@/lib/peer/segments";
 
-const MUTED = "text-[#15263c]/60 dark:text-[#eef3f8]/60";
+const MUTED = "text-[#15263c]/65 dark:text-[#eef3f8]/60";
 const CARD =
   "group block rounded-xl border border-black/10 dark:border-white/10 bg-white/60 dark:bg-white/5 p-4 transition-colors hover:border-[#d4af37]/60";
 

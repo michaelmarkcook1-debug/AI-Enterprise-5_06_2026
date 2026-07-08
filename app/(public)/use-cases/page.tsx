@@ -26,7 +26,7 @@ export default function UseCaseFrontDoorPage() {
         <h1 className="mt-1 font-[var(--font-display)] text-3xl font-extrabold tracking-tight">
           Where&apos;s your low-hanging fruit?
         </h1>
-        <p className="mt-2 max-w-2xl text-sm text-[#15263c]/60 dark:text-[#eef3f8]/60">
+        <p className="mt-2 max-w-2xl text-sm text-[#15263c]/65 dark:text-[#eef3f8]/60">
           Most AI programmes fail at use-case choice, not vendor choice. Two questions map your
           context to a prioritised set of real enterprise AI workflows — then route each into the
           evidence-backed vendor rankings.

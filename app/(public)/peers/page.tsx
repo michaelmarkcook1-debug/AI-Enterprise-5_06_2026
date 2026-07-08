@@ -28,7 +28,7 @@ export const metadata: Metadata = {
   openGraph: { title: TITLE, description: DESCRIPTION, url: absoluteUrl("/peers"), type: "website" },
 };
 
-const MUTED = "text-[#15263c]/60 dark:text-[#eef3f8]/60";
+const MUTED = "text-[#15263c]/65 dark:text-[#eef3f8]/60";
 
 export default function PeersPage() {
   return (
@@ -65,7 +65,7 @@ export default function PeersPage() {
       {/* ── Narrow to your own cohort (the prior default, now a drill-down). ── */}
       <section className="mt-8">
         <h2 className="text-sm font-semibold">Narrow to your own cohort</h2>
-        <p className="mt-1 max-w-2xl text-sm text-[#15263c]/60 dark:text-[#eef3f8]/60">
+        <p className="mt-1 max-w-2xl text-sm text-[#15263c]/65 dark:text-[#eef3f8]/60">
           State your segment — vertical, size, region — to see cited benchmarks, disclosed platforms
           and named exemplars scoped to enterprises like yours.
         </p>

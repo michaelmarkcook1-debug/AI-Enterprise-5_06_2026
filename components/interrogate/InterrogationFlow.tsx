@@ -12,7 +12,7 @@ import { useState, type ReactNode } from "react";
 import ContributePrompt from "./ContributePrompt";
 
 const CARD = "rounded-xl border border-black/10 dark:border-white/10 bg-white/60 dark:bg-white/5 p-5";
-const MUTED = "text-[#15263c]/60 dark:text-[#eef3f8]/60";
+const MUTED = "text-[#15263c]/65 dark:text-[#eef3f8]/60";
 const BTN = "rounded-md bg-[#13294b] px-4 py-2 text-sm font-medium text-white hover:bg-[#1c3a66] disabled:opacity-50 dark:bg-[#d4af37] dark:text-[#0a1f38]";
 
 interface EvidenceRef {

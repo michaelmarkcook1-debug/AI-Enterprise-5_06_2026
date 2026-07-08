@@ -38,7 +38,7 @@ function Section({ s }: { s: KitSection }) {
   return (
     <details className="mt-2 rounded-lg border border-black/10 bg-white/60 p-3 dark:border-white/10 dark:bg-white/5">
       <summary className="cursor-pointer select-none text-sm font-semibold">{s.title}</summary>
-      <p className="mt-1 text-[11px] italic text-[#15263c]/60 dark:text-[#eef3f8]/60">{s.blurb}</p>
+      <p className="mt-1 text-[11px] italic text-[#15263c]/65 dark:text-[#eef3f8]/60">{s.blurb}</p>
       <ul className="mt-2 list-disc space-y-1 pl-5 text-xs leading-5">
         {s.items.map((it, i) => <li key={i}>{it}</li>)}
       </ul>
@@ -156,7 +156,7 @@ export default function PrepKitPanel({
 
       {kit && (
         <div className="mt-3">
-          <p className="text-[11px] text-[#15263c]/60 dark:text-[#eef3f8]/60">
+          <p className="text-[11px] text-[#15263c]/65 dark:text-[#eef3f8]/60">
             {kit.scoredCount}/12 domains evidenced · {kit.insufficientCount} insufficient ·{" "}
             {kit.targets.weak.length + kit.targets.insufficient.length} gaps targeted
             {kit.targets.contextAdjusted ? " · context-adjusted" : ""}

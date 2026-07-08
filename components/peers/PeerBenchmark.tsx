@@ -16,7 +16,7 @@ import { buildPeerHeatmap, LEVEL_LABELS, SIGNAL_KINDS } from "@/lib/peer/heatmap
 import { TRACKED_VENDOR_NAMES } from "@/lib/sourcing/ai-news-manifest";
 import type { PeerSignal } from "@/lib/peer/types";
 
-const MUTED = "text-[#15263c]/60 dark:text-[#eef3f8]/60";
+const MUTED = "text-[#15263c]/65 dark:text-[#eef3f8]/60";
 const CARD = "rounded-xl border border-black/10 dark:border-white/10 bg-white/60 dark:bg-white/5";
 
 const ORG_KEY = "ae_peer_primary_org";

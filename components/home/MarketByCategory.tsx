@@ -7,7 +7,7 @@ import type { CategoryRanking } from "@/lib/home/category-rankings";
 // it. This is the home-page explanation of the categories the platform is built
 // around; full per-category tables live at /category/[id].
 const CARD = "rounded-xl border border-black/10 dark:border-white/10 bg-white/60 dark:bg-white/5 p-5";
-const MUTED = "text-[#15263c]/60 dark:text-[#eef3f8]/60";
+const MUTED = "text-[#15263c]/65 dark:text-[#eef3f8]/60";
 
 export default function MarketByCategory({ rankings }: { rankings: CategoryRanking[] }) {
   if (rankings.length === 0) return null;
