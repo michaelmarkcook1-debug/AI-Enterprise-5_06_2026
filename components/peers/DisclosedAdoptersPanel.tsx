@@ -6,7 +6,7 @@ import type { DisclosedAdopter } from "@/lib/peer/adopters";
 // label, in the same class as Implementation partners: it renders regardless
 // of the score gating and has no path into scores.
 
-const MUTED = "text-[#15263c]/60 dark:text-[#eef3f8]/60";
+const MUTED = "text-[#15263c]/65 dark:text-[#eef3f8]/60";
 
 /** Industry-usage rollup — a straight group-by-count over the SAME cited
  *  adopter list rendered below, no new data or fetch. Deliberately thin: the

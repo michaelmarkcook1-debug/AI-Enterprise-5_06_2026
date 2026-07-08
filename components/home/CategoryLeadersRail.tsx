@@ -5,7 +5,7 @@ import type { CategoryRanking } from "@/lib/home/category-rankings";
 // market category with its current leader. The point the old flat rail missed:
 // vendors are ranked within a category, never across them. Links into the full
 // per-category ranking at /category/[id].
-const MUTED = "text-[#15263c]/60 dark:text-[#eef3f8]/60";
+const MUTED = "text-[#15263c]/65 dark:text-[#eef3f8]/60";
 
 export default function CategoryLeadersRail({ rankings }: { rankings: CategoryRanking[] }) {
   const withLeaders = rankings.filter((r) => r.leaders.length > 0);

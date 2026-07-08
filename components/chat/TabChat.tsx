@@ -12,7 +12,7 @@ import { useRef, useState } from "react";
 import Link from "next/link";
 import { MEMBER_FEATURES_VISIBLE } from "@/lib/availability";
 
-const MUTED = "text-[#15263c]/60 dark:text-[#eef3f8]/60";
+const MUTED = "text-[#15263c]/65 dark:text-[#eef3f8]/60";
 
 export interface TabChatProps {
   tab: { kind: "vendor" | "category" | "peers" | "news" | "dependencies"; id?: string; peerIds?: string[] };
@@ -125,16 +125,26 @@ export default function TabChat({ tab, label, chips }: TabChatProps) {
 
   return (
     <>
-      {/* Launcher */}
+      {/* Launcher. `fixed` chrome always occupies the same screen corner
+          regardless of what scrolls underneath it, so it stays icon-only
+          (44×44, a real touch target) by default — on a page whose whole
+          value proposition is "every claim is cited," a source line landing
+          in that corner shouldn't become unreadable under a wide label
+          pill. Expands to the labelled pill on hover/focus (desktop) or
+          while the panel is open, when context already makes it obvious
+          what the control does. */}
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="fixed bottom-5 right-5 z-40 inline-flex items-center gap-2 rounded-full border border-[#d4af37]/60 bg-[#0a1f38] px-4 py-2.5 text-sm font-semibold text-[#f6f1e3] shadow-lg transition-colors hover:bg-[#13294b]"
+        className={`fixed bottom-5 right-5 z-40 inline-flex h-11 items-center justify-center gap-0 overflow-hidden whitespace-nowrap rounded-full border border-[#d4af37]/60 bg-[#0a1f38] text-sm font-semibold text-[#f6f1e3] shadow-lg transition-[width,gap,padding-left,padding-right] duration-200 ease-out hover:bg-[#13294b] motion-reduce:transition-none ${
+          open ? "w-24 gap-2 px-4" : "w-11 px-0 hover:w-28 hover:gap-2 hover:px-4 focus-visible:w-28 focus-visible:gap-2 focus-visible:px-4"
+        }`}
         aria-expanded={open}
         aria-controls="tab-chat-panel"
+        aria-label={open ? "Close Ask AI" : "Ask AI"}
       >
-        <span className="h-2 w-2 rounded-full bg-[#d4af37]" aria-hidden />
-        {open ? "Close" : "Ask AI"}
+        <span className="h-2 w-2 shrink-0 rounded-full bg-[#d4af37]" aria-hidden />
+        <span aria-hidden>{open ? "Close" : "Ask AI"}</span>
       </button>
 
       {open && (

@@ -23,7 +23,7 @@ export const metadata: Metadata = {
 };
 
 const CARD = "rounded-xl border border-black/10 dark:border-white/10 bg-white/60 dark:bg-white/5 p-5";
-const MUTED = "text-[#15263c]/60 dark:text-[#eef3f8]/60";
+const MUTED = "text-[#15263c]/65 dark:text-[#eef3f8]/60";
 
 function Stat({ label, value }: { label: string; value: string | number }) {
   return (

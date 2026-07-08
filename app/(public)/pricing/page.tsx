@@ -24,7 +24,7 @@ export const metadata: Metadata = {
   openGraph: { title: TITLE, description: DESCRIPTION, url: absoluteUrl("/pricing"), type: "website" },
 };
 
-const MUTED = "text-[#15263c]/60 dark:text-[#eef3f8]/60";
+const MUTED = "text-[#15263c]/65 dark:text-[#eef3f8]/60";
 
 // Human labels for the entitlement matrix rows (order = display order).
 const FEATURE_LABELS: { feature: Feature; label: string }[] = [

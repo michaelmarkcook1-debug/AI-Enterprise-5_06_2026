@@ -6,7 +6,7 @@ import type { BreakingNews } from "@/lib/intelligence/repository";
 // + an https source + recency-weighted importance — see repository.ts), just
 // given the visual weight a hero deserves: a lead story, then the rest.
 
-const MUTED = "text-[#15263c]/60 dark:text-[#eef3f8]/60";
+const MUTED = "text-[#15263c]/65 dark:text-[#eef3f8]/60";
 
 function ageLabel(days: number | null): string {
   if (days === null) return "no dated items";

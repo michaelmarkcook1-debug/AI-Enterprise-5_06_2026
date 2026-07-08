@@ -53,7 +53,7 @@ const CATEGORY_LABEL: Record<string, string> = {
   neocloud_inference: "Neocloud inference",
 };
 
-const MUTED = "text-[#15263c]/60 dark:text-[#eef3f8]/60";
+const MUTED = "text-[#15263c]/65 dark:text-[#eef3f8]/60";
 const CARD = "rounded-xl border border-black/10 dark:border-white/10 bg-white/60 dark:bg-white/5";
 
 const FEAS_TONE: Record<string, string> = {

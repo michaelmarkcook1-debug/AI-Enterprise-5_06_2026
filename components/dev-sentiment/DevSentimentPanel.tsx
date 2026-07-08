@@ -6,7 +6,7 @@ import { DEV_SENTIMENT_COMPILED_AT } from "@/lib/dev-sentiment/data";
 // three cited sources + top cited threads, or an honest "insufficient" state.
 // Never rendered for out-of-scope vendors (caller gates on aggregate !== null).
 
-const MUTED = "text-[#15263c]/60 dark:text-[#eef3f8]/60";
+const MUTED = "text-[#15263c]/65 dark:text-[#eef3f8]/60";
 
 const TAG_STYLE: Record<string, string> = {
   positive: "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300",

@@ -31,7 +31,7 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
   };
 }
 
-const MUTED = "text-[#15263c]/60 dark:text-[#eef3f8]/60";
+const MUTED = "text-[#15263c]/65 dark:text-[#eef3f8]/60";
 
 export default async function ArticlePage({ params }: { params: Promise<Params> }) {
   const { slug } = await params;

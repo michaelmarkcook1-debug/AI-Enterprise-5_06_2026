@@ -9,7 +9,7 @@ import { DOMAIN_LABEL } from "@/lib/assessment/domain-labels";
 // existing evidence-graded domain score, and an unscored domain reads
 // "insufficient" exactly as it does everywhere else — no fabrication, one engine.
 
-const MUTED = "text-[#15263c]/60 dark:text-[#eef3f8]/60";
+const MUTED = "text-[#15263c]/65 dark:text-[#eef3f8]/60";
 
 export interface IntelVendor {
   vendorId: string;

@@ -66,13 +66,13 @@ export default function MonitorControls({
   return (
     <div className="rounded-xl border border-black/10 dark:border-white/10 bg-white/60 dark:bg-white/5 p-5">
       <h2 className="text-sm font-semibold">Your shortlist</h2>
-      <p className="mt-1 text-[11px] text-[#15263c]/60 dark:text-[#eef3f8]/60">
+      <p className="mt-1 text-[11px] text-[#15263c]/65 dark:text-[#eef3f8]/60">
         Add the vendors and categories you want watched — private to you. Changes update your Monitor below.
       </p>
 
       <div className="mt-3 flex flex-wrap gap-2">
         {savedItems.length === 0 ? (
-          <span className="text-xs text-[#15263c]/60 dark:text-[#eef3f8]/60">
+          <span className="text-xs text-[#15263c]/65 dark:text-[#eef3f8]/60">
             Nothing saved yet — search below to add vendors and categories.
           </span>
         ) : (

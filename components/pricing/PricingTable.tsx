@@ -7,7 +7,7 @@
 import { useState } from "react";
 import Link from "next/link";
 
-const MUTED = "text-[#15263c]/60 dark:text-[#eef3f8]/60";
+const MUTED = "text-[#15263c]/65 dark:text-[#eef3f8]/60";
 const GOLD = "text-[#b08d2f] dark:text-[#d4af37]";
 
 export interface PlanView {
