@@ -92,10 +92,13 @@ export default function WeightedScorecard({
       <div className="mb-4 flex flex-wrap items-center gap-4 rounded-xl border border-[#d4af37]/50 bg-[#fbf6e4]/60 px-4 py-3 dark:border-[#d4af37]/40 dark:bg-[#1a1605]/30">
         <div>
           <div className="text-[10px] font-semibold uppercase tracking-wider text-[#a07f1f] dark:text-[#d4af37]">
-            Your weighted composite
+            Your weighted composite — global view
           </div>
           <div className="font-mono text-2xl font-bold tabular-nums text-[#13294b] dark:text-[#eef3f8]">
             {result.composite.toFixed(2)}<span className="text-sm text-[#7a8aa0]">/5</span>
+          </div>
+          <div className="mt-0.5 text-[11px] text-[#7a8aa0]">
+            Category-agnostic (12 domains) — category-specific standing below can differ
           </div>
         </div>
         <div className="text-xs text-[#3f5068] dark:text-[#a7bacd]">
