@@ -11,7 +11,7 @@ import { cookies } from "next/headers";
 import { createHash, randomBytes } from "node:crypto";
 import { getPrisma, hasDatabase } from "../prisma";
 import { captureSubscriber } from "../subscribers/service";
-import { MEMBER_TEST_OPEN } from "../availability";
+import { memberTestOpenEffective } from "../availability";
 
 export const MEMBER_COOKIE = "ae_member";
 /** Per-request browser nonce cookie — binds a magic link to the browser that
@@ -150,12 +150,14 @@ export async function getMember(): Promise<Member | null> {
 // A single shared, auto-provisioned "test member" so every member-gated feature
 // is exercisable without sign-in during testing. Backed by a REAL Subscriber row
 // (the watchlist has an FK to it), created once and cached in-module so we don't
-// write on every request. NEVER used unless MEMBER_TEST_OPEN is true.
+// write on every request. NEVER used unless MEMBER_TEST_OPEN is true AND this is
+// not real production (memberTestOpenEffective) — a real visitor on prod always
+// gets a genuine null (no session), never the shared test identity.
 const TEST_MEMBER_EMAIL = "tester@ai-enterprise.local";
 let testMemberCache: Member | null = null;
 
 async function ensureTestMember(): Promise<Member | null> {
-  if (!MEMBER_TEST_OPEN || !hasDatabase()) return null;
+  if (!memberTestOpenEffective() || !hasDatabase()) return null;
   if (testMemberCache) return testMemberCache;
   try {
     // Idempotent: creates the subscriber if absent, then we read its id.

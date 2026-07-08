@@ -105,6 +105,26 @@ export const MEMBER_AUTH_ENABLED: boolean = false;
  */
 export const MEMBER_TEST_OPEN: boolean = true;
 
+/**
+ * Real-production check for MEMBER_TEST_OPEN enforcement. `VERCEL_ENV` (NOT
+ * `NODE_ENV`, which Next.js sets to "production" for preview builds too) is
+ * the only reliable prod-vs-preview signal on this platform — see lib/site.ts
+ * for the same pattern. A FUNCTION, not a const: it must be called from a
+ * server-only context (getMemberOrTest, layouts resolving server props) so the
+ * live value is read at request time, never a build-time client-bundle literal.
+ */
+export function isRealProductionEnv(): boolean {
+  return process.env.VERCEL_ENV === "production";
+}
+
+/** MEMBER_TEST_OPEN's actual effect, gated to non-production. Server-only —
+ *  call this (not the raw MEMBER_TEST_OPEN literal) anywhere the test-member
+ *  fallback actually fires or is surfaced, so the bypass genuinely never
+ *  reaches real production regardless of the owner-intent flag above. */
+export function memberTestOpenEffective(): boolean {
+  return MEMBER_TEST_OPEN && !isRealProductionEnv();
+}
+
 /** Member-feature UI visibility: shown when real auth is on OR test-open is on.
  *  Client-safe (both operands are plain literals). The "Sign in" nav link is
  *  gated on MEMBER_AUTH_ENABLED alone — test-open does NOT resurrect sign-in. */
