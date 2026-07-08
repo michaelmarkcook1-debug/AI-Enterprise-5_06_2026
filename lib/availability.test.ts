@@ -1,5 +1,12 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
-import { seedFallbackAllowed, DataUnavailableError, isDataUnavailable } from "./availability";
+import {
+  seedFallbackAllowed,
+  DataUnavailableError,
+  isDataUnavailable,
+  isRealProductionEnv,
+  memberTestOpenEffective,
+  MEMBER_TEST_OPEN,
+} from "./availability";
 import {
   vendorsMockRepository,
   newsMockRepository,
@@ -62,5 +69,41 @@ describe("no seed-data path is reachable in a deployed build", () => {
     expect(isDataUnavailable(new DataUnavailableError("x"))).toBe(true);
     expect(isDataUnavailable(new Error("x"))).toBe(false);
     expect(isDataUnavailable(null)).toBe(false);
+  });
+});
+
+// Prompt 3 prerequisite: the shared MEMBER_TEST_OPEN bypass must be
+// unreachable on real production, regardless of the owner-intent flag.
+describe("isRealProductionEnv", () => {
+  it("is true only when VERCEL_ENV is exactly \"production\"", () => {
+    vi.stubEnv("VERCEL_ENV", "production");
+    expect(isRealProductionEnv()).toBe(true);
+  });
+
+  it("is false for preview deploys, even though Next.js sets NODE_ENV=production there too", () => {
+    // the exact trap this exists to avoid: preview builds are still NODE_ENV=production
+    vi.stubEnv("VERCEL_ENV", "preview");
+    vi.stubEnv("NODE_ENV", "production");
+    expect(isRealProductionEnv()).toBe(false);
+  });
+
+  it("is false for local dev (VERCEL_ENV unset)", () => {
+    vi.stubEnv("VERCEL_ENV", "");
+    expect(isRealProductionEnv()).toBe(false);
+  });
+});
+
+describe("memberTestOpenEffective", () => {
+  it("is false in real production even though MEMBER_TEST_OPEN (owner intent) is true", () => {
+    expect(MEMBER_TEST_OPEN).toBe(true); // the owner-intent flag itself is unconditional
+    vi.stubEnv("VERCEL_ENV", "production");
+    expect(memberTestOpenEffective()).toBe(false); // but the EFFECTIVE value must not be
+  });
+
+  it("is true in preview/local dev, matching MEMBER_TEST_OPEN", () => {
+    vi.stubEnv("VERCEL_ENV", "preview");
+    expect(memberTestOpenEffective()).toBe(true);
+    vi.stubEnv("VERCEL_ENV", "");
+    expect(memberTestOpenEffective()).toBe(true);
   });
 });

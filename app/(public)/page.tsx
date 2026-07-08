@@ -20,6 +20,13 @@ import { absoluteUrl } from "@/lib/site";
 import DataUnavailable from "@/components/DataUnavailable";
 import { buildDeliveryGraph } from "@/lib/graph/delivery-projection";
 import { TRACKED_VENDOR_NAMES } from "@/lib/sourcing/ai-news-manifest";
+import { resolveHomeViewMode } from "@/lib/member/view-mode";
+import { getMember, getMemberOrTest } from "@/lib/member/auth";
+import { ensureTestBuyerSeeded } from "@/lib/member/seed-test-buyer";
+import { getMemberWatchlist } from "@/lib/member/watchlist";
+import { listMemberDecisions } from "@/lib/member/decisions";
+import { buildMonitor } from "@/lib/member/monitor";
+import BuyerHome from "@/components/home/BuyerHome";
 
 // Public front door. DB-backed (live rankings, breaking news, provenance) →
 // force-dynamic, matching /vendors. All reads are parallel + guarded so the page
@@ -50,6 +57,26 @@ function fmtDate(d: Date | string | null | undefined): string | null {
 }
 
 export default async function HomePage() {
+  // Auth-dependent home (Prompt 3, locked IA decision §0): same URL, buyer
+  // view when a real session exists or the visitor has toggled into the
+  // test-buyer demo. Resolved FIRST so a buyer-mode visit does none of the
+  // visitor market-feed work below.
+  const viewMode = await resolveHomeViewMode();
+  if (viewMode === "buyer") {
+    const [realMember, member] = await Promise.all([getMember(), getMemberOrTest()]);
+    if (member) {
+      // Sample data belongs ONLY on the shared test-buyer account — never
+      // seeded into a real member's own watchlist/decisions.
+      if (!realMember) await ensureTestBuyerSeeded(member.subscriberId).catch(() => {});
+      const watchlist = await getMemberWatchlist(member.subscriberId);
+      const [decisions, monitor] = await Promise.all([
+        listMemberDecisions(member.subscriberId),
+        buildMonitor(watchlist),
+      ]);
+      return <BuyerHome watchlist={watchlist} decisions={decisions} monitor={monitor} isDemo={!realMember} />;
+    }
+  }
+
   // Pure, static, zero-cost graph derivation (no DB, no LLM).
   const edges = projectExposureToDependencyEdges();
   const byKind = summariseByKind(edges);
