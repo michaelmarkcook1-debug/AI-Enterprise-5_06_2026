@@ -1,10 +1,17 @@
-// Broadened model_quality DomainScore — from real benchmark rows, blended.
+// Broadened model_quality DomainScore — from real Artificial Analysis rows.
 // ─────────────────────────────────────────────────────────────────────────────
-// Reads the cited ModelQualityBenchmark rows (LMArena per-category Elos) and runs
-// the PURE blend (model-quality-blend.ts) → a single 0–5 model_quality DomainScore
-// plus the per-category breakdown for the UI. Deterministic, read-time, no writes.
-// A vendor with NO benchmark rows yields nothing here → the caller falls back to
-// the legacy single-Elo pillar (so nothing regresses before the first seed runs).
+// Reads the cited ModelQualityBenchmark rows (Artificial Analysis Intelligence/
+// Coding/Agentic Index) and runs the PURE blend (model-quality-blend.ts) → a
+// single 0–5 model_quality DomainScore plus the index breakdown for the UI.
+// Deterministic, read-time, no writes. A vendor with NO benchmark rows yields
+// nothing here → the caller falls back to the legacy single-Elo pillar (so
+// nothing regresses before the first seed runs).
+//
+// All three indices MUST come from the SAME model (never mix a vendor's
+// different models' indices — that would misattribute a score), so this picks
+// each vendor's FLAGSHIP model — the one with the highest Intelligence Index —
+// and reads only that model's rows, mirroring lib/model-inventory/frontier.ts's
+// flagship-pick logic.
 
 import { getPrisma, hasDatabase } from "../prisma";
 import { DOMAIN_TO_PILLAR } from "../types";
@@ -14,13 +21,7 @@ import {
   type DomainCitation,
   type ScoredDomainScore,
 } from "./domain-rubric";
-import {
-  blendModelQuality,
-  MODEL_QUALITY_CAP,
-  type MqBlendResult,
-  type MqCategory,
-  type MqCategoryInput,
-} from "../system/model-quality-blend";
+import { blendModelQuality, MODEL_QUALITY_CAP, type MqBlendResult, type MqModelInput } from "../system/model-quality-blend";
 
 export interface ModelQualityDetail {
   score: ScoredDomainScore; // the 0–5 model_quality domain score
@@ -33,7 +34,7 @@ const clamp = (n: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, n
 export function blendToDomainScore(blend: MqBlendResult, now: Date): ScoredDomainScore {
   const score = blend.score; // already 0..CAP, 2dp
   const band = clamp(Math.round(score), 0, 5) as ScoredDomainScore["band"];
-  // Citations: the LMArena leaderboard source(s) behind the category rows, deduped.
+  // Citations: the Artificial Analysis source(s) behind the index rows, deduped.
   const seen = new Set<string>();
   const citations: DomainCitation[] = [];
   for (const c of blend.contributions) {
@@ -51,6 +52,9 @@ export function blendToDomainScore(blend: MqBlendResult, now: Date): ScoredDomai
     // — the capability tier is the numeric score; this label is the evidence grade.
     bandLabel: DOMAIN_BAND_LABEL[4],
     confidence: blend.confidence,
+    // coverage < 1 here means coding/agentic are missing, not intelligence
+    // (blendModelQuality already returns null without it) — a real signal of
+    // thinner corroboration, still worth flagging low-confidence on.
     lowConfidence: blend.confidence < LOW_CONFIDENCE_FLOOR || blend.coverage < 0.5,
     bestGrade: "E4",
     evidenceCount: blend.contributions.length,
@@ -72,22 +76,36 @@ export async function loadModelQualityDetails(
   if (!hasDatabase() || vendorIds.length === 0) return out;
   try {
     const rows = await getPrisma().modelQualityBenchmark.findMany({
-      where: { vendorId: { in: vendorIds }, source: "lmarena" },
+      where: { vendorId: { in: vendorIds }, source: "artificial_analysis" },
       select: { vendorId: true, category: true, rating: true, modelName: true, sourceUrl: true },
     });
-    const byVendor = new Map<string, MqCategoryInput[]>();
+    // Group by (vendor, model) first — a vendor's indices must all come from
+    // ONE model's row set, never mixed across its different tracked models.
+    const byVendorModel = new Map<string, Map<string, MqModelInput>>();
     for (const r of rows) {
-      const list = byVendor.get(r.vendorId) ?? [];
-      list.push({
-        category: r.category as MqCategory,
-        rating: r.rating,
+      const models = byVendorModel.get(r.vendorId) ?? new Map<string, MqModelInput>();
+      const m = models.get(r.modelName) ?? {
+        intelligenceIndex: null,
+        codingIndex: null,
+        agenticIndex: null,
         modelName: r.modelName,
         sourceUrl: r.sourceUrl,
-      });
-      byVendor.set(r.vendorId, list);
+      };
+      if (r.category === "intelligence") m.intelligenceIndex = r.rating;
+      else if (r.category === "coding") m.codingIndex = r.rating;
+      else if (r.category === "agentic") m.agenticIndex = r.rating;
+      models.set(r.modelName, m);
+      byVendorModel.set(r.vendorId, models);
     }
-    for (const [vendorId, inputs] of byVendor) {
-      const blend = blendModelQuality(inputs);
+    for (const [vendorId, models] of byVendorModel) {
+      // Flagship = highest Intelligence Index among the vendor's tracked
+      // models (mirrors frontier.ts's flagshipFor()) — models with no
+      // intelligence row can't be the flagship (blendModelQuality requires it).
+      const flagship = [...models.values()]
+        .filter((m) => m.intelligenceIndex != null)
+        .sort((a, b) => (b.intelligenceIndex ?? 0) - (a.intelligenceIndex ?? 0))[0];
+      if (!flagship) continue;
+      const blend = blendModelQuality(flagship);
       if (!blend) continue;
       out.set(vendorId, { score: blendToDomainScore(blend, now), blend });
     }

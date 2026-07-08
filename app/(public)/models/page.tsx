@@ -6,9 +6,10 @@ import { buildFrontierComparison, summarizeFrontierComparison } from "@/lib/mode
 import FrontierFaceOff from "@/components/models/FrontierFaceOff";
 import DataUnavailable from "@/components/DataUnavailable";
 
-// Live, cited model inventory from ModelQualityBenchmark (LMArena Elo). Force-
-// dynamic so it always reflects the latest ingested benchmarks; no seed, no
-// hardcoded surface — a model shows ONLY when it has a real, source-linked row.
+// Live, cited model inventory from ModelQualityBenchmark (Artificial Analysis
+// Intelligence/Coding/Agentic Index). Force-dynamic so it always reflects the
+// latest ingested benchmarks; no seed, no hardcoded surface — a model shows
+// ONLY when it has a real, source-linked row.
 export const dynamic = "force-dynamic";
 
 const TITLE = "AI Model Inventory";
@@ -35,13 +36,9 @@ function Stat({ label, value }: { label: string; value: string | number }) {
 }
 
 const CATEGORY_LABEL: Record<string, string> = {
-  overall: "Overall",
+  intelligence: "Intelligence",
   coding: "Coding",
-  hard_prompts: "Hard prompts",
-  vision: "Vision",
-  instruction_following: "Instruction",
-  math: "Math",
-  creative_writing: "Creative",
+  agentic: "Agentic",
 };
 const catLabel = (c: string) => CATEGORY_LABEL[c] ?? c.replace(/_/g, " ");
 
@@ -83,7 +80,7 @@ export default async function ModelsPage() {
       <section className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
         <Stat label="Models scored" value={inv.totalModels} />
         <Stat label="Vendors" value={inv.totalVendors} />
-        <Stat label="Benchmark source" value={inv.sources.map((s) => (s === "lmarena" ? "LMArena" : s)).join(", ")} />
+        <Stat label="Benchmark source" value={inv.sources.map((s) => (s === "artificial_analysis" ? "Artificial Analysis" : s)).join(", ")} />
         <Stat label="Freshest data" value={inv.freshestPublishDate ?? "—"} />
       </section>
 
@@ -94,7 +91,7 @@ export default async function ModelsPage() {
               <tr className={`text-left ${MUTED}`}>
                 <th className="py-2 pr-4 font-medium">Model</th>
                 <th className="py-2 pr-4 font-medium">Vendor</th>
-                <th className="py-2 pr-4 font-medium tabular-nums">Headline Elo</th>
+                <th className="py-2 pr-4 font-medium tabular-nums">Headline Index</th>
                 <th className="py-2 pr-4 font-medium">Benchmarks</th>
                 <th className="py-2 pr-4 font-medium">As of</th>
                 <th className="py-2 pr-4 font-medium">Source</th>
@@ -106,7 +103,7 @@ export default async function ModelsPage() {
                   <td className="py-2 pr-4 font-medium">{m.modelName}</td>
                   <td className="py-2 pr-4">{m.vendorName}</td>
                   <td className="py-2 pr-4 tabular-nums">
-                    {Math.round(m.headlineRating)}
+                    {m.headlineRating.toFixed(1)}
                     <span className={`ml-1 text-xs ${MUTED}`}>{catLabel(m.headlineCategory)}</span>
                   </td>
                   <td className="py-2 pr-4">
@@ -117,7 +114,7 @@ export default async function ModelsPage() {
                           className="rounded-full border border-black/10 dark:border-white/15 px-2 py-0.5 text-xs tabular-nums"
                           title={c.voteCount ? `${c.voteCount.toLocaleString()} votes` : undefined}
                         >
-                          {catLabel(c.category)} {Math.round(c.rating)}
+                          {catLabel(c.category)} {c.rating.toFixed(1)}
                         </span>
                       ))}
                     </span>
@@ -130,7 +127,7 @@ export default async function ModelsPage() {
                       rel="noopener noreferrer"
                       className="underline underline-offset-2"
                     >
-                      {m.source === "lmarena" ? "LMArena" : m.source}
+                      {m.source === "artificial_analysis" ? "Artificial Analysis" : m.source}
                     </a>
                   </td>
                 </tr>
@@ -139,9 +136,9 @@ export default async function ModelsPage() {
           </table>
         </div>
         <p className={`mt-4 text-xs ${MUTED}`}>
-          Every rating is an independent LMArena Elo, linked to its leaderboard source and dated. Models
-          appear only when a cited benchmark row exists — none are estimated. A vendor&apos;s absence
-          means no benchmarked model, not a low score.
+          Every rating is a real Artificial Analysis benchmark index, linked to its source and dated with a
+          real per-model release date. Models appear only when a cited benchmark row exists — none are
+          estimated. A vendor&apos;s absence means no benchmarked model, not a low score.
         </p>
       </section>
 

@@ -3,20 +3,22 @@
 // The /models page used to read the hardcoded SEED inventory
 // (lib/model-inventory/seed.ts), so the no-fabrication gate
 // (HARDCODED_SURFACES_WIRED) correctly held it dark. This reads the LIVE,
-// analyst-cited ModelQualityBenchmark rows (LMArena per-category Elo, each with
-// a real source_url + publish date) and shapes them into an evidence-backed
-// model inventory. Nothing here is invented: a model appears ONLY if it has a
-// real benchmark row with a citation. Read-time, deterministic, no writes.
+// analyst-cited ModelQualityBenchmark rows (Artificial Analysis Intelligence /
+// Coding / Agentic Index per model, each with a real source_url + a real
+// per-model release date) and shapes them into an evidence-backed model
+// inventory. Nothing here is invented: a model appears ONLY if it has a real
+// benchmark row with a citation. Read-time, deterministic, no writes.
 //
 // FIREWALL: reads benchmark + vendor-name rows only; writes nothing; touches no
-// vendor score. Every rendered rating traces to its LMArena source_url.
+// vendor score. Every rendered rating traces to its Artificial Analysis
+// source_url (mandatory attribution per their Data API terms).
 
 import { getPrisma, hasDatabase } from "../prisma";
 
 /** One benchmark category's cited rating for a model. */
 export interface LiveModelCategory {
-  category: string; // "overall" | "coding" | "hard_prompts" | "vision" | …
-  rating: number; // LMArena Elo
+  category: string; // "intelligence" | "coding" | "agentic"
+  rating: number; // Artificial Analysis index value
   voteCount: number | null;
 }
 
@@ -25,27 +27,27 @@ export interface LiveModel {
   modelName: string;
   vendorId: string;
   vendorName: string;
-  /** The "overall" category rating when present, else the highest category. */
+  /** The "intelligence" category rating when present, else the highest category. */
   headlineRating: number;
   /** Which category headlineRating came from (so we never mislabel it). */
   headlineCategory: string;
   categories: LiveModelCategory[];
-  /** Freshness — the leaderboard publish date (YYYY-MM-DD) if the source gave one. */
+  /** Freshness — the model's real release date (YYYY-MM-DD) if the source gave one. */
   publishDate: string | null;
   /** When we captured it (freshness fallback). */
   capturedAt: string;
-  /** The cited LMArena leaderboard URL. */
+  /** The cited Artificial Analysis source URL. */
   sourceUrl: string;
-  source: string; // "lmarena"
+  source: string; // "artificial_analysis"
 }
 
 export interface LiveModelInventory {
   models: LiveModel[];
   totalModels: number;
   totalVendors: number;
-  /** Most recent leaderboard publish date across all rows (freshness headline). */
+  /** Most recent real per-model release date across all rows (freshness headline). */
   freshestPublishDate: string | null;
-  /** Distinct cited sources (e.g. "lmarena"). */
+  /** Distinct cited sources (e.g. "artificial_analysis"). */
   sources: string[];
 }
 

@@ -306,10 +306,11 @@ export function buildMethodologyNote(categoryId: string): string {
     : `Framework default weighting (${entries.length} domains, evenly tiered): ${weightList}.`;
 
   const modelQualityNote = categoryActivatesModelQuality(categoryId)
-    ? ` Model quality is a real, source-cited signal here: the top-2 average Arena human-preference Elo ` +
-      `per vendor (${ARENA_ELO_SOURCE_URL}, LMArena methodology), graded E4 and band-capped — it is a ` +
-      `capability proxy, not a factuality audit, and vendors with no Arena-ranked model show insufficient ` +
-      `evidence on this domain rather than a default.`
+    ? ` Model quality is a real, source-cited signal here: each vendor's flagship model's Artificial ` +
+      `Analysis Intelligence Index (artificialanalysis.ai), graded E4 and band-capped — a weighted composite ` +
+      `of 9 evaluations, not a fully independent audit, and vendors with no Artificial-Analysis-tracked ` +
+      `model fall back to a legacy Arena Elo pillar (${ARENA_ELO_SOURCE_URL}) or show insufficient evidence ` +
+      `rather than a default.`
     : "";
 
   // Public documentation of the dev-sentiment ranking variable (spec lock #1:

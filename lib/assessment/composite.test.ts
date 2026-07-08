@@ -306,7 +306,7 @@ describe("category-aware default weights", () => {
   });
 });
 
-describe("model_quality domain (Arena Elo) under the frontier profile", () => {
+describe("model_quality domain (Artificial Analysis) under the frontier profile", () => {
   // 12 framework domains + an optional model_quality score.
   const base = (s = 4): DomainScore[] => ASSESSMENT_DOMAINS.map((d) => scored(d, s));
   const withMQ = (s: number): DomainScore[] => [...base(4), scored("model_quality", s)];
@@ -319,14 +319,14 @@ describe("model_quality domain (Arena Elo) under the frontier profile", () => {
     expect(r.contributions.some((c) => c.domain === "model_quality" && c.state === "scored")).toBe(true);
   });
 
-  it("a higher Arena Elo score raises the frontier composite (it actually feeds the rank)", () => {
+  it("a higher Intelligence Index score raises the frontier composite (it actually feeds the rank)", () => {
     const hi = computeWeightedComposite(withMQ(4.0), mqWeights()).composite;
     const lo = computeWeightedComposite(withMQ(1.0), mqWeights()).composite;
     expect(hi).toBeGreaterThan(lo);
   });
 
-  it("insufficient stays insufficient: a vendor with no Arena Elo is /13 with model_quality contributing 0", () => {
-    // No model_quality entry at all (vendor has no Arena-ranked model).
+  it("insufficient stays insufficient: a vendor with no Intelligence Index is /13 with model_quality contributing 0", () => {
+    // No model_quality entry at all (vendor has no Artificial-Analysis-tracked model).
     const r = computeWeightedComposite(base(4), mqWeights());
     expect(r.domainTotal).toBe(13); // still counted in the denominator
     expect(r.scoredCount).toBe(12); // model_quality is NOT scored into existence
@@ -350,7 +350,7 @@ describe("frontier parity + ungameable coverage", () => {
   const vendors = [
     { vendorId: "alpha", domains: [...base(4.4), scored("model_quality", 3.95)] },
     { vendorId: "bravo", domains: [...base(3.2), scored("model_quality", 3.6)] },
-    { vendorId: "charlie", domains: base(3.0) }, // no Arena Elo → model_quality insufficient
+    { vendorId: "charlie", domains: base(3.0) }, // no Intelligence Index → model_quality insufficient
   ];
 
   it("static order == re-rank order at the frontier default (one shared ranker)", () => {
@@ -362,7 +362,7 @@ describe("frontier parity + ungameable coverage", () => {
   });
 
   it("zeroing a domain's weight does NOT shrink the coverage denominator (ungameable)", () => {
-    // A vendor scored on the 12 base but with NO Arena Elo: 12/13 under frontier.
+    // A vendor scored on the 12 base but with NO Intelligence Index: 12/13 under frontier.
     const thin = base(4);
     const full = computeWeightedComposite(thin, mqWeights());
     expect(full.rawCoverage).toBeCloseTo(12 / 13, 9);
@@ -374,12 +374,12 @@ describe("frontier parity + ungameable coverage", () => {
 });
 
 describe("per-category methodology note (transparency)", () => {
-  it("frontier note documents the weighting, the rationale, and the real Arena Elo source", () => {
+  it("frontier note documents the weighting, the rationale, and the real Artificial Analysis source", () => {
     const note = buildMethodologyNote(FRONTIER);
     expect(note).toContain("Category-specific weighting");
-    expect(note).toContain("Arena"); // model-quality source is named
+    expect(note).toContain("Artificial Analysis"); // model-quality source is named
     expect(note.toLowerCase()).toContain("frontier model api"); // the rationale
-    expect(note).toContain("Model Quality (Arena Elo)"); // the domain label appears in the weighting
+    expect(note).toContain("Model Quality (Artificial Analysis)"); // the domain label appears in the weighting
   });
 
   it("an unprofiled category shows the framework default note and does NOT mention model quality", () => {

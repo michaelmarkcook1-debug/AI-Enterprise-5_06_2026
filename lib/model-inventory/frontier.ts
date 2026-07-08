@@ -1,17 +1,19 @@
 // AIE-01 — Frontier model face-off (the daily-hook anchor).
 // ─────────────────────────────────────────────────────────────────────────────
 // A side-by-side comparison of the four tracked frontier vendors' flagship
-// models, built ENTIRELY from the live, cited LMArena benchmark evidence
-// (lib/model-inventory/live.ts → model_quality_benchmarks). Nothing is invented:
+// models, built ENTIRELY from the live, cited Artificial Analysis benchmark
+// evidence (lib/model-inventory/live.ts → model_quality_benchmarks). Nothing
+// is invented:
 //   • the four vendors are an owner-set constant (FRONTIER_VENDOR_IDS);
-//   • each vendor's column is its single highest-"overall"-Elo model — a
+//   • each vendor's column is its single highest-Intelligence-Index model — a
 //     deterministic pick, not analyst choice — and every category rating shown
 //     is THAT model's own cited rating (categories are never mixed across a
 //     vendor's models, which would misattribute a score);
 //   • a vendor with no benchmark row renders an honest "not on the tracked
 //     leaderboard yet" column — never a fabricated or defaulted number;
-//   • every number traces to the same LMArena source_url + publish date the
-//     /models page already cites (the AnalystGenius traceability rule).
+//   • every number traces to the same Artificial Analysis source_url + real
+//     per-model release date the /models page already cites (the
+//     AnalystGenius traceability rule).
 // Read-time, deterministic, no writes, no LLM call → "pre-computed platform
 // data" per the ticket.
 
@@ -31,13 +33,12 @@ for (const id of FRONTIER_VENDOR_IDS) {
 }
 
 /** Canonical comparison categories + display labels + display order. Keys match
- *  the LMArena category strings stored in model_quality_benchmarks. */
+ *  the Artificial Analysis category strings stored in model_quality_benchmarks
+ *  (intelligence/coding/agentic — see lib/system/model-quality-blend.ts). */
 export const COMPARE_CATEGORIES: { key: string; label: string }[] = [
-  { key: "overall", label: "Overall" },
+  { key: "intelligence", label: "Intelligence" },
   { key: "coding", label: "Coding" },
-  { key: "hard_prompts", label: "Hard prompts" },
-  { key: "instruction_following", label: "Instruction following" },
-  { key: "vision", label: "Vision" },
+  { key: "agentic", label: "Agentic" },
 ];
 
 export interface FrontierColumn {
@@ -46,18 +47,19 @@ export interface FrontierColumn {
   /** false → no cited benchmark row for this vendor; render honest absence. */
   present: boolean;
   modelName?: string;
-  /** category key → this model's cited Elo (undefined = that category absent). */
+  /** category key → this model's cited index value (undefined = that category absent). */
   ratings: Record<string, number | undefined>;
   /** Category keys the flagship model itself has no rating for, but where a
-   *  DIFFERENT model from the same vendor does (e.g. a vendor's vision-arena
-   *  leader carries a different model name than its text-arena leader). We
-   *  never blend that other model's number into this column — that would
-   *  misattribute a score to a model that didn't earn it — but we also must
-   *  not let a real, cited rating read as if the vendor has none at all. UI
-   *  should render these cells distinctly from a genuine absence. */
+   *  DIFFERENT model from the same vendor does. We never blend that other
+   *  model's number into this column — that would misattribute a score to a
+   *  model that didn't earn it — but we also must not let a real, cited
+   *  rating read as if the vendor has none at all. UI should render these
+   *  cells distinctly from a genuine absence. */
   uncoveredWithOtherModel?: string[];
+  /** The flagship's Intelligence Index (ratings.intelligence) — kept as a
+   *  distinctly-named field since it drives ranking/sort throughout. */
   overall?: number;
-  /** 1-based rank on the OVERALL leaderboard among the PRESENT columns. */
+  /** 1-based rank on the Intelligence Index leaderboard among the PRESENT columns. */
   overallRank?: number;
   /** The category (key) where this model leads all present columns, if any —
    *  the honest "where it's strongest" claim (a #1 among the four, not a
@@ -69,27 +71,28 @@ export interface FrontierColumn {
 
 export interface FrontierComparison {
   columns: FrontierColumn[]; // in FRONTIER_VENDOR_IDS order
-  /** category key → vendorId that leads it (max cited Elo among present cols). */
+  /** category key → vendorId that leads it (max cited index among present cols). */
   categoryLeaders: Record<string, string | undefined>;
-  /** Freshest leaderboard publish date across the shown models. */
+  /** Freshest real per-model release date across the shown models. */
   asOf: string | null;
-  /** The cited LMArena leaderboard URL (from the shown rows). */
+  /** The cited Artificial Analysis source URL (from the shown rows). */
   sourceUrl: string | null;
-  source: string; // "lmarena"
+  source: string; // "artificial_analysis"
   /** How many of the four have live cited data (honest coverage headline). */
   presentCount: number;
 }
 
-/** Pick a vendor's flagship model: the one with the highest "overall" Elo. Falls
- *  back to the highest-headline model only if none of the vendor's models carry
- *  an "overall" rating (still that model's own ratings — never a blend). */
+/** Pick a vendor's flagship model: the one with the highest Intelligence Index.
+ *  Falls back to the highest-headline model only if none of the vendor's
+ *  models carry an intelligence rating (still that model's own ratings —
+ *  never a blend). */
 function flagshipFor(models: LiveModel[]): LiveModel | null {
   if (models.length === 0) return null;
-  const withOverall = models
-    .map((m) => ({ m, overall: m.categories.find((c) => c.category === "overall")?.rating }))
-    .filter((x): x is { m: LiveModel; overall: number } => typeof x.overall === "number");
-  if (withOverall.length > 0) {
-    return withOverall.sort((a, b) => b.overall - a.overall)[0].m;
+  const withIntelligence = models
+    .map((m) => ({ m, intelligence: m.categories.find((c) => c.category === "intelligence")?.rating }))
+    .filter((x): x is { m: LiveModel; intelligence: number } => typeof x.intelligence === "number");
+  if (withIntelligence.length > 0) {
+    return withIntelligence.sort((a, b) => b.intelligence - a.intelligence)[0].m;
   }
   return [...models].sort((a, b) => b.headlineRating - a.headlineRating)[0];
 }
@@ -116,11 +119,9 @@ export function buildFrontierComparison(inv: LiveModelInventory): FrontierCompar
       ratings[c.key] = own;
       if (own === undefined) {
         // A DIFFERENT model of this vendor may still carry a real, cited
-        // rating for this category (categories can come from separate LMArena
-        // arenas with their own per-arena leaderboard, so the top model per
-        // category isn't always the same model). Never shown as this
-        // column's number — only flagged, so absence is never ambiguous
-        // between "no data anywhere" and "not this model's data."
+        // rating for this category. Never shown as this column's number —
+        // only flagged, so absence is never ambiguous between "no data
+        // anywhere" and "not this model's data."
         const elsewhere = models.some(
           (m) => m.modelName !== flagship.modelName && m.categories.some((x) => x.category === c.key),
         );
@@ -134,7 +135,7 @@ export function buildFrontierComparison(inv: LiveModelInventory): FrontierCompar
       modelName: flagship.modelName,
       ratings,
       uncoveredWithOtherModel: uncoveredWithOtherModel.length ? uncoveredWithOtherModel : undefined,
-      overall: ratings.overall,
+      overall: ratings.intelligence,
       publishDate: flagship.publishDate,
       sourceUrl: flagship.sourceUrl,
     };
@@ -175,13 +176,13 @@ export function buildFrontierComparison(inv: LiveModelInventory): FrontierCompar
     categoryLeaders,
     asOf,
     sourceUrl,
-    source: inv.sources[0] ?? "lmarena",
+    source: inv.sources[0] ?? "artificial_analysis",
     presentCount: present.length,
   };
 }
 
 /** A short, fully-derived comparative sentence — every number and name in it
- *  already lives on `c` (real cited Elo figures), so this restates the data
+ *  already lives on `c` (real cited index figures), so this restates the data
  *  rather than synthesising anything new. No LLM call: this is "platform
  *  work" computed the same way for every viewer, so it can be produced at
  *  read-time for free. (A future mid-tier LLM rewrite for tone would need its
@@ -197,14 +198,14 @@ export function summarizeFrontierComparison(c: FrontierComparison): string | nul
   const runnerUp = ranked[1];
   const margin =
     typeof leader.overall === "number" && typeof runnerUp.overall === "number"
-      ? Math.round(leader.overall - runnerUp.overall)
+      ? Math.round((leader.overall - runnerUp.overall) * 10) / 10
       : null;
   const leaderCategories = COMPARE_CATEGORIES.filter(
-    (cat) => cat.key !== "overall" && c.categoryLeaders[cat.key] === leader.vendorId,
+    (cat) => cat.key !== "intelligence" && c.categoryLeaders[cat.key] === leader.vendorId,
   ).map((cat) => cat.label);
 
-  let sentence = `${leader.vendorName}'s ${leader.modelName} leads overall (${Math.round(leader.overall ?? 0)} Elo)`;
-  if (margin !== null) sentence += `, ${margin} point${margin === 1 ? "" : "s"} ahead of ${runnerUp.vendorName}'s ${runnerUp.modelName} (${Math.round(runnerUp.overall ?? 0)})`;
+  let sentence = `${leader.vendorName}'s ${leader.modelName} leads on Intelligence Index (${leader.overall?.toFixed(1) ?? 0})`;
+  if (margin !== null) sentence += `, ${margin} point${margin === 1 ? "" : "s"} ahead of ${runnerUp.vendorName}'s ${runnerUp.modelName} (${runnerUp.overall?.toFixed(1) ?? 0})`;
   if (leaderCategories.length > 0) sentence += ` and also leads in ${leaderCategories.join(", ")}`;
   sentence += ".";
 

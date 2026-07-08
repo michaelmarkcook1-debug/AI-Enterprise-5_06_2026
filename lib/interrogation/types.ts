@@ -44,7 +44,7 @@ export interface TranscriptTurn {
  *  the synthesizer may only cite URLs present on the bundle's items. */
 export interface EvidenceItem {
   layer: "model" | "peer_public" | "peer_pool";
-  scopeLabel: string; // e.g. "Your exact segment", "LMArena", "Your vertical"
+  scopeLabel: string; // e.g. "Your exact segment", "Artificial Analysis", "Your vertical"
   headline: string; // the fact, stated exactly as the source supports it
   detail?: string;
   /** Honest note on how the source population differs from the user's segment. */
@@ -64,7 +64,7 @@ export interface CoverageFlags {
   disclosedAdopters: number;
   /** Contributors behind the PRIVATE pool layer. 0 until AIE-06/07 ship. */
   poolContributors: number;
-  /** True when the model-layer (LMArena) comparison was available. */
+  /** True when the model-layer (Artificial Analysis) comparison was available. */
   hasModelData: boolean;
 }
 

@@ -51,7 +51,7 @@ import TabChat from "@/components/chat/TabChat";
 import { aggregateDevSentiment } from "@/lib/dev-sentiment/aggregate";
 import DevSentimentPanel from "@/components/dev-sentiment/DevSentimentPanel";
 import { getVendorScorecard, getModelQualityBreakdown } from "@/lib/assessment/domain-scores";
-import { MODEL_QUALITY_CATEGORIES } from "@/lib/system/model-quality-blend";
+import { MODEL_QUALITY_CATEGORY_COUNT } from "@/lib/system/model-quality-blend";
 import DomainScorecard from "@/components/assessment/DomainScorecard";
 import WeightedScorecard from "@/components/assessment/WeightedScorecard";
 import ExportPackLinks from "@/components/export/ExportPackLinks";
@@ -637,13 +637,14 @@ export default async function VendorDeepDivePage({
   // Wave-3 Interrogate is the member-gated premium action; resolve identity only
   // when the flag is on so anonymous visitors keep the free Wave-2 experience.
   const interrogateMember = (INTERROGATE_ENABLED || PREP_KIT_ENABLED) ? await getMemberOrTest().catch(() => null) : null;
-  // Model quality (Arena Elo) — a real, cited capability signal shown on the
-  // profile so a CIO can see it. It is WEIGHTED in model-category rankings (e.g.
-  // frontier model APIs); here it is context. null when the vendor has no
-  // Arena-ranked model (insufficient — never a default).
+  // Model quality (Artificial Analysis Intelligence Index) — a real, cited
+  // capability signal shown on the profile so a CIO can see it. It is WEIGHTED
+  // in model-category rankings (e.g. frontier model APIs); here it is context.
+  // null when the vendor has no Artificial-Analysis-tracked model (insufficient
+  // — never a default; falls back to the legacy Arena-Elo pillar per vendor).
   const modelQuality = scorecard?.modelQuality?.state === "scored" ? scorecard.modelQuality : null;
-  // The per-category "why" behind the blended model-quality number (the real
-  // LMArena coding / reasoning / overall / vision / instruction-following Elos).
+  // The per-index "why" behind the model-quality number — the vendor's
+  // flagship model's real Intelligence / Coding / Agentic indices.
   const mqBreakdown = modelQuality
     ? await getModelQualityBreakdown([entity.id]).then((m) => m.get(entity.id) ?? null).catch(() => null)
     : null;
@@ -669,14 +670,16 @@ export default async function VendorDeepDivePage({
       {mqBreakdown ? (
         <>
           <p className="mt-1 text-[11px] leading-5 text-[#5e6b7e] dark:text-[#a7bacd]">
-            Weighted blend of LMArena capability leaderboards, each normalised within its own arena. A capability proxy
-            from community-preference benchmarks ({modelQuality.bestGrade}), not an independent audit — capped at 4.0.
+            Driven by the flagship model&apos;s Artificial Analysis Intelligence Index — a weighted composite of 9
+            evaluations, mostly independent ({modelQuality.bestGrade}), not a fully independent audit — capped at 4.0.
+            Coding/Agentic indices are shown as cited context, not blended into the score (Intelligence Index already
+            weighs both in).
           </p>
           <ul className="mt-2 space-y-1">
             {mqBreakdown.contributions.map((c) => (
               <li key={c.category} className="flex items-center gap-2 text-[11px]">
                 <span className="w-40 shrink-0 truncate text-[#3f5068] dark:text-[#a7bacd]" title={c.modelName}>
-                  {c.label} <span className="text-[#9aa7b8]">· {Math.round(c.weight * 100)}%</span>
+                  {c.label} <span className="text-[#9aa7b8]">· {c.weight > 0 ? "drives score" : "context"}</span>
                 </span>
                 <span className="h-1.5 flex-1 overflow-hidden rounded bg-black/5 dark:bg-white/10">
                   <span
@@ -685,13 +688,13 @@ export default async function VendorDeepDivePage({
                   />
                 </span>
                 <span className="w-24 shrink-0 text-right font-mono tabular-nums text-[#7a8aa0]">
-                  {Math.round(c.rating)} Elo
+                  {c.rating.toFixed(1)}
                 </span>
               </li>
             ))}
           </ul>
           <p className="mt-1.5 text-[10px] text-[#7a8aa0]">
-            {mqBreakdown.contributions.length} of {MODEL_QUALITY_CATEGORIES.length} categories · {modelQuality.confidence}% confidence
+            {mqBreakdown.contributions.length} of {MODEL_QUALITY_CATEGORY_COUNT} indices cited · {modelQuality.confidence}% confidence
             {modelQuality.citations[0] && (
               <>
                 {" · "}
@@ -701,7 +704,7 @@ export default async function VendorDeepDivePage({
                   rel="noopener noreferrer"
                   className="text-sky-700 underline underline-offset-2 hover:no-underline dark:text-sky-400"
                 >
-                  LMArena source
+                  Artificial Analysis source
                 </a>
               </>
             )}
@@ -709,7 +712,8 @@ export default async function VendorDeepDivePage({
         </>
       ) : (
         <p className="mt-1 text-[11px] leading-5 text-[#5e6b7e] dark:text-[#a7bacd]">
-          Human-preference Arena Elo — a capability proxy, not a factuality audit (band-capped at 4.0).
+          Legacy human-preference Arena Elo (Artificial Analysis has no tracked model for this vendor yet) — a
+          capability proxy, not a factuality audit (band-capped at 4.0).
           {modelQuality.citations[0] && (
             <>
               {" "}

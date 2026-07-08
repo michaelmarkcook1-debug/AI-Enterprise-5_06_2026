@@ -34,6 +34,7 @@ export type EnvKey =
   | "GITHUB_INBOX_PATH"
   | "REDDIT_CLIENT_ID"
   | "REDDIT_CLIENT_SECRET"
+  | "ARTIFICIAL_ANALYSIS_API_KEY"
   | "NODE_ENV"
   | "VERCEL_ENV";
 
@@ -121,6 +122,14 @@ export const ENV_SPEC: EnvVarSpec[] = [
     severity: "optional",
     enables: ["Developer-subreddit sentiment ingestion for coding models"],
     remediation: "From the same reddit.com/prefs/apps registration. Reddit's commercial data terms are the owner's to accept.",
+    secret: true,
+  },
+  {
+    key: "ARTIFICIAL_ANALYSIS_API_KEY",
+    description: "Artificial Analysis Data API key — the model_quality domain's source (Intelligence/Coding/Agentic Index + release dates), replacing LMArena.",
+    severity: "optional",
+    enables: ["model_quality domain scoring for frontier_model_api", "Real per-model release dates on /models"],
+    remediation: "Sign up at artificialanalysis.ai/data-api and set ARTIFICIAL_ANALYSIS_API_KEY (sent as the x-api-key header). Free tier is scoped to exploration/internal workflows per their terms — this is a live commercial product, so confirm the right licensing tier (redistribution rights) with their team before relying on this in production. Without a key, the connector reports not_configured and ingests nothing (never fabricated).",
     secret: true,
   },
   {

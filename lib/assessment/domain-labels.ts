@@ -8,7 +8,7 @@ export const DOMAIN_LABEL: Record<DomainId, string> = {
   data_security_privacy: "Data Security, Privacy & Retention",
   identity_access: "Identity, Permissioning & Access Control",
   model_reliability: "Model Reliability, Factuality & Hallucination",
-  model_quality: "Model Quality (Arena Elo)",
+  model_quality: "Model Quality (Artificial Analysis)",
   governance_compliance: "Governance, Compliance & Auditability",
   security_threat: "Security Architecture & Threat Resilience",
   integration_architecture: "Integration & Architecture Fit",

@@ -128,13 +128,15 @@ const EVIDENCE_SELECT = {
 
 /**
  * Synthesize the model_quality DomainScore for each vendor.
- * PRIMARY: the BROADENED, multi-benchmark blend from the cited ModelQualityBenchmark
- * rows (LMArena coding / hard-prompts / overall / vision / instruction-following) —
- * per-category normalised, weighted, E4-capped at 4.0 (model-quality-score.ts).
- * FALLBACK (per vendor, only when it has NO benchmark rows yet): the legacy single
- * Arena-Elo pillar through the rubric — so nothing regresses before the first
- * benchmark seed runs. Vendors with neither are absent → model_quality stays
- * insufficient wherever active (no default, no fabrication). Never writes anything.
+ * PRIMARY: the Artificial Analysis Intelligence Index blend from the cited
+ * ModelQualityBenchmark rows (that vendor's flagship model's Intelligence /
+ * Coding / Agentic indices) — fixed-window normalised, E4-capped at 4.0
+ * (model-quality-score.ts).
+ * FALLBACK (per vendor, only when it has NO benchmark rows yet — e.g.
+ * Artificial Analysis doesn't track it): the legacy single Arena-Elo pillar
+ * through the rubric, so nothing regresses before the first benchmark seed
+ * runs. Vendors with neither are absent → model_quality stays insufficient
+ * wherever active (no default, no fabrication). Never writes anything.
  */
 async function fetchModelQualityScores(vendorIds: string[], now: Date): Promise<Map<string, DomainScore>> {
   const out = new Map<string, DomainScore>();
