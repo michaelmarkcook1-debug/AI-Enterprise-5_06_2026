@@ -1116,7 +1116,7 @@ export default async function VendorDeepDivePage({
                         <span className="font-mono text-sm tabular-nums text-[#13294b] dark:text-[#eef3f8]">
                           #{s.standing.rank} of {s.rankedCount}
                           <span className="ml-2 text-xs text-[#54647a] dark:text-[#a7bacd]">
-                            composite {(s.standing.composite ?? 0).toFixed(0)} · {s.standing.compositeConfidence}% conf
+                            composite {s.standing.assessmentComposite == null ? "—" : s.standing.assessmentComposite.toFixed(2)}/5 · {s.standing.compositeConfidence}% conf
                           </span>
                         </span>
                       ) : (

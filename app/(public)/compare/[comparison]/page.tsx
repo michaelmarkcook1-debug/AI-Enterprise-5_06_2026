@@ -8,6 +8,7 @@ import {
   listVendorMomentum,
 } from "@/lib/intelligence/repository";
 import { isLiveData } from "@/lib/intelligence/provenance";
+import { getVendorCategoryStandings, type VendorCategoryStanding } from "@/lib/ranking/category-composite";
 import DataUnavailable from "@/components/DataUnavailable";
 
 // force-dynamic: comparisons are DB-backed (real pillar scores), so reflect the
@@ -48,20 +49,20 @@ const MUTED = "text-[#15263c]/65 dark:text-[#eef3f8]/60";
 function VendorColumn({
   name,
   slug,
-  overall,
-  confidence,
+  standing,
   category,
   position,
   momentum,
 }: {
   name: string;
   slug: string;
-  overall: number;
-  confidence: number;
+  standing: VendorCategoryStanding | null;
   category: string;
   position: string;
   momentum: number | null;
 }) {
+  const s = standing?.standing;
+  const ranked = s?.state === "ranked";
   return (
     <div className={CARD}>
       <Link href={`/vendors/${slug}`} className="text-lg font-semibold underline underline-offset-2">
@@ -69,8 +70,20 @@ function VendorColumn({
       </Link>
       <div className={`mt-1 text-xs ${MUTED}`}>{category} · {position}</div>
       <dl className="mt-4 space-y-2 text-sm">
-        <div className="flex justify-between"><dt className={MUTED}>Overall score</dt><dd className="tabular-nums font-medium">{overall.toFixed(1)}</dd></div>
-        <div className="flex justify-between"><dt className={MUTED}>Confidence</dt><dd className="tabular-nums">{Math.round(confidence)}%</dd></div>
+        <div className="flex justify-between">
+          <dt className={MUTED}>{standing ? `Composite in ${standing.categoryName}` : "In-category composite"}</dt>
+          <dd className="tabular-nums font-medium">
+            {ranked && s?.assessmentComposite != null ? `${s.assessmentComposite.toFixed(2)}/5` : "insufficient evidence"}
+          </dd>
+        </div>
+        <div className="flex justify-between">
+          <dt className={MUTED}>Rank</dt>
+          <dd className="tabular-nums">{ranked && standing ? `#${s!.rank} of ${standing.rankedCount}` : "—"}</dd>
+        </div>
+        <div className="flex justify-between">
+          <dt className={MUTED}>Confidence</dt>
+          <dd className="tabular-nums">{ranked && s?.compositeConfidence != null ? `${Math.round(s.compositeConfidence)}%` : "—"}</dd>
+        </div>
         <div className="flex justify-between"><dt className={MUTED}>Momentum</dt><dd className="tabular-nums">{momentum == null ? "—" : Math.round(momentum)}</dd></div>
       </dl>
     </div>
@@ -98,8 +111,30 @@ export default async function ComparePage({ params }: { params: Promise<Params> 
   const [a, b] = await Promise.all([getIntelligenceVendor(pair[0]), getIntelligenceVendor(pair[1])]);
   if (!a || !b) notFound();
 
-  const [pillars, momentum] = await Promise.all([listVendorPillarScores(), listVendorMomentum()]);
+  const [pillars, momentum, aStandings, bStandings] = await Promise.all([
+    listVendorPillarScores(),
+    listVendorMomentum(),
+    getVendorCategoryStandings(a.id),
+    getVendorCategoryStandings(b.id),
+  ]);
   const momentumBy = new Map(momentum.map((m) => [m.vendorId, m.momentumScore]));
+
+  // Composite unification: both columns must show the SAME basis (the unified
+  // 0-5 assessmentComposite) the category/homepage/vendor-list pages use — never
+  // the raw vendor.overallScore this page used to show. Prefer a category BOTH
+  // vendors compete in (a real head-to-head); prefer one where both are actually
+  // ranked over one where either is held. With no shared category, fall back to
+  // each vendor's own best standing — each carries its own category label so two
+  // different contexts never read as a false head-to-head.
+  const bByCategory = new Map(bStandings.map((s) => [s.categoryId, s]));
+  const shared = aStandings
+    .filter((s) => bByCategory.has(s.categoryId))
+    .map((s) => [s, bByCategory.get(s.categoryId)!] as const);
+  const bothRanked = shared.find(([sa, sb]) => sa.standing.state === "ranked" && sb.standing.state === "ranked");
+  const sharedPair = bothRanked ?? shared[0] ?? null;
+  const bestOwn = (list: VendorCategoryStanding[]) => list.find((s) => s.standing.state === "ranked") ?? list[0] ?? null;
+  const aStanding = sharedPair ? sharedPair[0] : bestOwn(aStandings);
+  const bStanding = sharedPair ? sharedPair[1] : bestOwn(bStandings);
 
   const aPillars = new Map(pillars.filter((p) => p.vendorId === a.id).map((p) => [p.pillar, p.capabilityScore]));
   const bPillars = new Map(pillars.filter((p) => p.vendorId === b.id).map((p) => [p.pillar, p.capabilityScore]));
@@ -120,10 +155,18 @@ export default async function ComparePage({ params }: { params: Promise<Params> 
         </p>
       </header>
 
-      <section className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <VendorColumn name={a.name} slug={a.slug} overall={a.overallScore} confidence={a.confidenceScore} category={a.category} position={a.marketPosition} momentum={momentumBy.get(a.id) ?? null} />
-        <VendorColumn name={b.name} slug={b.slug} overall={b.overallScore} confidence={b.confidenceScore} category={b.category} position={b.marketPosition} momentum={momentumBy.get(b.id) ?? null} />
+      <section className="mb-2 grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <VendorColumn name={a.name} slug={a.slug} standing={aStanding} category={a.category} position={a.marketPosition} momentum={momentumBy.get(a.id) ?? null} />
+        <VendorColumn name={b.name} slug={b.slug} standing={bStanding} category={b.category} position={b.marketPosition} momentum={momentumBy.get(b.id) ?? null} />
       </section>
+      <div className="mb-8">
+        {!sharedPair && (aStanding || bStanding) && (
+          <p className={`text-xs ${MUTED}`}>
+            {a.name} and {b.name} don&apos;t share a ranked market category, so each composite above is shown in
+            that vendor&apos;s own category — not a direct head-to-head.
+          </p>
+        )}
+      </div>
 
       {pillarKeys.length > 0 ? (
         <section className={CARD}>

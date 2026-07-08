@@ -265,12 +265,16 @@ export interface VendorCategoryStanding {
   isLive: boolean;
 }
 
-export async function getVendorCategoryStandings(
+/** Pure: find a vendor's standing across a set of category composites. Extracted
+ *  from getVendorCategoryStandings so a test can prove parity — the SAME
+ *  CategoryRankedVendor object every other surface reads, never a re-derived
+ *  or partially-copied value — without needing to fake the DB compute pipeline. */
+export function findVendorStandings(
+  composites: CategoryComposite[],
   vendorId: string,
-): Promise<VendorCategoryStanding[]> {
-  const all = await getCategoryComposites();
+): VendorCategoryStanding[] {
   const out: VendorCategoryStanding[] = [];
-  for (const c of all) {
+  for (const c of composites) {
     const standing =
       c.ranked.find((v) => v.vendorId === vendorId) ??
       c.incomplete.find((v) => v.vendorId === vendorId);
@@ -285,4 +289,11 @@ export async function getVendorCategoryStandings(
     }
   }
   return out;
+}
+
+export async function getVendorCategoryStandings(
+  vendorId: string,
+): Promise<VendorCategoryStanding[]> {
+  const all = await getCategoryComposites();
+  return findVendorStandings(all, vendorId);
 }
