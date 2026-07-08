@@ -4,6 +4,7 @@ import { PRICING_ENABLED, memberTestOpenEffective } from "@/lib/availability";
 import PublicFooter from "@/components/public/PublicFooter";
 import IntentBeacon from "@/components/IntentBeacon";
 import AmbientHeroBackdrop from "@/components/AmbientHeroBackdrop";
+import JourneyBadge from "@/components/shell/JourneyBadge";
 
 // LEAN public shell. The whole reason this route group exists: public pages get
 // NONE of the dashboard's live providers or pollers — no /api/system poll, no
@@ -27,6 +28,7 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
     <>
       <AmbientHeroBackdrop />
       <IntentBeacon />
+      <JourneyBadge />
       <div className="relative z-10 flex min-h-screen flex-col">
         <AppNav pricingEnabled={PRICING_ENABLED} showToggle={showToggle} />
         <div className="flex-1">{children}</div>

@@ -3,7 +3,7 @@
 // integration-level; the honesty invariants it relies on (stopping rule,
 // citation guard, cost fail-loud) are unit-tested in the pure cores.
 
-import { runQuestioner } from "./questioner";
+import { runQuestioner, QUICK_MODE_MAX_QUESTIONS } from "./questioner";
 import { buildEvidenceBundle } from "./retrieval";
 import { synthesizeFinding } from "./synthesis";
 import { costColumns, type CostColumns } from "./cost";
@@ -20,7 +20,7 @@ import {
   countQuestions,
   type SessionRow,
 } from "./session-store";
-import type { Finding, TranscriptTurn } from "./types";
+import type { Finding, TranscriptTurn, InterrogationMode } from "./types";
 
 export type AdvanceResult =
   | { kind: "question"; sessionId: string; question: string; options?: string[]; questionsAsked: number }
@@ -79,7 +79,8 @@ async function synthesize(session: SessionRow, concludingUsage: LLMUsage): Promi
 /** Advance a loaded session by one questioner step, synthesizing if ready. */
 async function advance(session: SessionRow): Promise<AdvanceResult> {
   const questionsAsked = countQuestions(session);
-  const step = await runQuestioner({ transcript: transcriptOf(session), questionsAsked });
+  const maxQuestions = session.mode === "quick" ? QUICK_MODE_MAX_QUESTIONS : undefined;
+  const step = await runQuestioner({ transcript: transcriptOf(session), questionsAsked, maxQuestions });
 
   if (step.next.action === "ask") {
     await appendQuestion(session, step.next.question, costColumns(step.usage));
@@ -103,6 +104,7 @@ export async function startInterrogation(input: {
   openingText: string;
   seatId?: string;
   orgId?: string;
+  mode?: InterrogationMode;
 }): Promise<AdvanceResult> {
   const sessionId = await createSession(input);
   const session = await getSession(sessionId);

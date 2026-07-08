@@ -8,7 +8,7 @@
 //    honest "impact not yet evidenced" state — never a default.
 //  • Draft-framed: a starting map to pressure-test, not a verdict.
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import type { IndustryTag } from "@/lib/use-cases";
 import {
@@ -17,6 +17,7 @@ import {
   type MaturityId,
   type FrontDoorEntry,
 } from "@/lib/usecase-front-door";
+import { bumpJourneyStepClient } from "@/lib/member/journey-client";
 
 const INDUSTRIES: { id: IndustryTag; label: string }[] = [
   { id: "financial_services", label: "Financial services" },
@@ -66,6 +67,13 @@ export default function UseCaseFrontDoorClient() {
   const [industry, setIndustry] = useState<IndustryTag | null>(null);
   const [maturity, setMaturity] = useState<MaturityId | null>(null);
   const [showAll, setShowAll] = useState(false);
+
+  // Golden path (Prompt 4), step 1 of 5. Landing here is the deliberate
+  // start of the guided journey — bump unconditionally (never regresses a
+  // visitor already further along, per bumpJourneyStepClient's own max()).
+  useEffect(() => {
+    bumpJourneyStepClient(1);
+  }, []);
 
   const results: FrontDoorEntry[] = useMemo(
     () => (industry && maturity ? frontDoorRank(industry, maturity) : []),
@@ -155,15 +163,15 @@ export default function UseCaseFrontDoorClient() {
                     )}
                   </div>
                 </div>
-                <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px]">
-                  <span className={MUTED}>Vendors for this:</span>
+                <div className="mt-3 flex flex-wrap items-center gap-2">
                   {e.routes.map((r) => (
                     <Link
                       key={r}
                       href={`/category/${r}`}
-                      className="rounded-full border border-black/15 px-2 py-0.5 font-medium underline-offset-2 hover:underline dark:border-white/15"
+                      onClick={() => bumpJourneyStepClient(2)}
+                      className="rounded-full bg-[#b08d2f] px-3 py-1 text-xs font-semibold text-white transition-colors hover:bg-[#987625] dark:bg-[#d4af37] dark:text-[#1a1605] dark:hover:bg-[#e8c95c]"
                     >
-                      {CATEGORY_LABEL[r] ?? r} →
+                      See the shortlist: {CATEGORY_LABEL[r] ?? r} →
                     </Link>
                   ))}
                 </div>

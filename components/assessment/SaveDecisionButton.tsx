@@ -7,7 +7,9 @@
 // cannot change the published composite for anyone, including the saver.
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import type { DomainId } from "@/lib/types";
+import { bumpJourneyStepClient } from "@/lib/member/journey-client";
 
 type State = "idle" | "naming" | "saving" | "saved" | "error";
 
@@ -22,6 +24,7 @@ export default function SaveDecisionButton({
   shortlist: string[]; // vendor ids, currently ranked
   asOfDate: string | null;
 }) {
+  const router = useRouter();
   const [state, setState] = useState<State>("idle");
   const [name, setName] = useState("");
   const [error, setError] = useState("");
@@ -53,7 +56,16 @@ export default function SaveDecisionButton({
       }
       setState("saved");
       setName("");
-      setTimeout(() => setState("idle"), 2500);
+      bumpJourneyStepClient(5); // golden path step 5 — decision saved
+      // Brief visual confirmation, then land on the decision itself — the
+      // fix for the golden-path gap this closes: saving used to just show
+      // "Saved" and dead-end, no way to reach prep kit / export / share.
+      const decisionId = (json.decision as { id?: string } | undefined)?.id;
+      if (decisionId) {
+        setTimeout(() => router.push(`/decisions/${decisionId}`), 700);
+      } else {
+        setTimeout(() => setState("idle"), 2500);
+      }
     } catch {
       setState("error");
       setError("Network error — check your connection.");
@@ -61,7 +73,7 @@ export default function SaveDecisionButton({
   }
 
   if (state === "saved") {
-    return <span className="text-xs font-medium text-emerald-700 dark:text-emerald-300">Saved</span>;
+    return <span className="text-xs font-medium text-emerald-700 dark:text-emerald-300">Saved — opening your decision…</span>;
   }
 
   if (state === "naming" || state === "saving") {

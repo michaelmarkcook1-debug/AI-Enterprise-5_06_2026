@@ -11,6 +11,8 @@
 import { useState, type ReactNode } from "react";
 import ContributePrompt from "./ContributePrompt";
 
+type InterrogationMode = "quick" | "comprehensive";
+
 const CARD = "rounded-xl border border-black/10 dark:border-white/10 bg-white/60 dark:bg-white/5 p-5";
 const MUTED = "text-[#15263c]/65 dark:text-[#eef3f8]/60";
 const BTN = "rounded-md bg-[#13294b] px-4 py-2 text-sm font-medium text-white hover:bg-[#1c3a66] disabled:opacity-50 dark:bg-[#d4af37] dark:text-[#0a1f38]";
@@ -97,6 +99,7 @@ async function postJson(url: string, body: unknown): Promise<QAResult> {
 export default function InterrogationFlow() {
   const [phase, setPhase] = useState<Phase>("opening");
   const [sessionId, setSessionId] = useState<string>("");
+  const [mode, setMode] = useState<InterrogationMode>("comprehensive");
   const [opening, setOpening] = useState("");
   const [question, setQuestion] = useState("");
   const [options, setOptions] = useState<string[]>([]);
@@ -162,7 +165,7 @@ export default function InterrogationFlow() {
     setBusy(true);
     setError("");
     try {
-      applyResult(await postJson("/api/interrogate/start", { opening: opening.trim() }));
+      applyResult(await postJson("/api/interrogate/start", { opening: opening.trim(), mode }));
     } catch (e) {
       setError((e as Error).message);
       setPhase("failed");
@@ -200,6 +203,40 @@ export default function InterrogationFlow() {
             One or two sentences — who you are, what you have, and where you want to get to with AI. I&apos;ll
             ask a few sharp questions, then write you a tailored, source-cited finding.
           </p>
+          <div className="mt-3 flex items-center gap-2">
+            <span className={`text-[11px] font-medium ${MUTED}`}>Depth:</span>
+            <div className="inline-flex overflow-hidden rounded-full border border-black/15 dark:border-white/15">
+              <button
+                type="button"
+                onClick={() => setMode("quick")}
+                aria-pressed={mode === "quick"}
+                className={`px-3 py-1 text-xs font-medium transition-colors ${
+                  mode === "quick"
+                    ? "bg-[#b08d2f] text-white dark:bg-[#d4af37] dark:text-[#0a1f38]"
+                    : `${MUTED} hover:bg-black/[0.03] dark:hover:bg-white/[0.05]`
+                }`}
+              >
+                Quick response
+              </button>
+              <button
+                type="button"
+                onClick={() => setMode("comprehensive")}
+                aria-pressed={mode === "comprehensive"}
+                className={`border-l border-black/15 px-3 py-1 text-xs font-medium transition-colors dark:border-white/15 ${
+                  mode === "comprehensive"
+                    ? "bg-[#b08d2f] text-white dark:bg-[#d4af37] dark:text-[#0a1f38]"
+                    : `${MUTED} hover:bg-black/[0.03] dark:hover:bg-white/[0.05]`
+                }`}
+              >
+                Comprehensive
+              </button>
+            </div>
+          </div>
+          <p className={`mt-1 text-[11px] ${MUTED}`}>
+            {mode === "quick"
+              ? "At most 5 questions, then a finding from whatever signal is gathered by then."
+              : "The model asks as many sharp questions as it judges it needs before concluding."}
+          </p>
           <textarea
             value={opening}
             onChange={(e) => setOpening(e.target.value)}
@@ -218,7 +255,9 @@ export default function InterrogationFlow() {
 
       {phase === "questioning" && (
         <section className={CARD}>
-          <div className={`text-[11px] font-semibold uppercase tracking-wide ${MUTED}`}>Question {questionsAsked}</div>
+          <div className={`text-[11px] font-semibold uppercase tracking-wide ${MUTED}`}>
+            Question {questionsAsked}{mode === "quick" ? " of at most 5" : ""}
+          </div>
           <p className="mt-1 text-sm font-medium">{question}</p>
           {options.length > 0 && (
             <div className="mt-3 flex flex-wrap gap-2">

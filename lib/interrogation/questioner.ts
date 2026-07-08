@@ -21,6 +21,9 @@ export const MIN_QUESTIONS = 2;
 /** Bug-guard only — NOT a UX cap. If the "ready" signal never fires by here,
  *  force conclusion so a logic bug can't loop the model (and its cost) forever. */
 export const MAX_TURNS = 12;
+/** "Quick response" mode's REAL UX ceiling (distinct from MAX_TURNS above,
+ *  which is a bug-guard for BOTH modes). Chosen once at session start. */
+export const QUICK_MODE_MAX_QUESTIONS = 5;
 
 // Explicitly typed as Set<string> (not the narrower literal-union Set the ids'
 // own types would infer): these check membership of an ARBITRARY incoming
@@ -47,10 +50,14 @@ export interface QuestionerResponse {
 /**
  * PURE stopping-rule enforcement. Given how many questions have already been
  * asked and the model's latest response, decide the actual next action.
- * Order matters: bug-guard cap first, then the ≥MIN floor, then the model's
- * own judgement. No DB, no LLM — fully unit-tested.
+ * Order matters: bug-guard cap, then the mode's real UX cap (if any), then
+ * the ≥MIN floor, then the model's own judgement. No DB, no LLM — fully
+ * unit-tested.
+ *
+ * `maxQuestions` is the "quick response" mode's real ceiling (undefined in
+ * comprehensive mode — no extra cap beyond MAX_TURNS/MIN_QUESTIONS below).
  */
-export function decideAction(questionsAsked: number, resp: QuestionerResponse): QuestionerAction {
+export function decideAction(questionsAsked: number, resp: QuestionerResponse, maxQuestions?: number): QuestionerAction {
   if (questionsAsked >= MAX_TURNS) {
     // Deliberately unconditional — NOT gated on profileValid. This is a
     // termination guarantee: if a model bug meant profileValid never turns
@@ -59,6 +66,13 @@ export function decideAction(questionsAsked: number, resp: QuestionerResponse): 
     // segment lookups (segmentId, VERTICAL_STATS, etc.) are plain map lookups
     // that simply miss on an invalid/empty id, degrading to an honest thin-
     // evidence finding rather than crashing or fabricating.
+    return { action: "ready", intentProfile: resp.intentProfile };
+  }
+  if (maxQuestions != null && questionsAsked >= maxQuestions) {
+    // Same reasoning as the MAX_TURNS bug-guard above, applied to the mode's
+    // chosen ceiling: unconditional, so a thin/invalid profile still degrades
+    // to an honest thin-evidence finding rather than exceeding what the
+    // visitor actually asked for ("quick" must mean quick, always).
     return { action: "ready", intentProfile: resp.intentProfile };
   }
   if (questionsAsked < MIN_QUESTIONS) {
@@ -181,6 +195,8 @@ export interface QuestionerStep {
 export async function runQuestioner(input: {
   transcript: TranscriptTurn[];
   questionsAsked: number;
+  /** "quick" mode's real ceiling — omit for comprehensive (no extra cap). */
+  maxQuestions?: number;
 }): Promise<QuestionerStep> {
   const result = await extractStructured<QuestionerResponse>({
     systemPrompt: buildSystemPrompt(),
@@ -201,7 +217,7 @@ export async function runQuestioner(input: {
     }),
   });
   return {
-    next: decideAction(input.questionsAsked, result.data),
+    next: decideAction(input.questionsAsked, result.data, input.maxQuestions),
     usage: result.usage,
     source: result.source,
   };

@@ -17,6 +17,7 @@ import type { DomainId } from "@/lib/types";
 import type { SessionLens } from "@/lib/assessment/session-lens";
 import { MEMBER_FEATURES_VISIBLE } from "@/lib/availability";
 import SaveDecisionButton from "./SaveDecisionButton";
+import { bumpJourneyStepClient } from "@/lib/member/journey-client";
 
 export interface InterrogateConfig {
   /** Paid-depth flag (INTERROGATE_ENABLED) resolved server-side. */
@@ -76,6 +77,7 @@ export default function InterrogatePanel({
   onApplyLens,
   currentSliders,
   rankedVendorIds,
+  vendorCategoryId,
   asOfDate,
 }: {
   config: InterrogateConfig;
@@ -93,6 +95,11 @@ export default function InterrogatePanel({
    *  as the shortlist. Distinct from `vendorIds` (the full in-scope set fed to
    *  the interrogate re-rank call). */
   rankedVendorIds?: string[];
+  /** Vendor scope only (Prompt 4): the category this vendor's own standing is
+   *  in, so a single-vendor decision can be saved from a vendor page too —
+   *  before this, only category-scoped Interrogate offered "save as decision"
+   *  at all. Undefined ⇒ vendor has no ranked category standing; button hides. */
+  vendorCategoryId?: string;
   /** The category's evidence freshness date (YYYY-MM-DD) at render time —
    *  stored on the decision so a later reopen can show "refreshed since". */
   asOfDate?: string | null;
@@ -159,6 +166,7 @@ export default function InterrogatePanel({
       onApplyLens(sl.adjustedSliders);
       setState("idle");
       setOpen(false);
+      bumpJourneyStepClient(4); // golden path step 4 — a real interrogate run, not just opening the panel
     } catch {
       setState("error");
       setError("Network error — check your connection.");
@@ -187,6 +195,14 @@ export default function InterrogatePanel({
               category={config.scope.categoryId}
               weights={currentSliders}
               shortlist={rankedVendorIds}
+              asOfDate={asOfDate ?? null}
+            />
+          )}
+          {config.scope.kind === "vendor" && currentSliders && vendorCategoryId && (
+            <SaveDecisionButton
+              category={vendorCategoryId}
+              weights={currentSliders}
+              shortlist={[config.scope.vendorId]}
               asOfDate={asOfDate ?? null}
             />
           )}

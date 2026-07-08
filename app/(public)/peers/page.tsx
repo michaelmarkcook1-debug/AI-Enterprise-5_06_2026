@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import CohortExplorer from "@/components/peers/CohortExplorer";
 import PeerUsageOverview from "@/components/peers/PeerUsageOverview";
 import TabChat from "@/components/chat/TabChat";
@@ -11,6 +12,7 @@ import {
   getUsageAsOf,
   getUsageCoverage,
 } from "@/lib/peer/aggregate-usage";
+import { VERTICALS } from "@/lib/peer/segments";
 import { TRACKED_VENDOR_NAMES } from "@/lib/sourcing/ai-news-manifest";
 import { absoluteUrl } from "@/lib/site";
 
@@ -31,6 +33,8 @@ export const metadata: Metadata = {
 const MUTED = "text-[#15263c]/65 dark:text-[#eef3f8]/60";
 
 export default function PeersPage() {
+  const coverage = getUsageCoverage();
+
   return (
     <main className="mx-auto max-w-6xl px-4 py-10">
       <header className="mb-6">
@@ -51,6 +55,26 @@ export default function PeersPage() {
         </p>
       </header>
 
+      {/* So-what takeaway (Prompt 4) — real coverage counts from the SAME
+          getUsageCoverage() this page already feeds into PeerUsageOverview,
+          same "Derived signal" pattern as the homepage graph and /vendors. */}
+      <div className="mb-6 max-w-3xl text-sm leading-6">
+        <p className="text-[#15263c] dark:text-[#eef3f8]">
+          <span className="mr-2 inline-block rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide align-middle">
+            Derived signal
+          </span>
+          Cited adoption benchmarks compiled for {coverage.verticalsWithBenchmark} of {VERTICALS.length} verticals;{" "}
+          {coverage.verticalsWithVendorUsage} show disclosed vendor usage, across {coverage.companies} tracked companies.
+        </p>
+        <p className="mt-1.5 text-[#15263c]/70 dark:text-[#eef3f8]/70">
+          Found a fit worth checking?{" "}
+          <Link href="/use-cases" className="underline underline-offset-2 hover:no-underline">
+            Assess it properly
+          </Link>{" "}
+          against the full evidence-graded scorecard, not just adoption signal.
+        </p>
+      </div>
+
       {/* ── DEFAULT view: the whole tracked base, aggregated (redesign 2026-07-06).
              Real cited data only — BTOS adoption breadth + disclosed vendor usage. ── */}
       <PeerUsageOverview
@@ -58,7 +82,7 @@ export default function PeersPage() {
         topVendors={getTopVendorsAcrossBase()}
         useCases={getBaseUseCases()}
         asOf={getUsageAsOf()}
-        coverage={getUsageCoverage()}
+        coverage={coverage}
         vendorNames={TRACKED_VENDOR_NAMES}
       />
 
