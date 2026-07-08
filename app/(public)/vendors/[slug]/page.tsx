@@ -840,6 +840,7 @@ export default async function VendorDeepDivePage({
                           signedIn: !!interrogateMember,
                           scope: { kind: "vendor", vendorId: entity.id },
                         }}
+                        vendorCategoryId={verdictStanding?.categoryId}
                       />
                     ) : (
                       <DomainScorecard scorecard={scorecard} />

@@ -40,11 +40,16 @@ function tone(score: number | null): string {
 export default function WeightedScorecard({
   scorecard,
   interrogate,
+  vendorCategoryId,
 }: {
   scorecard: VendorScorecard;
   /** Wave-3: when present + enabled, renders the member-gated Interrogate panel
    *  whose context re-run drives these same sliders. Absent → Wave-2 behaviour. */
   interrogate?: InterrogateConfig;
+  /** Prompt 4: the vendor's own ranked-category id, so vendor-scoped
+   *  Interrogate can also offer "save as decision" (previously category-scope
+   *  only — see InterrogatePanel's vendorCategoryId prop). */
+  vendorCategoryId?: string;
 }) {
   const [sliders, setSliders] = useState<Record<DomainId, number>>(defaultSliders);
 
@@ -69,6 +74,9 @@ export default function WeightedScorecard({
           config={interrogate}
           activeDomains={ASSESSMENT_DOMAINS}
           onApplyLens={(next) => setSliders((s) => ({ ...s, ...next }))}
+          currentSliders={sliders}
+          vendorCategoryId={vendorCategoryId}
+          asOfDate={null}
         />
       )}
       <p className="mb-3 text-xs leading-5 text-[#5e6b7e] dark:text-[#a7bacd]">

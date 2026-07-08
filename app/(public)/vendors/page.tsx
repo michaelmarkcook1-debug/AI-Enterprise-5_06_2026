@@ -30,12 +30,48 @@ export default async function VendorsPage() {
   const withVendors = composites.filter((c) => c.ranked.length > 0 || c.incomplete.length > 0);
   const anyRanked = composites.some((c) => c.ranked.length > 0);
 
+  // So-what takeaway (Prompt 4) — real derived counts from the SAME composites
+  // this page already renders, not a separate computation. Never a fabricated
+  // insight: just an honest summary of how much of this page is solid vs. thin.
+  const rankedCategories = withVendors.filter((c) => c.ranked.length > 0);
+  const totalVendorsRanked = rankedCategories.reduce((n, c) => n + c.ranked.length, 0);
+  const thinCategories = rankedCategories.filter((c) => c.lowDiscrimination).length;
+
   return (
     <PageFrame
       title="Vendor rankings"
       kicker="Provider intelligence"
       description="Ranked within each market category — never across them — by a weighted composite of all evidence-graded pillars. Not a single market-share proxy. Every position is explainable and tied to its evidence."
     >
+      {/* So-what takeaway (Prompt 4) — real counts from the composites this
+          page already renders, same "Derived signal" pattern as the homepage
+          graph. Points back into the guided path for anyone who landed on
+          this dense list cold and wants a steered fit instead. */}
+      {anyRanked && (
+        <div className="mb-4 max-w-3xl text-sm leading-6">
+          <p className="text-[#15263c] dark:text-[#eef3f8]">
+            <span className="mr-2 inline-block rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide align-middle">
+              Derived signal
+            </span>
+            {totalVendorsRanked} vendor{totalVendorsRanked === 1 ? "" : "s"} ranked with verified evidence across{" "}
+            {rankedCategories.length} categor{rankedCategories.length === 1 ? "y" : "ies"}
+            {thinCategories > 0 && (
+              <>
+                {" "}— {thinCategories} of them {thinCategories === 1 ? "is" : "are"} still thin (treat the order as
+                tiers, not a precise rank)
+              </>
+            )}
+            .
+          </p>
+          <p className="mt-1.5 text-[#15263c]/70 dark:text-[#eef3f8]/70">
+            Not sure where to look first?{" "}
+            <Link href="/use-cases" className="underline underline-offset-2 hover:no-underline">
+              Start here
+            </Link>{" "}
+            for a guided fit instead of the full list.
+          </p>
+        </div>
+      )}
       {!anyRanked ? (
         <div className={CARD}>
           <p className="text-sm">
