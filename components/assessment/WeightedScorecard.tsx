@@ -18,6 +18,7 @@ import {
 import type { VendorScorecard } from "@/lib/assessment/domain-scores";
 import { PILLARS, type DomainId } from "@/lib/types";
 import InterrogatePanel, { type InterrogateConfig } from "@/components/assessment/InterrogatePanel";
+import GradeChip from "@/components/assessment/GradeChip";
 
 const PILLAR_LABEL = Object.fromEntries(PILLARS.map((p) => [p.id, p.label])) as Record<string, string>;
 
@@ -34,17 +35,6 @@ function tone(score: number | null): string {
   if (score >= 3) return "text-amber-700 dark:text-amber-300";
   if (score >= 2) return "text-[#a07f1f] dark:text-[#d4af37]";
   return "text-rose-700 dark:text-rose-300";
-}
-
-function GradeChip({ grade }: { grade: string }) {
-  const label = grade === "E5" || grade === "E4" ? "verified" : grade === "E3" ? "tested" : grade === "E2" ? "documented" : "inferred";
-  const cls =
-    grade === "E5" || grade === "E4"
-      ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300"
-      : grade === "E3"
-        ? "bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300"
-        : "bg-[#ece3cb] text-[#3f5068] dark:bg-[#143049] dark:text-[#a7bacd]";
-  return <span className={`rounded px-1.5 py-0.5 text-[10px] font-medium ${cls}`}>{grade} {label}</span>;
 }
 
 export default function WeightedScorecard({

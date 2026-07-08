@@ -56,6 +56,11 @@ import DomainScorecard from "@/components/assessment/DomainScorecard";
 import WeightedScorecard from "@/components/assessment/WeightedScorecard";
 import ExportPackLinks from "@/components/export/ExportPackLinks";
 import PrepKitPanel from "@/components/assessment/PrepKitPanel";
+import VendorPageShell, { type VendorTabKey } from "@/components/vendor/VendorPageShell";
+import type { VerdictStanding } from "@/components/vendor/VerdictCard";
+import EvidenceTrail from "@/components/vendor/EvidenceTrail";
+import VendorDependencies from "@/components/vendor/VendorDependencies";
+import { summariseVerdict, verdictWhySentence } from "@/lib/assessment/verdict-summary";
 
 export const dynamic = "force-dynamic";
 
@@ -767,68 +772,198 @@ export default async function VendorDeepDivePage({
       return { overallDelta: last.overallScore - first.overallScore, days };
     })();
 
+    // Verdict card inputs (Prompt 2). Same strictCategoryStandings/scorecard
+    // reads above — no new query. summariseVerdict() is computeWeightedComposite
+    // under the framework default weights, the same pure function
+    // WeightedScorecard itself calls; the verdict shows the stable global read.
+    const liveStanding = strictCategoryStandings.find((s) => s.isLive && s.standing.rank != null);
+    const verdictStanding: VerdictStanding | null = liveStanding
+      ? {
+          categoryId: liveStanding.categoryId,
+          categoryName: liveStanding.categoryName,
+          rank: liveStanding.standing.rank as number,
+          rankedCount: liveStanding.rankedCount,
+        }
+      : null;
+    const verdictSummary = scorecard ? summariseVerdict(scorecard.domains) : null;
+
+    const availableTabs: VendorTabKey[] = [
+      "assessment",
+      "evidence",
+      "market",
+      "dependencies",
+      ...(peerAdopters.length > 0 ? (["peers"] as const) : []),
+      "financials",
+    ];
+
+    const liveGithub = hasLiveGitHubRepo(intelId) ? await fetchLiveGitHubSignalForVendor(intelId).catch(() => null) : null;
+    const reviewHealth = reviewsConnector.health();
+
     return (
       <div className="min-h-screen bg-white dark:bg-[#071827]">
         <main className="mx-auto max-w-3xl px-5 py-8">
-          <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+          <div className="mb-4">
             <Link
               href="/vendors"
               className="inline-flex items-center gap-1 text-xs font-medium text-[#54647a] hover:text-[#13294b] dark:text-[#a7bacd] dark:hover:text-[#eef3f8]"
             >
               ← Back to rankings
             </Link>
-            <TrackButton item={`vendor:${entity.slug}`} label={entity.name} />
           </div>
-          <h1 className="mb-4 text-3xl font-semibold tracking-tight text-[#13294b] dark:text-[#f6f9fc]">
-            {entity.name}
-          </h1>
-          {/* ── The Pulse — what moved + the live read, before the deep dive ── */}
-          <section className="mb-6">
-            <Panel title="The Pulse">
-              <VendorPulsePanel
-                vendorName={entity.name}
-                news={strictNews.map((n) => ({
-                  title: n.title,
-                  whyItMatters: n.whyItMatters ?? undefined,
-                  sourceName: n.sourceName,
-                  sourceUrl: n.sourceUrl ?? undefined,
-                  publishedAt: n.publishedAt,
-                  impactScore: n.impactScore ?? 0,
-                }))}
-                standing={pulseStanding}
-                momentum={pulseMomentum}
-              />
-            </Panel>
-          </section>
-          {hasEvidence && scorecard ? (
-            <section className="mb-6">
-              <Panel
-                title="Enterprise assessment — evidence scorecard"
-                action={<ExportPackLinks href={`/api/export/procurement-pack?vendor=${entity.slug}`} label="Export" />}
-              >
-                {INTERACTIVE_ASSESSMENT_ENABLED ? (
-                  <WeightedScorecard
-                    scorecard={scorecard}
-                    interrogate={{
-                      enabled: INTERROGATE_ENABLED,
-                      signedIn: !!interrogateMember,
-                      scope: { kind: "vendor", vendorId: entity.id },
-                    }}
-                  />
-                ) : (
-                  <DomainScorecard scorecard={scorecard} />
-                )}
-                {modelQualityPanel && <div className="mt-4">{modelQualityPanel}</div>}
-              </Panel>
-              {/* Wave 4 — vendor-meeting prep kit (member-gated premium action) */}
-              <PrepKitPanel
-                config={{ enabled: PREP_KIT_ENABLED, signedIn: !!interrogateMember }}
-                vendorId={entity.id}
-                vendorName={entity.name}
-              />
-            </section>
+
+          {hasEvidence && scorecard && verdictSummary ? (
+            <VendorPageShell
+              vendorName={entity.name}
+              vendorSlug={entity.slug}
+              standing={verdictStanding}
+              composite={verdictSummary.composite}
+              confidence={verdictSummary.confidence}
+              coverage={verdictSummary.coverage}
+              momentum={strictLast?.momentumScore ?? null}
+              whySentence={verdictWhySentence(verdictSummary)}
+              availableTabs={availableTabs}
+              verdictExtras={
+                <PrepKitPanel
+                  config={{ enabled: PREP_KIT_ENABLED, signedIn: !!interrogateMember }}
+                  vendorId={entity.id}
+                  vendorName={entity.name}
+                />
+              }
+              tabs={{
+                assessment: (
+                  <Panel title="12-domain assessment">
+                    {INTERACTIVE_ASSESSMENT_ENABLED ? (
+                      <WeightedScorecard
+                        scorecard={scorecard}
+                        interrogate={{
+                          enabled: INTERROGATE_ENABLED,
+                          signedIn: !!interrogateMember,
+                          scope: { kind: "vendor", vendorId: entity.id },
+                        }}
+                      />
+                    ) : (
+                      <DomainScorecard scorecard={scorecard} />
+                    )}
+                    {modelQualityPanel && <div className="mt-4">{modelQualityPanel}</div>}
+                  </Panel>
+                ),
+                evidence: (
+                  <Panel title="Evidence trail">
+                    <EvidenceTrail scorecard={scorecard} />
+                  </Panel>
+                ),
+                market: (
+                  <div className="space-y-6">
+                    <Panel title="The Pulse">
+                      <VendorPulsePanel
+                        vendorName={entity.name}
+                        news={strictNews.map((n) => ({
+                          title: n.title,
+                          whyItMatters: n.whyItMatters ?? undefined,
+                          sourceName: n.sourceName,
+                          sourceUrl: n.sourceUrl ?? undefined,
+                          publishedAt: n.publishedAt,
+                          impactScore: n.impactScore ?? 0,
+                        }))}
+                        standing={pulseStanding}
+                        momentum={pulseMomentum}
+                      />
+                    </Panel>
+                    {hasEvidence && strictLast && isRankableVendor(strictRoles) && (
+                      <StrategicPositionPanel
+                        badge={
+                          <span className="inline-flex rounded border border-sky-300/50 bg-sky-50 px-1.5 py-0.5 text-[10px] font-semibold text-sky-800 dark:border-sky-800/60 dark:bg-sky-950/40 dark:text-sky-300">
+                            Heuristic — derived from live evidence-based scores (snapshot {strictLast.date}), not a measured assessment
+                          </span>
+                        }
+                        inputs={{
+                          overallScore: strictLast.overallScore,
+                          confidenceScore: strictConfidence,
+                          ownershipType: entity.ownership,
+                          category: entity.primaryRole,
+                        }}
+                        momentum={strictLast.momentumScore}
+                      />
+                    )}
+                    {devSentiment && (
+                      <Panel title="Developer sentiment">
+                        <DevSentimentPanel agg={devSentiment} />
+                      </Panel>
+                    )}
+                    {/* Reputation — "Sources & independence" is genuinely live
+                        (connector health + a fixed policy statement); scored
+                        PILLARS stay held per the strict-mode rule (force-passed
+                        hasData:false, never the real seed read). GitHub
+                        stars/forks are the one live API read, scoped to this
+                        vendor's repo, cached 1h. */}
+                    <Panel title="Reputation">
+                      <ReputationPanel
+                        reputation={
+                          {
+                            developer: null,
+                            employee: null,
+                            customer: null,
+                            combined: null,
+                            asOf: null,
+                            hasData: false,
+                          } satisfies VendorReputation
+                        }
+                        vendorName={entity.name}
+                        reviewSources={{
+                          configured: reviewHealth.configured,
+                          contributing: reviewHealth.status === "ok" && reviewHealth.lastFetchOk === true,
+                        }}
+                        liveGithub={liveGithub}
+                      />
+                    </Panel>
+                  </div>
+                ),
+                dependencies: (
+                  <div className="space-y-6">
+                    <Panel title="Dependencies & encroachment">
+                      <VendorDependencies vendorSlug={entity.slug} />
+                    </Panel>
+                    {deliveryPartnerships.length > 0 && (
+                      <Panel title="Implementation partners">
+                        <ImplementationPartnersPanel
+                          vendorName={entity.name}
+                          partnerships={deliveryPartnerships}
+                          industries={partnerIndustries}
+                          regions={partnerRegions}
+                        />
+                      </Panel>
+                    )}
+                  </div>
+                ),
+                peers:
+                  peerAdopters.length > 0 ? (
+                    <Panel title="Disclosed enterprise adopters">
+                      <DisclosedAdoptersPanel vendorName={entity.name} adopters={peerAdopters} />
+                    </Panel>
+                  ) : undefined,
+                financials: (
+                  // Held honestly dark. Ownership/capital-signal fields on `entity`
+                  // are hardcoded (lib/intelligence/entities.ts), so FinancialsPanel
+                  // (which renders them as analyst-sourced context) stays out of
+                  // the strict path — this states the absence plainly instead.
+                  <Panel title="Financial Snapshot">
+                    <p className="text-sm text-[#54647a] dark:text-[#a7bacd]">
+                      No live-sourced financial profile for {entity.name} yet — ownership, capital-raise
+                      and valuation signals require a verified filing or press citation before we show
+                      them here. We report that absence rather than estimate a figure.
+                    </p>
+                  </Panel>
+                ),
+              }}
+            />
           ) : (
             <section className="mb-6">
+              <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+                <h1 className="text-3xl font-semibold tracking-tight text-[#13294b] dark:text-[#f6f9fc]">
+                  {entity.name}
+                </h1>
+                <TrackButton item={`vendor:${entity.slug}`} label={entity.name} />
+              </div>
               {modelQualityPanel && <div className="mb-4">{modelQualityPanel}</div>}
               <DataUnavailable
                 title={`${entity.name} — profile data unavailable`}
@@ -836,105 +971,6 @@ export default async function VendorDeepDivePage({
               />
             </section>
           )}
-          {/* C7 — strategic position from LIVE snapshot + scored-domain confidence.
-                 Absent (never seeded) when there is no evidence or no snapshot. */}
-          {hasEvidence && strictLast && isRankableVendor(strictRoles) && (
-            <section className="mt-6">
-              <StrategicPositionPanel
-                badge={
-                  <span className="inline-flex rounded border border-sky-300/50 bg-sky-50 px-1.5 py-0.5 text-[10px] font-semibold text-sky-800 dark:border-sky-800/60 dark:bg-sky-950/40 dark:text-sky-300">
-                    Heuristic — derived from live evidence-based scores (snapshot {strictLast.date}), not a measured assessment
-                  </span>
-                }
-                inputs={{
-                  overallScore: strictLast.overallScore,
-                  confidenceScore: strictConfidence,
-                  ownershipType: entity.ownership,
-                  category: entity.primaryRole,
-                }}
-                momentum={strictLast.momentumScore}
-              />
-            </section>
-          )}
-          {deliveryPartnerships.length > 0 && (
-            <section className="mt-6">
-              <Panel title="Implementation partners">
-                <ImplementationPartnersPanel
-                  vendorName={entity.name}
-                  partnerships={deliveryPartnerships}
-                  industries={partnerIndustries}
-                  regions={partnerRegions}
-                />
-              </Panel>
-            </section>
-          )}
-          {peerAdopters.length > 0 && (
-            <section className="mt-6">
-              <Panel title="Disclosed enterprise adopters">
-                <DisclosedAdoptersPanel vendorName={entity.name} adopters={peerAdopters} />
-              </Panel>
-            </section>
-          )}
-          {devSentiment && (
-            <section className="mt-6">
-              <Panel title="Developer sentiment">
-                <DevSentimentPanel agg={devSentiment} />
-              </Panel>
-            </section>
-          )}
-          {/* ── Reputation Tracker — the "Sources & independence" disclosure is
-                genuinely live (connector health + a fixed policy statement), so
-                it always renders. The scored PILLARS (developer/employee/
-                customer composites) are seed-sourced (lib/reputation/seed.ts)
-                and stay held per the strict-mode rule — reputation is force-
-                passed as hasData:false, never the real seed read, so no
-                curated number can ever surface here regardless of what the
-                seed file contains. The ONE exception: GitHub stars/forks are a
-                genuinely live API read (lib/reputation/live-github.ts, no key,
-                cellStatus "verified") — scoped to just this vendor's repo (not
-                the all-vendor loop) so a single page view costs one GitHub
-                call, cached 1h by Next's fetch cache. null for vendors with no
-                mapped flagship repo (Harvey, Hebbia, Rogo, Moveworks, …). */}
-          <section className="mt-6">
-            <Panel title="Reputation">
-              <ReputationPanel
-                reputation={
-                  {
-                    developer: null,
-                    employee: null,
-                    customer: null,
-                    combined: null,
-                    asOf: null,
-                    hasData: false,
-                  } satisfies VendorReputation
-                }
-                vendorName={entity.name}
-                reviewSources={(() => {
-                  const h = reviewsConnector.health();
-                  return { configured: h.configured, contributing: h.status === "ok" && h.lastFetchOk === true };
-                })()}
-                liveGithub={
-                  hasLiveGitHubRepo(intelId)
-                    ? await fetchLiveGitHubSignalForVendor(intelId).catch(() => null)
-                    : null
-                }
-              />
-            </Panel>
-          </section>
-          {/* ── Financial Snapshot — held honestly dark. Ownership/capital-signal
-                fields on `entity` are hardcoded (lib/intelligence/entities.ts),
-                so FinancialsPanel (which renders them as analyst-sourced context)
-                stays out of the strict path; this states the absence plainly
-                instead of presenting nothing with no explanation. */}
-          <section className="mt-6">
-            <Panel title="Financial Snapshot">
-              <p className="text-sm text-[#54647a] dark:text-[#a7bacd]">
-                No live-sourced financial profile for {entity.name} yet — ownership, capital-raise
-                and valuation signals require a verified filing or press citation before we show
-                them here. We report that absence rather than estimate a figure.
-              </p>
-            </Panel>
-          </section>
           {/* Ask AI — grounded in this vendor's cited data (also on the dark
               path so coding profiles showing dev-sentiment carry the chat). */}
           <TabChat
