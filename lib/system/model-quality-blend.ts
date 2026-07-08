@@ -25,13 +25,21 @@
 // rather than over-claim" standard already applied to accredited-cert sources
 // elsewhere in this codebase.
 //
-// PROVISIONAL ANCHOR WINDOW: normalizeIntelligence()'s anchorLo/anchorHi below
-// are a first-pass estimate from the ~8 highest-scoring models visible from
-// artificialanalysis.ai's public page (frontier currently ~44-60) — NOT yet
-// calibrated against the full ~100+ model roster (that requires a live API
-// pull, which requires a real API key). Recalibrate anchorLo especially once
-// the full distribution is visible — an uninformed floor risks compressing or
-// stretching the field incorrectly. Do not treat this window as final.
+// ANCHOR WINDOW — calibrated against the FULL live roster (2026-07-08 pull:
+// 548 models, 535 with an Intelligence Index; per-vendor flagship IIs across
+// the 19 mapped roster vendors span 3–59.9). Same philosophy as the old Elo
+// anchors: a fixed competitive window below a frozen frontier reference, so
+// the score answers "how close is this vendor's best model to the current
+// frontier" and stays stable as the field churns.
+//   hi = 62 — just above the observed frontier max (Claude Fable 5 @ 59.9),
+//        headroom for drift without instant re-anchoring.
+//   lo = 15 — below the competitive pack (every flagship a buyer would
+//        shortlist sits ≥ 17.8) and above the clearly-noncompetitive tail
+//        (3–8.9: legacy/small models); those floor to ~0, which matches how
+//        the old Arena window treated off-frontier vendors.
+// Refresh when the frontier moves materially (same maintenance posture as
+// the old Arena Elo snapshot); note Intelligence Index is itself versioned
+// (v4.1 today) — a major version bump upstream is also a re-anchor trigger.
 
 export type MqCategory = "intelligence" | "coding" | "agentic";
 
@@ -41,17 +49,31 @@ export const MODEL_QUALITY_CAP = 4.0;
 /** intelligence, coding, agentic — the maximum possible contributions[] length. */
 export const MODEL_QUALITY_CATEGORY_COUNT = 3;
 
-// PROVISIONAL — see module header. hi = just above the observed 2026-07 frontier
-// (Claude Fable 5 @ 60); lo is a wide, deliberately conservative guess pending
-// real full-roster data, to avoid clipping unknown mid/lower-tier models to 0.
 const INTELLIGENCE_ANCHOR_LO = 15;
 const INTELLIGENCE_ANCHOR_HI = 62;
+
+// The three indices are on DIFFERENT scales (verified live 2026-07-08:
+// coding tops at 76.5, agentic at 52.8, intelligence at 59.9), so each gets
+// its own display window — normalising coding inside the intelligence window
+// would clamp frontier coding bars to a misleading 100%. Coding/agentic
+// windows are DISPLAY-ONLY (weight 0); only intelligence drives the score.
+const DISPLAY_ANCHORS: Record<MqCategory, { lo: number; hi: number }> = {
+  intelligence: { lo: INTELLIGENCE_ANCHOR_LO, hi: INTELLIGENCE_ANCHOR_HI },
+  coding: { lo: 20, hi: 80 },
+  agentic: { lo: 10, hi: 55 },
+};
 
 const clamp01 = (n: number) => Math.max(0, Math.min(1, n));
 
 /** Normalise a raw Intelligence Index to 0..1 within the fixed anchor window. */
 export function normalizeIntelligence(index: number): number {
   return clamp01((index - INTELLIGENCE_ANCHOR_LO) / (INTELLIGENCE_ANCHOR_HI - INTELLIGENCE_ANCHOR_LO));
+}
+
+/** Normalise any index to 0..1 within ITS OWN category's window (display bars). */
+export function normalizeIndex(category: MqCategory, value: number): number {
+  const { lo, hi } = DISPLAY_ANCHORS[category];
+  return clamp01((value - lo) / (hi - lo));
 }
 
 /** One vendor's flagship model's real Artificial Analysis indices — all three
@@ -112,7 +134,7 @@ export function blendModelQuality(input: MqModelInput): MqBlendResult | null {
       category: "coding",
       label: "Coding Index",
       rating: input.codingIndex,
-      normalized: normalizeIntelligence(input.codingIndex), // same window; informational only
+      normalized: normalizeIndex("coding", input.codingIndex), // own scale; informational only
       weight: 0,
       modelName: input.modelName,
       sourceUrl: input.sourceUrl,
@@ -123,7 +145,7 @@ export function blendModelQuality(input: MqModelInput): MqBlendResult | null {
       category: "agentic",
       label: "Agentic Index",
       rating: input.agenticIndex,
-      normalized: normalizeIntelligence(input.agenticIndex),
+      normalized: normalizeIndex("agentic", input.agenticIndex),
       weight: 0,
       modelName: input.modelName,
       sourceUrl: input.sourceUrl,
