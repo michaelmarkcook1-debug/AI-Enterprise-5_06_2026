@@ -17,6 +17,8 @@ import { getMemberOrTest } from "@/lib/member/auth";
 import CategoryRerank, { type RerankVendor } from "@/components/assessment/CategoryRerank";
 import { getRankMovements, type RankMovement } from "@/lib/intelligence/rank-movement";
 import RankMovementIndicator from "@/components/ranking/RankMovementIndicator";
+import CalibrationBadge from "@/components/ranking/CalibrationBadge";
+import { calibrationBand } from "@/lib/ranking/calibration";
 import TabChat from "@/components/chat/TabChat";
 import CompetitiveIntelHeatmap from "@/components/assessment/CompetitiveIntelHeatmap";
 import ExportPackLinks from "@/components/export/ExportPackLinks";
@@ -145,7 +147,7 @@ export default async function CategoryPage({ params }: { params: Promise<Params>
           {lowDiscrimination && ranked.length > 1 && (
             <p className="mb-3 rounded-md border border-amber-500/30 bg-amber-500/5 px-3 py-2 text-xs text-amber-900 dark:text-amber-200">
               <strong>Early / thin evidence — limited discrimination.</strong> These vendors&apos; weighted assessment
-              composites sit within the noise band, so treat the order as <strong>tiers</strong> (shown per vendor), not a
+              composites sit within the noise band, so treat the order as <strong>standing bands</strong> (shown per vendor), not a
               precise 1-N ranking. More reviewed evidence will separate them.
             </p>
           )}
@@ -163,11 +165,14 @@ export default async function CategoryPage({ params }: { params: Promise<Params>
                       <Link href={`/vendors/${v.vendorSlug}`} className="truncate font-medium underline-offset-2 hover:underline">
                         {v.vendorName}
                       </Link>
-                      {v.tier && (
-                        <span className="rounded-full border border-black/10 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-[#15263c]/70 dark:border-white/15 dark:text-[#eef3f8]/70">
-                          {v.tier}
-                        </span>
-                      )}
+                      {/* Standing band (evidence-gated) beside the name — replaces the
+                          raw natural-break tier chip, which reads "Leaders" for a whole
+                          statistically-inseparable field. #rank is already shown left, so
+                          the badge omits the standing string. */}
+                      <CalibrationBadge
+                        calibration={calibrationBand(v.rank ?? ranked.length, ranked.length, v.domainCoverage ?? 0, v.compositeConfidence ?? 0)}
+                        showStanding={false}
+                      />
                     </span>
                     <span className="flex shrink-0 items-baseline gap-3">
                       <span className="font-mono text-sm tabular-nums" title={`${v.domainTotal}-domain weighted assessment composite (0–5), coverage-discounted`}>

@@ -5,6 +5,8 @@ import { getCategoryComposites } from "@/lib/ranking/category-composite";
 import { isLiveData } from "@/lib/intelligence/provenance";
 import PillarContributionTable from "@/components/ranking/PillarContributionTable";
 import TrackButton from "@/components/member/TrackButton";
+import CalibrationBadge from "@/components/ranking/CalibrationBadge";
+import { calibrationBand } from "@/lib/ranking/calibration";
 
 // Rankings are SEGMENTED BY CATEGORY (never across) and computed from the FULL
 // pillar framework — a transparent, weighted, deterministic composite of all
@@ -131,6 +133,11 @@ export default async function VendorsPage() {
                           <Link href={`/vendors/${v.vendorSlug}`} className="truncate font-medium underline-offset-2 hover:underline">
                             {v.vendorName}
                           </Link>
+                          {/* Standing band beside the name; #rank shown left → omit standing string. */}
+                          <CalibrationBadge
+                            calibration={calibrationBand(v.rank ?? c.ranked.length, c.ranked.length, v.domainCoverage ?? 0, v.compositeConfidence ?? 0)}
+                            showStanding={false}
+                          />
                         </span>
                         <span className="flex shrink-0 items-baseline gap-3">
                           <span className="font-mono text-sm tabular-nums">

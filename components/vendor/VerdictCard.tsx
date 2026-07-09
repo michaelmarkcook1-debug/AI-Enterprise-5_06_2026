@@ -1,6 +1,8 @@
 import Link from "next/link";
 import TrackButton from "@/components/member/TrackButton";
 import ExportPackLinks from "@/components/export/ExportPackLinks";
+import CalibrationBadge from "@/components/ranking/CalibrationBadge";
+import { calibrationBand } from "@/lib/ranking/calibration";
 
 const MUTED = "text-[#5e6b7e] dark:text-[#a7bacd]";
 
@@ -63,12 +65,24 @@ export default function VerdictCard({
 
       <div className="mt-4 flex flex-wrap items-baseline gap-x-6 gap-y-2">
         {composite != null ? (
-          <div>
-            <span className={`font-mono text-3xl font-semibold tabular-nums ${tone(composite)}`}>
-              {composite.toFixed(2)}
-              <span className={`text-base ${MUTED}`}>/5</span>
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            <span>
+              <span className={`font-mono text-3xl font-semibold tabular-nums ${tone(composite)}`}>
+                {composite.toFixed(2)}
+                <span className={`text-base ${MUTED}`}>/5</span>
+              </span>
+              <span className={`ml-2 text-xs ${MUTED}`}>composite</span>
             </span>
-            <span className={`ml-2 text-xs ${MUTED}`}>composite</span>
+            {/* Standing band beside the evidence-capped raw score, so "#1" reads as
+                a leader at a glance. The header already shows "#N of M in <cat>", so
+                the badge omits the standing string here. */}
+            {standing && confidence != null && coverage != null && (
+              <CalibrationBadge
+                calibration={calibrationBand(standing.rank, standing.rankedCount, coverage, confidence)}
+                size="md"
+                showStanding={false}
+              />
+            )}
           </div>
         ) : (
           <span className={`text-sm ${MUTED}`}>Composite unavailable — insufficient evidence</span>
