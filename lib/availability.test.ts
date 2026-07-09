@@ -6,6 +6,8 @@ import {
   isRealProductionEnv,
   memberTestOpenEffective,
   MEMBER_TEST_OPEN,
+  demoHeroOpen,
+  heroDemoActive,
 } from "./availability";
 import {
   vendorsMockRepository,
@@ -104,6 +106,38 @@ describe("memberTestOpenEffective", () => {
     vi.stubEnv("VERCEL_ENV", "preview");
     expect(memberTestOpenEffective()).toBe(true);
     vi.stubEnv("VERCEL_ENV", "");
+    expect(memberTestOpenEffective()).toBe(true);
+  });
+});
+
+describe("demoHeroOpen / heroDemoActive — the prod demo opening for the two hero features ONLY", () => {
+  it("demoHeroOpen is env-gated and OFF by default (merging changes nothing until DEMO_HERO_OPEN=1)", () => {
+    vi.stubEnv("DEMO_HERO_OPEN", "");
+    expect(demoHeroOpen()).toBe(false);
+    vi.stubEnv("DEMO_HERO_OPEN", "1");
+    expect(demoHeroOpen()).toBe(true);
+    vi.stubEnv("DEMO_HERO_OPEN", "true"); // only the exact "1" opens it
+    expect(demoHeroOpen()).toBe(false);
+  });
+
+  it("CRITICAL scoping: on REAL production, DEMO_HERO_OPEN=1 opens the hero gate but does NOT reopen the rest of the member surface", () => {
+    vi.stubEnv("VERCEL_ENV", "production");
+    vi.stubEnv("DEMO_HERO_OPEN", "1");
+    expect(heroDemoActive()).toBe(true); // the two hero features get the demo member…
+    expect(memberTestOpenEffective()).toBe(false); // …but watchlist/decisions/monitor/chat stay closed on prod
+  });
+
+  it("real production stays fully closed by default (flag unset) — nothing opens on merge", () => {
+    vi.stubEnv("VERCEL_ENV", "production");
+    vi.stubEnv("DEMO_HERO_OPEN", "");
+    expect(heroDemoActive()).toBe(false);
+    expect(memberTestOpenEffective()).toBe(false);
+  });
+
+  it("on preview/local the hero gate is already open via test-open, with or without the flag", () => {
+    vi.stubEnv("VERCEL_ENV", "preview");
+    vi.stubEnv("DEMO_HERO_OPEN", "");
+    expect(heroDemoActive()).toBe(true); // test-open path, flag not needed off-prod
     expect(memberTestOpenEffective()).toBe(true);
   });
 });

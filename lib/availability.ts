@@ -131,6 +131,35 @@ export function memberTestOpenEffective(): boolean {
 export const MEMBER_FEATURES_VISIBLE: boolean = MEMBER_AUTH_ENABLED || MEMBER_TEST_OPEN;
 
 /**
+ * DEMO override for the two HERO LLM features ONLY (Interrogate + prep kit), so a
+ * public demo audience on the REAL production URL can run them without sign-in —
+ * unlike memberTestOpenEffective(), which is deliberately OFF on real production.
+ *
+ * Env-gated + default OFF (like PRICING_ENABLED / BILLING_ENABLED): merging this
+ * changes NOTHING until the owner sets DEMO_HERO_OPEN=1 on the Vercel environment,
+ * and unsetting it closes the demo again — no code change. A FUNCTION (not a
+ * const) so the live env value is read server-side at request time, never inlined
+ * into a client bundle. NARROW BY DESIGN: it feeds ONLY getMemberOrHeroDemo (the
+ * two hero routes + their two page panels). Every other member feature — watchlist,
+ * decisions, monitor, Ask AI chat, the buyer/home toggle — keeps
+ * memberTestOpenEffective() and stays correctly closed on real production, so this
+ * does NOT reopen the member surface the MEMBER_TEST_OPEN scoping fix locked down.
+ * Spend is bounded: both hero routes already carry a per-IP rate limit + the inert
+ * credit meter, and their output is citation-gated (no fabrication, no score write).
+ */
+export function demoHeroOpen(): boolean {
+  return process.env.DEMO_HERO_OPEN === "1";
+}
+
+/** The gate deciding whether the shared demo member is resolved for the two hero
+ *  features: the normal non-prod test-open path, OR the explicit prod demo flag.
+ *  Server-only (reads env at request time). This is the ONLY place the two gates
+ *  are OR-ed — used solely by getMemberOrHeroDemo. */
+export function heroDemoActive(): boolean {
+  return memberTestOpenEffective() || demoHeroOpen();
+}
+
+/**
  * Interrogate (Phase 3 Wave 3) gate — the PREMIUM, member-only LLM action:
  * a buyer feeds real context ("ServiceNow renewal in 3 months, EU-only") and the
  * assessment re-runs through that lens. Unlike the free manual re-weighting
