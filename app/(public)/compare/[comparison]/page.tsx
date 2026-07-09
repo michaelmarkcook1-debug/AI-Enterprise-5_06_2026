@@ -10,6 +10,8 @@ import {
 import { isLiveData } from "@/lib/intelligence/provenance";
 import { getVendorCategoryStandings, type VendorCategoryStanding } from "@/lib/ranking/category-composite";
 import DataUnavailable from "@/components/DataUnavailable";
+import CalibrationBadge from "@/components/ranking/CalibrationBadge";
+import { calibrationBand } from "@/lib/ranking/calibration";
 
 // force-dynamic: comparisons are DB-backed (real pillar scores), so reflect the
 // live/recalculated data immediately rather than serve a stale render.
@@ -76,6 +78,16 @@ function VendorColumn({
             {ranked && s?.assessmentComposite != null ? `${s.assessmentComposite.toFixed(2)}/5` : "insufficient evidence"}
           </dd>
         </div>
+        {/* Standing band beside the composite, so the leader reads as one. The
+            Rank row below already states "#N of M", so the badge omits it. */}
+        {ranked && standing && s?.assessmentComposite != null && (
+          <div className="flex justify-end">
+            <CalibrationBadge
+              calibration={calibrationBand(s.rank ?? standing.rankedCount, standing.rankedCount, s.domainCoverage ?? 0, s.compositeConfidence ?? 0)}
+              showStanding={false}
+            />
+          </div>
+        )}
         <div className="flex justify-between">
           <dt className={MUTED}>Rank</dt>
           <dd className="tabular-nums">{ranked && standing ? `#${s!.rank} of ${standing.rankedCount}` : "—"}</dd>

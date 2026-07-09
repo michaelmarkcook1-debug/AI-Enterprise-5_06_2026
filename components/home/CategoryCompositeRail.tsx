@@ -1,5 +1,7 @@
 import Link from "next/link";
 import type { CategoryComposite } from "@/lib/ranking/composite-types";
+import CalibrationBadge from "@/components/ranking/CalibrationBadge";
+import { calibrationBand } from "@/lib/ranking/calibration";
 
 // Hero rail — a category NAVIGATOR. Each row is one market category with its
 // best-EVIDENCED vendor (top of the within-category multi-pillar composite),
@@ -38,9 +40,17 @@ export default function CategoryCompositeRail({ composites }: { composites: Cate
                     <span className="block truncate text-sm font-medium text-[#13294b] group-hover:underline dark:text-[#eef3f8]">
                       {c.category.name}
                     </span>
-                    <span className={`block truncate text-[11px] ${MUTED}`}>
-                      {top.vendorName} leads · {c.ranked.length} ranked
-                      {c.incomplete.length > 0 ? ` · ${c.incomplete.length} held` : ""}
+                    {/* Band caveats a thin-evidence leader here — e.g. the ai_silicon
+                        #1 reads "Emerging leader · limited evidence", not a bare "leads". */}
+                    <span className="mt-0.5 flex flex-wrap items-center gap-1.5">
+                      <CalibrationBadge
+                        calibration={calibrationBand(1, c.ranked.length, top.domainCoverage ?? 0, top.compositeConfidence ?? 0)}
+                        showStanding={false}
+                      />
+                      <span className={`truncate text-[11px] ${MUTED}`}>
+                        {top.vendorName} · {c.ranked.length} ranked
+                        {c.incomplete.length > 0 ? ` · ${c.incomplete.length} held` : ""}
+                      </span>
                     </span>
                   </span>
                   <span className="shrink-0 text-right">

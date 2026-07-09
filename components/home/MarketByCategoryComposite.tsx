@@ -1,5 +1,7 @@
 import Link from "next/link";
 import type { CategoryComposite } from "@/lib/ranking/composite-types";
+import CalibrationBadge from "@/components/ranking/CalibrationBadge";
+import { calibrationBand } from "@/lib/ranking/calibration";
 
 // "The market, by category" — the explained taxonomy. Each card states what the
 // category IS and shows the top vendors WITHIN it, ranked by the weighted
@@ -50,9 +52,19 @@ export default function MarketByCategoryComposite({ composites }: { composites: 
                 {c.ranked.slice(0, 3).map((v) => (
                   <li key={v.vendorId} className="grid grid-cols-[1rem_1fr_auto] items-baseline gap-2 text-sm">
                     <span className="font-display text-[#b08d2f] tabular-nums dark:text-[#d4af37]">{v.rank}</span>
-                    <Link href={`/vendors/${v.vendorSlug}`} className="min-w-0 truncate underline-offset-2 hover:underline">
-                      {v.vendorName}
-                    </Link>
+                    <span className="flex min-w-0 items-baseline gap-1.5">
+                      <Link href={`/vendors/${v.vendorSlug}`} className="min-w-0 truncate underline-offset-2 hover:underline">
+                        {v.vendorName}
+                      </Link>
+                      {/* Only the leader gets a band here — keeps this dense top-3
+                          overview readable while the #1 still reads as a leader. */}
+                      {v.rank === 1 && (
+                        <CalibrationBadge
+                          calibration={calibrationBand(1, c.ranked.length, v.domainCoverage ?? 0, v.compositeConfidence ?? 0)}
+                          showStanding={false}
+                        />
+                      )}
+                    </span>
                     <span className={`font-mono text-xs tabular-nums ${MUTED}`}>
                       {v.assessmentComposite == null ? "—" : `${v.assessmentComposite.toFixed(2)}/5`}
                     </span>
