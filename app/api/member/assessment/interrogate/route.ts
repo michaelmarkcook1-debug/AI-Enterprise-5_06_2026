@@ -12,7 +12,7 @@
 // altered. The buyer's context is a personal, session-local lens.
 
 import { NextResponse } from "next/server";
-import { getMemberOrTest } from "@/lib/member/auth";
+import { getMemberOrHeroDemo } from "@/lib/member/auth";
 import { isSameOrigin } from "@/lib/http/same-origin";
 import { INTERROGATE_ENABLED } from "@/lib/availability";
 import { reserveCredit } from "@/lib/billing/credits";
@@ -72,7 +72,7 @@ export async function POST(request: Request): Promise<Response> {
   if (!rl.allowed) {
     return NextResponse.json({ error: "rate_limited" }, { status: 429, headers: rateLimitHeaders(rl) });
   }
-  const member = await getMemberOrTest();
+  const member = await getMemberOrHeroDemo();
   if (!member) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   if (!INTERROGATE_ENABLED) return NextResponse.json({ error: "not_enabled" }, { status: 403 });
 

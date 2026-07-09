@@ -24,7 +24,7 @@ import {
 } from "@/lib/intelligence/taxonomy";
 import { listNewsItems } from "@/lib/intelligence/repository";
 import { HARDCODED_SURFACES_WIRED, INTERACTIVE_ASSESSMENT_ENABLED, INTERROGATE_ENABLED, PREP_KIT_ENABLED } from "@/lib/availability";
-import { getMemberOrTest } from "@/lib/member/auth";
+import { getMemberOrHeroDemo } from "@/lib/member/auth";
 import DataUnavailable from "@/components/DataUnavailable";
 import { getPrisma, hasDatabase } from "@/lib/prisma";
 import { Panel, SeedDataBadge } from "@/components/intelligence-ui";
@@ -641,7 +641,7 @@ export default async function VendorDeepDivePage({
   const hasEvidence = !!scorecard?.hasAnyEvidence;
   // Wave-3 Interrogate is the member-gated premium action; resolve identity only
   // when the flag is on so anonymous visitors keep the free Wave-2 experience.
-  const interrogateMember = (INTERROGATE_ENABLED || PREP_KIT_ENABLED) ? await getMemberOrTest().catch(() => null) : null;
+  const interrogateMember = (INTERROGATE_ENABLED || PREP_KIT_ENABLED) ? await getMemberOrHeroDemo().catch(() => null) : null;
   // Model quality (Arena Elo) — a real, cited capability signal shown on the
   // profile so a CIO can see it. It is WEIGHTED in model-category rankings (e.g.
   // frontier model APIs); here it is context. null when the vendor has no

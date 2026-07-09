@@ -11,7 +11,7 @@ import { cookies } from "next/headers";
 import { createHash, randomBytes } from "node:crypto";
 import { getPrisma, hasDatabase } from "../prisma";
 import { captureSubscriber } from "../subscribers/service";
-import { memberTestOpenEffective } from "../availability";
+import { memberTestOpenEffective, heroDemoActive } from "../availability";
 
 export const MEMBER_COOKIE = "ae_member";
 /** Per-request browser nonce cookie — binds a magic link to the browser that
@@ -156,12 +156,17 @@ export async function getMember(): Promise<Member | null> {
 const TEST_MEMBER_EMAIL = "tester@ai-enterprise.local";
 let testMemberCache: Member | null = null;
 
-async function ensureTestMember(): Promise<Member | null> {
-  if (!memberTestOpenEffective() || !hasDatabase()) return null;
+/** Provision (idempotently) + return the single shared test/demo Subscriber. The
+ *  CALLER decides whether it's allowed to resolve it (the env gate) — this only
+ *  does the DB work, cached in-module so we don't write on every request. Writes
+ *  nothing but the one Subscriber row; the two hero features that use it never
+ *  write watchlist/decisions/scores. */
+async function provisionSharedMember(source: string): Promise<Member | null> {
+  if (!hasDatabase()) return null;
   if (testMemberCache) return testMemberCache;
   try {
     // Idempotent: creates the subscriber if absent, then we read its id.
-    await captureSubscriber({ email: TEST_MEMBER_EMAIL, source: "test_open" });
+    await captureSubscriber({ email: TEST_MEMBER_EMAIL, source });
     const sub = await getPrisma().subscriber.findUnique({ where: { email: TEST_MEMBER_EMAIL } });
     if (!sub) return null;
     testMemberCache = { subscriberId: sub.id, email: sub.email };
@@ -171,14 +176,40 @@ async function ensureTestMember(): Promise<Member | null> {
   }
 }
 
+async function ensureTestMember(): Promise<Member | null> {
+  if (!memberTestOpenEffective()) return null;
+  return provisionSharedMember("test_open");
+}
+
+/** Same shared member, but resolved under the BROADER hero-demo gate
+ *  (heroDemoActive = test-open on non-prod OR DEMO_HERO_OPEN on real prod). Only
+ *  the two hero features (Interrogate + prep kit) use this — see getMemberOrHeroDemo. */
+async function ensureHeroDemoMember(): Promise<Member | null> {
+  if (!heroDemoActive()) return null;
+  return provisionSharedMember("demo_open");
+}
+
 /** Resolve the current member, falling back to the shared TEST member when
  *  MEMBER_TEST_OPEN is on and there's no real session. This is the resolver the
  *  member features use so they work with sign-in disabled but test-open on. A
- *  real session always wins (existing signed-in members are unaffected). */
+ *  real session always wins (existing signed-in members are unaffected).
+ *  Off on real production — the whole member surface stays closed there. */
 export async function getMemberOrTest(): Promise<Member | null> {
   const real = await getMember();
   if (real) return real;
   return ensureTestMember();
+}
+
+/** Like getMemberOrTest, but for the TWO HERO features (Interrogate + prep kit)
+ *  ONLY. Falls back to the shared demo member under the broader heroDemoActive()
+ *  gate, so a signed-out visitor can run those two features on the REAL prod URL
+ *  when DEMO_HERO_OPEN=1 — WITHOUT reopening the rest of the member surface
+ *  (which keeps getMemberOrTest and stays closed on prod). A real session still
+ *  wins. Callers behind it already enforce CSRF + a per-IP rate limit. */
+export async function getMemberOrHeroDemo(): Promise<Member | null> {
+  const real = await getMember();
+  if (real) return real;
+  return ensureHeroDemoMember();
 }
 
 /** Revoke a session by its raw cookie token (DB only). The caller clears the
