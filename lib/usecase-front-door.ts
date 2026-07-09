@@ -155,3 +155,34 @@ export function frontDoorRank(industry: IndustryTag, maturity: MaturityId): Fron
     })
     .sort((a, b) => b.feasibilityScore - a.feasibilityScore);
 }
+
+/**
+ * A small, MATURITY-INDEPENDENT preview for the front door's COLD state (before
+ * the buyer has picked industry × maturity) so it's never a bare selector screen.
+ *
+ * HONEST BY CONSTRUCTION: only HORIZONTAL use-cases (no industry tags → apply to
+ * every industry) that score "high" feasibility even at the WORST-CASE maturity
+ * (fit = 0). If a workflow is high-feasibility even for the least-mature team,
+ * "high feasibility" is true for everyone — so the band holds before any maturity
+ * is chosen, without presupposing one. No fabrication: real curated use-cases,
+ * real category routes, impact still null ("not yet evidenced"). It is a strict
+ * subset of what frontDoorRank returns once the buyer selects, never a different
+ * or inflated set — picking industry × maturity only tailors + expands the list.
+ */
+export function commonFastWins(limit = 6): FrontDoorEntry[] {
+  const worstCaseFit = 0;
+  return USE_CASES.filter((uc) => !uc.industries || uc.industries.length === 0)
+    .map((uc) => {
+      const score = feasibilityScore(uc, worstCaseFit);
+      return {
+        useCase: uc,
+        feasibility: feasibilityBand(score),
+        feasibilityScore: score,
+        impact: null as UseCaseImpact | null, // no industry chosen yet → honestly absent
+        routes: routesForUseCase(uc),
+      };
+    })
+    .filter((e) => e.feasibility === "high")
+    .sort((a, b) => b.feasibilityScore - a.feasibilityScore)
+    .slice(0, limit);
+}
