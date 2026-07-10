@@ -1,6 +1,15 @@
 # C6 — Use-case-first front door · Impact × Feasibility library (methodology + curation spec)
 
-**Status: CONTENT PREREQUISITE — not yet buildable on real data.**
+> **UPDATE 2026-07-10 — SHIPPED (v1, live on prod).** The impact axis is no longer held:
+> analyst-curated, CITED impact data was sourced and reviewed in
+> [`c6-usecase-impact-curated-v1.md`](./c6-usecase-impact-curated-v1.md), and the 2×2 (evidenced
+> Uplift × deterministic Feasibility) is live on `/use-cases`. One honest refinement to the model
+> below: the impact axis is **evidenced UPLIFT**, not $ value — independent studies measure task
+> uplift but almost never a portable per-enterprise dollar, so $ value is a secondary,
+> separately-sourced (usually vendor) chip. Uncovered cells still show "impact not yet evidenced";
+> counter-evidence renders as a flag. The sections below remain the governing methodology.
+
+**Status (original): CONTENT PREREQUISITE — not yet buildable on real data.**
 The C6 "where's my low-hanging fruit" front door needs a *curated, documented* impact × feasibility
 model at the **use-case level, tailored by industry and maturity**. The codebase has the *feasibility*
 inputs for free (real workflow attributes) but has **no impact data** — so, per the C6 guardrail and the
@@ -112,5 +121,8 @@ correct answer when there's no source.
 4. Wire routing into the assessment (`USE_CASE_MAP`).
 5. `tsc` + `next build` + tests; preview; sign-off before any merge to `main`.
 
-Until step 0 (the curated data) is delivered, C6 is **held** — exactly as the rest of the product holds
-surfaces with insufficient evidence rather than floating them on a default.
+~~Until step 0 (the curated data) is delivered, C6 is **held**~~ — **DONE (2026-07-10):** the curated
+data landed (`c6-usecase-impact-curated-v1.md`), all steps above shipped as
+`lib/usecase-impact-data.ts` + `lib/usecase-front-door.ts` + the 2×2 client, verified on prod. Uncovered
+(use-case × industry) cells still hold honestly at "impact not yet evidenced" — the guardrail is intact,
+now applied per-cell rather than to the whole surface.
