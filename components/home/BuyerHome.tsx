@@ -114,6 +114,19 @@ export default function BuyerHome({
                 <li key={`news-${i}`} className="text-sm">
                   <span className="font-medium text-[#13294b] dark:text-[#eef3f8]">{n.vendorName ?? "Market"}:</span>{" "}
                   <span className={MUTED}>{n.title}</span>
+                  {/* C12 — this news affects YOUR tracked vendor; route into its
+                      assessment. State B: pending re-assessment, no number. */}
+                  {n.vendorSlug && (
+                    <>
+                      {" "}
+                      <Link href={`/vendors/${n.vendorSlug}`} className="text-xs font-medium text-sky-700 hover:underline dark:text-sky-400">
+                        assess →
+                      </Link>
+                      <span className="ml-1 rounded-full border border-amber-500/40 bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-medium text-amber-800 dark:text-amber-200">
+                        pending re-assessment
+                      </span>
+                    </>
+                  )}
                 </li>
               ))}
             </ul>
