@@ -128,15 +128,21 @@ export default async function HomePage() {
             this, is the hero (below). ── */}
       <header className="mb-4">
         <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-[#b08d2f] dark:text-[#d4af37]">
-          Independent · evidence-based · source-cited
+          Daily market watch · independent · source-cited
         </p>
         <h1 className="font-display mt-2 max-w-3xl text-4xl font-semibold leading-[1.05] tracking-tight sm:text-5xl">
-          Who the enterprise-AI market runs on — and who&apos;s coming for them.
+          What&apos;s moving in enterprise AI — and who&apos;s exposed.
         </h1>
         <p className={`mt-3 max-w-2xl text-sm ${MUTED}`}>
-          Source-backed vendor rankings and the dependency/encroachment graph of who relies on whom for
-          compute, models, cloud, and capital. Every score is confidence-labelled; every edge carries
-          its own public source.
+          The source-backed changes worth knowing today — who&apos;s rising, who&apos;s being encroached
+          on, who relies on whom. Every score is confidence-labelled; every edge carries its own public
+          source.{" "}
+          <Link
+            href="/watchlist"
+            className="font-medium text-sky-700 underline underline-offset-2 hover:no-underline dark:text-sky-400"
+          >
+            Track the vendors you run →
+          </Link>
         </p>
         {/* Freshness / provenance strip — honest seed-vs-live, never a fake date. */}
         <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px]">

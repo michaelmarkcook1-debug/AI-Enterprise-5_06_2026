@@ -28,9 +28,13 @@ interface NavItem {
   label: string;
 }
 
+// IA reorg (2026-07-10, "watch, not a checkout"): the daily WATCH (home) leads;
+// the DECIDE surfaces (assess a vendor, optimise a workflow) follow. The use-case
+// funnel is demoted from the old "Start here" front door to one Decide entry — it
+// is the periodic job, not the front door.
 const JOBS_BASE: NavItem[] = [
-  { href: "/use-cases", label: "Start here" },
   { href: "/vendors", label: "Assess & decide" },
+  { href: "/use-cases", label: "Optimise a workflow" },
   { href: "/peers", label: "Peer benchmark" },
 ];
 
@@ -70,13 +74,15 @@ export default function AppNav({
     setViewMode(readViewModeCookie());
   }, [showToggle]);
 
-  const thirdJob: NavItem =
+  // The WATCH — the daily home — leads the nav (audit: a watch, not a checkout).
+  // Same URL, label swaps by mode: "Market watch" (visitor) / "My workspace" (buyer).
+  const watchJob: NavItem =
     viewMode === "buyer" ? { href: "/", label: "My workspace" } : { href: "/", label: "Market watch" };
   const NAV: NavItem[] = [
-    JOBS_BASE[0],
-    JOBS_BASE[1],
-    thirdJob,
-    JOBS_BASE[2],
+    watchJob, // Watch — leads
+    JOBS_BASE[0], // Assess & decide  ┐ Decide (periodic)
+    JOBS_BASE[1], // Optimise a workflow ┘ — demoted from the old "Start here"
+    JOBS_BASE[2], // Peer benchmark
     ...(pricingEnabled ? [{ href: "/pricing", label: "Pricing" }] : []),
   ];
 
