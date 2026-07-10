@@ -17,6 +17,23 @@
 // (like C13 role→layer), validated by tests against the real category ids.
 
 import { USE_CASES, type UseCase, type IndustryTag } from "./use-cases";
+import {
+  USECASE_IMPACT,
+  USECASE_EVIDENCE_FLAGS,
+  type UseCaseImpact,
+  type UseCaseEvidenceFlag,
+  type UpliftBand,
+} from "./usecase-impact-data";
+
+export { USECASE_IMPACT, USECASE_EVIDENCE_FLAGS } from "./usecase-impact-data";
+export type {
+  UseCaseImpact,
+  UseCaseEvidenceFlag,
+  UpliftBand,
+  ValueBand,
+  EvidenceFlagKind,
+  EvidenceGrade,
+} from "./usecase-impact-data";
 
 // ── Buyer maturity (guided input, documented mapping) ────────────────────────
 export const MATURITY_LEVELS = [
@@ -46,32 +63,46 @@ export function feasibilityBand(score: number): FeasibilityBand {
   return score >= 0.7 ? "high" : score >= 0.45 ? "medium" : "low";
 }
 
-// ── Impact (curated + cited — EMPTY until analyst rows land) ──────────────────
-// Bands mirror lib/engine.ts value-at-stake / expected-uplift bands.
-export type ValueBand = "lt_250k" | "250k_1m" | "1m_5m" | "5m_25m" | "gt_25m";
-export type UpliftBand = "lt_10%" | "10_25%" | "25_50%" | "gt_50%";
-export interface UseCaseImpact {
-  useCaseId: string; // must exist in USE_CASES (test-validated)
-  industryTag: IndustryTag | "*"; // "*" = horizontal estimate
-  valueBand: ValueBand;
-  upliftBand: UpliftBand;
-  sourceName: string; // NAMED source — required
-  sourceUrl: string;
-  evidenceGrade: "E2" | "E3" | "E4" | "E5";
-  confidence: number; // 0-100
-  asOf: string; // ISO date
-  note: string;
-}
-
-// ⚠️ FACTUAL-DATA-ONLY: populate ONLY from analyst-curated, cited rows
-// (docs/c6-usecase-library-template.csv). NEVER add a row without a real named
-// source. Empty = every use-case honestly shows "impact not yet evidenced".
-export const USECASE_IMPACT: UseCaseImpact[] = [];
+// ── Impact (curated + cited) — data + provenance live in usecase-impact-data.ts ──
+// The impact axis is EVIDENCED UPLIFT. A row exists ONLY where a real, named source
+// gives one; no row ⇒ "impact not yet evidenced" (never a default). $ value-at-stake
+// is an optional, separately-sourced sub-field, never inferred from uplift.
 
 /** Exact-industry row wins over a horizontal ("*") row; null = not evidenced. */
 export function impactFor(useCaseId: string, industry: IndustryTag): UseCaseImpact | null {
   const rows = USECASE_IMPACT.filter((r) => r.useCaseId === useCaseId);
   return rows.find((r) => r.industryTag === industry) ?? rows.find((r) => r.industryTag === "*") ?? null;
+}
+
+/** Counter-evidence flags for a use-case (AI does NOT cleanly help). Horizontal ("*")
+ *  flags apply to every industry. These are honesty signals, never impact chips. */
+export function flagsFor(useCaseId: string, industry: IndustryTag): UseCaseEvidenceFlag[] {
+  return USECASE_EVIDENCE_FLAGS.filter(
+    (f) => f.useCaseId === useCaseId && (f.industryTag === industry || f.industryTag === "*"),
+  );
+}
+
+// ── Priority quadrant (methodology §5): evidenced Uplift × deterministic Feasibility.
+// Only placeable when impact is EVIDENCED (a curated uplift row exists); otherwise null
+// and the use-case sits in the honest "impact not yet evidenced" lane, feasibility-only.
+export type PriorityQuadrant = "quick_win" | "big_bet" | "easy_fill_in" | "question_mark";
+
+/** High impact = a task uplift of 25% or more (the upper two evidenced bands). */
+export function impactIsHigh(band: UpliftBand): boolean {
+  return band === "25_50%" || band === "gt_50%";
+}
+
+export function priorityQuadrant(
+  impact: UseCaseImpact | null,
+  feasibility: FeasibilityBand,
+): PriorityQuadrant | null {
+  if (!impact) return null; // impact axis not evidenced → not placeable (honest)
+  const impactHigh = impactIsHigh(impact.upliftBand);
+  const feasHigh = feasibility === "high";
+  if (impactHigh && feasHigh) return "quick_win";
+  if (impactHigh && !feasHigh) return "big_bet";
+  if (!impactHigh && feasHigh) return "easy_fill_in";
+  return "question_mark";
 }
 
 // ── Routing: use-case FAMILY → market category ids (curated taxonomy) ─────────
@@ -131,6 +162,8 @@ export interface FrontDoorEntry {
   feasibility: FeasibilityBand;
   feasibilityScore: number; // kept for ORDERING only — UI shows the band
   impact: UseCaseImpact | null; // null ⇒ "impact not yet evidenced"
+  quadrant: PriorityQuadrant | null; // null ⇒ impact not evidenced → not placeable
+  flags: UseCaseEvidenceFlag[]; // counter-evidence (AI may not cleanly help) — honesty
   routes: MarketCategoryId[];
 }
 
@@ -145,11 +178,15 @@ export function frontDoorRank(industry: IndustryTag, maturity: MaturityId): Fron
   return USE_CASES.filter((uc) => matchesIndustry(uc, industry))
     .map((uc) => {
       const score = feasibilityScore(uc, fit);
+      const band = feasibilityBand(score);
+      const impact = impactFor(uc.id, industry);
       return {
         useCase: uc,
-        feasibility: feasibilityBand(score),
+        feasibility: band,
         feasibilityScore: score,
-        impact: impactFor(uc.id, industry),
+        impact,
+        quadrant: priorityQuadrant(impact, band),
+        flags: flagsFor(uc.id, industry),
         routes: routesForUseCase(uc),
       };
     })
@@ -179,6 +216,9 @@ export function commonFastWins(limit = 6): FrontDoorEntry[] {
         feasibility: feasibilityBand(score),
         feasibilityScore: score,
         impact: null as UseCaseImpact | null, // no industry chosen yet → honestly absent
+        quadrant: null, // impact absent → not placeable
+        // horizontal ("*") counter-evidence still applies before any industry is chosen
+        flags: USECASE_EVIDENCE_FLAGS.filter((f) => f.useCaseId === uc.id && f.industryTag === "*"),
         routes: routesForUseCase(uc),
       };
     })

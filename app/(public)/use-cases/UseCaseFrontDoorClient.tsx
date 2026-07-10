@@ -1,11 +1,14 @@
 "use client";
 
-// C6 guided flow — two calm choices (industry, maturity) → prioritised use-cases.
-// HONESTY CONTRACT (methodology: docs/c6-usecase-impact-feasibility.md):
-//  • Feasibility = deterministic model over REAL workflow attributes → shown as a
-//    band with the formula disclosed, never a false-precision number.
-//  • Impact = curated + cited per (use-case × industry). No curated row ⇒ the
-//    honest "impact not yet evidenced" state — never a default.
+// C6 guided flow — two calm choices (industry, maturity) → a prioritised 2×2 the
+// CIO reads at a glance. HONESTY CONTRACT (methodology: docs/c6-usecase-impact-
+// feasibility.md + docs/c6-usecase-impact-curated-v1.md):
+//  • Feasibility = deterministic model over REAL workflow attributes → a band, never
+//    a false-precision number.
+//  • Impact axis = EVIDENCED UPLIFT — a cited, evidence-graded band. No curated row ⇒
+//    the honest "impact not yet evidenced" lane, never a default. $ value-at-stake is
+//    a secondary, separately-sourced (usually vendor) chip, never drives placement.
+//  • Counter-evidence (AI may NOT cleanly help) is shown as a flag, never hidden.
 //  • Draft-framed: a starting map to pressure-test, not a verdict.
 
 import { useEffect, useMemo, useState } from "react";
@@ -17,6 +20,7 @@ import {
   MATURITY_LEVELS,
   type MaturityId,
   type FrontDoorEntry,
+  type PriorityQuadrant,
 } from "@/lib/usecase-front-door";
 import { bumpJourneyStepClient } from "@/lib/member/journey-client";
 
@@ -64,14 +68,138 @@ const FEAS_TONE: Record<string, string> = {
   low: "bg-rose-100 text-rose-800 dark:bg-rose-950/40 dark:text-rose-300",
 };
 
+const UPLIFT_LABEL: Record<string, string> = {
+  "lt_10%": "<10%",
+  "10_25%": "10–25%",
+  "25_50%": "25–50%",
+  "gt_50%": ">50%",
+};
+const VALUE_LABEL: Record<string, string> = {
+  lt_250k: "<$250k/yr",
+  "250k_1m": "$250k–1M/yr",
+  "1m_5m": "$1–5M/yr",
+  "5m_25m": "$5–25M/yr",
+  gt_25m: ">$25M/yr",
+};
+const GRADE_TITLE: Record<string, string> = {
+  E2: "E2 — public claim",
+  E3: "E3 — vendor case study / commissioned study",
+  E4: "E4 — major analyst or government evaluation",
+  E5: "E5 — independent / peer-reviewed / RCT / court-validated",
+};
+const FLAG_META: Record<string, { label: string; blurb: string }> = {
+  contested: { label: "Contested evidence", blurb: "Independent evidence that AI may NOT help here" },
+  not_a_net_win: { label: "Not evidenced as a net win", blurb: "No independent study shows a net delivery gain" },
+  accuracy_only: { label: "Accuracy only", blurb: "Model accuracy is evidenced, but not a realised business outcome" },
+  capability_limited: { label: "Capability-limited", blurb: "Frontier models underperform on realistic enterprise tasks" },
+};
+
+const QUADRANT_META: Record<PriorityQuadrant, { label: string; blurb: string; tone: string }> = {
+  quick_win: {
+    label: "Quick wins",
+    blurb: "High evidenced uplift · high feasibility. Start here.",
+    tone: "border-emerald-400/50 bg-emerald-50/60 dark:border-emerald-800/50 dark:bg-emerald-950/20",
+  },
+  big_bet: {
+    label: "Big bets",
+    blurb: "High evidenced uplift · harder to land. Plan for them.",
+    tone: "border-violet-400/50 bg-violet-50/60 dark:border-violet-800/50 dark:bg-violet-950/20",
+  },
+  easy_fill_in: {
+    label: "Easy fill-ins",
+    blurb: "Very feasible · more modest evidenced uplift.",
+    tone: "border-sky-400/50 bg-sky-50/60 dark:border-sky-800/50 dark:bg-sky-950/20",
+  },
+  question_mark: {
+    label: "Question marks",
+    blurb: "Lower on both axes — revisit as evidence grows.",
+    tone: "border-black/15 bg-black/[0.02] dark:border-white/15 dark:bg-white/[0.03]",
+  },
+};
+const QUADRANT_ORDER: PriorityQuadrant[] = ["quick_win", "big_bet", "easy_fill_in", "question_mark"];
+
+function Chips({ entry }: { entry: FrontDoorEntry }) {
+  const { feasibility, impact, flags } = entry;
+  return (
+    <div className="flex flex-wrap items-center gap-1.5">
+      <span className={`rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${FEAS_TONE[feasibility]}`}>
+        {feasibility} feasibility
+      </span>
+      {impact ? (
+        <span
+          className="inline-flex items-center gap-1 rounded bg-emerald-50 px-1.5 py-0.5 text-[10px] font-medium text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300"
+          title={`${impact.upliftBasis} — ${impact.sourceName} · ${impact.confidence}% confidence · directional estimate`}
+        >
+          uplift {UPLIFT_LABEL[impact.upliftBand] ?? impact.upliftBand}
+          <span
+            className="rounded-sm bg-black/10 px-1 text-[9px] font-bold dark:bg-white/15"
+            title={GRADE_TITLE[impact.evidenceGrade] ?? impact.evidenceGrade}
+          >
+            {impact.evidenceGrade}
+          </span>
+        </span>
+      ) : (
+        <span className={`rounded border border-dashed border-black/20 px-1.5 py-0.5 text-[10px] dark:border-white/20 ${MUTED}`}>
+          impact not yet evidenced
+        </span>
+      )}
+      {impact?.value && (
+        <span
+          className="rounded border border-amber-500/40 bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-medium text-amber-800 dark:text-amber-200"
+          title={`${impact.value.basis} — ${impact.value.sourceName} · ${GRADE_TITLE[impact.value.evidenceGrade] ?? impact.value.evidenceGrade} · vendor-sourced, directional`}
+        >
+          value {VALUE_LABEL[impact.value.band] ?? impact.value.band} · vendor-sourced
+        </span>
+      )}
+      {flags.map((f, i) => (
+        <span
+          key={i}
+          className="inline-flex items-center gap-1 rounded border border-rose-400/50 bg-rose-50 px-1.5 py-0.5 text-[10px] font-medium text-rose-800 dark:border-rose-800/50 dark:bg-rose-950/30 dark:text-rose-300"
+          title={`${f.summary} — ${f.sourceName} (${f.evidenceGrade})`}
+        >
+          ⚠ {FLAG_META[f.kind]?.label ?? f.kind}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+function EntryRow({ entry }: { entry: FrontDoorEntry }) {
+  return (
+    <li className={`${CARD} p-4`}>
+      <div className="flex flex-wrap items-start justify-between gap-2">
+        <div className="min-w-0">
+          <h3 className="text-sm font-semibold">{entry.useCase.label}</h3>
+          {entry.useCase.description && (
+            <p className={`mt-1 max-w-2xl text-xs leading-5 ${MUTED}`}>{entry.useCase.description}</p>
+          )}
+        </div>
+      </div>
+      <div className="mt-2.5">
+        <Chips entry={entry} />
+      </div>
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        {entry.routes.map((r) => (
+          <Link
+            key={r}
+            href={`/category/${r}`}
+            onClick={() => bumpJourneyStepClient(2)}
+            className="rounded-full bg-[#b08d2f] px-3 py-1 text-xs font-semibold text-white transition-colors hover:bg-[#987625] dark:bg-[#d4af37] dark:text-[#1a1605] dark:hover:bg-[#e8c95c]"
+          >
+            See the shortlist: {CATEGORY_LABEL[r] ?? r} →
+          </Link>
+        ))}
+      </div>
+    </li>
+  );
+}
+
 export default function UseCaseFrontDoorClient() {
   const [industry, setIndustry] = useState<IndustryTag | null>(null);
   const [maturity, setMaturity] = useState<MaturityId | null>(null);
-  const [showAll, setShowAll] = useState(false);
+  const [showAllPending, setShowAllPending] = useState(false);
 
-  // Golden path (Prompt 4), step 1 of 5. Landing here is the deliberate
-  // start of the guided journey — bump unconditionally (never regresses a
-  // visitor already further along, per bumpJourneyStepClient's own max()).
+  // Golden path (Prompt 4), step 1 of 5. Landing here starts the guided journey.
   useEffect(() => {
     bumpJourneyStepClient(1);
   }, []);
@@ -80,12 +208,19 @@ export default function UseCaseFrontDoorClient() {
     () => (industry && maturity ? frontDoorRank(industry, maturity) : []),
     [industry, maturity],
   );
-  const visible = showAll ? results : results.slice(0, 10);
-  // Cold-state preview — a few real, high-feasibility "fast wins" shown BEFORE the
-  // buyer has picked both axes, so the front door is never a bare selector screen.
-  // Static (maturity-independent by construction — see commonFastWins), so memo [].
   const preview = useMemo(() => commonFastWins(6), []);
   const selectionComplete = Boolean(industry && maturity);
+
+  // Split into the 2×2 (evidenced impact) + the honest "not yet evidenced" lane.
+  const byQuadrant = useMemo(() => {
+    const m: Record<PriorityQuadrant, FrontDoorEntry[]> = {
+      quick_win: [], big_bet: [], easy_fill_in: [], question_mark: [],
+    };
+    for (const e of results) if (e.quadrant) m[e.quadrant].push(e);
+    return m;
+  }, [results]);
+  const pending = useMemo(() => results.filter((e) => !e.quadrant), [results]);
+  const placedCount = results.length - pending.length;
 
   return (
     <div className="space-y-6">
@@ -131,118 +266,112 @@ export default function UseCaseFrontDoorClient() {
         </div>
       </section>
 
-      {/* Cold-state preview — never a bare selector screen. Real high-feasibility
-          fast wins with routes; replaced by the tailored ranked list once the buyer
-          picks both axes. Honest: "high feasibility" holds regardless of maturity
-          (commonFastWins), impact stays absent, no fabrication. */}
+      {/* Cold-state preview — never a bare selector screen. */}
       {!selectionComplete && preview.length > 0 && (
         <section>
           <div className="mb-3 rounded-md border border-amber-500/30 bg-amber-500/5 px-3 py-2 text-xs text-amber-900 dark:border-amber-800/50 dark:text-amber-200">
             <strong>Common fast wins to start.</strong> High-feasibility workflows most teams can land
-            early — each routed into the vendor rankings. Pick your industry and maturity above for the
-            full list ranked for your context.
+            early. Pick your industry and maturity above for the full impact × feasibility map.
           </div>
           <ol className="space-y-3">
             {preview.map((e) => (
-              <li key={e.useCase.id} className={`${CARD} p-4`}>
-                <div className="flex flex-wrap items-start justify-between gap-2">
-                  <div className="min-w-0">
-                    <h3 className="text-sm font-semibold">{e.useCase.label}</h3>
-                    {e.useCase.description && (
-                      <p className={`mt-1 max-w-2xl text-xs leading-5 ${MUTED}`}>{e.useCase.description}</p>
-                    )}
-                  </div>
-                  <span className={`shrink-0 rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${FEAS_TONE[e.feasibility]}`}>
-                    {e.feasibility} feasibility
-                  </span>
-                </div>
-                <div className="mt-3 flex flex-wrap items-center gap-2">
-                  {e.routes.map((r) => (
-                    <Link
-                      key={r}
-                      href={`/category/${r}`}
-                      onClick={() => bumpJourneyStepClient(2)}
-                      className="rounded-full bg-[#b08d2f] px-3 py-1 text-xs font-semibold text-white transition-colors hover:bg-[#987625] dark:bg-[#d4af37] dark:text-[#1a1605] dark:hover:bg-[#e8c95c]"
-                    >
-                      See the shortlist: {CATEGORY_LABEL[r] ?? r} →
-                    </Link>
-                  ))}
-                </div>
-              </li>
+              <EntryRow key={e.useCase.id} entry={e} />
             ))}
           </ol>
         </section>
       )}
 
-      {/* Results */}
-      {industry && maturity && (
-        <section>
-          <div className="mb-3 rounded-md border border-sky-300/40 bg-sky-50/60 px-3 py-2 text-xs text-sky-900 dark:border-sky-800/50 dark:bg-sky-950/30 dark:text-sky-200">
-            <strong>Draft map — pressure-test this.</strong> A starting view from a transparent
-            feasibility model over our curated workflow library, not a verdict. Feasibility ranks
-            how easy a workflow is to land — it says nothing about whether it&apos;s worth doing;
-            that&apos;s impact, shown only where a cited estimate exists.
+      {/* The 2×2 map */}
+      {selectionComplete && (
+        <section className="space-y-4">
+          <div className="rounded-md border border-sky-300/40 bg-sky-50/60 px-3 py-2 text-xs text-sky-900 dark:border-sky-800/50 dark:bg-sky-950/30 dark:text-sky-200">
+            <strong>Draft map — pressure-test this.</strong> Feasibility is a transparent, deterministic
+            model over the workflow&apos;s real attributes. Impact is <em>evidenced task uplift</em> — a
+            cited, evidence-graded band (E2–E5); where no credible source exists we say &ldquo;impact not
+            yet evidenced&rdquo; rather than invent one. Uplift is usually a task-level figure from
+            independent studies — not a promise of org-wide gains. Not a verdict.
           </div>
 
-          <ol className="space-y-3">
-            {visible.map((e) => (
-              <li key={e.useCase.id} className={`${CARD} p-4`}>
-                <div className="flex flex-wrap items-start justify-between gap-2">
-                  <div className="min-w-0">
-                    <h3 className="text-sm font-semibold">{e.useCase.label}</h3>
-                    {e.useCase.description && (
-                      <p className={`mt-1 max-w-2xl text-xs leading-5 ${MUTED}`}>{e.useCase.description}</p>
-                    )}
+          <div className="grid gap-4 md:grid-cols-2">
+            {QUADRANT_ORDER.map((q) => {
+              const meta = QUADRANT_META[q];
+              const entries = byQuadrant[q];
+              return (
+                <div key={q} className={`rounded-xl border p-4 ${meta.tone}`}>
+                  <div className="mb-1 flex items-baseline justify-between gap-2">
+                    <h3 className="text-sm font-bold text-[#13294b] dark:text-[#eef3f8]">{meta.label}</h3>
+                    <span className={`text-[11px] ${MUTED}`}>{entries.length}</span>
                   </div>
-                  <div className="flex shrink-0 flex-col items-end gap-1">
-                    <span className={`rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${FEAS_TONE[e.feasibility]}`}>
-                      {e.feasibility} feasibility
-                    </span>
-                    {e.impact ? (
-                      <span
-                        className="rounded bg-emerald-50 px-1.5 py-0.5 text-[10px] font-medium text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300"
-                        title={`${e.impact.sourceName} · ${e.impact.evidenceGrade} · ${e.impact.confidence}% confidence · directional estimate`}
-                      >
-                        impact: {e.impact.valueBand.replace(/_/g, "–")} · uplift {e.impact.upliftBand}
-                      </span>
-                    ) : (
-                      <span className={`rounded border border-dashed border-black/20 px-1.5 py-0.5 text-[10px] dark:border-white/20 ${MUTED}`}>
-                        impact not yet evidenced
-                      </span>
-                    )}
-                  </div>
+                  <p className={`mb-3 text-[11px] ${MUTED}`}>{meta.blurb}</p>
+                  {entries.length === 0 ? (
+                    <p className={`text-[11px] italic ${MUTED}`}>Nothing evidenced here for this selection.</p>
+                  ) : (
+                    <ul className="space-y-2.5">
+                      {entries.map((e) => (
+                        <li key={e.useCase.id} className="rounded-lg border border-black/5 bg-white/70 p-2.5 dark:border-white/10 dark:bg-white/5">
+                          <div className="flex flex-wrap items-center justify-between gap-1.5">
+                            <span className="text-xs font-semibold">{e.useCase.label}</span>
+                          </div>
+                          <div className="mt-1.5">
+                            <Chips entry={e} />
+                          </div>
+                          <div className="mt-2 flex flex-wrap gap-1.5">
+                            {e.routes.map((r) => (
+                              <Link
+                                key={r}
+                                href={`/category/${r}`}
+                                onClick={() => bumpJourneyStepClient(2)}
+                                className="rounded-full border border-[#b08d2f]/50 px-2 py-0.5 text-[11px] font-medium text-[#8a6d1f] hover:bg-[#b08d2f]/10 dark:border-[#d4af37]/40 dark:text-[#d4af37]"
+                              >
+                                {CATEGORY_LABEL[r] ?? r} →
+                              </Link>
+                            ))}
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
-                <div className="mt-3 flex flex-wrap items-center gap-2">
-                  {e.routes.map((r) => (
-                    <Link
-                      key={r}
-                      href={`/category/${r}`}
-                      onClick={() => bumpJourneyStepClient(2)}
-                      className="rounded-full bg-[#b08d2f] px-3 py-1 text-xs font-semibold text-white transition-colors hover:bg-[#987625] dark:bg-[#d4af37] dark:text-[#1a1605] dark:hover:bg-[#e8c95c]"
-                    >
-                      See the shortlist: {CATEGORY_LABEL[r] ?? r} →
-                    </Link>
-                  ))}
-                </div>
-              </li>
-            ))}
-          </ol>
+              );
+            })}
+          </div>
 
-          {results.length > 10 && (
-            <button
-              type="button"
-              onClick={() => setShowAll((s) => !s)}
-              className={`mt-3 text-xs underline underline-offset-2 ${MUTED}`}
-            >
-              {showAll ? "Show top 10" : `Show all ${results.length} workflows`}
-            </button>
+          {/* Impact-not-yet-evidenced lane — feasibility shown, impact honestly absent. */}
+          {pending.length > 0 && (
+            <div className={`${CARD} p-4`}>
+              <div className="mb-1 flex items-baseline justify-between gap-2">
+                <h3 className="text-sm font-bold text-[#13294b] dark:text-[#eef3f8]">Impact not yet evidenced</h3>
+                <span className={`text-[11px] ${MUTED}`}>{pending.length}</span>
+              </div>
+              <p className={`mb-3 text-[11px] ${MUTED}`}>
+                Feasible to varying degrees, but we have no cited impact estimate for these yet — so we
+                don&apos;t place them on the map. {placedCount} of {results.length} workflows are evidenced.
+              </p>
+              <ul className="grid gap-2 sm:grid-cols-2">
+                {(showAllPending ? pending : pending.slice(0, 8)).map((e) => (
+                  <li key={e.useCase.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-black/5 px-2.5 py-2 dark:border-white/10">
+                    <span className="text-xs font-medium">{e.useCase.label}</span>
+                    <Chips entry={e} />
+                  </li>
+                ))}
+              </ul>
+              {pending.length > 8 && (
+                <button
+                  type="button"
+                  onClick={() => setShowAllPending((s) => !s)}
+                  className={`mt-3 text-xs underline underline-offset-2 ${MUTED}`}
+                >
+                  {showAllPending ? "Show fewer" : `Show all ${pending.length}`}
+                </button>
+              )}
+            </div>
           )}
 
-          <p className={`mt-4 text-[11px] leading-5 ${MUTED}`}>
-            Feasibility is a documented, deterministic model over the workflow library&apos;s real
-            attributes (complexity, reliability bar, risk tier, regulatory load) plus your stated
-            maturity — methodology in the open. Impact estimates appear only as cited, evidence-graded
-            directional bands; where none exists we say so rather than inventing one.
+          <p className={`text-[11px] leading-5 ${MUTED}`}>
+            Impact estimates are analyst-curated from named, checkable sources (methodology + full source
+            list in the C6 curation doc), shown as evidence-graded directional bands. A dollar value
+            appears only where a named — usually vendor — source gives one, flagged as such. Where AI is
+            not clearly a net win, we flag it rather than hide it.
           </p>
         </section>
       )}
