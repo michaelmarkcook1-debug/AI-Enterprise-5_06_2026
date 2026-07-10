@@ -13,6 +13,7 @@ import Link from "next/link";
 import type { IndustryTag } from "@/lib/use-cases";
 import {
   frontDoorRank,
+  commonFastWins,
   MATURITY_LEVELS,
   type MaturityId,
   type FrontDoorEntry,
@@ -80,6 +81,11 @@ export default function UseCaseFrontDoorClient() {
     [industry, maturity],
   );
   const visible = showAll ? results : results.slice(0, 10);
+  // Cold-state preview — a few real, high-feasibility "fast wins" shown BEFORE the
+  // buyer has picked both axes, so the front door is never a bare selector screen.
+  // Static (maturity-independent by construction — see commonFastWins), so memo [].
+  const preview = useMemo(() => commonFastWins(6), []);
+  const selectionComplete = Boolean(industry && maturity);
 
   return (
     <div className="space-y-6">
@@ -124,6 +130,49 @@ export default function UseCaseFrontDoorClient() {
           ))}
         </div>
       </section>
+
+      {/* Cold-state preview — never a bare selector screen. Real high-feasibility
+          fast wins with routes; replaced by the tailored ranked list once the buyer
+          picks both axes. Honest: "high feasibility" holds regardless of maturity
+          (commonFastWins), impact stays absent, no fabrication. */}
+      {!selectionComplete && preview.length > 0 && (
+        <section>
+          <div className="mb-3 rounded-md border border-amber-500/30 bg-amber-500/5 px-3 py-2 text-xs text-amber-900 dark:border-amber-800/50 dark:text-amber-200">
+            <strong>Common fast wins to start.</strong> High-feasibility workflows most teams can land
+            early — each routed into the vendor rankings. Pick your industry and maturity above for the
+            full list ranked for your context.
+          </div>
+          <ol className="space-y-3">
+            {preview.map((e) => (
+              <li key={e.useCase.id} className={`${CARD} p-4`}>
+                <div className="flex flex-wrap items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <h3 className="text-sm font-semibold">{e.useCase.label}</h3>
+                    {e.useCase.description && (
+                      <p className={`mt-1 max-w-2xl text-xs leading-5 ${MUTED}`}>{e.useCase.description}</p>
+                    )}
+                  </div>
+                  <span className={`shrink-0 rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${FEAS_TONE[e.feasibility]}`}>
+                    {e.feasibility} feasibility
+                  </span>
+                </div>
+                <div className="mt-3 flex flex-wrap items-center gap-2">
+                  {e.routes.map((r) => (
+                    <Link
+                      key={r}
+                      href={`/category/${r}`}
+                      onClick={() => bumpJourneyStepClient(2)}
+                      className="rounded-full bg-[#b08d2f] px-3 py-1 text-xs font-semibold text-white transition-colors hover:bg-[#987625] dark:bg-[#d4af37] dark:text-[#1a1605] dark:hover:bg-[#e8c95c]"
+                    >
+                      See the shortlist: {CATEGORY_LABEL[r] ?? r} →
+                    </Link>
+                  ))}
+                </div>
+              </li>
+            ))}
+          </ol>
+        </section>
+      )}
 
       {/* Results */}
       {industry && maturity && (

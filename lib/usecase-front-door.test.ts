@@ -5,6 +5,7 @@ import {
   feasibilityScore,
   feasibilityBand,
   frontDoorRank,
+  commonFastWins,
   impactFor,
   routesForUseCase,
   USECASE_IMPACT,
@@ -124,5 +125,47 @@ describe("frontDoorRank — real library, deterministic order, industry scoping"
     for (const m of MATURITY_LEVELS) {
       expect(frontDoorRank("technology_software", m.id).length).toBeGreaterThan(0);
     }
+  });
+});
+
+describe("commonFastWins — the cold-state preview: honest, non-empty, maturity-independent", () => {
+  it("is never empty — the front door always has something concrete before any selection", () => {
+    expect(commonFastWins().length).toBeGreaterThan(0);
+  });
+
+  it("only shows HORIZONTAL use-cases (no industry tags) — honestly relevant to every visitor", () => {
+    for (const e of commonFastWins()) {
+      expect(!e.useCase.industries || e.useCase.industries.length === 0).toBe(true);
+    }
+  });
+
+  it("every preview item is HIGH feasibility, carries routes, and has null impact (never defaulted)", () => {
+    for (const e of commonFastWins()) {
+      expect(e.feasibility).toBe("high");
+      expect(e.routes.length).toBeGreaterThan(0);
+      expect(e.impact).toBeNull();
+    }
+  });
+
+  it("HONESTY: each preview item stays HIGH even at the LOWEST maturity — the band never presupposes a maturity", () => {
+    const lowest = MATURITY_LEVELS[0].id; // "early", worst-case fit
+    for (const e of commonFastWins()) {
+      const score = feasibilityScore(e.useCase, MATURITY_LEVELS[0].fit);
+      expect(feasibilityBand(score)).toBe("high");
+      // …and it therefore also surfaces HIGH once the buyer actually picks (any industry it's horizontal for).
+      const ranked = frontDoorRank("technology_software", lowest).find((r) => r.useCase.id === e.useCase.id);
+      expect(ranked?.feasibility).toBe("high");
+    }
+  });
+
+  it("is a strict SUBSET of the real ranked list — selection only tailors/expands, never a different set", () => {
+    const rankedIds = new Set(frontDoorRank("manufacturing", "developing").map((e) => e.useCase.id));
+    for (const e of commonFastWins()) {
+      expect(rankedIds.has(e.useCase.id)).toBe(true); // horizontal → present for every industry
+    }
+  });
+
+  it("respects the limit", () => {
+    expect(commonFastWins(3).length).toBeLessThanOrEqual(3);
   });
 });
