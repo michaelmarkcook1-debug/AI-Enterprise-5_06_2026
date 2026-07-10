@@ -22,6 +22,23 @@ function itemMeta(n: BreakingNews["items"][number]): string {
   return parts.join(" · ");
 }
 
+// How many stories show above the fold before the "show more" expander.
+const VISIBLE_LIST = 4; // + the lead story = 5 shown by default
+
+function NewsListItem({ n, bridge }: { n: BreakingNews["items"][number]; bridge?: NewsBridge }) {
+  return (
+    <li className="text-sm">
+      <a href={n.sourceUrl} target="_blank" rel="noopener noreferrer" className="font-medium underline-offset-2 hover:underline">
+        {n.title}
+      </a>
+      <span className={`mt-0.5 block text-[11px] ${MUTED}`}>{itemMeta(n)}</span>
+      {bridge && <NewsBridgePanel bridge={bridge} compact />}
+    </li>
+  );
+}
+
+const NEWS_UL = "grid grid-cols-1 gap-x-6 gap-y-3 sm:grid-cols-2";
+
 export default function BreakingNewsHero({
   news,
   bridges,
@@ -81,24 +98,32 @@ export default function BreakingNewsHero({
           {/* C12 bridge — outside the story anchor (no nested links). */}
           {bridges?.get(items[0].id) && <NewsBridgePanel bridge={bridges.get(items[0].id)!} />}
 
-          {/* Rest of the field — compact, secondary to the lead story. */}
+          {/* Rest of the field — compact, secondary to the lead story. The first
+              few show inline (5 total incl. the lead); the rest are behind a native
+              <details> "show more" so the daily glance stays tight but the full,
+              deeper feed is one click away. No client JS — keeps this server-rendered. */}
           {items.length > 1 && (
-            <ul className="mt-5 grid grid-cols-1 gap-x-6 gap-y-3 border-t border-black/5 pt-4 dark:border-white/10 sm:grid-cols-2">
-              {items.slice(1).map((n) => (
-                <li key={n.id} className="text-sm">
-                  <a
-                    href={n.sourceUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="font-medium underline-offset-2 hover:underline"
-                  >
-                    {n.title}
-                  </a>
-                  <span className={`mt-0.5 block text-[11px] ${MUTED}`}>{itemMeta(n)}</span>
-                  {bridges?.get(n.id) && <NewsBridgePanel bridge={bridges.get(n.id)!} compact />}
-                </li>
-              ))}
-            </ul>
+            <>
+              <ul className={`mt-5 border-t border-black/5 pt-4 dark:border-white/10 ${NEWS_UL}`}>
+                {items.slice(1, 1 + VISIBLE_LIST).map((n) => (
+                  <NewsListItem key={n.id} n={n} bridge={bridges?.get(n.id)} />
+                ))}
+              </ul>
+              {items.length > 1 + VISIBLE_LIST && (
+                <details className="mt-3">
+                  <summary className="inline-flex cursor-pointer list-none items-center gap-1 text-xs font-medium text-sky-700 hover:underline dark:text-sky-400">
+                    Show {items.length - 1 - VISIBLE_LIST} more verified{" "}
+                    {items.length - 1 - VISIBLE_LIST === 1 ? "story" : "stories"}
+                    <span aria-hidden>▾</span>
+                  </summary>
+                  <ul className={`mt-3 ${NEWS_UL}`}>
+                    {items.slice(1 + VISIBLE_LIST).map((n) => (
+                      <NewsListItem key={n.id} n={n} bridge={bridges?.get(n.id)} />
+                    ))}
+                  </ul>
+                </details>
+              )}
+            </>
           )}
         </div>
       )}

@@ -8,7 +8,7 @@ import {
 } from "@/lib/reputation/seed";
 import { listIntelligenceVendors } from "@/lib/intelligence/repository";
 import { adminPageGuard } from "@/components/admin/AdminPageGuard";
-import ReputationTabs from "./ReputationTabs";
+import ReputationTabs from "@/components/reputation/ReputationTabs";
 
 export const dynamic = "force-dynamic";
 

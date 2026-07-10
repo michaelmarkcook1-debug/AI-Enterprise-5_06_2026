@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import BreakingNewsHero from "@/components/home/BreakingNewsHero";
 import MarketTodayBand from "@/components/home/MarketTodayBand";
+import ReputationCard from "@/components/home/ReputationCard";
 import SubscribeForm from "@/components/SubscribeForm";
 import { EXPOSURE_NODES } from "@/lib/investing/exposure-map-data";
 import { projectExposureToDependencyEdges } from "@/lib/graph/dependency-projection";
@@ -97,7 +98,7 @@ export default async function HomePage() {
     getCachedProvenance().catch(() => null),
     getLastRefreshedAt().catch(() => null),
     listPublishedArticles().catch(() => []),
-    getBreakingNews({ days: 14, limit: 5 }).catch(() => null),
+    getBreakingNews({ days: 14, limit: 20 }).catch(() => null),
   ]);
   const isLive = provenance?.source === "live";
   const newsBridges = news ? await buildNewsBridges(news.items).catch(() => undefined) : undefined;
@@ -185,6 +186,10 @@ export default async function HomePage() {
           </div>
         )}
       </section>
+
+      {/* ── Reputation tracker — the complete 3-pillar tracker, un-buried onto the
+            daily watch (Developer / Employee / Customer + risk/litigation signals). ── */}
+      <ReputationCard />
 
       {/* ── 3 · Explore the market: the depth, one click from the glance. ── */}
       <section className="mb-9">
