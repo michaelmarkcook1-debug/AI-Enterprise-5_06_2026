@@ -60,6 +60,7 @@ function CorrectionForm({ bridge, onDone }: { bridge: NewsBridge; onDone: () => 
         <select
           value={vendorSlug}
           onChange={(e) => setVendorSlug(e.target.value)}
+          aria-label="Which vendor this item is not actually about"
           className="mt-2 w-full rounded border border-black/15 bg-white px-2 py-1 text-[11px] dark:border-white/15 dark:bg-[#0c2238]"
         >
           {bridge.vendors.map((v) => (
@@ -73,6 +74,7 @@ function CorrectionForm({ bridge, onDone }: { bridge: NewsBridge; onDone: () => 
         value={note}
         onChange={(e) => setNote(e.target.value.slice(0, 500))}
         placeholder={kind === "other" ? "What's off? (required)" : "Add a note (optional)"}
+        aria-label={kind === "other" ? "What's off? (required)" : "Add a note (optional)"}
         rows={2}
         className="mt-2 w-full rounded border border-black/15 bg-white px-2 py-1 text-[11px] dark:border-white/15 dark:bg-[#0c2238]"
       />
