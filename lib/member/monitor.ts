@@ -44,6 +44,9 @@ export interface MonitorNews {
   sourceName: string;
   sourceUrl?: string;
   vendorName: string | null;
+  /** C12 — the saved vendor this item affects, for the route into its assessment
+   *  (null if only a non-tracked vendor matched). */
+  vendorSlug: string | null;
   publishedAt: string;
 }
 export interface MonitorView {
@@ -149,13 +152,22 @@ export async function buildMonitor(watchlist: MemberWatchlistView): Promise<Moni
         (n.vendors ?? []).some((v) => vendorSet.has(v.replace(/^vendor_/, ""))),
     )
     .slice(0, 12)
-    .map((n) => ({
-      title: n.title,
-      sourceName: n.sourceName,
-      sourceUrl: n.sourceUrl,
-      vendorName: n.primaryVendorName ?? null,
-      publishedAt: n.publishedAt,
-    }));
+    .map((n) => {
+      // The specific SAVED vendor this item affects (for the C12 route into its
+      // assessment): the primary if tracked, else the first tracked token.
+      const affectedSlug =
+        n.primaryVendorId && vendorSet.has(n.primaryVendorId)
+          ? n.primaryVendorId
+          : (n.vendors ?? []).map((v) => v.replace(/^vendor_/, "")).find((v) => vendorSet.has(v)) ?? null;
+      return {
+        title: n.title,
+        sourceName: n.sourceName,
+        sourceUrl: n.sourceUrl,
+        vendorName: n.primaryVendorName ?? null,
+        vendorSlug: affectedSlug,
+        publishedAt: n.publishedAt,
+      };
+    });
 
   const hasSignal = rankingMoves.length > 0 || trimmedAlerts.length > 0 || news.length > 0;
 

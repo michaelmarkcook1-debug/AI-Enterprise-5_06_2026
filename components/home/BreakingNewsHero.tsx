@@ -1,4 +1,6 @@
 import type { BreakingNews } from "@/lib/intelligence/repository";
+import type { NewsBridge } from "@/lib/news-bridge/bridge";
+import NewsBridgePanel from "@/components/news/NewsBridgePanel";
 
 // Front-page hero. Breaking news is the first substantial thing a visitor
 // sees — promoted here from its old mid-page "Market today" tile. Same
@@ -20,7 +22,14 @@ function itemMeta(n: BreakingNews["items"][number]): string {
   return parts.join(" · ");
 }
 
-export default function BreakingNewsHero({ news }: { news: BreakingNews | null }) {
+export default function BreakingNewsHero({
+  news,
+  bridges,
+}: {
+  news: BreakingNews | null;
+  /** C12 — per-item news→assessment bridge (State B), keyed by news-item id. */
+  bridges?: Map<string, NewsBridge>;
+}) {
   const items = news?.items ?? [];
 
   return (
@@ -69,6 +78,8 @@ export default function BreakingNewsHero({ news }: { news: BreakingNews | null }
               {ageLabel(Math.floor((Date.now() - Date.parse(items[0].publishedAt)) / 86_400_000))}
             </p>
           </a>
+          {/* C12 bridge — outside the story anchor (no nested links). */}
+          {bridges?.get(items[0].id) && <NewsBridgePanel bridge={bridges.get(items[0].id)!} />}
 
           {/* Rest of the field — compact, secondary to the lead story. */}
           {items.length > 1 && (
@@ -84,6 +95,7 @@ export default function BreakingNewsHero({ news }: { news: BreakingNews | null }
                     {n.title}
                   </a>
                   <span className={`mt-0.5 block text-[11px] ${MUTED}`}>{itemMeta(n)}</span>
+                  {bridges?.get(n.id) && <NewsBridgePanel bridge={bridges.get(n.id)!} compact />}
                 </li>
               ))}
             </ul>

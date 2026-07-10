@@ -27,6 +27,7 @@ import { getMemberWatchlist } from "@/lib/member/watchlist";
 import { listMemberDecisions } from "@/lib/member/decisions";
 import { buildMonitor } from "@/lib/member/monitor";
 import BuyerHome from "@/components/home/BuyerHome";
+import { buildNewsBridges } from "@/lib/news-bridge/server";
 
 // Public front door. DB-backed (live rankings, breaking news, provenance) →
 // force-dynamic, matching /vendors. All reads are parallel + guarded so the page
@@ -113,6 +114,9 @@ export default async function HomePage() {
     getBreakingNews({ days: 14, limit: 5 }).catch(() => null),
   ]);
   const isLive = provenance?.source === "live";
+  // C12 — news→assessment bridge (State B): resolve which vendor(s) each breaking
+  // item touches → route into their assessment. Deterministic JOIN, no score.
+  const newsBridges = news ? await buildNewsBridges(news.items).catch(() => undefined) : undefined;
   // Rankings are a weighted multi-pillar composite, within category, computed only
   // when backed by verified evidence (else honest "insufficient evidence").
   const categoryComposites = isLive ? await getCategoryComposites().catch(() => []) : [];
@@ -154,7 +158,7 @@ export default async function HomePage() {
 
       {/* ── Hero: breaking news is the first substantial thing a visitor sees —
             promoted here from the old mid-page "Market today" tile. ── */}
-      <BreakingNewsHero news={news} />
+      <BreakingNewsHero news={news} bridges={newsBridges} />
 
       {/* Derived "so what" — from the dependency graph. UN-GATED 2026-07-02
           (Mic ruling): the graph is CURATED ANALYST REFERENCE data — every edge
