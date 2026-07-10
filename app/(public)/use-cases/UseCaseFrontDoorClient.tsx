@@ -164,6 +164,57 @@ function Chips({ entry }: { entry: FrontDoorEntry }) {
   );
 }
 
+// Accessible evidence disclosure — the cited source as a CLICKABLE link (matching
+// /legislation), not a hover-only title. So the provenance that is this product's
+// whole point is reachable on mobile + keyboard + screen-reader, not just on hover.
+const SRC_LINK =
+  "font-medium text-sky-700 underline underline-offset-2 hover:no-underline dark:text-sky-400";
+function Evidence({ entry }: { entry: FrontDoorEntry }) {
+  const { impact, flags } = entry;
+  if (!impact && flags.length === 0) return null;
+  return (
+    <details className="mt-2">
+      <summary className={`cursor-pointer list-none text-[11px] font-medium ${MUTED} hover:underline`}>
+        Evidence &amp; sources
+      </summary>
+      <div className="mt-1.5 space-y-1.5 border-l-2 border-black/10 pl-2.5 dark:border-white/15">
+        {impact && (
+          <p className="text-[11px] leading-4">
+            <span className="font-medium text-[#13294b] dark:text-[#eef3f8]">
+              Uplift {UPLIFT_LABEL[impact.upliftBand] ?? impact.upliftBand} · {impact.evidenceGrade} · {impact.confidence}% confidence · {impact.asOf}
+            </span>{" "}
+            <span className={MUTED}>{impact.upliftBasis}.</span>{" "}
+            <a href={impact.sourceUrl} target="_blank" rel="noopener noreferrer" className={SRC_LINK}>
+              {impact.sourceName} ↗
+            </a>{" "}
+            <span className={MUTED}>— directional estimate.</span>
+          </p>
+        )}
+        {impact?.value && (
+          <p className="text-[11px] leading-4">
+            <span className="font-medium text-amber-800 dark:text-amber-300">
+              Value {VALUE_LABEL[impact.value.band] ?? impact.value.band} · {impact.value.evidenceGrade} · vendor-sourced
+            </span>{" "}
+            <span className={MUTED}>{impact.value.basis}.</span>{" "}
+            <a href={impact.value.sourceUrl} target="_blank" rel="noopener noreferrer" className={SRC_LINK}>
+              {impact.value.sourceName} ↗
+            </a>
+          </p>
+        )}
+        {flags.map((f, i) => (
+          <p key={i} className="text-[11px] leading-4">
+            <span className="font-medium text-rose-800 dark:text-rose-300">⚠ {FLAG_META[f.kind]?.label ?? f.kind} · {f.evidenceGrade}</span>{" "}
+            <span className={MUTED}>{f.summary}</span>{" "}
+            <a href={f.sourceUrl} target="_blank" rel="noopener noreferrer" className={SRC_LINK}>
+              {f.sourceName} ↗
+            </a>
+          </p>
+        ))}
+      </div>
+    </details>
+  );
+}
+
 function EntryRow({ entry }: { entry: FrontDoorEntry }) {
   return (
     <li className={`${CARD} p-4`}>
@@ -178,13 +229,14 @@ function EntryRow({ entry }: { entry: FrontDoorEntry }) {
       <div className="mt-2.5">
         <Chips entry={entry} />
       </div>
+      <Evidence entry={entry} />
       <div className="mt-3 flex flex-wrap items-center gap-2">
         {entry.routes.map((r) => (
           <Link
             key={r}
             href={`/category/${r}`}
             onClick={() => bumpJourneyStepClient(2)}
-            className="rounded-full bg-[#b08d2f] px-3 py-1 text-xs font-semibold text-white transition-colors hover:bg-[#987625] dark:bg-[#d4af37] dark:text-[#1a1605] dark:hover:bg-[#e8c95c]"
+            className="rounded-full bg-[#b08d2f] px-3 py-1 text-xs font-semibold text-[#1a1605] transition-colors hover:bg-[#987625] dark:bg-[#d4af37] dark:text-[#1a1605] dark:hover:bg-[#e8c95c]"
           >
             See the shortlist: {CATEGORY_LABEL[r] ?? r} →
           </Link>
@@ -315,6 +367,7 @@ export default function UseCaseFrontDoorClient() {
                           <div className="mt-1.5">
                             <Chips entry={e} />
                           </div>
+                          <Evidence entry={e} />
                           <div className="mt-2 flex flex-wrap gap-1.5">
                             {e.routes.map((r) => (
                               <Link
@@ -349,9 +402,12 @@ export default function UseCaseFrontDoorClient() {
               </p>
               <ul className="grid gap-2 sm:grid-cols-2">
                 {(showAllPending ? pending : pending.slice(0, 8)).map((e) => (
-                  <li key={e.useCase.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-black/5 px-2.5 py-2 dark:border-white/10">
-                    <span className="text-xs font-medium">{e.useCase.label}</span>
-                    <Chips entry={e} />
+                  <li key={e.useCase.id} className="rounded-lg border border-black/5 px-2.5 py-2 dark:border-white/10">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <span className="text-xs font-medium">{e.useCase.label}</span>
+                      <Chips entry={e} />
+                    </div>
+                    <Evidence entry={e} />
                   </li>
                 ))}
               </ul>
