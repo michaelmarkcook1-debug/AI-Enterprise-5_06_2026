@@ -1,14 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import ExposureMapHero from "@/components/dashboard/ExposureMapHero";
 import BreakingNewsHero from "@/components/home/BreakingNewsHero";
-import CategoryCompositeRail from "@/components/home/CategoryCompositeRail";
-import MarketByCategoryComposite from "@/components/home/MarketByCategoryComposite";
 import MarketTodayBand from "@/components/home/MarketTodayBand";
-import { getCategoryComposites } from "@/lib/ranking/category-composite";
 import SubscribeForm from "@/components/SubscribeForm";
 import { EXPOSURE_NODES } from "@/lib/investing/exposure-map-data";
-import { projectExposureToDependencyEdges, summariseByKind } from "@/lib/graph/dependency-projection";
+import { projectExposureToDependencyEdges } from "@/lib/graph/dependency-projection";
 import { deriveEncroachmentEdges, buildRolesByNodeId } from "@/lib/graph/encroachment";
 import { deriveGraphTakeaway } from "@/lib/graph/takeaway";
 import { getBreakingNews } from "@/lib/intelligence/repository";
@@ -17,9 +13,6 @@ import { getLastRefreshedAt } from "@/lib/system/daily-refresh";
 import { listPublishedArticles } from "@/lib/articles/repository";
 import TabChat from "@/components/chat/TabChat";
 import { absoluteUrl } from "@/lib/site";
-import DataUnavailable from "@/components/DataUnavailable";
-import { buildDeliveryGraph } from "@/lib/graph/delivery-projection";
-import { TRACKED_VENDOR_NAMES } from "@/lib/sourcing/ai-news-manifest";
 import { resolveHomeViewMode } from "@/lib/member/view-mode";
 import { getMember, getMemberOrTest } from "@/lib/member/auth";
 import { ensureTestBuyerSeeded } from "@/lib/member/seed-test-buyer";
@@ -29,15 +22,18 @@ import { buildMonitor } from "@/lib/member/monitor";
 import BuyerHome from "@/components/home/BuyerHome";
 import { buildNewsBridges } from "@/lib/news-bridge/server";
 
-// Public front door. DB-backed (live rankings, breaking news, provenance) →
-// force-dynamic, matching /vendors. All reads are parallel + guarded so the page
-// stays fast and never 500s on a slow/absent DB. ZERO live LLM at request time;
-// the dependency graph is pure/static. No client poller (lean public shell).
+// Public front door — the daily WATCH (IA reorg 2026-07-10, "a watch, not a
+// checkout"). Rebuilt as a scannable daily briefing: what moved (news) → what to
+// watch (movers + encroachment) → then LINKS out to the depth. The heavy
+// exploration instruments (the full dependency graph, dependency-by-layer, the
+// delivery channel) live on their own pages (/dependencies, /vendors) — the home
+// no longer dumps everything; it's a glance. DB-backed → force-dynamic; all reads
+// parallel + guarded; zero live LLM at request time.
 export const dynamic = "force-dynamic";
 
-const TITLE = "AI Enterprise — who the enterprise-AI market runs on";
+const TITLE = "AI Enterprise — your daily enterprise-AI watch";
 const DESCRIPTION =
-  "Independent, source-cited rankings of enterprise AI vendors and the dependency/encroachment graph of who relies on whom — and who's about to eat whose lunch. Every score is confidence-labelled; every edge carries its source.";
+  "A daily, source-cited read on what's moving in enterprise AI — who's rising, who's being encroached on, who relies on whom. Every score is confidence-labelled; every edge carries its source.";
 
 export const metadata: Metadata = {
   title: { absolute: "AI Enterprise — Enterprise AI Market Intelligence" },
@@ -57,17 +53,21 @@ function fmtDate(d: Date | string | null | undefined): string | null {
   return new Date(t).toLocaleDateString("en-GB", { year: "numeric", month: "short", day: "numeric" });
 }
 
+// The "explore the market" links — the depth, one click from the daily glance.
+const EXPLORE: { href: string; title: string; blurb: string }[] = [
+  { href: "/dependencies", title: "Dependency & encroachment map", blurb: "Who relies on whom for compute, models, cloud & capital — and who's about to eat whose lunch." },
+  { href: "/vendors", title: "Vendor rankings & assessment", blurb: "Source-cited, confidence-labelled standings within each category — assess a specific provider." },
+  { href: "/peers", title: "Peer benchmark", blurb: "What companies like yours are adopting, by vertical, size and region." },
+  { href: "/legislation", title: "Regulatory tracker", blurb: "The AI rules landing in your jurisdiction and the assessment domains they touch." },
+];
+
 export default async function HomePage() {
-  // Auth-dependent home (Prompt 3, locked IA decision §0): same URL, buyer
-  // view when a real session exists or the visitor has toggled into the
-  // test-buyer demo. Resolved FIRST so a buyer-mode visit does none of the
-  // visitor market-feed work below.
+  // Auth-dependent home (locked IA decision): buyer "My workspace" view when a
+  // real session exists or the visitor toggled into the test-buyer demo.
   const viewMode = await resolveHomeViewMode();
   if (viewMode === "buyer") {
     const [realMember, member] = await Promise.all([getMember(), getMemberOrTest()]);
     if (member) {
-      // Sample data belongs ONLY on the shared test-buyer account — never
-      // seeded into a real member's own watchlist/decisions.
       if (!realMember) await ensureTestBuyerSeeded(member.subscriberId).catch(() => {});
       const watchlist = await getMemberWatchlist(member.subscriberId);
       const [decisions, monitor] = await Promise.all([
@@ -78,35 +78,21 @@ export default async function HomePage() {
     }
   }
 
-  // Pure, static, zero-cost graph derivation (no DB, no LLM).
+  // Pure, static, zero-cost graph derivation (no DB, no LLM) — the encroachment
+  // "what to watch" signal + its plain-English takeaway.
   const edges = projectExposureToDependencyEdges();
-  const byKind = summariseByKind(edges);
   const encroachments = deriveEncroachmentEdges(edges, buildRolesByNodeId());
   const labelById = new Map(EXPOSURE_NODES.map((n) => [n.id, n.label]));
   const label = (id: string) => labelById.get(id) ?? id;
   const graphTakeaway = deriveGraphTakeaway(edges, label);
 
-  // Confidence partition DERIVED from the data so the credibility line can never
-  // drift from the edges themselves (high ≥80, medium 45–79, seed <45).
+  // Source-backed graph confidence partition (for the coverage line in Movers).
   const high = edges.filter((e) => e.confidence >= 80).length;
   const medium = edges.filter((e) => e.confidence >= 45 && e.confidence < 80).length;
   const seed = edges.filter((e) => e.confidence < 45).length;
   const total = edges.length;
 
-  // Delivery-partnership graph — pure/static curated analyst data, always available.
-  const deliveryGraph = buildDeliveryGraph();
-  // Count distinct SIs per AI vendor (for "most covered" ranking).
-  const sisByVendor = new Map<string, number>();
-  for (const e of deliveryGraph.edges) {
-    sisByVendor.set(e.vendorId, (sisByVendor.get(e.vendorId) ?? 0) + 1);
-  }
-  const topVendorsBySI = [...sisByVendor.entries()]
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 6);
-
-  // Honest freshness + provenance (guarded — never fabricate a timestamp).
-  // Rankings are loaded only when the portal is backed by verified evidence;
-  // otherwise we hold the section rather than render directional/seed figures.
+  // Honest freshness + real-gated news (never fabricate a timestamp).
   const [provenance, lastRefreshed, articles, news] = await Promise.all([
     getCachedProvenance().catch(() => null),
     getLastRefreshedAt().catch(() => null),
@@ -114,19 +100,13 @@ export default async function HomePage() {
     getBreakingNews({ days: 14, limit: 5 }).catch(() => null),
   ]);
   const isLive = provenance?.source === "live";
-  // C12 — news→assessment bridge (State B): resolve which vendor(s) each breaking
-  // item touches → route into their assessment. Deterministic JOIN, no score.
   const newsBridges = news ? await buildNewsBridges(news.items).catch(() => undefined) : undefined;
-  // Rankings are a weighted multi-pillar composite, within category, computed only
-  // when backed by verified evidence (else honest "insufficient evidence").
-  const categoryComposites = isLive ? await getCategoryComposites().catch(() => []) : [];
-  const updated = isLive ? (fmtDate(lastRefreshed) ?? fmtDate(provenance?.lastIngestedAt)) : null;
+  const updated = fmtDate(lastRefreshed) ?? fmtDate(provenance?.lastIngestedAt);
 
   return (
-    <main className="mx-auto max-w-6xl px-4 py-10">
-      {/* ── Masthead: brand line + tagline. Kept short — breaking news, not
-            this, is the hero (below). ── */}
-      <header className="mb-4">
+    <main className="mx-auto max-w-5xl px-4 py-10">
+      {/* ── Masthead: the daily watch, dated. ── */}
+      <header className="mb-6">
         <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-[#b08d2f] dark:text-[#d4af37]">
           Daily market watch · independent · source-cited
         </p>
@@ -135,8 +115,7 @@ export default async function HomePage() {
         </h1>
         <p className={`mt-3 max-w-2xl text-sm ${MUTED}`}>
           The source-backed changes worth knowing today — who&apos;s rising, who&apos;s being encroached
-          on, who relies on whom. Every score is confidence-labelled; every edge carries its own public
-          source.{" "}
+          on, who relies on whom.{" "}
           <Link
             href="/watchlist"
             className="font-medium text-sky-700 underline underline-offset-2 hover:no-underline dark:text-sky-400"
@@ -144,7 +123,6 @@ export default async function HomePage() {
             Track the vendors you run →
           </Link>
         </p>
-        {/* Freshness / provenance strip — honest seed-vs-live, never a fake date. */}
         <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px]">
           <span
             className={`inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 font-medium ${
@@ -154,139 +132,43 @@ export default async function HomePage() {
             }`}
           >
             <span className={`h-1.5 w-1.5 rounded-full ${isLive ? "bg-emerald-500" : "bg-amber-500"}`} aria-hidden />
-            {isLive
-              ? "Live source"
-              : "Live rankings unavailable — shown only when backed by verified evidence"}
+            {isLive ? "Live source-backed data" : "Rankings shown only when backed by verified evidence"}
           </span>
-          <span className={MUTED}>{isLive && updated ? `Updated ${updated}` : ""}</span>
+          {updated && <span className={MUTED}>Updated {updated}</span>}
         </div>
       </header>
 
-      {/* ── Hero: breaking news is the first substantial thing a visitor sees —
-            promoted here from the old mid-page "Market today" tile. ── */}
+      {/* ── 1 · The day's read: verified breaking news (real-or-empty, never seed). ── */}
       <BreakingNewsHero news={news} bridges={newsBridges} />
 
-      {/* Derived "so what" — from the dependency graph. UN-GATED 2026-07-02
-          (Mic ruling): the graph is CURATED ANALYST REFERENCE data — every edge
-          carries a source + confidence, seed-confidence edges render dashed —
-          the same class as the taxonomy and the GSI delivery layer, NOT a
-          fabricated score. It shows with its labels, never presented as live-DB. */}
-      {graphTakeaway && (
-        <div className="mb-4 max-w-3xl text-sm leading-6">
-          <p className="text-[#15263c] dark:text-[#eef3f8]">
+      {/* ── 2 · What to watch: the scannable daily signals. ── */}
+      <section className="mb-9">
+        <h2 className="mb-1 font-[var(--font-display)] text-xl font-extrabold tracking-tight">What to watch</h2>
+        {graphTakeaway && (
+          <p className="mb-4 max-w-3xl text-sm leading-6 text-[#15263c] dark:text-[#eef3f8]">
             <span className="mr-2 inline-block rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide align-middle">
               Derived signal
             </span>
             {graphTakeaway.chokepoints}
           </p>
-          {graphTakeaway.ubiquity && (
-            <p className="mt-1.5 text-[#15263c]/70 dark:text-[#eef3f8]/70">{graphTakeaway.ubiquity}</p>
-          )}
-        </div>
-      )}
+        )}
 
-      {/* Fold: graph (~70%) + rankings rail (~30%), gated INDEPENDENTLY. The
-          rankings are the real evidence-derived composite → gate on isLive. The
-          dependency graph is CURATED ANALYST REFERENCE data (un-gated 2026-07-02,
-          Mic ruling — see note above): per-edge source + confidence labels do the
-          honesty work; it is never presented as live-DB fact. */}
-      <section className="mb-3 grid grid-cols-1 gap-5 lg:grid-cols-12">
-        <div className="lg:col-span-8">
-          {(
-            <>
-              {/* Gold "vitrine" bracket mounts the instrument without recolouring it. */}
-              <div className="relative rounded-xl border border-black/10 p-1.5 dark:border-white/10">
-                <span className="pointer-events-none absolute left-0 top-0 h-8 w-px bg-[#d4af37]" aria-hidden />
-                <span className="pointer-events-none absolute left-0 top-0 h-px w-8 bg-[#d4af37]" aria-hidden />
-                <span className="pointer-events-none absolute bottom-0 right-0 h-8 w-px bg-[#d4af37]" aria-hidden />
-                <span className="pointer-events-none absolute bottom-0 right-0 h-px w-8 bg-[#d4af37]" aria-hidden />
-                <ExposureMapHero />
-              </div>
-              <p className="mt-2 inline-block rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-[11px] font-medium">
-                Encroachment edges are a derived analytical signal — not a stated fact
-              </p>
-            </>
-          )}
-        </div>
-        <div className="lg:col-span-4">
-          {isLive ? (
-            <CategoryCompositeRail composites={categoryComposites} />
-          ) : (
-            <DataUnavailable
-              title="Live rankings unavailable"
-              detail="Rankings appear once the market data is backed by reviewed, source-backed evidence."
-              reason={provenance?.reason}
-            />
-          )}
-        </div>
-      </section>
+        {/* Movers (gated on live evidence) + coverage. */}
+        <MarketTodayBand coverage={{ edgesTotal: total, high, medium, seed }} isLive={isLive} />
 
-      {/* Signature: the gold "dependency spine" seam between owned-signal and evidence */}
-      <div className="my-8 flex items-center gap-3" aria-hidden>
-        <span className="h-px w-14 bg-[#d4af37]" />
-        <span className="h-px flex-1 bg-black/10 dark:bg-white/10" />
-      </div>
-
-      {/* ── Market today (breaking news is real-gated; movers gated on live evidence) ── */}
-      <MarketTodayBand coverage={{ edgesTotal: total, high, medium, seed }} isLive={isLive} />
-
-      {/* ── The market, by category (composite rankings + the explained taxonomy) ── */}
-      {isLive ? (
-        <MarketByCategoryComposite composites={categoryComposites} />
-      ) : (
-        <section className="mb-10">
-          <DataUnavailable
-            title="Live rankings by category unavailable"
-            detail="We rank vendors only on verified, source-backed evidence. Until ingestion lands and evidence is approved, we hold these rankings rather than show directional estimates as if measured."
-            reason={provenance?.reason}
-          />
-        </section>
-      )}
-
-      {/* ── Most depended-upon, by layer (indexable summary of the hero).
-            Graph-derived — curated analyst reference data, un-gated 2026-07-02
-            (Mic ruling); the per-edge confidence partition line below does the
-            honesty work. ── */}
-      <section className={`${CARD} mb-10`}>
-        <div className="mb-1 flex items-baseline justify-between gap-3">
-          <h2 className="font-[var(--font-display)] text-xl font-extrabold tracking-tight">
-            Most depended-upon, by layer
-          </h2>
-          <Link href="/dependencies" className={`text-xs underline-offset-2 hover:underline ${MUTED}`}>
-            Explore the full graph →
-          </Link>
-        </div>
-        <p className={`mb-4 text-xs ${MUTED}`}>
-          {total} source-backed relationships — {high} high-confidence, {medium} medium, {seed} seed
-          (plausible, not yet verified). Concentration here is where pricing power and systemic risk live.
-        </p>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {byKind.map((k) => (
-            <div key={k.kind} className="rounded-lg border border-black/5 p-4 dark:border-white/10">
-              <div className="flex items-baseline justify-between">
-                <h3 className="text-sm font-semibold">{k.label}</h3>
-                <span className={`text-xs ${MUTED}`}>{k.edgeCount} links</span>
-              </div>
-              <ul className="mt-2 space-y-1 text-sm">
-                {k.topProviders.map((p) => (
-                  <li key={p.id} className="flex items-baseline justify-between">
-                    <span>{label(p.id)}</span>
-                    <span className={`tabular-nums text-xs ${MUTED}`}>{p.dependents} rely on</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-
-        {/* Encroachment teaser — derived, clearly badged */}
+        {/* Encroachment watch — who's coming for whom (a daily-relevant signal). */}
         {encroachments.length > 0 && (
-          <div className="mt-5 border-t border-black/5 pt-4 dark:border-white/10">
-            <div className="mb-2 flex items-center gap-2">
-              <h3 className="text-sm font-semibold">Encroachment watch</h3>
-              <span className="rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-[10px] font-medium">
-                Derived — not a stated fact
-              </span>
+          <div className={`${CARD}`}>
+            <div className="mb-2 flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <h3 className="text-sm font-semibold">Encroachment watch</h3>
+                <span className="rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-[10px] font-medium">
+                  Derived — not a stated fact
+                </span>
+              </div>
+              <Link href="/dependencies" className={`text-xs underline-offset-2 hover:underline ${MUTED}`}>
+                Full map →
+              </Link>
             </div>
             <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
               {encroachments.slice(0, 4).map((e) => (
@@ -298,82 +180,31 @@ export default async function HomePage() {
               ))}
             </ul>
             <p className={`mt-2 text-[10px] ${MUTED}`}>
-              Derived only for vendors with mapped market roles — absence here is
-              under-coverage, not an all-clear.
+              Derived only for vendors with mapped market roles — absence here is under-coverage, not an all-clear.
             </p>
           </div>
         )}
       </section>
 
-      {/* ── IT-services delivery channel (GSI layer) — curated analyst data.
-            Relocated from the hero's flag-off fallback slot when the graph was
-            un-gated (2026-07-02): both now render, graph in the hero, this here. ── */}
-      <section className="mb-10 grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <div className="rounded-xl border border-black/10 dark:border-white/10 bg-white/60 dark:bg-white/5 p-5 h-full flex flex-col gap-4">
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <h2 className="font-[var(--font-display)] text-lg font-bold tracking-tight">
-                IT-services delivery channel
-              </h2>
-              <p className={`mt-0.5 text-xs ${MUTED}`}>
-                {deliveryGraph.edges.length} relationships — which global SIs are delivering AI vendors into enterprise
-              </p>
-            </div>
-            <span className="shrink-0 rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-800 dark:text-amber-200">
-              Analyst-curated
-            </span>
-          </div>
-
-          {/* Most covered AI vendors by SI count */}
-          <div>
-            <p className={`mb-1.5 text-[11px] font-semibold uppercase tracking-wide ${MUTED}`}>
-              Most covered AI vendors
-            </p>
-            <ul className="space-y-1.5">
-              {topVendorsBySI.map(([vendorId, count]) => (
-                <li key={vendorId} className="flex items-center justify-between">
-                  <Link
-                    href={`/vendors/${vendorId}`}
-                    className="text-sm font-medium hover:underline underline-offset-2"
-                  >
-                    {TRACKED_VENDOR_NAMES[vendorId] ?? vendorId}
-                  </Link>
-                  <span className={`text-xs tabular-nums ${MUTED}`}>
-                    {count} SI{count !== 1 ? "s" : ""}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <p className={`mt-auto text-[11px] ${MUTED}`}>
-            Analyst-curated · pending external confirmation ·{" "}
-            <Link href="/vendors" className="underline underline-offset-2">
-              see vendor profiles
-            </Link>{" "}
-            for implementation partner details
-          </p>
+      {/* ── 3 · Explore the market: the depth, one click from the glance. ── */}
+      <section className="mb-9">
+        <h2 className="mb-3 font-[var(--font-display)] text-xl font-extrabold tracking-tight">Explore the market</h2>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          {EXPLORE.map((c) => (
+            <Link key={c.href} href={c.href} className={`${CARD} group block transition-colors hover:border-[#d4af37]/50`}>
+              <div className="flex items-center justify-between gap-2">
+                <h3 className="text-sm font-semibold text-[#13294b] group-hover:underline dark:text-[#eef3f8]">{c.title}</h3>
+                <span className="text-[#b08d2f] dark:text-[#d4af37]" aria-hidden>→</span>
+              </div>
+              <p className={`mt-1 text-xs leading-5 ${MUTED}`}>{c.blurb}</p>
+            </Link>
+          ))}
         </div>
-
-        {/* Encroachment watch (delivery-derived) */}
-        {deliveryGraph.encroachers.length > 0 && (
-          <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-5">
-            <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-amber-700 dark:text-amber-300">
-              Derived encroachment signal
-            </p>
-            {deliveryGraph.encroachers.map((enc) => (
-              <p key={enc.partnerId} className="text-sm">
-                <span className="font-medium">{enc.partnerName}</span>
-                <span className={MUTED}> delivers rival models: {enc.vendorIds.join(", ")}</span>
-              </p>
-            ))}
-          </div>
-        )}
       </section>
 
-      {/* ── Latest insight (honestly empty when none) ── */}
+      {/* ── Latest insight (honestly empty when none). ── */}
       {articles.length > 0 && (
-        <section className="mb-10">
+        <section className="mb-9">
           <div className="mb-3 flex items-baseline justify-between gap-3">
             <h2 className="font-[var(--font-display)] text-xl font-extrabold tracking-tight">Latest insight</h2>
             <Link href="/insights" className={`text-xs underline-offset-2 hover:underline ${MUTED}`}>
@@ -397,19 +228,17 @@ export default async function HomePage() {
       <section className={`${CARD} mb-4`}>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="max-w-md">
-            <h2 className="font-[var(--font-display)] text-lg font-extrabold tracking-tight">
-              Get the market read
-            </h2>
+            <h2 className="font-[var(--font-display)] text-lg font-extrabold tracking-tight">Get the daily read by email</h2>
             <p className={`mt-1 text-sm ${MUTED}`}>
-              The evidence-based moves in enterprise AI — who&apos;s rising, who&apos;s exposed, who
-              relies on whom. Double opt-in, no spam.
+              The evidence-based moves in enterprise AI — who&apos;s rising, who&apos;s exposed, who relies on
+              whom. Double opt-in, no spam.
             </p>
           </div>
           <SubscribeForm source="home" className="w-full max-w-sm" />
         </div>
       </section>
 
-      {/* Piece 3 — Ask AI, grounded in the verified breaking-news feed only. */}
+      {/* Ask AI, grounded in the verified breaking-news feed only. */}
       <TabChat
         tab={{ kind: "news" }}
         label="Market today"
