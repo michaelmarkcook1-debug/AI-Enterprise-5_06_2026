@@ -23,9 +23,15 @@ export async function buildNewsBridges(items: readonly BridgeableItem[]): Promis
   const vendors = await listIntelligenceVendors().catch(() => []);
   const index = buildVendorIndex(vendors);
   for (const it of items) {
+    // Explicitly narrow to the ONLY three fields the bridge may read. Callers pass a
+    // full BreakingNewsItem (which carries impactScore/suggestedScoreImpact); this
+    // destructure makes it syntactically impossible for a future edit — or a widening
+    // of BridgeableItem — to carry a score/impact field into the JOIN. State-B stays
+    // unrepresentable by construction (see bridge.ts), belt-and-suspenders here.
+    const { id, vendors, primaryVendorId } = it;
     // Lead vendor first (dedup handled inside newsBridge), then the rest.
-    const tokens = it.primaryVendorId ? [it.primaryVendorId, ...it.vendors] : it.vendors;
-    out.set(it.id, newsBridge(it.id, tokens, index));
+    const tokens = primaryVendorId ? [primaryVendorId, ...vendors] : vendors;
+    out.set(id, newsBridge(id, tokens, index));
   }
   return out;
 }
