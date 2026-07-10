@@ -33,6 +33,7 @@ export default function PublicFooter() {
             <Link href="/interrogate" className="text-[#4c5d75] hover:underline dark:text-[#8fa5bb]">Interrogate</Link>
             <Link href="/peers" className="text-[#4c5d75] hover:underline dark:text-[#8fa5bb]">Peer AI</Link>
             <Link href="/insights" className="text-[#4c5d75] hover:underline dark:text-[#8fa5bb]">Insights</Link>
+            <Link href="/legislation" className="text-[#4c5d75] hover:underline dark:text-[#8fa5bb]">Legislation</Link>
           </div>
           <div className="flex flex-col gap-2">
             <Link href="/subscribe" className="text-[#4c5d75] hover:underline dark:text-[#8fa5bb]">Subscribe</Link>
