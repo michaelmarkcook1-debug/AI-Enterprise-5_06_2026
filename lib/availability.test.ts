@@ -96,13 +96,15 @@ describe("isRealProductionEnv", () => {
 });
 
 describe("memberTestOpenEffective", () => {
-  it("is false in real production even though MEMBER_TEST_OPEN (owner intent) is true", () => {
-    expect(MEMBER_TEST_OPEN).toBe(true); // the owner-intent flag itself is unconditional
+  // OWNER INSTRUCTION (2026-07-10): member surfaces stay UNGATED for testing on
+  // ALL environments incl. real production — the prior prod-scoping was reverted.
+  it("tracks MEMBER_TEST_OPEN unconditionally — open on real production too", () => {
+    expect(MEMBER_TEST_OPEN).toBe(true);
     vi.stubEnv("VERCEL_ENV", "production");
-    expect(memberTestOpenEffective()).toBe(false); // but the EFFECTIVE value must not be
+    expect(memberTestOpenEffective()).toBe(true);
   });
 
-  it("is true in preview/local dev, matching MEMBER_TEST_OPEN", () => {
+  it("is true in preview/local dev as well", () => {
     vi.stubEnv("VERCEL_ENV", "preview");
     expect(memberTestOpenEffective()).toBe(true);
     vi.stubEnv("VERCEL_ENV", "");

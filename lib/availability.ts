@@ -117,12 +117,18 @@ export function isRealProductionEnv(): boolean {
   return process.env.VERCEL_ENV === "production";
 }
 
-/** MEMBER_TEST_OPEN's actual effect, gated to non-production. Server-only —
- *  call this (not the raw MEMBER_TEST_OPEN literal) anywhere the test-member
- *  fallback actually fires or is surfaced, so the bypass genuinely never
- *  reaches real production regardless of the owner-intent flag above. */
+/** MEMBER_TEST_OPEN's actual effect. Server-only.
+ *  OWNER INSTRUCTION (reaffirmed 2026-07-10): member surfaces stay UNGATED for
+ *  testing, INCLUDING on the real production URL the owner actually tests on. The
+ *  prior `&& !isRealProductionEnv()` scoping (added for launch-safety) violated
+ *  that — it put a dead sign-in wall in front of /monitor, /watchlist, /decisions
+ *  and "My workspace" on prod. Reverted to honour the instruction.
+ *  Caveat kept for a real launch: this opens the member surfaces + the two LLM
+ *  hero routes to anonymous callers on prod (those routes keep per-IP rate limits,
+ *  and the shared test watchlist/decisions are common to all anonymous testers).
+ *  Before a genuine public launch, re-scope this + turn MEMBER_AUTH_ENABLED on. */
 export function memberTestOpenEffective(): boolean {
-  return MEMBER_TEST_OPEN && !isRealProductionEnv();
+  return MEMBER_TEST_OPEN;
 }
 
 /** Member-feature UI visibility: shown when real auth is on OR test-open is on.
