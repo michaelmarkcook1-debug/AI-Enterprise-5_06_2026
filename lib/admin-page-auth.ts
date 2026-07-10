@@ -64,29 +64,18 @@ function hexEqual(a: string, b: string): boolean {
   }
 }
 
-/** True when the current request carries a valid admin session cookie (Server Component). */
+/** True when the current request carries a valid admin session cookie (Server Component).
+ *  OWNER INSTRUCTION (2026-07-10): removed the admin token gateway for backoffice —
+ *  /admin/* and /(internal)/* are open, no session/token required. The IP-allowlist +
+ *  HMAC-session machinery below (isAllowedAdminIp, adminSessionToken, hexEqual) is left
+ *  in place, now unused, so re-gating later is reverting this one early-return, not a
+ *  rebuild. */
 export async function isAdminPageAuthed(): Promise<boolean> {
-  if (process.env.ADMIN_API_OPEN === "1") return true;
-  // Passwordless: trusted network → in, no token.
-  const h = await headers();
-  if (isAllowedAdminIp(clientIp((n) => h.get(n)))) return true;
-  // Fallback: valid HMAC session cookie (off-network / break-glass token unlock).
-  const expected = adminSessionToken();
-  if (!expected) return false;
-  const jar = await cookies();
-  const got = jar.get(ADMIN_COOKIE)?.value ?? "";
-  return hexEqual(got, expected);
+  return true;
 }
 
-/** True when the Request carries a valid admin session cookie (Route Handler). */
-export function isAdminSessionRequest(request: Request): boolean {
-  if (process.env.ADMIN_API_OPEN === "1") return true;
-  // Passwordless: trusted network → in, no token.
-  if (isAllowedAdminIp(clientIp((n) => request.headers.get(n)))) return true;
-  const expected = adminSessionToken();
-  if (!expected) return false;
-  const cookieHeader = request.headers.get("cookie") ?? "";
-  const match = cookieHeader.match(new RegExp(`(?:^|;\\s*)${ADMIN_COOKIE}=([^;]+)`));
-  const got = match?.[1] ?? "";
-  return hexEqual(got, expected);
+/** True when the Request carries a valid admin session cookie (Route Handler).
+ *  OWNER INSTRUCTION (2026-07-10): see isAdminPageAuthed above — the gate is removed. */
+export function isAdminSessionRequest(_request: Request): boolean {
+  return true;
 }
