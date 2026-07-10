@@ -36,7 +36,7 @@ import {
 } from "@/lib/decision-intelligence/seed";
 import { riskColor, statusColor } from "@/lib/decision-intelligence/types";
 import type { DecisionStatus } from "@/lib/decision-intelligence/types";
-import ReputationTabs from "../reputation/ReputationTabs";
+import ReputationTabs from "@/components/reputation/ReputationTabs";
 import { fetchLiveGitHubSignals, mergeGitHubIntoReputation } from "@/lib/reputation/live-github";
 import VendorUptakeExplorer from "@/components/demonstrate/VendorUptakeExplorer";
 import TokenPricingTable from "@/components/demonstrate/TokenPricingTable";
