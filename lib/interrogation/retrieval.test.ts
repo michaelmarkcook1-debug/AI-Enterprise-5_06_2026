@@ -15,13 +15,13 @@ const intent: IntentProfile = {
 
 const frontier: FrontierComparison = {
   columns: [
-    { vendorId: "openai", vendorName: "OpenAI", present: true, modelName: "gpt-x", ratings: { overall: 1470, coding: 1495 }, overall: 1470, overallRank: 2, sourceUrl: "https://lmarena.ai/leaderboard", publishDate: "2026-07-02" },
-    { vendorId: "anthropic", vendorName: "Anthropic", present: true, modelName: "claude-x", ratings: { overall: 1501, coding: 1480 }, overall: 1501, overallRank: 1, sourceUrl: "https://lmarena.ai/leaderboard", publishDate: "2026-07-02" },
+    { vendorId: "openai", vendorName: "OpenAI", present: true, modelName: "gpt-x", ratings: { intelligence: 55, coding: 58 }, overall: 55, overallRank: 2, sourceUrl: "https://artificialanalysis.ai/models", publishDate: "2026-07-02" },
+    { vendorId: "anthropic", vendorName: "Anthropic", present: true, modelName: "claude-x", ratings: { intelligence: 60, coding: 56 }, overall: 60, overallRank: 1, sourceUrl: "https://artificialanalysis.ai/models", publishDate: "2026-07-02" },
   ],
-  categoryLeaders: { overall: "anthropic", coding: "openai" },
+  categoryLeaders: { intelligence: "anthropic", coding: "openai" },
   asOf: "2026-07-02",
-  sourceUrl: "https://lmarena.ai/leaderboard",
-  source: "lmarena",
+  sourceUrl: "https://artificialanalysis.ai/models",
+  source: "artificial_analysis",
   presentCount: 2,
 };
 
@@ -113,7 +113,7 @@ describe("assembleEvidenceBundle — deterministic, honest, cited", () => {
   it("the allowlist is exactly the set of item sourceUrls (the synthesis gate's basis)", () => {
     const b = assembleEvidenceBundle(intent, frontier, composedExact, [exemplarCited]);
     const allow = bundleAllowlist(b);
-    expect(allow.has("https://lmarena.ai/leaderboard")).toBe(true);
+    expect(allow.has("https://artificialanalysis.ai/models")).toBe(true);
     expect(allow.has("https://www.census.gov/btos")).toBe(true);
     expect(allow.has("https://www.cnbc.com/ms")).toBe(true);
   });

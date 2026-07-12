@@ -67,14 +67,27 @@ export function activeDomains(weights: Partial<DomainWeights>): DomainId[] {
  * else the framework 12 alone. Single source of truth for this merge so the
  * static ranking, the interactive re-rank, and any export/derived view can
  * never quietly disagree about which domains are in scope for a vendor.
+ *
+ * `modelQualityDriver` picks WHICH index-driven model_quality score is merged
+ * (category decision — categoryModelQualityDriver): "coding" uses the
+ * Coding-Index-driven variant (developer_coding_agent); the default
+ * "intelligence" uses the Intelligence-Index-driven one. A vendor without the
+ * driver's score gets no substitute from the other driver — absence stays
+ * honest.
  */
 export function effectiveDomains(
   domains: DomainScore[],
-  extras: { modelQuality?: DomainScore | null; devSentiment?: DomainScore | null },
+  extras: {
+    modelQuality?: DomainScore | null;
+    modelQualityCoding?: DomainScore | null;
+    devSentiment?: DomainScore | null;
+  },
   resolvedWeights: Partial<DomainWeights>,
+  modelQualityDriver: "intelligence" | "coding" = "intelligence",
 ): DomainScore[] {
   const extra: DomainScore[] = [];
-  if ((resolvedWeights.model_quality ?? 0) > 0 && extras.modelQuality) extra.push(extras.modelQuality);
+  const mq = modelQualityDriver === "coding" ? extras.modelQualityCoding : extras.modelQuality;
+  if ((resolvedWeights.model_quality ?? 0) > 0 && mq) extra.push(mq);
   if ((resolvedWeights.dev_sentiment ?? 0) > 0 && extras.devSentiment) extra.push(extras.devSentiment);
   return extra.length > 0 ? [...domains, ...extra] : domains;
 }

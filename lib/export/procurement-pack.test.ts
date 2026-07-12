@@ -36,6 +36,7 @@ function scorecard(domains: DomainScore[], totalEvidenceRows = 10): VendorScorec
     hasAnyEvidence: domains.some((d) => d.state === "scored"),
     totalEvidenceRows,
     modelQuality: null,
+    modelQualityCoding: null,
     devSentiment: null,
   };
 }
