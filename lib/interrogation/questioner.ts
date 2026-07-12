@@ -36,6 +36,23 @@ const REGION_IDS: Set<string> = new Set(REGIONS.map((r) => r.id));
  *  parseQuestionerResponse will accept (see `options` filtering below). */
 const CHIP_LABELS: Set<string> = new Set([...VERTICALS, ...SIZE_BANDS, ...REGIONS].map((r) => r.label));
 
+// Suggested answers scaffold the USER's own reply — they must NEVER smuggle a
+// market fact (statistic, percentage, ranking, vendor/market claim) in as if it
+// were a neutral example. The prompt forbids it; this is the code enforcement
+// (defense-in-depth, matching the platform's FACTUAL-DATA rule). A digit alone is
+// FINE ("SOC 2", "live within 2 quarters") — only market-fact SHAPES are dropped.
+// Taxonomy chip labels ("Financial services") never match, so categorical options
+// are unaffected.
+const MARKET_FACT_RE =
+  /\d+\s*%|\bpercent\b|market\s*share|\bshare\s+of\b|\brank(?:ed|ing|s)?\b|#\s?\d|\btop\s+\d+\b|\bmarket\s+leader\b|\bbest[-\s]in[-\s]class\b|\b\d+\s?x\b|\bmajority\s+of\b|\bmost\s+(?:companies|firms|teams|enterprises|organi[sz]ations|vendors|buyers|cios|adopters)\b/i;
+
+/** True when a suggested answer reads like an (unverified) market fact/claim and
+ *  must therefore be dropped from the options offered to the user. Exported for
+ *  the unit test that pins this guard. */
+export function isFactualSuggestion(s: string): boolean {
+  return MARKET_FACT_RE.test(s);
+}
+
 /** The raw, always-both-branches shape the model returns each turn. */
 export interface QuestionerResponse {
   nextQuestion: string;
@@ -90,7 +107,10 @@ RULES:
 1. Ask ONE question at a time. Fewer, sharper questions beat a long interrogation — a busy CIO must not be annoyed.
 2. Each question must depend on what they have already told you. Do not re-ask what you know.
 3. You GATHER INTENT ONLY. Never assert, imply, or preview any market fact, statistic, model score, ranking, or peer figure — those come later, from cited evidence, not from you. A suggested answer chip may name a category ("Financial services") but never attach a claim to it.
-4. For CATEGORICAL dimensions with a fixed vocabulary (industry vertical, company-size band, region), offer suggested-answer chips drawn EXACTLY from the allowed ids below — this lets the busy CIO click instead of type. For OPEN dimensions (their specific goal, their constraints) do NOT offer chips; let them speak freely.
+4. ALWAYS offer 3-5 short suggested answers in "options" to scaffold the reply. The UI ALWAYS lets the user type their own answer instead (the first row is literally "type your own"), so suggestions are ADDITIVE — a starting shape, never a constraint or a forced choice.
+   - For CATEGORICAL dimensions (industry vertical, company-size band, region), the options MUST be drawn EXACTLY from the allowed ids' human labels below.
+   - For OPEN dimensions (their goal, constraints, incumbents, renewal timing, region/residency, regulatory bar, risk appetite, skills, timeline), the options are short ILLUSTRATIVE ANSWER-SHAPES — examples of the KIND of answer, phrased about the USER's own situation (e.g. "EU-only, data can't leave region", "Live within two quarters", "Small platform team, no ML engineers", "SOC 2 non-negotiable").
+   - HARD RULE (non-negotiable): a suggested answer must NEVER contain a statistic, percentage, count-based market claim, ranking, or ANY assertion about a specific vendor or the market — no "#1", "top 3", "40% of peers", "the market leader", "10x". Suggestions describe the user's OWN context, never a fact about the world. (This is also enforced in code; factual-looking options are dropped.)
 5. Always return BOTH: (a) your best next question, and (b) a best-effort intentProfile capturing everything inferred so far. Set readyToConclude=true only once you genuinely have enough to give a tailored finding (industry, size, region, a clear goal, and any hard constraints).
 
 ALLOWED CATEGORICAL IDS (use these EXACT id strings in intentProfile, and their human labels as chip text):
@@ -115,7 +135,8 @@ const SCHEMA = {
       nextQuestion: { type: "string", description: "The single best next question, shaped by prior answers." },
       options: {
         type: "array",
-        description: "Suggested-answer chips ONLY for a categorical question, drawn from the allowed ids' labels. Omit for open questions.",
+        description:
+          "3-5 short suggested answers to scaffold the reply (the user can always type their own instead). Categorical questions: draw EXACTLY from the allowed ids' labels. Open questions: short illustrative answer-shapes about the user's OWN situation — NEVER a statistic, ranking, or market/vendor claim.",
         items: { type: "string" },
       },
       readyToConclude: { type: "boolean", description: "True only when you have enough signal for a tailored finding." },
@@ -163,7 +184,11 @@ export function parseQuestionerResponse(raw: unknown): QuestionerResponse {
   // on). A non-categorical suggestion set (e.g. a yes/no confirmation) has no
   // overlap with the taxonomy and passes through unfiltered.
   const isTaxonomyChip = rawOptions.some((x) => CHIP_LABELS.has(x));
-  const options = isTaxonomyChip ? rawOptions.filter((x) => CHIP_LABELS.has(x)) : rawOptions;
+  const filtered = isTaxonomyChip ? rawOptions.filter((x) => CHIP_LABELS.has(x)) : rawOptions;
+  // Defense-in-depth: drop any suggested answer that reads like a market fact/claim
+  // (the prompt already forbids it). Taxonomy labels never match, so categorical
+  // options survive untouched; only smuggled-fact open examples are removed.
+  const options = filtered.filter((x) => !isFactualSuggestion(x));
   return {
     nextQuestion: str(o.nextQuestion).slice(0, 600) || "Could you tell me a little more about what you're trying to achieve?",
     options: options.length > 0 ? options : undefined,

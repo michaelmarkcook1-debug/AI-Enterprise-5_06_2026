@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   decideAction,
   parseQuestionerResponse,
+  isFactualSuggestion,
   MIN_QUESTIONS,
   MAX_TURNS,
   QUICK_MODE_MAX_QUESTIONS,
@@ -160,5 +161,47 @@ describe("parseQuestionerResponse — validates categorical ids against the real
       intentProfile: validProfile,
     });
     expect(r.options).toEqual(["Yes", "No"]);
+  });
+});
+
+describe("isFactualSuggestion — suggestions must never smuggle a market fact", () => {
+  it("REJECTS options that assert a statistic / ranking / vendor-or-market claim", () => {
+    for (const s of [
+      "40% of peers require this",
+      "used by the majority of enterprises",
+      "the market leader",
+      "ranked #1 for support",
+      "top 3 by market share",
+      "best-in-class reliability",
+      "10x faster than rivals",
+      "50 percent adoption",
+      "most CIOs standardise on it",
+    ]) {
+      expect(isFactualSuggestion(s), `should reject: ${s}`).toBe(true);
+    }
+  });
+
+  it("ALLOWS honest answer-shapes about the user's OWN situation (incl. benign digits)", () => {
+    for (const s of [
+      "EU-only, data can't leave region",
+      "SOC 2 non-negotiable",
+      "Live within two quarters",
+      "Renews in 3 months",
+      "Small platform team, no ML engineers",
+      "Financial services",
+      "Global enterprise",
+    ]) {
+      expect(isFactualSuggestion(s), `should allow: ${s}`).toBe(false);
+    }
+  });
+
+  it("parseQuestionerResponse DROPS a factual open example but keeps the honest ones", () => {
+    const r = parseQuestionerResponse({
+      nextQuestion: "What's your biggest constraint?",
+      options: ["EU-only data residency", "used by 40% of banks", "SOC 2 non-negotiable"],
+      readyToConclude: false,
+      intentProfile: validProfile,
+    });
+    expect(r.options).toEqual(["EU-only data residency", "SOC 2 non-negotiable"]);
   });
 });

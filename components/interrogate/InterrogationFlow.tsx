@@ -10,6 +10,7 @@
 
 import { useState, type ReactNode } from "react";
 import ContributePrompt from "./ContributePrompt";
+import SuggestInput from "@/components/forms/SuggestInput";
 
 type InterrogationMode = "quick" | "comprehensive";
 
@@ -259,27 +260,17 @@ export default function InterrogationFlow() {
             Question {questionsAsked}{mode === "quick" ? " of at most 5" : ""}
           </div>
           <p className="mt-1 text-sm font-medium">{question}</p>
-          {options.length > 0 && (
-            <div className="mt-3 flex flex-wrap gap-2">
-              {options.map((o) => (
-                <button
-                  key={o}
-                  onClick={() => submit(o)}
-                  disabled={busy}
-                  className="rounded-full border border-black/15 px-3 py-1 text-sm hover:border-[#b08d2f] disabled:opacity-50 dark:border-white/15"
-                >
-                  {o}
-                </button>
-              ))}
-            </div>
-          )}
+          {/* Free-text-FIRST answer: type anything, or open the dropdown for a few
+              relevant starting points (first row is always "type your own"). Same
+              accessible combobox as the context form; suggestions are additive. */}
           <div className="mt-3">
-            <textarea
+            <SuggestInput
               value={answer}
-              onChange={(e) => setAnswer(e.target.value)}
-              rows={2}
-              placeholder={options.length > 0 ? "…or type your own answer" : "Your answer"}
-              className="w-full rounded-md border border-black/15 bg-white/80 p-3 text-sm dark:border-white/15 dark:bg-[#0a1f38]"
+              onChange={setAnswer}
+              suggestions={options}
+              placeholder={options.length > 0 ? "Type your answer, or pick a starting point" : "Your answer"}
+              ariaLabel={question || "Your answer"}
+              inputClassName="w-full rounded-md border border-black/15 bg-white/80 px-3 py-2 pr-8 text-sm dark:border-white/15 dark:bg-[#0a1f38]"
             />
             <div className="mt-2 flex justify-end">
               <button className={BTN} onClick={() => submit(answer)} disabled={busy || !answer.trim()}>
