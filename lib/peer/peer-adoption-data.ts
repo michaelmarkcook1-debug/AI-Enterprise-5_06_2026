@@ -27,11 +27,13 @@
 // dataset grows via the same cited pipeline, never by invention.
 
 import type { PeerCompany } from "./types";
+import { SOURCED_PEER_COMPANIES } from "./peer-adoption-sourced";
 
 export const PEER_DATASET_SOURCE =
   "Analyst-curated · citations verified against live web sources, 2026-07-04";
 
-export const PEER_COMPANIES: PeerCompany[] = [
+// The hand-curated core (banking/pharma/retail/insurance/telecom/energy/auto).
+const CORE_PEER_COMPANIES: PeerCompany[] = [
   // ── JPMorgan Chase ──────────────────────────────────────────────────────
   {
     id: "jpmorgan-chase",
@@ -2653,3 +2655,10 @@ export const PEER_COMPANIES: PeerCompany[] = [
     ],
   },
 ];
+
+// The full peer set = hand-curated core + the 2026-07-12 16-vertical SOURCED
+// expansion (peer-adoption-sourced.ts, generated from cited web research). Both
+// obey the same honesty contract and are validated together by
+// peer-adoption-data.test.ts. Merged here so every consumer (segments.ts cohort
+// resolution, the heatmap, disclosedPlatformsForSegment) sees the whole set.
+export const PEER_COMPANIES: PeerCompany[] = [...CORE_PEER_COMPANIES, ...SOURCED_PEER_COMPANIES];

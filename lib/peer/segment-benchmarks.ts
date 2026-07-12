@@ -19,6 +19,7 @@ import type { IndustryTag } from "../use-cases";
 import type { Segment, SizeBandId, RegionId } from "./segments";
 import { segmentId } from "./segments";
 import type { MaturityId } from "../usecase-front-door";
+import { SOURCED_VERTICAL_STATS } from "./segment-benchmarks-sourced";
 
 export interface SegmentStatSource {
   title: string;
@@ -160,6 +161,17 @@ export const REGION_STATS: Partial<Record<RegionId, SegmentStat[]>> = {
 
 // ── Layer: SIZE-BAND stats ───────────────────────────────────────────────────
 export const SIZE_STATS: Partial<Record<SizeBandId, SegmentStat[]>> = {
+  smb: [
+    {
+      kind: "adoption_rate",
+      headline:
+        "AI use among the smallest US firms trails larger ones sharply: the firm-weighted national rate sits at ~18–20%, held down by small businesses, versus 37% at firms with 250+ employees.",
+      detail: "Official US statistics (BTOS) — adoption climbs steeply with firm size.",
+      source: BTOS_STORY,
+      segmentFitNote:
+        "US-only, firm-weighted; the smallest firms are the low end of the size gradient — BTOS publishes no exact <500-employee cut, so this is the gradient floor, not an SMB-specific rate.",
+    },
+  ],
   enterprise: [
     {
       kind: "adoption_rate",
@@ -180,7 +192,9 @@ export const SIZE_STATS: Partial<Record<SizeBandId, SegmentStat[]>> = {
 };
 
 // ── Layer: VERTICAL stats (BTOS sector → our vertical, mapping named) ────────
-export const VERTICAL_STATS: Partial<Record<IndustryTag, SegmentStat[]>> = {
+// The hand-curated BTOS base layer; merged below with the 2026-07-12 SOURCED
+// cohort stats so every vertical carries MULTIPLE cited data points.
+const VERTICAL_STATS_BASE: Partial<Record<IndustryTag, SegmentStat[]>> = {
   financial_services: [
     btosSector("Finance & Insurance", "30%", "34%", "NAICS 52 spans finance AND insurance."),
   ],
@@ -239,11 +253,27 @@ export const VERTICAL_STATS: Partial<Record<IndustryTag, SegmentStat[]>> = {
       segmentFitNote: "Population exclusion note, not an adoption figure — the global baseline below is the honest reference.",
     },
   ],
-  // healthcare / pharma_life_sciences / energy_utilities / aerospace_defence:
-  // no sector figure was stated in the extractable prose of either source —
-  // these verticals fall through to size/region/global layers rather than
-  // carry a guessed number. Fill via the cited pipeline as sources land.
+  // healthcare / pharma_life_sciences / energy_utilities / aerospace_defence had
+  // no BTOS sector figure in the extractable prose — they are now filled by the
+  // SOURCED cohort layer below (industry surveys), merged into VERTICAL_STATS.
 };
+
+/** The published vertical layer = hand-curated BTOS base + the 2026-07-12
+ *  SOURCED cohort stats (segment-benchmarks-sourced.ts), concatenated per
+ *  vertical so every category composes MULTIPLE cited, anonymised (size +
+ *  industry) examples. Both obey the same honesty contract and are guarded
+ *  together by segments.test.ts (https source, fit note, headline length). */
+export const VERTICAL_STATS: Partial<Record<IndustryTag, SegmentStat[]>> = (() => {
+  const merged: Partial<Record<IndustryTag, SegmentStat[]>> = {};
+  const keys = new Set<IndustryTag>([
+    ...(Object.keys(VERTICAL_STATS_BASE) as IndustryTag[]),
+    ...(Object.keys(SOURCED_VERTICAL_STATS) as IndustryTag[]),
+  ]);
+  for (const k of keys) {
+    merged[k] = [...(VERTICAL_STATS_BASE[k] ?? []), ...(SOURCED_VERTICAL_STATS[k] ?? [])];
+  }
+  return merged;
+})();
 
 /** Exact-segment registry — curated anchors + use-cases live ONLY here. */
 export const SEGMENT_BENCHMARKS: Record<string, SegmentBenchmark> = {
