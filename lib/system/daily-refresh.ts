@@ -393,10 +393,12 @@ export async function runDailyRefresh(
     return r as unknown as Record<string, unknown>;
   });
 
-  // ── 4c. Model-quality pillar from Arena ELO ────────────────
-  //     Writes the model_quality pillar (openlm.ai Arena ELO, bare ids) so the
-  //     model-provider ranking reflects raw model capability. Must run BEFORE
-  //     derive_scores so overallScore folds it in this run. The evidence
+  // ── 4c. Model-quality pillar fallback (legacy Arena ELO) ────
+  //     Writes the model_quality pillar (openlm.ai Arena ELO, bare ids) — kept
+  //     ONLY as a transition safety net for a vendor Artificial Analysis (4d,
+  //     the primary source since 2026-07) doesn't track; domain-scores.ts reads
+  //     this exclusively when a vendor has zero benchmark rows from 4d. Must run
+  //     BEFORE derive_scores so overallScore folds it in this run. The evidence
   //     projector never touches model_quality, so this is the only writer.
   await trackedStep("model_quality_elo", async () => {
     if (!dbConfigured) return { skipped: "no_database" };
@@ -414,11 +416,14 @@ export async function runDailyRefresh(
   });
 
   // ── 4d. Model-quality capability benchmarks (broadened signal) ─────────
-  //     Persists the real per-category LMArena leaderboards (coding, hard-prompts,
-  //     overall, vision, instruction-following) → model_quality_benchmarks. These
-  //     are the cited inputs the broadened model_quality blends at read-time. Run
-  //     AFTER the Elo pillar (shared org→vendor mapping); read-time blend prefers
-  //     these rows and falls back to the single Elo pillar per vendor without them.
+  //     Persists real per-model Artificial Analysis indices (Intelligence /
+  //     Coding / Agentic, all from that vendor's flagship model) →
+  //     model_quality_benchmarks. These are the cited inputs the broadened
+  //     model_quality blend reads at read-time (lib/system/model-quality-blend.ts).
+  //     Run AFTER the Elo pillar (shared creator→vendor mapping); read-time
+  //     blend prefers these rows and falls back to the single Elo pillar per
+  //     vendor without them. Requires ARTIFICIAL_ANALYSIS_API_KEY — without it,
+  //     reports not_configured and writes nothing (never fabricated).
   await trackedStep("model_quality_benchmarks", async () => {
     if (!dbConfigured) return { skipped: "no_database" };
     const r = await seedModelQualityBenchmarks(now);
@@ -426,8 +431,7 @@ export async function runDailyRefresh(
       source: r.source,
       rowsUpserted: r.rowsUpserted,
       vendorsCovered: r.vendorsCovered,
-      configsLoaded: r.configsLoaded,
-      unmappedCount: r.unmappedOrgs.length,
+      unmappedCount: r.unmappedCreators.length,
       notFound: r.notFound.length,
     };
   });

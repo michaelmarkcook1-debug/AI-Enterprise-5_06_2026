@@ -28,6 +28,7 @@ import {
   resolveDomainWeights,
   categoryActivatesModelQuality,
   categoryActivatesDevSentiment,
+  categoryModelQualityDriver,
   buildMethodologyNote,
 } from "../assessment/category-weights";
 import {
@@ -138,15 +139,20 @@ async function computeCategoryComposites(): Promise<CategoryComposite[]> {
     const catWeights = resolveDomainWeights(category.id);
     const activatesMQ = categoryActivatesModelQuality(category.id);
     const activatesDevSentiment = categoryActivatesDevSentiment(category.id);
+    // Which index-driven model_quality this category ranks on: frontier scores
+    // on the Intelligence Index; developer_coding_agent on the Coding Index
+    // (category decision — categoryModelQualityDriver, uniform per category).
+    const mqDriver = categoryModelQualityDriver(category.id);
     // A vendor's domain set for THIS category: the 12 framework domains, plus the
     // synthesized model_quality score when the category activates it and the
-    // vendor has a real Arena Elo (else model_quality is simply absent → counted
-    // as insufficient in the /13 coverage; never fabricated).
+    // vendor has a real cited index (else model_quality is simply absent →
+    // counted as insufficient in the /13 coverage; never fabricated).
     const effFor = (id: string): DomainScore[] | null => {
       const sc = scorecards.get(id);
       if (!sc) return null;
       const extra: DomainScore[] = [];
-      if (activatesMQ && sc.modelQuality) extra.push(sc.modelQuality);
+      const mq = mqDriver === "coding" ? sc.modelQualityCoding : sc.modelQuality;
+      if (activatesMQ && mq) extra.push(mq);
       // dev_sentiment: coding categories only, flag-gated, coverage-discounted
       // (absent → counted as an unscored domain), same pattern as model_quality.
       if (activatesDevSentiment && sc.devSentiment) extra.push(sc.devSentiment);

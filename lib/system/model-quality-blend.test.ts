@@ -1,117 +1,97 @@
 import { describe, it, expect } from "vitest";
-import {
-  blendModelQuality,
-  normalizeCategory,
-  MODEL_QUALITY_CATEGORIES,
-  MODEL_QUALITY_CAP,
-  MQ_CATEGORY_BY_KEY,
-  type MqCategoryInput,
-} from "./model-quality-blend";
+import { blendModelQuality, normalizeIndex, normalizeIntelligence, MODEL_QUALITY_CAP, type MqIndexRow } from "./model-quality-blend";
 
-const full = (ratings: Partial<Record<string, number>>): MqCategoryInput[] =>
-  Object.entries(ratings).map(([category, rating]) => ({ category: category as never, rating: rating as number }));
+const SRC = "https://artificialanalysis.ai/models";
+const rows = (overrides: Partial<Record<"intelligence" | "coding" | "agentic", number | null>> = {}): MqIndexRow[] => {
+  const vals = { intelligence: 55.7, coding: 74.3, agentic: 47.2, ...overrides };
+  return (Object.entries(vals) as ["intelligence" | "coding" | "agentic", number | null][])
+    .filter(([, v]) => v != null)
+    .map(([category, rating]) => ({ category, rating: rating as number, modelName: `best-${category}-model`, sourceUrl: SRC }));
+};
 
-describe("model-quality blend — weights + anchors", () => {
-  it("weights sum to 1.0", () => {
-    const sum = MODEL_QUALITY_CATEGORIES.reduce((s, c) => s + c.weight, 0);
-    expect(Math.abs(sum - 1)).toBeLessThan(1e-9);
+describe("normalizeIndex — per-category fixed windows", () => {
+  it("clamps to [0,1] outside each window and is monotonic", () => {
+    expect(normalizeIndex("intelligence", -100)).toBe(0);
+    expect(normalizeIndex("intelligence", 1000)).toBe(1);
+    expect(normalizeIndex("coding", 50)).toBeGreaterThan(normalizeIndex("coding", 30));
   });
 
-  it("coding carries the largest weight (per the chosen rationale)", () => {
-    const coding = MQ_CATEGORY_BY_KEY.coding.weight;
-    for (const c of MODEL_QUALITY_CATEGORIES) {
-      if (c.key !== "coding") expect(coding).toBeGreaterThanOrEqual(c.weight);
-    }
-    expect(coding).toBeCloseTo(0.35, 5);
-  });
-
-  it("each arena has its own anchor scale (vision lower than text)", () => {
-    expect(MQ_CATEGORY_BY_KEY.vision.anchorHi).toBeLessThan(MQ_CATEGORY_BY_KEY.coding.anchorHi);
-    // a 250-Elo competitive window per category
-    for (const c of MODEL_QUALITY_CATEGORIES) {
-      expect(c.anchorHi - c.anchorLo).toBe(250);
-    }
+  it("each index normalises on ITS OWN scale — a frontier coding value doesn't clamp to 1 in its own window", () => {
+    // Verified live 2026-07-08: coding tops at 76.5 (vs intelligence 59.9) —
+    // in the intelligence window 76.5 would read a misleading 100%.
+    expect(normalizeIndex("coding", 76.5)).toBeLessThan(1);
+    expect(normalizeIntelligence(76.5)).toBe(1); // the wrong window would clamp
   });
 });
 
-describe("normalizeCategory — within-arena normalization", () => {
-  it("maps lo→0, hi→1, clamps outside", () => {
-    expect(normalizeCategory("coding", MQ_CATEGORY_BY_KEY.coding.anchorLo)).toBeCloseTo(0, 6);
-    expect(normalizeCategory("coding", MQ_CATEGORY_BY_KEY.coding.anchorHi)).toBeCloseTo(1, 6);
-    expect(normalizeCategory("coding", MQ_CATEGORY_BY_KEY.coding.anchorLo - 500)).toBe(0);
-    expect(normalizeCategory("coding", MQ_CATEGORY_BY_KEY.coding.anchorHi + 500)).toBe(1);
+describe("blendModelQuality — one driver index per score", () => {
+  it("defaults to the intelligence driver and returns null without an intelligence row", () => {
+    expect(blendModelQuality(rows({ intelligence: null }))).toBeNull();
+    const r = blendModelQuality(rows())!;
+    expect(r.driver).toBe("intelligence");
   });
 
-  it("a vision Elo (lower absolute scale) is not penalised vs a text Elo", () => {
-    // vision SOTA ~1323 normalises high even though it is < a mid text Elo of 1450.
-    const visionTop = normalizeCategory("vision", 1323);
-    const textMid = normalizeCategory("coding", 1450);
-    expect(visionTop).toBeGreaterThan(textMid);
-  });
-});
-
-describe("blendModelQuality — composition", () => {
-  it("returns null for no data (honest absence, never a default)", () => {
-    expect(blendModelQuality([])).toBeNull();
+  it("coding driver: scores from the coding row, null without one — never inferred from intelligence", () => {
+    expect(blendModelQuality(rows({ coding: null }), "coding")).toBeNull();
+    const r = blendModelQuality(rows(), "coding")!;
+    expect(r.driver).toBe("coding");
+    expect(r.normalized).toBeCloseTo(normalizeIndex("coding", 74.3), 9);
+    expect(r.contributions.find((c) => c.category === "coding")?.weight).toBe(1);
+    expect(r.contributions.find((c) => c.category === "intelligence")?.weight).toBe(0);
   });
 
-  it("never exceeds the E4 cap even at max ratings", () => {
-    const maxed = full({ coding: 9999, hard_prompts: 9999, overall: 9999, vision: 9999, instruction_following: 9999 });
-    const r = blendModelQuality(maxed)!;
-    expect(r.score).toBeLessThanOrEqual(MODEL_QUALITY_CAP);
+  it("non-driver indices never change the score — informational context only", () => {
+    const withExtras = blendModelQuality(rows({ coding: 99, agentic: 99 }))!;
+    const withoutExtras = blendModelQuality(rows({ coding: null, agentic: null }))!;
+    expect(withExtras.score).toBe(withoutExtras.score);
+  });
+
+  it("never exceeds the E4 cap even at an extreme index", () => {
+    const r = blendModelQuality(rows({ intelligence: 9999 }))!;
     expect(r.score).toBeCloseTo(MODEL_QUALITY_CAP, 5);
-    expect(r.coverage).toBe(1);
+  });
+
+  it("a higher driver index outranks a lower one, per driver", () => {
+    expect(blendModelQuality(rows({ intelligence: 56 }))!.score).toBeGreaterThan(blendModelQuality(rows({ intelligence: 44 }))!.score);
+    expect(blendModelQuality(rows({ coding: 76.5 }), "coding")!.score).toBeGreaterThan(blendModelQuality(rows({ coding: 51.5 }), "coding")!.score);
+  });
+
+  it("each contribution keeps ITS OWN row's model name — a rating is never re-attributed", () => {
+    const r = blendModelQuality(rows())!;
+    expect(r.contributions.find((c) => c.category === "coding")?.modelName).toBe("best-coding-model");
+    expect(r.contributions.find((c) => c.category === "intelligence")?.modelName).toBe("best-intelligence-model");
+  });
+
+  it("keeps the best rating per category when duplicates appear", () => {
+    const r = blendModelQuality([
+      { category: "coding", rating: 40, modelName: "older" },
+      { category: "coding", rating: 74.3, modelName: "newer" },
+    ], "coding")!;
+    expect(r.contributions[0].rating).toBe(74.3);
+    expect(r.contributions[0].modelName).toBe("newer");
+  });
+
+  it("full 3-index coverage yields higher confidence than the driver alone; never above 95", () => {
+    const full = blendModelQuality(rows())!;
+    const partial = blendModelQuality(rows({ coding: null, agentic: null }))!;
+    expect(full.confidence).toBeGreaterThan(partial.confidence);
+    expect(full.confidence).toBeLessThanOrEqual(95);
+  });
+
+  it("contributions render in canonical order regardless of driver", () => {
+    const r = blendModelQuality(rows(), "coding")!;
+    expect(r.contributions.map((c) => c.category)).toEqual(["intelligence", "coding", "agentic"]);
   });
 
   it("is deterministic", () => {
-    const inp = full({ coding: 1500, hard_prompts: 1490, overall: 1480, vision: 1290, instruction_following: 1470 });
-    expect(blendModelQuality(inp)).toEqual(blendModelQuality(inp));
-  });
-
-  it("a uniformly stronger vendor outranks a uniformly weaker one", () => {
-    const strong = blendModelQuality(full({ coding: 1535, hard_prompts: 1525, overall: 1500, vision: 1323, instruction_following: 1521 }))!;
-    const weak = blendModelQuality(full({ coding: 1400, hard_prompts: 1390, overall: 1380, vision: 1180, instruction_following: 1370 }))!;
-    expect(strong.score).toBeGreaterThan(weak.score);
-  });
-
-  it("coding dominance: a coding-strong vendor beats a coding-weak one, others equal", () => {
-    const base = { hard_prompts: 1450, overall: 1450, vision: 1250, instruction_following: 1450 };
-    const codingStrong = blendModelQuality(full({ ...base, coding: 1535 }))!;
-    const codingWeak = blendModelQuality(full({ ...base, coding: 1330 }))!;
-    expect(codingStrong.score).toBeGreaterThan(codingWeak.score);
-  });
-
-  it("missing a category renormalises weights + lowers coverage and confidence", () => {
-    const all = blendModelQuality(full({ coding: 1500, hard_prompts: 1490, overall: 1480, vision: 1290, instruction_following: 1470 }))!;
-    const noVision = blendModelQuality(full({ coding: 1500, hard_prompts: 1490, overall: 1480, instruction_following: 1470 }))!;
-    expect(noVision.coverage).toBeLessThan(all.coverage);
-    expect(noVision.confidence).toBeLessThan(all.confidence);
-    expect(noVision.contributions.length).toBe(4);
-    // renormalised over present categories → still a valid 0..CAP score
-    expect(noVision.score).toBeGreaterThan(0);
-    expect(noVision.score).toBeLessThanOrEqual(MODEL_QUALITY_CAP);
-  });
-
-  it("keeps the best rating when a category appears twice", () => {
-    const r = blendModelQuality([
-      { category: "coding", rating: 1400 },
-      { category: "coding", rating: 1535 },
-    ])!;
-    expect(r.contributions[0].rating).toBe(1535);
-  });
-
-  it("contributions are in canonical category order", () => {
-    const r = blendModelQuality(full({ instruction_following: 1470, coding: 1500, vision: 1290, overall: 1480, hard_prompts: 1490 }))!;
-    const order = r.contributions.map((c) => c.category);
-    const canonical = MODEL_QUALITY_CATEGORIES.map((c) => c.key).filter((k) => order.includes(k));
-    expect(order).toEqual(canonical);
+    expect(blendModelQuality(rows(), "coding")).toEqual(blendModelQuality(rows(), "coding"));
   });
 
   it("ignores unknown categories", () => {
     const r = blendModelQuality([
-      { category: "coding", rating: 1500 },
-      { category: "math" as never, rating: 1520 },
+      { category: "intelligence", rating: 50 },
+      { category: "math" as never, rating: 60 },
     ])!;
-    expect(r.contributions.map((c) => c.category)).toEqual(["coding"]);
+    expect(r.contributions.map((c) => c.category)).toEqual(["intelligence"]);
   });
 });

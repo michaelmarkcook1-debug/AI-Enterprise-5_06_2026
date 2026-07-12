@@ -4,6 +4,8 @@ import {
   resolveDomainWeights,
   categoryActivatesModelQuality,
   categoryActivatesDevSentiment,
+  categoryModelQualityDriver,
+  MODEL_QUALITY_CODING_WEIGHT,
   getCategoryWeightRationale,
   buildMethodologyNote,
 } from "./category-weights";
@@ -45,23 +47,37 @@ describe("category weight profiles — every category has a principled profile",
 });
 
 describe("coverage denominator: /12 framework + category-scoped domains", () => {
-  it("every category includes ALL 12 framework domains; coding categories add dev_sentiment", () => {
+  it("every category includes ALL 12 framework domains; category-scoped extras only where activated", () => {
     for (const c of NON_FRONTIER) {
       const order = activeDomains(resolveDomainWeights(c));
       for (const d of ASSESSMENT_DOMAINS) expect(order, `${c} missing ${d}`).toContain(d);
-      // Length = 12 framework + dev_sentiment for the coding categories (flag on).
-      const extra = categoryActivatesDevSentiment(c) ? 1 : 0;
+      // Length = 12 framework + dev_sentiment (coding categories, flag on)
+      // + model_quality (developer_coding_agent — Coding-Index-driven).
+      const extra = (categoryActivatesDevSentiment(c) ? 1 : 0) + (categoryActivatesModelQuality(c) ? 1 : 0);
       expect(order.length, c).toBe(ASSESSMENT_DOMAINS.length + extra);
     }
   });
 
-  it("model_quality is activated ONLY for frontier_model_api", () => {
+  it("model_quality is activated ONLY for the model-capability categories (frontier + developer coding)", () => {
     expect(categoryActivatesModelQuality("frontier_model_api")).toBe(true);
-    for (const c of NON_FRONTIER) {
+    expect(categoryActivatesModelQuality("developer_coding_agent")).toBe(true);
+    for (const c of ALL_CATEGORIES) {
+      if (c === "frontier_model_api" || c === "developer_coding_agent") continue;
       expect(categoryActivatesModelQuality(c), `${c} should not activate model_quality`).toBe(false);
     }
     // frontier ranks over 14 domains (12 framework + model_quality + dev_sentiment).
     expect(activeDomains(resolveDomainWeights("frontier_model_api")).length).toBe(14);
+    // developer_coding_agent likewise (12 framework + model_quality + dev_sentiment).
+    expect(activeDomains(resolveDomainWeights("developer_coding_agent")).length).toBe(14);
+  });
+
+  it("each model_quality category scores on its own published driver index — never varied per vendor", () => {
+    expect(categoryModelQualityDriver("frontier_model_api")).toBe("intelligence");
+    expect(categoryModelQualityDriver("developer_coding_agent")).toBe("coding");
+    expect(resolveDomainWeights("developer_coding_agent").model_quality).toBe(MODEL_QUALITY_CODING_WEIGHT);
+    // The methodology note names the coding driver publicly.
+    expect(buildMethodologyNote("developer_coding_agent")).toContain("Coding Index");
+    expect(buildMethodologyNote("frontier_model_api")).toContain("Intelligence Index");
   });
 
   it("dev_sentiment is activated ONLY for the coding categories", () => {

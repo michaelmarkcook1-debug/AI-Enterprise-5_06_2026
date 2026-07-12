@@ -1,10 +1,16 @@
-// Broadened model_quality DomainScore — from real benchmark rows, blended.
+// Broadened model_quality DomainScore — from real Artificial Analysis rows.
 // ─────────────────────────────────────────────────────────────────────────────
-// Reads the cited ModelQualityBenchmark rows (LMArena per-category Elos) and runs
-// the PURE blend (model-quality-blend.ts) → a single 0–5 model_quality DomainScore
-// plus the per-category breakdown for the UI. Deterministic, read-time, no writes.
-// A vendor with NO benchmark rows yields nothing here → the caller falls back to
-// the legacy single-Elo pillar (so nothing regresses before the first seed runs).
+// Reads the cited ModelQualityBenchmark rows (Artificial Analysis Intelligence /
+// Coding / Agentic Index — each row from the vendor's best model on THAT
+// index, named per row) and runs the PURE blend (model-quality-blend.ts) →
+// per-DRIVER 0–5 model_quality DomainScores plus the index breakdown for the
+// UI. Which index drives is a CATEGORY decision (category-weights.ts):
+// frontier model APIs score on the Intelligence Index, the developer-coding
+// category on the Coding Index. Deterministic, read-time, no writes. A vendor
+// with NO rows for a driver yields nothing for that driver → the caller falls
+// back (intelligence only — the legacy Elo pillar has no coding measure, so a
+// coding score is never inferred from an overall reading) or stays
+// insufficient.
 
 import { getPrisma, hasDatabase } from "../prisma";
 import { DOMAIN_TO_PILLAR } from "../types";
@@ -19,13 +25,17 @@ import {
   MODEL_QUALITY_CAP,
   type MqBlendResult,
   type MqCategory,
-  type MqCategoryInput,
+  type MqIndexRow,
 } from "../system/model-quality-blend";
 
 export interface ModelQualityDetail {
   score: ScoredDomainScore; // the 0–5 model_quality domain score
-  blend: MqBlendResult; // the per-category breakdown (for the UI "why")
+  blend: MqBlendResult; // the per-index breakdown (for the UI "why")
 }
+
+/** One vendor's model-quality details per driver index. A driver key is
+ *  absent when the vendor has no row for that index (honest absence). */
+export type ModelQualityByDriver = Partial<Record<MqCategory, ModelQualityDetail>>;
 
 const clamp = (n: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, n));
 
@@ -33,7 +43,7 @@ const clamp = (n: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, n
 export function blendToDomainScore(blend: MqBlendResult, now: Date): ScoredDomainScore {
   const score = blend.score; // already 0..CAP, 2dp
   const band = clamp(Math.round(score), 0, 5) as ScoredDomainScore["band"];
-  // Citations: the LMArena leaderboard source(s) behind the category rows, deduped.
+  // Citations: the Artificial Analysis source(s) behind the index rows, deduped.
   const seen = new Set<string>();
   const citations: DomainCitation[] = [];
   for (const c of blend.contributions) {
@@ -47,10 +57,13 @@ export function blendToDomainScore(blend: MqBlendResult, now: Date): ScoredDomai
     state: "scored",
     score,
     band,
-    // Evidence standard achieved: E4 (community-preference benchmark, not an audit)
+    // Evidence standard achieved: E4 (benchmark composite, not an audit)
     // — the capability tier is the numeric score; this label is the evidence grade.
     bandLabel: DOMAIN_BAND_LABEL[4],
     confidence: blend.confidence,
+    // coverage < 1 means the non-driver indices are missing (the driver itself
+    // is guaranteed — blendModelQuality returns null without it): thinner
+    // corroboration, still worth flagging low-confidence on.
     lowConfidence: blend.confidence < LOW_CONFIDENCE_FLOOR || blend.coverage < 0.5,
     bestGrade: "E4",
     evidenceCount: blend.contributions.length,
@@ -58,24 +71,28 @@ export function blendToDomainScore(blend: MqBlendResult, now: Date): ScoredDomai
   };
 }
 
+/** The drivers a category can score model_quality on. */
+export const MODEL_QUALITY_DRIVERS: MqCategory[] = ["intelligence", "coding"];
+
 /**
- * Load broadened model_quality details for a set of vendors from their cited
- * benchmark rows. Returns only vendors that HAVE at least one benchmark row
- * (others are absent → caller falls back / stays insufficient). Read-time, pure
- * after the DB read.
+ * Load model-quality details for a set of vendors from their cited benchmark
+ * rows — ONE query, every supported driver computed from the same rows.
+ * Returns only vendors that HAVE at least one row for at least one driver
+ * (others are absent → caller falls back / stays insufficient). Read-time,
+ * pure after the DB read.
  */
 export async function loadModelQualityDetails(
   vendorIds: string[],
   now: Date = new Date(),
-): Promise<Map<string, ModelQualityDetail>> {
-  const out = new Map<string, ModelQualityDetail>();
+): Promise<Map<string, ModelQualityByDriver>> {
+  const out = new Map<string, ModelQualityByDriver>();
   if (!hasDatabase() || vendorIds.length === 0) return out;
   try {
     const rows = await getPrisma().modelQualityBenchmark.findMany({
-      where: { vendorId: { in: vendorIds }, source: "lmarena" },
+      where: { vendorId: { in: vendorIds }, source: "artificial_analysis" },
       select: { vendorId: true, category: true, rating: true, modelName: true, sourceUrl: true },
     });
-    const byVendor = new Map<string, MqCategoryInput[]>();
+    const byVendor = new Map<string, MqIndexRow[]>();
     for (const r of rows) {
       const list = byVendor.get(r.vendorId) ?? [];
       list.push({
@@ -86,10 +103,13 @@ export async function loadModelQualityDetails(
       });
       byVendor.set(r.vendorId, list);
     }
-    for (const [vendorId, inputs] of byVendor) {
-      const blend = blendModelQuality(inputs);
-      if (!blend) continue;
-      out.set(vendorId, { score: blendToDomainScore(blend, now), blend });
+    for (const [vendorId, indexRows] of byVendor) {
+      const detail: ModelQualityByDriver = {};
+      for (const driver of MODEL_QUALITY_DRIVERS) {
+        const blend = blendModelQuality(indexRows, driver);
+        if (blend) detail[driver] = { score: blendToDomainScore(blend, now), blend };
+      }
+      if (Object.keys(detail).length > 0) out.set(vendorId, detail);
     }
   } catch {
     // honest absence — caller falls back to the legacy single-Elo pillar

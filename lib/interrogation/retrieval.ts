@@ -7,7 +7,7 @@
 // impossible downstream (the reasoning model can only cite URLs on this bundle).
 //
 // Three layers, each item carrying its real citation:
-//   • model       — the live LMArena frontier comparison (AIE-01)
+//   • model       — the live Artificial Analysis frontier comparison (AIE-01)
 //   • peer_public — the cited public-disclosure benchmark layer (segment-
 //                   benchmarks + named disclosed adopters)
 //   • peer_pool   — the PRIVATE anonymised contribution pool (AIE-07). Returns
@@ -34,14 +34,14 @@ import {
   type CoverageFlags,
 } from "./types";
 
-const LMARENA_FALLBACK_URL = "https://lmarena.ai/leaderboard";
+const ARTIFICIAL_ANALYSIS_FALLBACK_URL = "https://artificialanalysis.ai/models";
 
 /** Model-layer evidence from the frontier comparison: overall standings + a
  *  per-category leader line for each category with cited ratings. */
 function modelEvidence(frontier: FrontierComparison): EvidenceItem[] {
   const present = frontier.columns.filter((c) => c.present);
   if (present.length === 0) return [];
-  const url = frontier.sourceUrl ?? present.find((c) => c.sourceUrl)?.sourceUrl ?? LMARENA_FALLBACK_URL;
+  const url = frontier.sourceUrl ?? present.find((c) => c.sourceUrl)?.sourceUrl ?? ARTIFICIAL_ANALYSIS_FALLBACK_URL;
   const asOf = frontier.asOf ?? undefined;
   const items: EvidenceItem[] = [];
 
@@ -50,21 +50,21 @@ function modelEvidence(frontier: FrontierComparison): EvidenceItem[] {
     .sort((a, b) => (a.overallRank ?? 99) - (b.overallRank ?? 99));
   if (ranked.length > 0) {
     const standings = ranked
-      .map((c) => `${c.vendorName} ${c.modelName} ${Math.round(c.overall as number)}`)
+      .map((c) => `${c.vendorName} ${c.modelName} ${(c.overall as number).toFixed(1)}`)
       .join("; ");
     items.push({
       layer: "model",
-      scopeLabel: "LMArena — overall",
-      headline: `Overall frontier standings (LMArena Elo): ${standings}.`,
-      detail: "Each vendor's single highest-overall-Elo model; independent crowd benchmark.",
+      scopeLabel: "Artificial Analysis — Intelligence Index",
+      headline: `Overall frontier standings (Artificial Analysis Intelligence Index): ${standings}.`,
+      detail: "Each vendor's single highest-Intelligence-Index model; weighted composite of 9 evaluations.",
       sourceUrl: url,
-      sourcePublisher: "LMArena",
+      sourcePublisher: "Artificial Analysis",
       sourceDate: asOf,
     });
   }
 
   for (const cat of COMPARE_CATEGORIES) {
-    if (cat.key === "overall") continue;
+    if (cat.key === "intelligence") continue;
     const leaderId = frontier.categoryLeaders[cat.key];
     if (!leaderId) continue;
     const leader = present.find((c) => c.vendorId === leaderId);
@@ -73,14 +73,14 @@ function modelEvidence(frontier: FrontierComparison): EvidenceItem[] {
     // Rivals with a cited rating in the same category, for honest contrast.
     const rivals = present
       .filter((c) => c.vendorId !== leaderId && typeof c.ratings[cat.key] === "number")
-      .map((c) => `${c.vendorName} ${Math.round(c.ratings[cat.key] as number)}`)
+      .map((c) => `${c.vendorName} ${(c.ratings[cat.key] as number).toFixed(1)}`)
       .join(", ");
     items.push({
       layer: "model",
-      scopeLabel: `LMArena — ${cat.label}`,
-      headline: `${cat.label}: ${leader.vendorName}'s ${leader.modelName} leads at ${Math.round(value)} Elo${rivals ? ` (vs ${rivals})` : ""}.`,
+      scopeLabel: `Artificial Analysis — ${cat.label}`,
+      headline: `${cat.label}: ${leader.vendorName}'s ${leader.modelName} leads at ${value.toFixed(1)}${rivals ? ` (vs ${rivals})` : ""}.`,
       sourceUrl: leader.sourceUrl ?? url,
-      sourcePublisher: "LMArena",
+      sourcePublisher: "Artificial Analysis",
       sourceDate: leader.publishDate ?? asOf,
     });
   }

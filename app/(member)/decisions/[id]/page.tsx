@@ -8,6 +8,7 @@ import { getVendorScorecardsBatch, type VendorScorecard } from "@/lib/assessment
 import { ENTITIES } from "@/lib/intelligence/entities";
 import { MARKET_CATEGORIES } from "@/lib/intelligence/seed";
 import { DOMAIN_LABEL } from "@/lib/assessment/domain-labels";
+import { categoryModelQualityDriver } from "@/lib/assessment/category-weights";
 import type { DomainScore } from "@/lib/assessment/domain-rubric";
 import {
   rankVendorsByComposite,
@@ -68,7 +69,9 @@ export default async function DecisionDetailPage({ params }: { params: Promise<P
       : new Map<string, VendorScorecard>();
 
   const effectiveDomainsFor = (sc: VendorScorecard | undefined): DomainScore[] =>
-    sc && composite ? effectiveDomains(sc.domains, sc, composite.resolvedDomainWeights) : [];
+    sc && composite
+      ? effectiveDomains(sc.domains, sc, composite.resolvedDomainWeights, categoryModelQualityDriver(decision.category))
+      : [];
 
   const noteByVendor = new Map(decision.shortlist.map((s) => [s.vendorId, s.note]));
   const ranked = composite

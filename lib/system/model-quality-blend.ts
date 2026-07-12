@@ -1,68 +1,93 @@
-// Broadened model-quality blend — PURE, deterministic, no DB/LLM/writes.
+// Model-quality scoring — from Artificial Analysis's published indices.
 // ─────────────────────────────────────────────────────────────────────────────
-// Combines several REAL LMArena capability leaderboards (coding, reasoning/hard
-// prompts, overall, vision, instruction-following) into one 0–5 model-quality
-// score. Each arena is a SEPARATE Elo scale (a vision Elo of 1300 is not "worse"
-// than a text Elo of 1500 — they are computed from different battle pools), so we
-// normalise EACH category within its own fixed anchor window BEFORE blending.
+// Replaces the earlier LMArena-based blend. That system combined SEVERAL
+// separate LMArena arena leaderboards ourselves, because each arena is an
+// independently computed Elo pool with no natural combined number. Artificial
+// Analysis publishes real composite indices directly:
+//   • Intelligence Index — a documented, versioned weighted composite of 9
+//     evaluations (Agents 34% / Coding 24% / Scientific Reasoning 24% /
+//     General 18% as of v4.1 — see
+//     https://artificialanalysis.ai/methodology/intelligence-benchmarking),
+//     mostly independent third-party benchmarks (HLE, GPQA Diamond,
+//     Terminal-Bench, SciCode) plus some of Artificial Analysis's own
+//     implementations (GDPval-AA, AA-Omniscience).
+//   • Coding Index / Agentic Index — the same suite's capability-scoped
+//     composites.
 //
-// Why fixed anchors (not field min/max): min–max lets the weakest tracked model
-// define the floor, which compresses everyone else upward and is unstable as the
-// field changes. Fixed per-category anchors (a 250-Elo competitive window below a
-// frozen frontier reference) keep the score stable and comparable across refreshes
-// and solve the cross-arena scale problem. Anchors are a documented 2026-06
-// frontier snapshot — refresh them when the leaderboards move materially (same
-// maintenance posture as the Arena Elo snapshot).
+// ONE index drives a given score (the `driver`): re-blending the others on
+// top would double-count dimensions the Intelligence Index already weights
+// in. Which index drives is a CATEGORY decision made by the caller
+// (category-weights.ts): frontier model APIs are judged on the Intelligence
+// Index; the developer-coding-agent category on the Coding Index — a coding
+// buyer is buying coding capability, and Artificial Analysis publishes a
+// purpose-built measure of exactly that. Non-driver indices are still real,
+// cited, and shown (informational context, zero score-weight).
 //
-// The blend is capped at 4.0 — the E4 band ceiling: these are community-preference
-// benchmarks, not independent audits, so model-quality can never reach the 5.0
-// "audit-grade" band (the under-claim rule, identical to the evidence rubric).
-// A category a vendor has no ranked model in simply does not contribute (weights
-// renormalise over present categories) and lowers confidence — never a default.
+// Kept at the E4 evidence-grade cap (never 5.0/"audit-grade"): the indices
+// mix third-party benchmarks with Artificial Analysis's own self-run
+// evaluations, so they are not fully independent audits — same "under-claim
+// rather than over-claim" standard as the accredited-cert sources.
+//
+// ANCHOR WINDOWS — calibrated against the FULL live roster (2026-07-08 pull:
+// 548 models; 535 with an Intelligence Index; the three indices are on
+// DIFFERENT scales — intelligence tops at 59.9, coding at 76.5, agentic at
+// 52.8 — so each gets its own window). Same philosophy as the old Elo
+// anchors: a fixed competitive window below a frozen frontier reference, so
+// a score answers "how close is this vendor's best model to the current
+// frontier" and stays stable as the field churns.
+//   intelligence lo=15/hi=62 — hi just above the frontier max (59.9);
+//     lo below the competitive pack (every shortlistable flagship ≥ 17.8)
+//     and above the clearly-noncompetitive tail (3–8.9), which floors to ~0
+//     exactly as the old Arena window treated off-frontier vendors.
+//   coding lo=20/hi=80 — same construction against the coding distribution
+//     (competitive pack 34–76.5; tail ≤ 10.4).
+//   agentic lo=10/hi=55 — likewise (pack 19–52.8; tail ≤ 9.2).
+// Refresh when the frontier moves materially; the indices are themselves
+// versioned upstream (v4.1 today) — a major version bump is a re-anchor
+// trigger too.
 
-export type MqCategory =
-  | "coding"
-  | "hard_prompts"
-  | "overall"
-  | "vision"
-  | "instruction_following";
+export type MqCategory = "intelligence" | "coding" | "agentic";
 
-export interface MqCategoryDef {
-  key: MqCategory;
-  label: string;
-  weight: number; // sums to 1.0 across all categories
-  /** HF dataset config + category the rating comes from (provenance + fetch). */
-  config: "text" | "vision";
-  sourceCategory: string;
-  /** Fixed normalisation anchors on THIS arena's Elo scale: lo→0, hi→1 (clamped).
-   *  hi = a frozen frontier reference per arena; lo = hi − 250 (competitive window). */
-  anchorLo: number;
-  anchorHi: number;
-}
-
-// Category weights set by rationale for a frontier-model-API buyer: code-gen and
-// reasoning dominate consumption, with overall, vision (multimodal) and
-// instruction-following as the other enterprise-relevant capability axes.
-// Anchors frozen from the 2026-06-25 (text) / 2026-06-10 (vision) LMArena snapshot.
-export const MODEL_QUALITY_CATEGORIES: MqCategoryDef[] = [
-  { key: "coding",                label: "Coding",                  weight: 0.35, config: "text",   sourceCategory: "coding",                anchorLo: 1300, anchorHi: 1550 },
-  { key: "hard_prompts",          label: "Hard prompts / reasoning", weight: 0.20, config: "text",  sourceCategory: "hard_prompts",          anchorLo: 1275, anchorHi: 1525 },
-  { key: "overall",              label: "Overall",                 weight: 0.15, config: "text",   sourceCategory: "overall",               anchorLo: 1250, anchorHi: 1500 },
-  { key: "vision",               label: "Vision (multimodal)",     weight: 0.15, config: "vision", sourceCategory: "overall",               anchorLo: 1075, anchorHi: 1325 },
-  { key: "instruction_following", label: "Instruction-following",  weight: 0.15, config: "text",   sourceCategory: "instruction_following", anchorLo: 1275, anchorHi: 1525 },
-];
-
-export const MQ_CATEGORY_BY_KEY: Record<MqCategory, MqCategoryDef> = Object.fromEntries(
-  MODEL_QUALITY_CATEGORIES.map((c) => [c.key, c]),
-) as Record<MqCategory, MqCategoryDef>;
-
-/** The E4 community-benchmark cap — model-quality can never reach the 5.0 audit band. */
+/** The E4 community/self-run-benchmark cap — model-quality can never reach the 5.0 audit band. */
 export const MODEL_QUALITY_CAP = 4.0;
 
-/** One vendor's real rating in one category (the vendor's TOP ranked model there). */
-export interface MqCategoryInput {
+/** intelligence, coding, agentic — the maximum possible contributions[] length. */
+export const MODEL_QUALITY_CATEGORY_COUNT = 3;
+
+const ANCHORS: Record<MqCategory, { lo: number; hi: number }> = {
+  intelligence: { lo: 15, hi: 62 },
+  coding: { lo: 20, hi: 80 },
+  agentic: { lo: 10, hi: 55 },
+};
+
+const CATEGORY_LABEL: Record<MqCategory, string> = {
+  intelligence: "Intelligence Index",
+  coding: "Coding Index",
+  agentic: "Agentic Index",
+};
+
+/** Canonical display order — driver or not, contributions always render in this order. */
+const CANONICAL_ORDER: MqCategory[] = ["intelligence", "coding", "agentic"];
+
+const clamp01 = (n: number) => Math.max(0, Math.min(1, n));
+
+/** Normalise an index value to 0..1 within ITS OWN category's fixed window. */
+export function normalizeIndex(category: MqCategory, value: number): number {
+  const { lo, hi } = ANCHORS[category];
+  return clamp01((value - lo) / (hi - lo));
+}
+
+/** Back-compat alias for the intelligence window (frontier scoring). */
+export function normalizeIntelligence(index: number): number {
+  return normalizeIndex("intelligence", index);
+}
+
+/** One real, cited index reading. Each row carries ITS OWN model name — a
+ *  vendor's best coding model may differ from its best overall model, and a
+ *  rating must never be attributed to a model that didn't earn it. */
+export interface MqIndexRow {
   category: MqCategory;
-  rating: number; // raw Arena Elo on that arena's scale
+  rating: number;
   modelName?: string;
   sourceUrl?: string;
 }
@@ -70,72 +95,63 @@ export interface MqCategoryInput {
 export interface MqContribution {
   category: MqCategory;
   label: string;
-  rating: number;        // raw Elo
-  normalized: number;    // 0..1 within the category's fixed window
-  weight: number;        // the category's nominal weight
+  rating: number; // raw index value
+  normalized: number; // 0..1 within the category's own window
+  weight: number; // 1 for the driver (sole score input), 0 for context rows
   modelName?: string;
   sourceUrl?: string;
 }
 
 export interface MqBlendResult {
-  score: number;            // 0..MODEL_QUALITY_CAP, 2 decimals
-  normalized: number;       // 0..1 blended (renormalised over present categories)
-  coverage: number;         // present categories / total categories (0..1)
-  presentWeight: number;    // sum of nominal weights for present categories (0..1)
-  confidence: number;       // 0..99
-  contributions: MqContribution[]; // per present category, in canonical order
-}
-
-const clamp01 = (n: number) => Math.max(0, Math.min(1, n));
-
-/** Normalise a raw category Elo to 0..1 within that category's fixed anchor window. */
-export function normalizeCategory(category: MqCategory, rating: number): number {
-  const def = MQ_CATEGORY_BY_KEY[category];
-  return clamp01((rating - def.anchorLo) / (def.anchorHi - def.anchorLo));
+  score: number; // 0..MODEL_QUALITY_CAP, 2 decimals — driven ENTIRELY by the driver index
+  normalized: number; // 0..1, same basis as score
+  driver: MqCategory; // which index drove the score
+  coverage: number; // how many of the 3 indices are present (0..1) — completeness, not score weight
+  presentWeight: number; // always 1 when scored (the driver is the sole driver)
+  confidence: number; // 0..99
+  contributions: MqContribution[]; // canonical order (intelligence, coding, agentic)
 }
 
 /**
- * Blend a vendor's per-category ratings into a single 0–5 model-quality score.
- * Returns null when the vendor has NO category data at all (honest absence — the
- * caller renders insufficient evidence, never a default). Deterministic.
+ * Score a vendor from its real Artificial Analysis index rows, driven by ONE
+ * index (default: intelligence). Returns null when the driver index itself is
+ * absent — even if other indices are present (honest absence; a coding score
+ * cannot be inferred from an intelligence reading, or vice versa).
+ * Deterministic; keeps the best rating per category when duplicates appear.
  */
-export function blendModelQuality(inputs: MqCategoryInput[]): MqBlendResult | null {
-  // Keep one (the best) rating per category; ignore unknown categories.
-  const byCat = new Map<MqCategory, MqCategoryInput>();
-  for (const i of inputs) {
-    if (!MQ_CATEGORY_BY_KEY[i.category]) continue;
-    const cur = byCat.get(i.category);
-    if (!cur || i.rating > cur.rating) byCat.set(i.category, i);
+export function blendModelQuality(rows: MqIndexRow[], driver: MqCategory = "intelligence"): MqBlendResult | null {
+  const byCat = new Map<MqCategory, MqIndexRow>();
+  for (const r of rows) {
+    if (!(r.category in ANCHORS)) continue;
+    const cur = byCat.get(r.category);
+    if (!cur || r.rating > cur.rating) byCat.set(r.category, r);
   }
-  if (byCat.size === 0) return null;
+  const driverRow = byCat.get(driver);
+  if (!driverRow) return null;
 
-  let acc = 0;
-  let presentWeight = 0;
+  const normalized = normalizeIndex(driver, driverRow.rating);
+  const score = Math.round(normalized * MODEL_QUALITY_CAP * 100) / 100;
+
   const contributions: MqContribution[] = [];
-  // Canonical order = MODEL_QUALITY_CATEGORIES order.
-  for (const def of MODEL_QUALITY_CATEGORIES) {
-    const input = byCat.get(def.key);
-    if (!input) continue;
-    const normalized = normalizeCategory(def.key, input.rating);
-    acc += def.weight * normalized;
-    presentWeight += def.weight;
+  for (const cat of CANONICAL_ORDER) {
+    const row = byCat.get(cat);
+    if (!row) continue;
     contributions.push({
-      category: def.key,
-      label: def.label,
-      rating: input.rating,
-      normalized,
-      weight: def.weight,
-      modelName: input.modelName,
-      sourceUrl: input.sourceUrl,
+      category: cat,
+      label: CATEGORY_LABEL[cat],
+      rating: row.rating,
+      normalized: normalizeIndex(cat, row.rating),
+      weight: cat === driver ? 1 : 0,
+      modelName: row.modelName,
+      sourceUrl: row.sourceUrl,
     });
   }
 
-  const normalized = presentWeight > 0 ? acc / presentWeight : 0; // renormalised over present
-  const score = Math.round(normalized * MODEL_QUALITY_CAP * 100) / 100;
-  const coverage = byCat.size / MODEL_QUALITY_CATEGORIES.length;
-  // Confidence: an E4 community-benchmark blend with full category coverage is
-  // strong (~90); thinner coverage lowers it. Never above 95 (benchmark, not audit).
-  const confidence = Math.round(clamp01(0.5 + 0.45 * presentWeight) * 100) - 5;
+  const coverage = contributions.length / MODEL_QUALITY_CATEGORY_COUNT;
+  // Confidence: the driver alone is a real, complete score (not partial), so
+  // the floor sits at 57; corroborating context indices nudge it up. Never
+  // above 95 (benchmark composite, not an independent audit).
+  const confidence = Math.round(clamp01(0.62 + 0.1 * (coverage - 1 / 3)) * 100) - 5;
 
-  return { score, normalized, coverage, presentWeight, confidence, contributions };
+  return { score, normalized, driver, coverage, presentWeight: 1, confidence, contributions };
 }

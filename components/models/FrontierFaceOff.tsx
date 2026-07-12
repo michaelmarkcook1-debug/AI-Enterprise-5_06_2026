@@ -15,7 +15,7 @@ const CARD = "rounded-xl border border-black/10 dark:border-white/10 bg-white/60
 const MUTED = "text-[#15263c]/65 dark:text-[#eef3f8]/60";
 
 function fmt(n: number | undefined): string {
-  return typeof n === "number" ? Math.round(n).toLocaleString() : "—";
+  return typeof n === "number" ? n.toFixed(1) : "—";
 }
 
 function ColumnHead({ col }: { col: FrontierColumn }) {
@@ -75,7 +75,8 @@ export default function FrontierFaceOff({
       </div>
       <p className={`${summary ? "mb-1" : "mb-4"} text-xs ${MUTED}`}>
         The four tracked frontier models, each vendor&apos;s single highest-rated model on independent
-        LMArena Elo benchmarks — the same fields for all four, so they compare like for like.
+        Artificial Analysis Intelligence Index benchmarks — the same fields for all four, so they compare
+        like for like.
       </p>
       {summary && (
         <p className="mb-4 text-sm leading-5 text-[#13294b] dark:text-[#eef3f8]">{summary}</p>
@@ -134,7 +135,7 @@ export default function FrontierFaceOff({
                       rel="noopener noreferrer"
                       className="underline underline-offset-2"
                     >
-                      LMArena{col.publishDate ? ` · ${col.publishDate}` : ""}
+                      Artificial Analysis{col.publishDate ? ` · released ${col.publishDate}` : ""}
                     </a>
                   ) : (
                     <span className={MUTED}>—</span>
@@ -147,9 +148,10 @@ export default function FrontierFaceOff({
       </div>
 
       <p className={`mt-4 text-[11px] leading-4 ${MUTED}`}>
-        Every rating is an independent LMArena Elo score, cited and dated. A vendor shows only its single
-        highest-overall-Elo model — categories are never mixed in from a different model of the same
-        vendor. A missing vendor means no benchmarked model yet, never a low or zero score.
+        Every rating is a real Artificial Analysis Intelligence Index score, cited and dated with a real
+        per-model release date. A vendor shows only its single highest-Intelligence-Index model —
+        categories are never mixed in from a different model of the same vendor. A missing vendor means no
+        benchmarked model yet, never a low or zero score.
         {c.columns.some((col) => col.uncoveredWithOtherModel?.length) && (
           <>
             {" "}

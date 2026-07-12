@@ -1,10 +1,11 @@
 // Verify the BROADENED model_quality + resulting frontier order IN-MEMORY from
 // live data — no DB write. Mirrors exactly what production computes once the
-// benchmark rows are seeded: same LMArena source, same blend, same composite.
+// benchmark rows are seeded: same Artificial Analysis source, same blend, same
+// composite.
 import "./_load-env";
 import { getPrisma } from "../lib/prisma";
-import { fetchLmarenaCategories } from "../lib/system/lmarena-categories";
-import { blendModelQuality, type MqCategoryInput } from "../lib/system/model-quality-blend";
+import { fetchArtificialAnalysisModels } from "../lib/system/artificial-analysis-fetch";
+import { blendModelQuality } from "../lib/system/model-quality-blend";
 import { blendToDomainScore } from "../lib/assessment/model-quality-score";
 import { getVendorScorecardsBatch } from "../lib/assessment/domain-scores";
 import { resolveDomainWeights } from "../lib/assessment/category-weights";
@@ -29,22 +30,26 @@ async function main() {
   });
   const nameById = new Map(vendorRows.map((v) => [v.id, v.name]));
 
-  // Broadened model_quality from LIVE LMArena categories (in-memory blend).
-  const lm = await fetchLmarenaCategories();
+  // Broadened model_quality from LIVE Artificial Analysis indices (in-memory blend).
+  const outcome = await fetchArtificialAnalysisModels();
   const blendedMQ = new Map<string, DomainScore>();
-  const mqMeta = new Map<string, { score: number; cov: number }>();
-  if (lm) {
-    for (const [vid, ratings] of lm.vendors) {
-      const inputs: MqCategoryInput[] = ratings.map((r) => ({
-        category: r.category,
-        rating: r.rating,
-        modelName: r.modelName,
-        sourceUrl: lm.sourceUrl,
-      }));
-      const blend = blendModelQuality(inputs);
+  const mqMeta = new Map<string, { score: number; cov: number; model: string }>();
+  if (outcome.status === "ok") {
+    const byVendor = new Map<string, typeof outcome.result.models>();
+    for (const m of outcome.result.models) byVendor.set(m.vendorId, [...(byVendor.get(m.vendorId) ?? []), m]);
+    for (const [vid, models] of byVendor) {
+      // Same per-index-best rows the seed writes (mirrors model-quality-seed.ts).
+      const rows = (["intelligence", "coding", "agentic"] as const).flatMap((category) => {
+        const read = (m: (typeof models)[number]) =>
+          category === "intelligence" ? m.intelligenceIndex : category === "coding" ? m.codingIndex : m.agenticIndex;
+        const best = models.filter((m) => read(m) != null).sort((a, b) => (read(b) ?? 0) - (read(a) ?? 0))[0];
+        return best ? [{ category, rating: read(best) as number, modelName: best.modelName, sourceUrl: outcome.result.sourceUrl }] : [];
+      });
+      const blend = blendModelQuality(rows, "intelligence");
       if (blend) {
         blendedMQ.set(vid, blendToDomainScore(blend, now));
-        mqMeta.set(vid, { score: blend.score, cov: blend.contributions.length });
+        const driverModel = blend.contributions.find((c) => c.weight === 1)?.modelName ?? "";
+        mqMeta.set(vid, { score: blend.score, cov: blend.contributions.length, model: driverModel });
       }
     }
   }
@@ -66,7 +71,7 @@ async function main() {
   const ranked = rankVendorsByComposite(ranker, catWeights).filter((r) => r.ranked);
 
   console.log(`\n══ BROADENED frontier_model_api (in-memory, live data) ══`);
-  console.log("rk vendor                       comp   cov    modelQ(0-5)  cats");
+  console.log("rk vendor                       comp   cov    modelQ(0-4)  idx  flagship");
   ranked.forEach((r, i) => {
     const sc = scorecards.get(r.vendorId)!;
     const mq = blendedMQ.get(r.vendorId);
@@ -76,11 +81,14 @@ async function main() {
     console.log(
       `${String(i + 1).padStart(2)} ${(nameById.get(r.vendorId) ?? r.vendorId).padEnd(28).slice(0, 28)} ` +
         `${(wc.composite).toFixed(2).padStart(5)}  ${String(Math.round(wc.rawCoverage * 100)).padStart(3)}%  ` +
-        `${(meta ? meta.score.toFixed(2) : "—").padStart(10)}   ${meta ? meta.cov + "/5" : "—"}`,
+        `${(meta ? meta.score.toFixed(2) : "—").padStart(10)}   ${meta ? meta.cov + "/3" : "—"}  ${meta?.model ?? ""}`,
     );
   });
 
-  console.log(`\nMembers: ${memberIds.length} · ranked: ${ranked.length} · LMArena source: ${lm ? "live" : "UNAVAILABLE"}`);
+  console.log(
+    `\nMembers: ${memberIds.length} · ranked: ${ranked.length} · Artificial Analysis: ${outcome.status}` +
+      (outcome.status === "ok" ? ` (${outcome.result.models.length} models, ${outcome.result.unmappedCreators.length} unmapped creators)` : ""),
+  );
   await prisma.$disconnect();
 }
 main().catch((e) => { console.error(e); process.exit(1); });
