@@ -80,6 +80,11 @@ export async function getLiveModelInventory(now: Date = new Date()): Promise<Liv
   if (!hasDatabase()) return EMPTY;
   try {
     const rows = (await getPrisma().modelQualityBenchmark.findMany({
+      // AA-only: the swap (LMArena→Artificial Analysis) left stale pre-swap
+      // "lmarena" Elo rows in the table whose ~1500 scale out-ranks the AA
+      // Intelligence Index (~0-100), so an unfiltered read would surface the old
+      // models. Read only cited Artificial Analysis rows — the one live source.
+      where: { source: "artificial_analysis" },
       select: {
         vendorId: true,
         source: true,

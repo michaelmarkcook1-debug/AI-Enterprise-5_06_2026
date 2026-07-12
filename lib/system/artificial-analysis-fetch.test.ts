@@ -52,8 +52,9 @@ describe("mapAaModels — pure, no fabrication", () => {
       row({ model_creator: { id: "t", name: "TII UAE" }, name: "Falcon" }),
       row({ model_creator: { id: "s", name: "ServiceNow" }, name: "Apriel" }),
       row({ model_creator: { id: "z", name: "Z AI" }, name: "GLM-5.2" }),
+      row({ model_creator: { id: "sx", name: "SpaceXAI" }, name: "Grok 4.20 0309 (Reasoning)" }),
     ]);
-    expect(models.map((m) => m.vendorId)).toEqual(["moonshot", "g42", "servicenow", "zai"]);
+    expect(models.map((m) => m.vendorId)).toEqual(["moonshot", "g42", "servicenow", "zai", "xai"]);
   });
 
   it("drops a row whose creator maps to no roster vendor, reporting it as unmapped (never invents a vendor)", () => {
