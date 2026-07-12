@@ -18,6 +18,8 @@ import type { SessionLens } from "@/lib/assessment/session-lens";
 import { MEMBER_FEATURES_VISIBLE } from "@/lib/availability";
 import SaveDecisionButton from "./SaveDecisionButton";
 import { bumpJourneyStepClient } from "@/lib/member/journey-client";
+import SuggestInput from "@/components/forms/SuggestInput";
+import { INTERROGATE_SUGGESTIONS } from "@/lib/assessment/interrogate-suggestions";
 
 export interface InterrogateConfig {
   /** Paid-depth flag (INTERROGATE_ENABLED) resolved server-side. */
@@ -228,16 +230,19 @@ export default function InterrogatePanel({
         <div className="mt-3">
           <div className="grid grid-cols-1 gap-x-4 gap-y-2 sm:grid-cols-2">
             {FIELDS.map((f) => (
-              <label key={f.key} className="block text-[11px]">
+              <div key={f.key} className="block text-[11px]">
                 <span className="text-[#3f5068] dark:text-[#a7bacd]">{f.label}</span>
-                <input
-                  type="text"
-                  value={form[f.key]}
-                  onChange={(e) => setForm((s) => ({ ...s, [f.key]: e.target.value }))}
-                  placeholder={f.placeholder}
-                  className="mt-0.5 w-full rounded-md border border-[#d6c9a8] bg-white/80 px-2 py-1 text-xs text-[#13294b] placeholder:text-[#9aa7b8] focus:border-[#b08d2f] focus:outline-none dark:border-[#2a4a6b] dark:bg-[#0c2238] dark:text-[#eef3f8]"
-                />
-              </label>
+                <div className="mt-0.5">
+                  <SuggestInput
+                    value={form[f.key]}
+                    onChange={(v) => setForm((s) => ({ ...s, [f.key]: v }))}
+                    suggestions={INTERROGATE_SUGGESTIONS[f.key] ?? []}
+                    placeholder={f.placeholder}
+                    ariaLabel={f.label}
+                    inputClassName="w-full rounded-md border border-[#d6c9a8] bg-white/80 px-2 py-1 pr-7 text-xs text-[#13294b] placeholder:text-[#9aa7b8] focus:border-[#b08d2f] focus:outline-none dark:border-[#2a4a6b] dark:bg-[#0c2238] dark:text-[#eef3f8]"
+                  />
+                </div>
+              </div>
             ))}
           </div>
           <label className="mt-2 block text-[11px]">
