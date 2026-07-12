@@ -28,12 +28,16 @@ export const ARTIFICIAL_ANALYSIS_SOURCE_URL = "https://artificialanalysis.ai/mod
 // Creators Artificial Analysis names differently from the shared Arena org
 // map — verified against the live roster (Kimi is Moonshot's model brand;
 // TII UAE is the Falcon/G42 line; ServiceNow is a roster vendor Arena never
-// listed). Checked in mapAaModels AFTER ORG_TO_VENDOR so the shared map stays
-// the single source for common names.
+// listed; "SpaceXAI" is AA's own creator label for xAI's Grok models —
+// confirmed 2026-07-12 by fetching the live API and inspecting sample model
+// names under that creator: "Grok 4.20 0309 (Reasoning)", "Grok Build 0.1
+// 0616", "Grok 4.1 Fast (Reasoning)"). Checked in mapAaModels AFTER
+// ORG_TO_VENDOR so the shared map stays the single source for common names.
 const AA_CREATOR_TO_VENDOR: Record<string, string> = {
   kimi: "moonshot",
   tiiuae: "g42",
   servicenow: "servicenow",
+  spacexai: "xai",
 };
 
 /** Raw shape of one model row from GET /language/models/free — verified live
