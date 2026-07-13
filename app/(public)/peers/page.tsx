@@ -17,11 +17,14 @@ import { TRACKED_VENDOR_NAMES } from "@/lib/sourcing/ai-news-manifest";
 import { absoluteUrl } from "@/lib/site";
 
 // Peer-AI benchmark — the demand-side twin of the vendor assessment.
-// Pure curated/cited data (lib/peer/*), zero DB, zero LLM at request time.
+// BUYER-FIRST (2026-07-13): the page leads with the buyer's OWN cohort answer
+// (CohortExplorer) — "enterprises like mine, and am I behind?" — and demotes the
+// whole-base aggregate to a "zoom out". Pure curated/cited data (lib/peer/*),
+// zero DB, zero LLM at request time.
 
 const TITLE = "Peer AI benchmark — what are enterprises like mine doing with AI?";
 const DESCRIPTION =
-  "Your cohort (vertical × size × region) on cited AI-adoption research: adoption benchmarks, deployed use-cases, disclosed platforms, and named exemplar deployments. Private usage is never asserted; thin segments read as limited data.";
+  "Your cohort (vertical × size × region) on cited AI-adoption research: are you ahead or behind, what platforms and use-cases your peers deploy, and named exemplar deployments. Private usage is never asserted; thin segments read as limited data.";
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -45,88 +48,68 @@ export default function PeersPage() {
           What are enterprises like mine doing with AI?
         </h1>
         <p className={`mt-3 max-w-2xl text-base leading-7 ${MUTED}`}>
-          State your segment — vertical, size, region — and see how your cohort adopts AI:
-          cited survey benchmarks, the use-cases and platforms they deploy, where you stand,
-          and named exemplars with publicly disclosed deployments.
-        </p>
-        {/* De-clutter: the amber pill → one quiet line; honesty kept, badge retired. */}
-        <p className={`mt-2 text-xs ${MUTED}`}>
-          Bands are computed from cited evidence by a documented rubric — never guessed. Anything private
-          reads “not disclosed”; thin segments read “limited data”.
+          Set your segment below and see how your cohort adopts AI — the cited benchmark, whether you sit ahead
+          or behind, the platforms and use-cases your peers deploy, and named exemplars. Anything private reads
+          “not disclosed”; thin segments read “limited data”.
         </p>
       </header>
 
-      {/* So-what takeaway (Prompt 4) — real coverage counts from the SAME
-          getUsageCoverage() this page already feeds into PeerUsageOverview,
-          same "Derived signal" pattern as the homepage graph and /vendors. */}
-      <div className="mb-6 max-w-3xl text-sm leading-6">
-        {/* De-clutter: pill retired — these are plain coverage counts, not estimates. */}
-        <p className="text-base text-[#15263c] dark:text-[#eef3f8]">
-          Cited adoption benchmarks compiled for {coverage.verticalsWithBenchmark} of {VERTICALS.length} verticals;{" "}
-          {coverage.verticalsWithVendorUsage} show disclosed vendor usage, across {coverage.companies} tracked companies.
-        </p>
-        <p className="mt-1.5 text-[#15263c]/70 dark:text-[#eef3f8]/70">
-          Found a fit worth checking?{" "}
-          <Link href="/use-cases" className="underline underline-offset-2 hover:no-underline">
-            Assess it properly
-          </Link>{" "}
-          against the full evidence-graded scorecard, not just adoption signal.
-        </p>
-      </div>
+      {/* ── The buyer's OWN cohort — the answer they came for, first. ── */}
+      <CohortExplorer />
 
-      {/* ── DEFAULT view: the whole tracked base, aggregated (redesign 2026-07-06).
-             Real cited data only — BTOS adoption breadth + disclosed vendor usage. ── */}
-      <PeerUsageOverview
-        rows={getBaseUsageAggregate()}
-        topVendors={getTopVendorsAcrossBase()}
-        useCases={getBaseUseCases()}
-        asOf={getUsageAsOf()}
-        coverage={coverage}
-        vendorNames={TRACKED_VENDOR_NAMES}
-      />
-
-      {/* ── Narrow to your own cohort (the prior default, now a drill-down). ── */}
-      <section className="mt-8">
-        <h2 className="text-sm font-semibold">Narrow to your own cohort</h2>
-        <p className="mt-1 max-w-2xl text-sm text-[#15263c]/65 dark:text-[#eef3f8]/60">
-          State your segment — vertical, size, region — to see cited benchmarks, disclosed platforms
-          and named exemplars scoped to enterprises like yours.
-        </p>
-        <div className="mt-4">
-          <CohortExplorer />
+      {/* ── Zoom out — the whole tracked base (context, demoted). ── */}
+      <section className="mt-10">
+        <div className="mb-3 max-w-3xl">
+          <h2 className="font-[var(--font-display)] text-xl font-extrabold tracking-tight">
+            Zoom out — the whole tracked base
+          </h2>
+          <p className={`mt-1 text-sm leading-6 ${MUTED}`}>
+            Beyond your cohort: cited adoption benchmarks compiled for {coverage.verticalsWithBenchmark} of{" "}
+            {VERTICALS.length} verticals; {coverage.verticalsWithVendorUsage} show disclosed vendor usage, across{" "}
+            {coverage.companies} tracked companies. Found a fit worth checking?{" "}
+            <Link href="/use-cases" className="underline underline-offset-2 hover:no-underline">
+              assess it properly
+            </Link>{" "}
+            against the full evidence-graded scorecard.
+          </p>
         </div>
+        <PeerUsageOverview
+          rows={getBaseUsageAggregate()}
+          topVendors={getTopVendorsAcrossBase()}
+          useCases={getBaseUseCases()}
+          asOf={getUsageAsOf()}
+          coverage={coverage}
+          vendorNames={TRACKED_VENDOR_NAMES}
+        />
       </section>
 
-      {/* ── Methodology — what each signal means and where the red line is ── */}
-      <section className="mt-10 rounded-xl border border-black/10 bg-white/60 p-5 dark:border-white/10 dark:bg-white/5">
-        <h2 className="font-[var(--font-display)] text-xl font-extrabold tracking-tight">
-          How to read this
-        </h2>
-        <p className={`mt-1 text-xs ${MUTED}`}>
-          Each band is <strong>computed from a documented rubric</strong> over observable
-          evidence — never assigned on judgment or graded by an LLM. The per-signal rule:
+      {/* ── Methodology — collapsed; the honesty contract for anyone who wants it. ── */}
+      <details className="mt-10 rounded-xl border border-black/10 bg-white/60 p-5 dark:border-white/10 dark:bg-white/5">
+        <summary className="cursor-pointer select-none font-[var(--font-display)] text-lg font-bold tracking-tight">
+          How to read this — signals, rubric &amp; the red line
+        </summary>
+        <p className={`mt-2 text-xs ${MUTED}`}>
+          Each band is <strong>computed from a documented rubric</strong> over observable evidence — never assigned on
+          judgment or graded by an LLM. The per-signal rule:
         </p>
         <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {SIGNAL_KINDS.map((k) => (
             <div key={k.kind} className="rounded-lg border border-black/5 p-4 dark:border-white/10">
               <h3 className="text-sm font-semibold">{k.label}</h3>
               <p className={`mt-1 text-xs leading-5 ${MUTED}`}>{k.description}</p>
-              <p className="mt-1.5 text-xs leading-5 text-[#b08d2f] dark:text-[#d4af37]">
-                Rubric: {RUBRIC_TEXT[k.kind]}
-              </p>
+              <p className="mt-1.5 text-xs leading-5 text-[#b08d2f] dark:text-[#d4af37]">Rubric: {RUBRIC_TEXT[k.kind]}</p>
             </div>
           ))}
           <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-4">
             <h3 className="text-sm font-semibold">The red line</h3>
             <p className={`mt-1 text-xs leading-5 ${MUTED}`}>
-              We show what a company has publicly disclosed or what is externally
-              observable. We never claim how a company uses AI internally when that is
-              private — those cells read “not disclosed”, and inferences carry an
-              explicit “est.” flag. Bands trace to real disclosed facts; nothing is invented.
+              We show what a company has publicly disclosed or what is externally observable. We never claim how a
+              company uses AI internally when that is private — those cells read “not disclosed”, and inferences carry
+              an explicit “est.” flag. Bands trace to real disclosed facts; nothing is invented.
             </p>
           </div>
         </div>
-      </section>
+      </details>
 
       {/* Piece 3 — Ask AI, grounded in the cited peer dataset only. */}
       <TabChat

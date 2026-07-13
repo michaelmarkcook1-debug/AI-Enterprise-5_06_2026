@@ -1,17 +1,16 @@
 "use client";
 
-// Cohort explorer — the CORRECTED peer model surface (spec rewrite 2 Jul 2026).
-// ─────────────────────────────────────────────────────────────────────────────
-// "What are enterprises like mine doing with AI?" — the user states their
-// segment (vertical × size band × region) and sees:
-//   1. the cohort's CITED adoption benchmarks (real surveys, dated, with an
-//      honest segment-fit note on every stat) — or "limited data";
-//   2. top use-cases in the segment (cited, cross-linked to C6 routes);
-//   3. the AI platforms the segment's exemplars have DISCLOSED adopting;
-//   4. you-vs-cohort — their self-assessed C6 maturity against the cohort's
-//      analyst-curated anchor, explicitly directional;
-//   5. named exemplar deployments (the cited heatmap), scoped to the segment.
-// Pure arrangement of curated cited data; per-browser saved state only.
+// Cohort explorer — BUYER-FIRST redesign (2026-07-13). The buyer arrives asking
+// "what are enterprises like MINE doing, and am I behind?", so the flow now leads
+// with the answer, not the apparatus:
+//   • one compact segment bar at the top (vertical × size × region);
+//   • the HEADLINE: their cohort's cited adoption reality + an inline "are you
+//     ahead/behind?" read (optional maturity);
+//   • what their peers are running (disclosed vendors → assess, + cited use-cases);
+//   • who specifically (named exemplars, cited, disclosure-only);
+//   • all the cited research, collapsed for anyone who wants to audit it.
+// Same curated cited data as before — only the order and weight change. Honesty
+// intact: limited-data states, fit notes, disclosure-only, directional caveats.
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
@@ -51,11 +50,17 @@ const STAT_KIND_LABEL: Record<string, string> = {
   other: "Signal",
 };
 
+// Ahead/behind is a DIRECTIONAL read (sky↔amber), not a score (never red↔green).
+const POSITION_TONE: Record<string, string> = {
+  ahead: "bg-sky-100 text-sky-800 dark:bg-sky-950/40 dark:text-sky-300",
+  behind: "bg-amber-100 text-amber-900 dark:bg-amber-950/40 dark:text-amber-300",
+  at: "bg-black/5 text-[#3f5068] dark:bg-white/10 dark:text-[#c7d4e2]",
+};
+
 export default function CohortExplorer() {
   const [segment, setSegment] = useState<Segment>(DEFAULT_SEGMENT);
   const [maturity, setMaturity] = useState<MaturityId | "">("");
 
-  // Hydrate saved segment + maturity after mount (SSR-safe).
   useEffect(() => {
     try {
       const raw = window.localStorage.getItem(SEGMENT_KEY);
@@ -93,87 +98,180 @@ export default function CohortExplorer() {
   };
 
   const composed = useMemo(() => composeBenchmark(segment), [segment]);
-  const benchmark = composed.exact; // anchor + use-cases live on exact-seeded entries
+  const benchmark = composed.exact;
+  const allStats = useMemo(() => composed.layers.flatMap((l) => l.stats), [composed]);
+  const headline = useMemo(
+    () => allStats.find((s) => s.kind === "adoption_rate") ?? allStats[0] ?? null,
+    [allStats],
+  );
   const exemplars = useMemo(() => exemplarsForSegment(segment), [segment]);
   const platforms = useMemo(() => disclosedPlatformsForSegment(segment), [segment]);
   const position = benchmark && maturity ? youVsCohort(maturity, benchmark) : null;
+  const hasData = composed.layers.length > 0;
 
+  const verticalLabel = VERTICALS.find((v) => v.id === segment.vertical)?.label ?? segment.vertical;
   const selectCls =
-    "rounded-md border border-black/15 bg-white/80 px-2 py-1.5 text-sm dark:border-white/15 dark:bg-[#0a1f38]";
+    "rounded-md border border-black/15 bg-white/80 px-2 py-1.5 text-sm font-medium dark:border-white/15 dark:bg-[#0a1f38]";
 
   return (
-    <div className="space-y-6">
-      {/* ── 1 · Your segment ── */}
-      <section className={`${CARD} p-5`}>
-        <h2 className="text-sm font-semibold">1 · Your segment — who counts as “enterprises like mine”</h2>
-        <div className="mt-3 flex flex-wrap items-center gap-3 text-sm">
-          <label className="flex items-center gap-2">
-            <span className={`text-xs font-medium ${MUTED}`}>Vertical</span>
-            <select value={segment.vertical} onChange={(e) => update({ vertical: e.target.value as Segment["vertical"] })} className={selectCls}>
-              {VERTICALS.map((v) => (
-                <option key={v.id} value={v.id}>{v.label}</option>
-              ))}
-            </select>
-          </label>
-          <label className="flex items-center gap-2">
-            <span className={`text-xs font-medium ${MUTED}`}>Size</span>
-            <select value={segment.sizeBand} onChange={(e) => update({ sizeBand: e.target.value as Segment["sizeBand"] })} className={selectCls}>
-              {SIZE_BANDS.map((b) => (
-                <option key={b.id} value={b.id}>{b.label}</option>
-              ))}
-            </select>
-          </label>
-          <label className="flex items-center gap-2">
-            <span className={`text-xs font-medium ${MUTED}`}>Region</span>
-            <select value={segment.region} onChange={(e) => update({ region: e.target.value as Segment["region"] })} className={selectCls}>
-              {REGIONS.map((r) => (
-                <option key={r.id} value={r.id}>{r.label}</option>
-              ))}
-            </select>
-          </label>
+    <div className="space-y-5">
+      {/* ── Segment bar — one input, up top ── */}
+      <section className={`${CARD} p-4`}>
+        <div className="flex flex-wrap items-center gap-2.5">
+          <span className="text-sm font-semibold text-[#13294b] dark:text-[#eef3f8]">Enterprises like mine:</span>
+          <select aria-label="Industry" value={segment.vertical} onChange={(e) => update({ vertical: e.target.value as Segment["vertical"] })} className={selectCls}>
+            {VERTICALS.map((v) => <option key={v.id} value={v.id}>{v.label}</option>)}
+          </select>
+          <select aria-label="Company size" value={segment.sizeBand} onChange={(e) => update({ sizeBand: e.target.value as Segment["sizeBand"] })} className={selectCls}>
+            {SIZE_BANDS.map((b) => <option key={b.id} value={b.id}>{b.label}</option>)}
+          </select>
+          <select aria-label="Region" value={segment.region} onChange={(e) => update({ region: e.target.value as Segment["region"] })} className={selectCls}>
+            {REGIONS.map((r) => <option key={r.id} value={r.id}>{r.label}</option>)}
+          </select>
         </div>
-        <p className={`mt-2 text-xs ${MUTED}`}>Saved in this browser — re-enter any time and pick up where you left off.</p>
       </section>
 
-      {/* ── 2 · The cohort's adoption picture (cited, layered by scope) ── */}
-      {composed.layers.length === 0 ? (
-        <section className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-5" role="status">
-          <div className="flex items-center gap-2">
-            <span className="h-1.5 w-1.5 rounded-full bg-amber-500" aria-hidden />
-            <h2 className="text-sm font-semibold">Limited data for this segment</h2>
-          </div>
-          <p className={`mt-2 text-sm ${MUTED}`}>
-            We haven&apos;t yet compiled credible, citable adoption research applicable to this
-            vertical × size × region. Rather than show a manufactured number, we hold the
-            benchmark — segments are seeded through the same cited pipeline.
+      {/* ── HEADLINE: how your cohort is adopting + are you behind ── */}
+      {hasData && headline ? (
+        <section className="rounded-2xl border border-[#d4af37]/45 bg-[#fbf6e4]/55 p-6 dark:border-[#d4af37]/30 dark:bg-[#1a1605]/25">
+          <p className="text-xs font-semibold uppercase tracking-wider text-[#a07f1f] dark:text-[#d4af37]">
+            How your cohort is adopting AI
           </p>
+          <p className="mt-2 max-w-3xl text-xl font-semibold leading-snug text-[#13294b] dark:text-[#eef3f8]">
+            {headline.headline}
+          </p>
+          <p className={`mt-2 text-sm ${MUTED}`}>
+            <a href={headline.source.url} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:no-underline">
+              {headline.source.title}
+            </a>{" "}
+            — {headline.source.publisher} · {headline.source.surveyDate}
+          </p>
+          <p className="mt-1 text-xs text-amber-700 dark:text-amber-300">How well it fits your exact segment: {headline.segmentFitNote}</p>
+
+          {/* Are you behind? — inline, the buyer's #1 question. */}
+          <div className="mt-5 border-t border-[#e6dcc3]/70 pt-4 dark:border-[#2a4a6b]/50">
+            <div className="flex flex-wrap items-center gap-2.5">
+              <span className="text-sm font-semibold text-[#13294b] dark:text-[#eef3f8]">Where do you sit?</span>
+              <select aria-label="Your AI maturity" value={maturity} onChange={(e) => saveMaturity(e.target.value as MaturityId | "")} className={selectCls}>
+                <option value="">Select your AI maturity…</option>
+                {MATURITY_LEVELS.map((m) => <option key={m.id} value={m.id}>{m.label}</option>)}
+              </select>
+            </div>
+            {position ? (
+              <div className="mt-3">
+                <p className="text-sm">
+                  <span className={`mr-2 inline-block rounded-full px-2.5 py-0.5 text-xs font-bold uppercase tracking-wide ${POSITION_TONE[position.position]}`}>
+                    {position.position === "at" ? "In step" : position.position}
+                  </span>
+                  {position.position === "at"
+                    ? "Your self-assessment sits level with the cohort anchor."
+                    : `Your self-assessment sits ${Math.abs(position.gap)} rung${Math.abs(position.gap) !== 1 ? "s" : ""} ${position.position} of the cohort anchor.`}
+                </p>
+                <p className={`mt-1.5 text-xs ${MUTED}`}>You: {position.userLabel} · Cohort anchor: {position.cohortLabel} · {position.caveat}</p>
+              </div>
+            ) : !benchmark ? (
+              <p className={`mt-2 text-xs ${MUTED}`}>A directional comparison needs an analyst-curated anchor for this exact segment — not compiled yet. The cited adoption above still applies.</p>
+            ) : (
+              <p className={`mt-2 text-xs ${MUTED}`}>Pick your maturity to see the directional gap — self-assessed, never a score.</p>
+            )}
+          </div>
         </section>
       ) : (
-        <section className={`${CARD} p-5`}>
-          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-            <h2 className="text-sm font-semibold">2 · How your cohort is adopting AI</h2>
-            <span className="rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-amber-800 dark:text-amber-200">
-              Cited research, layered by how closely each source matches your segment
-            </span>
+        <section className="rounded-2xl border border-amber-500/30 bg-amber-500/5 p-6" role="status">
+          <div className="flex items-center gap-2">
+            <span className="h-1.5 w-1.5 rounded-full bg-amber-500" aria-hidden />
+            <h2 className="text-sm font-semibold">Limited data for {verticalLabel} at this size &amp; region</h2>
           </div>
-          <div className="space-y-4">
+          <p className={`mt-2 max-w-2xl text-sm ${MUTED}`}>
+            We haven&apos;t yet compiled credible, citable adoption research for this exact vertical × size × region.
+            Rather than show a manufactured number, we hold the benchmark. Named exemplars for the segment, where we
+            have them, still appear below.
+          </p>
+        </section>
+      )}
+
+      {/* ── What your peers are running: vendors + use-cases ── */}
+      {(platforms.length > 0 || (benchmark && benchmark.topUseCases.length > 0)) && (
+        <section className={`${CARD} p-5`}>
+          <h2 className="text-base font-semibold text-[#13294b] dark:text-[#eef3f8]">What your peers are running</h2>
+          {platforms.length > 0 && (
+            <div className="mt-3">
+              <p className={`mb-1.5 text-xs font-semibold uppercase tracking-wide ${MUTED}`}>AI platforms they&apos;ve disclosed adopting</p>
+              <ul className="flex flex-wrap gap-2">
+                {platforms.map((p) => (
+                  <li key={p.vendorId}>
+                    <Link
+                      href={`/vendors/${p.vendorId}`}
+                      className="inline-flex items-center gap-1.5 rounded-full border border-black/15 px-3 py-1 text-sm font-medium underline-offset-2 hover:border-[#b08d2f] hover:underline dark:border-white/15"
+                    >
+                      {TRACKED_VENDOR_NAMES[p.vendorId] ?? p.vendorId}
+                      <span className={`text-xs ${MUTED}`}>· {p.adopters} disclosed</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {benchmark && benchmark.topUseCases.length > 0 && (
+            <div className="mt-4">
+              <p className={`mb-1.5 text-xs font-semibold uppercase tracking-wide ${MUTED}`}>Top use-cases in their disclosed deployments</p>
+              <div className="flex flex-wrap gap-2">
+                {benchmark.topUseCases.map((u) => (
+                  <span key={u.label} className="inline-flex items-center gap-1.5 rounded-full border border-black/15 px-2.5 py-1 text-sm dark:border-white/15">
+                    {u.categoryRouteId ? (
+                      <Link href={`/category/${u.categoryRouteId}`} className="font-medium underline-offset-2 hover:underline">{u.label}</Link>
+                    ) : (
+                      <span className="font-medium">{u.label}</span>
+                    )}
+                    <a href={u.source.url} target="_blank" rel="noopener noreferrer" className={`text-xs underline underline-offset-2 ${MUTED}`} title={`${u.source.title} — ${u.source.publisher}`}>src</a>
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+          <p className={`mt-3 text-xs ${MUTED}`}>
+            Publicly <strong>disclosed</strong> adoptions by named exemplars — disclosure counts, not market share.
+            Vendor links open the evidence-based assessment.
+          </p>
+        </section>
+      )}
+
+      {/* ── Who specifically — named exemplars ── */}
+      <section>
+        <h2 className="text-base font-semibold text-[#13294b] dark:text-[#eef3f8]">Who specifically — named deployments</h2>
+        <p className={`mt-0.5 mb-3 text-xs ${MUTED}`}>
+          Companies in your cohort with publicly disclosed AI deployments — cited, disclosure-only, never private usage.
+        </p>
+        {exemplars.length > 0 ? (
+          <PeerBenchmark key={segmentId(segment)} companyIds={exemplars.map((c) => c.id)} />
+        ) : (
+          <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-5" role="status">
+            <p className={`text-sm ${MUTED}`}>
+              No named exemplars compiled for this segment yet — absence here is under-coverage, never evidence that
+              nobody in the cohort is deploying AI.
+            </p>
+          </div>
+        )}
+      </section>
+
+      {/* ── All the cited research, for anyone who wants to audit it ── */}
+      {hasData && (
+        <details className={`${CARD} p-4`}>
+          <summary className={`cursor-pointer select-none text-sm font-medium ${MUTED} hover:underline`}>
+            All cited adoption research for this cohort ({allStats.length}) — layered by how closely each source matches your segment
+          </summary>
+          <div className="mt-3 space-y-4">
             {composed.layers.map((layer) => (
               <div key={layer.scope}>
-                <p className={`mb-2 text-xs font-semibold uppercase tracking-wide ${MUTED}`}>
-                  {layer.scopeLabel}
-                </p>
+                <p className={`mb-2 text-xs font-semibold uppercase tracking-wide ${MUTED}`}>{layer.scopeLabel}</p>
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   {layer.stats.map((s, i) => (
                     <div key={i} className="rounded-lg border border-black/5 p-4 dark:border-white/10">
-                      <p className={`text-xs font-semibold uppercase tracking-wide ${MUTED}`}>
-                        {STAT_KIND_LABEL[s.kind] ?? s.kind}
-                      </p>
+                      <p className={`text-xs font-semibold uppercase tracking-wide ${MUTED}`}>{STAT_KIND_LABEL[s.kind] ?? s.kind}</p>
                       <p className="mt-1 text-sm font-medium leading-snug">{s.headline}</p>
                       {s.detail && <p className={`mt-1 text-xs leading-5 ${MUTED}`}>{s.detail}</p>}
                       <p className={`mt-2 text-xs ${MUTED}`}>
-                        <a href={s.source.url} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2">
-                          {s.source.title}
-                        </a>{" "}
+                        <a href={s.source.url} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2">{s.source.title}</a>{" "}
                         — {s.source.publisher} · {s.source.surveyDate}
                       </p>
                       <p className="mt-1 text-xs text-amber-700 dark:text-amber-300">Fit: {s.segmentFitNote}</p>
@@ -183,130 +281,8 @@ export default function CohortExplorer() {
               </div>
             ))}
           </div>
-
-          {benchmark && benchmark.topUseCases.length > 0 && (
-            <div className="mt-4 border-t border-black/5 pt-4 dark:border-white/10">
-              <p className={`mb-2 text-xs font-semibold uppercase tracking-wide ${MUTED}`}>
-                Use-cases observed in your cohort&apos;s disclosed deployments (cited)
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {benchmark.topUseCases.map((u) => (
-                  <span key={u.label} className="inline-flex items-center gap-1.5 rounded-full border border-black/15 px-2.5 py-1 text-xs dark:border-white/15">
-                    {u.categoryRouteId ? (
-                      <Link href={`/category/${u.categoryRouteId}`} className="font-medium underline-offset-2 hover:underline">
-                        {u.label}
-                      </Link>
-                    ) : (
-                      <span className="font-medium">{u.label}</span>
-                    )}
-                    <a href={u.source.url} target="_blank" rel="noopener noreferrer" className={`underline underline-offset-2 ${MUTED}`} title={`${u.source.title} — ${u.source.publisher}`}>
-                      src
-                    </a>
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-        </section>
+        </details>
       )}
-
-      {/* ── 3 · Platforms the cohort's exemplars disclose (supply cross-link) ── */}
-      {platforms.length > 0 && (
-        <section className={`${CARD} p-5`}>
-          <h2 className="text-sm font-semibold">3 · AI platforms your cohort has disclosed adopting</h2>
-          <p className={`mt-1 text-xs ${MUTED}`}>
-            Derived from the named exemplars&apos; publicly disclosed adoptions below — disclosure
-            counts, not market share. Links open the vendor&apos;s evidence-based assessment.
-          </p>
-          <ul className="mt-3 flex flex-wrap gap-2">
-            {platforms.map((p) => (
-              <li key={p.vendorId}>
-                <Link
-                  href={`/vendors/${p.vendorId}`}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-black/15 px-3 py-1 text-xs font-medium underline-offset-2 hover:underline dark:border-white/15"
-                >
-                  {TRACKED_VENDOR_NAMES[p.vendorId] ?? p.vendorId}
-                  <span className={MUTED}>· {p.adopters} disclosed adopter{p.adopters !== 1 ? "s" : ""}</span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
-
-      {/* ── 4 · You vs the cohort (directional, honest) ── */}
-      <section className={`${CARD} p-5`}>
-        <h2 className="text-sm font-semibold">4 · You vs your cohort</h2>
-        <div className="mt-3 flex flex-wrap items-center gap-2 text-sm">
-          <span className={`text-xs font-medium ${MUTED}`}>Your data &amp; AI maturity</span>
-          <select value={maturity} onChange={(e) => saveMaturity(e.target.value as MaturityId | "")} className={selectCls}>
-            <option value="">— select —</option>
-            {MATURITY_LEVELS.map((m) => (
-              <option key={m.id} value={m.id}>{m.label}</option>
-            ))}
-          </select>
-        </div>
-        {!benchmark ? (
-          <p className={`mt-3 text-sm ${MUTED}`}>
-            The directional comparison needs an analyst-curated cohort anchor, which we
-            curate segment-by-segment as the cited research lands — not yet available for
-            this exact segment. The layered benchmarks above still apply.
-          </p>
-        ) : !maturity ? (
-          <p className={`mt-3 text-sm ${MUTED}`}>Select your maturity to see the directional gap.</p>
-        ) : position ? (
-          <div className="mt-3 rounded-lg border border-black/5 p-4 dark:border-white/10">
-            <p className="text-sm">
-              <span
-                className={`mr-2 inline-block rounded-full px-2.5 py-0.5 text-xs font-bold uppercase tracking-wide ${
-                  position.position === "ahead"
-                    ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300"
-                    : position.position === "behind"
-                      ? "bg-rose-100 text-rose-800 dark:bg-rose-950/40 dark:text-rose-300"
-                      : "bg-sky-100 text-sky-800 dark:bg-sky-950/40 dark:text-sky-300"
-                }`}
-              >
-                {position.position === "at" ? "In step" : position.position}
-              </span>
-              {position.position === "at"
-                ? "Your self-assessment sits level with the cohort anchor."
-                : `Your self-assessment sits ${Math.abs(position.gap)} rung${Math.abs(position.gap) !== 1 ? "s" : ""} ${position.position} of the cohort anchor.`}
-            </p>
-            <p className={`mt-1.5 text-xs ${MUTED}`}>
-              You: {position.userLabel} · Cohort anchor: {position.cohortLabel}
-            </p>
-            <p className={`mt-1.5 text-xs ${MUTED}`}>{position.caveat}</p>
-            <p className={`mt-1 text-xs ${MUTED}`}>Anchor basis: {benchmark.anchorRationale}</p>
-          </div>
-        ) : null}
-      </section>
-
-      {/* ── 5 · Named exemplar deployments in the segment (cited heatmap) ── */}
-      <section>
-        <div className="mb-3">
-          <h2 className="text-sm font-semibold">5 · Named exemplar deployments in your segment</h2>
-          <p className={`mt-0.5 text-xs ${MUTED}`}>
-            Specific companies in this cohort with publicly disclosed AI deployments — cited,
-            disclosure-only, never private usage.
-          </p>
-        </div>
-        {/* key = the segment → full remount on segment switch, so selection
-            state (org / scope / drilldown) can NEVER leak another cohort's
-            companies into this heatmap (the "banks showing under pharma" bug). */}
-        {exemplars.length > 0 ? (
-          <PeerBenchmark
-            key={segmentId(segment)}
-            companyIds={exemplars.map((c) => c.id)}
-          />
-        ) : (
-          <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-5" role="status">
-            <p className={`text-sm ${MUTED}`}>
-              No named exemplars compiled for this segment yet — absence here is under-coverage,
-              never evidence that nobody in the cohort is deploying AI.
-            </p>
-          </div>
-        )}
-      </section>
     </div>
   );
 }
