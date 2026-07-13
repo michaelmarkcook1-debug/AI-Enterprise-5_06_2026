@@ -10,7 +10,8 @@
 import { useMemo, useState, type ReactNode } from "react";
 import Link from "next/link";
 import type { IndustryUsageRow, UseCaseOption, VendorUsageCell } from "@/lib/peer/aggregate-usage";
-import { SimpleBarChart, StackedUsageBarChart, VendorColorLegend, assignVendorColors } from "./UsageBarChart";
+import { SimpleBarChart, assignVendorColors } from "./UsageBarChart";
+import IndustryVendorHeatmap from "./IndustryVendorHeatmap";
 
 const MUTED = "text-[#15263c]/65 dark:text-[#eef3f8]/60";
 const CARD = "rounded-xl border border-black/10 dark:border-white/10 bg-white/60 dark:bg-white/5";
@@ -78,21 +79,6 @@ export default function PeerUsageOverview({
   // already sorted desc) so the biggest, most-recurring vendors get the most
   // distinguishable colors first.
   const vendorColors = useMemo(() => assignVendorColors(topVendors.map((v) => v.vendorId)), [topVendors]);
-  const stackedRows = useMemo(
-    () =>
-      rows
-        .filter((r) => r.vendorUsage.length > 0)
-        .map((r) => ({
-          key: r.verticalId,
-          label: r.label,
-          segments: r.vendorUsage.map((v) => ({
-            vendorId: v.vendorId,
-            vendorName: vendorNames[v.vendorId] ?? prettyVendor(v.vendorId),
-            count: v.adopters,
-          })),
-        })),
-    [rows, vendorNames],
-  );
 
   return (
     <section className={`${CARD} p-5`}>
@@ -136,20 +122,17 @@ export default function PeerUsageOverview({
         </div>
       )}
 
-      {/* Industry usage BY vendor — stacked colored bar chart, one bar per
-          industry, segmented by vendor. The visual answer to "who's used where". */}
-      {stackedRows.length > 0 && !useCase && (
-        <div className="mt-4 rounded-lg border border-black/5 p-3 dark:border-white/10">
-          <div className={`mb-1.5 text-[10px] font-semibold uppercase tracking-wide ${MUTED}`}>
-            Disclosed AI-vendor usage by industry
-          </div>
-          <StackedUsageBarChart rows={stackedRows} colors={vendorColors} vendorHref={(id) => `/vendors/${id}`} />
-          <VendorColorLegend
-            vendors={topVendors.map((v) => ({ vendorId: v.vendorId, name: vendorNames[v.vendorId] ?? prettyVendor(v.vendorId) }))}
-            colors={vendorColors}
-          />
-        </div>
-      )}
+      {/* Industry × vendor adoption heatmap — the cross-tab read: a row is an
+          industry's vendor mix, a column is a vendor's reach across industries.
+          Respects the use-case filter (filtered rows); columns are base-wide,
+          capped to vendors with ≥2 disclosed adopters so the grid stays legible. */}
+      <IndustryVendorHeatmap
+        rows={filtered}
+        columns={topVendors
+          .filter((v) => v.adopters >= 2)
+          .map((v) => ({ vendorId: v.vendorId, name: vendorNames[v.vendorId] ?? prettyVendor(v.vendorId) }))}
+        vendorHref={(id) => `/vendors/${id}`}
+      />
 
       {useCase && (
         <div className="mt-3 space-y-1">
