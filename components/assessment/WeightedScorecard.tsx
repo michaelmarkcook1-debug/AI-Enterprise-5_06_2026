@@ -83,6 +83,17 @@ export default function WeightedScorecard({
         score or hide thin coverage. Draft assessment — pressure-test against the cited sources.
       </p>
 
+      {/* Legend for the per-domain bullet: gold bar = 0–5 score, ink tick = audit-grade line (4.0). */}
+      <div className="mb-4 flex items-center gap-2 text-[10px] text-[#7a8aa0] dark:text-[#7a9bb8]">
+        <span className="relative inline-block h-3.5 w-9 shrink-0 overflow-hidden rounded-sm bg-[#e9e0c9] align-middle dark:bg-[#102135]">
+          <span className="absolute bottom-[2px] left-0 top-[2px] w-5 rounded-sm bg-[#b08d2f] dark:bg-[#e8c95c]" />
+          <span className="absolute bottom-0 left-[80%] top-0 w-[2px] bg-[#13294b] opacity-70 dark:bg-[#eef3f8]" />
+        </span>
+        Bar = 0–5 score · the ink tick marks the{" "}
+        <strong className="font-semibold text-[#5e6b7e] dark:text-[#a7bacd]">audit-grade line (4.0)</strong> — only
+        E4/E5 evidence clears it. Faded + hatched = low confidence.
+      </div>
+
       {/* Live composite headline */}
       <div className="mb-4 flex flex-wrap items-center gap-4 rounded-xl border border-[#d4af37]/50 bg-[#fbf6e4]/60 px-4 py-3 dark:border-[#d4af37]/40 dark:bg-[#1a1605]/30">
         <div>
