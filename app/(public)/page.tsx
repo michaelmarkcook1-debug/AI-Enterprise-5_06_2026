@@ -74,11 +74,12 @@ export default async function HomePage() {
       // seeded into a real member's own watchlist/decisions.
       if (!realMember) await ensureTestBuyerSeeded(member.subscriberId).catch(() => {});
       const watchlist = await getMemberWatchlist(member.subscriberId);
-      const [decisions, monitor] = await Promise.all([
+      const [decisions, monitor, brief] = await Promise.all([
         listMemberDecisions(member.subscriberId),
         buildMonitor(watchlist),
+        getMarketBrief({ since: null }).catch(() => null),
       ]);
-      return <BuyerHome watchlist={watchlist} decisions={decisions} monitor={monitor} isDemo={!realMember} />;
+      return <BuyerHome watchlist={watchlist} decisions={decisions} monitor={monitor} isDemo={!realMember} brief={brief} />;
     }
   }
 

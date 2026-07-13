@@ -2,6 +2,9 @@ import Link from "next/link";
 import type { MemberWatchlistView } from "@/lib/member/watchlist";
 import type { MemberDecisionView } from "@/lib/member/decisions";
 import type { MonitorView } from "@/lib/member/monitor";
+import type { MarketBrief } from "@/lib/brief/market-brief";
+import TheBrief from "@/components/home/TheBrief";
+import BackToMarket from "@/components/home/BackToMarket";
 
 const CARD = "rounded-xl border border-black/10 dark:border-white/10 bg-white/60 dark:bg-white/5 p-5";
 const MUTED = "text-[#15263c]/65 dark:text-[#eef3f8]/60";
@@ -16,16 +19,29 @@ export default function BuyerHome({
   decisions,
   monitor,
   isDemo,
+  brief,
 }: {
   watchlist: MemberWatchlistView;
   decisions: MemberDecisionView[];
   monitor: MonitorView;
   isDemo: boolean;
+  brief?: MarketBrief | null;
 }) {
   const hasShortlist = watchlist.vendors.length > 0;
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-8">
+      {/* Unmistakable way back to the market view — this is the buyer/demo home,
+          so rankings + the news feed live under "Market view", not here. */}
+      <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-[#d4af37]/40 bg-[#fbf6e4]/50 px-3 py-2 dark:border-[#d4af37]/30 dark:bg-[#1a1605]/25">
+        <span className={`text-xs ${MUTED}`}>
+          You&apos;re in the{" "}
+          <strong className="font-semibold text-[#8a6d1f] dark:text-[#d4af37]">buyer workspace</strong> — your
+          shortlist &amp; saved decisions. The full rankings &amp; market news are in the market view.
+        </span>
+        <BackToMarket />
+      </div>
+
       <header className="mb-6 flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 className="font-[var(--font-display)] text-2xl font-extrabold tracking-tight text-[#13294b] dark:text-[#eef3f8]">
@@ -133,6 +149,14 @@ export default function BuyerHome({
           )}
         </section>
       </div>
+
+      {/* The wider market this week — the same Brief the market view shows, so a
+          buyer keeps market awareness (not just their own tracked items). */}
+      {brief && (
+        <div className="mt-6">
+          <TheBrief brief={brief} />
+        </div>
+      )}
 
       <p className={`mt-6 text-xs ${MUTED}`}>
         <Link href="/use-cases" className="underline underline-offset-2 hover:no-underline">
