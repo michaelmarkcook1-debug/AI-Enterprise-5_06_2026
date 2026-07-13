@@ -8,21 +8,15 @@ import { EvidenceBadge, lowEvidenceClass } from "@/components/intelligence-ui";
 import { DOMAIN_LABEL } from "@/lib/assessment/domain-labels";
 import { DOMAIN_BAND_TEXT, type DomainScore } from "@/lib/assessment/domain-rubric";
 import type { VendorScorecard } from "@/lib/assessment/domain-scores";
+import { BulletGraph, ConfidenceVeil } from "@/components/instrument";
 
 const PILLAR_LABEL = Object.fromEntries(PILLARS.map((p) => [p.id, p.label])) as Record<string, string>;
 
-function bandTone(band: number): string {
-  if (band >= 4) return "text-emerald-700 dark:text-emerald-300";
-  if (band >= 3) return "text-amber-700 dark:text-amber-300";
-  if (band >= 2) return "text-[#a07f1f] dark:text-[#d4af37]";
-  return "text-rose-700 dark:text-rose-300";
-}
-function barTone(band: number): string {
-  if (band >= 4) return "bg-emerald-500";
-  if (band >= 3) return "bg-amber-500";
-  if (band >= 2) return "bg-[#b08d2f] dark:bg-[#d4af37]";
-  return "bg-rose-400";
-}
+// Bullet benchmark: the audit-grade line. The rubric only lets a domain reach
+// 4–5 with audit-grade (E4/E5) evidence, so a tick at 4.0 tells a buyer, per
+// domain, whether this vendor has *proven* strength or merely directional
+// evidence — the platform's evidence-first thesis made scannable, no new data.
+const AUDIT_GRADE_LINE = 4;
 
 function ScoreRow({ d }: { d: DomainScore }) {
   const name = DOMAIN_LABEL[d.domain];
@@ -30,14 +24,18 @@ function ScoreRow({ d }: { d: DomainScore }) {
 
   if (d.state === "insufficient_evidence") {
     return (
-      <div className="flex flex-col gap-1 border-t border-[#ece4d0] py-3 dark:border-[#1d3a57] sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <div className="text-sm font-medium text-[#13294b] dark:text-[#eef3f8]">{name}</div>
-          <div className="text-[10px] uppercase tracking-wide text-[#7a8aa0] dark:text-[#7a9bb8]">{pillar}</div>
+      <div className="flex flex-col gap-1.5 border-t border-[#ece4d0] py-3 dark:border-[#1d3a57]">
+        <div className="flex items-center justify-between gap-2">
+          <div>
+            <div className="text-sm font-medium text-[#13294b] dark:text-[#eef3f8]">{name}</div>
+            <div className="text-[10px] uppercase tracking-wide text-[#7a8aa0] dark:text-[#7a9bb8]">{pillar}</div>
+          </div>
+          <span className="inline-flex w-fit rounded-full border border-[#d6c9a8] bg-[#f6f1e3] px-2 py-0.5 text-[11px] font-semibold text-[#5e6b7e] dark:border-[#2a4a6b] dark:bg-[#0c2238] dark:text-[#a7bacd]">
+            Insufficient evidence
+          </span>
         </div>
-        <span className="inline-flex w-fit rounded-full border border-[#d6c9a8] bg-[#f6f1e3] px-2 py-0.5 text-[11px] font-semibold text-[#5e6b7e] dark:border-[#2a4a6b] dark:bg-[#0c2238] dark:text-[#a7bacd]">
-          Insufficient evidence
-        </span>
+        {/* Honest-absence bullet — no bar, no implied zero — keeps the stack a uniform instrument column. */}
+        <BulletGraph value={null} max={5} label={name} />
       </div>
     );
   }
@@ -50,19 +48,22 @@ function ScoreRow({ d }: { d: DomainScore }) {
           <div className="text-[10px] uppercase tracking-wide text-[#7a8aa0] dark:text-[#7a9bb8]">{pillar}</div>
         </div>
         <div className="flex items-center gap-3">
-          <div className="text-right">
-            <div className={`font-mono text-lg font-semibold tabular-nums ${bandTone(d.band)}`}>
+          {/* Neutral ink number (no red↔green) — certainty carried by the veil, not hue. */}
+          <ConfidenceVeil confidence={d.confidence} label={`${name} score`} as="div" className="text-right">
+            <div className="font-mono text-lg font-semibold tabular-nums text-[#13294b] dark:text-[#eef3f8]">
               {d.score.toFixed(1)}<span className="text-xs text-[#7a8aa0]">/5</span>
             </div>
             <div className="text-[11px] text-[#5e6b7e] dark:text-[#a7bacd]">{DOMAIN_BAND_TEXT[d.bandLabel]}</div>
-          </div>
+          </ConfidenceVeil>
           <EvidenceBadge grade={d.bestGrade} />
         </div>
       </div>
 
-      {/* 0–5 bar */}
-      <div className="mt-2 h-1 overflow-hidden rounded-full bg-[#ece3cb] dark:bg-[#122c49]">
-        <div className={`h-full ${barTone(d.band)}`} style={{ width: `${Math.max(2, (d.score / 5) * 100)}%` }} />
+      {/* Evidence-Instrument bullet: gold value bar, faint rubric bands, and an ink
+          tick at the audit-grade line (4.0). Low-confidence → hatched + faded so a
+          thin-evidence score can never look as solid as a measured one. */}
+      <div className="mt-2">
+        <BulletGraph value={d.score} max={5} benchmark={AUDIT_GRADE_LINE} lowConfidence={d.lowConfidence} label={name} />
       </div>
 
       {/* confidence + low-confidence flag */}
@@ -118,6 +119,12 @@ export default function DomainScorecard({ scorecard }: { scorecard: VendorScorec
       <div className="text-[11px] text-[#7a8aa0] dark:text-[#7a9bb8]">
         {scorecard.scoredCount} of {scorecard.domains.length} domains evidenced · {scorecard.totalEvidenceRows} reviewed,
         source-backed records
+      </div>
+      <div className="mt-1 flex items-center gap-2 text-[10px] text-[#7a8aa0] dark:text-[#7a9bb8]">
+        <span className="inline-block h-3 w-6 rounded-sm bg-[#e9e0c9] dark:bg-[#102135]">
+          <span className="ml-[2px] inline-block h-3 w-3 rounded-sm bg-[#b08d2f] align-top dark:bg-[#e8c95c]" />
+        </span>
+        Bar = 0–5 score · the ink tick marks the <strong className="font-semibold">audit-grade line (4.0)</strong> — only E4/E5 evidence clears it
       </div>
       <div className="mt-1">
         {scorecard.domains.map((d) => (

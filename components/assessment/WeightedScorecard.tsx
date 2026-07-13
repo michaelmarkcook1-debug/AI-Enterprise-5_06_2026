@@ -19,8 +19,13 @@ import type { VendorScorecard } from "@/lib/assessment/domain-scores";
 import { PILLARS, type DomainId } from "@/lib/types";
 import InterrogatePanel, { type InterrogateConfig } from "@/components/assessment/InterrogatePanel";
 import GradeChip from "@/components/assessment/GradeChip";
+import { BulletGraph, ConfidenceVeil } from "@/components/instrument";
 
 const PILLAR_LABEL = Object.fromEntries(PILLARS.map((p) => [p.id, p.label])) as Record<string, string>;
+
+// The audit-grade line — a domain only reaches 4–5 with E4/E5 evidence, so the
+// bullet tick at 4.0 separates proven strength from directional signal per domain.
+const AUDIT_GRADE_LINE = 4;
 
 // Slider scale: framework default 0.11 → 11. normalizeWeights() renormalises.
 const defaultSliders = (): Record<DomainId, number> =>
@@ -28,14 +33,6 @@ const defaultSliders = (): Record<DomainId, number> =>
     acc[d] = Math.round(DEFAULT_DOMAIN_WEIGHTS[d] * 100);
     return acc;
   }, {} as Record<DomainId, number>);
-
-function tone(score: number | null): string {
-  if (score == null) return "text-[#7a8aa0] dark:text-[#7a9bb8]";
-  if (score >= 4) return "text-emerald-700 dark:text-emerald-300";
-  if (score >= 3) return "text-amber-700 dark:text-amber-300";
-  if (score >= 2) return "text-[#a07f1f] dark:text-[#d4af37]";
-  return "text-rose-700 dark:text-rose-300";
-}
 
 export default function WeightedScorecard({
   scorecard,
@@ -150,14 +147,15 @@ export default function WeightedScorecard({
                 </div>
                 <div className="flex items-center gap-3">
                   {scored ? (
-                    <div className="text-right">
-                      <div className={`font-mono text-lg font-semibold tabular-nums ${tone(d!.state === "scored" ? d!.score : null)}`}>
+                    // Neutral ink number (no red↔green) — certainty carried by the veil, not hue.
+                    <ConfidenceVeil confidence={d!.state === "scored" ? d!.confidence : null} label={`${DOMAIN_LABEL[domain]} score`} as="div" className="text-right">
+                      <div className="font-mono text-lg font-semibold tabular-nums text-[#13294b] dark:text-[#eef3f8]">
                         {d!.state === "scored" ? d!.score.toFixed(1) : "—"}<span className="text-xs text-[#7a8aa0]">/5</span>
                       </div>
                       <div className="text-[11px] text-[#5e6b7e] dark:text-[#a7bacd]">
                         {d!.state === "scored" ? DOMAIN_BAND_TEXT[d!.bandLabel] : ""}
                       </div>
-                    </div>
+                    </ConfidenceVeil>
                   ) : (
                     <span className="rounded-full border border-[#d6c9a8] bg-[#f6f1e3] px-2 py-0.5 text-[11px] font-semibold text-[#5e6b7e] dark:border-[#2a4a6b] dark:bg-[#0c2238] dark:text-[#a7bacd]">
                       Insufficient evidence
@@ -165,6 +163,18 @@ export default function WeightedScorecard({
                   )}
                   {scored && d!.state === "scored" && <GradeChip grade={d!.bestGrade} />}
                 </div>
+              </div>
+
+              {/* Evidence-Instrument bullet — same gold bar + audit-grade tick (4.0) as the
+                  read-only scorecard, so re-weighting never changes how a score *looks*. */}
+              <div className="mt-2">
+                <BulletGraph
+                  value={d && d.state === "scored" ? d.score : null}
+                  max={5}
+                  benchmark={AUDIT_GRADE_LINE}
+                  lowConfidence={!!d && d.state === "scored" && d.lowConfidence}
+                  label={DOMAIN_LABEL[domain]}
+                />
               </div>
 
               {/* weight slider */}
