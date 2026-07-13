@@ -663,26 +663,25 @@ export default async function VendorDeepDivePage({
         <span className="font-mono text-lg font-semibold tabular-nums text-[#a07f1f] dark:text-[#d4af37]">
           {modelQuality.score.toFixed(2)}<span className="text-xs text-[#7a8aa0]">/5</span>
         </span>
-        <span className="rounded bg-emerald-100 px-1.5 py-0.5 text-[10px] font-medium text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300">
+        <span className="rounded bg-emerald-100 px-1.5 py-0.5 text-xs font-medium text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300">
           {modelQuality.bestGrade} benchmark
         </span>
         {modelQuality.lowConfidence && (
-          <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-medium text-amber-800 dark:bg-amber-950/40 dark:text-amber-300">
+          <span className="rounded bg-amber-100 px-1.5 py-0.5 text-xs font-medium text-amber-800 dark:bg-amber-950/40 dark:text-amber-300">
             limited coverage
           </span>
         )}
       </div>
       {mqBreakdown ? (
         <>
-          <p className="mt-1 text-[11px] leading-5 text-[#5e6b7e] dark:text-[#a7bacd]">
+          <p className="mt-1 text-xs leading-5 text-[#5e6b7e] dark:text-[#a7bacd]">
             Driven by the flagship model&apos;s Artificial Analysis Intelligence Index — a weighted composite of 9
             evaluations, mostly independent ({modelQuality.bestGrade}), not a fully independent audit — capped at 4.0.
-            Coding/Agentic indices are shown as cited context, not blended into the score (Intelligence Index already
-            weighs both in).
+            Coding/Agentic indices are shown as cited context, not blended into the score.
           </p>
           <ul className="mt-2 space-y-1">
             {mqBreakdown.contributions.map((c) => (
-              <li key={c.category} className="flex items-center gap-2 text-[11px]">
+              <li key={c.category} className="flex items-center gap-2 text-xs">
                 <span className="w-40 shrink-0 truncate text-[#3f5068] dark:text-[#a7bacd]" title={c.modelName}>
                   {c.label} <span className="text-[#9aa7b8]">· {c.weight > 0 ? "drives score" : "context"}</span>
                 </span>
@@ -698,7 +697,7 @@ export default async function VendorDeepDivePage({
               </li>
             ))}
           </ul>
-          <p className="mt-1.5 text-[10px] text-[#7a8aa0]">
+          <p className="mt-1.5 text-xs text-[#7a8aa0]">
             {mqBreakdown.contributions.length} of {MODEL_QUALITY_CATEGORY_COUNT} indices cited · {modelQuality.confidence}% confidence
             {modelQuality.citations[0] && (
               <>
@@ -716,7 +715,7 @@ export default async function VendorDeepDivePage({
           </p>
         </>
       ) : (
-        <p className="mt-1 text-[11px] leading-5 text-[#5e6b7e] dark:text-[#a7bacd]">
+        <p className="mt-1 text-xs leading-5 text-[#5e6b7e] dark:text-[#a7bacd]">
           Legacy human-preference Arena Elo (Artificial Analysis has no tracked model for this vendor yet) — a
           capability proxy, not a factuality audit (band-capped at 4.0).
           {modelQuality.citations[0] && (
@@ -884,8 +883,9 @@ export default async function VendorDeepDivePage({
                     {hasEvidence && strictLast && isRankableVendor(strictRoles) && (
                       <StrategicPositionPanel
                         badge={
-                          <span className="inline-flex rounded border border-sky-300/50 bg-sky-50 px-1.5 py-0.5 text-[10px] font-semibold text-sky-800 dark:border-sky-800/60 dark:bg-sky-950/40 dark:text-sky-300">
-                            Heuristic — derived from live evidence-based scores (snapshot {strictLast.date}), not a measured assessment
+                          /* Label kept (it IS a heuristic) as quiet inline text, not a boxed pill. */
+                          <span className="text-xs font-medium text-sky-700 dark:text-sky-300">
+                            Heuristic — derived from live evidence-based scores (snapshot {strictLast.date}), not measured
                           </span>
                         }
                         inputs={{

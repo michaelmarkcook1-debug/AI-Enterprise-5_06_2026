@@ -29,7 +29,7 @@ export default function EvidenceTrail({ scorecard }: { scorecard: VendorScorecar
             <div className="flex flex-wrap items-center justify-between gap-2">
               <span className="text-sm font-medium text-[#13294b] dark:text-[#eef3f8]">{DOMAIN_LABEL[domain]}</span>
               {scored ? (
-                <span className="flex items-center gap-2 text-[11px]">
+                <span className="flex items-center gap-2 text-xs">
                   <GradeChip grade={d!.bestGrade} />
                   <span className={MUTED}>Confidence {d!.confidence}%</span>
                   {d!.lowConfidence && (
@@ -39,7 +39,7 @@ export default function EvidenceTrail({ scorecard }: { scorecard: VendorScorecar
                   )}
                 </span>
               ) : (
-                <span className="rounded-full border border-[#d6c9a8] bg-[#f6f1e3] px-2 py-0.5 text-[11px] font-semibold text-[#5e6b7e] dark:border-[#2a4a6b] dark:bg-[#0c2238] dark:text-[#a7bacd]">
+                <span className="rounded-full border border-[#d6c9a8] bg-[#f6f1e3] px-2 py-0.5 text-xs font-semibold text-[#5e6b7e] dark:border-[#2a4a6b] dark:bg-[#0c2238] dark:text-[#a7bacd]">
                   Insufficient evidence
                 </span>
               )}
@@ -47,7 +47,7 @@ export default function EvidenceTrail({ scorecard }: { scorecard: VendorScorecar
             {scored && d!.citations.length > 0 && (
               <ul className="mt-2 space-y-1 pl-1">
                 {d!.citations.map((cit) => (
-                  <li key={cit.sourceUrl} className="flex flex-wrap items-center gap-2 text-[11px]">
+                  <li key={cit.sourceUrl} className="flex flex-wrap items-center gap-2 text-xs">
                     <GradeChip grade={cit.evidenceGrade} />
                     <a
                       href={cit.sourceUrl}

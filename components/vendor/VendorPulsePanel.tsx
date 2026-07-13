@@ -43,15 +43,12 @@ export default function VendorPulsePanel({ vendorName, news, standing, momentum 
 
   return (
     <div>
-      <div className="mb-2 flex flex-wrap items-center gap-2">
-        <p className={`text-xs ${MUTED}`}>
-          What moved for {vendorName} and where the evidence stands — a starting read over the cited
-          news feed and the live composite.
-        </p>
-        <span className="rounded-full border border-sky-400/40 bg-sky-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-sky-700 dark:text-sky-300">
-          Draft — pressure-test it
-        </span>
-      </div>
+      {/* De-clutter: the "Draft — pressure-test it" pill retired — the footer line
+          below already carries the draft framing once, calmly. */}
+      <p className={`mb-2 text-sm ${MUTED}`}>
+        What moved for {vendorName} and where the evidence stands — a starting read over the cited
+        news feed and the live composite.
+      </p>
 
       {/* The read — real evidence standing + momentum (no narrative invented). */}
       <div className="mb-3 flex flex-wrap gap-2 text-xs">
@@ -68,9 +65,9 @@ export default function VendorPulsePanel({ vendorName, news, standing, momentum 
           <span
             className={`rounded-lg border px-2.5 py-1 ${
               dir === "up"
-                ? "border-emerald-500/30 text-emerald-700 dark:text-emerald-300"
+                ? "border-sky-500/30 text-sky-700 dark:text-sky-400"
                 : dir === "down"
-                  ? "border-rose-500/30 text-rose-700 dark:text-rose-300"
+                  ? "border-orange-500/30 text-orange-600 dark:text-orange-400"
                   : "border-black/10 dark:border-white/10 " + MUTED
             }`}
           >
@@ -95,18 +92,18 @@ export default function VendorPulsePanel({ vendorName, news, standing, momentum 
                 <span className="text-sm font-medium">{n.title}</span>
               )}
               {n.whyItMatters && <p className={`mt-1 text-xs leading-5 ${MUTED}`}>{n.whyItMatters}</p>}
-              <p className={`mt-1 text-[11px] ${MUTED}`}>
-                {n.sourceName} · {ageLabel(n.publishedAt)} · impact {Math.round(n.impactScore)}
-                <span className="ml-1">(directional estimate)</span>
+              {/* "~" marks the estimate per item; the footer states it once in words. */}
+              <p className={`mt-1 text-xs ${MUTED}`}>
+                {n.sourceName} · {ageLabel(n.publishedAt)} · impact ~{Math.round(n.impactScore)}
               </p>
             </li>
           ))}
         </ul>
       )}
 
-      <p className={`mt-2 text-[11px] ${MUTED}`}>
+      <p className={`mt-2 text-xs ${MUTED}`}>
         The Pulse is a view over the cited news feed + the live evidence composite — impact scores
-        are directional, the standing is evidence-graded, and the framing is a draft to challenge.
+        are directional (~), the standing is evidence-graded, and the framing is a draft to challenge.
       </p>
     </div>
   );

@@ -35,11 +35,11 @@ export default function BreakingNewsHero({
   return (
     <section className="mb-8">
       <div className="mb-3 flex items-center justify-between gap-3">
-        <span className="inline-flex items-center gap-1.5 rounded-full border border-rose-500/40 bg-rose-500/10 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-[0.14em] text-rose-700 dark:text-rose-300">
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-rose-500/40 bg-rose-500/10 px-2.5 py-0.5 text-xs font-bold uppercase tracking-[0.14em] text-rose-700 dark:text-rose-300">
           <span className="h-1.5 w-1.5 rounded-full bg-rose-500" aria-hidden />
           Breaking
         </span>
-        <span className={`text-[11px] ${MUTED}`}>
+        <span className={`text-xs ${MUTED}`}>
           {news ? `Latest verified item ${ageLabel(news.latestAgeDays)}` : ""}
         </span>
       </div>
@@ -54,7 +54,7 @@ export default function BreakingNewsHero({
       ) : (
         <div className="rounded-xl border border-black/10 bg-white/60 p-5 dark:border-white/10 dark:bg-white/5">
           {news?.usedFallback && (
-            <p className={`mb-3 text-[11px] ${MUTED}`}>
+            <p className={`mb-3 text-xs ${MUTED}`}>
               Nothing inside the two-week window — showing the most recent verified items.
             </p>
           )}
@@ -94,7 +94,7 @@ export default function BreakingNewsHero({
                   >
                     {n.title}
                   </a>
-                  <span className={`mt-0.5 block text-[11px] ${MUTED}`}>{itemMeta(n)}</span>
+                  <span className={`mt-0.5 block text-xs ${MUTED}`}>{itemMeta(n)}</span>
                   {bridges?.get(n.id) && <NewsBridgePanel bridge={bridges.get(n.id)!} compact />}
                 </li>
               ))}

@@ -6,13 +6,6 @@ import { calibrationBand } from "@/lib/ranking/calibration";
 
 const MUTED = "text-[#5e6b7e] dark:text-[#a7bacd]";
 
-function tone(score: number): string {
-  if (score >= 4) return "text-emerald-700 dark:text-emerald-300";
-  if (score >= 3) return "text-amber-700 dark:text-amber-300";
-  if (score >= 2) return "text-[#a07f1f] dark:text-[#d4af37]";
-  return "text-rose-700 dark:text-rose-300";
-}
-
 export interface VerdictStanding {
   categoryId: string;
   categoryName: string;
@@ -67,7 +60,9 @@ export default function VerdictCard({
         {composite != null ? (
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
             <span>
-              <span className={`font-mono text-3xl font-semibold tabular-nums ${tone(composite)}`}>
+              {/* Neutral ink (no red↔green) — the badge + explicit confidence stat
+                  beside it carry the qualitative read. */}
+              <span className="font-mono text-3xl font-semibold tabular-nums text-[#13294b] dark:text-[#eef3f8]">
                 {composite.toFixed(2)}
                 <span className={`text-base ${MUTED}`}>/5</span>
               </span>
@@ -101,7 +96,7 @@ export default function VerdictCard({
         )}
         {momentum != null && (
           <div className="text-sm">
-            <span className={`font-mono font-semibold ${momentum > 0 ? "text-emerald-700 dark:text-emerald-300" : momentum < 0 ? "text-rose-700 dark:text-rose-300" : MUTED}`}>
+            <span className={`font-mono font-semibold ${momentum > 0 ? "text-sky-700 dark:text-sky-400" : momentum < 0 ? "text-orange-600 dark:text-orange-400" : MUTED}`}>
               {momentum > 0 ? "+" : ""}
               {momentum.toFixed(1)}
             </span>
