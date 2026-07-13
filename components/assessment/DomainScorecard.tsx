@@ -28,9 +28,9 @@ function ScoreRow({ d }: { d: DomainScore }) {
         <div className="flex items-center justify-between gap-2">
           <div>
             <div className="text-sm font-medium text-[#13294b] dark:text-[#eef3f8]">{name}</div>
-            <div className="text-[10px] uppercase tracking-wide text-[#7a8aa0] dark:text-[#7a9bb8]">{pillar}</div>
+            <div className="text-xs uppercase tracking-wide text-[#7a8aa0] dark:text-[#7a9bb8]">{pillar}</div>
           </div>
-          <span className="inline-flex w-fit rounded-full border border-[#d6c9a8] bg-[#f6f1e3] px-2 py-0.5 text-[11px] font-semibold text-[#5e6b7e] dark:border-[#2a4a6b] dark:bg-[#0c2238] dark:text-[#a7bacd]">
+          <span className="inline-flex w-fit rounded-full border border-[#d6c9a8] bg-[#f6f1e3] px-2 py-0.5 text-xs font-semibold text-[#5e6b7e] dark:border-[#2a4a6b] dark:bg-[#0c2238] dark:text-[#a7bacd]">
             Insufficient evidence
           </span>
         </div>
@@ -45,7 +45,7 @@ function ScoreRow({ d }: { d: DomainScore }) {
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0">
           <div className="text-sm font-medium text-[#13294b] dark:text-[#eef3f8]">{name}</div>
-          <div className="text-[10px] uppercase tracking-wide text-[#7a8aa0] dark:text-[#7a9bb8]">{pillar}</div>
+          <div className="text-xs uppercase tracking-wide text-[#7a8aa0] dark:text-[#7a9bb8]">{pillar}</div>
         </div>
         <div className="flex items-center gap-3">
           {/* Neutral ink number (no red↔green) — certainty carried by the veil, not hue. */}
@@ -53,7 +53,7 @@ function ScoreRow({ d }: { d: DomainScore }) {
             <div className="font-mono text-lg font-semibold tabular-nums text-[#13294b] dark:text-[#eef3f8]">
               {d.score.toFixed(1)}<span className="text-xs text-[#7a8aa0]">/5</span>
             </div>
-            <div className="text-[11px] text-[#5e6b7e] dark:text-[#a7bacd]">{DOMAIN_BAND_TEXT[d.bandLabel]}</div>
+            <div className="text-xs text-[#5e6b7e] dark:text-[#a7bacd]">{DOMAIN_BAND_TEXT[d.bandLabel]}</div>
           </ConfidenceVeil>
           <EvidenceBadge grade={d.bestGrade} />
         </div>
@@ -67,7 +67,7 @@ function ScoreRow({ d }: { d: DomainScore }) {
       </div>
 
       {/* confidence + low-confidence flag */}
-      <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px] text-[#5e6b7e] dark:text-[#a7bacd]">
+      <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-[#5e6b7e] dark:text-[#a7bacd]">
         <span>Confidence {d.confidence}%</span>
         {d.lowConfidence && (
           <span className="rounded-full bg-amber-100 px-1.5 py-0.5 font-semibold text-amber-800 dark:bg-amber-950/40 dark:text-amber-300">
@@ -80,12 +80,12 @@ function ScoreRow({ d }: { d: DomainScore }) {
       {/* expandable citations */}
       {d.citations.length > 0 ? (
         <details className="mt-1.5">
-          <summary className="cursor-pointer select-none text-[11px] font-medium text-[#4c5d75] hover:text-[#13294b] dark:text-[#7a9bb8] dark:hover:text-[#eef3f8]">
+          <summary className="cursor-pointer select-none text-xs font-medium text-[#4c5d75] hover:text-[#13294b] dark:text-[#7a9bb8] dark:hover:text-[#eef3f8]">
             ▸ {d.citations.length} {d.citations.length === 1 ? "citation" : "citations"}
           </summary>
           <ul className="mt-1 space-y-1 pl-3">
             {d.citations.map((c) => (
-              <li key={c.sourceUrl} className="flex items-center gap-2 text-[11px]">
+              <li key={c.sourceUrl} className="flex items-center gap-2 text-xs">
                 <EvidenceBadge grade={c.evidenceGrade} />
                 <a
                   href={c.sourceUrl}
@@ -101,7 +101,7 @@ function ScoreRow({ d }: { d: DomainScore }) {
           </ul>
         </details>
       ) : (
-        <div className="mt-1 text-[11px] italic text-[#7a8aa0] dark:text-[#7a9bb8]">reviewed — source on file</div>
+        <div className="mt-1 text-xs italic text-[#7a8aa0] dark:text-[#7a9bb8]">reviewed — source on file</div>
       )}
     </div>
   );
@@ -116,11 +116,11 @@ export default function DomainScorecard({ scorecard }: { scorecard: VendorScorec
         <strong>“insufficient evidence,”</strong> never a guessed score. Draft assessment — pressure-test against the
         cited sources.
       </p>
-      <div className="text-[11px] text-[#7a8aa0] dark:text-[#7a9bb8]">
+      <div className="text-xs text-[#7a8aa0] dark:text-[#7a9bb8]">
         {scorecard.scoredCount} of {scorecard.domains.length} domains evidenced · {scorecard.totalEvidenceRows} reviewed,
         source-backed records
       </div>
-      <div className="mt-1 flex items-center gap-2 text-[10px] text-[#7a8aa0] dark:text-[#7a9bb8]">
+      <div className="mt-1 flex items-center gap-2 text-xs text-[#7a8aa0] dark:text-[#7a9bb8]">
         <span className="inline-block h-3 w-6 rounded-sm bg-[#e9e0c9] dark:bg-[#102135]">
           <span className="ml-[2px] inline-block h-3 w-3 rounded-sm bg-[#b08d2f] align-top dark:bg-[#e8c95c]" />
         </span>

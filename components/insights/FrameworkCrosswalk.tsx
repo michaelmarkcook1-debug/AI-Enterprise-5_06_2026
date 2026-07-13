@@ -21,7 +21,7 @@ function StrengthChip({ strength }: { strength: MappingStrength }) {
     gap: { label: "no clean mapping", cls: "bg-[#ece3cb] text-[#3f5068] dark:bg-[#143049] dark:text-[#a7bacd]" },
   };
   const { label, cls } = map[strength];
-  return <span className={`rounded px-1.5 py-0.5 text-[10px] font-semibold ${cls}`}>{label}</span>;
+  return <span className={`rounded px-1.5 py-0.5 text-xs font-semibold ${cls}`}>{label}</span>;
 }
 
 function Refs({ refs }: { refs: string[] }) {
@@ -84,7 +84,7 @@ export default function FrameworkCrosswalk() {
       {/* Crosswalk table */}
       <div className="overflow-x-auto rounded-xl border border-black/10 dark:border-white/10">
         <table className="w-full min-w-[720px] text-left">
-          <thead className="bg-black/[0.03] text-[11px] uppercase tracking-wide dark:bg-white/5">
+          <thead className="bg-black/[0.03] text-xs uppercase tracking-wide dark:bg-white/5">
             <tr>
               <th className="px-3 py-2 font-semibold">Assessment domain</th>
               <th className="px-3 py-2 font-semibold">NIST AI RMF</th>
@@ -101,7 +101,7 @@ export default function FrameworkCrosswalk() {
                     <StrengthChip strength={r.strength} />
                   </div>
                   <p className={`mt-1 text-xs leading-5 ${MUTED}`}>{r.cioLine}</p>
-                  <p className="mt-1 text-[11px] leading-5 text-[#7a8aa0] dark:text-[#8fa5bb]">{r.note}</p>
+                  <p className="mt-1 text-xs leading-5 text-[#7a8aa0] dark:text-[#8fa5bb]">{r.note}</p>
                 </td>
                 <td className="px-3 py-3"><Refs refs={r.nist} /></td>
                 <td className="px-3 py-3"><Refs refs={r.iso} /></td>

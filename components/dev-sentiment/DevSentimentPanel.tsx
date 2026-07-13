@@ -39,7 +39,7 @@ export default function DevSentimentPanel({ agg }: { agg: DevSentimentAggregate 
           What developers actually say about {agg.subject} — from official dev sources (Hacker News,
           GitHub, the Stack Overflow survey). Scoped to coding/developer models only.
         </p>
-        <span className="rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-800 dark:text-amber-200">
+        <span className="rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-amber-800 dark:text-amber-200">
           Analyst-curated · directional
         </span>
       </div>
@@ -49,7 +49,7 @@ export default function DevSentimentPanel({ agg }: { agg: DevSentimentAggregate 
           <p className="text-sm font-semibold">Insufficient developer-sentiment data</p>
           <p className={`mt-1 text-xs ${MUTED}`}>{agg.coverageNote}</p>
           {agg.record.sources.length > 0 && (
-            <p className={`mt-2 text-[11px] ${MUTED}`}>
+            <p className={`mt-2 text-xs ${MUTED}`}>
               What exists so far: {agg.record.sources.map((s) => SOURCE_LABEL[s.source]).join(", ")} —
               shown below, but not enough independent signal to characterise sentiment.
             </p>
@@ -63,7 +63,7 @@ export default function DevSentimentPanel({ agg }: { agg: DevSentimentAggregate 
                 {TAG_LABEL[agg.reading.tag]}
               </span>
             )}
-            <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase ${
+            <span className={`rounded-full border px-2 py-0.5 text-xs font-semibold uppercase ${
               agg.tier === "strong"
                 ? "border-emerald-500/40 text-emerald-700 dark:text-emerald-300"
                 : "border-black/15 dark:border-white/20 " + MUTED
@@ -72,7 +72,7 @@ export default function DevSentimentPanel({ agg }: { agg: DevSentimentAggregate 
             </span>
           </div>
           {agg.reading && <p className="mt-2 text-sm leading-6">{agg.reading.rationale}</p>}
-          <p className={`mt-1.5 text-[11px] ${MUTED}`}>{agg.coverageNote}</p>
+          <p className={`mt-1.5 text-xs ${MUTED}`}>{agg.coverageNote}</p>
         </div>
       )}
 
@@ -82,10 +82,10 @@ export default function DevSentimentPanel({ agg }: { agg: DevSentimentAggregate 
           <div key={s.source} className="border-t border-black/5 pt-3 dark:border-white/10">
             <div className="flex flex-wrap items-baseline justify-between gap-2">
               <span className="text-sm font-semibold">{SOURCE_LABEL[s.source]}</span>
-              <span className={`text-[10px] uppercase tracking-wide ${MUTED}`}>measures: {s.measures}</span>
+              <span className={`text-xs uppercase tracking-wide ${MUTED}`}>measures: {s.measures}</span>
             </div>
             <p className={`mt-1 text-xs leading-5 ${MUTED}`}>{s.metric}</p>
-            <ul className={`mt-1 space-y-0.5 text-[11px] ${MUTED}`}>
+            <ul className={`mt-1 space-y-0.5 text-xs ${MUTED}`}>
               {s.citations.map((c) => (
                 <li key={c.url}>
                   <a href={c.url} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-[#15263c] dark:hover:text-[#eef3f8]">
@@ -96,7 +96,7 @@ export default function DevSentimentPanel({ agg }: { agg: DevSentimentAggregate 
               ))}
             </ul>
             {(s.topThreads ?? []).length > 0 && (
-              <ul className="mt-1.5 space-y-0.5 text-[11px]">
+              <ul className="mt-1.5 space-y-0.5 text-xs">
                 {(s.topThreads ?? []).map((t) => (
                   <li key={t.url}>
                     <a href={t.url} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2">
@@ -111,7 +111,7 @@ export default function DevSentimentPanel({ agg }: { agg: DevSentimentAggregate 
         ))}
       </div>
 
-      <p className={`mt-2 text-[11px] ${MUTED}`}>
+      <p className={`mt-2 text-xs ${MUTED}`}>
         Compiled {DEV_SENTIMENT_COMPILED_AT} from official APIs (HN Algolia, GitHub REST) + the
         Stack Overflow Developer Survey. Engagement/adoption metrics are factual; the sentiment
         reading is an analyst interpretation, tier- and coverage-gated — a labelled input, never

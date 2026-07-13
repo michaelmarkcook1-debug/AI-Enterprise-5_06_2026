@@ -68,7 +68,7 @@ export default function PeerUsageOverview({
     <Link
       key={id}
       href={`/vendors/${id}`}
-      className="inline-flex items-baseline gap-1 rounded-full border border-black/10 px-2 py-0.5 text-[11px] hover:border-[#b08d2f] dark:border-white/10"
+      className="inline-flex items-baseline gap-1 rounded-full border border-black/10 px-2 py-0.5 text-xs hover:border-[#b08d2f] dark:border-white/10"
     >
       <span className="font-medium">{vendorNames[id] ?? prettyVendor(id)}</span>
     </Link>
@@ -111,7 +111,7 @@ export default function PeerUsageOverview({
       {/* Most-adopted vendors across the disclosed base — colored bar chart */}
       {topVendors.length > 0 && !useCase && (
         <div className="mt-4 rounded-lg border border-black/5 p-3 dark:border-white/10">
-          <div className={`mb-1.5 text-[10px] font-semibold uppercase tracking-wide ${MUTED}`}>
+          <div className={`mb-1.5 text-xs font-semibold uppercase tracking-wide ${MUTED}`}>
             Most-adopted across disclosed peers
           </div>
           <SimpleBarChart
@@ -136,12 +136,12 @@ export default function PeerUsageOverview({
 
       {useCase && (
         <div className="mt-3 space-y-1">
-          <p className={`text-[11px] ${MUTED}`}>
+          <p className={`text-xs ${MUTED}`}>
             Showing industries where <strong className="text-[#13294b] dark:text-[#eef3f8]">{useCase}</strong> is a
             top cited deployed use-case. This filters industries — it is not a claim that a specific vendor
             is used for this use-case.
           </p>
-          <p className="text-[11px] leading-4 text-amber-700 dark:text-amber-300">
+          <p className="text-xs leading-4 text-amber-700 dark:text-amber-300">
             Use-case labels are currently catalogued for {useCaseCoveredVerticals.size === 1 ? "one industry" : `${useCaseCoveredVerticals.size} industries`} only
             {uncoveredWithVendorUsage.length > 0 && (
               <>
@@ -164,7 +164,7 @@ export default function PeerUsageOverview({
         )}
       </div>
 
-      <p className={`mt-4 text-[11px] leading-4 ${MUTED}`}>
+      <p className={`mt-4 text-xs leading-4 ${MUTED}`}>
         Breadth = cited US-Census BTOS AI-adoption rates ({coverage.verticalsWithBenchmark} industries).
         Vendor usage = publicly <strong>disclosed</strong>, cited adoptions by {coverage.companies} named
         peers ({coverage.verticalsWithVendorUsage} industries covered so far) — absence means no peer has
@@ -187,7 +187,7 @@ function IndustryRow({
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <span className="text-sm font-semibold text-[#13294b] dark:text-[#eef3f8]">{row.label}</span>
         {row.adoptionStat && (
-          <span className={`text-[11px] ${MUTED}`}>
+          <span className={`text-xs ${MUTED}`}>
             {row.adoptionStat.headline}
             {row.adoptionStat.source?.url && (
               <>
@@ -208,16 +208,16 @@ function IndustryRow({
       <div className="mt-2">
         {row.vendorUsage.length > 0 ? (
           <div className="flex flex-wrap items-center gap-1.5">
-            <span className={`text-[10px] font-semibold uppercase tracking-wide ${MUTED}`}>Disclosed vendors</span>
+            <span className={`text-xs font-semibold uppercase tracking-wide ${MUTED}`}>Disclosed vendors</span>
             {row.vendorUsage.map((v) => (
               <span key={v.vendorId} className="inline-flex items-center gap-1" title={v.companies.join(", ")}>
                 {vendorLink(v.vendorId)}
-                <span className={`text-[11px] tabular-nums ${MUTED}`}>{v.adopters}</span>
+                <span className={`text-xs tabular-nums ${MUTED}`}>{v.adopters}</span>
               </span>
             ))}
           </div>
         ) : (
-          <p className={`text-[11px] ${MUTED}`}>
+          <p className={`text-xs ${MUTED}`}>
             {row.companyCount > 0
               ? `${row.companyCount} named peer${row.companyCount === 1 ? "" : "s"} tracked — no disclosed AI-vendor adoption cited yet.`
               : "No named adopters cited yet — industry-adoption benchmark only."}

@@ -97,7 +97,7 @@ export default async function SharedDecisionPage({ params }: { params: Promise<P
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-10">
-      <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-[#b08d2f] dark:text-[#d4af37]">
+      <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#b08d2f] dark:text-[#d4af37]">
         Shared decision — read only
       </p>
       <h1 className="font-display mt-2 text-3xl font-semibold tracking-tight">{decision.name}</h1>
@@ -125,7 +125,7 @@ export default async function SharedDecisionPage({ params }: { params: Promise<P
             <h2 className="text-sm font-semibold text-[#13294b] dark:text-[#eef3f8]">Weighting used</h2>
             <div className="mt-3 grid grid-cols-1 gap-x-4 gap-y-1 sm:grid-cols-2">
               {weightDomains.map((d: DomainId) => (
-                <div key={d} className="flex items-center justify-between gap-2 text-[11px]">
+                <div key={d} className="flex items-center justify-between gap-2 text-xs">
                   <span className="truncate text-[#3f5068] dark:text-[#a7bacd]" title={DOMAIN_LABEL[d]}>
                     {DOMAIN_LABEL[d]}
                   </span>
@@ -162,12 +162,12 @@ export default async function SharedDecisionPage({ params }: { params: Promise<P
                         </span>
                         <span className="flex shrink-0 items-baseline gap-3 text-xs">
                           <span className="font-mono tabular-nums text-[#13294b] dark:text-[#eef3f8]">
-                            {v.composite.toFixed(2)}<span className="ml-0.5 text-[10px] text-[#7a8aa0]">/5</span>
+                            {v.composite.toFixed(2)}<span className="ml-0.5 text-xs text-[#7a8aa0]">/5</span>
                           </span>
                           <span className="font-mono tabular-nums text-[#7a8aa0]">{Math.round(v.coverage * 100)}% cov</span>
                         </span>
                       </div>
-                      {note && <p className={`mt-1 pl-6 text-[11px] italic ${MUTED}`}>&ldquo;{note}&rdquo;</p>}
+                      {note && <p className={`mt-1 pl-6 text-xs italic ${MUTED}`}>&ldquo;{note}&rdquo;</p>}
                     </li>
                   );
                 })}

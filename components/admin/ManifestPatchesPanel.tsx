@@ -73,24 +73,24 @@ export default function ManifestPatchesPanel({ patches }: { patches: PatchRow[] 
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2 text-xs">
                     <span className="font-semibold text-[#15263c] dark:text-[#eef3f8]">{p.vendorName}</span>
-                    <span className="rounded-full border border-[#d6c9a8] bg-white px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[#2e3f57] dark:border-[#2a4a6b] dark:bg-[#0c2238] dark:text-[#c2d1e0]">
+                    <span className="rounded-full border border-[#d6c9a8] bg-white px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-[#2e3f57] dark:border-[#2a4a6b] dark:bg-[#0c2238] dark:text-[#c2d1e0]">
                       {p.category.replace(/_/g, " ")}
                     </span>
-                    <span className="rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-semibold text-rose-800 dark:bg-rose-950/40 dark:text-rose-300">
+                    <span className="rounded-full bg-rose-100 px-2 py-0.5 text-xs font-semibold text-rose-800 dark:bg-rose-950/40 dark:text-rose-300">
                       HTTP {p.httpStatus}
                     </span>
                     {p.retryOk === true && (
-                      <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300">
+                      <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300">
                         auto-retry succeeded
                       </span>
                     )}
                     {p.retryOk === false && (
-                      <span className="rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-semibold text-rose-800 dark:bg-rose-950/40 dark:text-rose-300">
+                      <span className="rounded-full bg-rose-100 px-2 py-0.5 text-xs font-semibold text-rose-800 dark:bg-rose-950/40 dark:text-rose-300">
                         retry failed
                       </span>
                     )}
                     {!p.retryAttempted && (
-                      <span className="rounded-full bg-[#e3d9c0] px-2 py-0.5 text-[10px] font-semibold text-[#2e3f57] dark:bg-[#143049] dark:text-[#c2d1e0]">
+                      <span className="rounded-full bg-[#e3d9c0] px-2 py-0.5 text-xs font-semibold text-[#2e3f57] dark:bg-[#143049] dark:text-[#c2d1e0]">
                         no auto-retry (confidence &lt; 75)
                       </span>
                     )}
@@ -102,7 +102,7 @@ export default function ManifestPatchesPanel({ patches }: { patches: PatchRow[] 
                   <div className="mt-2 text-xs italic text-[#3f5068] dark:text-[#a7bacd]">{p.candidateTitle}</div>
                   <p className="mt-2 text-xs leading-5 text-[#2e3f57] dark:text-[#c2d1e0]">{p.rationale}</p>
                   {p.citations.length > 0 && (
-                    <div className="mt-2 text-[11px] text-[#3f5068] dark:text-[#8fa5bb]">
+                    <div className="mt-2 text-xs text-[#3f5068] dark:text-[#8fa5bb]">
                       Cited:{" "}
                       {p.citations.map((c, i) => (
                         <span key={c}>
@@ -114,9 +114,9 @@ export default function ManifestPatchesPanel({ patches }: { patches: PatchRow[] 
                   )}
                 </div>
                 <div className="text-right text-xs">
-                  <div className="text-[10px] uppercase tracking-wide text-[#4c5d75]">Confidence</div>
+                  <div className="text-xs uppercase tracking-wide text-[#4c5d75]">Confidence</div>
                   <div className="mt-0.5 font-mono text-2xl font-bold tabular-nums text-[#15263c] dark:text-[#eef3f8]">{conf}</div>
-                  <div className="mt-1 text-[10px] text-[#4c5d75]">{p.searchesUsed} web searches</div>
+                  <div className="mt-1 text-xs text-[#4c5d75]">{p.searchesUsed} web searches</div>
                 </div>
               </div>
             </article>

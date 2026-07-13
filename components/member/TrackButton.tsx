@@ -127,12 +127,12 @@ export default function TrackButton({
         {text}
       </button>
       {justAdded && (
-        <span className="text-[11px] text-emerald-700 dark:text-emerald-300">
+        <span className="text-xs text-emerald-700 dark:text-emerald-300">
           Added to your watchlist
         </span>
       )}
       {error && (
-        <span className="text-[11px] text-rose-600 dark:text-rose-400">Couldn&apos;t save</span>
+        <span className="text-xs text-rose-600 dark:text-rose-400">Couldn&apos;t save</span>
       )}
     </span>
   );

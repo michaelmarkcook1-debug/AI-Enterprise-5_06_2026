@@ -88,7 +88,7 @@ export default function JobsHub() {
             </div>
             <p className={`mt-1 text-xs leading-5 ${MUTED}`}>{job.detail}</p>
             {job.href === "/peers" && resume && (
-              <p className="mt-2 inline-block rounded-full border border-[#d4af37]/50 bg-[#d4af37]/10 px-2 py-0.5 text-[10px] font-medium">
+              <p className="mt-2 inline-block rounded-full border border-[#d4af37]/50 bg-[#d4af37]/10 px-2 py-0.5 text-xs font-medium">
                 Resume: {resume}
               </p>
             )}

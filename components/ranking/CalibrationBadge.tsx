@@ -40,7 +40,7 @@ export default function CalibrationBadge({
   showStanding?: boolean;
 }) {
   const { band, limitedEvidence, standingLabel } = calibration;
-  const pad = size === "md" ? "px-2 py-0.5 text-[11px]" : "px-1.5 py-0.5 text-[10px]";
+  const pad = size === "md" ? "px-2 py-0.5 text-xs" : "px-1.5 py-0.5 text-xs";
   return (
     <span className="inline-flex flex-wrap items-center gap-1 align-middle">
       <span
@@ -50,7 +50,7 @@ export default function CalibrationBadge({
         {band}
       </span>
       {showStanding && (
-        <span className={`tabular-nums text-[#5b6b7f] dark:text-[#8fa5bb] ${size === "md" ? "text-[11px]" : "text-[10px]"}`}>
+        <span className={`tabular-nums text-[#5b6b7f] dark:text-[#8fa5bb] ${size === "md" ? "text-xs" : "text-xs"}`}>
           {standingLabel}
         </span>
       )}

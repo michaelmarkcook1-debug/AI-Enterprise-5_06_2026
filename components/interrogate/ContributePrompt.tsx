@@ -57,13 +57,13 @@ export default function ContributePrompt({ sessionId }: { sessionId: string }) {
   return (
     <div className="mt-4 border-t border-black/5 pt-3 dark:border-white/10">
       <p className="text-xs font-medium">Contribute this session anonymously?</p>
-      <p className={`mt-1 text-[11px] leading-4 ${MUTED}`}>
+      <p className={`mt-1 text-xs leading-4 ${MUTED}`}>
         Your goal and constraints would be reduced to coarse categories (never your company name or raw
         answers) and added to the shared pool, so future CIOs in a similar position see what peers are
         actually doing. Declining doesn&apos;t affect this finding at all.{" "}
         <span className="italic">Draft terms — pending legal review, not yet a final agreement.</span>
       </p>
-      {status === "error" && <p className="mt-2 text-[11px] text-amber-700 dark:text-amber-300">{error}</p>}
+      {status === "error" && <p className="mt-2 text-xs text-amber-700 dark:text-amber-300">{error}</p>}
       <div className="mt-2 flex gap-2">
         <button
           onClick={() => decide(true)}

@@ -89,7 +89,7 @@ export default function ShortlistVendorCards({
         <h2 className="text-xs font-bold uppercase tracking-[0.14em] text-[#a07f1f] dark:text-[#d4af37]">
           Your assessed shortlist
         </h2>
-        <span className="text-[10px] text-[#5b6b7f] dark:text-[#8fa5bb]">Select a card to compare against the top 3 in its category</span>
+        <span className="text-xs text-[#5b6b7f] dark:text-[#8fa5bb]">Select a card to compare against the top 3 in its category</span>
       </div>
       <div className="grid items-start gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {shortlisted.map((v) => {
@@ -109,18 +109,18 @@ export default function ShortlistVendorCards({
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
                   <div className="truncate text-base font-semibold text-[#13294b] dark:text-[#eef3f8]">{v.name}</div>
-                  <div className="mt-0.5 truncate text-[11px] text-[#5b6b7f] dark:text-[#a7bacd]">{v.category}</div>
+                  <div className="mt-0.5 truncate text-xs text-[#5b6b7f] dark:text-[#a7bacd]">{v.category}</div>
                 </div>
                 <span aria-hidden className={`mt-1 shrink-0 text-xs text-[#a07f1f] transition-transform dark:text-[#d4af37] ${isOpen ? "rotate-180" : ""}`}>▾</span>
               </div>
               <div className="mt-3 flex items-baseline gap-5 font-mono">
                 <span>
                   <span className="text-xl font-semibold text-[#13294b] dark:text-[#eef3f8]">{v.score}</span>
-                  <span className="ml-1 text-[10px] uppercase text-[#5b6b7f] dark:text-[#8fa5bb]">score</span>
+                  <span className="ml-1 text-xs uppercase text-[#5b6b7f] dark:text-[#8fa5bb]">score</span>
                 </span>
                 <span>
                   <span className="text-xl font-semibold text-[#475a72] dark:text-[#a7bacd]">{v.confidence}</span>
-                  <span className="ml-1 text-[10px] uppercase text-[#5b6b7f] dark:text-[#8fa5bb]">conf.</span>
+                  <span className="ml-1 text-xs uppercase text-[#5b6b7f] dark:text-[#8fa5bb]">conf.</span>
                 </span>
               </div>
             </button>
@@ -131,7 +131,7 @@ export default function ShortlistVendorCards({
       {/* Full-width comparison strip — outside the card grid so expanding never distorts the cards */}
       {openVendor && (
         <div className="mt-3 rounded-lg border border-[#e3d9c0] bg-[#fffdf7] p-4 dark:border-[#1d3a57] dark:bg-[#0c2238]">
-          <div className="mb-2 text-[10px] font-bold uppercase tracking-[0.14em] text-[#a07f1f] dark:text-[#d4af37]">
+          <div className="mb-2 text-xs font-bold uppercase tracking-[0.14em] text-[#a07f1f] dark:text-[#d4af37]">
             Top 3 — {openVendor.category}
           </div>
           <ol className="grid gap-2 md:grid-cols-3">
@@ -147,7 +147,7 @@ export default function ShortlistVendorCards({
                   }`}
                 >
                   <span className="min-w-0 truncate">
-                    <span className="mr-1.5 font-mono text-[10px] text-[#5b6b7f] dark:text-[#8fa5bb]">{i + 1}.</span>
+                    <span className="mr-1.5 font-mono text-xs text-[#5b6b7f] dark:text-[#8fa5bb]">{i + 1}.</span>
                     {t.name}
                     {isPick && <span className="ml-1.5 text-[9px] uppercase tracking-wide text-[#a07f1f] dark:text-[#d4af37]">shortlisted</span>}
                   </span>

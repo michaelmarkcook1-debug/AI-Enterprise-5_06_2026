@@ -114,7 +114,7 @@ const ROLE_TONE: Record<Role, { bg: string; text: string }> = {
 function RoleBadge({ role }: { role: Role }) {
   const tone = ROLE_TONE[role] ?? { bg: "bg-[#ece3cb] dark:bg-[#143049]", text: "text-[#3f5068] dark:text-[#c2d1e0]" };
   return (
-    <span className={`inline-flex rounded border border-current/20 px-1.5 py-0.5 text-[11px] font-semibold ${tone.bg} ${tone.text}`}>
+    <span className={`inline-flex rounded border border-current/20 px-1.5 py-0.5 text-xs font-semibold ${tone.bg} ${tone.text}`}>
       {role}
     </span>
   );
@@ -133,7 +133,7 @@ function TaxoChip({ label, variant }: { label: string; variant: "layer" | "lens"
         : "bg-[#ece3cb] text-[#3f5068] dark:bg-[#143049] dark:text-[#c2d1e0]";
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[11px] font-semibold ${cls}`}
+      className={`inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs font-semibold ${cls}`}
       title={variant === "lens" ? "Cross-cutting lens — a different axis, not a vendor tier" : variant === "tag" ? "Cross-cutting tag" : "Standard-stack layer"}
     >
       {variant === "lens" && <span aria-hidden>◇</span>}
@@ -176,9 +176,9 @@ function StrategicPositionPanel({
       <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
         {cells.map((c) => (
           <div key={c.label} className="rounded-lg border border-[#e9e0c8] bg-white p-3 dark:border-[#1d3a57] dark:bg-[#0c2238]/50">
-            <div className="text-[10px] font-semibold uppercase tracking-wide text-[#5b6b7f] dark:text-[#8fa5bb]">{c.label}</div>
+            <div className="text-xs font-semibold uppercase tracking-wide text-[#5b6b7f] dark:text-[#8fa5bb]">{c.label}</div>
             <div className={`mt-1 font-mono text-2xl font-bold tabular-nums ${c.tone}`}>{c.value}</div>
-            <p className="mt-1 text-[10px] leading-4 text-[#5b6b7f] dark:text-[#8fa5bb]">{c.note}</p>
+            <p className="mt-1 text-xs leading-4 text-[#5b6b7f] dark:text-[#8fa5bb]">{c.note}</p>
           </div>
         ))}
       </div>
@@ -237,7 +237,7 @@ function SentimentBadge({ sentiment }: { sentiment: string }) {
     mixed:    "border-amber-300 bg-amber-50 text-amber-800 dark:border-amber-800 dark:bg-amber-950/60 dark:text-amber-300",
   };
   return (
-    <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${map[sentiment] ?? map["neutral"]}`}>
+    <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold uppercase tracking-wide ${map[sentiment] ?? map["neutral"]}`}>
       {sentiment}
     </span>
   );
@@ -283,7 +283,7 @@ function EvidenceGradeChip({ grade }: { grade: Entity["evidenceGrade"] }) {
   };
   return (
     <span
-      className={`inline-flex items-center rounded border px-1.5 py-0.5 text-[11px] font-bold uppercase tracking-wide ${colours[grade]}`}
+      className={`inline-flex items-center rounded border px-1.5 py-0.5 text-xs font-bold uppercase tracking-wide ${colours[grade]}`}
       title={EVIDENCE_GRADE_DESCRIPTIONS[grade]}
     >
       {grade}
@@ -497,7 +497,7 @@ function ScoreHistoryChart({ snapshots, reputation = [] }: { snapshots: Snapshot
       <text x={PAD_LEFT + 170} y={PAD_TOP} fontSize="9" fill="#9ca3af">Reputation (composite)</text>
     </svg>
     {repInRange.length < 2 && (
-      <p className="mt-2 text-[11px] text-[#5b6b7f] dark:text-[#8fa5bb]">
+      <p className="mt-2 text-xs text-[#5b6b7f] dark:text-[#8fa5bb]">
         Reputation tracking begins with the next daily refresh — the line builds forward from there, never back-filled.
       </p>
     )}
@@ -1119,13 +1119,13 @@ export default async function VendorDeepDivePage({
                           <span className="text-sm font-semibold text-[#13294b] dark:text-[#eef3f8]">{role}</span>
                           <span className={`font-mono text-lg font-bold tabular-nums ${colour}`}>{v}</span>
                         </div>
-                        <div className="mt-1 flex gap-3 text-[10px] uppercase tracking-wide text-[#5b6b7f] dark:text-[#8fa5bb]">
+                        <div className="mt-1 flex gap-3 text-xs uppercase tracking-wide text-[#5b6b7f] dark:text-[#8fa5bb]">
                           <span>Innov {rs!.innovation}</span>
                           <span>Ready {rs!.readiness}</span>
                           <span>Reach {rs!.reach}</span>
                           <span>{rs!.evidenceGrade}</span>
                         </div>
-                        <p className="mt-2 text-[11px] leading-4 text-[#54647a] dark:text-[#a7bacd]">{rs!.rationale}</p>
+                        <p className="mt-2 text-xs leading-4 text-[#54647a] dark:text-[#a7bacd]">{rs!.rationale}</p>
                       </div>
                     );
                   })}
@@ -1225,9 +1225,9 @@ export default async function VendorDeepDivePage({
                   <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
                     {cells.map((c) => (
                       <div key={c.label} className="rounded-lg border border-[#e9e0c8] bg-white p-3 dark:border-[#1d3a57] dark:bg-[#0c2238]/50">
-                        <div className="text-[10px] font-semibold uppercase tracking-wide text-[#5b6b7f] dark:text-[#8fa5bb]">{c.label}</div>
+                        <div className="text-xs font-semibold uppercase tracking-wide text-[#5b6b7f] dark:text-[#8fa5bb]">{c.label}</div>
                         <div className={`mt-1 font-mono text-2xl font-bold tabular-nums ${c.tone}`}>{c.value}</div>
-                        <p className="mt-1 text-[10px] leading-4 text-[#5b6b7f] dark:text-[#8fa5bb]">{c.note}</p>
+                        <p className="mt-1 text-xs leading-4 text-[#5b6b7f] dark:text-[#8fa5bb]">{c.note}</p>
                       </div>
                     ))}
                   </div>
@@ -1387,7 +1387,7 @@ export default async function VendorDeepDivePage({
                       </div>
                       <div className="flex shrink-0 flex-col items-end gap-1.5">
                         <SentimentBadge sentiment={item.sentiment} />
-                        <span className="rounded border border-[#e0d6ba] bg-[#faf6ec] px-1.5 py-0.5 text-[10px] font-medium text-[#54647a] dark:border-[#2a4a6b] dark:bg-[#143049] dark:text-[#a7bacd]">
+                        <span className="rounded border border-[#e0d6ba] bg-[#faf6ec] px-1.5 py-0.5 text-xs font-medium text-[#54647a] dark:border-[#2a4a6b] dark:bg-[#143049] dark:text-[#a7bacd]">
                           {item.sourceName}
                         </span>
                       </div>
@@ -1399,11 +1399,11 @@ export default async function VendorDeepDivePage({
                       </div>
                     )}
                     <div className="mt-2 flex items-center gap-3">
-                      <span className="text-[10px] text-[#9ca3af] dark:text-[#7d93aa]">
+                      <span className="text-xs text-[#9ca3af] dark:text-[#7d93aa]">
                         {new Date(item.publishedAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
                       </span>
                       {item.impactScore >= 7 && (
-                        <span className="rounded border border-rose-200 bg-rose-50 px-1.5 py-0.5 text-[10px] font-semibold text-rose-700 dark:border-rose-800 dark:bg-rose-950/40 dark:text-rose-300">
+                        <span className="rounded border border-rose-200 bg-rose-50 px-1.5 py-0.5 text-xs font-semibold text-rose-700 dark:border-rose-800 dark:bg-rose-950/40 dark:text-rose-300">
                           High impact {item.impactScore}/10
                         </span>
                       )}

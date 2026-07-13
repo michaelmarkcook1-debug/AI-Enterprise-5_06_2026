@@ -98,13 +98,13 @@ export default function WeightedScorecard({
       {/* Live composite headline */}
       <div className="mb-4 flex flex-wrap items-center gap-4 rounded-xl border border-[#d4af37]/50 bg-[#fbf6e4]/60 px-4 py-3 dark:border-[#d4af37]/40 dark:bg-[#1a1605]/30">
         <div>
-          <div className="text-[10px] font-semibold uppercase tracking-wider text-[#a07f1f] dark:text-[#d4af37]">
+          <div className="text-xs font-semibold uppercase tracking-wider text-[#a07f1f] dark:text-[#d4af37]">
             Your weighted composite — global view
           </div>
           <div className="font-mono text-2xl font-bold tabular-nums text-[#13294b] dark:text-[#eef3f8]">
             {result.composite.toFixed(2)}<span className="text-sm text-[#7a8aa0]">/5</span>
           </div>
-          <div className="mt-0.5 text-[11px] text-[#7a8aa0]">
+          <div className="mt-0.5 text-xs text-[#7a8aa0]">
             Category-agnostic (12 domains) — category-specific standing below can differ
           </div>
         </div>
@@ -156,7 +156,7 @@ export default function WeightedScorecard({
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <div className="min-w-0">
                   <div className="text-sm font-medium text-[#13294b] dark:text-[#eef3f8]">{DOMAIN_LABEL[domain]}</div>
-                  <div className="text-[10px] uppercase tracking-wide text-[#7a8aa0] dark:text-[#7a9bb8]">
+                  <div className="text-xs uppercase tracking-wide text-[#7a8aa0] dark:text-[#7a9bb8]">
                     {PILLAR_LABEL[c.pillar] ?? c.pillar}
                   </div>
                 </div>
@@ -167,12 +167,12 @@ export default function WeightedScorecard({
                       <div className="font-mono text-lg font-semibold tabular-nums text-[#13294b] dark:text-[#eef3f8]">
                         {d!.state === "scored" ? d!.score.toFixed(1) : "—"}<span className="text-xs text-[#7a8aa0]">/5</span>
                       </div>
-                      <div className="text-[11px] text-[#5e6b7e] dark:text-[#a7bacd]">
+                      <div className="text-xs text-[#5e6b7e] dark:text-[#a7bacd]">
                         {d!.state === "scored" ? DOMAIN_BAND_TEXT[d!.bandLabel] : ""}
                       </div>
                     </ConfidenceVeil>
                   ) : (
-                    <span className="rounded-full border border-[#d6c9a8] bg-[#f6f1e3] px-2 py-0.5 text-[11px] font-semibold text-[#5e6b7e] dark:border-[#2a4a6b] dark:bg-[#0c2238] dark:text-[#a7bacd]">
+                    <span className="rounded-full border border-[#d6c9a8] bg-[#f6f1e3] px-2 py-0.5 text-xs font-semibold text-[#5e6b7e] dark:border-[#2a4a6b] dark:bg-[#0c2238] dark:text-[#a7bacd]">
                       Insufficient evidence
                     </span>
                   )}
@@ -204,10 +204,10 @@ export default function WeightedScorecard({
                   className="h-1 flex-1 cursor-pointer accent-[#b08d2f] dark:accent-[#d4af37]"
                   aria-label={`Weight for ${DOMAIN_LABEL[domain]}`}
                 />
-                <span className="w-10 shrink-0 text-right font-mono text-[11px] tabular-nums text-[#3f5068] dark:text-[#a7bacd]">
+                <span className="w-10 shrink-0 text-right font-mono text-xs tabular-nums text-[#3f5068] dark:text-[#a7bacd]">
                   {weightPct}%
                 </span>
-                <span className="w-24 shrink-0 text-right text-[11px] text-[#7a8aa0] dark:text-[#7a9bb8]">
+                <span className="w-24 shrink-0 text-right text-xs text-[#7a8aa0] dark:text-[#7a9bb8]">
                   {c.contribution != null ? `+${c.contribution.toFixed(2)}` : "contributes 0"}
                 </span>
               </div>

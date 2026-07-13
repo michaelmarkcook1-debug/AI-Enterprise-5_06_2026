@@ -32,7 +32,7 @@ const RISK_TONE = { minimal: "emerald", limited: "amber", high_risk: "rose", pro
 function Stat({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="rounded-lg border border-[#e3d9c0] bg-[#faf7ef] px-3 py-2.5 dark:border-[#1d3a57] dark:bg-[#0c2238]">
-      <div className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[#6b7d93] dark:text-[#7a9bb8]">{label}</div>
+      <div className="text-xs font-semibold uppercase tracking-[0.12em] text-[#6b7d93] dark:text-[#7a9bb8]">{label}</div>
       <div className="mt-1 text-sm font-semibold text-[#15263c] dark:text-[#eef3f8]">{children}</div>
     </div>
   );
@@ -48,10 +48,10 @@ export default function AssessmentOutputsPanel({ result }: { result: AssessmentR
   return (
     <section className="mb-6 overflow-hidden rounded-xl border border-[#e3d9c0] bg-[#fffdf7] dark:border-[#1d3a57] dark:bg-[#0c2238]">
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#ece4d0] px-4 py-3 dark:border-[#16314e]">
-        <h2 className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#3f5068] dark:text-[#9fb3c8]">
+        <h2 className="text-xs font-bold uppercase tracking-[0.16em] text-[#3f5068] dark:text-[#9fb3c8]">
           From your latest assessment
         </h2>
-        <span className="text-[11px] text-[#6b7d93] dark:text-[#7a9bb8]">
+        <span className="text-xs text-[#6b7d93] dark:text-[#7a9bb8]">
           {result.inputSummary?.industryName ?? "—"} · {new Date(result.generatedAt).toLocaleDateString("en-GB")}
         </span>
       </div>
@@ -59,7 +59,7 @@ export default function AssessmentOutputsPanel({ result }: { result: AssessmentR
       <div className="grid gap-3 p-4 sm:grid-cols-2 lg:grid-cols-4">
         {opp && (
           <Stat label="Opportunity value">
-            <span className={`mr-1.5 rounded px-1.5 py-0.5 text-[10px] font-bold uppercase ${toneClasses(PRIORITY_TONE[opp.priority] ?? "slate")}`}>{opp.priority}</span>
+            <span className={`mr-1.5 rounded px-1.5 py-0.5 text-xs font-bold uppercase ${toneClasses(PRIORITY_TONE[opp.priority] ?? "slate")}`}>{opp.priority}</span>
             {opp.estimatedAnnualValue != null ? fmtMoney(opp.estimatedAnnualValue) + "/yr" : fmtBand(opp.valueAtStake)}
           </Stat>
         )}
@@ -84,7 +84,7 @@ export default function AssessmentOutputsPanel({ result }: { result: AssessmentR
 
       {rationale.length > 0 && (
         <div className="border-t border-[#ece4d0] px-4 py-3 dark:border-[#16314e]">
-          <div className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-[#6b7d93] dark:text-[#7a9bb8]">What shaped the scoring</div>
+          <div className="mb-1.5 text-xs font-semibold uppercase tracking-[0.12em] text-[#6b7d93] dark:text-[#7a9bb8]">What shaped the scoring</div>
           <ul className="space-y-1">
             {rationale.slice(0, 3).map((r) => (
               <li key={r} className="flex gap-2 text-xs leading-5 text-[#475a72] dark:text-[#a7bacd]">
@@ -97,7 +97,7 @@ export default function AssessmentOutputsPanel({ result }: { result: AssessmentR
       )}
 
       <div className="border-t border-[#ece4d0] px-4 py-2 dark:border-[#16314e]">
-        <Link href={`/results/${result.runId}`} className="text-[11px] font-medium text-[#a07f1f] hover:underline dark:text-[#d4af37]">
+        <Link href={`/results/${result.runId}`} className="text-xs font-medium text-[#a07f1f] hover:underline dark:text-[#d4af37]">
           View full assessment →
         </Link>
       </div>

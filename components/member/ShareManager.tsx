@@ -106,14 +106,14 @@ export default function ShareManager({ decisionId }: { decisionId: string }) {
   return (
     <section className={CARD}>
       <h2 className="text-sm font-semibold text-[#13294b] dark:text-[#eef3f8]">Share (read-only)</h2>
-      <p className={`mt-1 text-[11px] ${MUTED}`}>
+      <p className={`mt-1 text-xs ${MUTED}`}>
         Anyone with the link can view this decision&apos;s weighting, shortlist, and evidence — no account, no edit
         access. They can never reach your other decisions.
       </p>
 
       {newLink && (
         <div className="mt-3 rounded-lg border border-[#d4af37]/50 bg-[#fbf6e4]/50 p-3 dark:border-[#d4af37]/40 dark:bg-[#1a1605]/30">
-          <p className="text-[11px] font-semibold text-[#5e6b7e] dark:text-[#a7bacd]">
+          <p className="text-xs font-semibold text-[#5e6b7e] dark:text-[#a7bacd]">
             Copy this now — it won&apos;t be shown again.
           </p>
           <div className="mt-1.5 flex items-center gap-2">
@@ -135,7 +135,7 @@ export default function ShareManager({ decisionId }: { decisionId: string }) {
       )}
 
       <div className="mt-3 flex flex-wrap items-end gap-2">
-        <label className="flex flex-col gap-1 text-[11px]">
+        <label className="flex flex-col gap-1 text-xs">
           <span className={MUTED}>Label (optional)</span>
           <input
             value={displayName}
@@ -145,7 +145,7 @@ export default function ShareManager({ decisionId }: { decisionId: string }) {
             className="w-44 rounded-md border border-[#d6c9a8] bg-white/80 px-2 py-1 text-xs dark:border-[#2a4a6b] dark:bg-[#0c2238]"
           />
         </label>
-        <label className="flex flex-col gap-1 text-[11px]">
+        <label className="flex flex-col gap-1 text-xs">
           <span className={MUTED}>Expires</span>
           <select
             value={expiresInDays}
@@ -166,7 +166,7 @@ export default function ShareManager({ decisionId }: { decisionId: string }) {
           {creating ? "…" : "Create link"}
         </button>
       </div>
-      {error && <p className="mt-1.5 text-[11px] text-rose-600 dark:text-rose-400">{error}</p>}
+      {error && <p className="mt-1.5 text-xs text-rose-600 dark:text-rose-400">{error}</p>}
 
       {shares && shares.length > 0 && (
         <ul className="mt-4 divide-y divide-black/5 dark:divide-white/10 border-t border-black/5 dark:border-white/10">
@@ -177,7 +177,7 @@ export default function ShareManager({ decisionId }: { decisionId: string }) {
                 <span className={`ml-2 rounded-full px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide ${statusClass(s.status)}`}>
                   {s.status}
                 </span>
-                <p className={`mt-0.5 text-[10px] ${MUTED}`}>
+                <p className={`mt-0.5 text-xs ${MUTED}`}>
                   Expires {fmtDate(s.expiresAt)} · {s.viewCount} view{s.viewCount === 1 ? "" : "s"} · created {fmtDate(s.createdAt)}
                 </p>
               </div>
@@ -185,7 +185,7 @@ export default function ShareManager({ decisionId }: { decisionId: string }) {
                 <button
                   type="button"
                   onClick={() => revoke(s.id)}
-                  className="shrink-0 rounded-full border border-black/15 px-2.5 py-1 text-[11px] font-medium text-rose-700 hover:border-rose-400 dark:border-white/15 dark:text-rose-400"
+                  className="shrink-0 rounded-full border border-black/15 px-2.5 py-1 text-xs font-medium text-rose-700 hover:border-rose-400 dark:border-white/15 dark:text-rose-400"
                 >
                   Revoke
                 </button>

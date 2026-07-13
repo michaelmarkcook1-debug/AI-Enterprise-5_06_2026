@@ -120,7 +120,7 @@ export default function TokenPricingTable({
       </div>
 
       {scopedLabel && (
-        <div className="mb-2 text-[11px] font-medium text-emerald-700 dark:text-emerald-300">
+        <div className="mb-2 text-xs font-medium text-emerald-700 dark:text-emerald-300">
           Scoped to: {scopedLabel}
         </div>
       )}
@@ -128,7 +128,7 @@ export default function TokenPricingTable({
       {/* Table */}
       <div className="overflow-x-auto rounded-lg border border-[#e3d9c0] dark:border-[#1d3a57]">
         <table className="min-w-full text-sm">
-          <thead className="bg-[#f6f1e3] text-left text-[11px] uppercase tracking-wide text-[#4c5d75] dark:bg-[#0c2238]/60">
+          <thead className="bg-[#f6f1e3] text-left text-xs uppercase tracking-wide text-[#4c5d75] dark:bg-[#0c2238]/60">
             <tr>
               <Th onClick={() => toggleSort("vendor")} active={sortKey === "vendor"} dir={sortDir}>Vendor</Th>
               <Th onClick={() => toggleSort("model")} active={sortKey === "model"} dir={sortDir}>Model / SKU</Th>
@@ -194,10 +194,10 @@ export default function TokenPricingTable({
         </table>
       </div>
 
-      <p className="mt-2 text-[11px] leading-5 text-[#4c5d75]">
+      <p className="mt-2 text-xs leading-5 text-[#4c5d75]">
         {TOKEN_PRICING_DISCLAIMER}
       </p>
-      <p className="mt-1 text-[10px] text-[#6b7d93]">
+      <p className="mt-1 text-xs text-[#6b7d93]">
         Captured {TOKEN_PRICING_CAPTURED_AT}. USD per 1M input tokens.
         Click a model name to open the official pricing page.
       </p>

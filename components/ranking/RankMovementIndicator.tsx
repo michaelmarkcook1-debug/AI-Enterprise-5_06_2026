@@ -25,7 +25,7 @@ export default function RankMovementIndicator({ movement }: { movement?: RankMov
     return (
       <span
         title={`No change in overall rank${fromDate ? ` since ${fromDate}` : ""}`}
-        className="font-mono text-[10px] tabular-nums text-[#15263c]/40 dark:text-[#eef3f8]/40"
+        className="font-mono text-xs tabular-nums text-[#15263c]/40 dark:text-[#eef3f8]/40"
         aria-label="No change in overall rank"
       >
         —
@@ -39,7 +39,7 @@ export default function RankMovementIndicator({ movement }: { movement?: RankMov
     <span
       title={`${up ? "Up" : "Down"} ${mag} place${mag === 1 ? "" : "s"} in overall rank${fromDate ? ` since ${fromDate}` : ""}`}
       aria-label={`${up ? "Up" : "Down"} ${mag} in overall rank`}
-      className={`inline-flex items-center gap-0.5 font-mono text-[10px] font-semibold tabular-nums ${
+      className={`inline-flex items-center gap-0.5 font-mono text-xs font-semibold tabular-nums ${
         up ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"
       }`}
     >

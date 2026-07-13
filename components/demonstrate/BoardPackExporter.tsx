@@ -853,7 +853,7 @@ export default function BoardPackExporter(props: BoardPackExporterProps) {
           : "No assessment shortlist yet. The Executive Summary exports as a concise AI-market overview; the Board, Procurement and Risk packs unlock once you run an assessment in Assess."}
       </p>
       <div className="mb-3 flex flex-wrap items-center gap-2 text-xs">
-        <span className="font-semibold uppercase tracking-wide text-[10px] text-[#5b6b7f]">Format</span>
+        <span className="font-semibold uppercase tracking-wide text-xs text-[#5b6b7f]">Format</span>
         {([
           { key: "html", label: "Document (HTML → PDF)" },
           { key: "pptx", label: "PowerPoint (.pptx)" },
@@ -894,7 +894,7 @@ export default function BoardPackExporter(props: BoardPackExporterProps) {
         })}
       </div>
       {lastExport && (
-        <p className="mt-2 text-[11px] text-[#56657b] dark:text-[#a7bacd]">
+        <p className="mt-2 text-xs text-[#56657b] dark:text-[#a7bacd]">
           Exported <strong>{lastExport.type}</strong> ({lastExport.filename.endsWith(".pptx") ? "PowerPoint" : "HTML"}).{" "}
           Didn&apos;t download?{" "}
           <a
@@ -909,7 +909,7 @@ export default function BoardPackExporter(props: BoardPackExporterProps) {
           .
         </p>
       )}
-      <p className="mt-2 text-[10px] text-[#5b6b7f]">
+      <p className="mt-2 text-xs text-[#5b6b7f]">
         Document format: open in browser and print to PDF. PowerPoint format: native, fully editable slides.
       </p>
     </div>

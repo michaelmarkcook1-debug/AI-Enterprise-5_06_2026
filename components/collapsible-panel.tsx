@@ -31,7 +31,7 @@ export default function CollapsiblePanel({
         <span className="flex min-w-0 items-baseline gap-3">
           <span className="text-sm font-semibold text-[#13294b] dark:text-[#eef3f8]">{title}</span>
           {summary && (
-            <span className="truncate font-mono text-[11px] text-[#5b6b7f] group-open:hidden dark:text-[#8fa5bb]">
+            <span className="truncate font-mono text-xs text-[#5b6b7f] group-open:hidden dark:text-[#8fa5bb]">
               {summary}
             </span>
           )}

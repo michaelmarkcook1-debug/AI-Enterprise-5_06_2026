@@ -38,7 +38,7 @@ export default function PeersPage() {
   return (
     <main className="mx-auto max-w-6xl px-4 py-10">
       <header className="mb-6">
-        <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-[#b08d2f] dark:text-[#d4af37]">
+        <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#b08d2f] dark:text-[#d4af37]">
           Observable · cited · never guessed
         </p>
         <h1 className="font-display mt-2 max-w-3xl text-4xl font-semibold leading-[1.05] tracking-tight sm:text-5xl">
@@ -111,7 +111,7 @@ export default function PeersPage() {
             <div key={k.kind} className="rounded-lg border border-black/5 p-4 dark:border-white/10">
               <h3 className="text-sm font-semibold">{k.label}</h3>
               <p className={`mt-1 text-xs leading-5 ${MUTED}`}>{k.description}</p>
-              <p className="mt-1.5 text-[11px] leading-5 text-[#b08d2f] dark:text-[#d4af37]">
+              <p className="mt-1.5 text-xs leading-5 text-[#b08d2f] dark:text-[#d4af37]">
                 Rubric: {RUBRIC_TEXT[k.kind]}
               </p>
             </div>

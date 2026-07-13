@@ -41,11 +41,11 @@ export default function IndustryVendorHeatmap({
 
   return (
     <div className="mt-4 rounded-lg border border-black/5 p-3 dark:border-white/10">
-      <div className={`mb-2 text-[10px] font-semibold uppercase tracking-wide ${MUTED}`}>
+      <div className={`mb-2 text-xs font-semibold uppercase tracking-wide ${MUTED}`}>
         Disclosed AI-vendor adoption · industry × vendor
       </div>
       <div className="overflow-x-auto">
-        <table className="border-collapse text-[11px]">
+        <table className="border-collapse text-xs">
           <thead>
             <tr>
               <th className="sticky left-0 z-10 bg-white/85 px-2 py-1 dark:bg-[#0a1f38]/85" aria-label="Industry" />
@@ -97,7 +97,7 @@ export default function IndustryVendorHeatmap({
           </tbody>
         </table>
       </div>
-      <div className={`mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] ${MUTED}`}>
+      <div className={`mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs ${MUTED}`}>
         <span>Cell = # of tracked peers that publicly disclosed adopting that vendor</span>
         <span className="flex items-center gap-1">
           fewer

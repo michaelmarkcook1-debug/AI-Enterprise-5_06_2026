@@ -39,14 +39,14 @@ const EVIDENCE_META: Record<EvidenceTierPartnership, { label: string; tone: stri
 };
 
 function Chip({ label, tone }: { label: string; tone: string }) {
-  return <span className={`inline-flex rounded border px-1.5 py-0.5 text-[10px] font-semibold ${tone}`}>{label}</span>;
+  return <span className={`inline-flex rounded border px-1.5 py-0.5 text-xs font-semibold ${tone}`}>{label}</span>;
 }
 
 function ProvenanceChip({ provenance }: { provenance: DeliveryPartnershipRow["provenance"] }) {
   const live = provenance === "news_confirmed";
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded-full border px-1.5 py-0.5 text-[10px] font-medium ${
+      className={`inline-flex items-center gap-1 rounded-full border px-1.5 py-0.5 text-xs font-medium ${
         live
           ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
           : "border-amber-500/40 bg-amber-500/10 text-amber-800 dark:text-amber-200"
@@ -63,7 +63,7 @@ function MiniChips({ items }: { items: string[] }) {
   return (
     <div className="mt-1.5 flex flex-wrap gap-1">
       {items.map((it) => (
-        <span key={it} className="rounded border border-[#e0d6ba] bg-[#faf6ec] px-1.5 py-0.5 text-[10px] text-[#475a72] dark:border-[#2a4a6b] dark:bg-[#143049] dark:text-[#c2d1e0]">
+        <span key={it} className="rounded border border-[#e0d6ba] bg-[#faf6ec] px-1.5 py-0.5 text-xs text-[#475a72] dark:border-[#2a4a6b] dark:bg-[#143049] dark:text-[#c2d1e0]">
           {it}
         </span>
       ))}
@@ -147,7 +147,7 @@ export default function ImplementationPartnersPanel({
               <section key={tier}>
                 <div className="mb-2 flex flex-wrap items-baseline gap-2">
                   <Chip label={meta.label} tone={meta.tone} />
-                  <span className={`text-[11px] ${MUTED}`}>{rows.length} · {meta.blurb}</span>
+                  <span className={`text-xs ${MUTED}`}>{rows.length} · {meta.blurb}</span>
                 </div>
                 <div className="grid gap-2 sm:grid-cols-2">
                   {rows.map((p) => (
@@ -169,7 +169,7 @@ export default function ImplementationPartnersPanel({
                       <MiniChips items={p.industries} />
                       <MiniChips items={p.regions} />
                       {p.source && (
-                        <p className={`mt-2 text-[10px] ${MUTED}`}>
+                        <p className={`mt-2 text-xs ${MUTED}`}>
                           Source: {p.source}
                           {p.provenance === "analyst_curated_seed"
                             ? " — pending external confirmation"

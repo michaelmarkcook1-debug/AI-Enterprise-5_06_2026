@@ -70,7 +70,7 @@ function hasAnyContext(f: ContextForm): boolean {
 const CARD =
   "rounded-xl border border-[#d4af37]/50 bg-[#fbf6e4]/60 p-4 dark:border-[#d4af37]/40 dark:bg-[#1a1605]/30";
 const KICKER =
-  "text-[10px] font-semibold uppercase tracking-wider text-[#a07f1f] dark:text-[#d4af37]";
+  "text-xs font-semibold uppercase tracking-wider text-[#a07f1f] dark:text-[#d4af37]";
 
 export default function InterrogatePanel({
   config,
@@ -230,7 +230,7 @@ export default function InterrogatePanel({
         <div className="mt-3">
           <div className="grid grid-cols-1 gap-x-4 gap-y-2 sm:grid-cols-2">
             {FIELDS.map((f) => (
-              <div key={f.key} className="block text-[11px]">
+              <div key={f.key} className="block text-xs">
                 <span className="text-[#3f5068] dark:text-[#a7bacd]">{f.label}</span>
                 <div className="mt-0.5">
                   <SuggestInput
@@ -245,7 +245,7 @@ export default function InterrogatePanel({
               </div>
             ))}
           </div>
-          <label className="mt-2 block text-[11px]">
+          <label className="mt-2 block text-xs">
             <span className="text-[#3f5068] dark:text-[#a7bacd]">Anything else</span>
             <textarea
               value={form.freeform}
@@ -265,9 +265,9 @@ export default function InterrogatePanel({
               {state === "loading" ? "Re-running…" : "Re-run through my context"}
             </button>
             {!hasAnyContext(form) && (
-              <span className="text-[11px] text-[#7a8aa0]">Add at least one detail to re-run.</span>
+              <span className="text-xs text-[#7a8aa0]">Add at least one detail to re-run.</span>
             )}
-            {state === "error" && <span className="text-[11px] text-rose-600 dark:text-rose-400">{error}</span>}
+            {state === "error" && <span className="text-xs text-rose-600 dark:text-rose-400">{error}</span>}
           </div>
         </div>
       )}
@@ -276,7 +276,7 @@ export default function InterrogatePanel({
       {lens && (
         <div className="mt-3 border-t border-[#e3d9c0] pt-3 dark:border-[#2a4a6b]">
           {stubbed || lens.insufficientContext ? (
-            <p className="text-[11px] leading-5 text-[#7a8aa0]">
+            <p className="text-xs leading-5 text-[#7a8aa0]">
               {lens.overallNote} <span className="italic">Default weighting shown — nothing was re-weighted.</span>
             </p>
           ) : (
@@ -287,7 +287,7 @@ export default function InterrogatePanel({
               {topDeltas.length > 0 && (
                 <ul className="mt-2 space-y-1.5">
                   {topDeltas.map((d) => (
-                    <li key={d.domain} className="text-[11px] leading-5 text-[#3f5068] dark:text-[#a7bacd]">
+                    <li key={d.domain} className="text-xs leading-5 text-[#3f5068] dark:text-[#a7bacd]">
                       <span className="font-medium text-[#13294b] dark:text-[#eef3f8]">{DOMAIN_LABEL[d.domain]}</span>{" "}
                       <span
                         className={
@@ -324,10 +324,10 @@ export default function InterrogatePanel({
 
               {askDomains.length > 0 && (
                 <div className="mt-2 rounded-md border border-[#d6c9a8] bg-white/50 px-2.5 py-2 dark:border-[#2a4a6b] dark:bg-[#0c2238]/40">
-                  <div className="text-[10px] font-semibold uppercase tracking-wide text-[#a07f1f] dark:text-[#d4af37]">
+                  <div className="text-xs font-semibold uppercase tracking-wide text-[#a07f1f] dark:text-[#d4af37]">
                     Ask the vendor — decisive for you, thin on evidence
                   </div>
-                  <p className="mt-1 text-[11px] leading-5 text-[#3f5068] dark:text-[#a7bacd]">
+                  <p className="mt-1 text-xs leading-5 text-[#3f5068] dark:text-[#a7bacd]">
                     {askDomains.map((d) => DOMAIN_LABEL[d]).join(", ")}. We couldn’t evidence{" "}
                     {askDomains.length === 1 ? "this" : "these"} to your bar — take{" "}
                     {askDomains.length === 1 ? "it" : "them"} to the vendor rather than assume a score.
@@ -336,12 +336,12 @@ export default function InterrogatePanel({
               )}
 
               {truncated && (
-                <p className="mt-2 text-[10px] text-amber-700 dark:text-amber-400">
+                <p className="mt-2 text-xs text-amber-700 dark:text-amber-400">
                   Large shortlist — this lens was computed over the first {60} vendors; narrow the category for full
                   per-vendor coverage.
                 </p>
               )}
-              <p className="mt-2 text-[10px] italic text-[#7a8aa0]">
+              <p className="mt-2 text-xs italic text-[#7a8aa0]">
                 A draft lens over the cited evidence — not a verdict. The 0–5 scores are unchanged; only their weight
                 is. Refine your context and re-run to pressure-test it.
               </p>

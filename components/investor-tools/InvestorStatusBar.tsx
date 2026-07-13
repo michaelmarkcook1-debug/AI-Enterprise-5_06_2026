@@ -21,7 +21,7 @@ export function InvestorStatusBar() {
   const savedCount = state.savedPortfolios.length;
 
   return (
-    <div className="border-b border-[#e6dcc3] bg-white/60 px-5 py-1.5 text-[11px] text-[#56657b] dark:border-[#1d3a57] dark:bg-[#071827]/60 dark:text-[#a7bacd]">
+    <div className="border-b border-[#e6dcc3] bg-white/60 px-5 py-1.5 text-xs text-[#56657b] dark:border-[#1d3a57] dark:bg-[#071827]/60 dark:text-[#a7bacd]">
       <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-4 gap-y-1">
         <span className="font-semibold uppercase tracking-wide">Investor session</span>
 
@@ -54,7 +54,7 @@ export function InvestorStatusBar() {
           <button
             type="button"
             onClick={() => setSimulatorInput({})}
-            className="ml-auto text-[10px] uppercase tracking-wide opacity-70 hover:opacity-100"
+            className="ml-auto text-xs uppercase tracking-wide opacity-70 hover:opacity-100"
             title="Reset simulator inputs to defaults (does not affect watchlist or saved portfolios)"
           >
             Reset simulator

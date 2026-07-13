@@ -33,7 +33,7 @@ const LEVEL_BG: Record<1 | 2 | 3 | 4, string> = {
 function CellChip({ signal }: { signal: PeerSignal }) {
   if (signal.status === "not_disclosed" || !signal.level) {
     return (
-      <span className={`inline-block rounded px-1.5 py-0.5 text-[10px] ${MUTED}`}>
+      <span className={`inline-block rounded px-1.5 py-0.5 text-xs ${MUTED}`}>
         Not disclosed
       </span>
     );
@@ -50,7 +50,7 @@ function CellChip({ signal }: { signal: PeerSignal }) {
         }`}
         aria-hidden
       />
-      <span className="text-[11px] font-medium">{LEVEL_LABELS[signal.level]}</span>
+      <span className="text-xs font-medium">{LEVEL_LABELS[signal.level]}</span>
       {est && <span className="text-[9px] font-semibold uppercase text-amber-700 dark:text-amber-300">est.</span>}
     </span>
   );
@@ -136,7 +136,7 @@ export default function PeerBenchmark({ companyIds }: { companyIds?: string[] } 
               ))}
             </select>
           </label>
-          <p className={`text-[11px] ${MUTED}`}>
+          <p className={`text-xs ${MUTED}`}>
             Named exemplars with publicly disclosed AI deployments — never private usage.
             Your selection is saved in this browser only.
           </p>
@@ -168,7 +168,7 @@ export default function PeerBenchmark({ companyIds }: { companyIds?: string[] } 
         <table className="w-full min-w-[640px] border-separate border-spacing-0 text-left">
           <thead>
             <tr>
-              <th className={`pb-2 pr-3 text-[11px] font-semibold uppercase tracking-wide ${MUTED}`}>
+              <th className={`pb-2 pr-3 text-xs font-semibold uppercase tracking-wide ${MUTED}`}>
                 Observable signal
               </th>
               {heatmap.columns.map((c) => {
@@ -197,7 +197,7 @@ export default function PeerBenchmark({ companyIds }: { companyIds?: string[] } 
                 <td className="max-w-[220px] py-2.5 pr-3 align-top">
                   <p className="text-sm font-medium leading-snug">{row.meta.label}</p>
                   {row.meta.kind === "automation_intensity" && (
-                    <p className="mt-0.5 text-[10px] text-amber-700 dark:text-amber-300">always inferred (est.)</p>
+                    <p className="mt-0.5 text-xs text-amber-700 dark:text-amber-300">always inferred (est.)</p>
                   )}
                 </td>
                 {row.cells.map((cell) => (
@@ -221,7 +221,7 @@ export default function PeerBenchmark({ companyIds }: { companyIds?: string[] } 
         </table>
 
         {/* Legend */}
-        <div className={`mt-4 flex flex-wrap items-center gap-x-4 gap-y-1.5 border-t border-black/5 pt-3 text-[11px] dark:border-white/10 ${MUTED}`}>
+        <div className={`mt-4 flex flex-wrap items-center gap-x-4 gap-y-1.5 border-t border-black/5 pt-3 text-xs dark:border-white/10 ${MUTED}`}>
           <span className="font-semibold">Scale (computed from cited evidence via the documented rubric):</span>
           {(Object.keys(LEVEL_BG) as unknown as (1 | 2 | 3 | 4)[]).map((lvl) => (
             <span key={lvl} className="inline-flex items-center gap-1">
@@ -270,7 +270,7 @@ export default function PeerBenchmark({ companyIds }: { companyIds?: string[] } 
                   </div>
                   {s.summary && <p className="mt-1.5 text-sm leading-6">{s.summary}</p>}
                   {s.status === "inferred" && s.inferenceNote && (
-                    <p className="mt-1 rounded-md border border-amber-500/30 bg-amber-500/5 px-2 py-1 text-[11px] text-amber-800 dark:text-amber-200">
+                    <p className="mt-1 rounded-md border border-amber-500/30 bg-amber-500/5 px-2 py-1 text-xs text-amber-800 dark:text-amber-200">
                       {s.inferenceNote}
                     </p>
                   )}
@@ -288,7 +288,7 @@ export default function PeerBenchmark({ companyIds }: { companyIds?: string[] } 
                       <span className="ml-1">(opens the vendor's assessment)</span>
                     </p>
                   )}
-                  <ul className={`mt-1.5 space-y-0.5 text-[11px] ${MUTED}`}>
+                  <ul className={`mt-1.5 space-y-0.5 text-xs ${MUTED}`}>
                     {(s.citations ?? []).map((cite) => (
                       <li key={cite.url}>
                         <a href={cite.url} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-[#15263c] dark:hover:text-[#eef3f8]">
@@ -300,7 +300,7 @@ export default function PeerBenchmark({ companyIds }: { companyIds?: string[] } 
                     ))}
                   </ul>
                   {(s.citations ?? []).length === 0 && s.citationStatus === "pending_enrichment" && (
-                    <p className="mt-1.5 text-[11px] italic text-amber-700 dark:text-amber-300">
+                    <p className="mt-1.5 text-xs italic text-amber-700 dark:text-amber-300">
                       Fact is real and rubric-computed from named public reporting — sources being linked.
                     </p>
                   )}
@@ -311,7 +311,7 @@ export default function PeerBenchmark({ companyIds }: { companyIds?: string[] } 
         </div>
       )}
 
-      <p className={`text-[11px] ${MUTED}`}>{PEER_DATASET_SOURCE}</p>
+      <p className={`text-xs ${MUTED}`}>{PEER_DATASET_SOURCE}</p>
     </div>
   );
 }

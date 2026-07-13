@@ -23,7 +23,7 @@ export function PageFrame({
         {/* Editorial masthead — serif display title, gold kicker, gold hairline rule */}
         <div className="mb-9 pb-2">
           {kicker && (
-            <div className="text-[11px] font-bold uppercase tracking-[0.24em] text-[#a07f1f] dark:text-[#d4af37]">
+            <div className="text-xs font-bold uppercase tracking-[0.24em] text-[#a07f1f] dark:text-[#d4af37]">
               {kicker}
             </div>
           )}

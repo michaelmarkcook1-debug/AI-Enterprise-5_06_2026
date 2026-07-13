@@ -104,7 +104,7 @@ export default function DecisionNameEditor({
           setEditing(false);
           setValue(name);
         }}
-        className="text-[11px] text-[#7a8aa0] hover:underline"
+        className="text-xs text-[#7a8aa0] hover:underline"
       >
         Cancel
       </button>

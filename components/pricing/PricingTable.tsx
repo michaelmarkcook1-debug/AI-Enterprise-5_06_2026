@@ -83,7 +83,7 @@ export default function PricingTable({ plans, matrix, billingLive }: PricingTabl
             <div className="flex items-center justify-between">
               <h3 className="font-display text-lg font-semibold">{plan.name}</h3>
               {plan.highlighted && (
-                <span className={`rounded-full border border-[#d4af37]/50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${GOLD}`}>
+                <span className={`rounded-full border border-[#d4af37]/50 px-2 py-0.5 text-xs font-semibold uppercase tracking-wide ${GOLD}`}>
                   Popular
                 </span>
               )}

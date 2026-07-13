@@ -101,7 +101,7 @@ export default function SaveDecisionButton({
         >
           {state === "saving" ? "…" : "Save"}
         </button>
-        <button type="button" onClick={() => setState("idle")} className="text-[11px] text-[#7a8aa0] hover:underline">
+        <button type="button" onClick={() => setState("idle")} className="text-xs text-[#7a8aa0] hover:underline">
           Cancel
         </button>
       </div>
@@ -117,7 +117,7 @@ export default function SaveDecisionButton({
       >
         Save this weighting as a decision
       </button>
-      {state === "error" && <span className="text-[11px] text-rose-600 dark:text-rose-400">{error}</span>}
+      {state === "error" && <span className="text-xs text-rose-600 dark:text-rose-400">{error}</span>}
     </div>
   );
 }

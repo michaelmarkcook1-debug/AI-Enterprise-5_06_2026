@@ -38,12 +38,12 @@ export default function DisclosedAdoptersPanel({
           Enterprises that have publicly disclosed adopting {vendorName} — from the cited
           peer-AI benchmark. Disclosure only: absence here never means non-use.
         </p>
-        <span className="rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-800 dark:text-amber-200">
+        <span className="rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-amber-800 dark:text-amber-200">
           Analyst-curated
         </span>
       </div>
       {byIndustry.length > 1 && (
-        <p className={`mb-2 text-[11px] ${MUTED}`}>
+        <p className={`mb-2 text-xs ${MUTED}`}>
           By industry (disclosed count): {byIndustry.map((b) => `${b.industry} (${b.count})`).join(" · ")}
         </p>
       )}
@@ -52,10 +52,10 @@ export default function DisclosedAdoptersPanel({
           <li key={a.company.id} className="rounded-lg border border-black/5 p-3 dark:border-white/10">
             <div className="flex flex-wrap items-baseline justify-between gap-2">
               <span className="text-sm font-semibold">{a.company.name}</span>
-              <span className={`text-[11px] ${MUTED}`}>{a.company.industry}</span>
+              <span className={`text-xs ${MUTED}`}>{a.company.industry}</span>
             </div>
             {a.summary && <p className={`mt-1 text-xs leading-5 ${MUTED}`}>{a.summary}</p>}
-            <ul className={`mt-1.5 space-y-0.5 text-[11px] ${MUTED}`}>
+            <ul className={`mt-1.5 space-y-0.5 text-xs ${MUTED}`}>
               {a.citations.map((c) => (
                 <li key={c.url}>
                   <a
@@ -71,14 +71,14 @@ export default function DisclosedAdoptersPanel({
               ))}
             </ul>
             {a.citations.length === 0 && a.citationStatus === "pending_enrichment" && (
-              <p className="mt-1.5 text-[11px] italic text-amber-700 dark:text-amber-300">
+              <p className="mt-1.5 text-xs italic text-amber-700 dark:text-amber-300">
                 Fact is real and rubric-computed from named public reporting — sources being linked.
               </p>
             )}
           </li>
         ))}
       </ul>
-      <p className={`mt-2 text-[11px] ${MUTED}`}>
+      <p className={`mt-2 text-xs ${MUTED}`}>
         <Link href="/peers" className="underline underline-offset-2">
           Benchmark your organisation against these peers →
         </Link>

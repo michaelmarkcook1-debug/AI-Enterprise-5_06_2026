@@ -27,7 +27,7 @@ const STATUS_CLASS: Record<DemoModuleStatus, string> = {
 };
 
 const SIZE_CLASS: Record<NonNullable<Props["size"]>, string> = {
-  xs: "px-1.5 py-0.5 text-[10px]",
+  xs: "px-1.5 py-0.5 text-xs",
   sm: "px-2 py-0.5 text-xs",
   md: "px-3 py-1 text-sm",
 };

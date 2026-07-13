@@ -122,12 +122,12 @@ function Chips({ entry }: { entry: FrontDoorEntry }) {
   const { feasibility, impact, flags } = entry;
   return (
     <div className="flex flex-wrap items-center gap-1.5">
-      <span className={`rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${FEAS_TONE[feasibility]}`}>
+      <span className={`rounded px-1.5 py-0.5 text-xs font-semibold uppercase tracking-wide ${FEAS_TONE[feasibility]}`}>
         {feasibility} feasibility
       </span>
       {impact ? (
         <span
-          className="inline-flex items-center gap-1 rounded bg-emerald-50 px-1.5 py-0.5 text-[10px] font-medium text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300"
+          className="inline-flex items-center gap-1 rounded bg-emerald-50 px-1.5 py-0.5 text-xs font-medium text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300"
           title={`${impact.upliftBasis} — ${impact.sourceName} · ${impact.confidence}% confidence · directional estimate`}
         >
           uplift {UPLIFT_LABEL[impact.upliftBand] ?? impact.upliftBand}
@@ -139,13 +139,13 @@ function Chips({ entry }: { entry: FrontDoorEntry }) {
           </span>
         </span>
       ) : (
-        <span className={`rounded border border-dashed border-black/20 px-1.5 py-0.5 text-[10px] dark:border-white/20 ${MUTED}`}>
+        <span className={`rounded border border-dashed border-black/20 px-1.5 py-0.5 text-xs dark:border-white/20 ${MUTED}`}>
           impact not yet evidenced
         </span>
       )}
       {impact?.value && (
         <span
-          className="rounded border border-amber-500/40 bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-medium text-amber-800 dark:text-amber-200"
+          className="rounded border border-amber-500/40 bg-amber-500/10 px-1.5 py-0.5 text-xs font-medium text-amber-800 dark:text-amber-200"
           title={`${impact.value.basis} — ${impact.value.sourceName} · ${GRADE_TITLE[impact.value.evidenceGrade] ?? impact.value.evidenceGrade} · vendor-sourced, directional`}
         >
           value {VALUE_LABEL[impact.value.band] ?? impact.value.band} · vendor-sourced
@@ -154,7 +154,7 @@ function Chips({ entry }: { entry: FrontDoorEntry }) {
       {flags.map((f, i) => (
         <span
           key={i}
-          className="inline-flex items-center gap-1 rounded border border-rose-400/50 bg-rose-50 px-1.5 py-0.5 text-[10px] font-medium text-rose-800 dark:border-rose-800/50 dark:bg-rose-950/30 dark:text-rose-300"
+          className="inline-flex items-center gap-1 rounded border border-rose-400/50 bg-rose-50 px-1.5 py-0.5 text-xs font-medium text-rose-800 dark:border-rose-800/50 dark:bg-rose-950/30 dark:text-rose-300"
           title={`${f.summary} — ${f.sourceName} (${f.evidenceGrade})`}
         >
           ⚠ {FLAG_META[f.kind]?.label ?? f.kind}
@@ -174,12 +174,12 @@ function Evidence({ entry }: { entry: FrontDoorEntry }) {
   if (!impact && flags.length === 0) return null;
   return (
     <details className="mt-2">
-      <summary className={`cursor-pointer list-none text-[11px] font-medium ${MUTED} hover:underline`}>
+      <summary className={`cursor-pointer list-none text-xs font-medium ${MUTED} hover:underline`}>
         Evidence &amp; sources
       </summary>
       <div className="mt-1.5 space-y-1.5 border-l-2 border-black/10 pl-2.5 dark:border-white/15">
         {impact && (
-          <p className="text-[11px] leading-4">
+          <p className="text-xs leading-4">
             <span className="font-medium text-[#13294b] dark:text-[#eef3f8]">
               Uplift {UPLIFT_LABEL[impact.upliftBand] ?? impact.upliftBand} · {impact.evidenceGrade} · {impact.confidence}% confidence · {impact.asOf}
             </span>{" "}
@@ -191,7 +191,7 @@ function Evidence({ entry }: { entry: FrontDoorEntry }) {
           </p>
         )}
         {impact?.value && (
-          <p className="text-[11px] leading-4">
+          <p className="text-xs leading-4">
             <span className="font-medium text-amber-800 dark:text-amber-300">
               Value {VALUE_LABEL[impact.value.band] ?? impact.value.band} · {impact.value.evidenceGrade} · vendor-sourced
             </span>{" "}
@@ -202,7 +202,7 @@ function Evidence({ entry }: { entry: FrontDoorEntry }) {
           </p>
         )}
         {flags.map((f, i) => (
-          <p key={i} className="text-[11px] leading-4">
+          <p key={i} className="text-xs leading-4">
             <span className="font-medium text-rose-800 dark:text-rose-300">⚠ {FLAG_META[f.kind]?.label ?? f.kind} · {f.evidenceGrade}</span>{" "}
             <span className={MUTED}>{f.summary}</span>{" "}
             <a href={f.sourceUrl} target="_blank" rel="noopener noreferrer" className={SRC_LINK}>
@@ -352,11 +352,11 @@ export default function UseCaseFrontDoorClient() {
                 <div key={q} className={`rounded-xl border p-4 ${meta.tone}`}>
                   <div className="mb-1 flex items-baseline justify-between gap-2">
                     <h3 className="text-sm font-bold text-[#13294b] dark:text-[#eef3f8]">{meta.label}</h3>
-                    <span className={`text-[11px] ${MUTED}`}>{entries.length}</span>
+                    <span className={`text-xs ${MUTED}`}>{entries.length}</span>
                   </div>
-                  <p className={`mb-3 text-[11px] ${MUTED}`}>{meta.blurb}</p>
+                  <p className={`mb-3 text-xs ${MUTED}`}>{meta.blurb}</p>
                   {entries.length === 0 ? (
-                    <p className={`text-[11px] italic ${MUTED}`}>Nothing evidenced here for this selection.</p>
+                    <p className={`text-xs italic ${MUTED}`}>Nothing evidenced here for this selection.</p>
                   ) : (
                     <ul className="space-y-2.5">
                       {entries.map((e) => (
@@ -374,7 +374,7 @@ export default function UseCaseFrontDoorClient() {
                                 key={r}
                                 href={`/category/${r}`}
                                 onClick={() => bumpJourneyStepClient(2)}
-                                className="rounded-full border border-[#b08d2f]/50 px-2 py-0.5 text-[11px] font-medium text-[#8a6d1f] hover:bg-[#b08d2f]/10 dark:border-[#d4af37]/40 dark:text-[#d4af37]"
+                                className="rounded-full border border-[#b08d2f]/50 px-2 py-0.5 text-xs font-medium text-[#8a6d1f] hover:bg-[#b08d2f]/10 dark:border-[#d4af37]/40 dark:text-[#d4af37]"
                               >
                                 {CATEGORY_LABEL[r] ?? r} →
                               </Link>
@@ -394,9 +394,9 @@ export default function UseCaseFrontDoorClient() {
             <div className={`${CARD} p-4`}>
               <div className="mb-1 flex items-baseline justify-between gap-2">
                 <h3 className="text-sm font-bold text-[#13294b] dark:text-[#eef3f8]">Impact not yet evidenced</h3>
-                <span className={`text-[11px] ${MUTED}`}>{pending.length}</span>
+                <span className={`text-xs ${MUTED}`}>{pending.length}</span>
               </div>
-              <p className={`mb-3 text-[11px] ${MUTED}`}>
+              <p className={`mb-3 text-xs ${MUTED}`}>
                 Feasible to varying degrees, but we have no cited impact estimate for these yet — so we
                 don&apos;t place them on the map. {placedCount} of {results.length} workflows are evidenced.
               </p>
@@ -423,7 +423,7 @@ export default function UseCaseFrontDoorClient() {
             </div>
           )}
 
-          <p className={`text-[11px] leading-5 ${MUTED}`}>
+          <p className={`text-xs leading-5 ${MUTED}`}>
             Impact estimates are analyst-curated from named, checkable sources (methodology + full source
             list in the C6 curation doc), shown as evidence-graded directional bands. A dollar value
             appears only where a named — usually vendor — source gives one, flagged as such. Where AI is

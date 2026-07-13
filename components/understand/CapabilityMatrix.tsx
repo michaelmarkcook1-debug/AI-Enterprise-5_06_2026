@@ -131,7 +131,7 @@ export default function CapabilityMatrix({
             ✕ Clear
           </button>
         )}
-        <span className="ml-auto text-[11px] text-[#5b6b7f] dark:text-[#8fa5bb]">
+        <span className="ml-auto text-xs text-[#5b6b7f] dark:text-[#8fa5bb]">
           {visibleVendors.length} vendor{visibleVendors.length !== 1 ? "s" : ""} × {visibleCaps.length} capabilit{visibleCaps.length !== 1 ? "ies" : "y"}
         </span>
       </div>
@@ -139,7 +139,7 @@ export default function CapabilityMatrix({
       <div className="overflow-x-auto">
         <table className="w-full min-w-[640px] text-left text-sm">
           <thead>
-            <tr className="border-b border-[#ece4d0] text-[10px] uppercase tracking-wide text-[#5b6b7f] dark:border-[#1d3a57] dark:text-[#8fa5bb]">
+            <tr className="border-b border-[#ece4d0] text-xs uppercase tracking-wide text-[#5b6b7f] dark:border-[#1d3a57] dark:text-[#8fa5bb]">
               <th className="sticky left-0 z-10 bg-[#fffdf7] py-2 pr-3 dark:bg-[#0c2238]">Vendor</th>
               {visibleCaps.map((cap) => (
                 <th key={cap.id} className="px-2 py-2 text-center font-semibold" title={cap.category}>
@@ -153,7 +153,7 @@ export default function CapabilityMatrix({
               <tr key={vendor.id} className="hover:bg-[#faf5e9] dark:hover:bg-[#0e2740]/60">
                 <td className="sticky left-0 z-10 bg-[#fffdf7] py-2 pr-3 dark:bg-[#0c2238]">
                   <div className="text-xs font-semibold text-[#13294b] dark:text-[#eef3f8]">{vendor.name}</div>
-                  <div className="text-[10px] text-[#5b6b7f] dark:text-[#8fa5bb]">{vendor.category}</div>
+                  <div className="text-xs text-[#5b6b7f] dark:text-[#8fa5bb]">{vendor.category}</div>
                 </td>
                 {visibleCaps.map((cap) => {
                   const cell = cells[`${vendor.id}_${cap.id}`];
@@ -168,7 +168,7 @@ export default function CapabilityMatrix({
                           <div className={`text-[9px] uppercase tracking-wide ${MODE_TONE[cell.mode]}`}>{MODE_LABEL[cell.mode]}</div>
                         </div>
                       ) : (
-                        <span className={`text-[10px] font-semibold uppercase tracking-wide ${MODE_TONE[cell.mode]}`}>
+                        <span className={`text-xs font-semibold uppercase tracking-wide ${MODE_TONE[cell.mode]}`}>
                           {MODE_LABEL[cell.mode]}
                         </span>
                       )}
@@ -181,7 +181,7 @@ export default function CapabilityMatrix({
         </table>
       </div>
 
-      <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 border-t border-[#efe9d9] pt-3 text-[10px] text-[#5b6b7f] dark:border-[#1d3a57] dark:text-[#8fa5bb]">
+      <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 border-t border-[#efe9d9] pt-3 text-xs text-[#5b6b7f] dark:border-[#1d3a57] dark:text-[#8fa5bb]">
         <span><strong className="text-emerald-700 dark:text-emerald-300">Verified</strong> E3+ evidence with sources</span>
         <span><strong className="text-[#13294b] dark:text-[#d8e2ec]">Documented</strong> public docs, unverified</span>
         <span><strong className="text-amber-700 dark:text-amber-300">Seed / Stale</strong> directional only</span>

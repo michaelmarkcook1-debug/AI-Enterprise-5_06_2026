@@ -88,7 +88,7 @@ export default function RestoreShortlistBanner({ hasUrlShortlist }: Props) {
     <div className="mb-6 rounded-2xl border-2 border-emerald-500/60 bg-emerald-50/60 px-5 py-4 dark:border-emerald-500/40 dark:bg-emerald-950/30">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="min-w-0">
-          <div className="text-[10px] font-semibold uppercase tracking-wider text-emerald-800 dark:text-emerald-300">
+          <div className="text-xs font-semibold uppercase tracking-wider text-emerald-800 dark:text-emerald-300">
             Restore your last shortlist
           </div>
           <div className="mt-1 text-sm leading-5 text-emerald-900 dark:text-emerald-100">

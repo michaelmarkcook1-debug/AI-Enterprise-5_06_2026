@@ -26,7 +26,7 @@ const COMPLETENESS_LABEL: Record<EvidenceCompleteness, string> = {
 
 function GradeChip({ grade }: { grade: EvidenceGrade }) {
   return (
-    <span className={`inline-flex rounded border px-1 py-0.5 text-[10px] font-bold uppercase tracking-wide ${GRADE_TONE[grade]}`}>
+    <span className={`inline-flex rounded border px-1 py-0.5 text-xs font-bold uppercase tracking-wide ${GRADE_TONE[grade]}`}>
       {grade}
     </span>
   );
@@ -86,9 +86,9 @@ export default function PillarContributionTable({
                     {scored && p.bestGrade ? (
                       <GradeChip grade={p.bestGrade} />
                     ) : context ? (
-                      <span className={`text-[10px] ${MUTED}`}>context only</span>
+                      <span className={`text-xs ${MUTED}`}>context only</span>
                     ) : (
-                      <span className={`text-[10px] ${MUTED}`}>insufficient</span>
+                      <span className={`text-xs ${MUTED}`}>insufficient</span>
                     )}
                   </td>
                   <td className="py-1.5 pr-3 text-right font-mono tabular-nums">
@@ -116,7 +116,7 @@ export default function PillarContributionTable({
 
       {/* Honest "what's held" — pillars with active domains but no reviewed evidence. */}
       {vendor.rankPillars.some((p) => p.state === "insufficient_evidence") && (
-        <div className="mt-2 text-[11px]">
+        <div className="mt-2 text-xs">
           <span className={`font-medium ${MUTED}`}>Held (no reviewed evidence yet): </span>
           <span className={MUTED}>
             {vendor.rankPillars.filter((p) => p.state === "insufficient_evidence").map((p) => p.label).join(", ")}
@@ -124,7 +124,7 @@ export default function PillarContributionTable({
         </div>
       )}
 
-      <p className={`mt-2 text-[10px] ${MUTED}`}>
+      <p className={`mt-2 text-xs ${MUTED}`}>
         Each pillar rolls up its evidence domains: domain score (0–5) × weight × a confidence blend
         (0.7 + 0.3×confidence). Contributions sum to the {vendor.assessmentComposite === null ? "composite" : `${vendor.assessmentComposite.toFixed(2)}/5 composite`} above.
         Market share / position is context, not part of the score.

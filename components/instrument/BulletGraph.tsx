@@ -61,7 +61,7 @@ export default function BulletGraph({
         role="img"
         aria-label={`${label}: insufficient evidence`}
       >
-        <span className="absolute inset-0 flex items-center pl-2 font-mono text-[10px] italic text-[#7e8a99] dark:text-[#8fa5bb]">
+        <span className="absolute inset-0 flex items-center pl-2 font-mono text-xs italic text-[#7e8a99] dark:text-[#8fa5bb]">
           {insufficientLabel}
         </span>
       </div>

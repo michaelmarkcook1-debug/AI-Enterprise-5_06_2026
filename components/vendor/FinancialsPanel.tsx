@@ -32,11 +32,11 @@ export default function FinancialsPanel({
   return (
     <Panel title="Financial profile">
       <div className="flex flex-wrap items-center gap-2">
-        <span className="rounded-full border border-[#e9e0c8] bg-white px-2 py-0.5 text-[11px] font-medium text-[#13294b] dark:border-[#1d3a57] dark:bg-[#0c2238]/60 dark:text-[#eef3f8]">
+        <span className="rounded-full border border-[#e9e0c8] bg-white px-2 py-0.5 text-xs font-medium text-[#13294b] dark:border-[#1d3a57] dark:bg-[#0c2238]/60 dark:text-[#eef3f8]">
           {badge}
         </span>
         {evidenceGrade && (
-          <span className={`rounded-full border border-[#e9e0c8] px-2 py-0.5 text-[11px] dark:border-[#1d3a57] ${MUTED}`}>
+          <span className={`rounded-full border border-[#e9e0c8] px-2 py-0.5 text-xs dark:border-[#1d3a57] ${MUTED}`}>
             Evidence {evidenceGrade}
           </span>
         )}
@@ -65,7 +65,7 @@ export default function FinancialsPanel({
       </p>
 
       <div className="mt-3">
-        <div className={`mb-1 text-[10px] font-semibold uppercase tracking-wider ${MUTED}`}>Capital &amp; funding signals</div>
+        <div className={`mb-1 text-xs font-semibold uppercase tracking-wider ${MUTED}`}>Capital &amp; funding signals</div>
         {signals.length === 0 ? (
           <p className={`text-sm ${MUTED}`}>No sourced capital signals on file.</p>
         ) : (
@@ -80,10 +80,10 @@ export default function FinancialsPanel({
         )}
       </div>
 
-      <p className="mt-3 inline-block rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-[11px] font-medium">
+      <p className="mt-3 inline-block rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-xs font-medium">
         Capital signals are analyst-sourced context — not audited financials
       </p>
-      {dataCaveats && <p className={`mt-2 text-[11px] leading-4 ${MUTED}`}>{dataCaveats}</p>}
+      {dataCaveats && <p className={`mt-2 text-xs leading-4 ${MUTED}`}>{dataCaveats}</p>}
     </Panel>
   );
 }

@@ -48,7 +48,7 @@ export default function CompetitiveIntelHeatmap({
         <h2 className="font-[var(--font-display)] text-xl font-extrabold tracking-tight">
           Competitive intel — capability heatmap
         </h2>
-        <span className={`text-[11px] ${MUTED}`}>A view of the live composite — not a new score</span>
+        <span className={`text-xs ${MUTED}`}>A view of the live composite — not a new score</span>
       </div>
       <p className={`mb-4 text-xs ${MUTED}`}>
         Every cell is the vendor&apos;s evidence-graded 0–5 domain score from the same assessment
@@ -60,14 +60,14 @@ export default function CompetitiveIntelHeatmap({
         <table className="w-full min-w-[640px] border-separate border-spacing-0 text-left">
           <thead>
             <tr>
-              <th className={`sticky left-0 z-10 bg-white/60 pb-2 pr-3 text-[11px] font-semibold uppercase tracking-wide dark:bg-transparent ${MUTED}`}>
+              <th className={`sticky left-0 z-10 bg-white/60 pb-2 pr-3 text-xs font-semibold uppercase tracking-wide dark:bg-transparent ${MUTED}`}>
                 Domain
               </th>
               {vendors.map((v) => (
                 <th key={v.vendorId} className="pb-2 pr-2 text-center">
                   <Link
                     href={`/vendors/${v.vendorSlug}`}
-                    className="text-[11px] font-semibold underline-offset-2 hover:underline"
+                    className="text-xs font-semibold underline-offset-2 hover:underline"
                     title={v.vendorName}
                   >
                     {v.vendorName.length > 12 ? `${v.vendorName.slice(0, 11)}…` : v.vendorName}
@@ -95,7 +95,7 @@ export default function CompetitiveIntelHeatmap({
                           {d.score.toFixed(1)}
                         </span>
                       ) : (
-                        <span className={`inline-block rounded px-1.5 py-1 text-[10px] ${MUTED}`} title="Insufficient evidence — no score">
+                        <span className={`inline-block rounded px-1.5 py-1 text-xs ${MUTED}`} title="Insufficient evidence — no score">
                           —
                         </span>
                       )}
@@ -108,7 +108,7 @@ export default function CompetitiveIntelHeatmap({
         </table>
       </div>
 
-      <p className={`mt-3 text-[11px] ${MUTED}`}>
+      <p className={`mt-3 text-xs ${MUTED}`}>
         Same engine, one honesty spine: scores are capped by evidence grade, insufficient stays
         insufficient (—), and nothing is inferred to fill a cell. Open any vendor for the cited working.
       </p>

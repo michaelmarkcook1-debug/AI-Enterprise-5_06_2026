@@ -156,7 +156,7 @@ export default function TabChat({ tab, label, chips }: TabChatProps) {
         >
           <div className="border-b border-black/10 px-4 py-3 dark:border-white/10">
             <p className="text-sm font-semibold">Ask AI — {label}</p>
-            <p className={`mt-0.5 text-[11px] leading-4 ${MUTED}`}>
+            <p className={`mt-0.5 text-xs leading-4 ${MUTED}`}>
               Grounded in this tab&apos;s cited data only. Beyond the evidence, it says so —
               it never guesses, and it never changes a score.
             </p>
@@ -165,7 +165,7 @@ export default function TabChat({ tab, label, chips }: TabChatProps) {
           <div ref={listRef} className="flex-1 space-y-3 overflow-y-auto px-4 py-3">
             {messages.length === 0 && (
               <div className="space-y-1.5">
-                <p className={`text-[11px] font-semibold uppercase tracking-wide ${MUTED}`}>Try asking</p>
+                <p className={`text-xs font-semibold uppercase tracking-wide ${MUTED}`}>Try asking</p>
                 {chips.map((c) => (
                   <button
                     key={c}
@@ -194,13 +194,13 @@ export default function TabChat({ tab, label, chips }: TabChatProps) {
                   }`}
                 >
                   {m.insufficient && !m.error && (
-                    <p className="mb-1 text-[10px] font-bold uppercase tracking-wide text-amber-700 dark:text-amber-300">
+                    <p className="mb-1 text-xs font-bold uppercase tracking-wide text-amber-700 dark:text-amber-300">
                       No evidence for this
                     </p>
                   )}
                   <p className="whitespace-pre-wrap">{m.text}</p>
                   {m.whatWouldHelp && (
-                    <p className={`mt-1.5 text-[11px] ${MUTED}`}>What would answer it: {m.whatWouldHelp}</p>
+                    <p className={`mt-1.5 text-xs ${MUTED}`}>What would answer it: {m.whatWouldHelp}</p>
                   )}
                   {(m.citations ?? []).length > 0 && (
                     <p className="mt-1.5 flex flex-wrap gap-1.5">
@@ -210,7 +210,7 @@ export default function TabChat({ tab, label, chips }: TabChatProps) {
                           href={c.sourceUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="rounded-full border border-black/15 px-2 py-0.5 text-[10px] underline-offset-2 hover:underline dark:border-white/20"
+                          className="rounded-full border border-black/15 px-2 py-0.5 text-xs underline-offset-2 hover:underline dark:border-white/20"
                         >
                           {hostOf(c.sourceUrl)}
                         </a>

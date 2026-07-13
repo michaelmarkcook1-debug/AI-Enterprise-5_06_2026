@@ -158,7 +158,7 @@ export default function WatchButton({ vendorId, vendorName }: WatchButtonProps) 
           className="absolute left-0 top-8 z-50 flex flex-col gap-1.5 rounded-lg border border-[#2a4a6b] bg-[#0d1f2d] p-3 shadow-xl"
           style={{ minWidth: "220px" }}
         >
-          <span className="text-[11px] font-semibold text-emerald-400 whitespace-nowrap">
+          <span className="text-xs font-semibold text-emerald-400 whitespace-nowrap">
             Add email to get alerts →
           </span>
           <input
@@ -170,20 +170,20 @@ export default function WatchButton({ vendorId, vendorName }: WatchButtonProps) 
             className="rounded border border-[#38587a] bg-[#071827] px-2 py-1 text-xs text-[#eef3f8] placeholder:text-[#4c5d75] focus:outline-none focus:ring-1 focus:ring-emerald-500"
           />
           {emailError && (
-            <span className="text-[10px] text-rose-400">{emailError}</span>
+            <span className="text-xs text-rose-400">{emailError}</span>
           )}
           <div className="flex gap-1.5">
             <button
               type="submit"
               disabled={emailSaving}
-              className="flex-1 rounded bg-emerald-600 px-2 py-1 text-[11px] font-semibold text-white hover:bg-emerald-500 disabled:opacity-50"
+              className="flex-1 rounded bg-emerald-600 px-2 py-1 text-xs font-semibold text-white hover:bg-emerald-500 disabled:opacity-50"
             >
               {emailSaving ? "Saving…" : "Save"}
             </button>
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); setShowEmailPrompt(false); }}
-              className="rounded border border-[#38587a] px-2 py-1 text-[11px] text-[#6b7d93] hover:text-[#d8e2ec]"
+              className="rounded border border-[#38587a] px-2 py-1 text-xs text-[#6b7d93] hover:text-[#d8e2ec]"
             >
               Skip
             </button>

@@ -161,7 +161,7 @@ export default function TriggerDailyRefresh() {
                 <span
                   key={s.step}
                   title={s.error ?? undefined}
-                  className={`rounded px-1.5 py-0.5 text-[10px] font-medium ${
+                  className={`rounded px-1.5 py-0.5 text-xs font-medium ${
                     s.ok
                       ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
                       : "bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300"
@@ -182,7 +182,7 @@ export default function TriggerDailyRefresh() {
             <span
               key={s.step}
               title={s.error ?? undefined}
-              className={`rounded px-1.5 py-0.5 text-[10px] font-medium ${
+              className={`rounded px-1.5 py-0.5 text-xs font-medium ${
                 s.ok
                   ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
                   : "bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300"

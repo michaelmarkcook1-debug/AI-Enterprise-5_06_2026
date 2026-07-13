@@ -134,7 +134,7 @@ export default function MarketMovement({ news, provenance }: Props) {
               <h3 className="text-sm font-semibold uppercase tracking-wide text-[#13294b] dark:text-[#eef3f8]">
                 {type.label}
               </h3>
-              <span className="rounded-full bg-[#f3ead2] px-2 py-0.5 text-[10px] font-semibold text-[#455044] dark:bg-[#143049] dark:text-[#c2d1e0]">
+              <span className="rounded-full bg-[#f3ead2] px-2 py-0.5 text-xs font-semibold text-[#455044] dark:bg-[#143049] dark:text-[#c2d1e0]">
                 {items.length}
               </span>
             </div>
@@ -152,7 +152,7 @@ export default function MarketMovement({ news, provenance }: Props) {
                       {item.title}
                     </h4>
                     <div className="flex shrink-0 items-center gap-2">
-                      <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                      <span className={`rounded-full px-2 py-0.5 text-xs font-bold ${
                         item.impactScore >= 70 ? "bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300"
                         : item.impactScore >= 50 ? "bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-200"
                         : "bg-[#ece3cb] text-[#3f5068] dark:bg-[#143049] dark:text-[#a7bacd]"
@@ -164,7 +164,7 @@ export default function MarketMovement({ news, provenance }: Props) {
 
                   {/* Why does this matter? — the required question */}
                   <div className="mt-3 rounded-lg bg-[#faf5e9] px-3 py-2.5 dark:bg-[#143049]/60">
-                    <div className="text-[10px] font-semibold uppercase tracking-wider text-[#5b6b7f] dark:text-[#8fa5bb]">
+                    <div className="text-xs font-semibold uppercase tracking-wider text-[#5b6b7f] dark:text-[#8fa5bb]">
                       Why it matters
                     </div>
                     <p className="mt-1 text-sm leading-5 text-[#13294b] dark:text-[#eef3f8]">
@@ -173,13 +173,13 @@ export default function MarketMovement({ news, provenance }: Props) {
                   </div>
 
                   {/* Metadata */}
-                  <div className="mt-3 flex flex-wrap items-center gap-3 text-[10px] text-[#5b6b7f] dark:text-[#8fa5bb]">
+                  <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-[#5b6b7f] dark:text-[#8fa5bb]">
                     <Confidence value={item.confidenceScore} />
                     {item.publishedAt && (
                       <span>{new Date(item.publishedAt).toLocaleDateString()}</span>
                     )}
                     {item.categories.slice(0, 2).map((c) => (
-                      <span key={c} className="rounded bg-[#f3ead2] px-1.5 py-0.5 text-[10px] dark:bg-[#143049]">{c}</span>
+                      <span key={c} className="rounded bg-[#f3ead2] px-1.5 py-0.5 text-xs dark:bg-[#143049]">{c}</span>
                     ))}
                   </div>
                 </div>

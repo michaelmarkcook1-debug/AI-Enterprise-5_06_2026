@@ -30,7 +30,7 @@ export default function JourneyBadge() {
     >
       <span className="h-2 w-2 shrink-0 rounded-full bg-[#d4af37]" aria-hidden />
       Your decision · step {step} of {JOURNEY_TOTAL_STEPS}
-      <span className="text-[10px] font-normal text-[#c8d7e9]">({JOURNEY_STEP_LABEL[step]}) →</span>
+      <span className="text-xs font-normal text-[#c8d7e9]">({JOURNEY_STEP_LABEL[step]}) →</span>
     </Link>
   );
 }

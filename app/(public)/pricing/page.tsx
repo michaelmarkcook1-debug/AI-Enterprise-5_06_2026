@@ -63,7 +63,7 @@ export default function PricingPage() {
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-16">
-      <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-[#b08d2f] dark:text-[#d4af37]">
+      <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#b08d2f] dark:text-[#d4af37]">
         Plans
       </p>
       <h1 className="font-display mt-2 text-4xl font-semibold leading-tight tracking-tight">

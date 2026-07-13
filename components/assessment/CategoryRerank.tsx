@@ -117,7 +117,7 @@ export default function CategoryRerank({
       {/* compact weight sliders */}
       <div className="mt-3 grid grid-cols-1 gap-x-4 gap-y-1 sm:grid-cols-2">
         {domainList.map((d) => (
-          <label key={d} className="flex items-center gap-2 text-[11px]">
+          <label key={d} className="flex items-center gap-2 text-xs">
             <span className="w-44 shrink-0 truncate text-[#3f5068] dark:text-[#a7bacd]" title={DOMAIN_LABEL[d]}>
               {DOMAIN_LABEL[d]}
             </span>
@@ -155,22 +155,22 @@ export default function CategoryRerank({
                 </span>
                 <span className="flex shrink-0 items-baseline gap-3 text-xs">
                   <span className="font-mono tabular-nums text-[#13294b] dark:text-[#eef3f8]">
-                    {v.composite.toFixed(2)}<span className="ml-0.5 text-[10px] text-[#7a8aa0]">/5</span>
+                    {v.composite.toFixed(2)}<span className="ml-0.5 text-xs text-[#7a8aa0]">/5</span>
                   </span>
                   <span className="font-mono tabular-nums text-[#7a8aa0]">{Math.round(v.coverage * 100)}% cov</span>
                 </span>
               </div>
               {next && gap && (
                 <details className="mt-0.5">
-                  <summary className="cursor-pointer select-none text-[10px] text-[#7a8aa0] hover:text-[#13294b] dark:hover:text-[#eef3f8]">
+                  <summary className="cursor-pointer select-none text-xs text-[#7a8aa0] hover:text-[#13294b] dark:hover:text-[#eef3f8]">
                     ▸ why above {next.vendorName} (+{gap.compositeDelta.toFixed(2)})
                   </summary>
                   {drivers.length === 0 ? (
-                    <p className="mt-1 pl-3 text-[11px] text-[#7a8aa0]">
+                    <p className="mt-1 pl-3 text-xs text-[#7a8aa0]">
                       Effectively tied at your current weights — re-weight to separate them. (Draft — interrogate the cited evidence.)
                     </p>
                   ) : (
-                    <ul className="mt-1 space-y-1 pl-3 text-[11px] text-[#5e6b7e] dark:text-[#a7bacd]">
+                    <ul className="mt-1 space-y-1 pl-3 text-xs text-[#5e6b7e] dark:text-[#a7bacd]">
                       {drivers.map((d) => (
                         <li key={d.domain} className="flex flex-wrap items-center gap-x-1.5">
                           <span className="font-medium text-[#13294b] dark:text-[#eef3f8]">{DOMAIN_LABEL[d.domain]}</span>
@@ -186,7 +186,7 @@ export default function CategoryRerank({
                           )}
                         </li>
                       ))}
-                      <li className="text-[10px] italic text-[#7a8aa0]">Draft — a decomposition of the gap, not a verdict. Interrogate the cited evidence.</li>
+                      <li className="text-xs italic text-[#7a8aa0]">Draft — a decomposition of the gap, not a verdict. Interrogate the cited evidence.</li>
                     </ul>
                   )}
                 </details>
@@ -198,10 +198,10 @@ export default function CategoryRerank({
 
       {computed.held.length > 0 && (
         <div className="mt-3 border-t border-black/5 pt-2 dark:border-white/10">
-          <div className="text-[11px] font-semibold text-[#5e6b7e] dark:text-[#a7bacd]">
+          <div className="text-xs font-semibold text-[#5e6b7e] dark:text-[#a7bacd]">
             Held — insufficient domain coverage ({computed.held.length})
           </div>
-          <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-[#7a8aa0]">
+          <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs text-[#7a8aa0]">
             {computed.held.map((v) => (
               <Link key={v.vendorId} href={`/vendors/${v.vendorSlug}`} className="underline-offset-2 hover:underline">
                 {v.vendorName} ({Math.round(v.coverage * 100)}%)

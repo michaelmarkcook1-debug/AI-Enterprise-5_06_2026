@@ -129,8 +129,8 @@ export default function VendorUptakeExplorer() {
           {headlineTop3.map((row, i) => (
             <div key={row.vendor} className="rounded-xl border border-[#e6dcc3] bg-white p-4 dark:border-[#1d3a57] dark:bg-[#0c2238]">
               <div className="flex items-center justify-between gap-2">
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-[#5b6b7f] dark:text-[#8fa5bb]">#{i + 1}</span>
-                <span className={`inline-flex items-center gap-1 text-[10px] font-medium text-[#56657b] dark:text-[#a7bacd]`}>
+                <span className="text-xs font-semibold uppercase tracking-wider text-[#5b6b7f] dark:text-[#8fa5bb]">#{i + 1}</span>
+                <span className={`inline-flex items-center gap-1 text-xs font-medium text-[#56657b] dark:text-[#a7bacd]`}>
                   <span className={`h-1.5 w-1.5 rounded-full ${CONF_DOT[row.confidence] ?? "bg-[#6b7d93]"}`} />
                   {row.confidence}
                 </span>
@@ -140,7 +140,7 @@ export default function VendorUptakeExplorer() {
                 <span className="text-base font-semibold text-[#13294b] dark:text-[#eef3f8]">{row.vendor}</span>
               </div>
               <div className="mt-1 font-mono text-2xl font-semibold text-[#13294b] dark:text-[#eef3f8]">{pct(row.share)}</div>
-              <div className="mt-0.5 text-[11px] text-[#5b6b7f] dark:text-[#8fa5bb]">share inside this slice</div>
+              <div className="mt-0.5 text-xs text-[#5b6b7f] dark:text-[#8fa5bb]">share inside this slice</div>
             </div>
           ))}
         </div>
@@ -167,7 +167,7 @@ export default function VendorUptakeExplorer() {
           reason="These shares are modelled estimates built in a May 2026 spreadsheet model from the cited research, not measured market data. Treat as directional; per-cell confidence dots show evidence strength."
         />
       </div>
-      <p className="text-[11px] leading-5 text-[#5b6b7f] dark:text-[#8fa5bb]">
+      <p className="text-xs leading-5 text-[#5b6b7f] dark:text-[#8fa5bb]">
         Modelled estimates, aggregated from 585 segment-share rows (5 regions × 9 industries × 13 vendors)
         and per-vendor large-enterprise / SME propensity, normalised within each slice. May 2026
         research basis: Menlo Ventures State of Enterprise GenAI, Ramp AI Index, Enlyft / Similarweb /
@@ -189,7 +189,7 @@ function describeFilter(regions: Region[], industries: Industry[], size: Company
 function FilterGroup({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="mt-3 first:mt-0">
-      <div className="mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-[#5b6b7f] dark:text-[#8fa5bb]">{title}</div>
+      <div className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-[#5b6b7f] dark:text-[#8fa5bb]">{title}</div>
       <div className="flex flex-wrap gap-1.5">{children}</div>
     </div>
   );
@@ -253,7 +253,7 @@ function VendorBarChart({ rows }: { rows: UptakeAggregateRow[] }) {
               />
             </div>
             <div className="text-right font-mono text-sm font-semibold text-[#13294b] dark:text-[#eef3f8]">{pct(r.share)}</div>
-            <div className="flex items-center justify-end gap-1 text-[10px] text-[#56657b] dark:text-[#a7bacd]">
+            <div className="flex items-center justify-end gap-1 text-xs text-[#56657b] dark:text-[#a7bacd]">
               <span className={`h-1.5 w-1.5 rounded-full ${CONF_DOT[r.confidence] ?? "bg-[#6b7d93]"}`} />
               {r.confidence}
             </div>
@@ -307,9 +307,9 @@ function RegionIndustryHeatmap({ focusVendor }: { focusVendor: string }) {
         <table className="min-w-full text-xs">
           <thead>
             <tr>
-              <th className="px-2 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-[#5b6b7f] dark:text-[#8fa5bb]"></th>
+              <th className="px-2 py-2 text-left text-xs font-semibold uppercase tracking-wider text-[#5b6b7f] dark:text-[#8fa5bb]"></th>
               {INDUSTRIES.map((i) => (
-                <th key={i} className="px-2 py-2 text-left text-[10px] font-medium text-[#56657b] dark:text-[#a7bacd]">{shortIndustry(i)}</th>
+                <th key={i} className="px-2 py-2 text-left text-xs font-medium text-[#56657b] dark:text-[#a7bacd]">{shortIndustry(i)}</th>
               ))}
             </tr>
           </thead>
@@ -326,7 +326,7 @@ function RegionIndustryHeatmap({ focusVendor }: { focusVendor: string }) {
                         style={{ background: cellColor(v) }}
                         title={`${vendor} · ${r} · ${i} → ${pct(v)}`}
                       >
-                        <span className="font-mono text-[11px] font-medium text-[#13294b] dark:text-[#eef3f8]">{v > 0 ? pct(v) : "—"}</span>
+                        <span className="font-mono text-xs font-medium text-[#13294b] dark:text-[#eef3f8]">{v > 0 ? pct(v) : "—"}</span>
                       </div>
                     </td>
                   );
@@ -336,7 +336,7 @@ function RegionIndustryHeatmap({ focusVendor }: { focusVendor: string }) {
           </tbody>
         </table>
       </div>
-      <p className="mt-2 text-[11px] text-[#5b6b7f] dark:text-[#8fa5bb]">
+      <p className="mt-2 text-xs text-[#5b6b7f] dark:text-[#8fa5bb]">
         Each cell = {vendor}&apos;s share of named-vendor usage in that (region, industry). Colour intensity
         scales relative to {vendor}&apos;s own peak cell.
       </p>

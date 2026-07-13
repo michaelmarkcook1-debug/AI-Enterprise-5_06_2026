@@ -68,7 +68,7 @@ export default function SignInForm({ track, returnTo }: { track?: string; return
         aria-label="Email address"
         className="w-full rounded-lg border border-black/15 dark:border-white/15 bg-white/80 dark:bg-white/5 px-3 py-2 text-sm outline-none focus:border-black/40 dark:focus:border-white/40"
       />
-      <label className="mt-3 flex items-start gap-2 text-[11px] text-[#15263c]/70 dark:text-[#eef3f8]/70">
+      <label className="mt-3 flex items-start gap-2 text-xs text-[#15263c]/70 dark:text-[#eef3f8]/70">
         <input
           type="checkbox"
           checked={consent}
@@ -89,7 +89,7 @@ export default function SignInForm({ track, returnTo }: { track?: string; return
         {state === "loading" ? "Sending…" : "Email me a sign-in link"}
       </button>
       {state === "error" && <p className="mt-2 text-xs text-rose-600 dark:text-rose-400">{msg}</p>}
-      <p className="mt-2 text-[11px] text-[#15263c]/50 dark:text-[#eef3f8]/50">
+      <p className="mt-2 text-xs text-[#15263c]/50 dark:text-[#eef3f8]/50">
         Passwordless. No spam — just your sign-in link.
       </p>
     </form>

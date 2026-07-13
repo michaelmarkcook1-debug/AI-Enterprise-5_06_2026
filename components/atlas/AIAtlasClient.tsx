@@ -467,7 +467,7 @@ function AtlasMap({
               aria-pressed={selected}
             >
               <span className={tone.text}>{entity.name}</span>
-              <span className="block text-[10px] font-normal text-[#8aa4b8] sm:text-[11px]">{entity.role}</span>
+              <span className="block text-xs font-normal text-[#8aa4b8] sm:text-xs">{entity.role}</span>
             </button>
           );
         })}

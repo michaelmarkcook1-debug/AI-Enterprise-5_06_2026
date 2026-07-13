@@ -18,7 +18,7 @@ export interface PrepKitConfig {
 }
 
 const CARD = "rounded-xl border border-[#2a6f6b]/40 bg-[#eef7f5]/70 p-4 dark:border-[#2a6f6b]/50 dark:bg-[#07201e]/40";
-const KICKER = "text-[10px] font-semibold uppercase tracking-wider text-[#1f6b63] dark:text-[#5ec8bd]";
+const KICKER = "text-xs font-semibold uppercase tracking-wider text-[#1f6b63] dark:text-[#5ec8bd]";
 
 function kitToText(k: PrepKit): string {
   const secLines = (s: KitSection) => [`\n## ${s.title}`, s.blurb, ...s.items.map((i) => `- ${i}`)].join("\n");
@@ -38,7 +38,7 @@ function Section({ s }: { s: KitSection }) {
   return (
     <details className="mt-2 rounded-lg border border-black/10 bg-white/60 p-3 dark:border-white/10 dark:bg-white/5">
       <summary className="cursor-pointer select-none text-sm font-semibold">{s.title}</summary>
-      <p className="mt-1 text-[11px] italic text-[#15263c]/65 dark:text-[#eef3f8]/60">{s.blurb}</p>
+      <p className="mt-1 text-xs italic text-[#15263c]/65 dark:text-[#eef3f8]/60">{s.blurb}</p>
       <ul className="mt-2 list-disc space-y-1 pl-5 text-xs leading-5">
         {s.items.map((it, i) => <li key={i}>{it}</li>)}
       </ul>
@@ -152,11 +152,11 @@ export default function PrepKitPanel({
           RFP / POC / reference / readiness templates. Draft — it probes gaps, it doesn&rsquo;t assert vendor facts.
         </p>
       )}
-      {state === "error" && <p className="mt-2 text-[11px] text-rose-600 dark:text-rose-400">{error}</p>}
+      {state === "error" && <p className="mt-2 text-xs text-rose-600 dark:text-rose-400">{error}</p>}
 
       {kit && (
         <div className="mt-3">
-          <p className="text-[11px] text-[#15263c]/65 dark:text-[#eef3f8]/60">
+          <p className="text-xs text-[#15263c]/65 dark:text-[#eef3f8]/60">
             {kit.scoredCount}/12 domains evidenced · {kit.insufficientCount} insufficient ·{" "}
             {kit.targets.weak.length + kit.targets.insufficient.length} gaps targeted
             {kit.targets.contextAdjusted ? " · context-adjusted" : ""}
@@ -177,7 +177,7 @@ export default function PrepKitPanel({
                   </span>
                 )}
                 <div className="mt-0.5 text-[#15263c]/90 dark:text-[#eef3f8]/90">{q.question}</div>
-                {q.rationale && <div className="text-[11px] text-[#15263c]/55 dark:text-[#eef3f8]/55">{q.rationale}</div>}
+                {q.rationale && <div className="text-xs text-[#15263c]/55 dark:text-[#eef3f8]/55">{q.rationale}</div>}
               </li>
             ))}
           </ol>
@@ -187,7 +187,7 @@ export default function PrepKitPanel({
           <Section s={kit.referenceBank} />
           <Section s={kit.readiness} />
 
-          <p className="mt-3 text-[10px] italic text-[#15263c]/55 dark:text-[#eef3f8]/55">{kit.draftNote}</p>
+          <p className="mt-3 text-xs italic text-[#15263c]/55 dark:text-[#eef3f8]/55">{kit.draftNote}</p>
         </div>
       )}
     </div>

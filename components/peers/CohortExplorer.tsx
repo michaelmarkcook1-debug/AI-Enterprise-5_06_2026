@@ -132,7 +132,7 @@ export default function CohortExplorer() {
             </select>
           </label>
         </div>
-        <p className={`mt-2 text-[11px] ${MUTED}`}>Saved in this browser — re-enter any time and pick up where you left off.</p>
+        <p className={`mt-2 text-xs ${MUTED}`}>Saved in this browser — re-enter any time and pick up where you left off.</p>
       </section>
 
       {/* ── 2 · The cohort's adoption picture (cited, layered by scope) ── */}
@@ -152,31 +152,31 @@ export default function CohortExplorer() {
         <section className={`${CARD} p-5`}>
           <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
             <h2 className="text-sm font-semibold">2 · How your cohort is adopting AI</h2>
-            <span className="rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-800 dark:text-amber-200">
+            <span className="rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-amber-800 dark:text-amber-200">
               Cited research, layered by how closely each source matches your segment
             </span>
           </div>
           <div className="space-y-4">
             {composed.layers.map((layer) => (
               <div key={layer.scope}>
-                <p className={`mb-2 text-[11px] font-semibold uppercase tracking-wide ${MUTED}`}>
+                <p className={`mb-2 text-xs font-semibold uppercase tracking-wide ${MUTED}`}>
                   {layer.scopeLabel}
                 </p>
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   {layer.stats.map((s, i) => (
                     <div key={i} className="rounded-lg border border-black/5 p-4 dark:border-white/10">
-                      <p className={`text-[10px] font-semibold uppercase tracking-wide ${MUTED}`}>
+                      <p className={`text-xs font-semibold uppercase tracking-wide ${MUTED}`}>
                         {STAT_KIND_LABEL[s.kind] ?? s.kind}
                       </p>
                       <p className="mt-1 text-sm font-medium leading-snug">{s.headline}</p>
                       {s.detail && <p className={`mt-1 text-xs leading-5 ${MUTED}`}>{s.detail}</p>}
-                      <p className={`mt-2 text-[11px] ${MUTED}`}>
+                      <p className={`mt-2 text-xs ${MUTED}`}>
                         <a href={s.source.url} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2">
                           {s.source.title}
                         </a>{" "}
                         — {s.source.publisher} · {s.source.surveyDate}
                       </p>
-                      <p className="mt-1 text-[10px] text-amber-700 dark:text-amber-300">Fit: {s.segmentFitNote}</p>
+                      <p className="mt-1 text-xs text-amber-700 dark:text-amber-300">Fit: {s.segmentFitNote}</p>
                     </div>
                   ))}
                 </div>
@@ -186,7 +186,7 @@ export default function CohortExplorer() {
 
           {benchmark && benchmark.topUseCases.length > 0 && (
             <div className="mt-4 border-t border-black/5 pt-4 dark:border-white/10">
-              <p className={`mb-2 text-[11px] font-semibold uppercase tracking-wide ${MUTED}`}>
+              <p className={`mb-2 text-xs font-semibold uppercase tracking-wide ${MUTED}`}>
                 Use-cases observed in your cohort&apos;s disclosed deployments (cited)
               </p>
               <div className="flex flex-wrap gap-2">
@@ -214,7 +214,7 @@ export default function CohortExplorer() {
       {platforms.length > 0 && (
         <section className={`${CARD} p-5`}>
           <h2 className="text-sm font-semibold">3 · AI platforms your cohort has disclosed adopting</h2>
-          <p className={`mt-1 text-[11px] ${MUTED}`}>
+          <p className={`mt-1 text-xs ${MUTED}`}>
             Derived from the named exemplars&apos; publicly disclosed adoptions below — disclosure
             counts, not market share. Links open the vendor&apos;s evidence-based assessment.
           </p>
@@ -275,8 +275,8 @@ export default function CohortExplorer() {
             <p className={`mt-1.5 text-xs ${MUTED}`}>
               You: {position.userLabel} · Cohort anchor: {position.cohortLabel}
             </p>
-            <p className={`mt-1.5 text-[11px] ${MUTED}`}>{position.caveat}</p>
-            <p className={`mt-1 text-[11px] ${MUTED}`}>Anchor basis: {benchmark.anchorRationale}</p>
+            <p className={`mt-1.5 text-xs ${MUTED}`}>{position.caveat}</p>
+            <p className={`mt-1 text-xs ${MUTED}`}>Anchor basis: {benchmark.anchorRationale}</p>
           </div>
         ) : null}
       </section>
@@ -285,7 +285,7 @@ export default function CohortExplorer() {
       <section>
         <div className="mb-3">
           <h2 className="text-sm font-semibold">5 · Named exemplar deployments in your segment</h2>
-          <p className={`mt-0.5 text-[11px] ${MUTED}`}>
+          <p className={`mt-0.5 text-xs ${MUTED}`}>
             Specific companies in this cohort with publicly disclosed AI deployments — cited,
             disclosure-only, never private usage.
           </p>

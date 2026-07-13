@@ -242,7 +242,7 @@ export default function CategoryCards({ vendors, momentum, provenance }: Props) 
                   </h3>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
-                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+                  <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
                     provenance.source === "live"
                       ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300"
                       : "border border-amber-300 bg-amber-50 text-amber-700 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-300"
@@ -250,7 +250,7 @@ export default function CategoryCards({ vendors, momentum, provenance }: Props) 
                     {dataLabel}
                   </span>
                   {avgConf > 0 && (
-                    <span className="rounded-full bg-white/70 px-2 py-0.5 text-[10px] font-semibold text-[#475a72] dark:bg-[#143049]/60 dark:text-[#c2d1e0]">
+                    <span className="rounded-full bg-white/70 px-2 py-0.5 text-xs font-semibold text-[#475a72] dark:bg-[#143049]/60 dark:text-[#c2d1e0]">
                       Confidence {avgConf}
                     </span>
                   )}
@@ -270,7 +270,7 @@ export default function CategoryCards({ vendors, momentum, provenance }: Props) 
                 {cat.subcategoryTags.map((tag) => (
                   <span
                     key={tag}
-                    className={`rounded-full px-2.5 py-0.5 text-[10px] font-medium ${cat.color.chipBg} ${cat.color.chipText}`}
+                    className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${cat.color.chipBg} ${cat.color.chipText}`}
                   >
                     {tag}
                   </span>
@@ -280,7 +280,7 @@ export default function CategoryCards({ vendors, momentum, provenance }: Props) 
               {/* Tier 1 — always visible */}
               {resolvedTier1.length > 0 && (
                 <div className="mb-2">
-                  <div className="text-[10px] font-semibold uppercase tracking-wider text-[#5b6b7f] dark:text-[#8fa5bb] mb-2">
+                  <div className="text-xs font-semibold uppercase tracking-wider text-[#5b6b7f] dark:text-[#8fa5bb] mb-2">
                     Major vendors
                   </div>
                   <div className="flex flex-wrap gap-1.5">
@@ -292,7 +292,7 @@ export default function CategoryCards({ vendors, momentum, provenance }: Props) 
                       return (
                         <span
                           key={`${cat.id}-${vendor.id}-${placement.displayName}`}
-                          className="inline-flex items-center gap-1.5 rounded-full border border-white/60 bg-white/80 px-3 py-1 text-[11px] font-semibold text-[#13294b] shadow-sm dark:border-[#2a4a6b] dark:bg-[#143049]/80 dark:text-[#eef3f8]"
+                          className="inline-flex items-center gap-1.5 rounded-full border border-white/60 bg-white/80 px-3 py-1 text-xs font-semibold text-[#13294b] shadow-sm dark:border-[#2a4a6b] dark:bg-[#143049]/80 dark:text-[#eef3f8]"
                           title={placement.roleNote ? `${placement.displayName} — ${placement.roleNote}` : placement.displayName}
                         >
                           {placement.displayName}
@@ -320,7 +320,7 @@ export default function CategoryCards({ vendors, momentum, provenance }: Props) 
                 <>
                   <button
                     onClick={() => toggle(cat.id)}
-                    className="mt-2 flex items-center gap-1.5 text-[11px] font-medium text-[#5b6b7f] hover:text-[#13294b] dark:text-[#8fa5bb] dark:hover:text-[#d8e2ec] transition-colors"
+                    className="mt-2 flex items-center gap-1.5 text-xs font-medium text-[#5b6b7f] hover:text-[#13294b] dark:text-[#8fa5bb] dark:hover:text-[#d8e2ec] transition-colors"
                     aria-expanded={isExpanded}
                     aria-controls={`${cat.id}-tier2`}
                   >
@@ -335,7 +335,7 @@ export default function CategoryCards({ vendors, momentum, provenance }: Props) 
                       {resolvedTier2.map(({ placement, vendor }) => (
                         <span
                           key={`${cat.id}-${vendor.id}-${placement.displayName}`}
-                          className="inline-flex items-center gap-1 rounded-full border border-[#e6dcc3]/60 bg-white/50 px-2.5 py-0.5 text-[10px] font-medium text-[#5b6b7f] dark:border-[#2a4a6b]/60 dark:bg-[#143049]/40 dark:text-[#a7bacd]"
+                          className="inline-flex items-center gap-1 rounded-full border border-[#e6dcc3]/60 bg-white/50 px-2.5 py-0.5 text-xs font-medium text-[#5b6b7f] dark:border-[#2a4a6b]/60 dark:bg-[#143049]/40 dark:text-[#a7bacd]"
                           title={placement.roleNote ? `${placement.displayName} — ${placement.roleNote}` : placement.displayName}
                         >
                           {placement.displayName}
@@ -356,7 +356,7 @@ export default function CategoryCards({ vendors, momentum, provenance }: Props) 
       })}
 
       {/* Legend */}
-      <div className="flex flex-wrap items-center gap-4 text-[10px] text-[#9da596] dark:text-[#8fa5bb] pt-1">
+      <div className="flex flex-wrap items-center gap-4 text-xs text-[#9da596] dark:text-[#8fa5bb] pt-1">
         <span className="flex items-center gap-1"><span className="text-emerald-600">{"↑"}</span> Improving</span>
         <span className="flex items-center gap-1"><span className="text-[#6b7d93]">{"→"}</span> Steady</span>
         <span className="flex items-center gap-1"><span className="text-rose-600">{"↓"}</span> Declining</span>

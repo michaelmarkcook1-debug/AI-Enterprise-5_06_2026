@@ -26,7 +26,7 @@ export default function InterrogatePage() {
   return (
     <main className="mx-auto max-w-3xl px-4 py-10">
       <header className="mb-6">
-        <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-[#b08d2f] dark:text-[#d4af37]">
+        <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#b08d2f] dark:text-[#d4af37]">
           Adaptive · grounded · source-cited
         </p>
         <h1 className="font-[var(--font-display)] mt-2 text-3xl font-extrabold tracking-tight">Interrogate</h1>

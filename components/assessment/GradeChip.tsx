@@ -8,5 +8,5 @@ export default function GradeChip({ grade }: { grade: string }) {
       : grade === "E3"
         ? "bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300"
         : "bg-[#ece3cb] text-[#3f5068] dark:bg-[#143049] dark:text-[#a7bacd]";
-  return <span className={`rounded px-1.5 py-0.5 text-[10px] font-medium ${cls}`}>{grade} {label}</span>;
+  return <span className={`rounded px-1.5 py-0.5 text-xs font-medium ${cls}`}>{grade} {label}</span>;
 }

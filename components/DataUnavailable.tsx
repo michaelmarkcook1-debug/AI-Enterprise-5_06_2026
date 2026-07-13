@@ -29,7 +29,7 @@ export default function DataUnavailable({
         {detail ??
           "We only show source-backed data. The live feed isn't available right now — rather than display placeholder figures, we're holding this section until verified data lands."}
       </p>
-      {reason && <p className={`mt-1.5 text-[11px] ${MUTED}`}>{reason}</p>}
+      {reason && <p className={`mt-1.5 text-xs ${MUTED}`}>{reason}</p>}
     </div>
   );
 }

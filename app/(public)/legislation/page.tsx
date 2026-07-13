@@ -58,7 +58,7 @@ export default function LegislationPage() {
           The instruments a CIO&apos;s risk and audit functions are tracking — cited to primary sources, tied to the
           assessment domains they touch. Filter by jurisdiction and sector.
         </p>
-        <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px]">
+        <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
           <span className="inline-flex items-center rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 font-medium text-amber-800 dark:text-amber-200">
             {REGISTER_STATUS}
           </span>
@@ -91,7 +91,7 @@ export default function LegislationPage() {
                       <span className="font-medium text-[#13294b] dark:text-[#eef3f8]">{u.shortName}</span>
                       <span className={MUTED}> · {JURISDICTION_LABEL[u.jurisdiction]} · {STATUS_LABEL[u.status]}</span>
                     </span>
-                    <span className={`shrink-0 tabular-nums text-[10px] ${MUTED}`}>{fmtDate(u.asOf)}</span>
+                    <span className={`shrink-0 tabular-nums text-xs ${MUTED}`}>{fmtDate(u.asOf)}</span>
                   </li>
                 ))}
               </ul>
@@ -102,7 +102,7 @@ export default function LegislationPage() {
         </>
       )}
 
-      <p className={`mt-6 text-[11px] leading-5 ${MUTED}`}>
+      <p className={`mt-6 text-xs leading-5 ${MUTED}`}>
         Framework anchors (NIST AI RMF, ISO/IEC 42001, EU AI Act articles) are shared with the{" "}
         <Link href="/insights" className="underline underline-offset-2 hover:no-underline">
           methodology crosswalk

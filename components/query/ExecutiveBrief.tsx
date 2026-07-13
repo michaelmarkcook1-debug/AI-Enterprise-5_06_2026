@@ -457,7 +457,7 @@ export default function ExecutiveBrief({ entities, winningByLayer, developments 
           className="flex w-full items-center justify-between px-5 py-4 text-left"
         >
           <div>
-            <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#a07f1f] dark:text-[#d4af37]">Executive Brief</div>
+            <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#a07f1f] dark:text-[#d4af37]">Executive Brief</div>
             <div className="mt-1 text-sm font-semibold text-[#13294b] dark:text-[#eef3f8]">
               {brief.total} entities tracked · Avg final score {brief.avgLeadership} · Confidence {brief.avgConfidence}% · {brief.risk.high} high-risk · {devs.length} developments
             </div>
@@ -469,7 +469,7 @@ export default function ExecutiveBrief({ entities, winningByLayer, developments 
           <div className="border-t border-[#efe9d9] px-5 py-4 dark:border-[#1d3a57]">
             <div className="grid gap-4 md:grid-cols-2">
               <div className="rounded-lg border border-[#e9e0c8] bg-[#fdfaf1] p-4 dark:border-[#1d3a57] dark:bg-[#081c30]/40">
-                <div className="text-[10px] font-semibold uppercase tracking-wider text-[#5b6b7f]">Market Snapshot</div>
+                <div className="text-xs font-semibold uppercase tracking-wider text-[#5b6b7f]">Market Snapshot</div>
                 <p className="mt-2 text-sm leading-6 text-[#2c3b52] dark:text-[#c2d1e0]">
                   AnalystGenius tracks <strong>{brief.total} entities</strong> across the enterprise AI landscape.
                   Average final score is <strong>{brief.avgLeadership}/100</strong> with momentum
@@ -479,7 +479,7 @@ export default function ExecutiveBrief({ entities, winningByLayer, developments 
                 </p>
               </div>
               <div className="rounded-lg border border-[#e9e0c8] bg-[#fdfaf1] p-4 dark:border-[#1d3a57] dark:bg-[#081c30]/40">
-                <div className="text-[10px] font-semibold uppercase tracking-wider text-[#5b6b7f]">Risk & Confidence</div>
+                <div className="text-xs font-semibold uppercase tracking-wider text-[#5b6b7f]">Risk & Confidence</div>
                 <p className="mt-2 text-sm leading-6 text-[#2c3b52] dark:text-[#c2d1e0]">
                   <strong>{brief.risk.high}</strong> high-risk, <strong>{brief.risk.medium}</strong> medium,
                   and <strong>{brief.risk.low}</strong> low-risk entities.
@@ -491,7 +491,7 @@ export default function ExecutiveBrief({ entities, winningByLayer, developments 
 
             {devs.length > 0 && (
               <div className="mt-4">
-                <div className="text-[10px] font-semibold uppercase tracking-wider text-[#5b6b7f]">Analyst Commentary — Recent Developments</div>
+                <div className="text-xs font-semibold uppercase tracking-wider text-[#5b6b7f]">Analyst Commentary — Recent Developments</div>
                 <div className="mt-2 space-y-3">
                   {devs.slice(0, 5).map((d, i) => {
                     const style = IMPACT_COLORS[d.impact];
@@ -518,14 +518,14 @@ export default function ExecutiveBrief({ entities, winningByLayer, developments 
                   })}
                 </div>
                 {devs.length > 5 && (
-                  <div className="mt-2 text-[10px] text-[#5b6b7f]">+ {devs.length - 5} more developments in export</div>
+                  <div className="mt-2 text-xs text-[#5b6b7f]">+ {devs.length - 5} more developments in export</div>
                 )}
               </div>
             )}
 
             <div className="mt-4 grid gap-4 md:grid-cols-3">
               <div>
-                <div className="text-[10px] font-semibold uppercase tracking-wider text-[#5b6b7f]">Leaders by Layer</div>
+                <div className="text-xs font-semibold uppercase tracking-wider text-[#5b6b7f]">Leaders by Layer</div>
                 <div className="mt-2 space-y-1.5">
                   {brief.leadersByLayer.map((l) => (
                     <div key={l.title} className="flex items-baseline justify-between gap-2 text-xs">
@@ -536,7 +536,7 @@ export default function ExecutiveBrief({ entities, winningByLayer, developments 
                 </div>
               </div>
               <div>
-                <div className="text-[10px] font-semibold uppercase tracking-wider text-[#5b6b7f]">Rising — Final Score</div>
+                <div className="text-xs font-semibold uppercase tracking-wider text-[#5b6b7f]">Rising — Final Score</div>
                 <div className="mt-2 space-y-1.5">
                   {brief.fastestMovers.length > 0 ? brief.fastestMovers.map((e) => (
                     <div key={e.id} className="flex items-center justify-between text-xs">
@@ -547,7 +547,7 @@ export default function ExecutiveBrief({ entities, winningByLayer, developments 
                 </div>
               </div>
               <div>
-                <div className="text-[10px] font-semibold uppercase tracking-wider text-[#5b6b7f]">High Risk Watch</div>
+                <div className="text-xs font-semibold uppercase tracking-wider text-[#5b6b7f]">High Risk Watch</div>
                 <div className="mt-2 space-y-1.5">
                   {brief.highRiskEntities.length > 0 ? brief.highRiskEntities.map((e) => (
                     <div key={e.id} className="flex items-center justify-between text-xs">
@@ -567,7 +567,7 @@ export default function ExecutiveBrief({ entities, winningByLayer, developments 
               >
                 {exporting ? "Exporting…" : "Export Executive Brief"}
               </button>
-              <span className="text-[10px] text-[#5b6b7f]">AG-branded HTML · print to PDF</span>
+              <span className="text-xs text-[#5b6b7f]">AG-branded HTML · print to PDF</span>
             </div>
           </div>
         )}

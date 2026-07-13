@@ -238,7 +238,7 @@ export default function TopNav() {
           {lastRefreshedAt && (
             <Link
               href="/admin/pipeline-health"
-              className={`hidden items-center gap-1.5 rounded-full border ${healthBorderClass(ingestionHealth)} ${healthBgClass(ingestionHealth)} px-2.5 py-1 text-[11px] font-medium ${healthTextClass(ingestionHealth)} no-underline md:inline-flex`}
+              className={`hidden items-center gap-1.5 rounded-full border ${healthBorderClass(ingestionHealth)} ${healthBgClass(ingestionHealth)} px-2.5 py-1 text-xs font-medium ${healthTextClass(ingestionHealth)} no-underline md:inline-flex`}
               title={healthTitle(ingestionHealth, lastRefreshedAt)}
             >
               <span className={`h-1.5 w-1.5 rounded-full ${healthDotClass(ingestionHealth)}`} aria-hidden />
@@ -384,7 +384,7 @@ export default function TopNav() {
               <Link
                 href="/admin/pipeline-health"
                 onClick={() => setMobileOpen(false)}
-                className={`inline-flex items-center gap-1.5 rounded-full border ${healthBorderClass(ingestionHealth)} ${healthBgClass(ingestionHealth)} px-2.5 py-1 text-[11px] font-medium ${healthTextClass(ingestionHealth)} no-underline`}
+                className={`inline-flex items-center gap-1.5 rounded-full border ${healthBorderClass(ingestionHealth)} ${healthBgClass(ingestionHealth)} px-2.5 py-1 text-xs font-medium ${healthTextClass(ingestionHealth)} no-underline`}
                 title={healthTitle(ingestionHealth, lastRefreshedAt)}
               >
                 <span className={`h-1.5 w-1.5 rounded-full ${healthDotClass(ingestionHealth)}`} aria-hidden />

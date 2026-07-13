@@ -6,8 +6,8 @@ export function Metric({ label, value, note }: { label: string; value: string | 
   return (
     <div className="border-t-2 border-[#d4af37] pt-2.5">
       <div className="font-mono text-[26px] font-semibold leading-none tracking-tight tabular-nums text-[#0f2240] dark:text-[#f6f1e3]">{value}</div>
-      <div className="mt-2 text-[11px] font-bold uppercase tracking-[0.14em] text-[#3f5068] dark:text-[#9fb3c8]">{label}</div>
-      {note && <div className="mt-0.5 text-[11px] text-[#5e7088] dark:text-[#7d93aa]">{note}</div>}
+      <div className="mt-2 text-xs font-bold uppercase tracking-[0.14em] text-[#3f5068] dark:text-[#9fb3c8]">{label}</div>
+      {note && <div className="mt-0.5 text-xs text-[#5e7088] dark:text-[#7d93aa]">{note}</div>}
     </div>
   );
 }
@@ -18,7 +18,7 @@ export function Panel({ title, children, action }: { title: string; children: Re
   return (
     <section className="overflow-hidden rounded-lg border border-[#e3d9c0] bg-[#fffdf7] dark:border-[#1d3a57] dark:bg-[#0c2238]">
       <div className="flex items-center justify-between gap-3 border-b border-[#ece4d0] px-5 py-3 dark:border-[#16314e]">
-        <h2 className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#3f5068] dark:text-[#9fb3c8]">{title}</h2>
+        <h2 className="text-xs font-bold uppercase tracking-[0.16em] text-[#3f5068] dark:text-[#9fb3c8]">{title}</h2>
         {action}
       </div>
       <div className="p-5">{children}</div>
@@ -56,7 +56,7 @@ export function SeedDataBadge({
     : `NOT LIVE — ${text}. Source: typed seed module. Run /admin/ingestion + approve in /admin/evidence to flip this surface to live.`);
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded border px-1.5 py-0.5 text-[11px] font-bold uppercase tracking-wide ${tone}`}
+      className={`inline-flex items-center gap-1 rounded border px-1.5 py-0.5 text-xs font-bold uppercase tracking-wide ${tone}`}
       title={tooltip}
     >
       <span
@@ -90,7 +90,7 @@ export function EvidenceDepthBadge({ depth }: { depth: number }) {
     : `Only ${depth} analyst-verified evidence row${depth === 1 ? "" : "s"} back these scores — treat as preliminary.`;
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded border px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${tone}`}
+      className={`inline-flex items-center gap-1 rounded border px-1.5 py-0.5 text-xs font-semibold uppercase tracking-wide ${tone}`}
       title={tooltip}
     >
       <span aria-hidden className={`inline-block h-1.5 w-1.5 rounded-full ${seed ? "bg-rose-500" : "bg-amber-500"}`} />

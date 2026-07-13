@@ -66,7 +66,7 @@ export default function MonitorControls({
   return (
     <div className="rounded-xl border border-black/10 dark:border-white/10 bg-white/60 dark:bg-white/5 p-5">
       <h2 className="text-sm font-semibold">Your shortlist</h2>
-      <p className="mt-1 text-[11px] text-[#15263c]/65 dark:text-[#eef3f8]/60">
+      <p className="mt-1 text-xs text-[#15263c]/65 dark:text-[#eef3f8]/60">
         Add the vendors and categories you want watched — private to you. Changes update your Monitor below.
       </p>
 
@@ -122,7 +122,7 @@ export default function MonitorControls({
                 className="flex w-full items-center justify-between px-3 py-2 text-left text-sm hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/10"
               >
                 <span>+ {o.label}</span>
-                <span className="text-[10px] uppercase tracking-wide text-[#15263c]/50 dark:text-[#eef3f8]/50">{o.type}</span>
+                <span className="text-xs uppercase tracking-wide text-[#15263c]/50 dark:text-[#eef3f8]/50">{o.type}</span>
               </button>
             ))}
           </div>

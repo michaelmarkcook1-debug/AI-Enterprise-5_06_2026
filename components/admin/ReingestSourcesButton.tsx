@@ -60,7 +60,7 @@ export default function ReingestSourcesButton() {
 
   return (
     <div className="mt-6 rounded-2xl border-2 border-[#d4af37] bg-[#fbf6e4] p-6 shadow-sm dark:border-[#d4af37] dark:bg-[#1a1605]/40">
-      <div className="text-[10px] font-semibold uppercase tracking-wider text-[#a07f1f] dark:text-[#d4af37]">
+      <div className="text-xs font-semibold uppercase tracking-wider text-[#a07f1f] dark:text-[#d4af37]">
         Live engine · reingest every official-data source
       </div>
       <h2 className="mt-1 text-xl font-semibold text-[#15263c] dark:text-[#eef3f8]">Reingest sources now</h2>
@@ -133,7 +133,7 @@ export default function ReingestSourcesButton() {
                   <tr key={r.id}>
                     <td className="px-4 py-2 font-medium">{r.label}</td>
                     <td className="px-4 py-2">
-                      <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${STATUS_TONE[r.status] ?? STATUS_TONE.error}`}>
+                      <span className={`rounded-full px-2 py-0.5 text-xs font-bold uppercase tracking-wide ${STATUS_TONE[r.status] ?? STATUS_TONE.error}`}>
                         {r.status.replace(/_/g, " ")}
                       </span>
                     </td>

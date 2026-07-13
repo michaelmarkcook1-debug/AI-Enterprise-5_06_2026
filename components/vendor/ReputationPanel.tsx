@@ -34,7 +34,7 @@ const MUTED = "text-[#54647a] dark:text-[#a7bacd]";
 
 function Badge({ status }: { status: "seed" | "documented" | "verified" }) {
   const s = STATUS[status] ?? STATUS.seed;
-  return <span className={`rounded-full border px-1.5 py-0.5 text-[10px] font-medium ${s.cls}`}>{s.label}</span>;
+  return <span className={`rounded-full border px-1.5 py-0.5 text-xs font-medium ${s.cls}`}>{s.label}</span>;
 }
 
 function scoreTone(v: number) {
@@ -63,12 +63,12 @@ function Pillar({
           <span className={`font-mono text-lg font-bold tabular-nums ${scoreTone(overall)}`}>{overall}</span>
         </span>
       </div>
-      <div className={`mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[10px] uppercase tracking-wide ${MUTED}`}>
+      <div className={`mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs uppercase tracking-wide ${MUTED}`}>
         {metrics.map((m) => (
           <span key={m.k}>{m.k} <span className="font-mono tabular-nums text-[#13294b] dark:text-[#eef3f8]">{m.v}</span></span>
         ))}
       </div>
-      {themes.length > 0 && <p className={`mt-2 text-[11px] leading-4 ${MUTED}`}>{themes.slice(0, 2).join(" · ")}</p>}
+      {themes.length > 0 && <p className={`mt-2 text-xs leading-4 ${MUTED}`}>{themes.slice(0, 2).join(" · ")}</p>}
     </div>
   );
 }
@@ -89,17 +89,17 @@ function GithubSignal({ signal }: { signal: LiveGitHubSignal }) {
   return (
     <div className="mt-3 rounded-lg border border-emerald-500/30 bg-emerald-500/5 p-2.5">
       <div className="flex flex-wrap items-center gap-2">
-        <span className="rounded-full border border-emerald-500/40 bg-emerald-500/10 px-1.5 py-0.5 text-[10px] font-medium text-emerald-700 dark:text-emerald-300">
+        <span className="rounded-full border border-emerald-500/40 bg-emerald-500/10 px-1.5 py-0.5 text-xs font-medium text-emerald-700 dark:text-emerald-300">
           verified · live
         </span>
-        <span className={`text-[11px] ${MUTED}`}>GitHub developer signal</span>
+        <span className={`text-xs ${MUTED}`}>GitHub developer signal</span>
       </div>
       <p className="mt-1.5 text-sm text-[#13294b] dark:text-[#eef3f8]">
         <span className="font-mono font-semibold tabular-nums">{signal.stars.toLocaleString()}</span> stars ·{" "}
         <span className="font-mono font-semibold tabular-nums">{signal.forks.toLocaleString()}</span> forks ·{" "}
         <span className="font-mono font-semibold tabular-nums">{signal.openIssues.toLocaleString()}</span> open issues
       </p>
-      <p className={`mt-1 text-[11px] ${MUTED}`}>
+      <p className={`mt-1 text-xs ${MUTED}`}>
         <a
           href={`https://github.com/${signal.repo}`}
           target="_blank"
@@ -121,7 +121,7 @@ function GithubSignal({ signal }: { signal: LiveGitHubSignal }) {
 function SourcesFooter({ reviewSources }: { reviewSources?: { configured: boolean; contributing: boolean } }) {
   return (
     <div className="mt-3 rounded-lg border border-[#e9e0c8] bg-[#faf6ec] p-2.5 dark:border-[#1d3a57] dark:bg-[#0c2238]/40">
-      <p className={`text-[11px] leading-4 ${MUTED}`}>
+      <p className={`text-xs leading-4 ${MUTED}`}>
         <span className="font-semibold text-[#13294b] dark:text-[#d8e2ec]">Sources: </span>
         reputation blends developer, employee and customer signals from public and operational
         evidence.{" "}
@@ -133,7 +133,7 @@ function SourcesFooter({ reviewSources }: { reviewSources?: { configured: boolea
           <>Dedicated customer-review platforms (G2 · TrustRadius · Trustpilot) are <span className="font-medium">not connected</span> — they need paid partner APIs, so customer reputation here is provisional until licensed. No scraping, no estimated ratings.</>
         )}
       </p>
-      <p className={`mt-1.5 text-[11px] leading-4 ${MUTED}`}>
+      <p className={`mt-1.5 text-xs leading-4 ${MUTED}`}>
         <span className="font-semibold text-[#13294b] dark:text-[#d8e2ec]">Independence: </span>
         analyst-house recognition (Gartner · Forrester · IDC) is deliberately <span className="font-medium">excluded</span> as a
         scored reputation signal. This tracker is the independent alternative to the paywalled
@@ -193,7 +193,7 @@ export default function ReputationPanel({
           {present.length > 0 && <Badge status={combinedGrade} />}
           <span className={`text-xs ${MUTED}`}>combined reputation (developer · employee · customer)</span>
         </div>
-        <span className={`text-[11px] ${MUTED}`}>
+        <span className={`text-xs ${MUTED}`}>
           {present.length}/3 pillars · {asOf ? `live signals to ${asOf}` : "curated, no live fetch yet"}
         </span>
       </div>
@@ -243,7 +243,7 @@ export default function ReputationPanel({
         )}
       </div>
 
-      <p className={`mt-3 text-[11px] leading-4 ${MUTED}`}>
+      <p className={`mt-3 text-xs leading-4 ${MUTED}`}>
         A point-in-time composite — each pillar is labelled with its evidence grade. The reputation
         line on the score-history chart tracks this forward from the day capture began (never
         back-filled).

@@ -60,45 +60,45 @@ function InstrumentCard({ inst }: { inst: LegislativeInstrument }) {
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
             <h3 className="text-sm font-semibold text-[#13294b] dark:text-[#eef3f8]">{inst.shortName}</h3>
-            <span className={`rounded-full border px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${STATUS_TONE[inst.status]}`}>
+            <span className={`rounded-full border px-1.5 py-0.5 text-xs font-semibold uppercase tracking-wide ${STATUS_TONE[inst.status]}`}>
               {STATUS_LABEL[inst.status]}
             </span>
             {inst.directional && (
               <span
-                className="rounded-full border border-[#e0d6ba] px-1.5 py-0.5 text-[10px] font-medium text-[#8a6d1f] dark:border-[#4a3d1a] dark:text-[#caa54a]"
+                className="rounded-full border border-[#e0d6ba] px-1.5 py-0.5 text-xs font-medium text-[#8a6d1f] dark:border-[#4a3d1a] dark:text-[#caa54a]"
                 title="Scope/status involves interpretation — read directionally, verify against the source."
               >
                 directional
               </span>
             )}
           </div>
-          <p className={`mt-0.5 text-[11px] ${MUTED}`}>
+          <p className={`mt-0.5 text-xs ${MUTED}`}>
             {JURISDICTION_LABEL[inst.jurisdiction]} · {inst.name}
           </p>
         </div>
         <div className="shrink-0 text-right">
           {inForce ? (
-            <div className="text-[11px]">
+            <div className="text-xs">
               <span className={MUTED}>In force </span>
               <span className="font-mono tabular-nums text-[#13294b] dark:text-[#eef3f8]">{inForce}</span>
             </div>
           ) : (
-            <div className={`text-[11px] ${MUTED}`}>no single in-force date</div>
+            <div className={`text-xs ${MUTED}`}>no single in-force date</div>
           )}
         </div>
       </div>
 
       <p className="mt-2 max-w-2xl text-xs leading-5 text-[#15263c] dark:text-[#eef3f8]">{inst.whatItRequires}</p>
-      {inst.timelineNote && <p className={`mt-1 max-w-2xl text-[11px] leading-5 ${MUTED}`}>{inst.timelineNote}</p>}
+      {inst.timelineNote && <p className={`mt-1 max-w-2xl text-xs leading-5 ${MUTED}`}>{inst.timelineNote}</p>}
 
       {/* Domain tie-in — the reg → the assessment domains it touches → vendor evidence. */}
       {chips.length > 0 && (
         <div className="mt-3 flex flex-wrap items-center gap-1.5">
-          <span className={`text-[10px] font-semibold uppercase tracking-wide ${MUTED}`}>Touches</span>
+          <span className={`text-xs font-semibold uppercase tracking-wide ${MUTED}`}>Touches</span>
           {chips.map((c) => (
             <span
               key={c.id}
-              className="rounded border border-[#e0d6ba] bg-[#faf6ec] px-1.5 py-0.5 text-[10px] text-[#475a72] dark:border-[#2a4a6b] dark:bg-[#143049] dark:text-[#c2d1e0]"
+              className="rounded border border-[#e0d6ba] bg-[#faf6ec] px-1.5 py-0.5 text-xs text-[#475a72] dark:border-[#2a4a6b] dark:bg-[#143049] dark:text-[#c2d1e0]"
             >
               {c.label}
             </span>
@@ -107,7 +107,7 @@ function InstrumentCard({ inst }: { inst: LegislativeInstrument }) {
       )}
 
       {inst.verticals.length > 0 && (
-        <p className={`mt-2 text-[10px] ${MUTED}`}>
+        <p className={`mt-2 text-xs ${MUTED}`}>
           Sector-specific: {inst.verticals.map((v) => VERTICAL_LABEL[v] ?? v).join(", ")}
         </p>
       )}
@@ -117,11 +117,11 @@ function InstrumentCard({ inst }: { inst: LegislativeInstrument }) {
           href={inst.citation.url}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-[11px] font-medium text-sky-700 underline underline-offset-2 hover:no-underline dark:text-sky-400"
+          className="text-xs font-medium text-sky-700 underline underline-offset-2 hover:no-underline dark:text-sky-400"
         >
           Primary source: {inst.citation.sourceName} ↗
         </a>
-        <span className={`text-[10px] ${MUTED}`}>as of {fmtDate(inst.asOf)}</span>
+        <span className={`text-xs ${MUTED}`}>as of {fmtDate(inst.asOf)}</span>
       </div>
     </li>
   );
@@ -170,7 +170,7 @@ export default function LegislationClient({
         {verticals.length > 0 && (
           <>
             <h2 className="mt-4 text-sm font-semibold">Sector lens</h2>
-            <p className={`mt-1 text-[11px] ${MUTED}`}>
+            <p className={`mt-1 text-xs ${MUTED}`}>
               Filtering by a sector keeps economy-wide instruments AND that sector&apos;s specific rules.
             </p>
             <div className="mt-2 flex flex-wrap gap-2">
@@ -211,7 +211,7 @@ export default function LegislationClient({
         )}
       </section>
 
-      <p className={`text-[11px] leading-5 ${MUTED}`}>
+      <p className={`text-xs leading-5 ${MUTED}`}>
         Each instrument maps to the{" "}
         <Link href="/insights" className="underline underline-offset-2 hover:no-underline">
           assessment domains

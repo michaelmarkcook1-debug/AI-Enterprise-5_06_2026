@@ -29,7 +29,7 @@ export default async function NotLiveBanner() {
         <div className="flex flex-wrap items-center gap-2">
           <span
             aria-hidden
-            className="inline-flex h-5 w-5 animate-pulse items-center justify-center rounded-full bg-rose-600 text-[10px] font-extrabold text-white"
+            className="inline-flex h-5 w-5 animate-pulse items-center justify-center rounded-full bg-rose-600 text-xs font-extrabold text-white"
           >
             !
           </span>
@@ -44,10 +44,10 @@ export default async function NotLiveBanner() {
           </span>
         </div>
         <div className="flex flex-wrap items-center gap-3 font-semibold">
-          <span className="rounded-full border border-rose-300 bg-white/70 px-2 py-0.5 text-[10px] uppercase tracking-wide dark:border-rose-700 dark:bg-rose-950/40">
+          <span className="rounded-full border border-rose-300 bg-white/70 px-2 py-0.5 text-xs uppercase tracking-wide dark:border-rose-700 dark:bg-rose-950/40">
             Reviewed evidence: <span className="font-extrabold tabular-nums">{provenance.evidenceCount}</span>
           </span>
-          <span className="rounded-full border border-rose-300 bg-white/70 px-2 py-0.5 text-[10px] uppercase tracking-wide dark:border-rose-700 dark:bg-rose-950/40">
+          <span className="rounded-full border border-rose-300 bg-white/70 px-2 py-0.5 text-xs uppercase tracking-wide dark:border-rose-700 dark:bg-rose-950/40">
             Approved proposals: <span className="font-extrabold tabular-nums">{provenance.approvedProposalCount}</span>
           </span>
           <Link

@@ -35,14 +35,14 @@ export default function ShortlistCompetitiveAlerts({ alerts }: { alerts: Shortli
                     <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
                       <span className="text-[#33455e] dark:text-[#c2d1e0]">
                         {c.incumbent.name}: <strong className="tabular-nums">{c.incumbent.finalScore}</strong>{" "}
-                        <span className="text-[10px] uppercase text-[#6b7d93]">{pretty(c.incumbent.recommendationBand)}</span>
+                        <span className="text-xs uppercase text-[#6b7d93]">{pretty(c.incumbent.recommendationBand)}</span>
                       </span>
                       <span className="text-[#33455e] dark:text-[#c2d1e0]">
                         {c.challenger.name}: <strong className="tabular-nums">{c.challenger.finalScore}</strong>{" "}
-                        <span className="text-[10px] uppercase text-[#6b7d93]">{pretty(c.challenger.recommendationBand)}</span>
+                        <span className="text-xs uppercase text-[#6b7d93]">{pretty(c.challenger.recommendationBand)}</span>
                       </span>
                       <span
-                        className={`rounded px-1.5 py-0.5 text-[11px] font-bold tabular-nums ${
+                        className={`rounded px-1.5 py-0.5 text-xs font-bold tabular-nums ${
                           challengerAhead
                             ? "bg-rose-100 text-rose-800 dark:bg-rose-950/40 dark:text-rose-300"
                             : "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300"

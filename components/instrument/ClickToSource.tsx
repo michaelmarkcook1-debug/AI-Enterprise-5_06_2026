@@ -65,13 +65,13 @@ export default function ClickToSource({ children, href, source, label = "source"
           className="absolute top-full left-0 z-30 mt-1.5 w-56 rounded-lg border border-[#e6dcc3] bg-white p-2.5 text-left shadow-lg dark:border-[#2a4a6b] dark:bg-[#0c2238]"
         >
           {source?.title && (
-            <span className="block text-[11px] font-medium leading-snug text-[#13294b] dark:text-[#eef3f8]">
+            <span className="block text-xs font-medium leading-snug text-[#13294b] dark:text-[#eef3f8]">
               {source.title}
             </span>
           )}
           <span className="mt-1 flex items-center gap-1.5">
             {source?.publisher && (
-              <span className="text-[10px] text-[#5b6b7f] dark:text-[#a7bacd]">{source.publisher}</span>
+              <span className="text-xs text-[#5b6b7f] dark:text-[#a7bacd]">{source.publisher}</span>
             )}
             {source?.grade && <GradeChip grade={source.grade} />}
           </span>

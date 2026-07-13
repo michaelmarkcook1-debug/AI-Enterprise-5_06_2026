@@ -205,7 +205,7 @@ export default function InterrogationFlow() {
             ask a few sharp questions, then write you a tailored, source-cited finding.
           </p>
           <div className="mt-3 flex items-center gap-2">
-            <span className={`text-[11px] font-medium ${MUTED}`}>Depth:</span>
+            <span className={`text-xs font-medium ${MUTED}`}>Depth:</span>
             <div className="inline-flex overflow-hidden rounded-full border border-black/15 dark:border-white/15">
               <button
                 type="button"
@@ -233,7 +233,7 @@ export default function InterrogationFlow() {
               </button>
             </div>
           </div>
-          <p className={`mt-1 text-[11px] ${MUTED}`}>
+          <p className={`mt-1 text-xs ${MUTED}`}>
             {mode === "quick"
               ? "At most 5 questions, then a finding from whatever signal is gathered by then."
               : "The model asks as many sharp questions as it judges it needs before concluding."}
@@ -246,7 +246,7 @@ export default function InterrogationFlow() {
             className="mt-3 w-full rounded-md border border-black/15 bg-white/80 p-3 text-sm dark:border-white/15 dark:bg-[#0a1f38]"
           />
           <div className="mt-3 flex items-center justify-between">
-            <span className={`text-[11px] ${MUTED}`}>{opening.trim().length < 8 ? "A sentence or two." : `${opening.trim().length} chars`}</span>
+            <span className={`text-xs ${MUTED}`}>{opening.trim().length < 8 ? "A sentence or two." : `${opening.trim().length} chars`}</span>
             <button className={BTN} onClick={start} disabled={busy || opening.trim().length < 8}>
               {busy ? "Starting…" : "Start"}
             </button>
@@ -256,7 +256,7 @@ export default function InterrogationFlow() {
 
       {phase === "questioning" && (
         <section className={CARD}>
-          <div className={`text-[11px] font-semibold uppercase tracking-wide ${MUTED}`}>
+          <div className={`text-xs font-semibold uppercase tracking-wide ${MUTED}`}>
             Question {questionsAsked}{mode === "quick" ? " of at most 5" : ""}
           </div>
           <p className="mt-1 text-sm font-medium">{question}</p>
@@ -290,7 +290,7 @@ export default function InterrogationFlow() {
           <Finding markdown={finding.markdown} />
           {finding.citedSourceUrls.length > 0 && (
             <div className="mt-4 border-t border-black/5 pt-3 dark:border-white/10">
-              <div className={`mb-1.5 text-[10px] font-semibold uppercase tracking-wide ${MUTED}`}>Sources</div>
+              <div className={`mb-1.5 text-xs font-semibold uppercase tracking-wide ${MUTED}`}>Sources</div>
               <ul className="space-y-1">
                 {finding.citedSourceUrls.map((u) => (
                   <li key={u} className="text-xs">
@@ -309,7 +309,7 @@ export default function InterrogationFlow() {
             </div>
           )}
           <div className="mt-4 flex items-center justify-between">
-            <span className={`text-[11px] ${MUTED}`}>
+            <span className={`text-xs ${MUTED}`}>
               {costUsd !== null ? `Session inference cost: $${costUsd.toFixed(4)}` : ""}
             </span>
             <button className="text-xs underline underline-offset-2" onClick={resetToStart}>

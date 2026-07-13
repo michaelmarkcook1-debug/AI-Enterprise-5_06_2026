@@ -39,11 +39,11 @@ export default function IngestionCostPanel({ vendorCount }: { vendorCount: numbe
       {/* Headline estimate */}
       <div className="flex flex-wrap items-end justify-between gap-3 rounded-xl border border-emerald-300 bg-emerald-50/60 p-4 dark:border-emerald-800 dark:bg-emerald-950/30">
         <div>
-          <div className="text-[10px] font-semibold uppercase tracking-wider text-emerald-800 dark:text-emerald-300">
+          <div className="text-xs font-semibold uppercase tracking-wider text-emerald-800 dark:text-emerald-300">
             Estimated cost — full ingestion run
           </div>
           <div className="font-mono text-3xl font-semibold text-emerald-900 dark:text-emerald-200">{fmtUsd(est.totalUsd)}</div>
-          <div className="mt-1 text-[11px] text-[#3a4a63] dark:text-[#a7bacd]">
+          <div className="mt-1 text-xs text-[#3a4a63] dark:text-[#a7bacd]">
             {a.vendorCount} vendors · {fmtTok(est.totalInputTokens)} input / {fmtTok(est.totalOutputTokens)} output tokens ·
             prices verified 10 Jun 2026
           </div>
@@ -60,7 +60,7 @@ export default function IngestionCostPanel({ vendorCount }: { vendorCount: numbe
       <div className="overflow-x-auto">
         <table className="w-full text-left text-xs">
           <thead>
-            <tr className="border-b border-[#e6dcc3] text-[10px] uppercase tracking-wider text-[#5b6b7f] dark:border-[#1d3a57] dark:text-[#8fa5bb]">
+            <tr className="border-b border-[#e6dcc3] text-xs uppercase tracking-wider text-[#5b6b7f] dark:border-[#1d3a57] dark:text-[#8fa5bb]">
               <th className="py-2 pr-3">Stage</th>
               <th className="py-2 pr-3">Tier · Model</th>
               <th className="py-2 pr-3 text-right">Calls</th>
@@ -73,7 +73,7 @@ export default function IngestionCostPanel({ vendorCount }: { vendorCount: numbe
               <tr key={s.stage} className="border-b border-[#efe9d9]/70 dark:border-[#1d3a57]/70">
                 <td className="py-2 pr-3 font-medium text-[#13294b] dark:text-[#eef3f8]">
                   {s.stage}
-                  {s.note && <span className="ml-1.5 text-[10px] text-emerald-700 dark:text-emerald-400">{s.note}</span>}
+                  {s.note && <span className="ml-1.5 text-xs text-emerald-700 dark:text-emerald-400">{s.note}</span>}
                 </td>
                 <td className="py-2 pr-3 text-[#5b6b7f] dark:text-[#a7bacd]">{s.tier} · {s.model}</td>
                 <td className="py-2 pr-3 text-right font-mono">{s.calls}</td>
@@ -115,7 +115,7 @@ export default function IngestionCostPanel({ vendorCount }: { vendorCount: numbe
         </h3>
         <table className="w-full text-left text-xs">
           <thead>
-            <tr className="border-b border-[#e6dcc3] text-[10px] uppercase tracking-wider text-[#5b6b7f] dark:border-[#1d3a57] dark:text-[#8fa5bb]">
+            <tr className="border-b border-[#e6dcc3] text-xs uppercase tracking-wider text-[#5b6b7f] dark:border-[#1d3a57] dark:text-[#8fa5bb]">
               <th className="py-2 pr-3">Tier</th>
               <th className="py-2 pr-3">Model · $/MTok in/out</th>
               <th className="py-2">Use for</th>

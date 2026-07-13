@@ -43,7 +43,7 @@ export default function AdminUnlockForm() {
   return (
     <div className="flex min-h-[70vh] items-center justify-center px-4">
       <div className="w-full max-w-sm rounded-xl border border-black/10 dark:border-white/10 bg-white/70 dark:bg-white/5 p-8 shadow-sm">
-        <p className="mb-1 text-[11px] font-semibold uppercase tracking-widest text-[#b08d2f]">Admin access</p>
+        <p className="mb-1 text-xs font-semibold uppercase tracking-widest text-[#b08d2f]">Admin access</p>
         <h1 className="mb-5 text-xl font-extrabold tracking-tight">Enter admin token</h1>
         <form onSubmit={submit} className="space-y-4">
           <input
@@ -66,7 +66,7 @@ export default function AdminUnlockForm() {
             {busy ? "Unlocking…" : "Unlock"}
           </button>
         </form>
-        <p className="mt-4 text-[11px] text-[#15263c]/50 dark:text-[#eef3f8]/40">
+        <p className="mt-4 text-xs text-[#15263c]/50 dark:text-[#eef3f8]/40">
           Session lasts 90 days. Set <code className="font-mono">ADMIN_API_TOKEN</code> in Vercel env vars.
         </p>
       </div>

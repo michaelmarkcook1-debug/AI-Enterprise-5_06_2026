@@ -68,19 +68,19 @@ function NewsRow({ item }: { item: BreakingNewsItem }) {
             title={synopsis || undefined}
             className="text-[13px] font-semibold leading-5 text-[#13294b] hover:underline dark:text-[#eef3f8]"
           >
-            {title} <span aria-hidden className="text-[10px] text-[#6b7d93]">↗</span>
+            {title} <span aria-hidden className="text-xs text-[#6b7d93]">↗</span>
           </a>
         ) : (
           <span title={synopsis || undefined} className="text-[13px] font-semibold leading-5 text-[#13294b] dark:text-[#eef3f8]">
             {title}
           </span>
         )}
-        <span className={`shrink-0 rounded px-1.5 py-0.5 text-[10px] font-bold tabular-nums ${impactClasses(item.impactScore)}`} title="Market-impact score">
+        <span className={`shrink-0 rounded px-1.5 py-0.5 text-xs font-bold tabular-nums ${impactClasses(item.impactScore)}`} title="Market-impact score">
           {item.impactScore}
         </span>
       </div>
       {why && (
-        <p className="mt-1 line-clamp-2 text-[11px] leading-4 text-[#54647a] dark:text-[#a7bacd]" title={synopsis || undefined}>
+        <p className="mt-1 line-clamp-2 text-xs leading-4 text-[#54647a] dark:text-[#a7bacd]" title={synopsis || undefined}>
           <span className="font-semibold text-[#3f5068] dark:text-[#c2d1e0]">Why it matters: </span>{why}
         </p>
       )}
@@ -98,7 +98,7 @@ function NewsRow({ item }: { item: BreakingNewsItem }) {
             {item.sourceName}
           </a>
         )}
-        <span className="ml-auto text-[10px] tabular-nums text-[#8a98a8]">{fmtDate(item.publishedAt)}</span>
+        <span className="ml-auto text-xs tabular-nums text-[#8a98a8]">{fmtDate(item.publishedAt)}</span>
       </div>
     </li>
   );
@@ -128,14 +128,14 @@ export default function BreakingNewsCard({ news }: { news: BreakingNews }) {
           </span>
           <h3 className="text-sm font-bold uppercase tracking-wide text-[#15263c] dark:text-[#eef3f8]">Breaking news</h3>
         </div>
-        <span className="text-[10px] font-medium text-[#6b7d93] dark:text-[#7a9bb8]">
+        <span className="text-xs font-medium text-[#6b7d93] dark:text-[#7a9bb8]">
           Last {windowDays} days · top {items.length}{vendorsCovered > 0 ? ` · ${vendorsCovered} vendors` : ""}
         </span>
       </div>
 
       {/* Freshness / staleness line — honest about the daily ingest cadence. */}
       {latestPublishedAt && (
-        <div className={`mt-1 text-[11px] ${stale ? "text-amber-700 dark:text-amber-400" : "text-[#6b7d93] dark:text-[#7a9bb8]"}`}>
+        <div className={`mt-1 text-xs ${stale ? "text-amber-700 dark:text-amber-400" : "text-[#6b7d93] dark:text-[#7a9bb8]"}`}>
           {usedFallback
             ? `No new signals in the last ${windowDays} days — showing the most recent (${fmtDate(latestPublishedAt)}, ${latestAgeDays}d ago).`
             : stale
@@ -157,8 +157,8 @@ export default function BreakingNewsCard({ news }: { news: BreakingNews }) {
             <div key={g.level}>
               <div className="flex items-center gap-1.5">
                 <span className={`inline-flex h-1.5 w-1.5 rounded-full ${g.dot}`} />
-                <span className={`text-[10px] font-bold uppercase tracking-wide ${g.text}`}>{g.label}</span>
-                <span className="text-[10px] tabular-nums text-[#8a98a8]">({g.rows.length})</span>
+                <span className={`text-xs font-bold uppercase tracking-wide ${g.text}`}>{g.label}</span>
+                <span className="text-xs tabular-nums text-[#8a98a8]">({g.rows.length})</span>
               </div>
               <ul className="mt-1 divide-y divide-[#efe9d9] dark:divide-[#16314c]">
                 {g.rows.map((item) => (

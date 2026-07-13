@@ -23,7 +23,7 @@ function ColumnHead({ col }: { col: FrontierColumn }) {
     return (
       <th className="min-w-[150px] py-2 px-3 text-left align-bottom">
         <div className="text-sm font-semibold">{col.vendorName}</div>
-        <p className={`mt-1 text-[11px] italic ${MUTED}`}>Not on the tracked leaderboard yet</p>
+        <p className={`mt-1 text-xs italic ${MUTED}`}>Not on the tracked leaderboard yet</p>
       </th>
     );
   }
@@ -36,7 +36,7 @@ function ColumnHead({ col }: { col: FrontierColumn }) {
       <div className="mt-1 flex flex-wrap items-center gap-1">
         {col.overallRank && (
           <span
-            className={`rounded-full border px-1.5 py-0.5 text-[10px] font-semibold tabular-nums ${
+            className={`rounded-full border px-1.5 py-0.5 text-xs font-semibold tabular-nums ${
               col.overallRank === 1
                 ? "border-[#b08d2f] bg-[#d4af37]/15 text-[#8a6d1f] dark:text-[#d4af37]"
                 : "border-black/10 dark:border-white/15"
@@ -46,7 +46,7 @@ function ColumnHead({ col }: { col: FrontierColumn }) {
           </span>
         )}
         {col.leadsCategory && col.leadsCategory !== "overall" && (
-          <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-1.5 py-0.5 text-[10px] font-medium text-emerald-700 dark:text-emerald-300">
+          <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-1.5 py-0.5 text-xs font-medium text-emerald-700 dark:text-emerald-300">
             Leads {COMPARE_CATEGORIES.find((c) => c.key === col.leadsCategory)?.label}
           </span>
         )}
@@ -147,7 +147,7 @@ export default function FrontierFaceOff({
         </table>
       </div>
 
-      <p className={`mt-4 text-[11px] leading-4 ${MUTED}`}>
+      <p className={`mt-4 text-xs leading-4 ${MUTED}`}>
         Every rating is a real Artificial Analysis Intelligence Index score, cited and dated with a real
         per-model release date. A vendor shows only its single highest-Intelligence-Index model —
         categories are never mixed in from a different model of the same vendor. A missing vendor means no
