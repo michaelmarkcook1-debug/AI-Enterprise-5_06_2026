@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getPrisma, hasDatabase } from "../../../../lib/prisma";
 import { ENTITIES } from "../../../../lib/intelligence/entities";
+import { ADMIN_OPEN } from "../../../../lib/availability";
 
 export const dynamic = "force-dynamic";
 
@@ -36,7 +37,7 @@ function riskCountFromLevel(risk: string): string[] {
 }
 
 export async function POST(request: Request) {
-  const isOpen = process.env.ADMIN_API_OPEN === "1";
+  const isOpen = ADMIN_OPEN || process.env.ADMIN_API_OPEN === "1";
   if (!isOpen) {
     const authHeader = request.headers.get("authorization");
     const expected = process.env.CRON_SECRET ?? process.env.ADMIN_API_TOKEN;

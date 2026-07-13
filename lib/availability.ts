@@ -137,6 +137,27 @@ export function memberTestOpenEffective(): boolean {
 export const MEMBER_FEATURES_VISIBLE: boolean = MEMBER_AUTH_ENABLED || MEMBER_TEST_OPEN;
 
 /**
+ * ADMIN + BACK-OFFICE OPEN — owner instruction, reaffirmed REPEATEDLY: this is a
+ * TEST deployment, no admin/password wall anywhere. A single HARDCODED literal on
+ * purpose — NOT an env var. Env-based admin opening (ADMIN_API_OPEN) has to be set,
+ * scoped to the right Vercel environment, and redeployed, and it kept silently
+ * reverting — which is why "remove the admin gate" never stuck. This can't revert:
+ * it's in the code.
+ *
+ * When true:
+ *   • /admin/* and /(internal)/* pages already render with no unlock
+ *     (isAdminPageAuthed() returns true) — this is the companion for the ACTIONS;
+ *   • every /api/admin/* route guarded by isCronOrAdminRequest() is open, so the
+ *     admin console buttons (trigger ingestion / daily-refresh, approve evidence,
+ *     backfill, exposure edits) work from a browser with no token.
+ *
+ * RISK, owner-accepted for test: those routes spend LLM credits and can edit
+ * evidence rows, and are now publicly callable. Flip to false (and rely on
+ * CRON_SECRET / ADMIN_API_TOKEN again) before any real or public launch.
+ */
+export const ADMIN_OPEN: boolean = true;
+
+/**
  * DEMO override for the two HERO LLM features ONLY (Interrogate + prep kit), so a
  * public demo audience on the REAL production URL can run them without sign-in —
  * unlike memberTestOpenEffective(), which is deliberately OFF on real production.

@@ -5,8 +5,13 @@
 // /api/admin/trigger-refresh (session-gated) to fire the pipeline from a browser.
 
 import { safeEqual } from "@/lib/safe-equal";
+import { ADMIN_OPEN } from "@/lib/availability";
 
 export function isCronOrAdminRequest(request: Request): boolean {
+  // 0. Owner TEST-OPEN (ADMIN_OPEN) — no token required from anywhere. Hardcoded
+  //    so it can't silently revert like the ADMIN_API_OPEN env var did. The cron
+  //    secret / token paths below still work when ADMIN_OPEN is flipped back off.
+  if (ADMIN_OPEN) return true;
   // 1. Vercel Cron — `Authorization: Bearer <CRON_SECRET>`
   const cronSecret = process.env.CRON_SECRET;
   if (cronSecret) {
