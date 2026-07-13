@@ -197,10 +197,10 @@ export default async function HomePage() {
           fabricated score. It shows with its labels, never presented as live-DB. */}
       {graphTakeaway && (
         <div className="mb-4 max-w-3xl text-sm leading-6">
+          {/* Label kept (an analytical derivation) as quiet inline text, not a badge —
+              matches /dependencies. */}
           <p className="text-[#15263c] dark:text-[#eef3f8]">
-            <span className="mr-2 inline-block rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide align-middle">
-              Derived signal
-            </span>
+            <span className="mr-1.5 font-semibold text-amber-700 dark:text-amber-300">Derived signal —</span>
             {graphTakeaway.chokepoints}
           </p>
           {graphTakeaway.ubiquity && (

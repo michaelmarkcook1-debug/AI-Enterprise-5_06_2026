@@ -20,6 +20,7 @@ import { getRankMovements, type RankMovement } from "@/lib/intelligence/rank-mov
 import RankMovementIndicator from "@/components/ranking/RankMovementIndicator";
 import CalibrationBadge from "@/components/ranking/CalibrationBadge";
 import { calibrationBand } from "@/lib/ranking/calibration";
+import { ConfidenceVeil } from "@/components/instrument";
 import TabChat from "@/components/chat/TabChat";
 import CompetitiveIntelHeatmap from "@/components/assessment/CompetitiveIntelHeatmap";
 import ExportPackLinks from "@/components/export/ExportPackLinks";
@@ -108,9 +109,9 @@ export default async function CategoryPage({ params }: { params: Promise<Params>
         {/* C15 — honest as-of: the sector ranking is materialised once per nightly
             batch and served cached; never presented as "live" when it isn't. */}
         {isLive && (
-          <p className={`mt-2 text-[11px] ${MUTED}`}>
+          <p className={`mt-2 text-xs ${MUTED}`}>
             {asOf
-              ? `Sector rankings as of ${asOf.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })} — refreshed nightly, computed once per sector`
+              ? `Sector rankings as of ${asOf.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })} — refreshed nightly`
               : "Sector rankings computed live"}
           </p>
         )}
@@ -136,7 +137,7 @@ export default async function CategoryPage({ params }: { params: Promise<Params>
       ) : (
         <section className={CARD}>
           <details className="mb-4 text-sm">
-            <summary className="cursor-pointer text-[11px] font-medium underline-offset-2 hover:underline">
+            <summary className="cursor-pointer text-xs font-medium underline-offset-2 hover:underline">
               How this ranking is computed
             </summary>
             <p className={`mt-2 text-xs leading-5 ${MUTED}`}>{methodologyNote}</p>
@@ -175,22 +176,24 @@ export default async function CategoryPage({ params }: { params: Promise<Params>
                         showStanding={false}
                       />
                     </span>
+                    {/* De-clutter: composite is the answer — the "N/M domains" and "% conf"
+                        micro-stats live one click away in "Why this rank"; the badge keeps
+                        the band and the veil dims a thin number. */}
                     <span className="flex shrink-0 items-baseline gap-3">
-                      <span className="font-mono text-sm tabular-nums" title={`${v.domainTotal}-domain weighted assessment composite (0–5), coverage-discounted`}>
-                        {(v.assessmentComposite ?? 0).toFixed(2)}
-                        <span className={`ml-1 text-[10px] ${MUTED}`}>/5 composite</span>
-                      </span>
-                      <span className={`font-mono text-[11px] tabular-nums ${MUTED}`}>{v.domainScored}/{v.domainTotal} domains</span>
-                      <span className={`font-mono text-[11px] tabular-nums ${MUTED}`}>{v.compositeConfidence}% conf</span>
+                      <ConfidenceVeil confidence={v.compositeConfidence} label={`${v.vendorName} composite`}>
+                        <span className="font-mono text-base tabular-nums" title={`${v.domainTotal}-domain weighted assessment composite (0–5), coverage-discounted`}>
+                          {(v.assessmentComposite ?? 0).toFixed(2)}
+                          <span className={`ml-1 text-xs ${MUTED}`}>/5</span>
+                        </span>
+                      </ConfidenceVeil>
                       <TrackButton item={`vendor:${v.vendorSlug}`} label={v.vendorName} />
                     </span>
                   </div>
-                  {v.marketContext.estimatedShare === null ? (
-                    <p className={`mt-1 text-[10px] ${MUTED}`}>Market Share Est.: mapping insufficient</p>
-                  ) : v.marketContext.isSeedSource ? (
-                    <p className={`mt-1 text-[10px] ${MUTED}`}>Market Share Est.: insufficient real-sourced estimate</p>
-                  ) : (
-                    <p className={`mt-1 text-[10px] ${MUTED}`}>
+                  {/* Market-share context shows ONLY when a real, labelled estimate exists —
+                      announcing its absence under every vendor was noise, not honesty (it's
+                      context-only and never part of the rank). */}
+                  {v.marketContext.estimatedShare !== null && !v.marketContext.isSeedSource && (
+                    <p className={`mt-1 text-xs ${MUTED}`}>
                       Market Share Est.: ~{Math.round(v.marketContext.estimatedShare)}% category share · context only, not the rank ·{" "}
                       <Link href="/insights#market-share-est" className="underline underline-offset-2">how this is estimated</Link>
                     </p>
@@ -216,7 +219,7 @@ export default async function CategoryPage({ params }: { params: Promise<Params>
                       <Link href={`/vendors/${v.vendorSlug}`} className="text-sm font-medium underline-offset-2 hover:underline">
                         {v.vendorName}
                       </Link>
-                      <span className={`text-[11px] ${MUTED}`}>{v.excludedReason}</span>
+                      <span className={`text-xs ${MUTED}`}>{v.excludedReason}</span>
                     </div>
                     <PillarContributionTable vendor={v} />
                     <DomainStrip domains={effectiveDomainsFor(scorecards.get(v.vendorId))} order={activeOrder} />
@@ -290,12 +293,16 @@ function DomainStrip({ domains, order }: { domains: DomainScore[]; order: Domain
   const byDomain = new Map<DomainId, DomainScore>(domains.map((d) => [d.domain, d]));
   const anyScored = order.some((id) => byDomain.get(id)?.state === "scored");
   if (!anyScored) return null;
+  // Single-hue gold intensity ramp (house instrument language, same as the peer
+  // heatmap) — strength reads as depth of gold, never red↔green traffic lights.
   const tone = (band: number) =>
     band >= 4
-      ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300"
+      ? "bg-[#b08d2f]/60 text-[#13294b] dark:bg-[#e8c95c]/50 dark:text-[#f6f0e7]"
       : band >= 3
-        ? "bg-amber-100 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300"
-        : "bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300";
+        ? "bg-[#b08d2f]/35 text-[#13294b] dark:bg-[#e8c95c]/30 dark:text-[#f6f0e7]"
+        : band >= 2
+          ? "bg-[#b08d2f]/20 text-[#13294b] dark:bg-[#e8c95c]/15 dark:text-[#e8dfd0]"
+          : "bg-[#b08d2f]/10 text-[#3f5068] dark:bg-[#e8c95c]/10 dark:text-[#c7d4e2]";
   return (
     <div className="mt-2 flex flex-wrap gap-1" aria-label="Per-domain evidence scores (0–5)">
       {order.map((id) => {
@@ -305,7 +312,7 @@ function DomainStrip({ domains, order }: { domains: DomainScore[]; order: Domain
           <span
             key={id}
             title={`${DOMAIN_LABEL[id]}: ${scored ? `${d!.score.toFixed(1)}/5` : "insufficient evidence"}`}
-            className={`inline-flex h-6 min-w-[2.1rem] items-center justify-center rounded px-1 font-mono text-[10px] tabular-nums ${
+            className={`inline-flex h-6 min-w-[2.1rem] items-center justify-center rounded px-1 font-mono text-[11px] tabular-nums ${
               scored
                 ? tone(d!.band)
                 : "bg-black/5 text-[#15263c]/40 dark:bg-white/5 dark:text-[#eef3f8]/40"

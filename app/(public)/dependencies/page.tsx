@@ -55,7 +55,7 @@ export default async function DependenciesPage() {
     <main className="mx-auto max-w-6xl px-4 py-10">
       <header className="mb-6">
         <h1 className="font-[var(--font-display)] text-3xl font-extrabold tracking-tight">{TITLE}</h1>
-        <p className={`mt-2 max-w-3xl text-sm ${MUTED}`}>{DESCRIPTION}</p>
+        <p className={`mt-2 max-w-3xl text-base ${MUTED}`}>{DESCRIPTION}</p>
       </header>
 
       {/* Derived "so what" — chokepoints (compute/cloud/capital leverage) stated
@@ -63,10 +63,10 @@ export default async function DependenciesPage() {
           mislabelled as pricing power. Recomputed from the live edge data. */}
       {takeaway && (
         <div className="mb-6 max-w-3xl text-sm leading-6">
+          {/* The label stays (this IS an analytical derivation) but as quiet inline
+              text, not an uppercase badge. */}
           <p>
-            <span className="mr-2 inline-block rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide align-middle">
-              Derived signal
-            </span>
+            <span className="mr-1.5 font-semibold text-amber-700 dark:text-amber-300">Derived signal —</span>
             {takeaway.chokepoints}
           </p>
           {takeaway.ubiquity && <p className={`mt-1.5 ${MUTED}`}>{takeaway.ubiquity}</p>}
@@ -121,11 +121,11 @@ export default async function DependenciesPage() {
       {/* Encroachment watch — DERIVED signals, clearly labelled, never stated as fact. */}
       <section className={`${CARD} mt-6`}>
         <h2 className="mb-1 text-lg font-semibold">Encroachment watch</h2>
-        <p className="mb-1 inline-block rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-[11px] font-medium">
-          Derived analytical signal — not a stated fact
-        </p>
-        <p className={`mb-4 text-xs ${MUTED}`}>
-          Each line combines a <strong>source-backed dependency</strong> with a{" "}
+        {/* De-clutter: the badge repeated what the explainer below already says
+            ("never as a measured claim") — one readable paragraph does the work. */}
+        <p className={`mb-4 max-w-3xl text-sm leading-6 ${MUTED}`}>
+          These are <strong>derived signals, not stated facts</strong>. Each line combines a{" "}
+          <strong>source-backed dependency</strong> with a{" "}
           <strong>role overlap</strong> in a genuine product layer: a dependent that also operates
           in its supplier&apos;s layer is positioned to compete. We show these only where both hold —
           never as a measured claim — and only for vendors with mapped market roles, so absence
