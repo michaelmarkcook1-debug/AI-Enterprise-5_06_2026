@@ -261,7 +261,7 @@ export default function ExposureMapHero(_: { edges?: unknown } = {}) {
     <div ref={containerRef} className="relative rounded-2xl border border-[#e3d9c0] bg-gradient-to-br from-white to-[#f6f1e3] p-6 shadow-sm dark:border-[#1d3a57] dark:from-[#0a1521] dark:to-[#071827]">
       {/* Header */}
       <div className="mb-5">
-        <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-700 dark:text-emerald-400">
+        <div className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700 dark:text-emerald-400">
           AI Ecosystem Navigator
         </div>
         <h2 className="mt-1 text-2xl font-semibold tracking-tight text-[#15263c] dark:text-[#f6f9fc] md:text-3xl">
@@ -276,7 +276,7 @@ export default function ExposureMapHero(_: { edges?: unknown } = {}) {
       <div className="mb-4 flex flex-wrap items-center gap-3 border-b border-[#e3d9c0] pb-4 dark:border-[#1d3a57]">
         {/* Relationship-type filter chips */}
         <div className="flex flex-wrap items-center gap-1.5">
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-[#4c5d75] dark:text-[#8fa5bb]">Relationship</span>
+          <span className="text-xs font-semibold uppercase tracking-wider text-[#4c5d75] dark:text-[#8fa5bb]">Relationship</span>
           {ALL_REL_TYPES.map((rt) => {
             const active = activeRelTypes.has(rt);
             return (
@@ -291,7 +291,7 @@ export default function ExposureMapHero(_: { edges?: unknown } = {}) {
                     return next;
                   })
                 }
-                className={`rounded-full border px-2.5 py-0.5 text-[11px] font-medium transition-colors ${
+                className={`rounded-full border px-2.5 py-0.5 text-xs font-medium transition-colors ${
                   active
                     ? "border-[#0a1f38] bg-[#0c2238] text-white dark:border-[#ece4d0] dark:bg-[#ece3cb] dark:text-[#13294b]"
                     : "border-[#d6c9a8] bg-white text-[#3f5068] hover:border-[#6b87a3] dark:border-[#2a4a6b] dark:bg-[#0c2238] dark:text-[#a7bacd] dark:hover:border-[#6b87a3]"
@@ -306,7 +306,7 @@ export default function ExposureMapHero(_: { edges?: unknown } = {}) {
 
         {/* Confidence filter */}
         <div className="ml-1 flex flex-wrap items-center gap-1.5">
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-[#4c5d75] dark:text-[#8fa5bb]">Confidence</span>
+          <span className="text-xs font-semibold uppercase tracking-wider text-[#4c5d75] dark:text-[#8fa5bb]">Confidence</span>
           {ALL_CONF_TIERS.map((ct) => {
             const active = activeConfTiers.has(ct);
             return (
@@ -321,7 +321,7 @@ export default function ExposureMapHero(_: { edges?: unknown } = {}) {
                     return next;
                   })
                 }
-                className={`rounded-full border px-2.5 py-0.5 text-[11px] font-medium transition-colors ${
+                className={`rounded-full border px-2.5 py-0.5 text-xs font-medium transition-colors ${
                   active
                     ? "border-emerald-600 bg-emerald-600 text-white"
                     : "border-[#d6c9a8] bg-white text-[#3f5068] hover:border-emerald-500 dark:border-[#2a4a6b] dark:bg-[#0c2238] dark:text-[#a7bacd]"
@@ -344,7 +344,7 @@ export default function ExposureMapHero(_: { edges?: unknown } = {}) {
           <button
             type="button"
             onClick={() => setPinned(new Set())}
-            className="ml-auto rounded-full border border-[#d6c9a8] px-3 py-0.5 text-[11px] font-medium text-[#2e3f57] hover:bg-[#ece3cb] dark:border-[#2a4a6b] dark:text-[#c2d1e0] dark:hover:bg-[#143049]"
+            className="ml-auto rounded-full border border-[#d6c9a8] px-3 py-0.5 text-xs font-medium text-[#2e3f57] hover:bg-[#ece3cb] dark:border-[#2a4a6b] dark:text-[#c2d1e0] dark:hover:bg-[#143049]"
           >
             Clear {pinned.size} pin{pinned.size === 1 ? "" : "s"}
           </button>
@@ -355,7 +355,7 @@ export default function ExposureMapHero(_: { edges?: unknown } = {}) {
           don't have to guess what an edge means. Investment / subsidiary
           imply ownership-or-control exposure; cloud / hosting / supply
           chain / partnership imply dependency or distribution exposure. */}
-      <div className="mb-3 rounded-lg border border-[#e3d9c0] bg-[#f6f1e3] px-3 py-2 text-[11px] leading-relaxed text-[#3f5068] dark:border-[#1d3a57] dark:bg-[#0c2238]/50 dark:text-[#a7bacd]">
+      <div className="mb-3 rounded-lg border border-[#e3d9c0] bg-[#f6f1e3] px-3 py-2 text-xs leading-relaxed text-[#3f5068] dark:border-[#1d3a57] dark:bg-[#0c2238]/50 dark:text-[#a7bacd]">
         <span className="font-semibold text-[#2e3f57] dark:text-[#c2d1e0]">Direction:</span>{" "}
         edges run <span className="font-semibold">left → right</span>, from exposure owner to model/API provider.{" "}
         <span className="font-semibold text-amber-700 dark:text-amber-400">Investment</span> and{" "}
@@ -370,8 +370,8 @@ export default function ExposureMapHero(_: { edges?: unknown } = {}) {
       {/* Inline legend strip — always visible. Same content as the
           legend at the bottom of the panel, but anchored near the
           map so colour decoding doesn't require scrolling. */}
-      <div className="mb-3 hidden flex-wrap items-center gap-3 rounded-lg border border-[#e3d9c0] bg-white px-3 py-2 text-[10px] text-[#3f5068] dark:border-[#1d3a57] dark:bg-[#0c2238] dark:text-[#a7bacd] md:flex">
-        <span className="text-[10px] font-semibold uppercase tracking-wider text-[#4c5d75]">Legend</span>
+      <div className="mb-3 hidden flex-wrap items-center gap-3 rounded-lg border border-[#e3d9c0] bg-white px-3 py-2 text-xs text-[#3f5068] dark:border-[#1d3a57] dark:bg-[#0c2238] dark:text-[#a7bacd] md:flex">
+        <span className="text-xs font-semibold uppercase tracking-wider text-[#4c5d75]">Legend</span>
         {ALL_REL_TYPES.map((rt) => (
           <span key={rt} className="inline-flex items-center gap-1.5">
             <svg width={22} height={6} aria-hidden>
@@ -421,10 +421,10 @@ export default function ExposureMapHero(_: { edges?: unknown } = {}) {
             ))}
           </defs>
           {/* Column headers */}
-          <text x={COL_LEFT_X} y={42} textAnchor="middle" className="fill-current text-[11px] font-semibold uppercase tracking-[0.16em] opacity-60">
+          <text x={COL_LEFT_X} y={42} textAnchor="middle" className="fill-current text-xs font-semibold uppercase tracking-[0.16em] opacity-60">
             Public exposure owners
           </text>
-          <text x={COL_RIGHT_X} y={42} textAnchor="middle" className="fill-current text-[11px] font-semibold uppercase tracking-[0.16em] opacity-60">
+          <text x={COL_RIGHT_X} y={42} textAnchor="middle" className="fill-current text-xs font-semibold uppercase tracking-[0.16em] opacity-60">
             AI labs / model owners
           </text>
 
@@ -552,8 +552,8 @@ export default function ExposureMapHero(_: { edges?: unknown } = {}) {
       )}
 
       {/* Legend */}
-      <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-[#e3d9c0] pt-3 text-[11px] text-[#3f5068] dark:border-[#1d3a57] dark:text-[#a7bacd]">
-        <span className="text-[10px] font-semibold uppercase tracking-wider text-[#4c5d75]">Legend</span>
+      <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-[#e3d9c0] pt-3 text-xs text-[#3f5068] dark:border-[#1d3a57] dark:text-[#a7bacd]">
+        <span className="text-xs font-semibold uppercase tracking-wider text-[#4c5d75]">Legend</span>
         {ALL_REL_TYPES.map((rt) => (
           <span key={rt} className="inline-flex items-center gap-1.5">
             <span className="inline-block h-1 w-6 rounded-sm" style={{ backgroundColor: REL_COLOR[rt] }} />
@@ -715,14 +715,14 @@ function MapTooltip({
             {content.sourceNode.label} → {content.targetNode.label}
           </span>
         </div>
-        <div className="mb-1.5 text-[10px] uppercase tracking-wider text-[#4c5d75]">
+        <div className="mb-1.5 text-xs uppercase tracking-wider text-[#4c5d75]">
           {REL_LABEL[e.relationshipType]} · confidence {CONF_LABEL[e.confidence]}
           {e.estimatedValue && ` · ${e.estimatedValue}`}
         </div>
         <p className="leading-relaxed text-[#2e3f57] dark:text-[#c2d1e0]">{e.summary}</p>
-        <div className="mt-2 text-[10px] text-[#4c5d75]">Updated {e.dateUpdated}</div>
+        <div className="mt-2 text-xs text-[#4c5d75]">Updated {e.dateUpdated}</div>
         {e.sourceUrls.length > 0 && (
-          <ul className="mt-1 space-y-0.5 text-[10px]">
+          <ul className="mt-1 space-y-0.5 text-xs">
             {e.sourceUrls.slice(0, 2).map((u) => (
               <li key={u} className="truncate text-emerald-700 dark:text-emerald-400">{new URL(u).hostname}</li>
             ))}
@@ -734,13 +734,13 @@ function MapTooltip({
   return (
     <div style={style} className="rounded-xl border border-[#e3d9c0] bg-white p-3 text-xs shadow-lg dark:border-[#2a4a6b] dark:bg-[#0c2238]">
       <div className="mb-1 font-semibold text-[#15263c] dark:text-[#eef3f8]">{content.node.label}</div>
-      <div className="mb-2 text-[10px] uppercase tracking-wider text-[#4c5d75]">
+      <div className="mb-2 text-xs uppercase tracking-wider text-[#4c5d75]">
         {content.node.ticker ? `${content.node.ticker} · ` : ""}{content.node.category}
       </div>
       {content.edges.length === 0 ? (
-        <div className="text-[11px] italic text-[#4c5d75]">No edges match current filters.</div>
+        <div className="text-xs italic text-[#4c5d75]">No edges match current filters.</div>
       ) : (
-        <ul className="space-y-1 text-[11px]">
+        <ul className="space-y-1 text-xs">
           {content.edges.slice(0, 5).map((e) => {
             const otherId = e.sourceId === content.node.id ? e.targetId : e.sourceId;
             const other = EXPOSURE_NODES.find((n) => n.id === otherId);
@@ -754,7 +754,7 @@ function MapTooltip({
             );
           })}
           {content.edges.length > 5 && (
-            <li className="text-[10px] italic text-[#4c5d75]">+{content.edges.length - 5} more</li>
+            <li className="text-xs italic text-[#4c5d75]">+{content.edges.length - 5} more</li>
           )}
         </ul>
       )}
@@ -805,7 +805,7 @@ function MobileStackedView({
               </span>
               <div className="flex-1">
                 <div className="text-sm font-semibold text-[#15263c] dark:text-[#eef3f8]">{src.label}</div>
-                <div className="text-[10px] uppercase tracking-wider text-[#4c5d75]">
+                <div className="text-xs uppercase tracking-wider text-[#4c5d75]">
                   {src.ticker ?? src.category} · {sourceEdges.length} relationship{sourceEdges.length === 1 ? "" : "s"}
                 </div>
               </div>
@@ -823,14 +823,14 @@ function MobileStackedView({
                         {CONF_LABEL[e.confidence]}
                       </span>
                     </div>
-                    <div className="text-[10px] uppercase tracking-wider text-[#4c5d75]">
+                    <div className="text-xs uppercase tracking-wider text-[#4c5d75]">
                       {REL_LABEL[e.relationshipType]}
                       {e.estimatedValue && ` · ${e.estimatedValue}`}
                       {` · updated ${e.dateUpdated}`}
                     </div>
                     <p className="leading-relaxed text-[#2e3f57] dark:text-[#c2d1e0]">{e.summary}</p>
                     {e.sourceUrls.length > 0 && (
-                      <div className="text-[10px] text-emerald-700 dark:text-emerald-400">
+                      <div className="text-xs text-emerald-700 dark:text-emerald-400">
                         {e.sourceUrls.slice(0, 2).map((u) => {
                           try {
                             return <span key={u} className="mr-2">{new URL(u).hostname}</span>;
@@ -873,7 +873,7 @@ function ActiveReadout({
   const ids = [...activeIds];
   return (
     <div className="mt-4 space-y-3">
-      <div className="text-[10px] font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
+      <div className="text-xs font-semibold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">
         {pinnedCount > 0 ? `${pinnedCount} pinned · ${ids.length} active` : "Hovered detail"}
       </div>
       <div className="grid gap-3 md:grid-cols-2">
@@ -888,14 +888,14 @@ function ActiveReadout({
               <div className="flex items-baseline justify-between gap-2">
                 <div>
                   <div className="font-semibold text-[#15263c] dark:text-[#eef3f8]">{node.label}</div>
-                  <div className="text-[10px] uppercase tracking-wider text-[#4c5d75]">
+                  <div className="text-xs uppercase tracking-wider text-[#4c5d75]">
                     {node.ticker ? `${node.ticker} · ` : ""}{node.category}
                   </div>
                 </div>
                 {profileSlug && (
                   <a
                     href={`/vendors/${profileSlug}`}
-                    className="rounded-full border border-emerald-500 bg-white px-2.5 py-0.5 text-[11px] font-medium text-emerald-800 hover:bg-emerald-100 dark:border-emerald-700 dark:bg-[#0c2238] dark:text-emerald-300 dark:hover:bg-emerald-950/60"
+                    className="rounded-full border border-emerald-500 bg-white px-2.5 py-0.5 text-xs font-medium text-emerald-800 hover:bg-emerald-100 dark:border-emerald-700 dark:bg-[#0c2238] dark:text-emerald-300 dark:hover:bg-emerald-950/60"
                   >
                     View vendor profile →
                   </a>
@@ -923,7 +923,7 @@ function ActiveReadout({
                       {e.summary && (
                         <p className="mt-1 leading-relaxed text-[#2e3f57] dark:text-[#c2d1e0]">{e.summary}</p>
                       )}
-                      <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] text-[#4c5d75]">
+                      <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[#4c5d75]">
                         {e.estimatedValue && <span>{e.estimatedValue}</span>}
                         <span>Updated {e.dateUpdated}</span>
                       </div>
@@ -932,9 +932,9 @@ function ActiveReadout({
                           pending" line when sourceUrls is empty so the
                           operator never sees a silent gap. */}
                       <div className="mt-2 border-t border-[#e3d9c0] pt-1.5 dark:border-[#1d3a57]">
-                        <div className="text-[10px] font-semibold uppercase tracking-wider text-[#4c5d75]">View evidence</div>
+                        <div className="text-xs font-semibold uppercase tracking-wider text-[#4c5d75]">View evidence</div>
                         {e.sourceUrls.length === 0 ? (
-                          <div className="mt-0.5 text-[11px] italic text-[#4c5d75]">Evidence pending — relationship classified from public reporting; primary source not yet attached.</div>
+                          <div className="mt-0.5 text-xs italic text-[#4c5d75]">Evidence pending — relationship classified from public reporting; primary source not yet attached.</div>
                         ) : (
                           <ul className="mt-0.5 space-y-0.5">
                             {e.sourceUrls.slice(0, 3).map((url) => {
@@ -946,7 +946,7 @@ function ActiveReadout({
                                     href={url}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="inline-flex items-center gap-1 text-[11px] text-emerald-700 underline-offset-2 hover:underline dark:text-emerald-400"
+                                    className="inline-flex items-center gap-1 text-xs text-emerald-700 underline-offset-2 hover:underline dark:text-emerald-400"
                                   >
                                     {host}
                                     <span aria-hidden className="text-[9px]">↗</span>

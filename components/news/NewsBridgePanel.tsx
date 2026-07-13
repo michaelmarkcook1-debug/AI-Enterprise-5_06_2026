@@ -39,12 +39,12 @@ function CorrectionForm({ bridge, onDone }: { bridge: NewsBridge; onDone: () => 
   }
 
   if (state === "done") {
-    return <p className="mt-2 text-[11px] text-emerald-700 dark:text-emerald-300">Thanks — flagged for review. It won&apos;t change anything until an analyst checks it.</p>;
+    return <p className="mt-2 text-xs text-emerald-700 dark:text-emerald-300">Thanks — flagged for review. It won&apos;t change anything until an analyst checks it.</p>;
   }
 
   return (
     <div className="mt-2 rounded-md border border-black/10 bg-black/[0.02] p-2.5 dark:border-white/10 dark:bg-white/[0.03]">
-      <div className="flex flex-wrap gap-2 text-[11px]">
+      <div className="flex flex-wrap gap-2 text-xs">
         {bridge.vendors.length > 0 && (
           <label className="inline-flex items-center gap-1">
             <input type="radio" checked={kind === "wrong_vendor"} onChange={() => setKind("wrong_vendor")} />
@@ -61,7 +61,7 @@ function CorrectionForm({ bridge, onDone }: { bridge: NewsBridge; onDone: () => 
           value={vendorSlug}
           onChange={(e) => setVendorSlug(e.target.value)}
           aria-label="Which vendor this item is not actually about"
-          className="mt-2 w-full rounded border border-black/15 bg-white px-2 py-1 text-[11px] dark:border-white/15 dark:bg-[#0c2238]"
+          className="mt-2 w-full rounded border border-black/15 bg-white px-2 py-1 text-xs dark:border-white/15 dark:bg-[#0c2238]"
         >
           {bridge.vendors.map((v) => (
             <option key={v.slug} value={v.slug}>
@@ -76,19 +76,19 @@ function CorrectionForm({ bridge, onDone }: { bridge: NewsBridge; onDone: () => 
         placeholder={kind === "other" ? "What's off? (required)" : "Add a note (optional)"}
         aria-label={kind === "other" ? "What's off? (required)" : "Add a note (optional)"}
         rows={2}
-        className="mt-2 w-full rounded border border-black/15 bg-white px-2 py-1 text-[11px] dark:border-white/15 dark:bg-[#0c2238]"
+        className="mt-2 w-full rounded border border-black/15 bg-white px-2 py-1 text-xs dark:border-white/15 dark:bg-[#0c2238]"
       />
       <div className="mt-2 flex items-center gap-3">
         <button
           type="button"
           disabled={state === "sending" || (kind === "other" && !note.trim())}
           onClick={submit}
-          className="rounded-full border border-[#d6c9a8] px-2.5 py-1 text-[11px] font-medium disabled:opacity-50 dark:border-[#2a4a6b]"
+          className="rounded-full border border-[#d6c9a8] px-2.5 py-1 text-xs font-medium disabled:opacity-50 dark:border-[#2a4a6b]"
         >
           {state === "sending" ? "Sending…" : "Send suggestion"}
         </button>
-        <button type="button" onClick={onDone} className={`text-[11px] ${MUTED}`}>Cancel</button>
-        {state === "error" && <span className="text-[11px] text-rose-600 dark:text-rose-400">Couldn&apos;t send — try again.</span>}
+        <button type="button" onClick={onDone} className={`text-xs ${MUTED}`}>Cancel</button>
+        {state === "error" && <span className="text-xs text-rose-600 dark:text-rose-400">Couldn&apos;t send — try again.</span>}
       </div>
     </div>
   );
@@ -100,7 +100,7 @@ export default function NewsBridgePanel({ bridge, compact = false }: { bridge: N
 
   return (
     <div className={compact ? "mt-1.5" : "mt-2"}>
-      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px]">
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs">
         <span className={`font-semibold uppercase tracking-wide ${MUTED}`}>Assessment</span>
         {bridge.vendors.map((v: BridgeVendor) => (
           <Link
@@ -125,7 +125,7 @@ export default function NewsBridgePanel({ bridge, compact = false }: { bridge: N
         )}
       </div>
       {!compact && (
-        <p className={`mt-1 text-[10px] leading-4 ${MUTED}`}>
+        <p className={`mt-1 text-xs leading-4 ${MUTED}`}>
           We link the item to the vendor&apos;s evidence-based assessment — we don&apos;t claim a score
           movement until the evidence pipeline actually re-scores it.
         </p>

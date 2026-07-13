@@ -18,7 +18,7 @@ export default function CategoryLeadersRail({ rankings }: { rankings: CategoryRa
           All categories →
         </Link>
       </div>
-      <p className={`mt-1 text-[11px] ${MUTED}`}>
+      <p className={`mt-1 text-xs ${MUTED}`}>
         Ranked within each category — never across them. Figures are <strong>Market Share Est.</strong> —
         directional, derived from cited signals, not measured.
       </p>
@@ -36,7 +36,7 @@ export default function CategoryLeadersRail({ rankings }: { rankings: CategoryRa
                     <span className="block truncate text-sm font-medium text-[#13294b] group-hover:underline dark:text-[#eef3f8]">
                       {r.category.name}
                     </span>
-                    <span className={`block truncate text-[11px] ${MUTED}`}>
+                    <span className={`block truncate text-xs ${MUTED}`}>
                       {top.vendor.name} leads · {r.leaders.length} tracked
                     </span>
                   </span>

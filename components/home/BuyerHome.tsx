@@ -50,7 +50,7 @@ export default function BuyerHome({
           <p className={`mt-1 text-sm ${MUTED}`}>Your shortlist, your saved decisions, what changed this week.</p>
         </div>
         {isDemo && (
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-rose-400 bg-rose-50 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-rose-900 dark:border-rose-700 dark:bg-rose-950/50 dark:text-rose-200">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-rose-400 bg-rose-50 px-2.5 py-1 text-xs font-bold uppercase tracking-wide text-rose-900 dark:border-rose-700 dark:bg-rose-950/50 dark:text-rose-200">
             <span className="h-1.5 w-1.5 rounded-full bg-current" aria-hidden />
             Demo — shared test account
           </span>
@@ -138,7 +138,7 @@ export default function BuyerHome({
                       <Link href={`/vendors/${n.vendorSlug}`} className="text-xs font-medium text-sky-700 hover:underline dark:text-sky-400">
                         assess →
                       </Link>
-                      <span className="ml-1 rounded-full border border-amber-500/40 bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-medium text-amber-800 dark:text-amber-200">
+                      <span className="ml-1 rounded-full border border-amber-500/40 bg-amber-500/10 px-1.5 py-0.5 text-xs font-medium text-amber-800 dark:text-amber-200">
                         pending re-assessment
                       </span>
                     </>

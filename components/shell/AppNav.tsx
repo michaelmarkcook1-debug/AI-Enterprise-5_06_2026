@@ -119,7 +119,7 @@ export default function AppNav({
           {showToggle && <ViewModeToggle mode={viewMode} onToggle={setViewMode} />}
           {isRealSession && memberEmail ? (
             <>
-              <span className="hidden text-[11px] text-[#9fb3c8] sm:inline">{memberEmail}</span>
+              <span className="hidden text-xs text-[#9fb3c8] sm:inline">{memberEmail}</span>
               <button
                 type="button"
                 onClick={signOut}

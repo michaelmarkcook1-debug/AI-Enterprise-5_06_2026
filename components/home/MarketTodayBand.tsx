@@ -84,7 +84,7 @@ export default async function MarketTodayBand({
             <dl className="mt-3 grid grid-cols-2 gap-3">
               <div className={TILE}>
                 <dd className="font-display text-2xl tabular-nums">{vendors.length || "—"}</dd>
-                <dt className={`mt-0.5 text-[11px] ${MUTED}`}>Vendors tracked</dt>
+                <dt className={`mt-0.5 text-xs ${MUTED}`}>Vendors tracked</dt>
               </div>
               {/* Edge counts are graph-derived (hardcoded) — gate so they don't ride
                   the provenance flip and show hardcoded numbers as live. */}
@@ -92,15 +92,15 @@ export default async function MarketTodayBand({
                 <>
                   <div className={TILE}>
                     <dd className="font-display text-2xl tabular-nums">{coverage.edgesTotal}</dd>
-                    <dt className={`mt-0.5 text-[11px] ${MUTED}`}>Source-cited edges</dt>
+                    <dt className={`mt-0.5 text-xs ${MUTED}`}>Source-cited edges</dt>
                   </div>
                   <div className={TILE}>
                     <dd className="font-display text-2xl tabular-nums">{coverage.high}</dd>
-                    <dt className={`mt-0.5 text-[11px] ${MUTED}`}>High-confidence</dt>
+                    <dt className={`mt-0.5 text-xs ${MUTED}`}>High-confidence</dt>
                   </div>
                   <div className={TILE}>
                     <dd className="font-display text-2xl tabular-nums">{coverage.medium} · {coverage.seed}</dd>
-                    <dt className={`mt-0.5 text-[11px] ${MUTED}`}>Medium · seed</dt>
+                    <dt className={`mt-0.5 text-xs ${MUTED}`}>Medium · seed</dt>
                   </div>
                 </>
               )}

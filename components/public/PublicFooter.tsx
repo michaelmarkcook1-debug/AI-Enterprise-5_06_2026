@@ -41,7 +41,7 @@ export default function PublicFooter() {
           </div>
         </nav>
       </div>
-      <p className="mx-auto mt-8 max-w-6xl text-[11px] text-[#4c5d75]/80 dark:text-[#8fa5bb]/80">
+      <p className="mx-auto mt-8 max-w-6xl text-xs text-[#4c5d75]/80 dark:text-[#8fa5bb]/80">
         AI Enterprise · Independent enterprise-AI market intelligence · Scores are directional and
         confidence-labelled; every edge in the dependency graph carries its own public source.
       </p>

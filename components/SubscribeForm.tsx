@@ -75,7 +75,7 @@ export default function SubscribeForm({ source = "site", className = "" }: { sou
           {state === "loading" ? "…" : "Subscribe"}
         </button>
       </div>
-      <label className="mt-2 flex items-start gap-2 text-[11px] text-[#15263c]/70 dark:text-[#eef3f8]/70">
+      <label className="mt-2 flex items-start gap-2 text-xs text-[#15263c]/70 dark:text-[#eef3f8]/70">
         <input
           type="checkbox"
           checked={consent}
@@ -89,7 +89,7 @@ export default function SubscribeForm({ source = "site", className = "" }: { sou
         </span>
       </label>
       {state === "error" && <p className="mt-2 text-xs text-rose-600 dark:text-rose-400">{msg}</p>}
-      <p className="mt-2 text-[11px] text-[#15263c]/50 dark:text-[#eef3f8]/50">
+      <p className="mt-2 text-xs text-[#15263c]/50 dark:text-[#eef3f8]/50">
         Double opt-in. No spam, unsubscribe any time.
       </p>
     </form>

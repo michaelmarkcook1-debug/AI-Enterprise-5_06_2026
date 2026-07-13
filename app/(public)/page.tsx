@@ -142,7 +142,7 @@ export default async function HomePage() {
       {/* ── Masthead: brand line + tagline. Kept short — breaking news, not
             this, is the hero (below). ── */}
       <header className="mb-4">
-        <p className="text-[11px] font-bold uppercase tracking-[0.24em] text-[#b08d2f] dark:text-[#d4af37]">
+        <p className="text-xs font-bold uppercase tracking-[0.24em] text-[#b08d2f] dark:text-[#d4af37]">
           Independent · evidence-based · source-cited
         </p>
         <h1 className="font-display mt-2 max-w-3xl text-4xl font-semibold leading-[1.05] tracking-tight sm:text-5xl">
@@ -163,7 +163,7 @@ export default async function HomePage() {
           </Link>
         </p>
         {/* Freshness / provenance strip — honest seed-vs-live, never a fake date. */}
-        <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px]">
+        <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
           <span
             className={`inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 font-medium ${
               isLive
@@ -310,7 +310,7 @@ export default async function HomePage() {
           <div className="mt-5 border-t border-black/5 pt-4 dark:border-white/10">
             <div className="mb-2 flex items-center gap-2">
               <h3 className="text-sm font-semibold">Encroachment watch</h3>
-              <span className="rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-[10px] font-medium">
+              <span className="rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-xs font-medium">
                 Derived — not a stated fact
               </span>
             </div>
@@ -323,7 +323,7 @@ export default async function HomePage() {
                 </li>
               ))}
             </ul>
-            <p className={`mt-2 text-[10px] ${MUTED}`}>
+            <p className={`mt-2 text-xs ${MUTED}`}>
               Derived only for vendors with mapped market roles — absence here is
               under-coverage, not an all-clear.
             </p>
@@ -345,14 +345,14 @@ export default async function HomePage() {
                 {deliveryGraph.edges.length} relationships — which global SIs are delivering AI vendors into enterprise
               </p>
             </div>
-            <span className="shrink-0 rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-800 dark:text-amber-200">
+            <span className="shrink-0 rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-amber-800 dark:text-amber-200">
               Analyst-curated
             </span>
           </div>
 
           {/* Most covered AI vendors by SI count */}
           <div>
-            <p className={`mb-1.5 text-[11px] font-semibold uppercase tracking-wide ${MUTED}`}>
+            <p className={`mb-1.5 text-xs font-semibold uppercase tracking-wide ${MUTED}`}>
               Most covered AI vendors
             </p>
             <ul className="space-y-1.5">
@@ -372,7 +372,7 @@ export default async function HomePage() {
             </ul>
           </div>
 
-          <p className={`mt-auto text-[11px] ${MUTED}`}>
+          <p className={`mt-auto text-xs ${MUTED}`}>
             Analyst-curated · pending external confirmation ·{" "}
             <Link href="/vendors" className="underline underline-offset-2">
               see vendor profiles
@@ -384,7 +384,7 @@ export default async function HomePage() {
         {/* Encroachment watch (delivery-derived) */}
         {deliveryGraph.encroachers.length > 0 && (
           <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-5">
-            <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-amber-700 dark:text-amber-300">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-amber-700 dark:text-amber-300">
               Derived encroachment signal
             </p>
             {deliveryGraph.encroachers.map((enc) => (

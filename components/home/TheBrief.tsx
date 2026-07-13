@@ -29,7 +29,7 @@ export default function TheBrief({ brief }: { brief: MarketBrief }) {
         <div className="flex items-baseline gap-3">
           <h2 className="font-[var(--font-display)] text-xl font-extrabold tracking-tight">The Brief</h2>
           {newCount > 0 && (
-            <span className="rounded-full bg-[#b08d2f] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#0a1f38]">
+            <span className="rounded-full bg-[#b08d2f] px-2 py-0.5 text-xs font-bold uppercase tracking-wide text-[#0a1f38]">
               {newCount} new since you last looked
             </span>
           )}
@@ -41,8 +41,8 @@ export default function TheBrief({ brief }: { brief: MarketBrief }) {
         <ul className="divide-y divide-[#e6dcc3]/70 dark:divide-[#2a4a6b]/50">
           {items.map((it, i) => (
             <li key={`${it.kind}-${i}-${it.href}`} className="flex items-baseline gap-3 py-2">
-              <time className={`w-12 shrink-0 font-mono text-[11px] tabular-nums ${MUTED}`}>{fmt(it.date)}</time>
-              <span className={`shrink-0 rounded border px-1.5 py-0.5 text-[10px] font-medium ${KIND[it.kind].cls}`}>
+              <time className={`w-12 shrink-0 font-mono text-xs tabular-nums ${MUTED}`}>{fmt(it.date)}</time>
+              <span className={`shrink-0 rounded border px-1.5 py-0.5 text-xs font-medium ${KIND[it.kind].cls}`}>
                 {KIND[it.kind].label}
               </span>
               <span className="min-w-0 flex-1">
@@ -54,7 +54,7 @@ export default function TheBrief({ brief }: { brief: MarketBrief }) {
                     className="text-sm font-medium text-[#13294b] underline-offset-2 hover:underline dark:text-[#eef3f8]"
                   >
                     {it.title}
-                    <span aria-hidden className="ml-0.5 text-[10px] text-[#7a8aa0]">↗</span>
+                    <span aria-hidden className="ml-0.5 text-xs text-[#7a8aa0]">↗</span>
                   </a>
                 ) : (
                   <Link
@@ -64,7 +64,7 @@ export default function TheBrief({ brief }: { brief: MarketBrief }) {
                     {it.title}
                   </Link>
                 )}
-                <span className={`ml-2 text-[11px] ${MUTED}`}>{it.sourceLabel}</span>
+                <span className={`ml-2 text-xs ${MUTED}`}>{it.sourceLabel}</span>
               </span>
               {it.isNew && <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[#b08d2f] dark:bg-[#e8c95c]" aria-label="new since your last visit" />}
             </li>
@@ -81,9 +81,9 @@ export default function TheBrief({ brief }: { brief: MarketBrief }) {
       {horizon.length > 0 && (
         <div className="mt-3 border-t border-[#e6dcc3]/70 pt-3 dark:border-[#2a4a6b]/50">
           <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
-            <span className={`text-[10px] font-semibold uppercase tracking-wide ${MUTED}`}>On the regulatory horizon</span>
+            <span className={`text-xs font-semibold uppercase tracking-wide ${MUTED}`}>On the regulatory horizon</span>
             {horizon.map((h) => (
-              <span key={h.shortName} className="text-[11px]">
+              <span key={h.shortName} className="text-xs">
                 <a
                   href={h.sourceUrl}
                   target="_blank"
@@ -97,7 +97,7 @@ export default function TheBrief({ brief }: { brief: MarketBrief }) {
                 </span>
               </span>
             ))}
-            <Link href="/legislation" className={`text-[11px] underline-offset-2 hover:underline ${MUTED}`}>
+            <Link href="/legislation" className={`text-xs underline-offset-2 hover:underline ${MUTED}`}>
               full tracker →
             </Link>
           </div>

@@ -24,7 +24,7 @@ export default function MarketByCategory({ rankings }: { rankings: CategoryRanki
         We rank vendors <strong>within</strong> comparable categories — never across them. A model lab,
         a chip foundry, and a cloud platform don&apos;t belong on one leaderboard, so each has its own.
       </p>
-      <p className={`mb-4 max-w-3xl text-[11px] leading-5 ${MUTED}`}>
+      <p className={`mb-4 max-w-3xl text-xs leading-5 ${MUTED}`}>
         <span className="rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 font-medium">Market Share Est.</span>{" "}
         — figures are estimates derived from real cited signals (reviewed evidence, dependencies, adoption, momentum),
         not measured market data. Directional, recalculated each refresh.{" "}
