@@ -44,6 +44,7 @@ export const RANKABLE_DOMAIN_ORDER: DomainId[] = [
   "workforce_adoption",
   "vendor_maturity_lockin",
   "capital_resilience",
+  "market_position", // category-scoped — silicon capability (MLPerf + accelerator share); only active where a category weights it
   "dev_sentiment", // category-scoped — only active where a coding profile weights it
 ];
 
@@ -81,6 +82,7 @@ export function effectiveDomains(
     modelQuality?: DomainScore | null;
     modelQualityCoding?: DomainScore | null;
     devSentiment?: DomainScore | null;
+    marketPosition?: DomainScore | null;
   },
   resolvedWeights: Partial<DomainWeights>,
   modelQualityDriver: "intelligence" | "coding" = "intelligence",
@@ -89,6 +91,8 @@ export function effectiveDomains(
   const mq = modelQualityDriver === "coding" ? extras.modelQualityCoding : extras.modelQuality;
   if ((resolvedWeights.model_quality ?? 0) > 0 && mq) extra.push(mq);
   if ((resolvedWeights.dev_sentiment ?? 0) > 0 && extras.devSentiment) extra.push(extras.devSentiment);
+  // Silicon capability (market_position) — the hardware categories' primary driver.
+  if ((resolvedWeights.market_position ?? 0) > 0 && extras.marketPosition) extra.push(extras.marketPosition);
   return extra.length > 0 ? [...domains, ...extra] : domains;
 }
 

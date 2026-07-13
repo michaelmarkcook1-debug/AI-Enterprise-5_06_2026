@@ -19,6 +19,7 @@ import { ARENA_ELO_SOURCE_URL } from "../system/elo-fetch";
 import { loadModelQualityDetails } from "./model-quality-score";
 import type { MqBlendResult } from "../system/model-quality-blend";
 import { synthesizeDevSentimentDomain } from "../dev-sentiment/ranking-signal";
+import { synthesizeSiliconMarketPosition } from "./silicon-capability";
 
 export interface VendorScorecard {
   vendorId: string;
@@ -48,6 +49,12 @@ export interface VendorScorecard {
    *  faked). Merged into the ranked domain set ONLY by coding categories when
    *  DEV_SENTIMENT_IN_RANKING is on — same pattern as modelQuality. */
   devSentiment: DomainScore | null;
+  /** Category-scoped AI-silicon capability signal, synthesized from the cited
+   *  MLPerf + accelerator-share bands (lib/assessment/silicon-capability). null
+   *  for non-silicon vendors (or the fab). Merged into the ranked domain set as
+   *  `market_position` ONLY by categories that weight it (ai_silicon) — same
+   *  pattern as modelQuality. */
+  marketPosition: DomainScore | null;
 }
 
 const EMPTY_SCORECARD = (vendorId: string, now?: Date): VendorScorecard => {
@@ -64,6 +71,7 @@ const EMPTY_SCORECARD = (vendorId: string, now?: Date): VendorScorecard => {
     // Curated + pure — present even for a vendor with no evidence rows (a coding
     // model dark on the live scorecard can still have a developer-sentiment signal).
     devSentiment: synthesizeDevSentimentDomain(vendorId),
+    marketPosition: synthesizeSiliconMarketPosition(vendorId),
   };
 };
 
@@ -85,6 +93,7 @@ function summarise(
     modelQuality,
     modelQualityCoding,
     devSentiment: synthesizeDevSentimentDomain(vendorId),
+    marketPosition: synthesizeSiliconMarketPosition(vendorId),
   };
 }
 

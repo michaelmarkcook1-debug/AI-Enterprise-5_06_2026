@@ -187,13 +187,18 @@ export const CATEGORY_DOMAIN_WEIGHTS: Record<string, CategoryWeightProfile> = {
   // AI SILICON / ACCELERATORS — a capital- and supply-concentration market.
   ai_silicon: {
     weights: {
-      capital_resilience: 0.20, strategic_value: 0.16, vendor_maturity_lockin: 0.14,
-      integration_architecture: 0.12, cost_finops: 0.12, security_threat: 0.06,
-      governance_compliance: 0.05, model_reliability: 0.04, data_security_privacy: 0.04,
-      identity_access: 0.03, agentic_autonomy: 0.02, workforce_adoption: 0.02,
+      // PRIMARY driver — the cited silicon capability signal: independent MLPerf
+      // performance + documented accelerator share (lib/assessment/silicon-
+      // capability). This is what actually separates the leaders (NVIDIA) from the
+      // pack; the software-assessment domains alone produced a noise band.
+      market_position: 0.34,
+      capital_resilience: 0.13, strategic_value: 0.11, vendor_maturity_lockin: 0.09,
+      integration_architecture: 0.08, cost_finops: 0.08, security_threat: 0.04,
+      governance_compliance: 0.03, model_reliability: 0.03, data_security_privacy: 0.03,
+      identity_access: 0.02, agentic_autonomy: 0.01, workforce_adoption: 0.01,
     },
     rationale:
-      "Silicon is a capital- and supply-concentration market: capital resilience (fab/capex durability), strategic supply position, ecosystem lock-in (e.g. toolchains), software-ecosystem integration, and performance-per-dollar dominate. The software-centric governance/identity domains apply only thinly here and are weighted down accordingly.",
+      "Silicon leadership is defined first by capability — independent performance (MLPerf/MLCommons) and documented data-center accelerator position — so that cited capability signal is the primary driver. Capital resilience (fab/capex durability), strategic supply position, ecosystem lock-in (toolchains) and software-ecosystem integration follow. The software-centric governance/identity domains apply only thinly here and are weighted down accordingly.",
   },
 
   // AI CLOUD & COMPUTE — hyperscaler / sovereign capacity.

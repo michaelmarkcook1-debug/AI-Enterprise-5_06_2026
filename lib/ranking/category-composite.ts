@@ -15,6 +15,7 @@ import type { MarketShareEstimate, VendorPillarScore } from "../intelligence/typ
 import { scoreVendorComposite, evidenceCompletenessBand, MANDATORY_PILLARS } from "./composite-engine";
 import type { CategoryComposite, CategoryRankedVendor } from "./composite-types";
 import { getVendorScorecardsBatch, type VendorScorecard } from "../assessment/domain-scores";
+import { hasSiliconCapability } from "../assessment/silicon-capability";
 import type { DomainScore } from "../assessment/domain-rubric";
 import {
   computeWeightedComposite,
@@ -156,6 +157,10 @@ async function computeCategoryComposites(): Promise<CategoryComposite[]> {
       // dev_sentiment: coding categories only, flag-gated, coverage-discounted
       // (absent → counted as an unscored domain), same pattern as model_quality.
       if (activatesDevSentiment && sc.devSentiment) extra.push(sc.devSentiment);
+      // market_position: the AI-silicon capability driver (MLPerf + accelerator
+      // share) — active only where the category weights it (ai_silicon). Same
+      // pattern; a vendor without a cited band (e.g. the fab) is absent → held.
+      if ((catWeights.market_position ?? 0) > 0 && sc.marketPosition) extra.push(sc.marketPosition);
       return extra.length > 0 ? [...sc.domains, ...extra] : sc.domains;
     };
 
@@ -167,7 +172,14 @@ async function computeCategoryComposites(): Promise<CategoryComposite[]> {
     const scored = memberIds.flatMap((id) => {
       const vendor = vendorById.get(id);
       if (!vendor) return [] as CategoryRankedVendor[];
-      const share = shareByVendorCat.get(`${id}__${category.id}`);
+      // Suppress the miscalibrated market-share estimate where the cited
+      // silicon-capability signal now carries position (NVIDIA was shown at
+      // ~21%): an honest absence beats a wrong number. Scoped to the category
+      // that weights market_position (ai_silicon).
+      const share =
+        (catWeights.market_position ?? 0) > 0 && hasSiliconCapability(id)
+          ? undefined
+          : shareByVendorCat.get(`${id}__${category.id}`);
       return [enrich(scoreVendorComposite(vendor, scoresByVendor.get(id) ?? [], share), effFor(id), catWeights)];
     });
 

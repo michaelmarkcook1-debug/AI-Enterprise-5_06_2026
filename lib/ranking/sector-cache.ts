@@ -34,7 +34,7 @@ const CACHE_MAX_AGE_MS = 48 * 60 * 60 * 1000;
 // materialise. BUMP THIS whenever a change alters what getCategoryComposites
 // produces, so the new ranking reaches pages on the next load instead of ~48h later.
 //   2 (2026-07-05): dev_sentiment blended into coding-category composites @ 0.25.
-export const RANKING_COMPUTE_VERSION = "2-dev_sentiment@0.25";
+export const RANKING_COMPUTE_VERSION = "3-silicon_capability@0.34";
 const VERSION_KEY = "__computeVersion";
 
 export interface CachedComposites {
