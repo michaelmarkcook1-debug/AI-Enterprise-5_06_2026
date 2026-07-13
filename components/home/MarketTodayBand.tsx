@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { getMarketDashboard, listIntelligenceVendors } from "@/lib/intelligence/repository";
 import { HARDCODED_SURFACES_WIRED } from "@/lib/availability";
 import DataUnavailable from "@/components/DataUnavailable";
@@ -49,7 +50,20 @@ export default async function MarketTodayBand({
               Directional estimates, not measured market data
             </p>
             {movers.length === 0 ? (
-              <p className={`mt-3 text-sm ${MUTED}`}>No estimated movement to report.</p>
+              <div className="mt-3 space-y-2">
+                <p className={`text-sm ${MUTED}`}>
+                  No evidence-backed market-share movement in the current window — movers surface only when
+                  the shift is cited, never invented.
+                </p>
+                <p className="text-[13px]">
+                  <span className={`mr-1 ${MUTED}`}>Fresh right now:</span>
+                  <Link href="/models" className="underline underline-offset-2 hover:no-underline">model benchmarks</Link>
+                  <span className={MUTED}> · </span>
+                  <Link href="/legislation" className="underline underline-offset-2 hover:no-underline">
+                    legislation &amp; regulation
+                  </Link>
+                </p>
+              </div>
             ) : (
               <ul className="mt-3 space-y-2">
                 {movers.map((m) => {
@@ -57,7 +71,7 @@ export default async function MarketTodayBand({
                   return (
                     <li key={m.vendor.id} className="flex items-baseline justify-between gap-3 text-sm">
                       <span className="min-w-0 truncate">{m.vendor.name}</span>
-                      <span className={`tabular-nums font-mono text-xs ${up ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}`}>
+                      <span className={`tabular-nums font-mono text-xs ${up ? "text-sky-700 dark:text-sky-400" : "text-orange-600 dark:text-orange-400"}`}>
                         {up ? "▲" : "▼"} {Math.abs(m.changePct).toFixed(1)}%
                       </span>
                     </li>
