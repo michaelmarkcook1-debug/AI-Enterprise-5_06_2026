@@ -196,6 +196,7 @@ export async function assembleProcurementPack(
       modelQuality: null,
       modelQualityCoding: null,
       devSentiment: null,
+      marketPosition: null,
     },
   }));
   return buildProcurementPackData({ ...input, vendors });
