@@ -28,6 +28,10 @@ import { listMemberDecisions } from "@/lib/member/decisions";
 import { buildMonitor } from "@/lib/member/monitor";
 import BuyerHome from "@/components/home/BuyerHome";
 import { buildNewsBridges } from "@/lib/news-bridge/server";
+import { cookies } from "next/headers";
+import { getMarketBrief } from "@/lib/brief/market-brief";
+import TheBrief from "@/components/home/TheBrief";
+import MarkBriefSeen from "@/components/home/MarkBriefSeen";
 
 // Public front door. DB-backed (live rankings, breaking news, provenance) →
 // force-dynamic, matching /vendors. All reads are parallel + guarded so the page
@@ -107,11 +111,21 @@ export default async function HomePage() {
   // Honest freshness + provenance (guarded — never fabricate a timestamp).
   // Rankings are loaded only when the portal is backed by verified evidence;
   // otherwise we hold the section rather than render directional/seed figures.
-  const [provenance, lastRefreshed, articles, news] = await Promise.all([
+  // Visitor's last look at The Brief (first-party cookie) → "new since" highlight.
+  const briefSince = await (async (): Promise<Date | null> => {
+    try {
+      const v = (await cookies()).get("ae_brief_seen")?.value;
+      return v ? new Date(decodeURIComponent(v)) : null;
+    } catch {
+      return null;
+    }
+  })();
+  const [provenance, lastRefreshed, articles, news, brief] = await Promise.all([
     getCachedProvenance().catch(() => null),
     getLastRefreshedAt().catch(() => null),
     listPublishedArticles().catch(() => []),
     getBreakingNews({ days: 14, limit: 5 }).catch(() => null),
+    getMarketBrief({ since: briefSince }).catch(() => null),
   ]);
   const isLive = provenance?.source === "live";
   // C12 — news→assessment bridge (State B): resolve which vendor(s) each breaking
@@ -159,6 +173,12 @@ export default async function HomePage() {
       {/* ── Hero: breaking news is the first substantial thing a visitor sees —
             promoted here from the old mid-page "Market today" tile. ── */}
       <BreakingNewsHero news={news} bridges={newsBridges} />
+
+      {/* The Brief — market-wide "since you last looked" digest of real, dated
+          moves (news + new models) + the regulatory horizon. MarkBriefSeen stamps
+          the visit (after paint) so the next visit can highlight what's new. */}
+      {brief && <TheBrief brief={brief} />}
+      <MarkBriefSeen />
 
       {/* Derived "so what" — from the dependency graph. UN-GATED 2026-07-02
           (Mic ruling): the graph is CURATED ANALYST REFERENCE data — every edge
