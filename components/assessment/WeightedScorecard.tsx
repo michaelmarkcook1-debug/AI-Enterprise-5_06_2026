@@ -76,15 +76,16 @@ export default function WeightedScorecard({
           asOfDate={null}
         />
       )}
-      <p className="mb-3 text-xs leading-5 text-[#5e6b7e] dark:text-[#a7bacd]">
-        Weight the 12 domains to <strong>your</strong> priorities — the composite and coverage recompute live from
-        reviewed, source-backed evidence. A domain only reaches 4–5 with audit-grade (E4/E5) evidence; domains with no
-        reviewed evidence stay <strong>“insufficient evidence”</strong> and contribute 0 — re-weighting can’t conjure a
-        score or hide thin coverage. Draft assessment — pressure-test against the cited sources.
+      {/* De-clutter (owner, 2026-07-13): answer-first, readable size. The full
+          honesty mechanics live in the "How this was computed" expander below. */}
+      <p className="mb-3 max-w-2xl text-sm leading-6 text-[#3f5068] dark:text-[#a7bacd]">
+        Slide a domain&apos;s weight to match <strong>your</strong> priorities — the composite recomputes live
+        from cited evidence. Thin evidence stays <strong>“insufficient”</strong>; re-weighting can never
+        conjure a score.
       </p>
 
       {/* Legend for the per-domain bullet: gold bar = 0–5 score, ink tick = audit-grade line (4.0). */}
-      <div className="mb-4 flex items-center gap-2 text-[10px] text-[#7a8aa0] dark:text-[#7a9bb8]">
+      <div className="mb-4 flex items-center gap-2 text-xs text-[#7a8aa0] dark:text-[#7a9bb8]">
         <span className="relative inline-block h-3.5 w-9 shrink-0 overflow-hidden rounded-sm bg-[#e9e0c9] align-middle dark:bg-[#102135]">
           <span className="absolute bottom-[2px] left-0 top-[2px] w-5 rounded-sm bg-[#b08d2f] dark:bg-[#e8c95c]" />
           <span className="absolute bottom-0 left-[80%] top-0 w-[2px] bg-[#13294b] opacity-70 dark:bg-[#eef3f8]" />
@@ -127,8 +128,11 @@ export default function WeightedScorecard({
           your weights); no fabricated steps, no fake timing. The composite/coverage
           terms update live as you re-weight. The honest answer to "why so fast?" —
           it's a rubric, and this is the rubric. */}
-      <div className="mb-4 rounded-lg border border-[#e3d9c0] bg-white/60 px-3 py-2 text-[11px] leading-5 text-[#3f5068] dark:border-[#1d3a57] dark:bg-[#0c2238]/40 dark:text-[#a7bacd]">
-        <span className="font-semibold uppercase tracking-wide text-[#7a8aa0] dark:text-[#7a9bb8]">How this was computed</span>{" "}
+      <details className="mb-4 rounded-lg border border-[#e3d9c0] bg-white/60 text-xs leading-5 text-[#3f5068] dark:border-[#1d3a57] dark:bg-[#0c2238]/40 dark:text-[#a7bacd]">
+        <summary className="cursor-pointer select-none px-3 py-2 font-semibold text-[#5e6b7e] dark:text-[#a7bacd]">
+          How this was computed — deterministic rubric, no model call
+        </summary>
+        <p className="px-3 pb-2">
         <span className="font-semibold text-[#13294b] dark:text-[#eef3f8]">{scorecard.totalEvidenceRows.toLocaleString()}</span> reviewed,
         source-backed records →{" "}
         <span className="font-semibold text-[#13294b] dark:text-[#eef3f8]">{result.scoredCount}/12 domains</span> scored from cited
@@ -136,9 +140,9 @@ export default function WeightedScorecard({
         composite <span className="font-semibold text-[#13294b] dark:text-[#eef3f8]">{result.composite.toFixed(2)}/5</span> at{" "}
         <span className="font-semibold text-[#13294b] dark:text-[#eef3f8]">{Math.round(result.rawCoverage * 100)}%</span> coverage →{" "}
         <span className="font-semibold text-[#13294b] dark:text-[#eef3f8]">{lowConfidenceCount}</span> low-confidence,{" "}
-        <span className="font-semibold text-[#13294b] dark:text-[#eef3f8]">{result.insufficientCount}</span> insufficient-evidence.{" "}
-        Deterministic — no model call.
-      </div>
+        <span className="font-semibold text-[#13294b] dark:text-[#eef3f8]">{result.insufficientCount}</span> insufficient-evidence.
+        </p>
+      </details>
 
       {/* Per-domain rows: weight slider + live contribution + citations */}
       <div>
@@ -208,16 +212,18 @@ export default function WeightedScorecard({
                 </span>
               </div>
 
-              {/* confidence + citations */}
+              {/* Sources + citations. De-clutter: per-row "Confidence NN%" text retired —
+                  certainty is already carried visually (ConfidenceVeil dims the number, the
+                  bullet hatches when thin) and numerically once, in the headline box.
+                  Low-confidence keeps its explicit chip. */}
               {scored && d!.state === "scored" && (
-                <div className="mt-1.5 flex flex-wrap items-center gap-2 text-[11px] text-[#5e6b7e] dark:text-[#a7bacd]">
-                  <span>Confidence {d!.confidence}%</span>
+                <div className="mt-1.5 flex flex-wrap items-center gap-2 text-xs text-[#5e6b7e] dark:text-[#a7bacd]">
                   {d!.lowConfidence && (
                     <span className="rounded-full bg-amber-100 px-1.5 py-0.5 font-semibold text-amber-800 dark:bg-amber-950/40 dark:text-amber-300">
                       Low confidence
                     </span>
                   )}
-                  <span>· {d!.evidenceCount} reviewed {d!.evidenceCount === 1 ? "source" : "sources"}</span>
+                  <span>{d!.evidenceCount} reviewed {d!.evidenceCount === 1 ? "source" : "sources"}</span>
                   {d!.citations.length > 0 && (
                     <details className="w-full">
                       <summary className="cursor-pointer select-none font-medium text-[#4c5d75] hover:text-[#13294b] dark:text-[#7a9bb8] dark:hover:text-[#eef3f8]">

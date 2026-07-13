@@ -73,6 +73,7 @@ export default function AppNav({
   const thirdJob: NavItem =
     viewMode === "buyer" ? { href: "/", label: "My workspace" } : { href: "/", label: "Market watch" };
   const NAV: NavItem[] = [
+    { href: "/how-it-works", label: "How it works" },
     JOBS_BASE[0],
     JOBS_BASE[1],
     thirdJob,

@@ -148,10 +148,19 @@ export default async function HomePage() {
         <h1 className="font-display mt-2 max-w-3xl text-4xl font-semibold leading-[1.05] tracking-tight sm:text-5xl">
           Who the enterprise-AI market runs on — and who&apos;s coming for them.
         </h1>
-        <p className={`mt-3 max-w-2xl text-sm ${MUTED}`}>
-          Source-backed vendor rankings and the dependency/encroachment graph of who relies on whom for
-          compute, models, cloud, and capital. Every score is confidence-labelled; every edge carries
-          its own public source.
+        <p className={`mt-3 max-w-2xl text-base ${MUTED}`}>
+          Source-backed vendor rankings and the dependency graph of who relies on whom for compute,
+          models, cloud, and capital — every score traceable to a public source.
+        </p>
+        {/* Orientation pointer — the designed-it-and-still-lost fix: one obvious
+            link to the plain-English "what is this / how do I assess" page. */}
+        <p className="mt-2 text-sm">
+          <Link
+            href="/how-it-works"
+            className="font-semibold text-[#a07f1f] underline-offset-4 hover:underline dark:text-[#d4af37]"
+          >
+            New here? How it works — the data, the scoring, and how to run an assessment →
+          </Link>
         </p>
         {/* Freshness / provenance strip — honest seed-vs-live, never a fake date. */}
         <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px]">
@@ -217,8 +226,10 @@ export default async function HomePage() {
                 <span className="pointer-events-none absolute bottom-0 right-0 h-px w-8 bg-[#d4af37]" aria-hidden />
                 <ExposureMapHero />
               </div>
-              <p className="mt-2 inline-block rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-[11px] font-medium">
-                Encroachment edges are a derived analytical signal — not a stated fact
+              {/* De-clutter (owner, 2026-07-13): caveat kept, pill retired — one quiet
+                  muted line instead of another amber badge competing for attention. */}
+              <p className={`mt-2 text-xs ${MUTED}`}>
+                Encroachment edges are a derived signal — not a stated fact.
               </p>
             </>
           )}

@@ -46,9 +46,7 @@ export default async function MarketTodayBand({
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           <div className={CARD}>
             <h3 className="text-sm font-semibold">Movers</h3>
-            <p className="mt-1 inline-block rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-[10px] font-medium">
-              Directional estimates, not measured market data
-            </p>
+            <p className={`mt-1 text-xs ${MUTED}`}>Directional estimates — never shown as measured.</p>
             {movers.length === 0 ? (
               <div className="mt-3 space-y-2">
                 <p className={`text-sm ${MUTED}`}>
