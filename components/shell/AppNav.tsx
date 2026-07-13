@@ -1,7 +1,7 @@
 "use client";
 
 // Unified app-shell nav (Prompt 3) — replaces the old PublicNav / MemberNav
-// split. Four jobs everywhere; the third slot swaps label+meaning by view
+// split. The LEADING slot (just right of the logo) swaps label+meaning by view
 // mode (Market watch <-> My workspace) since both point at "/", which itself
 // renders differently per mode (see lib/member/view-mode.ts). Deliberately
 // still ZERO network calls (no live pollers) — same reasoning PublicNav had.
@@ -70,13 +70,15 @@ export default function AppNav({
     setViewMode(readViewModeCookie());
   }, [showToggle]);
 
-  const thirdJob: NavItem =
+  // "Market watch" (visitor) / "My workspace" (buyer) both point at "/" — the
+  // home is the market landing, so it leads the nav, immediately right of the logo.
+  const homeJob: NavItem =
     viewMode === "buyer" ? { href: "/", label: "My workspace" } : { href: "/", label: "Market watch" };
   const NAV: NavItem[] = [
+    homeJob,
     { href: "/how-it-works", label: "How it works" },
     JOBS_BASE[0],
     JOBS_BASE[1],
-    thirdJob,
     JOBS_BASE[2],
     ...(pricingEnabled ? [{ href: "/pricing", label: "Pricing" }] : []),
   ];
