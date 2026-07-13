@@ -4,6 +4,8 @@ import { absoluteUrl } from "@/lib/site";
 import { getLiveModelInventory, type LiveModel } from "@/lib/model-inventory/live";
 import { buildFrontierComparison, summarizeFrontierComparison } from "@/lib/model-inventory/frontier";
 import FrontierFaceOff from "@/components/models/FrontierFaceOff";
+import ValueScatter from "@/components/models/ValueScatter";
+import { getModelValueField } from "@/lib/model-inventory/value-field";
 import DataUnavailable from "@/components/DataUnavailable";
 
 // Live, cited model inventory from ModelQualityBenchmark (Artificial Analysis
@@ -47,7 +49,7 @@ function freshness(m: LiveModel): string {
 }
 
 export default async function ModelsPage() {
-  const inv = await getLiveModelInventory();
+  const [inv, valueField] = await Promise.all([getLiveModelInventory(), getModelValueField()]);
   const frontier = buildFrontierComparison(inv);
   const frontierSummary = summarizeFrontierComparison(frontier);
 
@@ -76,6 +78,8 @@ export default async function ModelsPage() {
       {header}
 
       <FrontierFaceOff comparison={frontier} summary={frontierSummary} />
+
+      {valueField && <ValueScatter field={valueField} />}
 
       <section className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
         <Stat label="Models scored" value={inv.totalModels} />
