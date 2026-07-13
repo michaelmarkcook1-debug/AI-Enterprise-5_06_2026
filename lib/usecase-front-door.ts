@@ -226,3 +226,52 @@ export function commonFastWins(limit = 6): FrontDoorEntry[] {
     .sort((a, b) => b.feasibilityScore - a.feasibilityScore)
     .slice(0, limit);
 }
+
+// ── Ungated evidence library (2026-07-13 owner reframe) ───────────────────────
+// The honest replacement for the industry × maturity gate: selecting an industry
+// changed the sourcing for only 4 of 29 cited rows (23 are horizontal "*"), so
+// the two-question gate implied a per-industry read the evidence doesn't support.
+// Here we lead with the evidence itself — one entry per CITED impact row, joined
+// to its workflow, strongest-first. No feasibility model, no personalisation:
+// just the cited task-level uplift + counter-evidence + the route into rankings.
+export interface EvidencedUseCase {
+  useCase: UseCase;
+  impact: UseCaseImpact; // a real, named-source row (never synthesised)
+  flags: UseCaseEvidenceFlag[];
+  routes: MarketCategoryId[];
+}
+
+const UPLIFT_RANK: Record<UpliftBand, number> = { "gt_50%": 3, "25_50%": 2, "10_25%": 1, "lt_10%": 0 };
+const GRADE_RANK: Record<string, number> = { E5: 4, E4: 3, E3: 2, E2: 1 };
+
+/** Every workflow that has a CITED impact study, strongest-first. Ungated — no
+ *  industry/maturity input. One entry per cited row (a workflow with both a
+ *  horizontal and an industry-specific row appears once per cited fact). */
+export function evidencedUseCases(): EvidencedUseCase[] {
+  const byId = new Map(USE_CASES.map((u) => [u.id, u]));
+  return USECASE_IMPACT.flatMap((row) => {
+    const uc = byId.get(row.useCaseId);
+    if (!uc) return [];
+    return [
+      {
+        useCase: uc,
+        impact: row,
+        flags: USECASE_EVIDENCE_FLAGS.filter(
+          (f) => f.useCaseId === uc.id && (f.industryTag === row.industryTag || f.industryTag === "*"),
+        ),
+        routes: routesForUseCase(uc),
+      },
+    ];
+  }).sort(
+    (a, b) =>
+      UPLIFT_RANK[b.impact.upliftBand] - UPLIFT_RANK[a.impact.upliftBand] ||
+      (GRADE_RANK[b.impact.evidenceGrade] ?? 0) - (GRADE_RANK[a.impact.evidenceGrade] ?? 0) ||
+      b.impact.confidence - a.impact.confidence,
+  );
+}
+
+/** How many curated workflows have NO cited impact study yet — the honest denominator. */
+export function unevidencedUseCaseCount(): number {
+  const evidenced = new Set(USECASE_IMPACT.map((r) => r.useCaseId));
+  return USE_CASES.filter((u) => !evidenced.has(u.id)).length;
+}
