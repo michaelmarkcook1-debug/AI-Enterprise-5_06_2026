@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { CategoryComposite } from "@/lib/ranking/composite-types";
 import CalibrationBadge from "@/components/ranking/CalibrationBadge";
 import { calibrationBand } from "@/lib/ranking/calibration";
+import { ConfidenceVeil } from "@/components/instrument";
 
 // Hero rail — a category NAVIGATOR. Each row is one market category with its
 // best-EVIDENCED vendor (top of the within-category multi-pillar composite),
@@ -19,7 +20,7 @@ export default function CategoryCompositeRail({ composites }: { composites: Cate
           All categories →
         </Link>
       </div>
-      <p className={`mt-1 text-[11px] ${MUTED}`}>
+      <p className={`mt-1 text-xs ${MUTED}`}>
         Best-evidenced vendor per category — a weighted composite of all pillars, ranked within
         category. Not market share.
       </p>
@@ -47,17 +48,20 @@ export default function CategoryCompositeRail({ composites }: { composites: Cate
                         calibration={calibrationBand(1, c.ranked.length, top.domainCoverage ?? 0, top.compositeConfidence ?? 0)}
                         showStanding={false}
                       />
-                      <span className={`truncate text-[11px] ${MUTED}`}>
+                      <span className={`truncate text-xs ${MUTED}`}>
                         {top.vendorName} · {c.ranked.length} ranked
                         {c.incomplete.length > 0 ? ` · ${c.incomplete.length} held` : ""}
                       </span>
                     </span>
                   </span>
+                  {/* De-clutter: the "% conf" micro-line is retired — the badge already
+                      caveats a thin leader and the veil dims a thin composite. */}
                   <span className="shrink-0 text-right">
-                    <span className="block font-mono text-sm tabular-nums text-[#b08d2f] dark:text-[#d4af37]">
-                      {top.assessmentComposite == null ? "—" : `${top.assessmentComposite.toFixed(2)}/5`}
-                    </span>
-                    <span className={`block text-[10px] tabular-nums ${MUTED}`}>{top.compositeConfidence}% conf</span>
+                    <ConfidenceVeil confidence={top.compositeConfidence} label={`${top.vendorName} composite`}>
+                      <span className="block font-mono text-sm tabular-nums text-[#b08d2f] dark:text-[#d4af37]">
+                        {top.assessmentComposite == null ? "—" : `${top.assessmentComposite.toFixed(2)}/5`}
+                      </span>
+                    </ConfidenceVeil>
                   </span>
                 </Link>
               </li>

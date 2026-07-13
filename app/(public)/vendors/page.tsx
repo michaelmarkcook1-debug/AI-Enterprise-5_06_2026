@@ -7,6 +7,7 @@ import PillarContributionTable from "@/components/ranking/PillarContributionTabl
 import TrackButton from "@/components/member/TrackButton";
 import CalibrationBadge from "@/components/ranking/CalibrationBadge";
 import { calibrationBand } from "@/lib/ranking/calibration";
+import { ConfidenceVeil } from "@/components/instrument";
 
 // Rankings are SEGMENTED BY CATEGORY (never across) and computed from the FULL
 // pillar framework — a transparent, weighted, deterministic composite of all
@@ -50,11 +51,11 @@ export default async function VendorsPage() {
           graph. Points back into the guided path for anyone who landed on
           this dense list cold and wants a steered fit instead. */}
       {anyRanked && (
-        <div className="mb-4 max-w-3xl text-sm leading-6">
-          <p className="text-[#15263c] dark:text-[#eef3f8]">
-            <span className="mr-2 inline-block rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide align-middle">
-              Derived signal
-            </span>
+        {/* De-clutter (2026-07-13): "Derived signal" pill retired here — these are
+            plain counts of what the page renders, not modelled estimates, so the
+            label added noise without honesty. Lede bumped to readable size. */}
+        <div className="mb-4 max-w-3xl leading-6">
+          <p className="text-base text-[#15263c] dark:text-[#eef3f8]">
             {totalVendorsRanked} vendor{totalVendorsRanked === 1 ? "" : "s"} ranked with verified evidence across{" "}
             {rankedCategories.length} categor{rankedCategories.length === 1 ? "y" : "ies"}
             {thinCategories > 0 && (
@@ -99,13 +100,13 @@ export default async function VendorsPage() {
                   Full table &amp; sources →
                 </Link>
               </div>
-              <p className={`mb-3 max-w-2xl text-xs leading-5 ${MUTED}`}>{c.category.description}</p>
+              <p className={`mb-3 max-w-2xl text-sm leading-6 ${MUTED}`}>{c.category.description}</p>
 
               {/* Per-category methodology — weights are bespoke per category, so the
                   note must never be presented as one global formula. */}
               {c.methodologyNote && (
                 <details className="mb-3 text-sm">
-                  <summary className="cursor-pointer text-[11px] font-medium underline-offset-2 hover:underline">
+                  <summary className="cursor-pointer text-xs font-medium underline-offset-2 hover:underline">
                     How this category&apos;s ranking is computed
                   </summary>
                   <p className={`mt-2 max-w-3xl text-xs leading-5 ${MUTED}`}>{c.methodologyNote}</p>
@@ -139,13 +140,17 @@ export default async function VendorsPage() {
                             showStanding={false}
                           />
                         </span>
+                        {/* De-clutter: the composite is the answer. The "% covered / % conf"
+                            micro-stats are retired — the standing badge carries the band, the
+                            veil dims a thin number, and the full coverage/evidence detail is
+                            one click away in "Why this rank" below. */}
                         <span className="flex shrink-0 items-baseline gap-3">
-                          <span className="font-mono text-sm tabular-nums">
-                            {v.assessmentComposite == null ? "—" : v.assessmentComposite.toFixed(2)}
-                            <span className={`ml-1 text-[10px] ${MUTED}`}>/5 composite</span>
-                          </span>
-                          <span className={`font-mono text-[11px] tabular-nums ${MUTED}`}>{Math.round(v.coverage * 100)}% covered</span>
-                          <span className={`font-mono text-[11px] tabular-nums ${MUTED}`}>{v.compositeConfidence}% conf</span>
+                          <ConfidenceVeil confidence={v.compositeConfidence} label={`${v.vendorName} composite`}>
+                            <span className="font-mono text-base tabular-nums">
+                              {v.assessmentComposite == null ? "—" : v.assessmentComposite.toFixed(2)}
+                              <span className={`ml-1 text-xs ${MUTED}`}>/5</span>
+                            </span>
+                          </ConfidenceVeil>
                           <TrackButton item={`vendor:${v.vendorSlug}`} label={v.vendorName} />
                         </span>
                       </div>
@@ -155,11 +160,13 @@ export default async function VendorsPage() {
                 </ol>
               )}
 
+              {/* Held vendors collapse behind a one-line expander — the honest state
+                  stays visible (with the count), the long reason list stops dominating. */}
               {c.incomplete.length > 0 && (
-                <div className="mt-4 border-t border-black/5 pt-3 dark:border-white/10">
-                  <p className={`text-[11px] font-medium ${MUTED}`}>
+                <details className="mt-4 border-t border-black/5 pt-3 dark:border-white/10">
+                  <summary className={`cursor-pointer select-none text-xs font-medium underline-offset-2 hover:underline ${MUTED}`}>
                     Held — insufficient evidence to rank ({c.incomplete.length})
-                  </p>
+                  </summary>
                   <ul className="mt-1.5 space-y-1">
                     {c.incomplete.map((v) => (
                       <li key={v.vendorId} className="text-xs">
@@ -170,7 +177,7 @@ export default async function VendorsPage() {
                       </li>
                     ))}
                   </ul>
-                </div>
+                </details>
               )}
             </section>
           ))}

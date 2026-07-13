@@ -21,14 +21,12 @@ export default function MarketByCategoryComposite({ composites }: { composites: 
         </h2>
         <span className={`text-xs ${MUTED}`}>{composites.length} categories</span>
       </div>
-      <p className={`mb-2 max-w-3xl text-sm ${MUTED}`}>
-        We rank vendors <strong>within</strong> comparable categories — never across them — by a
-        weighted composite of all evidence-graded pillars (Business Fit, Enterprise Control,
-        Reliability &amp; Safety, Integration &amp; Operations, Vendor Resilience, Market Strength).
-        Market share is one input via Market Strength, never the rank.
-      </p>
-      <p className="mb-4 inline-block rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-[11px] font-medium">
-        Only pillars with verified evidence (E2+) count — dark pillars show as insufficient, never defaulted
+      {/* De-clutter (2026-07-13): six pillar names + a second amber pill → one
+          short paragraph. Honesty folded in, not badged. */}
+      <p className={`mb-4 max-w-3xl text-sm leading-6 ${MUTED}`}>
+        Vendors are ranked <strong>within</strong> comparable categories — never across them — by a
+        weighted composite of evidence-graded pillars. Market share is one input, never the rank;
+        pillars without verified evidence read “insufficient”, never a default.
       </p>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">

@@ -44,14 +44,15 @@ export default function PeersPage() {
         <h1 className="font-display mt-2 max-w-3xl text-4xl font-semibold leading-[1.05] tracking-tight sm:text-5xl">
           What are enterprises like mine doing with AI?
         </h1>
-        <p className={`mt-3 max-w-2xl text-sm ${MUTED}`}>
+        <p className={`mt-3 max-w-2xl text-base leading-7 ${MUTED}`}>
           State your segment — vertical, size, region — and see how your cohort adopts AI:
           cited survey benchmarks, the use-cases and platforms they deploy, where you stand,
-          and named exemplars with publicly disclosed deployments. Anything private reads
-          honestly as “not disclosed”; thin segments read “limited data”.
+          and named exemplars with publicly disclosed deployments.
         </p>
-        <p className="mt-3 inline-block rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-[11px] font-medium">
-          Bands computed from cited evidence via a documented rubric — never guesses, never LLM-graded
+        {/* De-clutter: the amber pill → one quiet line; honesty kept, badge retired. */}
+        <p className={`mt-2 text-xs ${MUTED}`}>
+          Bands are computed from cited evidence by a documented rubric — never guessed. Anything private
+          reads “not disclosed”; thin segments read “limited data”.
         </p>
       </header>
 
@@ -59,10 +60,8 @@ export default function PeersPage() {
           getUsageCoverage() this page already feeds into PeerUsageOverview,
           same "Derived signal" pattern as the homepage graph and /vendors. */}
       <div className="mb-6 max-w-3xl text-sm leading-6">
-        <p className="text-[#15263c] dark:text-[#eef3f8]">
-          <span className="mr-2 inline-block rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide align-middle">
-            Derived signal
-          </span>
+        {/* De-clutter: pill retired — these are plain coverage counts, not estimates. */}
+        <p className="text-base text-[#15263c] dark:text-[#eef3f8]">
           Cited adoption benchmarks compiled for {coverage.verticalsWithBenchmark} of {VERTICALS.length} verticals;{" "}
           {coverage.verticalsWithVendorUsage} show disclosed vendor usage, across {coverage.companies} tracked companies.
         </p>
