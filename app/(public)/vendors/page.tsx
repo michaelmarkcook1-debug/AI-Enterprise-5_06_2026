@@ -50,10 +50,10 @@ export default async function VendorsPage() {
           page already renders, same "Derived signal" pattern as the homepage
           graph. Points back into the guided path for anyone who landed on
           this dense list cold and wants a steered fit instead. */}
+      {/* De-clutter (2026-07-13): "Derived signal" pill retired here — these are
+          plain counts of what the page renders, not modelled estimates, so the
+          label added noise without honesty. Lede bumped to readable size. */}
       {anyRanked && (
-        {/* De-clutter (2026-07-13): "Derived signal" pill retired here — these are
-            plain counts of what the page renders, not modelled estimates, so the
-            label added noise without honesty. Lede bumped to readable size. */}
         <div className="mb-4 max-w-3xl leading-6">
           <p className="text-base text-[#15263c] dark:text-[#eef3f8]">
             {totalVendorsRanked} vendor{totalVendorsRanked === 1 ? "" : "s"} ranked with verified evidence across{" "}
