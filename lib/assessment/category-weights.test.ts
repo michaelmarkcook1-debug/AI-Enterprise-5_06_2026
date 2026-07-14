@@ -20,6 +20,12 @@ const ALL_CATEGORIES = [
   "cloud_ai_platform", "regulated_industry_ai", "ai_silicon", "ai_cloud_compute", "neocloud_inference",
 ];
 const NON_FRONTIER = ALL_CATEGORIES.filter((c) => c !== "frontier_model_api");
+// Infrastructure categories are SCOPED to the domains that apply to hardware/
+// capacity — they intentionally do NOT include all 12 framework domains (a chip
+// has no hallucination/agentic/workforce/data-privacy axis). See category-weights.
+const INFRA = ["ai_silicon", "ai_cloud_compute", "neocloud_inference"];
+// Pure model-application domains that never apply to raw hardware/compute.
+const INFRA_EXCLUDED_ALWAYS = ["model_reliability", "agentic_autonomy", "workforce_adoption"];
 
 describe("category weight profiles — every category has a principled profile", () => {
   it("all 13 categories have a bespoke profile (no category left on the bare even default)", () => {
@@ -48,19 +54,39 @@ describe("category weight profiles — every category has a principled profile",
 });
 
 describe("coverage denominator: /12 framework + category-scoped domains", () => {
-  it("every category includes ALL 12 framework domains; category-scoped extras only where activated", () => {
+  it("every NON-INFRA category includes ALL 12 framework domains; category-scoped extras only where activated", () => {
     for (const c of NON_FRONTIER) {
+      if (INFRA.includes(c)) continue; // infra is deliberately scoped — asserted separately below
       const order = activeDomains(resolveDomainWeights(c));
       for (const d of ASSESSMENT_DOMAINS) expect(order, `${c} missing ${d}`).toContain(d);
       // Length = 12 framework + dev_sentiment (coding categories, flag on)
-      // + model_quality (developer_coding_agent — Coding-Index-driven)
-      // + market_position (the infra capability driver — ai_silicon,
-      //   ai_cloud_compute, neocloud_inference).
+      // + model_quality (developer_coding_agent — Coding-Index-driven).
       const extra =
         (categoryActivatesDevSentiment(c) ? 1 : 0) +
         (categoryActivatesModelQuality(c) ? 1 : 0) +
         (categoryActivatesMarketPosition(c) ? 1 : 0);
       expect(order.length, c).toBe(ASSESSMENT_DOMAINS.length + extra);
+    }
+  });
+
+  it("infra categories are SCOPED to applicable domains — N/A model-app domains excluded, capability driver led", () => {
+    for (const c of INFRA) {
+      const order = activeDomains(resolveDomainWeights(c));
+      // Scoped: fewer than the full framework set (they drop N/A axes).
+      expect(order.length, `${c} should be scoped (< full framework)`).toBeLessThan(ASSESSMENT_DOMAINS.length);
+      // The cited capability driver is always present and is the lead weight.
+      expect(order, `${c} must weight market_position`).toContain("market_position");
+      expect(categoryActivatesMarketPosition(c), c).toBe(true);
+      // Pure model-application domains are NEVER weighted for raw hardware/compute
+      // (they are not-applicable, not "insufficient evidence").
+      for (const d of INFRA_EXCLUDED_ALWAYS) {
+        expect(order, `${c} must NOT weight N/A domain ${d}`).not.toContain(d);
+      }
+    }
+    // A bare accelerator additionally has no enterprise-control posture.
+    const silicon = activeDomains(resolveDomainWeights("ai_silicon"));
+    for (const d of ["data_security_privacy", "identity_access", "governance_compliance"]) {
+      expect(silicon, `ai_silicon must NOT weight enterprise-control domain ${d}`).not.toContain(d);
     }
   });
 

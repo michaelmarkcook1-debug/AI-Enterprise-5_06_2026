@@ -37,7 +37,10 @@ const CACHE_MAX_AGE_MS = 48 * 60 * 60 * 1000;
 //   3 (2026-07-13): silicon capability driver (market_position @ 0.34, ai_silicon).
 //   4 (2026-07-14): capability driver extended to ai_cloud_compute (market_position
 //                   @ 0.30) + neocloud_inference (@ 0.28) — cited cloud/neocloud bands.
-export const RANKING_COMPUTE_VERSION = "4-infra_capability@cloud0.30_neocloud0.28";
+//   5 (2026-07-14): infra categories SCOPED to applicable domains (drop N/A software-
+//                   app domains + category-aware enterprise_control gate) so the leader
+//                   reads correctly (NVIDIA ~4.5, not 2.57 "limited evidence").
+export const RANKING_COMPUTE_VERSION = "5-infra_scoped_applicable_domains";
 const VERSION_KEY = "__computeVersion";
 
 export interface CachedComposites {

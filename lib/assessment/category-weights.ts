@@ -184,39 +184,50 @@ export const CATEGORY_DOMAIN_WEIGHTS: Record<string, CategoryWeightProfile> = {
       "In regulated verticals, regulatory compliance/governance and data protection (residency, PII/PHI) dominate, with security, identity, and factual reliability close behind because errors are safety- and liability-critical. Cost and adoption are secondary to defensibility.",
   },
 
-  // AI SILICON / ACCELERATORS — a capital- and supply-concentration market.
+  // ── INFRASTRUCTURE categories (ai_silicon, ai_cloud_compute, neocloud_inference)
+  //    are SCOPED to the domains that actually apply to hardware/capacity. The
+  //    software-application domains (model_reliability/hallucination, agentic
+  //    autonomy, workforce adoption — and, for a bare chip, the enterprise-control
+  //    trio of data-privacy/identity/governance) are NOT weighted here: for a GPU
+  //    or a compute region those axes are NOT-APPLICABLE, not "insufficient
+  //    evidence." Forcing them into the /12 denominator drags the composite down
+  //    and permanently trips a "limited evidence" badge on a clear leader (NVIDIA
+  //    read 2.57/5 "limited evidence" — indefensible). Coverage is therefore
+  //    measured over the APPLICABLE set only (activeDomains shrinks to these keys),
+  //    and the enterprise_control mandatory-rank gate applies only where the
+  //    category actually assesses it (see mandatoryPillarsFor in category-composite).
+  //    This is category-appropriate scoping, never vendor-targeting.
+
+  // AI SILICON / ACCELERATORS — a chip is judged on capability, supply and ecosystem.
   ai_silicon: {
     weights: {
       // PRIMARY driver — the cited silicon capability signal: independent MLPerf
       // performance + documented accelerator share (lib/assessment/silicon-
-      // capability). This is what actually separates the leaders (NVIDIA) from the
-      // pack; the software-assessment domains alone produced a noise band.
-      market_position: 0.34,
-      capital_resilience: 0.13, strategic_value: 0.11, vendor_maturity_lockin: 0.09,
-      integration_architecture: 0.08, cost_finops: 0.08, security_threat: 0.04,
-      governance_compliance: 0.03, model_reliability: 0.03, data_security_privacy: 0.03,
-      identity_access: 0.02, agentic_autonomy: 0.01, workforce_adoption: 0.01,
+      // capability). Then the axes that actually apply to an accelerator: fab/capex
+      // durability, strategic supply position, toolchain lock-in, software-ecosystem
+      // integration, price/performance, and hardware/supply-chain security.
+      market_position: 0.42,
+      capital_resilience: 0.15, strategic_value: 0.13, vendor_maturity_lockin: 0.11,
+      integration_architecture: 0.09, cost_finops: 0.06, security_threat: 0.04,
     },
     rationale:
-      "Silicon leadership is defined first by capability — independent performance (MLPerf/MLCommons) and documented data-center accelerator position — so that cited capability signal is the primary driver. Capital resilience (fab/capex durability), strategic supply position, ecosystem lock-in (toolchains) and software-ecosystem integration follow. The software-centric governance/identity domains apply only thinly here and are weighted down accordingly.",
+      "Silicon leadership is defined first by capability — independent performance (MLPerf/MLCommons) and documented data-center accelerator position — so that cited capability signal is the primary driver. Capital resilience (fab/capex durability), strategic supply position, ecosystem lock-in (toolchains), software-ecosystem integration, price/performance and hardware/supply-chain security follow. The software-application domains (hallucination reliability, agentic autonomy, workforce adoption, and the data-privacy/identity/governance controls of an enterprise app) are NOT-APPLICABLE to a bare accelerator and are excluded from the score rather than scored as 'insufficient'.",
   },
 
-  // AI CLOUD & COMPUTE — hyperscaler / sovereign capacity.
+  // AI CLOUD & COMPUTE — hyperscaler / sovereign capacity. A cloud DOES handle
+  // customer data, identity and governance, so the enterprise-control trio stays.
   ai_cloud_compute: {
     weights: {
       // PRIMARY driver — the cited infrastructure-capability signal: documented
       // cloud-infrastructure share + AI capex/buildout + contracted backlog
-      // (lib/assessment/silicon-capability). Raw capacity leadership is what
-      // separates a hyperscaler from a regional entrant; the software-assessment
-      // domains alone produced a noise band.
+      // (lib/assessment/silicon-capability).
       market_position: 0.30,
-      capital_resilience: 0.12, integration_architecture: 0.09, security_threat: 0.08,
-      data_security_privacy: 0.08, governance_compliance: 0.07, identity_access: 0.06,
-      cost_finops: 0.06, vendor_maturity_lockin: 0.05, strategic_value: 0.04,
-      model_reliability: 0.02, agentic_autonomy: 0.01, workforce_adoption: 0.01,
+      capital_resilience: 0.14, integration_architecture: 0.10, security_threat: 0.09,
+      data_security_privacy: 0.09, governance_compliance: 0.08, identity_access: 0.06,
+      cost_finops: 0.06, vendor_maturity_lockin: 0.05, strategic_value: 0.03,
     },
     rationale:
-      "Cloud compute is a durability-and-trust commitment, but capacity leadership comes first: the cited capability signal (cloud-infrastructure share, AI capex/buildout and contracted backlog) is the primary driver. Capital resilience (balance sheet behind the buildout), security, data protection, governance, identity and integration follow, with total cost of ownership and lock-in material. Model/agentic domains barely apply to raw capacity.",
+      "Cloud compute is a durability-and-trust commitment, but capacity leadership comes first: the cited capability signal (cloud-infrastructure share, AI capex/buildout and contracted backlog) is the primary driver. Capital resilience (balance sheet behind the buildout), security, data protection, governance, identity and integration follow, with total cost of ownership and lock-in material. The pure model-application domains (hallucination reliability, agentic autonomy, workforce adoption) do not apply to raw capacity and are excluded from the score.",
   },
 
   // NEOCLOUD & INFERENCE — AI-specialist GPU/inference clouds (often young, leveraged).
@@ -224,16 +235,14 @@ export const CATEGORY_DOMAIN_WEIGHTS: Record<string, CategoryWeightProfile> = {
     weights: {
       // PRIMARY driver — the cited infrastructure-capability signal: GPU-fleet
       // scale, revenue/backlog and funding-implied position (lib/assessment/
-      // silicon-capability). This is what separates the leader (CoreWeave) from
-      // the pack; price/performance and capital durability then co-lead.
+      // silicon-capability). Price/performance and capital durability then co-lead.
       market_position: 0.28,
-      cost_finops: 0.12, capital_resilience: 0.11, integration_architecture: 0.08,
-      vendor_maturity_lockin: 0.08, security_threat: 0.07, data_security_privacy: 0.07,
-      identity_access: 0.05, governance_compliance: 0.04, strategic_value: 0.04,
-      model_reliability: 0.02, agentic_autonomy: 0.02, workforce_adoption: 0.02,
+      cost_finops: 0.14, capital_resilience: 0.12, integration_architecture: 0.09,
+      vendor_maturity_lockin: 0.09, security_threat: 0.08, data_security_privacy: 0.08,
+      identity_access: 0.05, governance_compliance: 0.04, strategic_value: 0.03,
     },
     rationale:
-      "Neoclouds are ranked first on the cited capability signal (GPU-fleet scale, revenue/backlog and funding-implied position), then on price/performance (cost/TCO) and capital durability (GPU financing is capital-intensive and often leveraged) and vendor maturity, since many are young. Capability, cost, capital resilience, integration depth and lock-in lead, with security and data protection close behind.",
+      "Neoclouds are ranked first on the cited capability signal (GPU-fleet scale, revenue/backlog and funding-implied position), then on price/performance (cost/TCO) and capital durability (GPU financing is capital-intensive and often leveraged) and vendor maturity, since many are young. Security and data protection (they host customer models/data) follow. The pure model-application domains (hallucination reliability, agentic autonomy, workforce adoption) do not apply to a compute provider and are excluded from the score.",
   },
 };
 

@@ -17,6 +17,7 @@ import type { CategoryComposite, CategoryRankedVendor } from "./composite-types"
 import { getVendorScorecardsBatch, type VendorScorecard } from "../assessment/domain-scores";
 import { hasSiliconCapability } from "../assessment/silicon-capability";
 import type { DomainScore } from "../assessment/domain-rubric";
+import { DOMAIN_TO_PILLAR } from "../types";
 import {
   computeWeightedComposite,
   rankVendorsByComposite,
@@ -103,7 +104,16 @@ async function computeCategoryComposites(): Promise<CategoryComposite[]> {
     // coverage alone can be met while the pillar enterprises care most about is
     // dark. Framework rule, silently lost in the rank-fix unification; restored
     // per the 2026-07 audit.
-    const mandatoryPillarsScored = MANDATORY_PILLARS.every(
+    // A mandatory pillar is only mandatory WHERE THE CATEGORY ASSESSES IT. The
+    // infra categories scope out the enterprise-control domains (a bare chip has
+    // no data-privacy/identity/governance posture — see category-weights), so
+    // requiring that pillar there would falsely hold the category leader. Filter
+    // MANDATORY_PILLARS to those with at least one ACTIVE domain in this profile.
+    const activeSet = activeDomains(catWeights);
+    const mandatoryPillarsHere = MANDATORY_PILLARS.filter((p) =>
+      activeSet.some((d) => DOMAIN_TO_PILLAR[d] === p),
+    );
+    const mandatoryPillarsScored = mandatoryPillarsHere.every(
       (p) => eff?.some((d) => d.pillar === p && d.state === "scored") ?? false,
     );
     const ranked =
