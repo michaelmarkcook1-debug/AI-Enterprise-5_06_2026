@@ -32,11 +32,12 @@ const S = {
   NVDA_10K: "https://www.sec.gov/Archives/edgar/data/1045810/000104581025000023/nvda-20250126.htm",
   NVDA_RESULTS: "https://nvidianews.nvidia.com/news/nvidia-announces-financial-results-for-fourth-quarter-and-fiscal-2025",
   NVDA_SHARE: "https://siliconanalysts.com/analysis/nvidia-ai-accelerator-market-share-2024-2026",
-  CUDA_MOAT: "https://introl.com/blog/nvidia-dominance-cuda-moat-competition-analysis-2025",
-  CUDA_MOAT2: "https://pitchgrade.com/research/nvidia-competitive-moat",
+  CUDA_MOAT2: "https://pitchgrade.com/research/nvidia-competitive-moat", // pitchgrade: confirms ~4M CUDA devs + cuDNN/TensorRT + Hopper→Blackwell cadence
+  NVDA_DEVPROG: "https://developer.nvidia.com/developer-program", // NVIDIA's own developer-ecosystem figure (4.5M+ devs, up from 1.8M in 2020)
   AMD_IR: "https://ir.amd.com/news-events/press-releases/detail/1276/amd-reports-fourth-quarter-and-full-year-2025-financial-results",
   AMD_10K: "https://www.sec.gov/Archives/edgar/data/2488/000000248826000018/amd-20251227.htm",
-  AMD_ROCM: "https://news.alphastreet.com/nvidias-cuda-lock-in-and-supply-scarcity-make-its-ai-chip-moat-harder-to-break-than-it-looks/",
+  AMD_ROCM7: "https://www.amd.com/en/blogs/2025/rocm7-supercharging-ai-and-hpc-infrastructure.html", // AMD: ROCm 7.0 supports PyTorch/TensorFlow/ONNX/JAX
+  SEMI_MI355: "https://inferencex.semianalysis.com/blog/mi355x-glm5-fp8-sglang-40-cheaper-than-b200", // SemiAnalysis independent benchmark: MI355X ~40% cheaper/token than B200
   AVGO_FY25: "https://investors.broadcom.com/news-releases/news-release-details/broadcom-inc-announces-fourth-quarter-and-fiscal-year-2025",
   AVGO_BACKLOG: "https://www.tikr.com/blog/broadcoms-ai-chip-revenue-just-doubled-year-over-year-and-the-ceo-says-100-billion-is-coming-in-2027",
   CBRS_SACRA: "https://sacra.com/c/cerebras-systems/",
@@ -51,25 +52,25 @@ const ROWS = [
   ["nvidia","capital_resilience","Public filing financial health",S.NVDA_10K,"E5",96,90,"FY2025 10-K: revenue $130.5B (+114%), net income $72.9B (+145%), 75.0% gross margin — fortress balance sheet."],
   ["nvidia","capital_resilience","Capital returns",S.NVDA_RESULTS,"E5",94,88,"FY2025: $34.5B returned to shareholders ($33.7B buybacks); Data Center revenue $115.2B (+142%)."],
   ["nvidia","strategic_value","competitive_position",S.NVDA_SHARE,"E4",93,82,"~80–92% of the data-center AI-accelerator market — the indispensable supplier of AI compute."],
-  ["nvidia","strategic_value","Ecosystem network effect",S.CUDA_MOAT,"E4",90,78,"CUDA network effect (4M+ developers, 40,000+ organisations) makes NVIDIA the default strategic platform."],
-  ["nvidia","vendor_maturity_lockin","Ecosystem lock-in",S.CUDA_MOAT,"E4",91,80,"CUDA ~20-year ecosystem, 4M+ developers, 3,000+ optimised apps — deep organisational switching cost."],
+  ["nvidia","strategic_value","Ecosystem network effect",S.NVDA_DEVPROG,"E4",90,78,"CUDA network effect — 4.5M+ developers (NVIDIA, up from 1.8M in 2020) makes NVIDIA the default strategic platform."],
+  ["nvidia","vendor_maturity_lockin","Ecosystem lock-in",S.CUDA_MOAT2,"E4",91,80,"CUDA ~20-year ecosystem with ~4M+ developers — deep organisational switching cost (retrain, rewrite kernels, revalidate)."],
   ["nvidia","vendor_maturity_lockin","Roadmap delivery cadence",S.CUDA_MOAT2,"E4",88,76,"Sustained annual architecture cadence (Hopper→Blackwell) with the fastest product ramp in company history."],
-  ["nvidia","integration_architecture","Framework integration breadth",S.CUDA_MOAT,"E4",89,78,"CUDA integrates into every major AI framework; 3,000+ optimised applications and full toolchain (cuDNN/TensorRT)."],
+  ["nvidia","integration_architecture","Framework integration breadth",S.CUDA_MOAT2,"E4",89,78,"CUDA integrates with every major AI framework via a full toolchain (cuDNN/TensorRT) — the deepest accelerator integration."],
   ["nvidia","integration_architecture","Ecosystem completeness",S.CUDA_MOAT2,"E4",86,74,"End-to-end software stack (libraries, compilers, orchestration) — the most complete accelerator ecosystem."],
-  ["nvidia","cost_finops","Public pricing transparency",S.AMD_ROCM,"E3",55,58,"Performance-leading but premium-priced; competitors claim ~40% better tokens-per-dollar on some benchmarks."],
+  ["nvidia","cost_finops","Public pricing transparency",S.SEMI_MI355,"E3",55,58,"Performance-leading but premium-priced; independent SemiAnalysis benchmarks show AMD's MI355X ~40% cheaper per million tokens than B200 on some inference workloads."],
 
   // ════ AMD ════ (credible #2 — strong financials, maturing ROCm)
   ["amd","capital_resilience","Public filing financial health",S.AMD_IR,"E5",56,78,"FY2025: record revenue $34.6B, net income $4.3B, 50% gross margin; Data Center revenue $16.6B (+32%)."],
   ["amd","capital_resilience","Segment durability",S.AMD_10K,"E5",52,74,"Data Center operating income $3.6B; diversified EPYC + Instinct franchise — solid but sub-scale vs the leader."],
   ["amd","strategic_value","competitive_position",S.NVDA_SHARE,"E4",55,68,"Credible #2 accelerator vendor (~5–7% share) with structural OpenAI/Meta commitments; the main NVIDIA alternative."],
-  ["amd","vendor_maturity_lockin","Ecosystem lock-in",S.AMD_ROCM,"E3",46,58,"ROCm maturing (7.0 native PyTorch/JAX) but far weaker lock-in than CUDA; Triton eases portability off NVIDIA."],
-  ["amd","integration_architecture","Framework integration breadth",S.AMD_ROCM,"E4",50,64,"ROCm 7.0 offers native PyTorch and JAX support — a real, improving open integration path."],
-  ["amd","cost_finops","Public pricing transparency",S.AMD_ROCM,"E3",70,62,"MI355X claims ~40% better tokens-per-dollar and ~30% faster inference than B200 on certain benchmarks — a price/perf strength."],
+  ["amd","vendor_maturity_lockin","Ecosystem lock-in",S.AMD_ROCM7,"E3",46,58,"ROCm 7.0 maturing (broad framework support) but far weaker ecosystem lock-in than CUDA's ~20-year base."],
+  ["amd","integration_architecture","Framework integration breadth",S.AMD_ROCM7,"E4",50,64,"ROCm 7.0 supports PyTorch, TensorFlow, ONNX and JAX/XLA — a real, improving open integration path."],
+  ["amd","cost_finops","Public pricing transparency",S.SEMI_MI355,"E3",70,62,"SemiAnalysis benchmark: MI355X up to ~40% cheaper per million tokens than B200 (SGLang FP8) and ~30% faster inference on Llama 3.1 405B — a price/perf strength."],
 
   // ════ BROADCOM ════ (custom-ASIC powerhouse — different lane)
-  ["broadcom","capital_resilience","Public filing financial health",S.AVGO_FY25,"E5",80,82,"FY2025 revenue ~$63.9B (+24%); custom-ASIC now the majority of semiconductor revenue; strong free cash flow."],
-  ["broadcom","strategic_value","competitive_position",S.AVGO_BACKLOG,"E4",78,74,"~$73B AI backlog secured through 2028; six-customer custom-ASIC platform (incl. Google TPU) — strategic hyperscaler supplier."],
-  ["broadcom","vendor_maturity_lockin","Design-win lock-in",S.AVGO_BACKLOG,"E4",58,68,"Multi-year hyperscaler custom-silicon design wins with TSMC capacity reserved to 2028 — deep, durable lock-in."],
+  ["broadcom","capital_resilience","Public filing financial health",S.AVGO_FY25,"E5",80,82,"FY2025 revenue ~$63.9B (+24%); large, cash-generative custom-ASIC + infrastructure-software franchise."],
+  ["broadcom","strategic_value","competitive_position",S.AVGO_BACKLOG,"E4",78,74,"~$73B AI backlog; custom-ASIC platform supplying multiple hyperscalers — a strategic AI-silicon supplier."],
+  ["broadcom","vendor_maturity_lockin","Design-win lock-in",S.AVGO_BACKLOG,"E4",58,68,"Multi-year hyperscaler custom-silicon design wins backed by a large committed AI backlog — deep, durable lock-in."],
   ["broadcom","integration_architecture","Ecosystem completeness",S.AVGO_FY25,"E3",50,58,"Per-customer custom silicon rather than a merchant developer ecosystem — narrower general integration surface."],
   ["broadcom","cost_finops","Custom-ASIC economics",S.AVGO_BACKLOG,"E3",50,56,"Custom-ASIC TCO favours scale hyperscalers; pricing is contract-specific and opaque to the broader market."],
 
