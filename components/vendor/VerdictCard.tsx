@@ -3,6 +3,7 @@ import TrackButton from "@/components/member/TrackButton";
 import ExportPackLinks from "@/components/export/ExportPackLinks";
 import CalibrationBadge from "@/components/ranking/CalibrationBadge";
 import { calibrationBand } from "@/lib/ranking/calibration";
+import { ScoreTrendChart } from "@/components/ranking/ScoreTrendChart";
 
 const MUTED = "text-[#5e6b7e] dark:text-[#a7bacd]";
 
@@ -18,6 +19,7 @@ export interface VerdictStanding {
 // come from lib/assessment/verdict-summary.ts, itself computeWeightedComposite
 // over the SAME scorecard every tab reads — never a separate number.
 export default function VerdictCard({
+  vendorId,
   vendorName,
   vendorSlug,
   standing,
@@ -29,6 +31,7 @@ export default function VerdictCard({
   onInterrogateClick,
   onAddToDecisionClick,
 }: {
+  vendorId: string;
   vendorName: string;
   vendorSlug: string;
   standing: VerdictStanding | null;
@@ -63,7 +66,13 @@ export default function VerdictCard({
               {/* Neutral ink (no red↔green) — the badge + explicit confidence stat
                   beside it carry the qualitative read. */}
               <span className="font-mono text-3xl font-semibold tabular-nums text-[#13294b] dark:text-[#eef3f8]">
-                {composite.toFixed(2)}
+                {standing ? (
+                  <ScoreTrendChart vendorId={vendorId} categoryId={standing.categoryId} vendorName={vendorName}>
+                    {composite.toFixed(2)}
+                  </ScoreTrendChart>
+                ) : (
+                  composite.toFixed(2)
+                )}
                 <span className={`text-base ${MUTED}`}>/5</span>
               </span>
               <span className={`ml-2 text-xs ${MUTED}`}>composite</span>

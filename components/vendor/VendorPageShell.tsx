@@ -20,6 +20,7 @@ const TAB_LABEL: Record<VendorTabKey, string> = {
 // Server Component passed as a prop retains its server-rendered nature; this
 // shell only ever touches show/hide state, never re-fetches anything).
 export default function VendorPageShell({
+  vendorId,
   vendorName,
   vendorSlug,
   standing,
@@ -32,6 +33,7 @@ export default function VendorPageShell({
   tabs,
   availableTabs,
 }: {
+  vendorId: string;
   vendorName: string;
   vendorSlug: string;
   standing: VerdictStanding | null;
@@ -68,6 +70,7 @@ export default function VendorPageShell({
   return (
     <>
       <VerdictCard
+        vendorId={vendorId}
         vendorName={vendorName}
         vendorSlug={vendorSlug}
         standing={standing}

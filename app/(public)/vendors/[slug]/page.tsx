@@ -824,6 +824,7 @@ export default async function VendorDeepDivePage({
 
           {hasEvidence && scorecard && verdictSummary ? (
             <VendorPageShell
+              vendorId={intelId}
               vendorName={entity.name}
               vendorSlug={entity.slug}
               standing={verdictStanding}
