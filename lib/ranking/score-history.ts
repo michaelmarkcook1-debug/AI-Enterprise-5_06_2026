@@ -22,7 +22,7 @@
 
 import { getPrisma, hasDatabase } from "../prisma";
 import { scoreAllDomains, type RubricEvidenceRow } from "../assessment/domain-rubric";
-import { computeWeightedComposite } from "../assessment/composite";
+import { computeWeightedComposite, rollUpToPillars } from "../assessment/composite";
 import { resolveDomainWeights } from "../assessment/category-weights";
 import { synthesizeSiliconMarketPosition } from "../assessment/silicon-capability";
 import type { CategoryComposite } from "./composite-types";
@@ -181,15 +181,18 @@ export async function reconstructScoreHistory(vendorId: string, categoryId: stri
     const eff = mp && (weights.market_position ?? 0) > 0 ? [...domains, mp] : domains;
     const wc = computeWeightedComposite(eff, weights);
     if (wc.composite == null || wc.scoredCount === 0) continue;
-    const pillars = wc.contributions
-      .filter((c) => c.state === "scored")
-      .map((c) => ({ pillar: c.pillar, score: c.score }));
+    // Roll up to the 6 clean pillars (same shape as a live snapshot's rankPillars).
+    const pillars = rollUpToPillars(wc.contributions, eff)
+      .filter((p) => p.score != null)
+      .map((p) => ({ pillar: p.pillar, score: p.score }));
     const id = `${vendorId}__${categoryId}__${asOf}`;
     try {
       await prisma.$executeRawUnsafe(
         `INSERT INTO "${TABLE}" (id, vendor_id, category_id, snapshot_date, composite, rank, tracked_vendors, pillars, source, captured_at)
          VALUES ($1,$2,$3,$4::date,$5,NULL,NULL,$6::jsonb,'reconstructed',now())
-         ON CONFLICT (vendor_id, category_id, snapshot_date) DO NOTHING`, // never overwrite a real snapshot
+         ON CONFLICT (vendor_id, category_id, snapshot_date) DO UPDATE SET
+           composite=EXCLUDED.composite, pillars=EXCLUDED.pillars, captured_at=now()
+           WHERE "${TABLE}".source='reconstructed'`, // refresh reconstructed rows; NEVER touch a real snapshot
         id, vendorId, categoryId, asOf, wc.composite, JSON.stringify(pillars),
       );
       written++;
