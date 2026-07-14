@@ -66,6 +66,7 @@ function scorecard(domains: DomainScore[]): VendorScorecard {
     totalEvidenceRows: 10,
     modelQuality: null,
     modelQualityCoding: null,
+    marketPosition: null,
     devSentiment: null,
   };
 }

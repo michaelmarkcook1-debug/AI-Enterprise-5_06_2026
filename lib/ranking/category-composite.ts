@@ -157,9 +157,11 @@ async function computeCategoryComposites(): Promise<CategoryComposite[]> {
       // dev_sentiment: coding categories only, flag-gated, coverage-discounted
       // (absent → counted as an unscored domain), same pattern as model_quality.
       if (activatesDevSentiment && sc.devSentiment) extra.push(sc.devSentiment);
-      // market_position: the AI-silicon capability driver (MLPerf + accelerator
-      // share) — active only where the category weights it (ai_silicon). Same
-      // pattern; a vendor without a cited band (e.g. the fab) is absent → held.
+      // market_position: the hardware/infra capability driver (silicon = MLPerf +
+      // accelerator share; cloud/neocloud = capacity + share + backlog) — active
+      // only where the category weights it (ai_silicon, ai_cloud_compute,
+      // neocloud_inference). Same pattern; a vendor without a cited band (e.g. the
+      // fab) is absent → held.
       if ((catWeights.market_position ?? 0) > 0 && sc.marketPosition) extra.push(sc.marketPosition);
       return extra.length > 0 ? [...sc.domains, ...extra] : sc.domains;
     };
@@ -173,9 +175,9 @@ async function computeCategoryComposites(): Promise<CategoryComposite[]> {
       const vendor = vendorById.get(id);
       if (!vendor) return [] as CategoryRankedVendor[];
       // Suppress the miscalibrated market-share estimate where the cited
-      // silicon-capability signal now carries position (NVIDIA was shown at
-      // ~21%): an honest absence beats a wrong number. Scoped to the category
-      // that weights market_position (ai_silicon).
+      // capability signal now carries position (e.g. NVIDIA was shown at ~21%):
+      // an honest absence beats a wrong number. Scoped to the categories that
+      // weight market_position (ai_silicon, ai_cloud_compute, neocloud_inference).
       const share =
         (catWeights.market_position ?? 0) > 0 && hasSiliconCapability(id)
           ? undefined

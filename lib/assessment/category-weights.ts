@@ -204,25 +204,36 @@ export const CATEGORY_DOMAIN_WEIGHTS: Record<string, CategoryWeightProfile> = {
   // AI CLOUD & COMPUTE — hyperscaler / sovereign capacity.
   ai_cloud_compute: {
     weights: {
-      capital_resilience: 0.16, integration_architecture: 0.13, security_threat: 0.12,
-      data_security_privacy: 0.12, governance_compliance: 0.11, identity_access: 0.10,
-      cost_finops: 0.09, vendor_maturity_lockin: 0.08, strategic_value: 0.05,
+      // PRIMARY driver — the cited infrastructure-capability signal: documented
+      // cloud-infrastructure share + AI capex/buildout + contracted backlog
+      // (lib/assessment/silicon-capability). Raw capacity leadership is what
+      // separates a hyperscaler from a regional entrant; the software-assessment
+      // domains alone produced a noise band.
+      market_position: 0.30,
+      capital_resilience: 0.12, integration_architecture: 0.09, security_threat: 0.08,
+      data_security_privacy: 0.08, governance_compliance: 0.07, identity_access: 0.06,
+      cost_finops: 0.06, vendor_maturity_lockin: 0.05, strategic_value: 0.04,
       model_reliability: 0.02, agentic_autonomy: 0.01, workforce_adoption: 0.01,
     },
     rationale:
-      "Cloud compute is a durability-and-trust commitment: capital resilience (capacity buildout and balance sheet), security, data protection, governance, identity and integration lead, with total cost of ownership and lock-in material. Model/agentic domains barely apply to raw capacity.",
+      "Cloud compute is a durability-and-trust commitment, but capacity leadership comes first: the cited capability signal (cloud-infrastructure share, AI capex/buildout and contracted backlog) is the primary driver. Capital resilience (balance sheet behind the buildout), security, data protection, governance, identity and integration follow, with total cost of ownership and lock-in material. Model/agentic domains barely apply to raw capacity.",
   },
 
   // NEOCLOUD & INFERENCE — AI-specialist GPU/inference clouds (often young, leveraged).
   neocloud_inference: {
     weights: {
-      cost_finops: 0.16, capital_resilience: 0.15, integration_architecture: 0.12,
-      vendor_maturity_lockin: 0.11, security_threat: 0.10, data_security_privacy: 0.10,
-      identity_access: 0.08, governance_compliance: 0.06, strategic_value: 0.05,
-      model_reliability: 0.03, agentic_autonomy: 0.02, workforce_adoption: 0.02,
+      // PRIMARY driver — the cited infrastructure-capability signal: GPU-fleet
+      // scale, revenue/backlog and funding-implied position (lib/assessment/
+      // silicon-capability). This is what separates the leader (CoreWeave) from
+      // the pack; price/performance and capital durability then co-lead.
+      market_position: 0.28,
+      cost_finops: 0.12, capital_resilience: 0.11, integration_architecture: 0.08,
+      vendor_maturity_lockin: 0.08, security_threat: 0.07, data_security_privacy: 0.07,
+      identity_access: 0.05, governance_compliance: 0.04, strategic_value: 0.04,
+      model_reliability: 0.02, agentic_autonomy: 0.02, workforce_adoption: 0.02,
     },
     rationale:
-      "Neoclouds compete on price/performance (cost/TCO) and must prove capital durability (GPU financing is capital-intensive and often leveraged) and vendor maturity, since many are young; cost, capital resilience, integration depth and lock-in lead, with security and data protection close behind.",
+      "Neoclouds are ranked first on the cited capability signal (GPU-fleet scale, revenue/backlog and funding-implied position), then on price/performance (cost/TCO) and capital durability (GPU financing is capital-intensive and often leveraged) and vendor maturity, since many are young. Capability, cost, capital resilience, integration depth and lock-in lead, with security and data protection close behind.",
   },
 };
 
@@ -292,6 +303,13 @@ export function categoryModelQualityDriver(categoryId: string): "intelligence" |
  *  i.e. a coding category AND DEV_SENTIMENT_IN_RANKING is on. */
 export function categoryActivatesDevSentiment(categoryId: string): boolean {
   return (resolveDomainWeights(categoryId).dev_sentiment ?? 0) > 0;
+}
+
+/** True when the category activates the (category-scoped) market_position domain
+ *  — the hardware/infra capability driver (ai_silicon, ai_cloud_compute,
+ *  neocloud_inference). See lib/assessment/silicon-capability. */
+export function categoryActivatesMarketPosition(categoryId: string): boolean {
+  return (resolveDomainWeights(categoryId).market_position ?? 0) > 0;
 }
 
 /** The category's documented rationale, or null when it uses the framework default. */

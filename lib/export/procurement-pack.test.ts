@@ -38,6 +38,7 @@ function scorecard(domains: DomainScore[], totalEvidenceRows = 10): VendorScorec
     modelQuality: null,
     modelQualityCoding: null,
     devSentiment: null,
+    marketPosition: null,
   };
 }
 

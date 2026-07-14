@@ -4,6 +4,7 @@ import {
   resolveDomainWeights,
   categoryActivatesModelQuality,
   categoryActivatesDevSentiment,
+  categoryActivatesMarketPosition,
   categoryModelQualityDriver,
   MODEL_QUALITY_CODING_WEIGHT,
   getCategoryWeightRationale,
@@ -52,8 +53,13 @@ describe("coverage denominator: /12 framework + category-scoped domains", () => 
       const order = activeDomains(resolveDomainWeights(c));
       for (const d of ASSESSMENT_DOMAINS) expect(order, `${c} missing ${d}`).toContain(d);
       // Length = 12 framework + dev_sentiment (coding categories, flag on)
-      // + model_quality (developer_coding_agent — Coding-Index-driven).
-      const extra = (categoryActivatesDevSentiment(c) ? 1 : 0) + (categoryActivatesModelQuality(c) ? 1 : 0);
+      // + model_quality (developer_coding_agent — Coding-Index-driven)
+      // + market_position (the infra capability driver — ai_silicon,
+      //   ai_cloud_compute, neocloud_inference).
+      const extra =
+        (categoryActivatesDevSentiment(c) ? 1 : 0) +
+        (categoryActivatesModelQuality(c) ? 1 : 0) +
+        (categoryActivatesMarketPosition(c) ? 1 : 0);
       expect(order.length, c).toBe(ASSESSMENT_DOMAINS.length + extra);
     }
   });
@@ -88,6 +94,15 @@ describe("coverage denominator: /12 framework + category-scoped domains", () => 
       expect(categoryActivatesDevSentiment(c), `${c} should not activate dev_sentiment`).toBe(false);
     }
   });
+
+  it("market_position (infra capability driver) is activated ONLY for the three infra categories", () => {
+    const INFRA = ["ai_silicon", "ai_cloud_compute", "neocloud_inference"];
+    for (const c of INFRA) expect(categoryActivatesMarketPosition(c), `${c} should activate market_position`).toBe(true);
+    for (const c of ALL_CATEGORIES) {
+      if (INFRA.includes(c)) continue;
+      expect(categoryActivatesMarketPosition(c), `${c} should not activate market_position`).toBe(false);
+    }
+  });
 });
 
 describe("each profile leans where its category's rationale says it should", () => {
@@ -95,10 +110,17 @@ describe("each profile leans where its category's rationale says it should", () 
     const w = CATEGORY_DOMAIN_WEIGHTS[c].weights as Record<string, number>;
     return Object.entries(w).sort((a, b) => b[1] - a[1])[0][0];
   };
-  it("compute categories lead on capital/cost, not model quality", () => {
-    expect(["capital_resilience", "cost_finops"]).toContain(topDomain("ai_silicon"));
-    expect(["capital_resilience", "cost_finops"]).toContain(topDomain("ai_cloud_compute"));
-    expect(["capital_resilience", "cost_finops"]).toContain(topDomain("neocloud_inference"));
+  it("infra categories lead on the cited capability driver (market_position), not model quality", () => {
+    // The three hardware/infra categories are led by market_position — the cited
+    // capability driver (silicon = MLPerf + share; cloud/neocloud = capacity +
+    // share + backlog). Capital/cost follow, but capability comes first.
+    expect(topDomain("ai_silicon")).toBe("market_position");
+    expect(topDomain("ai_cloud_compute")).toBe("market_position");
+    expect(topDomain("neocloud_inference")).toBe("market_position");
+    // …and none of them lead on the software model-capability domains.
+    for (const c of ["ai_silicon", "ai_cloud_compute", "neocloud_inference"]) {
+      expect(["model_quality", "agentic_autonomy"]).not.toContain(topDomain(c));
+    }
   });
   it("agent/workflow categories lead on agentic or integration", () => {
     expect(["agentic_autonomy", "integration_architecture"]).toContain(topDomain("agent_platform"));

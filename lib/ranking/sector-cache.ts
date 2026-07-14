@@ -34,7 +34,10 @@ const CACHE_MAX_AGE_MS = 48 * 60 * 60 * 1000;
 // materialise. BUMP THIS whenever a change alters what getCategoryComposites
 // produces, so the new ranking reaches pages on the next load instead of ~48h later.
 //   2 (2026-07-05): dev_sentiment blended into coding-category composites @ 0.25.
-export const RANKING_COMPUTE_VERSION = "3-silicon_capability@0.34";
+//   3 (2026-07-13): silicon capability driver (market_position @ 0.34, ai_silicon).
+//   4 (2026-07-14): capability driver extended to ai_cloud_compute (market_position
+//                   @ 0.30) + neocloud_inference (@ 0.28) — cited cloud/neocloud bands.
+export const RANKING_COMPUTE_VERSION = "4-infra_capability@cloud0.30_neocloud0.28";
 const VERSION_KEY = "__computeVersion";
 
 export interface CachedComposites {

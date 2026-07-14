@@ -290,9 +290,11 @@ describe("category-aware default weights", () => {
     expect(active).toContain("model_quality");
     expect(active).toContain("dev_sentiment");
     expect(active.length).toBe(14);
-    // market_position is never an assessment domain in either set.
+    // market_position is a category-scoped rankable domain (the infra capability
+    // driver) — present in RANKABLE_DOMAIN_ORDER, but NOT active for the framework
+    // default or frontier (neither weights it; only the three infra categories do).
     expect(active).not.toContain("market_position");
-    expect(RANKABLE_DOMAIN_ORDER).not.toContain("market_position");
+    expect(RANKABLE_DOMAIN_ORDER).toContain("market_position");
   });
 
   it("default-category behaviour is byte-identical to the pre-category-aware path", () => {
