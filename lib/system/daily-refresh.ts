@@ -46,7 +46,8 @@ import {
   captureRankingSnapshots,
   backfillRankingSnapshots,
 } from "../intelligence/ranking-snapshots";
-import { materializeCategoryCache } from "../ranking/category-composite";
+import { materializeCategoryCache, getCategoryComposites } from "../ranking/category-composite";
+import { captureScoreHistory } from "../ranking/score-history";
 import { runCompetitiveIntelMonitor } from "../intelligence/competitive-monitor";
 import { COMPETITIVE_CORE } from "../intelligence/competitive-targets";
 import { fetchFinancialsForProviders } from "../investing/financials-live";
@@ -490,6 +491,15 @@ export async function runDailyRefresh(
     if (!dbConfigured) return { skipped: "no_database" };
     const r = await materializeCategoryCache();
     return { sectorsCached: r.written };
+  });
+
+  // ── 6a. Score-history snapshot — REAL point-in-time composite + pillars + rank
+  //     per vendor/category, powering the ranking hover trend charts. Reads the
+  //     cache just materialised above (no recompute); non-fatal if it fails.
+  await trackedStep("score_history", async () => {
+    if (!dbConfigured) return { skipped: "no_database" };
+    const r = await captureScoreHistory(await getCategoryComposites(), now);
+    return { pointsCaptured: r.captured, snapshotDate: r.snapshotDate };
   });
 
   // ── 6b. Dependency / encroachment graph edges ──────────────

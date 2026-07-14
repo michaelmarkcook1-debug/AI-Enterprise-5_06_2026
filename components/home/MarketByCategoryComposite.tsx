@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { CategoryComposite } from "@/lib/ranking/composite-types";
 import CalibrationBadge from "@/components/ranking/CalibrationBadge";
 import { calibrationBand } from "@/lib/ranking/calibration";
+import { ScoreTrendChart } from "@/components/ranking/ScoreTrendChart";
 
 // "The market, by category" — the explained taxonomy. Each card states what the
 // category IS and shows the top vendors WITHIN it, ranked by the weighted
@@ -64,7 +65,13 @@ export default function MarketByCategoryComposite({ composites }: { composites: 
                       )}
                     </span>
                     <span className={`font-mono text-xs tabular-nums ${MUTED}`}>
-                      {v.assessmentComposite == null ? "—" : `${v.assessmentComposite.toFixed(2)}/5`}
+                      {v.assessmentComposite == null ? (
+                        "—"
+                      ) : (
+                        <ScoreTrendChart vendorId={v.vendorId} categoryId={c.category.id} vendorName={v.vendorName}>
+                          {`${v.assessmentComposite.toFixed(2)}/5`}
+                        </ScoreTrendChart>
+                      )}
                     </span>
                   </li>
                 ))}
