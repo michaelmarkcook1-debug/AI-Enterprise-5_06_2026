@@ -40,7 +40,10 @@ const CACHE_MAX_AGE_MS = 48 * 60 * 60 * 1000;
 //   5 (2026-07-14): infra categories SCOPED to applicable domains (drop N/A software-
 //                   app domains + category-aware enterprise_control gate) so the leader
 //                   reads correctly (NVIDIA ~4.5, not 2.57 "limited evidence").
-export const RANKING_COMPUTE_VERSION = "5-infra_scoped_applicable_domains";
+//   6 (2026-07-14): cited business-domain evidence added for silicon vendors (capital/
+//                   strategic/lock-in/integration/cost) — invalidate cache so the new
+//                   evidence-driven scores surface now instead of ~48h later.
+export const RANKING_COMPUTE_VERSION = "6-silicon_business_evidence";
 const VERSION_KEY = "__computeVersion";
 
 export interface CachedComposites {
