@@ -42,6 +42,7 @@ import { hasLiveGitHubRepo, fetchLiveGitHubSignalForVendor } from "@/lib/reputat
 import { getReputationSnapshots, type ReputationSnapshotPoint } from "@/lib/reputation/reputation-snapshots";
 import { intelVendorId } from "@/lib/intelligence/vendor-id";
 import { getVendorCategoryStandings } from "@/lib/ranking/category-composite";
+import { ScoreTrendChart } from "@/components/ranking/ScoreTrendChart";
 import PillarContributionTable from "@/components/ranking/PillarContributionTable";
 import { getDeliveryPartnershipsForVendor } from "@/lib/delivery/repository";
 import ImplementationPartnersPanel from "@/components/vendor/ImplementationPartnersPanel";
@@ -1164,7 +1165,15 @@ export default async function VendorDeepDivePage({
                         <span className="font-mono text-sm tabular-nums text-[#13294b] dark:text-[#eef3f8]">
                           #{s.standing.rank} of {s.rankedCount}
                           <span className="ml-2 text-xs text-[#54647a] dark:text-[#a7bacd]">
-                            composite {s.standing.assessmentComposite == null ? "—" : s.standing.assessmentComposite.toFixed(2)}/5 · {s.standing.compositeConfidence}% conf
+                            composite{" "}
+                            {s.standing.assessmentComposite == null ? (
+                              "—"
+                            ) : (
+                              <ScoreTrendChart vendorId={s.standing.vendorId} categoryId={s.categoryId} vendorName={s.standing.vendorName}>
+                                {s.standing.assessmentComposite.toFixed(2)}
+                              </ScoreTrendChart>
+                            )}
+                            /5 · {s.standing.compositeConfidence}% conf
                           </span>
                         </span>
                       ) : (

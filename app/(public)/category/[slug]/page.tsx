@@ -20,6 +20,7 @@ import { getRankMovements, type RankMovement } from "@/lib/intelligence/rank-mov
 import RankMovementIndicator from "@/components/ranking/RankMovementIndicator";
 import CalibrationBadge from "@/components/ranking/CalibrationBadge";
 import { calibrationBand } from "@/lib/ranking/calibration";
+import { ScoreTrendChart } from "@/components/ranking/ScoreTrendChart";
 import { ConfidenceVeil } from "@/components/instrument";
 import TabChat from "@/components/chat/TabChat";
 import CompetitiveIntelHeatmap from "@/components/assessment/CompetitiveIntelHeatmap";
@@ -182,8 +183,16 @@ export default async function CategoryPage({ params }: { params: Promise<Params>
                     <span className="flex shrink-0 items-baseline gap-3">
                       <ConfidenceVeil confidence={v.compositeConfidence} label={`${v.vendorName} composite`}>
                         <span className="font-mono text-base tabular-nums" title={`${v.domainTotal}-domain weighted assessment composite (0–5), coverage-discounted`}>
-                          {(v.assessmentComposite ?? 0).toFixed(2)}
-                          <span className={`ml-1 text-xs ${MUTED}`}>/5</span>
+                          {v.assessmentComposite == null ? (
+                            <>
+                              0.00<span className={`ml-1 text-xs ${MUTED}`}>/5</span>
+                            </>
+                          ) : (
+                            <ScoreTrendChart vendorId={v.vendorId} categoryId={category.id} vendorName={v.vendorName}>
+                              {v.assessmentComposite.toFixed(2)}
+                              <span className={`ml-1 text-xs ${MUTED}`}>/5</span>
+                            </ScoreTrendChart>
+                          )}
                         </span>
                       </ConfidenceVeil>
                       <TrackButton item={`vendor:${v.vendorSlug}`} label={v.vendorName} />
