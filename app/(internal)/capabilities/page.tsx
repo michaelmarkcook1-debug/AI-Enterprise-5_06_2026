@@ -86,13 +86,13 @@ export default async function CapabilitiesPage() {
               <p className="mt-1 text-[11px] italic text-[#5b6b7f] dark:text-[#8fa5bb]">{provenance.reason}</p>
             </div>
             <div className="flex flex-wrap gap-2 text-xs">
-              <Link href="/admin/data-sources" className="rounded-full border border-[#e6dcc3] bg-white px-3 py-1 font-semibold text-[#13294b] hover:bg-[#f3ead2] dark:border-[#2a4a6b] dark:bg-[#0c2238] dark:text-[#eef3f8] dark:hover:bg-[#143049]">
+              <Link href="/admin/data-sources" className="rounded-full border border-[#e6dcc3] bg-white px-3 py-1 font-semibold text-[#123d2c] hover:bg-[#f3ead2] dark:border-[#2a4a6b] dark:bg-[#0d1f17] dark:text-[#eef3f8] dark:hover:bg-[#143049]">
                 Connector status →
               </Link>
-              <Link href="/admin/ingestion" className="rounded-full border border-[#e6dcc3] bg-white px-3 py-1 font-semibold text-[#13294b] hover:bg-[#f3ead2] dark:border-[#2a4a6b] dark:bg-[#0c2238] dark:text-[#eef3f8] dark:hover:bg-[#143049]">
+              <Link href="/admin/ingestion" className="rounded-full border border-[#e6dcc3] bg-white px-3 py-1 font-semibold text-[#123d2c] hover:bg-[#f3ead2] dark:border-[#2a4a6b] dark:bg-[#0d1f17] dark:text-[#eef3f8] dark:hover:bg-[#143049]">
                 Run ingestion →
               </Link>
-              <Link href="/admin/evidence" className="rounded-full border border-[#e6dcc3] bg-white px-3 py-1 font-semibold text-[#13294b] hover:bg-[#f3ead2] dark:border-[#2a4a6b] dark:bg-[#0c2238] dark:text-[#eef3f8] dark:hover:bg-[#143049]">
+              <Link href="/admin/evidence" className="rounded-full border border-[#e6dcc3] bg-white px-3 py-1 font-semibold text-[#123d2c] hover:bg-[#f3ead2] dark:border-[#2a4a6b] dark:bg-[#0d1f17] dark:text-[#eef3f8] dark:hover:bg-[#143049]">
                 Approve evidence →
               </Link>
             </div>
@@ -125,7 +125,7 @@ export default async function CapabilitiesPage() {
                       <td className="py-3 pr-4 font-medium align-top">
                         <VendorNameWithOwnership name={vendor.name} ownershipType={vendor.ownershipType} />
                         {isInfra && (
-                          <div className="mt-1 inline-flex rounded-full border border-[#d6c9a8] bg-[#f6f1e3] px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-[#2e3f57] dark:border-[#2a4a6b] dark:bg-[#0c2238] dark:text-[#c2d1e0]">
+                          <div className="mt-1 inline-flex rounded-full border border-[#d6c9a8] bg-[#f6f1e3] px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-[#2e3f57] dark:border-[#2a4a6b] dark:bg-[#0d1f17] dark:text-[#c2d1e0]">
                             Infra-only
                           </div>
                         )}
@@ -163,7 +163,7 @@ function Stat({ label, value, note, tone = "neutral" }: { label: string; value: 
       ? "border-amber-300 bg-amber-50 text-amber-800 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-300"
       : tone === "bad"
         ? "border-rose-300 bg-rose-50 text-rose-800 dark:border-rose-800 dark:bg-rose-950/40 dark:text-rose-300"
-        : "border-[#e6dcc3] bg-white text-[#475a72] dark:border-[#1d3a57] dark:bg-[#0c2238] dark:text-[#c2d1e0]";
+        : "border-[#e6dcc3] bg-white text-[#475a72] dark:border-[#223a2e] dark:bg-[#0d1f17] dark:text-[#c2d1e0]";
   return (
     <div className={`rounded-md border px-3 py-2 ${toneClass}`}>
       <div className="text-[10px] font-semibold uppercase tracking-wide opacity-80">{label}</div>
@@ -193,8 +193,8 @@ const MODE_TONE: Record<CapabilityRenderMode, string> = {
   stale: "border-orange-400 bg-orange-50 text-orange-900 dark:border-orange-700 dark:bg-orange-950/40 dark:text-orange-200",
   disputed: "border-rose-500 bg-rose-50 text-rose-900 dark:border-rose-700 dark:bg-rose-950/40 dark:text-rose-200",
   validation_required: "border-rose-500 bg-rose-50 text-rose-900 dark:border-rose-700 dark:bg-rose-950/40 dark:text-rose-200",
-  unknown: "border-[#9fb0c4] bg-[#f6f1e3] text-[#2e3f57] dark:border-[#38587a] dark:bg-[#0c2238] dark:text-[#c2d1e0]",
-  infrastructure_only: "border-[#d6c9a8] bg-[#f6f1e3] text-[#3f5068] dark:border-[#2a4a6b] dark:bg-[#0c2238] dark:text-[#a7bacd]",
+  unknown: "border-[#9fb0c4] bg-[#f6f1e3] text-[#2e3f57] dark:border-[#38587a] dark:bg-[#0d1f17] dark:text-[#c2d1e0]",
+  infrastructure_only: "border-[#d6c9a8] bg-[#f6f1e3] text-[#3f5068] dark:border-[#2a4a6b] dark:bg-[#0d1f17] dark:text-[#a7bacd]",
 };
 
 function ModeLegend() {

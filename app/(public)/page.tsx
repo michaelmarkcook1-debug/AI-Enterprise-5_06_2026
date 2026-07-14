@@ -52,7 +52,7 @@ export const metadata: Metadata = {
 };
 
 const CARD = "rounded-xl border border-black/10 dark:border-white/10 bg-white/60 dark:bg-white/5 p-5";
-const MUTED = "text-[#15263c]/65 dark:text-[#eef3f8]/60";
+const MUTED = "text-[#123d2c]/65 dark:text-[#eef3f8]/60";
 
 function fmtDate(d: Date | string | null | undefined): string | null {
   if (!d) return null;
@@ -199,12 +199,12 @@ export default async function HomePage() {
         <div className="mb-4 max-w-3xl text-sm leading-6">
           {/* Label kept (an analytical derivation) as quiet inline text, not a badge —
               matches /dependencies. */}
-          <p className="text-[#15263c] dark:text-[#eef3f8]">
+          <p className="text-[#123d2c] dark:text-[#eef3f8]">
             <span className="mr-1.5 font-semibold text-amber-700 dark:text-amber-300">Derived signal —</span>
             {graphTakeaway.chokepoints}
           </p>
           {graphTakeaway.ubiquity && (
-            <p className="mt-1.5 text-[#15263c]/70 dark:text-[#eef3f8]/70">{graphTakeaway.ubiquity}</p>
+            <p className="mt-1.5 text-[#123d2c]/70 dark:text-[#eef3f8]/70">{graphTakeaway.ubiquity}</p>
           )}
         </div>
       )}

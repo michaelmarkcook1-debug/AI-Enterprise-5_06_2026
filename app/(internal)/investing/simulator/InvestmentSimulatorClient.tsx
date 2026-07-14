@@ -332,17 +332,17 @@ export default function InvestmentSimulatorClient({
           <a
             key={item.href}
             href={item.href}
-            className="rounded-full border border-[#d6c9a8] bg-white px-2.5 py-0.5 text-[11px] font-medium text-[#3f5068] hover:border-emerald-500 hover:bg-emerald-50 dark:border-[#2a4a6b] dark:bg-[#0c2238] dark:text-[#a7bacd] dark:hover:border-emerald-400 dark:hover:bg-emerald-950/40"
+            className="rounded-full border border-[#d6c9a8] bg-white px-2.5 py-0.5 text-[11px] font-medium text-[#3f5068] hover:border-emerald-500 hover:bg-emerald-50 dark:border-[#2a4a6b] dark:bg-[#0d1f17] dark:text-[#a7bacd] dark:hover:border-emerald-400 dark:hover:bg-emerald-950/40"
           >
             {item.label}
           </a>
         ))}
       </nav>
 
-      <div id="sim-quickstart" className="scroll-mt-20 rounded-lg border border-[#e6dcc3] bg-white p-4 dark:border-[#1d3a57] dark:bg-[#071827]">
+      <div id="sim-quickstart" className="scroll-mt-20 rounded-lg border border-[#e6dcc3] bg-white p-4 dark:border-[#223a2e] dark:bg-[#081410]">
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
           <div>
-            <h2 className="text-sm font-semibold text-[#13294b] dark:text-[#eef3f8]">Quick start</h2>
+            <h2 className="text-sm font-semibold text-[#123d2c] dark:text-[#eef3f8]">Quick start</h2>
             <p className="mt-0.5 text-xs text-[#5b6b7f] dark:text-[#a7bacd]">Pick a preset to load a sensible starting configuration. The chart updates live as you tune inputs below — no &ldquo;run&rdquo; button required.</p>
           </div>
           <div className="flex items-center gap-2">
@@ -358,9 +358,9 @@ export default function InvestmentSimulatorClient({
               key={preset.id}
               type="button"
               onClick={() => applyPreset(preset)}
-              className="rounded-md border border-[#e6dcc3] bg-[#faf6ec] p-3 text-left transition-colors hover:border-[#b08d2f] hover:bg-[#f3ead2] dark:border-[#1d3a57] dark:bg-[#0c2238] dark:hover:border-emerald-400 dark:hover:bg-[#143049]"
+              className="rounded-md border border-[#e6dcc3] bg-[#faf6ec] p-3 text-left transition-colors hover:border-[#b08d2f] hover:bg-[#f3ead2] dark:border-[#223a2e] dark:bg-[#0d1f17] dark:hover:border-emerald-400 dark:hover:bg-[#143049]"
             >
-              <div className="text-sm font-semibold text-[#13294b] dark:text-[#eef3f8]">{preset.label}</div>
+              <div className="text-sm font-semibold text-[#123d2c] dark:text-[#eef3f8]">{preset.label}</div>
               <div className="mt-1 text-[11px] leading-4 text-[#5b6b7f] dark:text-[#a7bacd]">{preset.description}</div>
             </button>
           ))}
@@ -375,7 +375,7 @@ export default function InvestmentSimulatorClient({
         <SummaryCard label="Evidence weight" value={hasIntegrityError ? "Blocked" : `${result.confidenceScore.toFixed(0)}/100`} note="evidence-weighted score" />
       </div>
 
-      <div className="rounded-lg border border-[#e6dcc3] bg-white p-3 text-xs leading-5 text-[#54647a] dark:border-[#1d3a57] dark:bg-[#071827] dark:text-[#a7bacd]">
+      <div className="rounded-lg border border-[#e6dcc3] bg-white p-3 text-xs leading-5 text-[#54647a] dark:border-[#223a2e] dark:bg-[#081410] dark:text-[#a7bacd]">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex flex-wrap items-center gap-2">
             <SeedDataBadge label="Live scenario" provenance="live" reason="Scenario engine recomputes deterministically from your inputs." />
@@ -397,7 +397,7 @@ export default function InvestmentSimulatorClient({
               <div className="relative">
                 <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-[#5b6b7f] dark:text-[#8fa5bb]">$</span>
                 <input
-                  className="w-full rounded-md border border-[#e0d6ba] bg-white px-3 py-2 pl-7 text-sm dark:border-[#2a4a6b] dark:bg-[#0c2238]"
+                  className="w-full rounded-md border border-[#e0d6ba] bg-white px-3 py-2 pl-7 text-sm dark:border-[#2a4a6b] dark:bg-[#0d1f17]"
                   min={100}
                   step={500}
                   type="number"
@@ -544,7 +544,7 @@ export default function InvestmentSimulatorClient({
                   shock is active so the operator can undo deliberately. */}
             <div className="grid grid-cols-2 gap-2 pt-2">
               <button
-                className="rounded-md border border-[#d6c9a8] px-3 py-2 text-xs font-semibold hover:bg-[#f3ead2] dark:border-[#2a4a6b] dark:hover:bg-[#0c2238]"
+                className="rounded-md border border-[#d6c9a8] px-3 py-2 text-xs font-semibold hover:bg-[#f3ead2] dark:border-[#2a4a6b] dark:hover:bg-[#0d1f17]"
                 onClick={() => { setInput(coerceClientInput(initialInput)); setShockEvent(null); }}
                 type="button"
                 aria-label="Reset inputs and clear any active shock"
@@ -552,7 +552,7 @@ export default function InvestmentSimulatorClient({
                 Reset to defaults
               </button>
               <button
-                className="rounded-md bg-[#13294b] px-3 py-2 text-xs font-semibold text-white hover:bg-[#2a382c] dark:bg-[#ece3cb] dark:text-[#13294b] dark:hover:bg-white"
+                className="rounded-md bg-[#123d2c] px-3 py-2 text-xs font-semibold text-white hover:bg-[#2a382c] dark:bg-[#ece3cb] dark:text-[#123d2c] dark:hover:bg-white"
                 onClick={applyBoardShock}
                 type="button"
                 title="Generates a random market shock — drawdown severity, timing, and stress amplifier vary each click. The shock effect shows on the fan chart and drawdown panel."
@@ -625,8 +625,8 @@ export default function InvestmentSimulatorClient({
                 <ScenarioValue label="Bear" value={result.bearValue} startingCapital={input.startingCapital} tone="text-amber-700 dark:text-amber-300" />
                 <ScenarioValue label="Stress" value={result.stressValue} startingCapital={input.startingCapital} tone="text-rose-700 dark:text-rose-300" />
               </div>
-              <details className="mt-4 rounded-md border border-[#e6dcc3] bg-[#faf6ec] p-3 text-xs leading-5 text-[#54647a] dark:border-[#1d3a57] dark:bg-[#0c2238] dark:text-[#a7bacd]">
-                <summary className="cursor-pointer font-semibold text-[#13294b] dark:text-[#d8e2ec]">What do Bull / Base / Bear / Stress mean?</summary>
+              <details className="mt-4 rounded-md border border-[#e6dcc3] bg-[#faf6ec] p-3 text-xs leading-5 text-[#54647a] dark:border-[#223a2e] dark:bg-[#0d1f17] dark:text-[#a7bacd]">
+                <summary className="cursor-pointer font-semibold text-[#123d2c] dark:text-[#d8e2ec]">What do Bull / Base / Bear / Stress mean?</summary>
                 <ul className="mt-2 space-y-1 pl-4 [&_strong]:font-semibold">
                   <li><strong className="text-emerald-700 dark:text-emerald-300">Bull</strong> &mdash; favourable AI adoption + healthy macro. Catalysts hit, valuations expand.</li>
                   <li><strong className="text-[#b08d2f] dark:text-emerald-300">Base</strong> &mdash; central path. Trend growth, no fresh shocks beyond the climate setting.</li>
@@ -650,7 +650,7 @@ export default function InvestmentSimulatorClient({
               {/* Confidence chip removed app-wide (May 2026). Evidence
                   weighting still drives the scores above; the strip
                   beneath the chart already mentions evidence-weighting. */}
-              <p className="rounded-md border border-[#e6dcc3] bg-[#faf6ec] p-3 text-xs leading-5 text-[#54647a] dark:border-[#1d3a57] dark:bg-[#0c2238] dark:text-[#a7bacd]">
+              <p className="rounded-md border border-[#e6dcc3] bg-[#faf6ec] p-3 text-xs leading-5 text-[#54647a] dark:border-[#223a2e] dark:bg-[#0d1f17] dark:text-[#a7bacd]">
                 The current pack is tilted toward public platform and infrastructure exposure, with IPO-watch upside modelled as scenario sensitivity rather than direct ownership.
               </p>
               <p className="text-xs leading-5 text-[#5e6b7e] dark:text-[#8fa5bb]">{PRIVATE_WARNING}</p>
@@ -741,7 +741,7 @@ export default function InvestmentSimulatorClient({
                 <th className="py-2">Main risk</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#ece4d0] dark:divide-[#1d3a57]">
+            <tbody className="divide-y divide-[#ece4d0] dark:divide-[#223a2e]">
               {portfolio.holdings.map((holding) => {
                 const provider = providerById.get(holding.providerId)!;
                 const signalRow = signalOverlay?.perHolding.find((p) => p.providerId === holding.providerId);
@@ -806,7 +806,7 @@ function ShareConfigButton({ input }: { input: SimulationInput }) {
       type="button"
       onClick={copy}
       title="Copy a link encoding the current scenario config — paste it to share or bookmark."
-      className="inline-flex items-center gap-1.5 rounded-full border border-[#d6c9a8] bg-white px-2.5 py-1 text-[11px] font-semibold text-[#2e3f57] hover:border-emerald-500 hover:bg-emerald-50 dark:border-[#2a4a6b] dark:bg-[#0c2238] dark:text-[#c2d1e0] dark:hover:border-emerald-400 dark:hover:bg-emerald-950/40"
+      className="inline-flex items-center gap-1.5 rounded-full border border-[#d6c9a8] bg-white px-2.5 py-1 text-[11px] font-semibold text-[#2e3f57] hover:border-emerald-500 hover:bg-emerald-50 dark:border-[#2a4a6b] dark:bg-[#0d1f17] dark:text-[#c2d1e0] dark:hover:border-emerald-400 dark:hover:bg-emerald-950/40"
     >
       {status === "copied" ? "✓ Link copied" : status === "failed" ? "× Couldn't copy" : "Copy share link"}
     </button>
@@ -815,7 +815,7 @@ function ShareConfigButton({ input }: { input: SimulationInput }) {
 
 function SummaryCard({ label, value, note }: { label: string; value: string; note: string }) {
   return (
-    <div className="rounded-lg border border-[#e6dcc3] bg-white p-4 dark:border-[#1d3a57] dark:bg-[#071827]">
+    <div className="rounded-lg border border-[#e6dcc3] bg-white p-4 dark:border-[#223a2e] dark:bg-[#081410]">
       <div className="text-xs font-semibold uppercase tracking-wide text-[#5b6b7f] dark:text-[#8fa5bb]">{label}</div>
       <div className="mt-2 text-xl font-semibold text-[#0f2240] dark:text-[#f6f9fc]">{value}</div>
       <div className="mt-1 text-xs text-[#5e6b7e] dark:text-[#8fa5bb]">{note}</div>
@@ -861,7 +861,7 @@ function Field({ label: labelText, info, children }: { label: string; info?: str
 
 function GuidanceNote({ children }: { children: React.ReactNode }) {
   return (
-    <div className="mt-2 rounded-md border border-[#e6dcc3] bg-[#faf6ec] px-3 py-2 text-xs leading-5 text-[#54647a] dark:border-[#1d3a57] dark:bg-[#0c2238] dark:text-[#a7bacd]">
+    <div className="mt-2 rounded-md border border-[#e6dcc3] bg-[#faf6ec] px-3 py-2 text-xs leading-5 text-[#54647a] dark:border-[#223a2e] dark:bg-[#0d1f17] dark:text-[#a7bacd]">
       {children}
     </div>
   );
@@ -881,7 +881,7 @@ function InfoButton({ text }: { text: string }) {
 
 function BlockedOutputNote() {
   return (
-    <div className="mt-4 rounded-md border border-[#e6dcc3] bg-[#faf6ec] px-3 py-2 text-xs leading-5 text-[#54647a] dark:border-[#1d3a57] dark:bg-[#0c2238] dark:text-[#a7bacd]">
+    <div className="mt-4 rounded-md border border-[#e6dcc3] bg-[#faf6ec] px-3 py-2 text-xs leading-5 text-[#54647a] dark:border-[#223a2e] dark:bg-[#0d1f17] dark:text-[#a7bacd]">
       Scenario values are blocked until the current input combination is valid.
     </div>
   );
@@ -944,7 +944,7 @@ function MacroModelPanel({
             <div className="text-[10px] font-semibold uppercase tracking-wider text-[#b08d2f] dark:text-emerald-400">
               Forward growth · Model I — MC-SSDF
             </div>
-            <h3 className="mt-0.5 text-base font-semibold text-[#13294b] dark:text-[#eef3f8]">
+            <h3 className="mt-0.5 text-base font-semibold text-[#123d2c] dark:text-[#eef3f8]">
               Macro-coupled state-space projection · {horizonYears}-year horizon
             </h3>
           </div>
@@ -955,11 +955,11 @@ function MacroModelPanel({
         <p className="mt-1 text-xs leading-5 text-[#54647a] dark:text-[#a7bacd]">{choice.reason}</p>
         <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
           {yearMarks.map((idx, i) => (
-            <div key={i} className="rounded-md border border-[#e6dcc3] bg-white p-2 dark:border-[#1d3a57] dark:bg-[#0c2238]">
+            <div key={i} className="rounded-md border border-[#e6dcc3] bg-white p-2 dark:border-[#223a2e] dark:bg-[#0d1f17]">
               <div className="text-[10px] uppercase tracking-wide text-[#5b6b7f] dark:text-[#8fa5bb]">
                 {i === 0 ? "Now" : `Year ${(r.t[idx]).toFixed(1)}`}
               </div>
-              <div className="mt-0.5 font-mono text-lg font-semibold text-[#13294b] dark:text-[#eef3f8]">
+              <div className="mt-0.5 font-mono text-lg font-semibold text-[#123d2c] dark:text-[#eef3f8]">
                 {(r.growth[idx] * 100).toFixed(0)}%
               </div>
             </div>
@@ -990,7 +990,7 @@ function MacroModelPanel({
           <div className="text-[10px] font-semibold uppercase tracking-wider text-[#b08d2f] dark:text-emerald-400">
             Forward growth · Model II — SRS-MJN
           </div>
-          <h3 className="mt-0.5 text-base font-semibold text-[#13294b] dark:text-[#eef3f8]">
+          <h3 className="mt-0.5 text-base font-semibold text-[#123d2c] dark:text-[#eef3f8]">
             Regime-switching jump-diffusion · {horizonYears}-year horizon
           </h3>
         </div>
@@ -1003,7 +1003,7 @@ function MacroModelPanel({
         <MacroStat label="P5 (downside)" value={formatCurrency(ens.p5)} tone="text-rose-700 dark:text-rose-300" />
         <MacroStat label="P50 (median)" value={formatCurrency(ens.p50)} tone="text-[#b08d2f] dark:text-emerald-300" />
         <MacroStat label="P95 (upside)" value={formatCurrency(ens.p95)} tone="text-emerald-700 dark:text-emerald-300" />
-        <MacroStat label="Median CAGR" value={`${(ens.medianCagr * 100).toFixed(0)}%`} tone="text-[#13294b] dark:text-[#eef3f8]" />
+        <MacroStat label="Median CAGR" value={`${(ens.medianCagr * 100).toFixed(0)}%`} tone="text-[#123d2c] dark:text-[#eef3f8]" />
       </div>
       <div className="mt-3">
         <div className="text-[10px] font-semibold uppercase tracking-wide text-[#5b6b7f] dark:text-[#8fa5bb]">
@@ -1016,7 +1016,7 @@ function MacroModelPanel({
               <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-[#ece3cb] dark:bg-[#143049]">
                 <div className="h-full rounded-full bg-[#b08d2f] dark:bg-emerald-400" style={{ width: `${reg.fraction * 100}%` }} />
               </div>
-              <span className="w-10 text-right font-mono text-[#13294b] dark:text-[#d8e2ec]">{(reg.fraction * 100).toFixed(0)}%</span>
+              <span className="w-10 text-right font-mono text-[#123d2c] dark:text-[#d8e2ec]">{(reg.fraction * 100).toFixed(0)}%</span>
             </div>
           ))}
         </div>
@@ -1034,7 +1034,7 @@ function MacroModelPanel({
 
 function MacroStat({ label, value, tone }: { label: string; value: string; tone: string }) {
   return (
-    <div className="rounded-md border border-[#e6dcc3] bg-white p-2 dark:border-[#1d3a57] dark:bg-[#0c2238]">
+    <div className="rounded-md border border-[#e6dcc3] bg-white p-2 dark:border-[#223a2e] dark:bg-[#0d1f17]">
       <div className="text-[10px] uppercase tracking-wide text-[#5b6b7f] dark:text-[#8fa5bb]">{label}</div>
       <div className={`mt-0.5 font-mono text-lg font-semibold ${tone}`}>{value}</div>
     </div>
@@ -1072,7 +1072,7 @@ function UnifiedHybridPanel({ universe }: { universe: SimulationInput["investmen
           <div className="text-[10px] font-semibold uppercase tracking-wider text-[#b08d2f] dark:text-emerald-400">
             Forward growth · Unified Hybrid Engine
           </div>
-          <h3 className="mt-0.5 text-base font-semibold text-[#13294b] dark:text-[#eef3f8]">
+          <h3 className="mt-0.5 text-base font-semibold text-[#123d2c] dark:text-[#eef3f8]">
             Multi-horizon forecast for public AI equities · 1 / 3 / 5 / 10-year
           </h3>
         </div>
@@ -1091,7 +1091,7 @@ function UnifiedHybridPanel({ universe }: { universe: SimulationInput["investmen
         <label className="block">
           <div className="mb-1 flex items-center justify-between text-[11px] font-medium text-[#54647a] dark:text-[#a7bacd]">
             <span>Shock onset year</span>
-            <span className="font-mono text-[#13294b] dark:text-[#eef3f8]">Y{tShock.toFixed(1)}</span>
+            <span className="font-mono text-[#123d2c] dark:text-[#eef3f8]">Y{tShock.toFixed(1)}</span>
           </div>
           <input
             type="range" min={0} max={10} step={0.5}
@@ -1104,7 +1104,7 @@ function UnifiedHybridPanel({ universe }: { universe: SimulationInput["investmen
         <label className="block">
           <div className="mb-1 flex items-center justify-between text-[11px] font-medium text-[#54647a] dark:text-[#a7bacd]">
             <span>Shock severity ξ</span>
-            <span className={`font-mono ${xi < 0 ? "text-rose-700 dark:text-rose-300" : xi > 0 ? "text-emerald-700 dark:text-emerald-300" : "text-[#13294b] dark:text-[#eef3f8]"}`}>
+            <span className={`font-mono ${xi < 0 ? "text-rose-700 dark:text-rose-300" : xi > 0 ? "text-emerald-700 dark:text-emerald-300" : "text-[#123d2c] dark:text-[#eef3f8]"}`}>
               {xi >= 0 ? "+" : ""}{xi.toFixed(2)}
             </span>
           </div>
@@ -1124,11 +1124,11 @@ function UnifiedHybridPanel({ universe }: { universe: SimulationInput["investmen
       {/* Milestone forecasts */}
       <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
         {r.milestones.map((m) => (
-          <div key={m.year} className="rounded-md border border-[#e6dcc3] bg-white p-2 dark:border-[#1d3a57] dark:bg-[#0c2238]">
+          <div key={m.year} className="rounded-md border border-[#e6dcc3] bg-white p-2 dark:border-[#223a2e] dark:bg-[#0d1f17]">
             <div className="text-[10px] uppercase tracking-wide text-[#5b6b7f] dark:text-[#8fa5bb]">
               Year {m.year}
             </div>
-            <div className={`mt-0.5 font-mono text-lg font-semibold ${m.growth < 0 ? "text-rose-700 dark:text-rose-300" : "text-[#13294b] dark:text-[#eef3f8]"}`}>
+            <div className={`mt-0.5 font-mono text-lg font-semibold ${m.growth < 0 ? "text-rose-700 dark:text-rose-300" : "text-[#123d2c] dark:text-[#eef3f8]"}`}>
               {(m.growth * 100).toFixed(1)}%
             </div>
             <div className="text-[9px] text-[#5b6b7f] dark:text-[#8fa5bb]">{engineLabel[m.engine]}</div>
@@ -1183,7 +1183,7 @@ function SingleStockPicker({
       )
     : tickers;
   return (
-    <div className="rounded-lg border border-[#e6dcc3] p-3 dark:border-[#1d3a57]">
+    <div className="rounded-lg border border-[#e6dcc3] p-3 dark:border-[#223a2e]">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <div className="text-[10px] font-semibold uppercase tracking-wide text-[#5b6b7f] dark:text-[#8fa5bb]">Single ticker</div>
         <div className="text-[10px] text-[#4c5d75]">{filtered.length} of {tickers.length}</div>
@@ -1199,7 +1199,7 @@ function SingleStockPicker({
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Filter by name, ticker, or category…"
-            className="mt-2 w-full rounded-md border border-[#e0d6ba] bg-white px-3 py-1.5 text-xs dark:border-[#2a4a6b] dark:bg-[#0c2238]"
+            className="mt-2 w-full rounded-md border border-[#e0d6ba] bg-white px-3 py-1.5 text-xs dark:border-[#2a4a6b] dark:bg-[#0d1f17]"
             aria-label="Filter tickers"
           />
         </>
@@ -1218,8 +1218,8 @@ function SingleStockPicker({
                 onClick={() => onSelect(p.id)}
                 className={`flex items-center justify-between rounded-md border px-3 py-2 text-left text-xs transition-colors ${
                   isSelected
-                    ? "border-[#13294b] bg-[#13294b] text-white dark:border-[#ece4d0] dark:bg-[#ece3cb] dark:text-[#13294b]"
-                    : "border-[#e6dcc3] bg-white hover:bg-[#f3ead2] dark:border-[#1d3a57] dark:bg-[#0c2238] dark:hover:bg-[#143049]"
+                    ? "border-[#123d2c] bg-[#123d2c] text-white dark:border-[#ece4d0] dark:bg-[#ece3cb] dark:text-[#123d2c]"
+                    : "border-[#e6dcc3] bg-white hover:bg-[#f3ead2] dark:border-[#223a2e] dark:bg-[#0d1f17] dark:hover:bg-[#143049]"
                 }`}
               >
                 <span>
@@ -1295,11 +1295,11 @@ function ManualAllocationEditor({
           : "Review the validation messages below.";
 
   return (
-    <div className="rounded-lg border border-[#e6dcc3] p-3 dark:border-[#1d3a57]">
+    <div className="rounded-lg border border-[#e6dcc3] p-3 dark:border-[#223a2e]">
       <Field label="Vendor selection" info="Manual vendor selection is filtered by investment universe. It affects eligibility, holdings, charts, and validation.">
         <div className="grid grid-cols-[1fr_auto] gap-2">
           <select
-            className="rounded-md border border-[#e0d6ba] bg-white px-3 py-2 text-sm dark:border-[#2a4a6b] dark:bg-[#0c2238]"
+            className="rounded-md border border-[#e0d6ba] bg-white px-3 py-2 text-sm dark:border-[#2a4a6b] dark:bg-[#0d1f17]"
             defaultValue=""
             onChange={(event) => {
               onAddVendor(event.target.value);
@@ -1322,7 +1322,7 @@ function ManualAllocationEditor({
           if (!provider) return null;
           const allocation = input.manualAllocations?.[providerId] ?? 0;
           return (
-            <div key={providerId} className="rounded-md border border-[#efe9d9] p-2 text-xs dark:border-[#1d3a57]">
+            <div key={providerId} className="rounded-md border border-[#efe9d9] p-2 text-xs dark:border-[#223a2e]">
               <div className="flex items-start justify-between gap-2">
                 <div>
                   <div className="font-semibold">{provider.name} {provider.ticker ? `(${provider.ticker})` : "(private/watchlist)"}</div>
@@ -1334,7 +1334,7 @@ function ManualAllocationEditor({
               </div>
               <Field label="Allocation %" info="Allocation weight controls amount, contribution, risk, donut, scatter, fan chart, drawdown, and confidence heatmap.">
                 <input
-                  className="mt-1 w-full rounded-md border border-[#e0d6ba] bg-white px-3 py-2 text-sm dark:border-[#2a4a6b] dark:bg-[#0c2238]"
+                  className="mt-1 w-full rounded-md border border-[#e0d6ba] bg-white px-3 py-2 text-sm dark:border-[#2a4a6b] dark:bg-[#0d1f17]"
                   min={0}
                   max={100}
                   step={0.5}
@@ -1371,7 +1371,7 @@ function Select({
   onChange: (value: string) => void;
 }) {
   return (
-    <select className="w-full rounded-md border border-[#e0d6ba] bg-white px-3 py-2 text-sm dark:border-[#2a4a6b] dark:bg-[#0c2238]" value={value} onChange={(event) => onChange(event.target.value)}>
+    <select className="w-full rounded-md border border-[#e0d6ba] bg-white px-3 py-2 text-sm dark:border-[#2a4a6b] dark:bg-[#0d1f17]" value={value} onChange={(event) => onChange(event.target.value)}>
       {options.map((option) => {
         const disabledReason = disabledOptions[option];
         return (
@@ -1388,7 +1388,7 @@ function Segmented({ value, options, onChange }: { value: string; options: strin
   return (
     <div className="grid grid-cols-4 gap-1">
       {options.map((option) => (
-        <button key={option} className={`rounded-md border px-2 py-1.5 text-xs font-semibold ${value === option ? "border-[#13294b] bg-[#13294b] text-white dark:border-[#ece4d0] dark:bg-[#ece3cb] dark:text-[#13294b]" : "border-[#e0d6ba] text-[#475a72] dark:border-[#2a4a6b] dark:text-[#a7bacd]"}`} onClick={() => onChange(option)} type="button">
+        <button key={option} className={`rounded-md border px-2 py-1.5 text-xs font-semibold ${value === option ? "border-[#123d2c] bg-[#123d2c] text-white dark:border-[#ece4d0] dark:bg-[#ece3cb] dark:text-[#123d2c]" : "border-[#e0d6ba] text-[#475a72] dark:border-[#2a4a6b] dark:text-[#a7bacd]"}`} onClick={() => onChange(option)} type="button">
           {option}y
         </button>
       ))}
@@ -1423,8 +1423,8 @@ function CollapsibleSection({
   children: React.ReactNode;
 }) {
   return (
-    <details className="group rounded-md border border-[#e6dcc3] bg-[#faf6ec] px-3 py-2 dark:border-[#1d3a57] dark:bg-[#0c2238]/40" open={defaultOpen}>
-      <summary className="flex cursor-pointer list-none items-center justify-between text-[10px] font-semibold uppercase tracking-[0.18em] text-[#5b6b7f] hover:text-[#13294b] dark:text-[#a7bacd] dark:hover:text-[#eef3f8]">
+    <details className="group rounded-md border border-[#e6dcc3] bg-[#faf6ec] px-3 py-2 dark:border-[#223a2e] dark:bg-[#0d1f17]/40" open={defaultOpen}>
+      <summary className="flex cursor-pointer list-none items-center justify-between text-[10px] font-semibold uppercase tracking-[0.18em] text-[#5b6b7f] hover:text-[#123d2c] dark:text-[#a7bacd] dark:hover:text-[#eef3f8]">
         {title}
         <span className="text-[10px] transition-transform group-open:rotate-180" aria-hidden>▾</span>
       </summary>
@@ -1461,7 +1461,7 @@ function ClimateSegmented({
             onClick={() => onChange(opt.value)}
             aria-pressed={active}
             className={`rounded-md border px-2 py-1.5 text-[11px] font-semibold transition-colors ${
-              active ? opt.tone + " ring-2 ring-current ring-offset-0" : "border-[#e6dcc3] bg-white text-[#5b6b7f] hover:border-[#d6c9a8] dark:border-[#1d3a57] dark:bg-[#0c2238] dark:text-[#a7bacd]"
+              active ? opt.tone + " ring-2 ring-current ring-offset-0" : "border-[#e6dcc3] bg-white text-[#5b6b7f] hover:border-[#d6c9a8] dark:border-[#223a2e] dark:bg-[#0d1f17] dark:text-[#a7bacd]"
             }`}
           >
             {opt.label}
@@ -1495,7 +1495,7 @@ function ToggleSwitch({
       className={`flex w-full items-center justify-between rounded-md border px-3 py-2 text-xs font-semibold transition-colors ${
         checked
           ? "border-emerald-300 bg-emerald-50 text-emerald-900 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-200"
-          : "border-[#e0d6ba] bg-white text-[#475a72] hover:bg-[#faf6ec] dark:border-[#2a4a6b] dark:bg-[#0c2238] dark:text-[#a7bacd] dark:hover:bg-[#143049]"
+          : "border-[#e0d6ba] bg-white text-[#475a72] hover:bg-[#faf6ec] dark:border-[#2a4a6b] dark:bg-[#0d1f17] dark:text-[#a7bacd] dark:hover:bg-[#143049]"
       }`}
     >
       <span>{checked ? labelOn : labelOff}</span>
@@ -1519,7 +1519,7 @@ function ScenarioValue({
 }) {
   const movement = formatMovementPercent(value, startingCapital);
   return (
-    <div className="rounded-md border border-[#e1e6dc] p-3 dark:border-[#1d3a57]">
+    <div className="rounded-md border border-[#e1e6dc] p-3 dark:border-[#223a2e]">
       <div className="text-xs text-[#5b6b7f] dark:text-[#8fa5bb]">{labelText}</div>
       <div className={`mt-1 text-lg font-semibold tabular-nums ${tone}`}>{formatCurrency(value)}</div>
       <div className={`mt-1 text-xs font-semibold tabular-nums ${movement.isNegative ? "text-rose-700 dark:text-rose-300" : "text-emerald-700 dark:text-emerald-300"}`}>
@@ -1633,11 +1633,11 @@ function ScenarioFanChart({ result, shockEvent }: { result: SimulationResult; sh
         onMouseMove={handleMove}
         onMouseLeave={() => setHover(null)}
       >
-        <rect width={w} height={h} rx="10" fill="currentColor" className="text-[#faf6ec] dark:text-[#13294b]" />
+        <rect width={w} height={h} rx="10" fill="currentColor" className="text-[#faf6ec] dark:text-[#123d2c]" />
         {/* Y gridlines + labels */}
         {yTicks.map((value, idx) => (
           <g key={`y-${idx}`}>
-            <line x1={padLeft} x2={w - padRight} y1={yFor(value)} y2={yFor(value)} stroke="#e6dcc3" strokeDasharray="4 4" className="dark:stroke-[#1d3a57]" />
+            <line x1={padLeft} x2={w - padRight} y1={yFor(value)} y2={yFor(value)} stroke="#e6dcc3" strokeDasharray="4 4" className="dark:stroke-[#223a2e]" />
             <text x={padLeft - 8} y={yFor(value) + 4} textAnchor="end" fill="#5b6b7f" fontSize="10" className="tabular-nums">{formatCompactCurrency(value)}</text>
           </g>
         ))}
@@ -1677,7 +1677,7 @@ function ScenarioFanChart({ result, shockEvent }: { result: SimulationResult; sh
       </svg>
       {hoverNear && hover && (
         <div
-          className="pointer-events-none absolute z-20 -translate-y-2 rounded-md border border-[#e6dcc3] bg-white px-2.5 py-2 text-[11px] shadow-md dark:border-[#2a4a6b] dark:bg-[#0c2238]"
+          className="pointer-events-none absolute z-20 -translate-y-2 rounded-md border border-[#e6dcc3] bg-white px-2.5 py-2 text-[11px] shadow-md dark:border-[#2a4a6b] dark:bg-[#0d1f17]"
           style={{
             left: `${hover.xPct * (innerW / w) * 100 + (padLeft / w) * 100}%`,
             top: 30,
@@ -1685,7 +1685,7 @@ function ScenarioFanChart({ result, shockEvent }: { result: SimulationResult; sh
             minWidth: 160,
           }}
         >
-          <div className="mb-1 font-semibold text-[#13294b] dark:text-[#eef3f8]">{formatYearMonthLabel(hover.year)}</div>
+          <div className="mb-1 font-semibold text-[#123d2c] dark:text-[#eef3f8]">{formatYearMonthLabel(hover.year)}</div>
           <div className="space-y-0.5">
             {hoverNear.map((item) => (
               <div key={item.key} className="flex items-center justify-between gap-3">
@@ -1693,7 +1693,7 @@ function ScenarioFanChart({ result, shockEvent }: { result: SimulationResult; sh
                   <span className="h-2 w-2 rounded-sm" style={{ background: item.color }} />
                   <span className="text-[#475a72] dark:text-[#c2d1e0]">{item.name}</span>
                 </span>
-                <span className="font-mono tabular-nums text-[#13294b] dark:text-[#f6f9fc]">{formatCurrency(item.point.value)}</span>
+                <span className="font-mono tabular-nums text-[#123d2c] dark:text-[#f6f9fc]">{formatCurrency(item.point.value)}</span>
               </div>
             ))}
           </div>
@@ -1755,7 +1755,7 @@ function AllocationDonut({ portfolio, providers }: { portfolio: SimulationPortfo
             />
           );
         })}
-        <circle cx="130" cy="130" r="60" fill="white" className="dark:fill-[#071827]" />
+        <circle cx="130" cy="130" r="60" fill="white" className="dark:fill-[#081410]" />
         <text x="130" y="124" textAnchor="middle" fontSize="22" fontWeight="700" fill="currentColor">{portfolio.holdings.length}</text>
         <text x="130" y="145" textAnchor="middle" fontSize="11" fill="#5b6b7f">holdings</text>
       </svg>
@@ -1774,12 +1774,12 @@ function AllocationDonut({ portfolio, providers }: { portfolio: SimulationPortfo
               </span>
               <span className="flex shrink-0 gap-3">
                 <span className="font-mono tabular-nums text-[#5b6b7f] dark:text-[#8fa5bb]">{holding.weightPct.toFixed(1)}%</span>
-                <span className="w-20 text-right font-mono tabular-nums text-[#13294b] dark:text-[#eef3f8]">{formatCurrency(holding.amount)}</span>
+                <span className="w-20 text-right font-mono tabular-nums text-[#123d2c] dark:text-[#eef3f8]">{formatCurrency(holding.amount)}</span>
               </span>
             </div>
           );
         })}
-        <div className="mt-2 flex items-center justify-between border-t border-[#e6dcc3] pt-2 text-xs font-semibold dark:border-[#1d3a57]">
+        <div className="mt-2 flex items-center justify-between border-t border-[#e6dcc3] pt-2 text-xs font-semibold dark:border-[#223a2e]">
           <span>Total</span>
           <span className="font-mono tabular-nums">{formatCurrency(portfolio.holdings.reduce((sum, h) => sum + h.amount, 0))}</span>
         </div>
@@ -1806,7 +1806,7 @@ function RiskReturnScatter({ portfolio, providers, stateHash }: { portfolio: Sim
   const scale = (value: number, domain: { min: number; max: number }) => (value - domain.min) / Math.max(1, domain.max - domain.min);
   return (
     <svg className="h-[300px] w-full" viewBox={`0 0 ${w} ${h}`} role="img" aria-label="Risk return scatterplot">
-      <rect width={w} height={h} rx="10" fill="currentColor" className="text-[#faf6ec] dark:text-[#13294b]" />
+      <rect width={w} height={h} rx="10" fill="currentColor" className="text-[#faf6ec] dark:text-[#123d2c]" />
       <line x1={pad} x2={w - pad} y1={h - pad} y2={h - pad} stroke="#b3a98c" />
       <line x1={pad} x2={pad} y1={pad} y2={h - pad} stroke="#b3a98c" />
       {points.map((point, index) => {
@@ -1837,7 +1837,7 @@ function ExposureNetwork({ exposures, providers }: { exposures: IndirectExposure
   const privateX = (index: number) => 80 + (index / Math.max(1, privateNodes.length - 1)) * 520;
   return (
     <svg className="h-[320px] w-full" viewBox="0 0 680 320" role="img" aria-label="Indirect exposure network graph">
-      <rect width="680" height="320" rx="10" fill="currentColor" className="text-[#faf6ec] dark:text-[#13294b]" />
+      <rect width="680" height="320" rx="10" fill="currentColor" className="text-[#faf6ec] dark:text-[#123d2c]" />
       {exposures.map((edge, index) => {
         const x1 = publicX(Math.max(0, publicNodes.indexOf(edge.publicTicker)));
         const x2 = privateX(Math.max(0, privateNodes.indexOf(edge.privateProviderId)));
@@ -1916,7 +1916,7 @@ function DrawdownChart({ path, shockEvent }: { path: ScenarioPoint[]; shockEvent
     : Array.from({ length: Math.round(maxYear) + 1 }, (_, i) => i);
   return (
     <svg className="h-[220px] w-full" viewBox={`0 0 ${w} ${h}`} role="img" aria-label="Drawdown chart">
-      <rect width={w} height={h} rx="10" fill="currentColor" className="text-[#faf6ec] dark:text-[#13294b]" />
+      <rect width={w} height={h} rx="10" fill="currentColor" className="text-[#faf6ec] dark:text-[#123d2c]" />
       <line x1={pad} x2={w - pad} y1={pad} y2={pad} stroke="#b3a98c" />
       {shockX !== null && <line x1={shockX} x2={shockX} y1={pad} y2={h - pad} stroke="#b45309" strokeWidth="2" strokeDasharray="4 4" />}
       {xTicks.map((tick, idx) => (
@@ -1938,7 +1938,7 @@ function StackedExposureBar({ portfolio }: { portfolio: SimulationPortfolio }) {
   portfolio.holdings.forEach((holding) => totals.set(holding.exposureType, (totals.get(holding.exposureType) ?? 0) + holding.weightPct));
   return (
     <div>
-      <div className="flex h-10 overflow-hidden rounded-md border border-[#e6dcc3] dark:border-[#1d3a57]">
+      <div className="flex h-10 overflow-hidden rounded-md border border-[#e6dcc3] dark:border-[#223a2e]">
         {Array.from(totals).map(([type, value]) => (
           <div key={type} className="h-full" style={{ width: `${value}%`, background: exposureColors[type] }} title={`${label(type)} ${value.toFixed(1)}%`} />
         ))}
@@ -2032,7 +2032,7 @@ function RiskRadar({ result, portfolio, providers }: { result: SimulationResult;
   }).join(" ");
   return (
     <svg className="h-[340px] w-full" viewBox="0 0 560 340" role="img" aria-label="Risk radar">
-      <rect width="560" height="340" rx="10" fill="currentColor" className="text-[#faf6ec] dark:text-[#13294b]" />
+      <rect width="560" height="340" rx="10" fill="currentColor" className="text-[#faf6ec] dark:text-[#123d2c]" />
       {[0.25, 0.5, 0.75, 1].map((scale) => <circle key={scale} cx={cx} cy={cy} r={r * scale} fill="none" stroke="#e6dcc3" />)}
       {axes.map(([name], index) => {
         const angle = -Math.PI / 2 + (index / axes.length) * Math.PI * 2;

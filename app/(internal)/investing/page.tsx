@@ -87,7 +87,7 @@ export default async function InvestingDashboardPage() {
             <ul className="space-y-1.5 text-xs">
               {newsTickerTop.map((item) => (
                 <li key={item.id} className="border-l-2 border-[#e6dcc3] pl-2">
-                  <div className="truncate text-[#13294b] dark:text-[#eef3f8]" title={item.title}>{item.title}</div>
+                  <div className="truncate text-[#123d2c] dark:text-[#eef3f8]" title={item.title}>{item.title}</div>
                   <div className="flex items-center gap-2 text-[10px] text-[#5d6b80]">
                     <span>{new Date(item.publishedAt).toLocaleDateString()}</span>
                     <span>impact {item.impactScore}</span>
@@ -160,7 +160,7 @@ export default async function InvestingDashboardPage() {
           <Panel title="IPO rumour monitor">
             <div className="space-y-3">
               {dashboard.ipoRumourMonitor.slice(0, 6).map((row) => (
-                <div key={row.provider.id} className="flex items-center justify-between gap-3 rounded-md border border-[#ece4d0] px-3 py-2 text-sm dark:border-[#1d3a57]">
+                <div key={row.provider.id} className="flex items-center justify-between gap-3 rounded-md border border-[#ece4d0] px-3 py-2 text-sm dark:border-[#223a2e]">
                   <span>{row.provider.name}</span>
                   <span className="text-xs text-[#5b6b7f] dark:text-[#8fa5bb]">{row.profile.rumourStage} | readiness {row.profile.readinessScore}/100</span>
                 </div>
@@ -182,7 +182,7 @@ export default async function InvestingDashboardPage() {
         </div>
 
         <Panel title="Recent investment-relevant AI news">
-          <div className="divide-y divide-[#ece4d0] dark:divide-[#1d3a57]">
+          <div className="divide-y divide-[#ece4d0] dark:divide-[#223a2e]">
             {investmentNews.map((item) => (
               <div key={item.id} className="grid gap-3 py-3 md:grid-cols-[1fr_110px_130px] md:items-center">
                 <div>
@@ -214,7 +214,7 @@ export default async function InvestingDashboardPage() {
             ["/investor-tools/simulator", "Simulator"],
             ["/investor-tools/watchlist", "Watchlist"],
           ].map(([href, text]) => (
-            <Link key={href} href={href} className="rounded-md border border-[#d6c9a8] px-3 py-2 text-xs font-semibold hover:bg-[#f3ead2] dark:border-[#2a4a6b] dark:hover:bg-[#0c2238]">
+            <Link key={href} href={href} className="rounded-md border border-[#d6c9a8] px-3 py-2 text-xs font-semibold hover:bg-[#f3ead2] dark:border-[#2a4a6b] dark:hover:bg-[#0d1f17]">
               {text}
             </Link>
           ))}

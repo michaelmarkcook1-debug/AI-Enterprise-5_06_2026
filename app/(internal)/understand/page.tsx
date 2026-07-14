@@ -140,9 +140,9 @@ export default async function UnderstandPage() {
             const highestRisk = [...scores].sort((a, b) => b.encroachment - a.encroachment)[0];
             return (
               <div className="grid gap-3 md:grid-cols-3">
-                <div className="rounded-md border border-[#e6dcc3] p-3 dark:border-[#1d3a57]">
+                <div className="rounded-md border border-[#e6dcc3] p-3 dark:border-[#223a2e]">
                   <div className="text-[10px] uppercase tracking-wider text-[#5b6b7f]">Avg sustainability</div>
-                  <div className="mt-1 font-mono text-2xl font-semibold text-[#13294b] dark:text-[#eef3f8]">{avgSus}/100</div>
+                  <div className="mt-1 font-mono text-2xl font-semibold text-[#123d2c] dark:text-[#eef3f8]">{avgSus}/100</div>
                 </div>
                 <div className="rounded-md border border-emerald-200 bg-emerald-50/60 p-3 dark:border-emerald-900/60 dark:bg-emerald-950/20">
                   <div className="text-[10px] uppercase tracking-wider text-emerald-700 dark:text-emerald-300">Most durable</div>
@@ -204,13 +204,13 @@ export default async function UnderstandPage() {
               <p className="mt-1 text-[11px] italic text-[#5b6b7f] dark:text-[#8fa5bb]">{provenance.reason}</p>
             </div>
             <div className="flex flex-wrap gap-2 text-xs">
-              <Link href="/admin/data-sources" className="rounded-full border border-[#e6dcc3] bg-white px-3 py-1 font-semibold text-[#13294b] hover:bg-[#f3ead2] dark:border-[#2a4a6b] dark:bg-[#0c2238] dark:text-[#eef3f8] dark:hover:bg-[#143049]">
+              <Link href="/admin/data-sources" className="rounded-full border border-[#e6dcc3] bg-white px-3 py-1 font-semibold text-[#123d2c] hover:bg-[#f3ead2] dark:border-[#2a4a6b] dark:bg-[#0d1f17] dark:text-[#eef3f8] dark:hover:bg-[#143049]">
                 Connector status →
               </Link>
-              <Link href="/admin/ingestion" className="rounded-full border border-[#e6dcc3] bg-white px-3 py-1 font-semibold text-[#13294b] hover:bg-[#f3ead2] dark:border-[#2a4a6b] dark:bg-[#0c2238] dark:text-[#eef3f8] dark:hover:bg-[#143049]">
+              <Link href="/admin/ingestion" className="rounded-full border border-[#e6dcc3] bg-white px-3 py-1 font-semibold text-[#123d2c] hover:bg-[#f3ead2] dark:border-[#2a4a6b] dark:bg-[#0d1f17] dark:text-[#eef3f8] dark:hover:bg-[#143049]">
                 Run ingestion →
               </Link>
-              <Link href="/admin/evidence" className="rounded-full border border-[#e6dcc3] bg-white px-3 py-1 font-semibold text-[#13294b] hover:bg-[#f3ead2] dark:border-[#2a4a6b] dark:bg-[#0c2238] dark:text-[#eef3f8] dark:hover:bg-[#143049]">
+              <Link href="/admin/evidence" className="rounded-full border border-[#e6dcc3] bg-white px-3 py-1 font-semibold text-[#123d2c] hover:bg-[#f3ead2] dark:border-[#2a4a6b] dark:bg-[#0d1f17] dark:text-[#eef3f8] dark:hover:bg-[#143049]">
                 Approve evidence →
               </Link>
             </div>
@@ -264,7 +264,7 @@ export default async function UnderstandPage() {
             full vendor list — now sit on each vendor&apos;s own profile, so a vendor appears in{" "}
             <strong>one place</strong> instead of being duplicated here and in Query. Open any vendor
             from the{" "}
-            <Link href="/query" className="font-semibold text-[#13294b] underline underline-offset-2 hover:no-underline dark:text-[#eef3f8]">
+            <Link href="/query" className="font-semibold text-[#123d2c] underline underline-offset-2 hover:no-underline dark:text-[#eef3f8]">
               Query leaderboard
             </Link>{" "}
             to see its Strategic position, scores, dependencies and live news together.
@@ -277,7 +277,7 @@ export default async function UnderstandPage() {
         <CollapsiblePanel title="Methodology — Enterprise AI Assessment Framework v2.0" summary={"weights, evidence grades, scoring rubric"}>
           <div className="grid gap-6 lg:grid-cols-2">
             <div>
-              <h3 className="text-sm font-semibold text-[#13294b] dark:text-[#eef3f8]">Six pillars (default weights)</h3>
+              <h3 className="text-sm font-semibold text-[#123d2c] dark:text-[#eef3f8]">Six pillars (default weights)</h3>
               <ul className="mt-2 list-disc space-y-1 pl-6 text-sm text-[#2e3f57] dark:text-[#c2d1e0]">
                 <li>Business Fit — 15%</li>
                 <li>Enterprise Control — 25%</li>
@@ -291,7 +291,7 @@ export default async function UnderstandPage() {
                 autonomy appetite and budget sensitivity.
               </p>
 
-              <h3 className="mt-6 text-sm font-semibold text-[#13294b] dark:text-[#eef3f8]">Risk engine</h3>
+              <h3 className="mt-6 text-sm font-semibold text-[#123d2c] dark:text-[#eef3f8]">Risk engine</h3>
               <p className="mt-2 text-sm leading-6 text-[#2e3f57] dark:text-[#c2d1e0]">
                 Fatal blockers exclude vendors in incompatible contexts. Severe / moderate risks
                 apply penalties scaled by the user&apos;s risk tolerance. Industry-critical control
@@ -299,7 +299,7 @@ export default async function UnderstandPage() {
               </p>
             </div>
             <div>
-              <h3 className="text-sm font-semibold text-[#13294b] dark:text-[#eef3f8]">Evidence grading (E0–E5)</h3>
+              <h3 className="text-sm font-semibold text-[#123d2c] dark:text-[#eef3f8]">Evidence grading (E0–E5)</h3>
               <div className="mt-2 grid grid-cols-1 gap-1 text-sm">
                 {[
                   ["E0", "0.0", "No evidence"],
@@ -309,7 +309,7 @@ export default async function UnderstandPage() {
                   ["E4", "0.9", "Production customer evidence"],
                   ["E5", "1.0", "Independent audit / verified benchmark"],
                 ].map(([g, m, d]) => (
-                  <div key={g} className="grid grid-cols-12 border-b border-[#ece4d0] py-1.5 dark:border-[#1d3a57]">
+                  <div key={g} className="grid grid-cols-12 border-b border-[#ece4d0] py-1.5 dark:border-[#223a2e]">
                     <div className="col-span-2 font-mono">{g}</div>
                     <div className="col-span-2">×{m}</div>
                     <div className="col-span-8 text-[#3f5068] dark:text-[#a7bacd]">{d}</div>
@@ -317,8 +317,8 @@ export default async function UnderstandPage() {
                 ))}
               </div>
 
-              <h3 className="mt-6 text-sm font-semibold text-[#13294b] dark:text-[#eef3f8]">Final score formula</h3>
-              <pre className="mt-2 overflow-x-auto rounded-lg bg-[#f6f1e3] p-3 text-xs dark:bg-[#0c2238]">{`Final Score =
+              <h3 className="mt-6 text-sm font-semibold text-[#123d2c] dark:text-[#eef3f8]">Final score formula</h3>
+              <pre className="mt-2 overflow-x-auto rounded-lg bg-[#f6f1e3] p-3 text-xs dark:bg-[#0d1f17]">{`Final Score =
   Σ(Pillar Score × Dynamic Context Weight × Evidence Confidence)
   + Strategic Fit Bonus
   + Sector Adoption Fit Bonus
@@ -332,8 +332,8 @@ export default async function UnderstandPage() {
 
       {/* Next actions */}
       <div className="mt-4 flex flex-wrap gap-2 text-xs">
-        <Link href="/query" className="rounded-md border border-[#d6c9a8] px-3 py-2 font-semibold hover:bg-[#f3ead2] dark:border-[#2a4a6b] dark:hover:bg-[#0c2238]">← Market intelligence</Link>
-        <Link href="/assess" className="rounded-md border border-[#d6c9a8] px-3 py-2 font-semibold hover:bg-[#f3ead2] dark:border-[#2a4a6b] dark:hover:bg-[#0c2238]">Assess your needs →</Link>
+        <Link href="/query" className="rounded-md border border-[#d6c9a8] px-3 py-2 font-semibold hover:bg-[#f3ead2] dark:border-[#2a4a6b] dark:hover:bg-[#0d1f17]">← Market intelligence</Link>
+        <Link href="/assess" className="rounded-md border border-[#d6c9a8] px-3 py-2 font-semibold hover:bg-[#f3ead2] dark:border-[#2a4a6b] dark:hover:bg-[#0d1f17]">Assess your needs →</Link>
       </div>
     </PageFrame>
   );
@@ -362,9 +362,9 @@ function Stat({
       ? "text-amber-700 dark:text-amber-300"
       : tone === "bad"
       ? "text-rose-700 dark:text-rose-300"
-      : "text-[#13294b] dark:text-[#eef3f8]";
+      : "text-[#123d2c] dark:text-[#eef3f8]";
   return (
-    <div className="rounded-md border border-[#e6dcc3] bg-white p-3 dark:border-[#1d3a57] dark:bg-[#0c2238]">
+    <div className="rounded-md border border-[#e6dcc3] bg-white p-3 dark:border-[#223a2e] dark:bg-[#0d1f17]">
       <div className="text-[10px] font-semibold uppercase tracking-wider text-[#5b6b7f] dark:text-[#8fa5bb]">{label}</div>
       <div className={`mt-1 font-mono text-2xl font-semibold ${toneClass}`}>{value}</div>
       {note && <div className="text-[10px] text-[#5b6b7f] dark:text-[#8fa5bb]">{note}</div>}

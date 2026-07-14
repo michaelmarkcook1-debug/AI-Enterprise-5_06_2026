@@ -170,7 +170,7 @@ export default async function SettingsPage() {
                 className={`rounded-lg border px-3 py-2 ${
                   cat === "press_release"
                     ? "border-sky-300 bg-sky-50 dark:border-sky-700 dark:bg-sky-950/30"
-                    : "border-[#e3d9c0] bg-[#f9f5ec] dark:border-[#1d3a57] dark:bg-[#0c2238]"
+                    : "border-[#e3d9c0] bg-[#f9f5ec] dark:border-[#223a2e] dark:bg-[#0d1f17]"
                 }`}
               >
                 <div className="flex items-center gap-1.5">
@@ -182,7 +182,7 @@ export default async function SettingsPage() {
                   )}
                 </div>
                 <div className="mt-1 flex items-baseline gap-1.5">
-                  <span className="text-xl font-bold tabular-nums text-[#15263c] dark:text-[#eef3f8]">{info.count}</span>
+                  <span className="text-xl font-bold tabular-nums text-[#123d2c] dark:text-[#eef3f8]">{info.count}</span>
                   <span className="text-[10px] text-[#4c5d75] dark:text-[#7a9bb8]">{info.vendors}v</span>
                 </div>
               </div>
@@ -251,7 +251,7 @@ function ActionCard({
   return (
     <Link
       href={href}
-      className="flex flex-col rounded-xl border border-[#e3d9c0] dark:border-[#1d3a57] bg-white dark:bg-[#0c2238] p-4 hover:border-[#c5b99a] dark:hover:border-[#2d5078] transition-colors"
+      className="flex flex-col rounded-xl border border-[#e3d9c0] dark:border-[#223a2e] bg-white dark:bg-[#0d1f17] p-4 hover:border-[#c5b99a] dark:hover:border-[#2d5078] transition-colors"
     >
       <div className="flex items-start justify-between gap-2">
         <span className="text-2xl leading-none select-none">{icon}</span>
@@ -261,7 +261,7 @@ function ActionCard({
           </span>
         )}
       </div>
-      <div className="mt-2 text-sm font-semibold text-[#15263c] dark:text-[#eef3f8]">{title}</div>
+      <div className="mt-2 text-sm font-semibold text-[#123d2c] dark:text-[#eef3f8]">{title}</div>
       <div className="mt-1 text-xs text-[#4c5d75] dark:text-[#a7bacd] leading-relaxed">{description}</div>
     </Link>
   );
@@ -269,12 +269,12 @@ function ActionCard({
 
 function Stat({ label, value, highlight, warn }: { label: string; value: number; highlight?: boolean; warn?: boolean }) {
   return (
-    <div className="rounded-lg border border-[#e3d9c0] dark:border-[#1d3a57] bg-[#f9f5ec] dark:bg-[#0c2238] px-4 py-3">
+    <div className="rounded-lg border border-[#e3d9c0] dark:border-[#223a2e] bg-[#f9f5ec] dark:bg-[#0d1f17] px-4 py-3">
       <div className="text-xs text-[#4c5d75] dark:text-[#7a9bb8]">{label}</div>
       <div className={`mt-1 text-2xl font-bold tabular-nums ${
         warn && value > 0 ? "text-amber-600 dark:text-amber-400"
         : highlight && value > 0 ? "text-emerald-600 dark:text-emerald-400"
-        : "text-[#15263c] dark:text-[#eef3f8]"
+        : "text-[#123d2c] dark:text-[#eef3f8]"
       }`}>{value}</div>
     </div>
   );
@@ -293,14 +293,14 @@ function CronRow({
     <div className={`flex gap-4 rounded-lg border px-4 py-3 ${
       highlight
         ? "border-sky-200 bg-sky-50 dark:border-sky-800 dark:bg-sky-950/30"
-        : "border-[#e3d9c0] bg-white dark:border-[#1d3a57] dark:bg-[#0c2238]"
+        : "border-[#e3d9c0] bg-white dark:border-[#223a2e] dark:bg-[#0d1f17]"
     }`}>
       <div className="w-36 shrink-0">
-        <div className="text-xs font-semibold tabular-nums text-[#15263c] dark:text-[#eef3f8]">{time}</div>
+        <div className="text-xs font-semibold tabular-nums text-[#123d2c] dark:text-[#eef3f8]">{time}</div>
         <div className="mt-0.5 font-mono text-[10px] text-[#4c5d75] dark:text-[#7a9bb8]">{endpoint}</div>
       </div>
       <div>
-        <div className="text-sm font-medium text-[#15263c] dark:text-[#eef3f8]">
+        <div className="text-sm font-medium text-[#123d2c] dark:text-[#eef3f8]">
           {label}
           {highlight && <span className="ml-2 rounded-full bg-sky-500 px-1.5 py-0.5 text-[9px] font-bold text-white">NEW</span>}
         </div>

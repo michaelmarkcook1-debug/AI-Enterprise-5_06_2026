@@ -358,14 +358,14 @@ export default function AssessForm({ industries, useCases, objectives, vendors, 
   })();
 
   return (
-    <div className="text-[#15263c]">
+    <div className="text-[#123d2c]">
       <main className="mx-auto max-w-3xl">
         <div className="mb-8">
           <div className="flex items-center gap-2 text-sm text-[#4c5d75]">
             {STEPS.map((s, i) => (
               <div key={s} className="flex items-center gap-2">
-                <span className={`inline-block h-2 w-2 rounded-full ${i <= step ? "bg-[#0c2238] dark:bg-white" : "bg-[#d6c9a8] dark:bg-[#1c3d5c]"}`} />
-                <span className={i === step ? "font-medium text-[#15263c] dark:text-white" : ""}>{s}</span>
+                <span className={`inline-block h-2 w-2 rounded-full ${i <= step ? "bg-[#0d1f17] dark:bg-white" : "bg-[#d6c9a8] dark:bg-[#1c3d5c]"}`} />
+                <span className={i === step ? "font-medium text-[#123d2c] dark:text-white" : ""}>{s}</span>
                 {i < STEPS.length - 1 && <span className="text-[#c2d1e0] dark:text-[#64798f]">→</span>}
               </div>
             ))}
@@ -424,7 +424,7 @@ export default function AssessForm({ industries, useCases, objectives, vendors, 
               {/* v1.3 — Value & ROI block. Turns the Opportunity tier from a
                   vendor-fit list into a value-ranked opportunity view. */}
               <div className="rounded-lg border border-[#e3d9c0] bg-[#faf7ef] p-4">
-                <div className="mb-1 text-sm font-semibold text-[#15263c]">Value at stake (optional)</div>
+                <div className="mb-1 text-sm font-semibold text-[#123d2c]">Value at stake (optional)</div>
                 <p className="mb-3 text-xs text-[#4c5d75]">Range-based, so it informs prioritisation without false precision.</p>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <Field label="Annual value the use case is worth">
@@ -790,7 +790,7 @@ export default function AssessForm({ industries, useCases, objectives, vendors, 
 
               {/* v1.3 — Fact-derived negotiation leverage (replaces the slider) */}
               <div className="rounded-lg border border-[#e3d9c0] bg-[#faf7ef] p-4">
-                <div className="mb-1 text-sm font-semibold text-[#15263c]">Negotiation leverage — from facts</div>
+                <div className="mb-1 text-sm font-semibold text-[#123d2c]">Negotiation leverage — from facts</div>
                 <p className="mb-3 text-xs text-[#4c5d75]">Derived from objective facts rather than a self-rating.</p>
                 <div className="grid gap-4 sm:grid-cols-3">
                   <Field label="Incumbent annual spend">
@@ -842,13 +842,13 @@ export default function AssessForm({ industries, useCases, objectives, vendors, 
               <button
                 disabled={!canAdvance}
                 onClick={() => setStep((s) => s + 1)}
-                className="rounded-full bg-[#0c2238] px-6 py-2.5 text-sm font-medium text-white disabled:opacity-40"
+                className="rounded-full bg-[#0d1f17] px-6 py-2.5 text-sm font-medium text-white disabled:opacity-40"
               >Continue</button>
             ) : (
               <button
                 disabled={submitting}
                 onClick={submit}
-                className="rounded-full bg-[#0c2238] px-6 py-2.5 text-sm font-medium text-white disabled:opacity-40"
+                className="rounded-full bg-[#0d1f17] px-6 py-2.5 text-sm font-medium text-white disabled:opacity-40"
               >{submitting ? "Scoring…" : "Run assessment"}</button>
             )}
           </div>
@@ -870,12 +870,12 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 function Select({ value, onChange, options }: { value: string; onChange: (v: string) => void; options: { value: string; label: string }[] }) {
   // Form card is always bg-white (regardless of theme), so the select must
   // stay light too — dark: variants here would clash with the white surround
-  // and inherit the parent's text-[#15263c], producing invisible dark-on-dark.
+  // and inherit the parent's text-[#123d2c], producing invisible dark-on-dark.
   return (
     <select
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="w-full rounded-lg border border-[#d6c9a8] bg-white px-3 py-2 text-sm text-[#15263c]"
+      className="w-full rounded-lg border border-[#d6c9a8] bg-white px-3 py-2 text-sm text-[#123d2c]"
     >
       {options.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
     </select>
@@ -893,7 +893,7 @@ function ChipGroup({ options, selected, onToggle }: { options: Option[]; selecte
             type="button"
             onClick={() => onToggle(o.id)}
             className={`rounded-full border px-3 py-1.5 text-xs ${on
-              ? "border-[#0a1f38] bg-[#0c2238] text-white"
+              ? "border-[#0b2519] bg-[#0d1f17] text-white"
               : "border-[#d6c9a8] text-[#2e3f57] hover:bg-[#ece3cb]"}`}
           >{o.label ?? o.name}</button>
         );
@@ -1034,7 +1034,7 @@ function WorkflowPicker({
         placeholder={`Search ${workflows.length} workflows by name, category, or description…`}
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        className="w-full rounded-md border border-[#e3d9c0] bg-white px-3 py-2 text-sm placeholder:text-[#6b7d93] focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 dark:border-[#2a4a6b] dark:bg-[#0c2238] dark:text-[#eef3f8]"
+        className="w-full rounded-md border border-[#e3d9c0] bg-white px-3 py-2 text-sm placeholder:text-[#6b7d93] focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 dark:border-[#2a4a6b] dark:bg-[#0d1f17] dark:text-[#eef3f8]"
         aria-label="Filter workflows"
       />
 
@@ -1052,7 +1052,7 @@ function WorkflowPicker({
               <details
                 key={cat}
                 open={open}
-                className="rounded-lg border border-[#e3d9c0] bg-white dark:border-[#1d3a57] dark:bg-[#0c2238]"
+                className="rounded-lg border border-[#e3d9c0] bg-white dark:border-[#223a2e] dark:bg-[#0d1f17]"
               >
                 <summary className="cursor-pointer select-none px-3 py-2 text-sm font-semibold text-[#20314a] marker:text-[#6b7d93] dark:text-[#eef3f8]">
                   <span className="inline-flex items-center gap-2">
@@ -1067,7 +1067,7 @@ function WorkflowPicker({
                     )}
                   </span>
                 </summary>
-                <div className="border-t border-[#ece4d0] px-3 py-2 dark:border-[#1d3a57]">
+                <div className="border-t border-[#ece4d0] px-3 py-2 dark:border-[#223a2e]">
                   <div className="flex flex-wrap gap-1.5">
                     {rows.map((w) => {
                       const isSel = selectedSet.has(w.id);
@@ -1080,7 +1080,7 @@ function WorkflowPicker({
                           title={w.description}
                           className={`rounded-full px-3 py-1 text-xs transition-colors ${
                             isSel
-                              ? "bg-[#0c2238] text-white dark:bg-white dark:text-[#13294b]"
+                              ? "bg-[#0d1f17] text-white dark:bg-white dark:text-[#123d2c]"
                               : "bg-[#ece3cb] text-[#2e3f57] hover:bg-[#e3d9c0] dark:bg-[#143049] dark:text-[#c2d1e0] dark:hover:bg-[#1c3d5c]"
                           }`}
                         >
@@ -1134,7 +1134,7 @@ function InfraPicker({
   const chip = (on: boolean) =>
     `rounded-full px-3 py-1 text-xs transition-colors ${
       on
-        ? "bg-[#0c2238] text-white dark:bg-white dark:text-[#13294b]"
+        ? "bg-[#0d1f17] text-white dark:bg-white dark:text-[#123d2c]"
         : "bg-[#ece3cb] text-[#2e3f57] hover:bg-[#e3d9c0] dark:bg-[#143049] dark:text-[#c2d1e0] dark:hover:bg-[#1c3d5c]"
     }`;
 
@@ -1147,7 +1147,7 @@ function InfraPicker({
       {layers.map((layer, i) => {
         const selCount = layer.items.filter((it) => ecoSet.has(it.id)).length;
         return (
-          <details key={layer.id} open={i < 2 || selCount > 0} className="rounded-lg border border-[#e3d9c0] bg-white dark:border-[#1d3a57] dark:bg-[#0c2238]">
+          <details key={layer.id} open={i < 2 || selCount > 0} className="rounded-lg border border-[#e3d9c0] bg-white dark:border-[#223a2e] dark:bg-[#0d1f17]">
             <summary className="cursor-pointer select-none px-3 py-2 text-sm font-semibold text-[#20314a] marker:text-[#6b7d93] dark:text-[#eef3f8]">
               <span className="inline-flex flex-wrap items-center gap-2">
                 <span>{layer.label}</span>
@@ -1159,7 +1159,7 @@ function InfraPicker({
                 <span className="text-[11px] font-normal text-[#6b7d93]">{layer.hint}</span>
               </span>
             </summary>
-            <div className="flex flex-wrap gap-1.5 border-t border-[#ece4d0] px-3 py-2 dark:border-[#1d3a57]">
+            <div className="flex flex-wrap gap-1.5 border-t border-[#ece4d0] px-3 py-2 dark:border-[#223a2e]">
               {layer.items.map((it) => (
                 <button key={it.id} type="button" onClick={() => onToggleItem(it.id)} aria-pressed={ecoSet.has(it.id)} className={chip(ecoSet.has(it.id))}>
                   {it.label}{it.open && <span className="ml-1 opacity-60">· open</span>}
@@ -1172,7 +1172,7 @@ function InfraPicker({
 
       {systems.length > 0 && (
         <details open className="rounded-lg border border-sky-300 bg-sky-50 dark:border-sky-800 dark:bg-sky-950/30">
-          <summary className="cursor-pointer select-none px-3 py-2 text-sm font-semibold text-[#15263c] marker:text-sky-500 dark:text-[#eef3f8]">
+          <summary className="cursor-pointer select-none px-3 py-2 text-sm font-semibold text-[#123d2c] marker:text-sky-500 dark:text-[#eef3f8]">
             <span className="inline-flex flex-wrap items-center gap-2">
               <span>Systems of record — {industryName}</span>
               <span className="rounded-full bg-sky-500 px-1.5 py-0.5 text-[9px] font-bold uppercase leading-none text-white">industry</span>

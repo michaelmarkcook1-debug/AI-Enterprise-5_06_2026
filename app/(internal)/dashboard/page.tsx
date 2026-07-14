@@ -37,7 +37,7 @@ export default async function DashboardPage() {
             surface and was crowding the executive overview here. */}
 
         <div className="grid gap-6 lg:grid-cols-[1.35fr_0.65fr]">
-          <section className="border-b border-[#e6dcc3] pb-6 dark:border-[#1d3a57]">
+          <section className="border-b border-[#e6dcc3] pb-6 dark:border-[#223a2e]">
             <div className="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#5e6b7e] dark:text-[#8fa5bb]">
               <span>Executive market dashboard</span>
               <SeedDataBadge provenance={provenance.source} reason={provenance.reason} />
@@ -52,7 +52,7 @@ export default async function DashboardPage() {
               <OwnershipLegend />
             </div>
           </section>
-          <section className="grid grid-cols-2 gap-4 self-end border-b border-[#e6dcc3] pb-6 dark:border-[#1d3a57]">
+          <section className="grid grid-cols-2 gap-4 self-end border-b border-[#e6dcc3] pb-6 dark:border-[#223a2e]">
             <Metric label="Tracked vendors" value="20" note="MVP universe" />
             <Metric label="Major signals" value={dashboard.majorNews.length} note="Seed news" />
             <Metric label="Risk radar" value={dashboard.riskAlerts.length} note="Estimated status" />
@@ -62,12 +62,12 @@ export default async function DashboardPage() {
 
         <div className="mt-6 grid gap-5 lg:grid-cols-[1fr_0.9fr]">
           <Panel title="Top enterprise AI platform vendors" action={<Link className="text-xs text-[#b08d2f] hover:underline dark:text-emerald-300" href="/vendors">View all</Link>}>
-            <div className="divide-y divide-[#efe9d9] dark:divide-[#1d3a57]">
+            <div className="divide-y divide-[#efe9d9] dark:divide-[#223a2e]">
               {dashboard.topVendors.slice(0, 7).map((vendor, index) => (
                 <Link key={vendor.id} href={`/vendors/${vendor.slug}`} className="grid grid-cols-[32px_1fr_120px] items-center gap-3 py-3">
                   <div className="font-mono text-sm text-[#5b6b7f]">{index + 1}</div>
                   <div>
-                    <div className="font-medium text-[#13294b] dark:text-[#eef3f8]">
+                    <div className="font-medium text-[#123d2c] dark:text-[#eef3f8]">
                       <VendorNameWithOwnership name={vendor.name} ownershipType={vendor.ownershipType} />
                     </div>
                     <div className="text-xs text-[#5d6b80] dark:text-[#8fa5bb]">{vendor.category} - {vendor.marketPosition}</div>
@@ -247,11 +247,11 @@ export default async function DashboardPage() {
 
         <div className="mt-5">
           <Panel title="Recent major news" action={<SeedDataBadge label={provenance.source === "live" ? "Live news" : "Seed news"} provenance={provenance.source} reason={provenance.reason} />}>
-            <div className="divide-y divide-[#efe9d9] dark:divide-[#1d3a57]">
+            <div className="divide-y divide-[#efe9d9] dark:divide-[#223a2e]">
               {dashboard.majorNews.map((item) => (
                 <Link key={item.id} href="/news" className="block py-3">
                   <div className="flex items-center justify-between gap-3">
-                    <div className="text-sm font-medium text-[#13294b] dark:text-[#eef3f8]">{item.title}</div>
+                    <div className="text-sm font-medium text-[#123d2c] dark:text-[#eef3f8]">{item.title}</div>
                     <span className="font-mono text-xs text-[#5b6b7f] dark:text-[#8fa5bb]">{item.impactScore}</span>
                   </div>
                   <div className="mt-1 text-xs leading-5 text-[#5d6b80] dark:text-[#a7bacd]">{item.whyItMatters}</div>
@@ -268,7 +268,7 @@ export default async function DashboardPage() {
           </Panel>
         </div>
 
-        <div className="mt-5 rounded-lg border border-[#e6dcc3] bg-[#f3ead2] p-4 dark:border-[#1d3a57] dark:bg-[#071827]">
+        <div className="mt-5 rounded-lg border border-[#e6dcc3] bg-[#f3ead2] p-4 dark:border-[#223a2e] dark:bg-[#081410]">
           <EstimatedNote />
         </div>
       </main>

@@ -11,7 +11,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Your Monitor", robots: { index: false, follow: false } };
 
 const CARD = "rounded-xl border border-black/10 dark:border-white/10 bg-white/60 dark:bg-white/5 p-5";
-const MUTED = "text-[#15263c]/65 dark:text-[#eef3f8]/60";
+const MUTED = "text-[#123d2c]/65 dark:text-[#eef3f8]/60";
 
 const TIER_CLS: Record<string, string> = {
   high: "border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
