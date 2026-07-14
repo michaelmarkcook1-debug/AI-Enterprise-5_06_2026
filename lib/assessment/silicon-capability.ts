@@ -50,7 +50,6 @@ const CLOUD_SHARE_2026 =
 // Oracle AI-cloud position — RPO backlog + $300B OpenAI/Stargate capacity.
 const ORACLE_STARGATE =
   "https://www.datacenterfrontier.com/machine-learning/article/55316610/openai-and-oracles-300b-stargate-deal-building-ais-national-scale-infrastructure";
-const ORACLE_BACKLOG = "https://erp.today/oracle-loads-up-on-ai-infrastructure-as-oci-backlog-data-center-commitments-surge/";
 // Sovereign AI clouds — G42 (Microsoft-backed UAE buildout) + HUMAIN (Saudi PIF).
 const G42_MSFT_UAE =
   "https://news.microsoft.com/source/emea/2025/11/microsoft-and-g42-accelerate-uaes-digital-future-with-major-data-centre-expansion/";
@@ -128,7 +127,7 @@ const BANDS: Record<string, CapabilityBand> = {
     rationale:
       "The #1 cloud-infrastructure provider (~28–30% of a market that grew 29% YoY in Q4 2025), with in-house Trainium/Inferentia accelerators and Bedrock — the broadest, most durable AI-capacity base.",
     citations: [
-      { url: CLOUD_SHARE_2026, grade: "E4", asOf: "2026-02" },
+      { url: CLOUD_SHARE_2026, grade: "E3", asOf: "2026-02" },
       { url: OMDIA_CLOUD_Q425, grade: "E4", asOf: "2026-03" },
     ],
   },
@@ -139,7 +138,7 @@ const BANDS: Record<string, CapabilityBand> = {
     rationale:
       "#2 in cloud infrastructure (~21–24%) but a co-leader in AI capacity specifically — the OpenAI partnership plus one of the largest AI-datacenter capex programs of any hyperscaler.",
     citations: [
-      { url: CLOUD_SHARE_2026, grade: "E4", asOf: "2026-02" },
+      { url: CLOUD_SHARE_2026, grade: "E3", asOf: "2026-02" },
       { url: OMDIA_CLOUD_Q425, grade: "E4", asOf: "2026-03" },
     ],
   },
@@ -150,7 +149,7 @@ const BANDS: Record<string, CapabilityBand> = {
     rationale:
       "#3 cloud-infrastructure provider (~13–14%, gaining share) with a decade-deep custom-silicon program (TPU) and Gemini — a genuinely differentiated, self-sufficient AI-capacity stack.",
     citations: [
-      { url: CLOUD_SHARE_2026, grade: "E4", asOf: "2026-02" },
+      { url: CLOUD_SHARE_2026, grade: "E3", asOf: "2026-02" },
       { url: OMDIA_CLOUD_Q425, grade: "E4", asOf: "2026-03" },
     ],
   },
@@ -159,19 +158,16 @@ const BANDS: Record<string, CapabilityBand> = {
     confidence: 72,
     bestGrade: "E4",
     rationale:
-      "A modest general-cloud share but an outsized AI-capacity position: OCI's remaining performance obligations surged past $450B on the ~$300B/4.5GW OpenAI–Stargate contract, backed by ~$50B of FY26 capex. Backlog-heavy (execution risk), so weighted below the top hyperscalers.",
-    citations: [
-      { url: ORACLE_STARGATE, grade: "E4", asOf: "2025-09" },
-      { url: ORACLE_BACKLOG, grade: "E4", asOf: "2025-12" },
-    ],
+      "A modest general-cloud share but an outsized AI-capacity position: OCI's remaining performance obligations surged into the hundreds of billions of dollars on the ~$300B/4.5GW OpenAI–Stargate contract, backed by ~$50B of FY26 capex. Backlog-heavy (execution risk), so weighted below the top hyperscalers.",
+    citations: [{ url: ORACLE_STARGATE, grade: "E4", asOf: "2025-09" }],
   },
   alibaba: {
     score: 3.4,
     confidence: 68,
-    bestGrade: "E4",
+    bestGrade: "E3", // sole source is the share aggregator (directional), not an analyst house
     rationale:
       "The dominant China/APAC cloud (~4% globally, #1 in-region) with its own Qwen models and a large multi-year AI-infrastructure capex commitment — the leading non-US hyperscale AI-capacity provider.",
-    citations: [{ url: CLOUD_SHARE_2026, grade: "E4", asOf: "2026-02" }],
+    citations: [{ url: CLOUD_SHARE_2026, grade: "E3", asOf: "2026-02" }],
   },
   coreweave: {
     score: 3.4,
@@ -211,18 +207,18 @@ const BANDS: Record<string, CapabilityBand> = {
   together: {
     score: 3.3,
     confidence: 66,
-    bestGrade: "E4",
+    bestGrade: "E3", // funding-news aggregator (directional), not an analyst market report
     rationale:
       "A leading open-model inference/training cloud — ~$8.3B valuation on an $800M 2026 round, with annual bookings past $1.15B as enterprises shift to open weights. The strongest of the pure-play inference specialists after CoreWeave.",
-    citations: [{ url: TOGETHER_800M, grade: "E4", asOf: "2026-07" }],
+    citations: [{ url: TOGETHER_800M, grade: "E3", asOf: "2026-07" }],
   },
   fireworks: {
     score: 3.0,
     confidence: 62,
-    bestGrade: "E4",
+    bestGrade: "E3", // single private-markets research blog (directional), not an analyst market report
     rationale:
       "Fast-growing inference platform — ~$800M annualized revenue (up from ~$305M end-2025) on strong developer adoption of open models; ~$4B valuation with a much larger round reported in talks.",
-    citations: [{ url: FIREWORKS_SACRA, grade: "E4", asOf: "2026-05" }],
+    citations: [{ url: FIREWORKS_SACRA, grade: "E3", asOf: "2026-05" }],
   },
   lambda: {
     score: 3.0,

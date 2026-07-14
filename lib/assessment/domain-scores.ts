@@ -49,11 +49,12 @@ export interface VendorScorecard {
    *  faked). Merged into the ranked domain set ONLY by coding categories when
    *  DEV_SENTIMENT_IN_RANKING is on — same pattern as modelQuality. */
   devSentiment: DomainScore | null;
-  /** Category-scoped AI-silicon capability signal, synthesized from the cited
-   *  MLPerf + accelerator-share bands (lib/assessment/silicon-capability). null
-   *  for non-silicon vendors (or the fab). Merged into the ranked domain set as
-   *  `market_position` ONLY by categories that weight it (ai_silicon) — same
-   *  pattern as modelQuality. */
+  /** Category-scoped hardware/infra capability signal, synthesized from the cited
+   *  capacity bands (lib/assessment/silicon-capability): silicon = MLPerf +
+   *  accelerator share; cloud/neocloud = infra share + AI capex + backlog + fleet.
+   *  null for vendors with no cited band (or the fab). Merged into the ranked
+   *  domain set as `market_position` ONLY by categories that weight it (ai_silicon,
+   *  ai_cloud_compute, neocloud_inference) — same pattern as modelQuality. */
   marketPosition: DomainScore | null;
 }
 
