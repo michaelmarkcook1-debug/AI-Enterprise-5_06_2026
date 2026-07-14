@@ -10,7 +10,6 @@ type Phase = "idle" | "confirming" | "running" | "done" | "error";
 
 export default function BackfillSnapshotsButton() {
   const [phase, setPhase] = useState<Phase>("idle");
-  const [token, setToken] = useState("");
   const [result, setResult] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -19,10 +18,7 @@ export default function BackfillSnapshotsButton() {
     setError(null);
     setResult(null);
     try {
-      const res = await fetch("/api/admin/backfill-snapshots", {
-        method: "POST",
-        headers: token ? { "x-admin-token": token } : {},
-      });
+      const res = await fetch("/api/admin/backfill-snapshots", { method: "POST" });
       const body = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(body.error ?? `HTTP ${res.status}`);
       const { todayCaptured, backfill, totalSnapshots } = body as {
@@ -68,15 +64,6 @@ export default function BackfillSnapshotsButton() {
           This will capture today&apos;s snapshot for every vendor, then reconstruct historical data for all dates without existing records.
           It is non-destructive — existing rows are never overwritten.
         </p>
-        {process.env.NODE_ENV !== "development" && (
-          <input
-            type="text"
-            placeholder="Admin token (x-admin-token)"
-            value={token}
-            onChange={(e) => setToken(e.target.value)}
-            className="mt-3 w-full rounded border border-amber-300 bg-white px-3 py-1.5 text-xs font-mono dark:border-amber-700 dark:bg-[#0d1f17]"
-          />
-        )}
         <div className="mt-3 flex gap-2">
           <button
             onClick={run}
