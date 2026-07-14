@@ -26,7 +26,7 @@ export default function AIEnterpriseShell() {
       {/* Hero background image — Möbius-band globe/chart artwork */}
       <div className={styles.bgWash} aria-hidden>
         <img
-          src="/brand/ai-enterprise-light-hero.png"
+          src="/brand/ai-enterprise-light-hero.webp"
           alt=""
           aria-hidden
           className={styles.heroImage}
