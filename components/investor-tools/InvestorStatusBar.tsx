@@ -21,17 +21,17 @@ export function InvestorStatusBar() {
   const savedCount = state.savedPortfolios.length;
 
   return (
-    <div className="border-b border-[#e6dcc3] bg-white/60 px-5 py-1.5 text-xs text-[#56657b] dark:border-[#1d3a57] dark:bg-[#071827]/60 dark:text-[#a7bacd]">
+    <div className="border-b border-[#e6dcc3] bg-white/60 px-5 py-1.5 text-xs text-[#56657b] dark:border-[#223a2e] dark:bg-[#081410]/60 dark:text-[#a7bacd]">
       <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-4 gap-y-1">
         <span className="font-semibold uppercase tracking-wide">Investor session</span>
 
-        <Link href="/investor-tools/watchlist" className="hover:text-[#13294b] dark:hover:text-[#eef3f8]">
+        <Link href="/investor-tools/watchlist" className="hover:text-[#123d2c] dark:hover:text-[#eef3f8]">
           Watchlist <span className="font-mono">{watchlistCount}</span>
         </Link>
 
         <span className="opacity-50">·</span>
 
-        <Link href="/investor-tools/simulator" className="hover:text-[#13294b] dark:hover:text-[#eef3f8]">
+        <Link href="/investor-tools/simulator" className="hover:text-[#123d2c] dark:hover:text-[#eef3f8]">
           Simulator {hasSimulatorConfig ? <span className="text-emerald-700 dark:text-emerald-400">configured</span> : <span className="opacity-70">default</span>}
         </Link>
 
@@ -44,7 +44,7 @@ export function InvestorStatusBar() {
         {focusName && focusId && (
           <>
             <span className="opacity-50">·</span>
-            <Link href={`/investor-tools/provider/${focusId}`} className="hover:text-[#13294b] dark:hover:text-[#eef3f8]">
+            <Link href={`/investor-tools/provider/${focusId}`} className="hover:text-[#123d2c] dark:hover:text-[#eef3f8]">
               Last viewed: <strong>{focusName}</strong>
             </Link>
           </>

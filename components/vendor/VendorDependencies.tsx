@@ -49,14 +49,14 @@ export default function VendorDependencies({ vendorSlug }: { vendorSlug: string 
           </h3>
           <ul className="space-y-2">
             {touching.map((e: DependencyEdge, i) => (
-              <li key={i} className="rounded-lg border border-[#e3d9c0] bg-white/60 px-3 py-2 dark:border-[#1d3a57] dark:bg-[#0c2238]/40">
+              <li key={i} className="rounded-lg border border-[#e3d9c0] bg-white/60 px-3 py-2 dark:border-[#223a2e] dark:bg-[#0d1f17]/40">
                 <div className="mb-1 flex flex-wrap items-center gap-2 text-xs">
                   <span className="rounded bg-black/5 px-1.5 py-0.5 font-semibold uppercase tracking-wide text-[#4c5d75] dark:bg-white/10 dark:text-[#a7bacd]">
                     {KIND_LABEL[e.kind]}
                   </span>
                   {tierBadge(e.confidence)}
                 </div>
-                <p className="text-sm text-[#13294b] dark:text-[#eef3f8]">{e.rationale}</p>
+                <p className="text-sm text-[#123d2c] dark:text-[#eef3f8]">{e.rationale}</p>
                 {e.sourceUrls[0] && (
                   <a href={e.sourceUrls[0]} target="_blank" rel="noopener noreferrer" className="mt-1 inline-block text-xs text-sky-700 hover:underline dark:text-sky-400">
                     source
@@ -76,7 +76,7 @@ export default function VendorDependencies({ vendorSlug }: { vendorSlug: string 
             {encroachments.map((e, i) => (
               <li key={i} className="rounded-lg border border-amber-300/50 bg-amber-50/50 px-3 py-2 dark:border-amber-800/40 dark:bg-amber-950/10">
                 <div className="mb-1">{tierBadge(e.confidence)}</div>
-                <p className="text-sm text-[#13294b] dark:text-[#eef3f8]">{e.rationale}</p>
+                <p className="text-sm text-[#123d2c] dark:text-[#eef3f8]">{e.rationale}</p>
                 <p className={`mt-1 text-xs ${MUTED}`}>Derived — not a stated fact.</p>
               </li>
             ))}

@@ -6,7 +6,7 @@ import type { DisclosedAdopter } from "@/lib/peer/adopters";
 // label, in the same class as Implementation partners: it renders regardless
 // of the score gating and has no path into scores.
 
-const MUTED = "text-[#15263c]/65 dark:text-[#eef3f8]/60";
+const MUTED = "text-[#123d2c]/65 dark:text-[#eef3f8]/60";
 
 /** Industry-usage rollup — a straight group-by-count over the SAME cited
  *  adopter list rendered below, no new data or fetch. Deliberately thin: the
@@ -62,7 +62,7 @@ export default function DisclosedAdoptersPanel({
                     href={c.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="underline underline-offset-2 hover:text-[#15263c] dark:hover:text-[#eef3f8]"
+                    className="underline underline-offset-2 hover:text-[#123d2c] dark:hover:text-[#eef3f8]"
                   >
                     {c.title}
                   </a>{" "}

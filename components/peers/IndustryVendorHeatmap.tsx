@@ -10,7 +10,7 @@
 import Link from "next/link";
 import type { IndustryUsageRow } from "@/lib/peer/aggregate-usage";
 
-const MUTED = "text-[#15263c]/65 dark:text-[#eef3f8]/60";
+const MUTED = "text-[#123d2c]/65 dark:text-[#eef3f8]/60";
 
 // # of disclosed adopters → a four-step gold ramp. Bucketed (not continuous) so
 // the legend is legible and dark-mode variants can be paired class-for-class.
@@ -48,12 +48,12 @@ export default function IndustryVendorHeatmap({
         <table className="border-collapse text-xs">
           <thead>
             <tr>
-              <th className="sticky left-0 z-10 bg-white/85 px-2 py-1 dark:bg-[#0a1f38]/85" aria-label="Industry" />
+              <th className="sticky left-0 z-10 bg-white/85 px-2 py-1 dark:bg-[#0b2519]/85" aria-label="Industry" />
               {columns.map((c) => (
                 <th key={c.vendorId} className="px-1 py-1 align-bottom">
                   <Link
                     href={vendorHref(c.vendorId)}
-                    className="block w-[54px] truncate text-center font-medium text-[#13294b] hover:underline dark:text-[#eef3f8]"
+                    className="block w-[54px] truncate text-center font-medium text-[#123d2c] hover:underline dark:text-[#eef3f8]"
                     title={c.name}
                   >
                     {c.name}
@@ -67,7 +67,7 @@ export default function IndustryVendorHeatmap({
               <tr key={r.verticalId}>
                 <th
                   scope="row"
-                  className="sticky left-0 z-10 whitespace-nowrap bg-white/85 px-2 py-1 text-left font-medium text-[#13294b] dark:bg-[#0a1f38]/85 dark:text-[#eef3f8]"
+                  className="sticky left-0 z-10 whitespace-nowrap bg-white/85 px-2 py-1 text-left font-medium text-[#123d2c] dark:bg-[#0b2519]/85 dark:text-[#eef3f8]"
                 >
                   {r.label}
                 </th>
@@ -85,9 +85,9 @@ export default function IndustryVendorHeatmap({
                       }
                     >
                       {n > 0 ? (
-                        <span className="text-[#13294b] dark:text-[#f6f0e7]">{n}</span>
+                        <span className="text-[#123d2c] dark:text-[#f6f0e7]">{n}</span>
                       ) : (
-                        <span className="text-[#15263c]/25 dark:text-[#eef3f8]/20">·</span>
+                        <span className="text-[#123d2c]/25 dark:text-[#eef3f8]/20">·</span>
                       )}
                     </td>
                   );

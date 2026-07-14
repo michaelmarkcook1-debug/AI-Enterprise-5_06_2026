@@ -95,13 +95,13 @@ export default function TokenPricingTable({
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder={`Search ${rows.length} models — vendor, model, basis, notes…`}
-          className="min-w-[220px] flex-1 rounded-md border border-[#e3d9c0] bg-white px-3 py-1.5 text-sm placeholder:text-[#6b7d93] focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 dark:border-[#2a4a6b] dark:bg-[#0c2238] dark:text-[#eef3f8]"
+          className="min-w-[220px] flex-1 rounded-md border border-[#e3d9c0] bg-white px-3 py-1.5 text-sm placeholder:text-[#6b7d93] focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 dark:border-[#2a4a6b] dark:bg-[#0d1f17] dark:text-[#eef3f8]"
           aria-label="Search token pricing"
         />
         {query && (
           <button
             onClick={() => setQuery("")}
-            className="rounded-md px-2 py-1 text-xs text-[#4c5d75] hover:text-[#15263c] dark:hover:text-[#eef3f8]"
+            className="rounded-md px-2 py-1 text-xs text-[#4c5d75] hover:text-[#123d2c] dark:hover:text-[#eef3f8]"
           >
             Clear
           </button>
@@ -126,9 +126,9 @@ export default function TokenPricingTable({
       )}
 
       {/* Table */}
-      <div className="overflow-x-auto rounded-lg border border-[#e3d9c0] dark:border-[#1d3a57]">
+      <div className="overflow-x-auto rounded-lg border border-[#e3d9c0] dark:border-[#223a2e]">
         <table className="min-w-full text-sm">
-          <thead className="bg-[#f6f1e3] text-left text-xs uppercase tracking-wide text-[#4c5d75] dark:bg-[#0c2238]/60">
+          <thead className="bg-[#f6f1e3] text-left text-xs uppercase tracking-wide text-[#4c5d75] dark:bg-[#0d1f17]/60">
             <tr>
               <Th onClick={() => toggleSort("vendor")} active={sortKey === "vendor"} dir={sortDir}>Vendor</Th>
               <Th onClick={() => toggleSort("model")} active={sortKey === "model"} dir={sortDir}>Model / SKU</Th>
@@ -139,7 +139,7 @@ export default function TokenPricingTable({
               <th className="px-3 py-2 font-semibold">Notes</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-[#ece4d0] dark:divide-[#1d3a57]">
+          <tbody className="divide-y divide-[#ece4d0] dark:divide-[#223a2e]">
             {sorted.map((row) => {
               const isCheapest = row.inputPerM === cheapestInput;
               return (
@@ -218,7 +218,7 @@ function Th({
     <th className={`px-3 py-2 font-semibold ${numeric ? "text-right" : ""}`}>
       <button
         onClick={onClick}
-        className={`inline-flex items-center gap-1 hover:text-[#15263c] dark:hover:text-[#eef3f8] ${active ? "text-[#15263c] dark:text-[#eef3f8]" : ""}`}
+        className={`inline-flex items-center gap-1 hover:text-[#123d2c] dark:hover:text-[#eef3f8] ${active ? "text-[#123d2c] dark:text-[#eef3f8]" : ""}`}
       >
         {children}
         <span aria-hidden className="text-[8px]">
@@ -242,7 +242,7 @@ function FilterChip({
       aria-pressed={active}
       className={`rounded-full px-2.5 py-1 text-xs font-medium transition-colors ${
         active
-          ? "bg-[#0c2238] text-white dark:bg-white dark:text-[#13294b]"
+          ? "bg-[#0d1f17] text-white dark:bg-white dark:text-[#123d2c]"
           : "bg-[#ece3cb] text-[#2e3f57] hover:bg-[#e3d9c0] dark:bg-[#143049] dark:text-[#c2d1e0] dark:hover:bg-[#1c3d5c]"
       }`}
     >

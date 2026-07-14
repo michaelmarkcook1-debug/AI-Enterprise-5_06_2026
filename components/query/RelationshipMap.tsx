@@ -446,7 +446,7 @@ export default function RelationshipMap() {
   return (
     <section className="mb-8">
       <div className="mb-5">
-        <h2 className="text-xl font-semibold text-[#13294b] dark:text-[#eef3f8]">
+        <h2 className="text-xl font-semibold text-[#123d2c] dark:text-[#eef3f8]">
           Who Depends on Whom
         </h2>
         <p className="mt-1 text-sm text-[#56657b] dark:text-[#a7bacd]">
@@ -468,7 +468,7 @@ export default function RelationshipMap() {
               className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-all ${
                 isActive
                   ? `${meta.color} border-current`
-                  : "border-[#e6dcc3] bg-white text-[#9da596] dark:border-[#2a4a6b] dark:bg-[#0c2238] dark:text-[#8fa5bb]"
+                  : "border-[#e6dcc3] bg-white text-[#9da596] dark:border-[#2a4a6b] dark:bg-[#0d1f17] dark:text-[#8fa5bb]"
               }`}
             >
               <span aria-hidden>{meta.icon}</span>
@@ -493,8 +493,8 @@ export default function RelationshipMap() {
               className={`rounded-xl border transition-all ${
                 hasCritical
                   ? "border-rose-200 dark:border-rose-900/60"
-                  : "border-[#e6dcc3] dark:border-[#1d3a57]"
-              } bg-white dark:bg-[#0c2238]`}
+                  : "border-[#e6dcc3] dark:border-[#223a2e]"
+              } bg-white dark:bg-[#0d1f17]`}
             >
               {/* Header — always visible */}
               <button
@@ -503,7 +503,7 @@ export default function RelationshipMap() {
                 aria-expanded={isExpanded}
               >
                 <div className="flex items-center gap-3 min-w-0">
-                  <span className="text-sm font-semibold text-[#13294b] dark:text-[#eef3f8]">
+                  <span className="text-sm font-semibold text-[#123d2c] dark:text-[#eef3f8]">
                     {vendor}
                   </span>
                   {hasCritical && (
@@ -536,7 +536,7 @@ export default function RelationshipMap() {
 
               {/* Expanded — full dependency detail */}
               {isExpanded && (
-                <div className="border-t border-[#f3ead2] px-5 py-4 dark:border-[#1d3a57]">
+                <div className="border-t border-[#f3ead2] px-5 py-4 dark:border-[#223a2e]">
                   <div className="space-y-3">
                     {rels.map((r, idx) => {
                       const meta = RELATION_META[r.type];
@@ -571,9 +571,9 @@ export default function RelationshipMap() {
 
                           {/* Arrow connector */}
                           <div className="flex items-center gap-2 mb-2">
-                            <span className="text-sm font-semibold text-[#13294b] dark:text-[#eef3f8]">{r.from}</span>
+                            <span className="text-sm font-semibold text-[#123d2c] dark:text-[#eef3f8]">{r.from}</span>
                             <span className="text-xs text-[#9da596]">depends on</span>
-                            <span className="text-sm font-semibold text-[#13294b] dark:text-[#eef3f8]">{r.to}</span>
+                            <span className="text-sm font-semibold text-[#123d2c] dark:text-[#eef3f8]">{r.to}</span>
                           </div>
 
                           {/* What it does */}

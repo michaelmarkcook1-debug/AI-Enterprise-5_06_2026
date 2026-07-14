@@ -26,7 +26,7 @@ export default function DataSourceRail({ tab, title = "Data sources" }: { tab: T
   const total = groups.reduce((n, g) => n + g.sources.length, 0);
 
   return (
-    <details open className="group rounded-lg border border-[#e3d9c0] bg-[#fffdf7] dark:border-[#1d3a57] dark:bg-[#0c2238]">
+    <details open className="group rounded-lg border border-[#e3d9c0] bg-[#fffdf7] dark:border-[#223a2e] dark:bg-[#0d1f17]">
       <summary className="flex cursor-pointer select-none items-center justify-between gap-2 px-3 py-2.5 marker:content-none">
         <span className="text-xs font-bold uppercase tracking-[0.16em] text-[#3f5068] dark:text-[#9fb3c8]">{title}</span>
         <span className="flex items-center gap-1.5">

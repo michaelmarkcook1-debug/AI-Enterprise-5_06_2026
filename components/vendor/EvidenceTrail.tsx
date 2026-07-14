@@ -25,9 +25,9 @@ export default function EvidenceTrail({ scorecard }: { scorecard: VendorScorecar
         const d = byDomain.get(domain);
         const scored = d && d.state === "scored";
         return (
-          <div key={domain} className="border-t border-[#ece4d0] py-3 dark:border-[#1d3a57]">
+          <div key={domain} className="border-t border-[#ece4d0] py-3 dark:border-[#223a2e]">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <span className="text-sm font-medium text-[#13294b] dark:text-[#eef3f8]">{DOMAIN_LABEL[domain]}</span>
+              <span className="text-sm font-medium text-[#123d2c] dark:text-[#eef3f8]">{DOMAIN_LABEL[domain]}</span>
               {scored ? (
                 <span className="flex items-center gap-2 text-xs">
                   <GradeChip grade={d!.bestGrade} />
@@ -39,7 +39,7 @@ export default function EvidenceTrail({ scorecard }: { scorecard: VendorScorecar
                   )}
                 </span>
               ) : (
-                <span className="rounded-full border border-[#d6c9a8] bg-[#f6f1e3] px-2 py-0.5 text-xs font-semibold text-[#5e6b7e] dark:border-[#2a4a6b] dark:bg-[#0c2238] dark:text-[#a7bacd]">
+                <span className="rounded-full border border-[#d6c9a8] bg-[#f6f1e3] px-2 py-0.5 text-xs font-semibold text-[#5e6b7e] dark:border-[#2a4a6b] dark:bg-[#0d1f17] dark:text-[#a7bacd]">
                   Insufficient evidence
                 </span>
               )}

@@ -14,12 +14,12 @@ interface View {
 }
 
 const CARD = "rounded-xl border border-black/10 dark:border-white/10 bg-white/60 dark:bg-white/5 p-5";
-const MUTED = "text-[#15263c]/65 dark:text-[#eef3f8]/60";
+const MUTED = "text-[#123d2c]/65 dark:text-[#eef3f8]/60";
 
 function chipClass(on: boolean): string {
   return on
-    ? "rounded-full border border-[#b08d2f] bg-[#b08d2f] px-3 py-1 text-xs font-medium text-white dark:border-[#d4af37] dark:bg-[#d4af37] dark:text-[#0a1f38]"
-    : "rounded-full border border-black/15 dark:border-white/15 px-3 py-1 text-xs text-[#15263c] hover:border-[#b08d2f]/60 dark:text-[#eef3f8]";
+    ? "rounded-full border border-[#b08d2f] bg-[#b08d2f] px-3 py-1 text-xs font-medium text-white dark:border-[#d4af37] dark:bg-[#d4af37] dark:text-[#0b2519]"
+    : "rounded-full border border-black/15 dark:border-white/15 px-3 py-1 text-xs text-[#123d2c] hover:border-[#b08d2f]/60 dark:text-[#eef3f8]";
 }
 
 function Section({
@@ -118,7 +118,7 @@ export default function WatchlistEditor({
     <div className="space-y-5">
       <div className="flex items-center justify-between gap-3">
         <p className={`text-xs ${MUTED}`}>Changes save automatically — private to you, never shown to vendors.</p>
-        <span className="text-xs font-medium text-[#15263c]/70 dark:text-[#eef3f8]/70" aria-live="polite">
+        <span className="text-xs font-medium text-[#123d2c]/70 dark:text-[#eef3f8]/70" aria-live="polite">
           {save === "saving" ? "Saving…" : save === "saved" ? "Saved ✓" : save === "error" ? "Save failed — retry" : ""}
         </span>
       </div>

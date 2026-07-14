@@ -16,7 +16,7 @@ export function Metric({ label, value, note }: { label: string; value: string | 
 // Gold is reserved for the masthead, key numerals and active states.
 export function Panel({ title, children, action }: { title: string; children: React.ReactNode; action?: React.ReactNode }) {
   return (
-    <section className="overflow-hidden rounded-lg border border-[#e3d9c0] bg-[#fffdf7] dark:border-[#1d3a57] dark:bg-[#0c2238]">
+    <section className="overflow-hidden rounded-lg border border-[#e3d9c0] bg-[#fffdf7] dark:border-[#223a2e] dark:bg-[#0d1f17]">
       <div className="flex items-center justify-between gap-3 border-b border-[#ece4d0] px-5 py-3 dark:border-[#16314e]">
         <h2 className="text-xs font-bold uppercase tracking-[0.16em] text-[#3f5068] dark:text-[#9fb3c8]">{title}</h2>
         {action}
@@ -128,7 +128,7 @@ export function ScoreBar({ value, label }: { value: number; label?: string }) {
     <div>
       <div className="flex items-center justify-between gap-3 text-xs">
         {label && <span className="text-[#475a72] dark:text-[#a7bacd]">{label}</span>}
-        <span className="font-mono text-[#13294b] dark:text-[#eef3f8]">{value.toFixed(0)}</span>
+        <span className="font-mono text-[#123d2c] dark:text-[#eef3f8]">{value.toFixed(0)}</span>
       </div>
       <div className="mt-1 h-1 overflow-hidden bg-[#ece3cb] dark:bg-[#122c49]">
         <div className="h-full bg-[#b08d2f] dark:bg-[#d4af37]" style={{ width: `${Math.max(2, Math.min(100, value))}%` }} />

@@ -24,13 +24,13 @@ function ScoreRow({ d }: { d: DomainScore }) {
 
   if (d.state === "insufficient_evidence") {
     return (
-      <div className="flex flex-col gap-1.5 border-t border-[#ece4d0] py-3 dark:border-[#1d3a57]">
+      <div className="flex flex-col gap-1.5 border-t border-[#ece4d0] py-3 dark:border-[#223a2e]">
         <div className="flex items-center justify-between gap-2">
           <div>
-            <div className="text-sm font-medium text-[#13294b] dark:text-[#eef3f8]">{name}</div>
+            <div className="text-sm font-medium text-[#123d2c] dark:text-[#eef3f8]">{name}</div>
             <div className="text-xs uppercase tracking-wide text-[#7a8aa0] dark:text-[#7a9bb8]">{pillar}</div>
           </div>
-          <span className="inline-flex w-fit rounded-full border border-[#d6c9a8] bg-[#f6f1e3] px-2 py-0.5 text-xs font-semibold text-[#5e6b7e] dark:border-[#2a4a6b] dark:bg-[#0c2238] dark:text-[#a7bacd]">
+          <span className="inline-flex w-fit rounded-full border border-[#d6c9a8] bg-[#f6f1e3] px-2 py-0.5 text-xs font-semibold text-[#5e6b7e] dark:border-[#2a4a6b] dark:bg-[#0d1f17] dark:text-[#a7bacd]">
             Insufficient evidence
           </span>
         </div>
@@ -41,16 +41,16 @@ function ScoreRow({ d }: { d: DomainScore }) {
   }
 
   return (
-    <div className={`border-t border-[#ece4d0] py-3 dark:border-[#1d3a57] ${lowEvidenceClass(d.evidenceCount)}`}>
+    <div className={`border-t border-[#ece4d0] py-3 dark:border-[#223a2e] ${lowEvidenceClass(d.evidenceCount)}`}>
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0">
-          <div className="text-sm font-medium text-[#13294b] dark:text-[#eef3f8]">{name}</div>
+          <div className="text-sm font-medium text-[#123d2c] dark:text-[#eef3f8]">{name}</div>
           <div className="text-xs uppercase tracking-wide text-[#7a8aa0] dark:text-[#7a9bb8]">{pillar}</div>
         </div>
         <div className="flex items-center gap-3">
           {/* Neutral ink number (no red↔green) — certainty carried by the veil, not hue. */}
           <ConfidenceVeil confidence={d.confidence} label={`${name} score`} as="div" className="text-right">
-            <div className="font-mono text-lg font-semibold tabular-nums text-[#13294b] dark:text-[#eef3f8]">
+            <div className="font-mono text-lg font-semibold tabular-nums text-[#123d2c] dark:text-[#eef3f8]">
               {d.score.toFixed(1)}<span className="text-xs text-[#7a8aa0]">/5</span>
             </div>
             <div className="text-xs text-[#5e6b7e] dark:text-[#a7bacd]">{DOMAIN_BAND_TEXT[d.bandLabel]}</div>
@@ -80,7 +80,7 @@ function ScoreRow({ d }: { d: DomainScore }) {
       {/* expandable citations */}
       {d.citations.length > 0 ? (
         <details className="mt-1.5">
-          <summary className="cursor-pointer select-none text-xs font-medium text-[#4c5d75] hover:text-[#13294b] dark:text-[#7a9bb8] dark:hover:text-[#eef3f8]">
+          <summary className="cursor-pointer select-none text-xs font-medium text-[#4c5d75] hover:text-[#123d2c] dark:text-[#7a9bb8] dark:hover:text-[#eef3f8]">
             ▸ {d.citations.length} {d.citations.length === 1 ? "citation" : "citations"}
           </summary>
           <ul className="mt-1 space-y-1 pl-3">

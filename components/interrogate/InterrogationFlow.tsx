@@ -15,8 +15,8 @@ import SuggestInput from "@/components/forms/SuggestInput";
 type InterrogationMode = "quick" | "comprehensive";
 
 const CARD = "rounded-xl border border-black/10 dark:border-white/10 bg-white/60 dark:bg-white/5 p-5";
-const MUTED = "text-[#15263c]/65 dark:text-[#eef3f8]/60";
-const BTN = "rounded-md bg-[#13294b] px-4 py-2 text-sm font-medium text-white hover:bg-[#1c3a66] disabled:opacity-50 dark:bg-[#d4af37] dark:text-[#0a1f38]";
+const MUTED = "text-[#123d2c]/65 dark:text-[#eef3f8]/60";
+const BTN = "rounded-md bg-[#123d2c] px-4 py-2 text-sm font-medium text-white hover:bg-[#1c3a66] disabled:opacity-50 dark:bg-[#d4af37] dark:text-[#0b2519]";
 
 interface EvidenceRef {
   layer: string;
@@ -213,7 +213,7 @@ export default function InterrogationFlow() {
                 aria-pressed={mode === "quick"}
                 className={`px-3 py-1 text-xs font-medium transition-colors ${
                   mode === "quick"
-                    ? "bg-[#b08d2f] text-white dark:bg-[#d4af37] dark:text-[#0a1f38]"
+                    ? "bg-[#b08d2f] text-white dark:bg-[#d4af37] dark:text-[#0b2519]"
                     : `${MUTED} hover:bg-black/[0.03] dark:hover:bg-white/[0.05]`
                 }`}
               >
@@ -225,7 +225,7 @@ export default function InterrogationFlow() {
                 aria-pressed={mode === "comprehensive"}
                 className={`border-l border-black/15 px-3 py-1 text-xs font-medium transition-colors dark:border-white/15 ${
                   mode === "comprehensive"
-                    ? "bg-[#b08d2f] text-white dark:bg-[#d4af37] dark:text-[#0a1f38]"
+                    ? "bg-[#b08d2f] text-white dark:bg-[#d4af37] dark:text-[#0b2519]"
                     : `${MUTED} hover:bg-black/[0.03] dark:hover:bg-white/[0.05]`
                 }`}
               >
@@ -243,7 +243,7 @@ export default function InterrogationFlow() {
             onChange={(e) => setOpening(e.target.value)}
             rows={3}
             placeholder="e.g. I'm the CIO of a regional bank rolling out AI coding copilots for a 200-person engineering org. Which frontier model should we standardize on, and what are peers doing?"
-            className="mt-3 w-full rounded-md border border-black/15 bg-white/80 p-3 text-sm dark:border-white/15 dark:bg-[#0a1f38]"
+            className="mt-3 w-full rounded-md border border-black/15 bg-white/80 p-3 text-sm dark:border-white/15 dark:bg-[#0b2519]"
           />
           <div className="mt-3 flex items-center justify-between">
             <span className={`text-xs ${MUTED}`}>{opening.trim().length < 8 ? "A sentence or two." : `${opening.trim().length} chars`}</span>
@@ -270,7 +270,7 @@ export default function InterrogationFlow() {
               suggestions={options}
               placeholder={options.length > 0 ? "Type your answer, or pick a starting point" : "Your answer"}
               ariaLabel={question || "Your answer"}
-              inputClassName="w-full rounded-md border border-black/15 bg-white/80 px-3 py-2 pr-8 text-sm dark:border-white/15 dark:bg-[#0a1f38]"
+              inputClassName="w-full rounded-md border border-black/15 bg-white/80 px-3 py-2 pr-8 text-sm dark:border-white/15 dark:bg-[#0b2519]"
             />
             <div className="mt-2 flex justify-end">
               <button className={BTN} onClick={() => submit(answer)} disabled={busy || !answer.trim()}>

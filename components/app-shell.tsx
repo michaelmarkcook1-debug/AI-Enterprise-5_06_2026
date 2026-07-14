@@ -1,5 +1,5 @@
 export function AppShell({ children }: { children: React.ReactNode }) {
-  return <div className="min-h-screen bg-[#faf6ec] text-[#13294b] dark:bg-[#071827] dark:text-[#eef3f8]">{children}</div>;
+  return <div className="min-h-screen bg-[#faf6ec] text-[#123d2c] dark:bg-[#081410] dark:text-[#eef3f8]">{children}</div>;
 }
 
 export function PageFrame({
@@ -37,7 +37,7 @@ export function PageFrame({
           )}
           <div aria-hidden className="mt-6 flex items-center gap-2">
             <span className="h-px w-14 bg-[#d4af37]" />
-            <span className="h-px flex-1 bg-[#13294b]/10 dark:bg-white/10" />
+            <span className="h-px flex-1 bg-[#123d2c]/10 dark:bg-white/10" />
           </div>
         </div>
         {aside ? (

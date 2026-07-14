@@ -82,9 +82,9 @@ export default function BulletGraph({
       }
     >
       {/* qualitative bands: light → dark single hue = worse → better */}
-      <span className="pointer-events-none absolute inset-y-0 left-0 w-2/5 bg-[#13294b]/[0.035] dark:bg-white/[0.02]" />
-      <span className="pointer-events-none absolute inset-y-0 left-2/5 w-[35%] bg-[#13294b]/[0.06] dark:bg-white/[0.05]" />
-      <span className="pointer-events-none absolute inset-y-0 left-[75%] right-0 bg-[#13294b]/[0.10] dark:bg-white/[0.09]" />
+      <span className="pointer-events-none absolute inset-y-0 left-0 w-2/5 bg-[#123d2c]/[0.035] dark:bg-white/[0.02]" />
+      <span className="pointer-events-none absolute inset-y-0 left-2/5 w-[35%] bg-[#123d2c]/[0.06] dark:bg-white/[0.05]" />
+      <span className="pointer-events-none absolute inset-y-0 left-[75%] right-0 bg-[#123d2c]/[0.10] dark:bg-white/[0.09]" />
 
       {/* the value bar — inset so the taller benchmark tick reads above it */}
       <span
@@ -95,7 +95,7 @@ export default function BulletGraph({
       {/* benchmark tick — full-height, ink, sits above the value bar */}
       {tickPct != null && (
         <span
-          className="absolute top-0 bottom-0 w-[2px] bg-[#13294b] opacity-70 dark:bg-[#eef3f8]"
+          className="absolute top-0 bottom-0 w-[2px] bg-[#123d2c] opacity-70 dark:bg-[#eef3f8]"
           style={{ left: tickPct }}
         />
       )}

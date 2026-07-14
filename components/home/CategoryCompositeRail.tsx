@@ -7,7 +7,7 @@ import { ConfidenceVeil } from "@/components/instrument";
 // Hero rail — a category NAVIGATOR. Each row is one market category with its
 // best-EVIDENCED vendor (top of the within-category multi-pillar composite),
 // not the biggest by market share. Links into the full per-category ranking.
-const MUTED = "text-[#15263c]/65 dark:text-[#eef3f8]/60";
+const MUTED = "text-[#123d2c]/65 dark:text-[#eef3f8]/60";
 
 export default function CategoryCompositeRail({ composites }: { composites: CategoryComposite[] }) {
   const withRanked = composites.filter((c) => c.ranked.length > 0);
@@ -38,7 +38,7 @@ export default function CategoryCompositeRail({ composites }: { composites: Cate
               <li key={c.category.id} className="py-2">
                 <Link href={`/category/${c.category.id}`} className="group flex items-baseline justify-between gap-3">
                   <span className="min-w-0">
-                    <span className="block truncate text-sm font-medium text-[#13294b] group-hover:underline dark:text-[#eef3f8]">
+                    <span className="block truncate text-sm font-medium text-[#123d2c] group-hover:underline dark:text-[#eef3f8]">
                       {c.category.name}
                     </span>
                     {/* Band caveats a thin-evidence leader here — e.g. the ai_silicon

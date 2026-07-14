@@ -5,7 +5,7 @@
 
 const CARD =
   "rounded-xl border border-amber-500/30 bg-amber-500/5 p-5 dark:border-amber-400/20";
-const MUTED = "text-[#15263c]/70 dark:text-[#eef3f8]/70";
+const MUTED = "text-[#123d2c]/70 dark:text-[#eef3f8]/70";
 
 export default function DataUnavailable({
   title = "Live data unavailable",

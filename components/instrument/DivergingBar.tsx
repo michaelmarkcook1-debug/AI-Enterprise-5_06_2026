@@ -75,7 +75,7 @@ export default function DivergingBar({
           />
         </span>
         {/* centre axis */}
-        <span className="w-px shrink-0 bg-[#13294b]/40 dark:bg-[#eef3f8]/40" />
+        <span className="w-px shrink-0 bg-[#123d2c]/40 dark:bg-[#eef3f8]/40" />
         {/* right half — B grows toward the centre */}
         <span className="relative flex-1">
           <span

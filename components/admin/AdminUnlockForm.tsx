@@ -66,7 +66,7 @@ export default function AdminUnlockForm() {
             {busy ? "Unlocking…" : "Unlock"}
           </button>
         </form>
-        <p className="mt-4 text-xs text-[#15263c]/50 dark:text-[#eef3f8]/40">
+        <p className="mt-4 text-xs text-[#123d2c]/50 dark:text-[#eef3f8]/40">
           Session lasts 90 days. Set <code className="font-mono">ADMIN_API_TOKEN</code> in Vercel env vars.
         </p>
       </div>

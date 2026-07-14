@@ -25,7 +25,7 @@ export default function RankMovementIndicator({ movement }: { movement?: RankMov
     return (
       <span
         title={`No change in overall rank${fromDate ? ` since ${fromDate}` : ""}`}
-        className="font-mono text-xs tabular-nums text-[#15263c]/40 dark:text-[#eef3f8]/40"
+        className="font-mono text-xs tabular-nums text-[#123d2c]/40 dark:text-[#eef3f8]/40"
         aria-label="No change in overall rank"
       >
         —

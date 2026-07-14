@@ -166,7 +166,7 @@ export const CEO_BIO =
   "transformation — and brings deep cross-market expertise to every AnalystGenius engagement.";
 
 const AG_LOGO_SVG = `<svg width="40" height="40" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="64" height="64" rx="12" fill="#071827"/>
+  <rect width="64" height="64" rx="12" fill="#081410"/>
   <circle cx="32" cy="32" r="7" fill="#e8c95c"/>
   <ellipse cx="32" cy="32" rx="22" ry="9" stroke="#e8c95c" stroke-width="3"/>
   <ellipse cx="32" cy="32" rx="22" ry="9" stroke="#F5C451" stroke-width="3" transform="rotate(60 32 32)"/>
@@ -238,35 +238,35 @@ function htmlShell(title: string, type: ExportType, body: string, headshotDataUr
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
     font: 13px/1.6 -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    color: #13294b; max-width: 860px; margin: 0 auto; padding: 32px 28px;
+    color: #123d2c; max-width: 860px; margin: 0 auto; padding: 32px 28px;
   }
 
   /* ── Header ── */
   .ag-header {
     display: flex; align-items: center; gap: 14px;
-    border-bottom: 3px solid #071827; padding-bottom: 14px; margin-bottom: 6px;
+    border-bottom: 3px solid #081410; padding-bottom: 14px; margin-bottom: 6px;
   }
   .ag-header .logo { flex-shrink: 0; }
   .ag-header .brand { flex: 1; }
-  .ag-header .brand-name { font-size: 20px; font-weight: 700; letter-spacing: -0.02em; color: #071827; }
+  .ag-header .brand-name { font-size: 20px; font-weight: 700; letter-spacing: -0.02em; color: #081410; }
   .ag-header .brand-sub { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: #5b6b7f; margin-top: 1px; }
   .ag-header .confidentiality {
     font-size: 9px; text-transform: uppercase; letter-spacing: 0.06em;
-    color: #fff; background: #071827; padding: 4px 12px; border-radius: 4px; font-weight: 600;
+    color: #fff; background: #081410; padding: 4px 12px; border-radius: 4px; font-weight: 600;
   }
 
-  .doc-title { font-size: 22px; font-weight: 700; color: #071827; margin: 18px 0 2px; letter-spacing: -0.01em; }
+  .doc-title { font-size: 22px; font-weight: 700; color: #081410; margin: 18px 0 2px; letter-spacing: -0.01em; }
   .doc-meta { font-size: 11px; color: #5b6b7f; margin-bottom: 24px; }
 
   /* ── Content ── */
-  h2 { font-size: 15px; font-weight: 700; color: #071827; margin: 28px 0 10px; padding-bottom: 4px; border-bottom: 1px solid #eae2cc; letter-spacing: -0.01em; }
+  h2 { font-size: 15px; font-weight: 700; color: #081410; margin: 28px 0 10px; padding-bottom: 4px; border-bottom: 1px solid #eae2cc; letter-spacing: -0.01em; }
   h3 { font-size: 13px; font-weight: 700; color: #2d3a2b; margin: 16px 0 6px; }
   p { margin: 6px 0; }
   ul { padding-left: 20px; margin: 6px 0; }
   li { margin: 3px 0; }
 
   table { width: 100%; border-collapse: collapse; font-size: 12px; margin: 10px 0 16px; }
-  th { text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: 0.04em; color: #5b6b7f; padding: 6px 8px; border-bottom: 2px solid #071827; font-weight: 600; }
+  th { text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: 0.04em; color: #5b6b7f; padding: 6px 8px; border-bottom: 2px solid #081410; font-weight: 600; }
   td { padding: 6px 8px; border-bottom: 1px solid #efe9d9; vertical-align: top; }
   tr:last-child td { border-bottom: none; }
 
@@ -275,7 +275,7 @@ function htmlShell(title: string, type: ExportType, body: string, headshotDataUr
     flex: 1; border: 1px solid #e6dcc3; border-radius: 10px; padding: 14px 16px; text-align: center;
   }
   .score-card .label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.06em; color: #5b6b7f; font-weight: 600; }
-  .score-card .value { font-size: 32px; font-weight: 700; color: #071827; margin: 4px 0 2px; font-variant-numeric: tabular-nums; }
+  .score-card .value { font-size: 32px; font-weight: 700; color: #081410; margin: 4px 0 2px; font-variant-numeric: tabular-nums; }
   .score-card .sub { font-size: 10px; color: #5b6b7f; }
   .score-card.green { border-color: #e8c95c; background: #f0fdf8; }
   .score-card.green .value { color: #065f46; }
@@ -298,16 +298,16 @@ function htmlShell(title: string, type: ExportType, body: string, headshotDataUr
 
   /* ── Sign-off ── */
   .signoff {
-    margin-top: 40px; padding-top: 24px; border-top: 3px solid #071827;
+    margin-top: 40px; padding-top: 24px; border-top: 3px solid #081410;
     display: flex; gap: 18px; align-items: flex-start;
   }
   .headshot { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; flex-shrink: 0; border: 2px solid #e6dcc3; }
   .headshot-placeholder {
-    width: 80px; height: 80px; border-radius: 50%; background: #071827; color: #e8c95c;
+    width: 80px; height: 80px; border-radius: 50%; background: #081410; color: #e8c95c;
     display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 700; flex-shrink: 0;
   }
   .signoff-text { flex: 1; }
-  .signoff-name { font-size: 14px; font-weight: 700; color: #071827; }
+  .signoff-name { font-size: 14px; font-weight: 700; color: #081410; }
   .signoff-title { font-size: 11px; color: #5b6b7f; margin: 2px 0 8px; }
   .signoff-bio { font-size: 11px; color: #475a72; line-height: 1.5; }
 
@@ -863,8 +863,8 @@ export default function BoardPackExporter(props: BoardPackExporterProps) {
             onClick={() => setFormat(f.key)}
             className={`rounded-full border px-3 py-1 font-semibold transition-colors ${
               format === f.key
-                ? "border-[#071827] bg-[#071827] text-white dark:border-emerald-500 dark:bg-emerald-600"
-                : "border-[#d6c9a8] bg-white text-[#13294b] hover:bg-[#f3ead2] dark:border-[#2a4a6b] dark:bg-[#0c2238] dark:text-[#eef3f8] dark:hover:bg-[#143049]"
+                ? "border-[#081410] bg-[#081410] text-white dark:border-emerald-500 dark:bg-emerald-600"
+                : "border-[#d6c9a8] bg-white text-[#123d2c] hover:bg-[#f3ead2] dark:border-[#2a4a6b] dark:bg-[#0d1f17] dark:text-[#eef3f8] dark:hover:bg-[#143049]"
             }`}
           >
             {f.label}
@@ -884,8 +884,8 @@ export default function BoardPackExporter(props: BoardPackExporterProps) {
               title={locked ? "Requires a completed assessment shortlist — run Assess first" : undefined}
               className={`rounded-full border px-4 py-2 text-xs font-semibold ${
                 locked
-                  ? "cursor-not-allowed border-dashed border-[#d6c9a8] bg-[#f4f6f1] text-[#a1a8a0] dark:border-[#2a4a6b] dark:bg-[#0c2238]/60 dark:text-[#7d93aa]"
-                  : "border-[#d6c9a8] bg-white text-[#13294b] hover:bg-[#f3ead2] disabled:opacity-50 dark:border-[#2a4a6b] dark:bg-[#0c2238] dark:text-[#eef3f8] dark:hover:bg-[#143049]"
+                  ? "cursor-not-allowed border-dashed border-[#d6c9a8] bg-[#f4f6f1] text-[#a1a8a0] dark:border-[#2a4a6b] dark:bg-[#0d1f17]/60 dark:text-[#7d93aa]"
+                  : "border-[#d6c9a8] bg-white text-[#123d2c] hover:bg-[#f3ead2] disabled:opacity-50 dark:border-[#2a4a6b] dark:bg-[#0d1f17] dark:text-[#eef3f8] dark:hover:bg-[#143049]"
               }`}
             >
               {exporting === t ? "Exporting…" : locked ? `${t} — requires assessment` : `Export ${t}`}

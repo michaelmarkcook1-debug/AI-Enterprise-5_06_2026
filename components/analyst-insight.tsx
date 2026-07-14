@@ -7,7 +7,7 @@
 export default function AnalystInsight({ paragraph }: { paragraph: string }) {
   if (!paragraph) return null;
   return (
-    <section className="mb-6 rounded-lg border border-[#e3d9c0] bg-[#fffdf7] p-5 dark:border-[#1d3a57] dark:bg-[#0c2238]">
+    <section className="mb-6 rounded-lg border border-[#e3d9c0] bg-[#fffdf7] p-5 dark:border-[#223a2e] dark:bg-[#0d1f17]">
       <div className="mb-1.5 flex items-center gap-2">
         <span className="inline-block h-2 w-2 rounded-full bg-[#d4af37]" aria-hidden />
         <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-[#a07f1f] dark:text-[#d4af37]">

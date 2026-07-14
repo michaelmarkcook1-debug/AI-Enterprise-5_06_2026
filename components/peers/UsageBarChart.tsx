@@ -78,14 +78,14 @@ export function SimpleBarChart({
         const color = colors[d.vendorId] ?? PALETTE[i % PALETTE.length];
         return (
           <g key={d.vendorId}>
-            <text x={LABEL_W - 8} y={y + BAR_H / 2 + 4} textAnchor="end" fontSize={12} className="fill-[#13294b] dark:fill-[#eef3f8]">
+            <text x={LABEL_W - 8} y={y + BAR_H / 2 + 4} textAnchor="end" fontSize={12} className="fill-[#123d2c] dark:fill-[#eef3f8]">
               {d.label}
             </text>
             <rect x={LABEL_W} y={y} width={innerW} height={BAR_H} rx={3} className="fill-black/5 dark:fill-white/5" />
             <a href={vendorHref(d.vendorId)}>
               <rect x={LABEL_W} y={y} width={Math.max(barW, 2)} height={BAR_H} rx={3} fill={color} />
             </a>
-            <text x={LABEL_W + Math.max(barW, 2) + 6} y={y + BAR_H / 2 + 4} fontSize={11} fontWeight={600} className="fill-[#13294b] dark:fill-[#eef3f8] tabular-nums">
+            <text x={LABEL_W + Math.max(barW, 2) + 6} y={y + BAR_H / 2 + 4} fontSize={11} fontWeight={600} className="fill-[#123d2c] dark:fill-[#eef3f8] tabular-nums">
               {d.value}
             </text>
           </g>
@@ -129,12 +129,12 @@ export function StackedUsageBarChart({
         let x = LABEL_W;
         return (
           <g key={row.key}>
-            <text x={LABEL_W - 8} y={y + BAR_H / 2 + 4} textAnchor="end" fontSize={12} className="fill-[#13294b] dark:fill-[#eef3f8]">
+            <text x={LABEL_W - 8} y={y + BAR_H / 2 + 4} textAnchor="end" fontSize={12} className="fill-[#123d2c] dark:fill-[#eef3f8]">
               {row.label}
             </text>
             <rect x={LABEL_W} y={y} width={innerW} height={BAR_H} rx={3} className="fill-black/5 dark:fill-white/5" />
             {total === 0 ? (
-              <text x={LABEL_W + 8} y={y + BAR_H / 2 + 4} fontSize={10} className="fill-[#15263c]/40 dark:fill-[#eef3f8]/40 italic">
+              <text x={LABEL_W + 8} y={y + BAR_H / 2 + 4} fontSize={10} className="fill-[#123d2c]/40 dark:fill-[#eef3f8]/40 italic">
                 no disclosed adopters cited yet
               </text>
             ) : (
@@ -152,7 +152,7 @@ export function StackedUsageBarChart({
               })
             )}
             {total > 0 && (
-              <text x={LABEL_W + innerW + 6} y={y + BAR_H / 2 + 4} fontSize={11} fontWeight={600} className="fill-[#13294b] dark:fill-[#eef3f8] tabular-nums">
+              <text x={LABEL_W + innerW + 6} y={y + BAR_H / 2 + 4} fontSize={11} fontWeight={600} className="fill-[#123d2c] dark:fill-[#eef3f8] tabular-nums">
                 {total}
               </text>
             )}
@@ -173,7 +173,7 @@ export function VendorColorLegend({
 }) {
   if (vendors.length === 0) return null;
   return (
-    <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[#15263c]/65 dark:text-[#eef3f8]/60">
+    <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[#123d2c]/65 dark:text-[#eef3f8]/60">
       {vendors.map((v) => (
         <span key={v.vendorId} className="inline-flex items-center gap-1.5">
           <span className="inline-block h-2.5 w-2.5 rounded-sm" style={{ backgroundColor: colors[v.vendorId] ?? "#78716c" }} />

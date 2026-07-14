@@ -81,7 +81,7 @@ export default function RootLayout({
           lean, idle-reaching shell; app/(internal) gets the gated, live-polling
           dashboard shell. This separation is what lets public pages avoid the
           dashboard's pollers and reach document-idle. */}
-      <body className="min-h-full bg-[#faf6ec] dark:bg-[#071827] text-[#15263c] dark:text-[#eef3f8]">
+      <body className="min-h-full bg-[#faf6ec] dark:bg-[#081410] text-[#123d2c] dark:text-[#eef3f8]">
         {children}
       </body>
     </html>

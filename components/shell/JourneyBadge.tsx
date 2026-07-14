@@ -26,7 +26,7 @@ export default function JourneyBadge() {
   return (
     <Link
       href={JOURNEY_STEP_RESUME_HREF[step] ?? "/use-cases"}
-      className="fixed bottom-5 left-5 z-40 inline-flex items-center gap-2 rounded-full border border-[#d4af37]/60 bg-[#0a1f38] px-3 py-2 text-xs font-semibold text-[#f6f1e3] shadow-lg transition-colors hover:bg-[#13294b]"
+      className="fixed bottom-5 left-5 z-40 inline-flex items-center gap-2 rounded-full border border-[#d4af37]/60 bg-[#0b2519] px-3 py-2 text-xs font-semibold text-[#f6f1e3] shadow-lg transition-colors hover:bg-[#123d2c]"
     >
       <span className="h-2 w-2 shrink-0 rounded-full bg-[#d4af37]" aria-hidden />
       Your decision · step {step} of {JOURNEY_TOTAL_STEPS}

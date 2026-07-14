@@ -66,13 +66,13 @@ export default function MonitorControls({
   return (
     <div className="rounded-xl border border-black/10 dark:border-white/10 bg-white/60 dark:bg-white/5 p-5">
       <h2 className="text-sm font-semibold">Your shortlist</h2>
-      <p className="mt-1 text-xs text-[#15263c]/65 dark:text-[#eef3f8]/60">
+      <p className="mt-1 text-xs text-[#123d2c]/65 dark:text-[#eef3f8]/60">
         Add the vendors and categories you want watched — private to you. Changes update your Monitor below.
       </p>
 
       <div className="mt-3 flex flex-wrap gap-2">
         {savedItems.length === 0 ? (
-          <span className="text-xs text-[#15263c]/65 dark:text-[#eef3f8]/60">
+          <span className="text-xs text-[#123d2c]/65 dark:text-[#eef3f8]/60">
             Nothing saved yet — search below to add vendors and categories.
           </span>
         ) : (
@@ -81,7 +81,7 @@ export default function MonitorControls({
             return (
               <span
                 key={item}
-                className="inline-flex items-center gap-1.5 rounded-full border border-[#b08d2f] bg-[#b08d2f]/10 px-2.5 py-1 text-xs font-medium text-[#15263c] dark:border-[#d4af37] dark:text-[#eef3f8]"
+                className="inline-flex items-center gap-1.5 rounded-full border border-[#b08d2f] bg-[#b08d2f]/10 px-2.5 py-1 text-xs font-medium text-[#123d2c] dark:border-[#d4af37] dark:text-[#eef3f8]"
               >
                 {m?.label ?? item}
                 <span className="text-[9px] uppercase tracking-wide opacity-60">{m?.type ?? ""}</span>
@@ -109,7 +109,7 @@ export default function MonitorControls({
           className="w-full rounded-lg border border-black/15 dark:border-white/15 bg-white/80 dark:bg-white/5 px-3 py-2 text-sm outline-none focus:border-black/40 dark:focus:border-white/40"
         />
         {suggestions.length > 0 && (
-          <div className="absolute z-10 mt-1 w-full overflow-hidden rounded-lg border border-black/10 bg-white shadow-lg dark:border-white/10 dark:bg-[#0c2238]">
+          <div className="absolute z-10 mt-1 w-full overflow-hidden rounded-lg border border-black/10 bg-white shadow-lg dark:border-white/10 dark:bg-[#0d1f17]">
             {suggestions.map((o) => (
               <button
                 key={o.item}
@@ -122,7 +122,7 @@ export default function MonitorControls({
                 className="flex w-full items-center justify-between px-3 py-2 text-left text-sm hover:bg-black/5 disabled:opacity-50 dark:hover:bg-white/10"
               >
                 <span>+ {o.label}</span>
-                <span className="text-xs uppercase tracking-wide text-[#15263c]/50 dark:text-[#eef3f8]/50">{o.type}</span>
+                <span className="text-xs uppercase tracking-wide text-[#123d2c]/50 dark:text-[#eef3f8]/50">{o.type}</span>
               </button>
             ))}
           </div>

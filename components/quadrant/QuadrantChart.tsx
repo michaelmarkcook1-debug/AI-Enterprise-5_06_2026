@@ -131,7 +131,7 @@ export default function QuadrantChart({ data }: { data: QuadrantData }) {
   return (
     <div className="space-y-4">
       {/* Controls */}
-      <div className="flex flex-wrap items-center gap-3 rounded-lg border border-[#e6dcc3] bg-white p-3 text-xs dark:border-[#1d3a57] dark:bg-[#071827]">
+      <div className="flex flex-wrap items-center gap-3 rounded-lg border border-[#e6dcc3] bg-white p-3 text-xs dark:border-[#223a2e] dark:bg-[#081410]">
         <div className="flex items-center gap-1">
           <span className="font-semibold uppercase tracking-wide text-[#5e6b7e] dark:text-[#8fa5bb]">Timeframe</span>
           {TIMEFRAMES.map((t) => (
@@ -141,8 +141,8 @@ export default function QuadrantChart({ data }: { data: QuadrantData }) {
               onClick={() => updateParam("days", String(t.days))}
               className={`rounded px-2 py-1 font-medium ${
                 data.windowDays === t.days
-                  ? "bg-[#13294b] text-white dark:bg-white dark:text-[#0c1220]"
-                  : "text-[#475a72] hover:bg-[#f1ead6] dark:text-[#a7bacd] dark:hover:bg-[#0c2238]"
+                  ? "bg-[#123d2c] text-white dark:bg-white dark:text-[#0c1220]"
+                  : "text-[#475a72] hover:bg-[#f1ead6] dark:text-[#a7bacd] dark:hover:bg-[#0d1f17]"
               }`}
             >
               {t.label}
@@ -158,7 +158,7 @@ export default function QuadrantChart({ data }: { data: QuadrantData }) {
             max={99}
             defaultValue={data.executeCut}
             onBlur={(e) => updateParam("executeCut", e.target.value)}
-            className="w-14 rounded border border-[#d6c9a8] bg-white px-1.5 py-0.5 font-mono dark:border-[#2a4a6b] dark:bg-[#0c2238] dark:text-[#eef3f8]"
+            className="w-14 rounded border border-[#d6c9a8] bg-white px-1.5 py-0.5 font-mono dark:border-[#2a4a6b] dark:bg-[#0d1f17] dark:text-[#eef3f8]"
           />
         </label>
 
@@ -170,7 +170,7 @@ export default function QuadrantChart({ data }: { data: QuadrantData }) {
             max={99}
             defaultValue={data.visionCut}
             onBlur={(e) => updateParam("visionCut", e.target.value)}
-            className="w-14 rounded border border-[#d6c9a8] bg-white px-1.5 py-0.5 font-mono dark:border-[#2a4a6b] dark:bg-[#0c2238] dark:text-[#eef3f8]"
+            className="w-14 rounded border border-[#d6c9a8] bg-white px-1.5 py-0.5 font-mono dark:border-[#2a4a6b] dark:bg-[#0d1f17] dark:text-[#eef3f8]"
           />
         </label>
 
@@ -193,7 +193,7 @@ export default function QuadrantChart({ data }: { data: QuadrantData }) {
       </div>
 
       {/* Chart */}
-      <div className="rounded-lg border border-[#e6dcc3] bg-white p-4 dark:border-[#1d3a57] dark:bg-[#071827]">
+      <div className="rounded-lg border border-[#e6dcc3] bg-white p-4 dark:border-[#223a2e] dark:bg-[#081410]">
         <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} className="w-full" role="img" aria-label="AI Atlas: Enhance vs Innovate">
           {/* Quadrant background fills */}
           {(["leaders", "challengers", "visionaries", "niche"] as const).map((q) => {
@@ -269,7 +269,7 @@ export default function QuadrantChart({ data }: { data: QuadrantData }) {
           {/* Arrow marker definition */}
           <defs>
             <marker id="qarrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-              <path d="M0,0 L10,5 L0,10 Z" className="fill-[#13294b] dark:fill-[#eef3f8]" />
+              <path d="M0,0 L10,5 L0,10 Z" className="fill-[#123d2c] dark:fill-[#eef3f8]" />
             </marker>
           </defs>
 
@@ -310,7 +310,7 @@ export default function QuadrantChart({ data }: { data: QuadrantData }) {
                   r={isHovered ? radius + 1.5 : radius}
                   fill={colour.label}
                   stroke="white" strokeWidth={1.5}
-                  className="dark:stroke-[#0a1f38]"
+                  className="dark:stroke-[#0b2519]"
                 />
                 {p.crossedQuadrant && (
                   <circle cx={nowPos.x} cy={nowPos.y} r={9} fill="none" stroke={colour.label} strokeWidth={1.2} strokeDasharray="2 1.5" />
@@ -318,7 +318,7 @@ export default function QuadrantChart({ data }: { data: QuadrantData }) {
                 <text
                   x={nowPos.x + 8} y={nowPos.y + 3}
                   fontSize={10} fontWeight={isHovered ? 700 : 500}
-                  className="fill-[#13294b] dark:fill-[#eef3f8]"
+                  className="fill-[#123d2c] dark:fill-[#eef3f8]"
                   style={{ pointerEvents: "none" }}
                 >
                   {p.vendor.name}
@@ -333,7 +333,7 @@ export default function QuadrantChart({ data }: { data: QuadrantData }) {
           <div className="mt-3 grid gap-3 rounded-md border border-[#e6dcc3] bg-[#faf6ec] p-3 text-xs dark:border-[#2a4a6b] dark:bg-[#0b1f30] md:grid-cols-[1.3fr_auto_auto_auto_auto]">
             <div>
               <div className="text-[10px] uppercase tracking-wide text-[#5e6b7e] dark:text-[#8fa5bb]">Vendor</div>
-              <div className="font-semibold text-[#13294b] dark:text-[#eef3f8]">{hoveredPoint.vendor.name}</div>
+              <div className="font-semibold text-[#123d2c] dark:text-[#eef3f8]">{hoveredPoint.vendor.name}</div>
               <div className="text-[#5b6b7f] dark:text-[#a7bacd]">{hoveredPoint.vendor.category}</div>
               {hoveredPoint.isLosing && (
                 <div className="mt-1 inline-block rounded bg-rose-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-rose-800 dark:bg-rose-950/50 dark:text-rose-300">

@@ -32,11 +32,11 @@ export default function FinancialsPanel({
   return (
     <Panel title="Financial profile">
       <div className="flex flex-wrap items-center gap-2">
-        <span className="rounded-full border border-[#e9e0c8] bg-white px-2 py-0.5 text-xs font-medium text-[#13294b] dark:border-[#1d3a57] dark:bg-[#0c2238]/60 dark:text-[#eef3f8]">
+        <span className="rounded-full border border-[#e9e0c8] bg-white px-2 py-0.5 text-xs font-medium text-[#123d2c] dark:border-[#223a2e] dark:bg-[#0d1f17]/60 dark:text-[#eef3f8]">
           {badge}
         </span>
         {evidenceGrade && (
-          <span className={`rounded-full border border-[#e9e0c8] px-2 py-0.5 text-xs dark:border-[#1d3a57] ${MUTED}`}>
+          <span className={`rounded-full border border-[#e9e0c8] px-2 py-0.5 text-xs dark:border-[#223a2e] ${MUTED}`}>
             Evidence {evidenceGrade}
           </span>
         )}
@@ -52,12 +52,12 @@ export default function FinancialsPanel({
           <>
             {vendorName} is a subsidiary — its financials may be consolidated into its parent&apos;s
             filings (e.g. acquisition consideration or segment data) and are{" "}
-            <strong className="text-[#13294b] dark:text-[#eef3f8]">not separately disclosed here</strong>.
+            <strong className="text-[#123d2c] dark:text-[#eef3f8]">not separately disclosed here</strong>.
             What we can source is its capital position.
           </>
         ) : (
           <>
-            {vendorName} is privately held — <strong className="text-[#13294b] dark:text-[#eef3f8]">revenue is not publicly disclosed</strong>.
+            {vendorName} is privately held — <strong className="text-[#123d2c] dark:text-[#eef3f8]">revenue is not publicly disclosed</strong>.
             We report that absence rather than estimate a number. What we can source is its capital
             position.
           </>
@@ -71,7 +71,7 @@ export default function FinancialsPanel({
         ) : (
           <ul className="space-y-1.5">
             {signals.map((s, i) => (
-              <li key={i} className="flex gap-2 text-sm text-[#13294b] dark:text-[#eef3f8]">
+              <li key={i} className="flex gap-2 text-sm text-[#123d2c] dark:text-[#eef3f8]">
                 <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-[#b08d2f] dark:bg-[#d4af37]" aria-hidden />
                 <span>{s}</span>
               </li>

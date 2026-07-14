@@ -11,7 +11,7 @@ import Link from "next/link";
 import type { NewsBridge, BridgeVendor } from "@/lib/news-bridge/bridge";
 import { PENDING_LABEL } from "@/lib/news-bridge/bridge";
 
-const MUTED = "text-[#15263c]/65 dark:text-[#eef3f8]/60";
+const MUTED = "text-[#123d2c]/65 dark:text-[#eef3f8]/60";
 
 function CorrectionForm({ bridge, onDone }: { bridge: NewsBridge; onDone: () => void }) {
   const [kind, setKind] = useState<"wrong_vendor" | "other">(bridge.vendors.length > 0 ? "wrong_vendor" : "other");
@@ -61,7 +61,7 @@ function CorrectionForm({ bridge, onDone }: { bridge: NewsBridge; onDone: () => 
           value={vendorSlug}
           onChange={(e) => setVendorSlug(e.target.value)}
           aria-label="Which vendor this item is not actually about"
-          className="mt-2 w-full rounded border border-black/15 bg-white px-2 py-1 text-xs dark:border-white/15 dark:bg-[#0c2238]"
+          className="mt-2 w-full rounded border border-black/15 bg-white px-2 py-1 text-xs dark:border-white/15 dark:bg-[#0d1f17]"
         >
           {bridge.vendors.map((v) => (
             <option key={v.slug} value={v.slug}>
@@ -76,7 +76,7 @@ function CorrectionForm({ bridge, onDone }: { bridge: NewsBridge; onDone: () => 
         placeholder={kind === "other" ? "What's off? (required)" : "Add a note (optional)"}
         aria-label={kind === "other" ? "What's off? (required)" : "Add a note (optional)"}
         rows={2}
-        className="mt-2 w-full rounded border border-black/15 bg-white px-2 py-1 text-xs dark:border-white/15 dark:bg-[#0c2238]"
+        className="mt-2 w-full rounded border border-black/15 bg-white px-2 py-1 text-xs dark:border-white/15 dark:bg-[#0d1f17]"
       />
       <div className="mt-2 flex items-center gap-3">
         <button

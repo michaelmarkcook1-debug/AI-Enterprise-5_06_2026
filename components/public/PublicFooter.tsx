@@ -12,10 +12,10 @@ import SubscribeForm from "@/components/SubscribeForm";
 // top nav and would need the same threading here for no real benefit).
 export default function PublicFooter() {
   return (
-    <footer className="mt-16 border-t border-[#e3d9c0] px-6 py-10 dark:border-[#1d3a57]">
+    <footer className="mt-16 border-t border-[#e3d9c0] px-6 py-10 dark:border-[#223a2e]">
       <div className="mx-auto flex max-w-6xl flex-col gap-8 sm:flex-row sm:items-start sm:justify-between">
         <div className="max-w-sm">
-          <p className="text-sm font-semibold text-[#15263c] dark:text-[#eef3f8]">Get the market read</p>
+          <p className="text-sm font-semibold text-[#123d2c] dark:text-[#eef3f8]">Get the market read</p>
           <p className="mt-1 text-xs text-[#4c5d75] dark:text-[#8fa5bb]">
             Evidence-based moves in the enterprise-AI market — who&apos;s rising, who&apos;s exposed,
             and who relies on whom. Double opt-in, no spam.

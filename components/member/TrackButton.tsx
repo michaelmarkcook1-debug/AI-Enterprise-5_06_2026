@@ -110,8 +110,8 @@ export default function TrackButton({
   const base =
     "inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors disabled:opacity-60";
   const tone = tracked
-    ? "border-[#b08d2f] bg-[#b08d2f] text-white dark:border-[#d4af37] dark:bg-[#d4af37] dark:text-[#0a1f38]"
-    : "border-black/15 text-[#15263c] hover:border-[#b08d2f]/60 dark:border-white/20 dark:text-[#eef3f8]";
+    ? "border-[#b08d2f] bg-[#b08d2f] text-white dark:border-[#d4af37] dark:bg-[#d4af37] dark:text-[#0b2519]"
+    : "border-black/15 text-[#123d2c] hover:border-[#b08d2f]/60 dark:border-white/20 dark:text-[#eef3f8]";
   const text = busy ? "…" : tracked ? "Tracking ✓" : "+ Track";
 
   return (

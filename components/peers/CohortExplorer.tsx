@@ -29,7 +29,7 @@ import { MATURITY_LEVELS, type MaturityId } from "@/lib/usecase-front-door";
 import { TRACKED_VENDOR_NAMES } from "@/lib/sourcing/ai-news-manifest";
 import PeerBenchmark from "./PeerBenchmark";
 
-const MUTED = "text-[#15263c]/65 dark:text-[#eef3f8]/60";
+const MUTED = "text-[#123d2c]/65 dark:text-[#eef3f8]/60";
 const CARD = "rounded-xl border border-black/10 dark:border-white/10 bg-white/60 dark:bg-white/5";
 
 const SEGMENT_KEY = "ae_peer_segment";
@@ -111,14 +111,14 @@ export default function CohortExplorer() {
 
   const verticalLabel = VERTICALS.find((v) => v.id === segment.vertical)?.label ?? segment.vertical;
   const selectCls =
-    "rounded-md border border-black/15 bg-white/80 px-2 py-1.5 text-sm font-medium dark:border-white/15 dark:bg-[#0a1f38]";
+    "rounded-md border border-black/15 bg-white/80 px-2 py-1.5 text-sm font-medium dark:border-white/15 dark:bg-[#0b2519]";
 
   return (
     <div className="space-y-5">
       {/* ── Segment bar — one input, up top ── */}
       <section className={`${CARD} p-4`}>
         <div className="flex flex-wrap items-center gap-2.5">
-          <span className="text-sm font-semibold text-[#13294b] dark:text-[#eef3f8]">Enterprises like mine:</span>
+          <span className="text-sm font-semibold text-[#123d2c] dark:text-[#eef3f8]">Enterprises like mine:</span>
           <select aria-label="Industry" value={segment.vertical} onChange={(e) => update({ vertical: e.target.value as Segment["vertical"] })} className={selectCls}>
             {VERTICALS.map((v) => <option key={v.id} value={v.id}>{v.label}</option>)}
           </select>
@@ -137,7 +137,7 @@ export default function CohortExplorer() {
           <p className="text-xs font-semibold uppercase tracking-wider text-[#a07f1f] dark:text-[#d4af37]">
             How your cohort is adopting AI
           </p>
-          <p className="mt-2 max-w-3xl text-xl font-semibold leading-snug text-[#13294b] dark:text-[#eef3f8]">
+          <p className="mt-2 max-w-3xl text-xl font-semibold leading-snug text-[#123d2c] dark:text-[#eef3f8]">
             {headline.headline}
           </p>
           <p className={`mt-2 text-sm ${MUTED}`}>
@@ -151,7 +151,7 @@ export default function CohortExplorer() {
           {/* Are you behind? — inline, the buyer's #1 question. */}
           <div className="mt-5 border-t border-[#e6dcc3]/70 pt-4 dark:border-[#2a4a6b]/50">
             <div className="flex flex-wrap items-center gap-2.5">
-              <span className="text-sm font-semibold text-[#13294b] dark:text-[#eef3f8]">Where do you sit?</span>
+              <span className="text-sm font-semibold text-[#123d2c] dark:text-[#eef3f8]">Where do you sit?</span>
               <select aria-label="Your AI maturity" value={maturity} onChange={(e) => saveMaturity(e.target.value as MaturityId | "")} className={selectCls}>
                 <option value="">Select your AI maturity…</option>
                 {MATURITY_LEVELS.map((m) => <option key={m.id} value={m.id}>{m.label}</option>)}
@@ -193,7 +193,7 @@ export default function CohortExplorer() {
       {/* ── What your peers are running: vendors + use-cases ── */}
       {(platforms.length > 0 || (benchmark && benchmark.topUseCases.length > 0)) && (
         <section className={`${CARD} p-5`}>
-          <h2 className="text-base font-semibold text-[#13294b] dark:text-[#eef3f8]">What your peers are running</h2>
+          <h2 className="text-base font-semibold text-[#123d2c] dark:text-[#eef3f8]">What your peers are running</h2>
           {platforms.length > 0 && (
             <div className="mt-3">
               <p className={`mb-1.5 text-xs font-semibold uppercase tracking-wide ${MUTED}`}>AI platforms they&apos;ve disclosed adopting</p>
@@ -238,7 +238,7 @@ export default function CohortExplorer() {
 
       {/* ── Who specifically — named exemplars ── */}
       <section>
-        <h2 className="text-base font-semibold text-[#13294b] dark:text-[#eef3f8]">Who specifically — named deployments</h2>
+        <h2 className="text-base font-semibold text-[#123d2c] dark:text-[#eef3f8]">Who specifically — named deployments</h2>
         <p className={`mt-0.5 mb-3 text-xs ${MUTED}`}>
           Companies in your cohort with publicly disclosed AI deployments — cited, disclosure-only, never private usage.
         </p>

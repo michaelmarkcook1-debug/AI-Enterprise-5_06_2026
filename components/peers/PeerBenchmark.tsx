@@ -16,7 +16,7 @@ import { buildPeerHeatmap, LEVEL_LABELS, SIGNAL_KINDS } from "@/lib/peer/heatmap
 import { TRACKED_VENDOR_NAMES } from "@/lib/sourcing/ai-news-manifest";
 import type { PeerSignal } from "@/lib/peer/types";
 
-const MUTED = "text-[#15263c]/65 dark:text-[#eef3f8]/60";
+const MUTED = "text-[#123d2c]/65 dark:text-[#eef3f8]/60";
 const CARD = "rounded-xl border border-black/10 dark:border-white/10 bg-white/60 dark:bg-white/5";
 
 const ORG_KEY = "ae_peer_primary_org";
@@ -128,7 +128,7 @@ export default function PeerBenchmark({ companyIds }: { companyIds?: string[] } 
             <select
               value={orgId}
               onChange={(e) => saveOrg(e.target.value)}
-              className="rounded-md border border-black/15 bg-white/80 px-2 py-1.5 text-sm dark:border-white/15 dark:bg-[#0a1f38]"
+              className="rounded-md border border-black/15 bg-white/80 px-2 py-1.5 text-sm dark:border-white/15 dark:bg-[#0b2519]"
             >
               <option value="">— not selected —</option>
               {COMPANIES.map((c) => (
@@ -291,7 +291,7 @@ export default function PeerBenchmark({ companyIds }: { companyIds?: string[] } 
                   <ul className={`mt-1.5 space-y-0.5 text-xs ${MUTED}`}>
                     {(s.citations ?? []).map((cite) => (
                       <li key={cite.url}>
-                        <a href={cite.url} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-[#15263c] dark:hover:text-[#eef3f8]">
+                        <a href={cite.url} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-[#123d2c] dark:hover:text-[#eef3f8]">
                           {cite.title}
                         </a>{" "}
                         — {cite.publisher}

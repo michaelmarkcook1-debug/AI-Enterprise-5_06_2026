@@ -93,7 +93,7 @@ export default function AppNav({
   }
 
   return (
-    <header className="sticky top-0 z-30 border-b border-[#d4af37]/30 bg-[#0a1f38]/[0.97] backdrop-blur dark:border-[#d4af37]/20 dark:bg-[#071827]/[0.97]">
+    <header className="sticky top-0 z-30 border-b border-[#d4af37]/30 bg-[#0b2519]/[0.97] backdrop-blur dark:border-[#d4af37]/20 dark:bg-[#081410]/[0.97]">
       <div className="mx-auto flex h-14 max-w-6xl items-center gap-6 px-5">
         <Link href="/" className="flex items-center" aria-label="AI Enterprise — home">
           <BrandLogo size={30} onDark />
@@ -133,7 +133,7 @@ export default function AppNav({
           ) : (
             <Link
               href="/subscribe"
-              className="hidden rounded-full bg-[#d4af37] px-3.5 py-1.5 text-xs font-semibold text-[#0a1f38] transition-colors hover:bg-[#e8c95c] md:inline-block"
+              className="hidden rounded-full bg-[#d4af37] px-3.5 py-1.5 text-xs font-semibold text-[#0b2519] transition-colors hover:bg-[#e8c95c] md:inline-block"
             >
               Get the market read
             </Link>
@@ -163,7 +163,7 @@ export default function AppNav({
       </div>
 
       {open && (
-        <nav id="app-mobile-nav" className="border-t border-white/10 bg-[#0a1f38] px-4 py-3 md:hidden" aria-label="Mobile navigation">
+        <nav id="app-mobile-nav" className="border-t border-white/10 bg-[#0b2519] px-4 py-3 md:hidden" aria-label="Mobile navigation">
           <ul className="flex flex-col gap-1 text-sm">
             {NAV.map((n) => (
               <li key={n.label}>
@@ -173,7 +173,7 @@ export default function AppNav({
                   aria-current={isActive(pathname, n.href) ? "page" : undefined}
                   className={`block rounded-md px-3 py-2.5 transition-colors ${
                     isActive(pathname, n.href)
-                      ? "bg-[#d4af37] font-semibold !text-[#0a1f38]"
+                      ? "bg-[#d4af37] font-semibold !text-[#0b2519]"
                       : "font-medium text-[#c2d1e0] hover:bg-white/[0.06] hover:text-white"
                   }`}
                 >
@@ -199,7 +199,7 @@ export default function AppNav({
                 <Link
                   href="/subscribe"
                   onClick={() => setOpen(false)}
-                  className="rounded-full bg-[#d4af37] px-3 py-1.5 text-xs font-semibold text-[#0a1f38]"
+                  className="rounded-full bg-[#d4af37] px-3 py-1.5 text-xs font-semibold text-[#0b2519]"
                 >
                   Get the market read
                 </Link>

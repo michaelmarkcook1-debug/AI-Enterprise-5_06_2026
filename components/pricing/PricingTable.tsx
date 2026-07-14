@@ -7,7 +7,7 @@
 import { useState } from "react";
 import Link from "next/link";
 
-const MUTED = "text-[#15263c]/65 dark:text-[#eef3f8]/60";
+const MUTED = "text-[#123d2c]/65 dark:text-[#eef3f8]/60";
 const GOLD = "text-[#b08d2f] dark:text-[#d4af37]";
 
 export interface PlanView {
@@ -53,7 +53,7 @@ export default function PricingTable({ plans, matrix, billingLive }: PricingTabl
           type="button"
           onClick={() => setAnnual(false)}
           className={`rounded-full px-4 py-1.5 text-sm font-medium transition ${
-            !annual ? "bg-[#15263c] text-white dark:bg-white dark:text-[#0a1f38]" : MUTED
+            !annual ? "bg-[#123d2c] text-white dark:bg-white dark:text-[#0b2519]" : MUTED
           }`}
         >
           Monthly
@@ -62,7 +62,7 @@ export default function PricingTable({ plans, matrix, billingLive }: PricingTabl
           type="button"
           onClick={() => setAnnual(true)}
           className={`rounded-full px-4 py-1.5 text-sm font-medium transition ${
-            annual ? "bg-[#15263c] text-white dark:bg-white dark:text-[#0a1f38]" : MUTED
+            annual ? "bg-[#123d2c] text-white dark:bg-white dark:text-[#0b2519]" : MUTED
           }`}
         >
           Annual <span className={annual ? "text-[#d4af37]" : GOLD}>· ~17% off</span>
@@ -120,8 +120,8 @@ export default function PricingTable({ plans, matrix, billingLive }: PricingTabl
                   href="/subscribe"
                   className={`block rounded-lg px-4 py-2 text-center text-sm font-semibold ${
                     plan.highlighted
-                      ? "bg-[#d4af37] text-[#0a1f38] hover:bg-[#c9a230]"
-                      : "bg-[#15263c] text-white hover:bg-[#1d3350] dark:bg-white dark:text-[#0a1f38] dark:hover:bg-white/90"
+                      ? "bg-[#d4af37] text-[#0b2519] hover:bg-[#c9a230]"
+                      : "bg-[#123d2c] text-white hover:bg-[#1d3350] dark:bg-white dark:text-[#0b2519] dark:hover:bg-white/90"
                   }`}
                 >
                   {billingLive ? "Start free trial" : "Notify me at launch"}

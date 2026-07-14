@@ -96,7 +96,7 @@ export default function ImplementationPartnersPanel({
   );
 
   const selectCls =
-    "rounded border border-[#e0d6ba] bg-white px-2 py-1 text-xs dark:border-[#2a4a6b] dark:bg-[#0c2238] dark:text-[#eef3f8]";
+    "rounded border border-[#e0d6ba] bg-white px-2 py-1 text-xs dark:border-[#2a4a6b] dark:bg-[#0d1f17] dark:text-[#eef3f8]";
 
   return (
     <div>
@@ -151,9 +151,9 @@ export default function ImplementationPartnersPanel({
                 </div>
                 <div className="grid gap-2 sm:grid-cols-2">
                   {rows.map((p) => (
-                    <div key={`${p.deliveryPartnerId}-${p.partnershipTier}`} className="rounded-lg border border-[#e9e0c8] p-3 dark:border-[#1d3a57]">
+                    <div key={`${p.deliveryPartnerId}-${p.partnershipTier}`} className="rounded-lg border border-[#e9e0c8] p-3 dark:border-[#223a2e]">
                       <div className="flex flex-wrap items-center justify-between gap-2">
-                        <span className="text-sm font-semibold text-[#13294b] dark:text-[#eef3f8]">
+                        <span className="text-sm font-semibold text-[#123d2c] dark:text-[#eef3f8]">
                           {p.partnerName}
                           {p.platformHybrid && (
                             <span className="ml-1.5 rounded border border-fuchsia-300 bg-fuchsia-50 px-1 py-0.5 text-[9px] font-semibold text-fuchsia-800 dark:border-fuchsia-800 dark:bg-fuchsia-950/50 dark:text-fuchsia-300">

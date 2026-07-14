@@ -169,7 +169,7 @@ export default function IngestionTrigger() {
   const okSoFar = steps.filter((s) => s.ok).length;
 
   return (
-    <div className="rounded-2xl border border-[#e3d9c0] bg-white p-6 shadow-sm dark:border-[#1d3a57] dark:bg-[#0c2238]">
+    <div className="rounded-2xl border border-[#e3d9c0] bg-white p-6 shadow-sm dark:border-[#223a2e] dark:bg-[#0d1f17]">
       <div className="flex items-start justify-between gap-3">
         <div>
           <div className="text-xs font-semibold uppercase tracking-wider text-[#4c5d75] dark:text-[#a7bacd]">
@@ -192,7 +192,7 @@ export default function IngestionTrigger() {
           <button
             type="button"
             onClick={() => setPhase("confirming")}
-            className="inline-flex items-center gap-2 rounded-full bg-[#0c2238] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#1c3d5c] dark:bg-white dark:text-[#13294b] dark:hover:bg-[#e3d9c0]"
+            className="inline-flex items-center gap-2 rounded-full bg-[#0d1f17] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#1c3d5c] dark:bg-white dark:text-[#123d2c] dark:hover:bg-[#e3d9c0]"
           >
             Run full ingestion now
             <span aria-hidden>→</span>
@@ -261,7 +261,7 @@ export default function IngestionTrigger() {
               value={token}
               onChange={(e) => setToken(e.target.value)}
               type="password"
-              className="w-full rounded-lg border border-red-300 bg-white px-3 py-2 text-sm dark:border-red-800 dark:bg-[#0c2238]"
+              className="w-full rounded-lg border border-red-300 bg-white px-3 py-2 text-sm dark:border-red-800 dark:bg-[#0d1f17]"
             />
           </label>
 
@@ -286,7 +286,7 @@ export default function IngestionTrigger() {
 
       {/* Running → live progress from the background run */}
       {phase === "running" && (
-        <div className="mt-4 rounded-xl border border-[#e3d9c0] bg-[#f6f1e3] px-4 py-3 dark:border-[#1d3a57] dark:bg-[#081c30]/40">
+        <div className="mt-4 rounded-xl border border-[#e3d9c0] bg-[#f6f1e3] px-4 py-3 dark:border-[#223a2e] dark:bg-[#081c30]/40">
           <div className="flex items-center gap-3 text-sm font-medium text-[#2e3f57] dark:text-[#c2d1e0]">
             <span className="h-3 w-3 animate-spin rounded-full border-2 border-[#9fb0c4] border-t-transparent" aria-hidden />
             Running in the background — {elapsedSec}s elapsed

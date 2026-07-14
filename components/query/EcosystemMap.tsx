@@ -68,7 +68,7 @@ export default function EcosystemMap({ layers }: Props) {
           <div key={layer.id}>
             {/* Layer card */}
             <div
-              className={`relative rounded-2xl border-2 transition-all duration-200 ${layer.color.border} ${isExpanded ? layer.color.bg : "bg-white dark:bg-[#0c2238]"} ${isExpanded ? "" : `hover:${layer.color.bgHover} cursor-pointer`}`}
+              className={`relative rounded-2xl border-2 transition-all duration-200 ${layer.color.border} ${isExpanded ? layer.color.bg : "bg-white dark:bg-[#0d1f17]"} ${isExpanded ? "" : `hover:${layer.color.bgHover} cursor-pointer`}`}
               onClick={() => !isExpanded && setExpanded(layer.id)}
               role={isExpanded ? undefined : "button"}
               tabIndex={isExpanded ? undefined : 0}
@@ -91,7 +91,7 @@ export default function EcosystemMap({ layers }: Props) {
                     </p>
                   </div>
                   <div className="flex items-center gap-3 shrink-0">
-                    <span className="rounded-full bg-white/60 px-2.5 py-1 text-[11px] font-semibold text-[#13294b] dark:bg-[#143049]/60 dark:text-[#d8e2ec]">
+                    <span className="rounded-full bg-white/60 px-2.5 py-1 text-[11px] font-semibold text-[#123d2c] dark:bg-[#143049]/60 dark:text-[#d8e2ec]">
                       {vendorCount} vendors
                     </span>
                     <button
@@ -138,11 +138,11 @@ export default function EcosystemMap({ layers }: Props) {
                   <div className="mb-5 grid gap-3 md:grid-cols-2">
                     <div className="rounded-lg bg-white/70 p-3 dark:bg-[#143049]/50">
                       <div className="text-[10px] font-semibold uppercase tracking-wider text-[#5b6b7f] dark:text-[#8fa5bb]">What it does</div>
-                      <p className="mt-1 text-sm leading-5 text-[#13294b] dark:text-[#eef3f8]">{layer.whatItDoes}</p>
+                      <p className="mt-1 text-sm leading-5 text-[#123d2c] dark:text-[#eef3f8]">{layer.whatItDoes}</p>
                     </div>
                     <div className="rounded-lg bg-white/70 p-3 dark:bg-[#143049]/50">
                       <div className="text-[10px] font-semibold uppercase tracking-wider text-[#5b6b7f] dark:text-[#8fa5bb]">Why it matters</div>
-                      <p className="mt-1 text-sm leading-5 text-[#13294b] dark:text-[#eef3f8]">{layer.whyCare}</p>
+                      <p className="mt-1 text-sm leading-5 text-[#123d2c] dark:text-[#eef3f8]">{layer.whyCare}</p>
                     </div>
                   </div>
 
@@ -173,7 +173,7 @@ export default function EcosystemMap({ layers }: Props) {
                         onMouseLeave={() => setTooltip(null)}
                       >
                         <div className="flex items-center justify-between gap-2">
-                          <span className="text-sm font-semibold text-[#13294b] dark:text-[#eef3f8]">{v.name}</span>
+                          <span className="text-sm font-semibold text-[#123d2c] dark:text-[#eef3f8]">{v.name}</span>
                           <div className="flex items-center gap-1.5">
                             {/* Momentum arrow */}
                             <span className={`text-[10px] font-bold ${
@@ -195,7 +195,7 @@ export default function EcosystemMap({ layers }: Props) {
 
                         {/* Tooltip on hover */}
                         {tooltip?.layerId === layer.id && tooltip?.vendorId === v.id && (
-                          <div className="absolute left-0 right-0 -bottom-1 translate-y-full z-10 rounded-lg border border-[#e6dcc3] bg-white p-3 shadow-lg dark:border-[#2a4a6b] dark:bg-[#0c2238]">
+                          <div className="absolute left-0 right-0 -bottom-1 translate-y-full z-10 rounded-lg border border-[#e6dcc3] bg-white p-3 shadow-lg dark:border-[#2a4a6b] dark:bg-[#0d1f17]">
                             <p className="text-xs leading-4 text-[#475a72] dark:text-[#c2d1e0]">{v.description}</p>
                             <div className="mt-2 flex items-center gap-3 text-[10px] text-[#5b6b7f] dark:text-[#8fa5bb]">
                               <span>Data confidence: {v.confidenceScore}%</span>

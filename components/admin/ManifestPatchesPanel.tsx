@@ -29,7 +29,7 @@ type PatchRow = {
 export default function ManifestPatchesPanel({ patches }: { patches: PatchRow[] }) {
   if (patches.length === 0) {
     return (
-      <section className="mt-8 rounded-2xl border border-[#e3d9c0] bg-white p-6 dark:border-[#1d3a57] dark:bg-[#0c2238]">
+      <section className="mt-8 rounded-2xl border border-[#e3d9c0] bg-white p-6 dark:border-[#223a2e] dark:bg-[#0d1f17]">
         <h2 className="text-lg font-semibold">Manifest patches (URL-repair agent)</h2>
         <p className="mt-2 text-sm text-[#3f5068] dark:text-[#a7bacd]">
           No pending patches. The URL-repair agent fires automatically when an ingest
@@ -40,7 +40,7 @@ export default function ManifestPatchesPanel({ patches }: { patches: PatchRow[] 
   }
 
   return (
-    <section className="mt-8 rounded-2xl border border-[#e3d9c0] bg-white p-6 dark:border-[#1d3a57] dark:bg-[#0c2238]">
+    <section className="mt-8 rounded-2xl border border-[#e3d9c0] bg-white p-6 dark:border-[#223a2e] dark:bg-[#0d1f17]">
       <div className="flex flex-wrap items-end justify-between gap-2">
         <div>
           <h2 className="text-lg font-semibold">Manifest patches (URL-repair agent)</h2>
@@ -72,8 +72,8 @@ export default function ManifestPatchesPanel({ patches }: { patches: PatchRow[] 
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2 text-xs">
-                    <span className="font-semibold text-[#15263c] dark:text-[#eef3f8]">{p.vendorName}</span>
-                    <span className="rounded-full border border-[#d6c9a8] bg-white px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-[#2e3f57] dark:border-[#2a4a6b] dark:bg-[#0c2238] dark:text-[#c2d1e0]">
+                    <span className="font-semibold text-[#123d2c] dark:text-[#eef3f8]">{p.vendorName}</span>
+                    <span className="rounded-full border border-[#d6c9a8] bg-white px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-[#2e3f57] dark:border-[#2a4a6b] dark:bg-[#0d1f17] dark:text-[#c2d1e0]">
                       {p.category.replace(/_/g, " ")}
                     </span>
                     <span className="rounded-full bg-rose-100 px-2 py-0.5 text-xs font-semibold text-rose-800 dark:bg-rose-950/40 dark:text-rose-300">
@@ -106,7 +106,7 @@ export default function ManifestPatchesPanel({ patches }: { patches: PatchRow[] 
                       Cited:{" "}
                       {p.citations.map((c, i) => (
                         <span key={c}>
-                          <a href={c} target="_blank" rel="noopener noreferrer" className="underline hover:text-[#15263c] dark:hover:text-[#d8e2ec]">{shortHost(c)}</a>
+                          <a href={c} target="_blank" rel="noopener noreferrer" className="underline hover:text-[#123d2c] dark:hover:text-[#d8e2ec]">{shortHost(c)}</a>
                           {i < p.citations.length - 1 ? ", " : ""}
                         </span>
                       ))}
@@ -115,7 +115,7 @@ export default function ManifestPatchesPanel({ patches }: { patches: PatchRow[] 
                 </div>
                 <div className="text-right text-xs">
                   <div className="text-xs uppercase tracking-wide text-[#4c5d75]">Confidence</div>
-                  <div className="mt-0.5 font-mono text-2xl font-bold tabular-nums text-[#15263c] dark:text-[#eef3f8]">{conf}</div>
+                  <div className="mt-0.5 font-mono text-2xl font-bold tabular-nums text-[#123d2c] dark:text-[#eef3f8]">{conf}</div>
                   <div className="mt-1 text-xs text-[#4c5d75]">{p.searchesUsed} web searches</div>
                 </div>
               </div>

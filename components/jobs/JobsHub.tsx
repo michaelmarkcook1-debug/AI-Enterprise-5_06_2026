@@ -11,7 +11,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { VERTICALS, SIZE_BANDS, REGIONS, type Segment } from "@/lib/peer/segments";
 
-const MUTED = "text-[#15263c]/65 dark:text-[#eef3f8]/60";
+const MUTED = "text-[#123d2c]/65 dark:text-[#eef3f8]/60";
 const SEGMENT_KEY = "ae_peer_segment";
 
 const PRIMARY = [
@@ -68,7 +68,7 @@ export default function JobsHub() {
             href={j.href}
             className="group flex flex-col rounded-2xl border border-[#d4af37]/40 bg-[#fbf6e4]/40 p-5 transition-colors hover:border-[#d4af37] dark:border-[#d4af37]/30 dark:bg-[#1a1605]/20"
           >
-            <h3 className="text-lg font-semibold text-[#13294b] dark:text-[#eef3f8]">{j.title}</h3>
+            <h3 className="text-lg font-semibold text-[#123d2c] dark:text-[#eef3f8]">{j.title}</h3>
             <p className={`mt-1.5 flex-1 text-sm leading-6 ${MUTED}`}>{j.detail}</p>
             <span className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-[#a07f1f] dark:text-[#d4af37]">
               {j.cta} <span aria-hidden className="transition-transform group-hover:translate-x-0.5">→</span>

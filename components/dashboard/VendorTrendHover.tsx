@@ -77,7 +77,7 @@ export default function VendorTrendHover({ vendorName, history, tone, children }
         className="pointer-events-none invisible absolute bottom-[calc(100%+8px)] left-1/2 z-50 w-[330px] -translate-x-1/2 rounded-lg border border-[#e6dcc3] bg-white p-3 opacity-0 shadow-xl transition-opacity duration-150 group-hover/trend:visible group-hover/trend:opacity-100 group-focus-within/trend:visible group-focus-within/trend:opacity-100 dark:border-[#2a4a6b] dark:bg-[#0b1f30]"
       >
         <div className="flex items-baseline justify-between gap-2">
-          <div className="text-xs font-semibold text-[#13294b] dark:text-[#eef3f8]">{vendorName}</div>
+          <div className="text-xs font-semibold text-[#123d2c] dark:text-[#eef3f8]">{vendorName}</div>
           <div className="text-[10px] uppercase tracking-wide text-[#8a9382] dark:text-[#8fa5bb]">Ranking trend</div>
         </div>
         <div className="mt-0.5 text-[10px] text-[#5e6b7e] dark:text-[#8fa5bb]">
@@ -132,24 +132,24 @@ export default function VendorTrendHover({ vendorName, history, tone, children }
           <span>{formatDate(last.date)}</span>
         </div>
 
-        <div className="mt-2 grid grid-cols-3 gap-2 border-t border-[#efe9d9] pt-2 dark:border-[#1d3a57]">
+        <div className="mt-2 grid grid-cols-3 gap-2 border-t border-[#efe9d9] pt-2 dark:border-[#223a2e]">
           <div>
             <div className="text-[9px] uppercase tracking-wide text-[#8a9382] dark:text-[#8fa5bb]">Score</div>
-            <div className="font-mono text-sm font-semibold text-[#13294b] dark:text-[#eef3f8]">{last.score.toFixed(1)}</div>
+            <div className="font-mono text-sm font-semibold text-[#123d2c] dark:text-[#eef3f8]">{last.score.toFixed(1)}</div>
             <div className={`text-[10px] font-medium ${scoreUp ? "text-emerald-700 dark:text-emerald-400" : "text-rose-700 dark:text-rose-400"}`}>
               {scoreUp ? "▲" : "▼"} {scoreUp ? "+" : ""}{scoreDelta.toFixed(1)}
             </div>
           </div>
           <div>
             <div className="text-[9px] uppercase tracking-wide text-[#8a9382] dark:text-[#8fa5bb]">Rank</div>
-            <div className="font-mono text-sm font-semibold text-[#13294b] dark:text-[#eef3f8]">#{last.rank}</div>
+            <div className="font-mono text-sm font-semibold text-[#123d2c] dark:text-[#eef3f8]">#{last.rank}</div>
             <div className={`text-[10px] font-medium ${rankUp ? "text-emerald-700 dark:text-emerald-400" : "text-rose-700 dark:text-rose-400"}`}>
               {rankUp ? "▲" : "▼"} {rankDelta === 0 ? "flat" : `${Math.abs(rankDelta)} ${rankDelta >= 0 ? "up" : "down"}`}
             </div>
           </div>
           <div>
             <div className="text-[9px] uppercase tracking-wide text-[#8a9382] dark:text-[#8fa5bb]">Momentum</div>
-            <div className="font-mono text-sm font-semibold text-[#13294b] dark:text-[#eef3f8]">{last.momentum.toFixed(0)}</div>
+            <div className="font-mono text-sm font-semibold text-[#123d2c] dark:text-[#eef3f8]">{last.momentum.toFixed(0)}</div>
             <div className="text-[10px] text-[#8a9382] dark:text-[#8fa5bb]">/100</div>
           </div>
         </div>

@@ -89,7 +89,7 @@ export default function SuggestInput({
   }
 
   const OPT_BASE =
-    "cursor-pointer px-2 py-1.5 text-xs leading-snug text-[#13294b] dark:text-[#eef3f8]";
+    "cursor-pointer px-2 py-1.5 text-xs leading-snug text-[#123d2c] dark:text-[#eef3f8]";
   const OPT_ACTIVE = "bg-[#f3ead0] dark:bg-[#153a5c]";
 
   return (
@@ -133,7 +133,7 @@ export default function SuggestInput({
         <ul
           role="listbox"
           id={listId}
-          className="absolute z-20 mt-1 max-h-56 w-full overflow-auto rounded-md border border-[#d6c9a8] bg-white py-1 shadow-lg dark:border-[#2a4a6b] dark:bg-[#0c2238]"
+          className="absolute z-20 mt-1 max-h-56 w-full overflow-auto rounded-md border border-[#d6c9a8] bg-white py-1 shadow-lg dark:border-[#2a4a6b] dark:bg-[#0d1f17]"
         >
           <li
             role="option"
@@ -148,7 +148,7 @@ export default function SuggestInput({
             {FREE_TEXT_LABEL}
           </li>
           {suggestions.length > 0 && (
-            <li role="presentation" className="my-1 border-t border-[#ece4d0] dark:border-[#1d3a57]" aria-hidden />
+            <li role="presentation" className="my-1 border-t border-[#ece4d0] dark:border-[#223a2e]" aria-hidden />
           )}
           {suggestions.map((s, i) => (
             <li

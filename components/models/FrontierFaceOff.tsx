@@ -12,7 +12,7 @@ import type { FrontierColumn, FrontierComparison } from "@/lib/model-inventory/f
 import { COMPARE_CATEGORIES } from "@/lib/model-inventory/frontier";
 
 const CARD = "rounded-xl border border-black/10 dark:border-white/10 bg-white/60 dark:bg-white/5 p-5";
-const MUTED = "text-[#15263c]/65 dark:text-[#eef3f8]/60";
+const MUTED = "text-[#123d2c]/65 dark:text-[#eef3f8]/60";
 
 function fmt(n: number | undefined): string {
   return typeof n === "number" ? n.toFixed(1) : "—";
@@ -79,7 +79,7 @@ export default function FrontierFaceOff({
         like for like.
       </p>
       {summary && (
-        <p className="mb-4 text-sm leading-5 text-[#13294b] dark:text-[#eef3f8]">{summary}</p>
+        <p className="mb-4 text-sm leading-5 text-[#123d2c] dark:text-[#eef3f8]">{summary}</p>
       )}
 
       <div className="overflow-x-auto">
@@ -105,7 +105,7 @@ export default function FrontierFaceOff({
                   return (
                     <td key={col.vendorId} className="py-2 px-3 tabular-nums">
                       {typeof value === "number" ? (
-                        <span className={isLeader ? "font-semibold text-[#13294b] dark:text-[#eef3f8]" : undefined}>
+                        <span className={isLeader ? "font-semibold text-[#123d2c] dark:text-[#eef3f8]" : undefined}>
                           {fmt(value)}
                         </span>
                       ) : elsewhere ? (

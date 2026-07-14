@@ -9,7 +9,7 @@ import { DOMAIN_LABEL } from "@/lib/assessment/domain-labels";
 // existing evidence-graded domain score, and an unscored domain reads
 // "insufficient" exactly as it does everywhere else — no fabrication, one engine.
 
-const MUTED = "text-[#15263c]/65 dark:text-[#eef3f8]/60";
+const MUTED = "text-[#123d2c]/65 dark:text-[#eef3f8]/60";
 
 export interface IntelVendor {
   vendorId: string;
@@ -20,8 +20,8 @@ export interface IntelVendor {
 
 /** 0–5 → gold intensity (on-brand, theme-safe). Insufficient renders blank. */
 function cellStyle(score: number): string {
-  if (score >= 4) return "bg-[#d4af37]/80 text-[#0a1f38]";
-  if (score >= 3) return "bg-[#d4af37]/55 text-[#0a1f38]";
+  if (score >= 4) return "bg-[#d4af37]/80 text-[#0b2519]";
+  if (score >= 3) return "bg-[#d4af37]/55 text-[#0b2519]";
   if (score >= 2) return "bg-[#d4af37]/35";
   if (score >= 1) return "bg-[#d4af37]/18";
   return "bg-[#d4af37]/8";

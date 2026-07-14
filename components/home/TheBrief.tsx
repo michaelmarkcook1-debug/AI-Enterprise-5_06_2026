@@ -6,7 +6,7 @@
 import Link from "next/link";
 import type { MarketBrief } from "@/lib/brief/market-brief";
 
-const MUTED = "text-[#15263c]/65 dark:text-[#eef3f8]/60";
+const MUTED = "text-[#123d2c]/65 dark:text-[#eef3f8]/60";
 
 function fmt(iso: string): string {
   const t = Date.parse(iso);
@@ -15,7 +15,7 @@ function fmt(iso: string): string {
 }
 
 const KIND: Record<"news" | "model", { label: string; cls: string }> = {
-  news: { label: "News", cls: "border-[#13294b]/15 text-[#13294b] dark:border-white/20 dark:text-[#c8d7e9]" },
+  news: { label: "News", cls: "border-[#123d2c]/15 text-[#123d2c] dark:border-white/20 dark:text-[#c8d7e9]" },
   model: { label: "New model", cls: "border-[#b08d2f]/40 bg-[#b08d2f]/10 text-[#8a6d1f] dark:text-[#d4af37]" },
 };
 
@@ -29,7 +29,7 @@ export default function TheBrief({ brief }: { brief: MarketBrief }) {
         <div className="flex items-baseline gap-3">
           <h2 className="font-[var(--font-display)] text-xl font-extrabold tracking-tight">The Brief</h2>
           {newCount > 0 && (
-            <span className="rounded-full bg-[#b08d2f] px-2 py-0.5 text-xs font-bold uppercase tracking-wide text-[#0a1f38]">
+            <span className="rounded-full bg-[#b08d2f] px-2 py-0.5 text-xs font-bold uppercase tracking-wide text-[#0b2519]">
               {newCount} new since you last looked
             </span>
           )}
@@ -51,7 +51,7 @@ export default function TheBrief({ brief }: { brief: MarketBrief }) {
                     href={it.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-sm font-medium text-[#13294b] underline-offset-2 hover:underline dark:text-[#eef3f8]"
+                    className="text-sm font-medium text-[#123d2c] underline-offset-2 hover:underline dark:text-[#eef3f8]"
                   >
                     {it.title}
                     <span aria-hidden className="ml-0.5 text-xs text-[#7a8aa0]">↗</span>
@@ -59,7 +59,7 @@ export default function TheBrief({ brief }: { brief: MarketBrief }) {
                 ) : (
                   <Link
                     href={it.href}
-                    className="text-sm font-medium text-[#13294b] underline-offset-2 hover:underline dark:text-[#eef3f8]"
+                    className="text-sm font-medium text-[#123d2c] underline-offset-2 hover:underline dark:text-[#eef3f8]"
                   >
                     {it.title}
                   </Link>
@@ -88,7 +88,7 @@ export default function TheBrief({ brief }: { brief: MarketBrief }) {
                   href={h.sourceUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="font-medium text-[#13294b] underline-offset-2 hover:underline dark:text-[#eef3f8]"
+                  className="font-medium text-[#123d2c] underline-offset-2 hover:underline dark:text-[#eef3f8]"
                 >
                   {h.shortName}
                 </a>

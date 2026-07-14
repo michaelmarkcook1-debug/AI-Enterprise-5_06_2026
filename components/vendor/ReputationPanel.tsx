@@ -55,9 +55,9 @@ function Pillar({
   themes: string[];
 }) {
   return (
-    <div className="rounded-lg border border-[#e9e0c8] bg-white p-3 dark:border-[#1d3a57] dark:bg-[#0c2238]/50">
+    <div className="rounded-lg border border-[#e9e0c8] bg-white p-3 dark:border-[#223a2e] dark:bg-[#0d1f17]/50">
       <div className="flex items-baseline justify-between gap-2">
-        <span className="text-sm font-semibold text-[#13294b] dark:text-[#eef3f8]">{label}</span>
+        <span className="text-sm font-semibold text-[#123d2c] dark:text-[#eef3f8]">{label}</span>
         <span className="flex items-center gap-2">
           <Badge status={status} />
           <span className={`font-mono text-lg font-bold tabular-nums ${scoreTone(overall)}`}>{overall}</span>
@@ -65,7 +65,7 @@ function Pillar({
       </div>
       <div className={`mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs uppercase tracking-wide ${MUTED}`}>
         {metrics.map((m) => (
-          <span key={m.k}>{m.k} <span className="font-mono tabular-nums text-[#13294b] dark:text-[#eef3f8]">{m.v}</span></span>
+          <span key={m.k}>{m.k} <span className="font-mono tabular-nums text-[#123d2c] dark:text-[#eef3f8]">{m.v}</span></span>
         ))}
       </div>
       {themes.length > 0 && <p className={`mt-2 text-xs leading-4 ${MUTED}`}>{themes.slice(0, 2).join(" · ")}</p>}
@@ -94,7 +94,7 @@ function GithubSignal({ signal }: { signal: LiveGitHubSignal }) {
         </span>
         <span className={`text-xs ${MUTED}`}>GitHub developer signal</span>
       </div>
-      <p className="mt-1.5 text-sm text-[#13294b] dark:text-[#eef3f8]">
+      <p className="mt-1.5 text-sm text-[#123d2c] dark:text-[#eef3f8]">
         <span className="font-mono font-semibold tabular-nums">{signal.stars.toLocaleString()}</span> stars ·{" "}
         <span className="font-mono font-semibold tabular-nums">{signal.forks.toLocaleString()}</span> forks ·{" "}
         <span className="font-mono font-semibold tabular-nums">{signal.openIssues.toLocaleString()}</span> open issues
@@ -104,7 +104,7 @@ function GithubSignal({ signal }: { signal: LiveGitHubSignal }) {
           href={`https://github.com/${signal.repo}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="underline underline-offset-2 hover:text-[#13294b] dark:hover:text-[#eef3f8]"
+          className="underline underline-offset-2 hover:text-[#123d2c] dark:hover:text-[#eef3f8]"
         >
           github.com/{signal.repo}
         </a>{" "}
@@ -120,9 +120,9 @@ function GithubSignal({ signal }: { signal: LiveGitHubSignal }) {
  *  reputation evidence still gets an honest, non-empty panel. */
 function SourcesFooter({ reviewSources }: { reviewSources?: { configured: boolean; contributing: boolean } }) {
   return (
-    <div className="mt-3 rounded-lg border border-[#e9e0c8] bg-[#faf6ec] p-2.5 dark:border-[#1d3a57] dark:bg-[#0c2238]/40">
+    <div className="mt-3 rounded-lg border border-[#e9e0c8] bg-[#faf6ec] p-2.5 dark:border-[#223a2e] dark:bg-[#0d1f17]/40">
       <p className={`text-xs leading-4 ${MUTED}`}>
-        <span className="font-semibold text-[#13294b] dark:text-[#d8e2ec]">Sources: </span>
+        <span className="font-semibold text-[#123d2c] dark:text-[#d8e2ec]">Sources: </span>
         reputation blends developer, employee and customer signals from public and operational
         evidence.{" "}
         {reviewSources?.contributing ? (
@@ -134,7 +134,7 @@ function SourcesFooter({ reviewSources }: { reviewSources?: { configured: boolea
         )}
       </p>
       <p className={`mt-1.5 text-xs leading-4 ${MUTED}`}>
-        <span className="font-semibold text-[#13294b] dark:text-[#d8e2ec]">Independence: </span>
+        <span className="font-semibold text-[#123d2c] dark:text-[#d8e2ec]">Independence: </span>
         analyst-house recognition (Gartner · Forrester · IDC) is deliberately <span className="font-medium">excluded</span> as a
         scored reputation signal. This tracker is the independent alternative to the paywalled
         houses — it does not launder their verdicts into a score.

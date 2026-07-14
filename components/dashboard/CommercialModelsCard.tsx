@@ -70,7 +70,7 @@ function SummaryStat({
       ? "border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-900/60 dark:bg-amber-950/40 dark:text-amber-300"
       : tone === "info"
         ? "border-sky-200 bg-sky-50 text-sky-800 dark:border-sky-900/60 dark:bg-sky-950/40 dark:text-sky-300"
-        : "border-[#e6dcc3] bg-[#faf6ec] text-[#475a72] dark:border-[#1d3a57] dark:bg-[#0c2238] dark:text-[#c2d1e0]";
+        : "border-[#e6dcc3] bg-[#faf6ec] text-[#475a72] dark:border-[#223a2e] dark:bg-[#0d1f17] dark:text-[#c2d1e0]";
   return (
     <div className={`rounded-md border px-3 py-2 ${toneClass}`}>
       <div className="text-xs font-semibold uppercase tracking-wide opacity-80">{label}</div>

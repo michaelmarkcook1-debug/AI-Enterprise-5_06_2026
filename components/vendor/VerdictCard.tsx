@@ -47,7 +47,7 @@ export default function VerdictCard({
     <div className="mb-6 rounded-xl border border-black/10 bg-white/70 p-5 dark:border-white/10 dark:bg-white/[0.04]">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
-          <h1 className="text-2xl font-semibold tracking-tight text-[#13294b] dark:text-[#f6f9fc]">{vendorName}</h1>
+          <h1 className="text-2xl font-semibold tracking-tight text-[#123d2c] dark:text-[#f6f9fc]">{vendorName}</h1>
           {standing && (
             <p className={`mt-0.5 text-sm ${MUTED}`}>
               <Link href={`/category/${standing.categoryId}`} className="hover:underline">
@@ -65,7 +65,7 @@ export default function VerdictCard({
             <span>
               {/* Neutral ink (no red↔green) — the badge + explicit confidence stat
                   beside it carry the qualitative read. */}
-              <span className="font-mono text-3xl font-semibold tabular-nums text-[#13294b] dark:text-[#eef3f8]">
+              <span className="font-mono text-3xl font-semibold tabular-nums text-[#123d2c] dark:text-[#eef3f8]">
                 {standing ? (
                   <ScoreTrendChart vendorId={vendorId} categoryId={standing.categoryId} vendorName={vendorName}>
                     {composite.toFixed(2)}
@@ -93,13 +93,13 @@ export default function VerdictCard({
         )}
         {confidence != null && (
           <div className="text-sm">
-            <span className="font-mono font-semibold text-[#13294b] dark:text-[#eef3f8]">{confidence}%</span>
+            <span className="font-mono font-semibold text-[#123d2c] dark:text-[#eef3f8]">{confidence}%</span>
             <span className={`ml-1 text-xs ${MUTED}`}>confidence</span>
           </div>
         )}
         {coverage != null && (
           <div className="text-sm">
-            <span className="font-mono font-semibold text-[#13294b] dark:text-[#eef3f8]">{Math.round(coverage * 100)}%</span>
+            <span className="font-mono font-semibold text-[#123d2c] dark:text-[#eef3f8]">{Math.round(coverage * 100)}%</span>
             <span className={`ml-1 text-xs ${MUTED}`}>coverage</span>
           </div>
         )}
@@ -116,18 +116,18 @@ export default function VerdictCard({
 
       {whySentence && <p className={`mt-3 text-sm leading-6 ${MUTED}`}>{whySentence}</p>}
 
-      <div className="mt-4 flex flex-wrap gap-2 border-t border-[#ece4d0] pt-4 dark:border-[#1d3a57]">
+      <div className="mt-4 flex flex-wrap gap-2 border-t border-[#ece4d0] pt-4 dark:border-[#223a2e]">
         <button
           type="button"
           onClick={onInterrogateClick}
-          className="rounded-full border border-[#d6c9a8] px-3 py-1.5 text-xs font-medium text-[#4c5d75] hover:bg-white dark:border-[#2a4a6b] dark:text-[#a7bacd] dark:hover:bg-[#0c2238]"
+          className="rounded-full border border-[#d6c9a8] px-3 py-1.5 text-xs font-medium text-[#4c5d75] hover:bg-white dark:border-[#2a4a6b] dark:text-[#a7bacd] dark:hover:bg-[#0d1f17]"
         >
           Interrogate for my context
         </button>
         <button
           type="button"
           onClick={onAddToDecisionClick}
-          className="rounded-full border border-[#d6c9a8] px-3 py-1.5 text-xs font-medium text-[#4c5d75] hover:bg-white dark:border-[#2a4a6b] dark:text-[#a7bacd] dark:hover:bg-[#0c2238]"
+          className="rounded-full border border-[#d6c9a8] px-3 py-1.5 text-xs font-medium text-[#4c5d75] hover:bg-white dark:border-[#2a4a6b] dark:text-[#a7bacd] dark:hover:bg-[#0d1f17]"
         >
           Add to decision
         </button>

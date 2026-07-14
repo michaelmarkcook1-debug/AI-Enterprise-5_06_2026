@@ -12,7 +12,7 @@
 
 import { useState } from "react";
 
-const MUTED = "text-[#15263c]/65 dark:text-[#eef3f8]/60";
+const MUTED = "text-[#123d2c]/65 dark:text-[#eef3f8]/60";
 
 type Status = "asking" | "submitting" | "done" | "error";
 
@@ -68,7 +68,7 @@ export default function ContributePrompt({ sessionId }: { sessionId: string }) {
         <button
           onClick={() => decide(true)}
           disabled={status === "submitting"}
-          className="rounded-md bg-[#13294b] px-3 py-1.5 text-xs font-medium text-white hover:bg-[#1c3a66] disabled:opacity-50 dark:bg-[#d4af37] dark:text-[#0a1f38]"
+          className="rounded-md bg-[#123d2c] px-3 py-1.5 text-xs font-medium text-white hover:bg-[#1c3a66] disabled:opacity-50 dark:bg-[#d4af37] dark:text-[#0b2519]"
         >
           {status === "submitting" ? "…" : "Yes, contribute"}
         </button>

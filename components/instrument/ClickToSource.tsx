@@ -62,10 +62,10 @@ export default function ClickToSource({ children, href, source, label = "source"
       {open && hasCard && (
         <span
           role="tooltip"
-          className="absolute top-full left-0 z-30 mt-1.5 w-56 rounded-lg border border-[#e6dcc3] bg-white p-2.5 text-left shadow-lg dark:border-[#2a4a6b] dark:bg-[#0c2238]"
+          className="absolute top-full left-0 z-30 mt-1.5 w-56 rounded-lg border border-[#e6dcc3] bg-white p-2.5 text-left shadow-lg dark:border-[#2a4a6b] dark:bg-[#0d1f17]"
         >
           {source?.title && (
-            <span className="block text-xs font-medium leading-snug text-[#13294b] dark:text-[#eef3f8]">
+            <span className="block text-xs font-medium leading-snug text-[#123d2c] dark:text-[#eef3f8]">
               {source.title}
             </span>
           )}

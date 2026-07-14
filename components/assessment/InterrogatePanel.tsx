@@ -211,7 +211,7 @@ export default function InterrogatePanel({
           <button
             type="button"
             onClick={() => setOpen((o) => !o)}
-            className="rounded-full border border-[#d6c9a8] px-3 py-1 text-xs font-medium text-[#4c5d75] hover:bg-white dark:border-[#2a4a6b] dark:text-[#a7bacd] dark:hover:bg-[#0c2238]"
+            className="rounded-full border border-[#d6c9a8] px-3 py-1 text-xs font-medium text-[#4c5d75] hover:bg-white dark:border-[#2a4a6b] dark:text-[#a7bacd] dark:hover:bg-[#0d1f17]"
           >
             {open ? "Hide" : lens ? "Refine context & re-run" : "Add your context"}
           </button>
@@ -239,7 +239,7 @@ export default function InterrogatePanel({
                     suggestions={INTERROGATE_SUGGESTIONS[f.key] ?? []}
                     placeholder={f.placeholder}
                     ariaLabel={f.label}
-                    inputClassName="w-full rounded-md border border-[#d6c9a8] bg-white/80 px-2 py-1 pr-7 text-xs text-[#13294b] placeholder:text-[#9aa7b8] focus:border-[#b08d2f] focus:outline-none dark:border-[#2a4a6b] dark:bg-[#0c2238] dark:text-[#eef3f8]"
+                    inputClassName="w-full rounded-md border border-[#d6c9a8] bg-white/80 px-2 py-1 pr-7 text-xs text-[#123d2c] placeholder:text-[#9aa7b8] focus:border-[#b08d2f] focus:outline-none dark:border-[#2a4a6b] dark:bg-[#0d1f17] dark:text-[#eef3f8]"
                   />
                 </div>
               </div>
@@ -252,7 +252,7 @@ export default function InterrogatePanel({
               onChange={(e) => setForm((s) => ({ ...s, freeform: e.target.value }))}
               rows={2}
               placeholder="Free-text: the constraints, priorities, or deal context that matter most."
-              className="mt-0.5 w-full rounded-md border border-[#d6c9a8] bg-white/80 px-2 py-1 text-xs text-[#13294b] placeholder:text-[#9aa7b8] focus:border-[#b08d2f] focus:outline-none dark:border-[#2a4a6b] dark:bg-[#0c2238] dark:text-[#eef3f8]"
+              className="mt-0.5 w-full rounded-md border border-[#d6c9a8] bg-white/80 px-2 py-1 text-xs text-[#123d2c] placeholder:text-[#9aa7b8] focus:border-[#b08d2f] focus:outline-none dark:border-[#2a4a6b] dark:bg-[#0d1f17] dark:text-[#eef3f8]"
             />
           </label>
           <div className="mt-2 flex items-center gap-3">
@@ -281,14 +281,14 @@ export default function InterrogatePanel({
             </p>
           ) : (
             <>
-              <p className="text-xs leading-5 text-[#13294b] dark:text-[#eef3f8]">
+              <p className="text-xs leading-5 text-[#123d2c] dark:text-[#eef3f8]">
                 <span className="font-semibold">Draft — what your context changed:</span> {lens.overallNote}
               </p>
               {topDeltas.length > 0 && (
                 <ul className="mt-2 space-y-1.5">
                   {topDeltas.map((d) => (
                     <li key={d.domain} className="text-xs leading-5 text-[#3f5068] dark:text-[#a7bacd]">
-                      <span className="font-medium text-[#13294b] dark:text-[#eef3f8]">{DOMAIN_LABEL[d.domain]}</span>{" "}
+                      <span className="font-medium text-[#123d2c] dark:text-[#eef3f8]">{DOMAIN_LABEL[d.domain]}</span>{" "}
                       <span
                         className={
                           d.weightDelta > 0
@@ -323,7 +323,7 @@ export default function InterrogatePanel({
               )}
 
               {askDomains.length > 0 && (
-                <div className="mt-2 rounded-md border border-[#d6c9a8] bg-white/50 px-2.5 py-2 dark:border-[#2a4a6b] dark:bg-[#0c2238]/40">
+                <div className="mt-2 rounded-md border border-[#d6c9a8] bg-white/50 px-2.5 py-2 dark:border-[#2a4a6b] dark:bg-[#0d1f17]/40">
                   <div className="text-xs font-semibold uppercase tracking-wide text-[#a07f1f] dark:text-[#d4af37]">
                     Ask the vendor — decisive for you, thin on evidence
                   </div>

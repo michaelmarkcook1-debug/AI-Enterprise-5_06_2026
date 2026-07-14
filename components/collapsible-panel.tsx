@@ -25,11 +25,11 @@ export default function CollapsiblePanel({
   return (
     <details
       open={defaultOpen}
-      className="group rounded-xl border border-[#e6dcc3] bg-white dark:border-[#1d3a57] dark:bg-[#081c30]"
+      className="group rounded-xl border border-[#e6dcc3] bg-white dark:border-[#223a2e] dark:bg-[#081c30]"
     >
-      <summary className="flex cursor-pointer list-none items-center justify-between gap-3 rounded-xl px-4 py-3 transition-colors hover:bg-[#f6f8f3] dark:hover:bg-[#0c2238] [&::-webkit-details-marker]:hidden">
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-3 rounded-xl px-4 py-3 transition-colors hover:bg-[#f6f8f3] dark:hover:bg-[#0d1f17] [&::-webkit-details-marker]:hidden">
         <span className="flex min-w-0 items-baseline gap-3">
-          <span className="text-sm font-semibold text-[#13294b] dark:text-[#eef3f8]">{title}</span>
+          <span className="text-sm font-semibold text-[#123d2c] dark:text-[#eef3f8]">{title}</span>
           {summary && (
             <span className="truncate font-mono text-xs text-[#5b6b7f] group-open:hidden dark:text-[#8fa5bb]">
               {summary}
@@ -47,7 +47,7 @@ export default function CollapsiblePanel({
           </svg>
         </span>
       </summary>
-      <div className="border-t border-[#efe9d9] px-4 py-4 dark:border-[#1d3a57]">{children}</div>
+      <div className="border-t border-[#efe9d9] px-4 py-4 dark:border-[#223a2e]">{children}</div>
     </details>
   );
 }

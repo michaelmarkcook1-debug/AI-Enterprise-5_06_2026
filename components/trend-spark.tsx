@@ -79,10 +79,10 @@ export default function TrendSpark({
       {open && (
         <span
           role="tooltip"
-          className="absolute top-full left-1/2 z-30 mt-2 w-52 -translate-x-1/2 rounded-lg border border-[#e6dcc3] bg-white p-2.5 shadow-lg dark:border-[#2a4a6b] dark:bg-[#0c2238]"
+          className="absolute top-full left-1/2 z-30 mt-2 w-52 -translate-x-1/2 rounded-lg border border-[#e6dcc3] bg-white p-2.5 shadow-lg dark:border-[#2a4a6b] dark:bg-[#0d1f17]"
         >
           <span className="block text-[10px] font-semibold uppercase tracking-wider text-[#5b6b7f] dark:text-[#a7bacd]">{label}</span>
-          <span className="mt-1 block font-mono text-xs text-[#13294b] dark:text-[#eef3f8]">
+          <span className="mt-1 block font-mono text-xs text-[#123d2c] dark:text-[#eef3f8]">
             {first.value} → {last.value}{" "}
             <span className={rising ? "text-emerald-700 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}>
               ({rising ? "+" : ""}{delta})

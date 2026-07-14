@@ -163,7 +163,7 @@ export default function TopNav() {
   }
 
   return (
-    <header className="sticky top-0 z-30 border-b border-[#d4af37]/30 bg-[#0a1f38]/[0.97] backdrop-blur dark:border-[#d4af37]/20 dark:bg-[#071827]/[0.97]">
+    <header className="sticky top-0 z-30 border-b border-[#d4af37]/30 bg-[#0b2519]/[0.97] backdrop-blur dark:border-[#d4af37]/20 dark:bg-[#081410]/[0.97]">
       <div className="mx-auto flex h-14 max-w-7xl items-center gap-6 px-5">
         <Link href="/" className="flex items-center" aria-label="AI Enterprise home">
           <BrandLogo size={32} onDark />
@@ -201,7 +201,7 @@ export default function TopNav() {
               <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="m6 9 6 6 6-6" /></svg>
             </button>
             <div className="invisible absolute left-0 top-full z-40 w-52 pt-1 opacity-0 transition-all duration-150 group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100">
-              <div role="menu" className="grid grid-cols-1 gap-0.5 rounded-md border border-[#2a4a6b] bg-[#0c2238] p-1.5 shadow-[0_12px_32px_rgba(2,10,20,0.55)]">
+              <div role="menu" className="grid grid-cols-1 gap-0.5 rounded-md border border-[#2a4a6b] bg-[#0d1f17] p-1.5 shadow-[0_12px_32px_rgba(2,10,20,0.55)]">
                 {LIBRARY.map((l) => (
                   <Link
                     key={l.href}
@@ -209,7 +209,7 @@ export default function TopNav() {
                     role="menuitem"
                     className={`rounded px-2.5 py-1.5 text-xs transition-colors ${
                       pathname.startsWith(l.href)
-                        ? "bg-[#d4af37] font-semibold !text-[#0a1f38]"
+                        ? "bg-[#d4af37] font-semibold !text-[#0b2519]"
                         : "text-[#c2d1e0] hover:bg-white/[0.06] hover:text-white"
                     }`}
                   >
@@ -252,7 +252,7 @@ export default function TopNav() {
             title="Settings — ingestion & spend"
             className={`hidden h-8 w-8 items-center justify-center rounded-md transition-colors md:flex ${
               pathname.startsWith("/settings") || pathname.startsWith("/admin")
-                ? "bg-[#d4af37] text-[#0a1f38]"
+                ? "bg-[#d4af37] text-[#0b2519]"
                 : "text-[#c8d7e9] hover:bg-white/[0.07] hover:text-white"
             }`}
           >
@@ -304,7 +304,7 @@ export default function TopNav() {
       {mobileOpen && (
         <nav
           id="mobile-nav-drawer"
-          className="border-t border-white/10 bg-[#0a1f38] px-4 py-3 md:hidden"
+          className="border-t border-white/10 bg-[#0b2519] px-4 py-3 md:hidden"
           aria-label="Mobile navigation"
         >
           <ul className="flex flex-col gap-1 text-sm">
@@ -318,7 +318,7 @@ export default function TopNav() {
                     aria-current={active ? "page" : undefined}
                     className={`block rounded-md px-3 py-2.5 transition-colors ${
                       active
-                        ? "bg-[#d4af37] font-semibold !text-[#0a1f38]"
+                        ? "bg-[#d4af37] font-semibold !text-[#0b2519]"
                         : "font-medium text-[#c2d1e0] hover:bg-white/[0.06] hover:text-white"
                     }`}
                   >
@@ -336,7 +336,7 @@ export default function TopNav() {
                 aria-current={pathname.startsWith("/investor-tools") || pathname.startsWith("/investing") ? "page" : undefined}
                 className={`block rounded-md px-3 py-2.5 transition-colors ${
                   pathname.startsWith("/investor-tools") || pathname.startsWith("/investing")
-                    ? "bg-[#d4af37] font-semibold !text-[#0a1f38]"
+                    ? "bg-[#d4af37] font-semibold !text-[#0b2519]"
                     : "font-medium text-[#d8bd6a] hover:bg-white/[0.06] hover:text-[#e8c95c]"
                 }`}
               >
@@ -365,7 +365,7 @@ export default function TopNav() {
               onClick={() => setMobileOpen(false)}
               className={`flex items-center gap-2 rounded-md px-3 py-2 text-xs font-medium transition-colors ${
                 pathname.startsWith("/admin")
-                  ? "bg-[#d4af37] text-[#0a1f38]"
+                  ? "bg-[#d4af37] text-[#0b2519]"
                   : "text-[#8fa5bb] hover:bg-white/[0.06] hover:text-white"
               }`}
             >

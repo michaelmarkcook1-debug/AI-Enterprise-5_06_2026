@@ -88,10 +88,10 @@ export default function VendorUptakeExplorer() {
   return (
     <div className="space-y-5">
       {/* Filters */}
-      <div className="rounded-xl border border-[#e6dcc3] bg-white p-4 dark:border-[#1d3a57] dark:bg-[#0c2238]">
+      <div className="rounded-xl border border-[#e6dcc3] bg-white p-4 dark:border-[#223a2e] dark:bg-[#0d1f17]">
         <div className="mb-3 flex items-center justify-between gap-3">
           <div>
-            <h3 className="text-sm font-semibold text-[#13294b] dark:text-[#eef3f8]">Filters</h3>
+            <h3 className="text-sm font-semibold text-[#123d2c] dark:text-[#eef3f8]">Filters</h3>
             <p className="text-xs text-[#56657b] dark:text-[#a7bacd]">
               {filterSummary} · {aggregate.length > 0 ? `${totalCells} contributing data cell${totalCells === 1 ? "" : "s"}` : "no data — narrow the filters"}
             </p>
@@ -100,7 +100,7 @@ export default function VendorUptakeExplorer() {
             <button
               type="button"
               onClick={clearAll}
-              className="rounded-md border border-[#e6dcc3] bg-white px-3 py-1 text-xs font-semibold text-[#13294b] hover:bg-[#f3ead2] dark:border-[#2a4a6b] dark:bg-[#0c2238] dark:text-[#eef3f8] dark:hover:bg-[#143049]"
+              className="rounded-md border border-[#e6dcc3] bg-white px-3 py-1 text-xs font-semibold text-[#123d2c] hover:bg-[#f3ead2] dark:border-[#2a4a6b] dark:bg-[#0d1f17] dark:text-[#eef3f8] dark:hover:bg-[#143049]"
             >
               Clear all
             </button>
@@ -127,7 +127,7 @@ export default function VendorUptakeExplorer() {
       {headlineTop3.length > 0 && (
         <div className="grid gap-3 sm:grid-cols-3">
           {headlineTop3.map((row, i) => (
-            <div key={row.vendor} className="rounded-xl border border-[#e6dcc3] bg-white p-4 dark:border-[#1d3a57] dark:bg-[#0c2238]">
+            <div key={row.vendor} className="rounded-xl border border-[#e6dcc3] bg-white p-4 dark:border-[#223a2e] dark:bg-[#0d1f17]">
               <div className="flex items-center justify-between gap-2">
                 <span className="text-xs font-semibold uppercase tracking-wider text-[#5b6b7f] dark:text-[#8fa5bb]">#{i + 1}</span>
                 <span className={`inline-flex items-center gap-1 text-xs font-medium text-[#56657b] dark:text-[#a7bacd]`}>
@@ -137,9 +137,9 @@ export default function VendorUptakeExplorer() {
               </div>
               <div className="mt-1 flex items-center gap-2">
                 <span className="h-3 w-3 rounded-sm" style={{ background: colorFor(row.vendor) }} />
-                <span className="text-base font-semibold text-[#13294b] dark:text-[#eef3f8]">{row.vendor}</span>
+                <span className="text-base font-semibold text-[#123d2c] dark:text-[#eef3f8]">{row.vendor}</span>
               </div>
-              <div className="mt-1 font-mono text-2xl font-semibold text-[#13294b] dark:text-[#eef3f8]">{pct(row.share)}</div>
+              <div className="mt-1 font-mono text-2xl font-semibold text-[#123d2c] dark:text-[#eef3f8]">{pct(row.share)}</div>
               <div className="mt-0.5 text-xs text-[#5b6b7f] dark:text-[#8fa5bb]">share inside this slice</div>
             </div>
           ))}
@@ -147,7 +147,7 @@ export default function VendorUptakeExplorer() {
       )}
 
       {/* Tab switcher */}
-      <div className="flex gap-1 border-b border-[#e6dcc3] dark:border-[#1d3a57]">
+      <div className="flex gap-1 border-b border-[#e6dcc3] dark:border-[#223a2e]">
         <TabButton active={tab === "bars"} onClick={() => setTab("bars")}>Vendor share (bar)</TabButton>
         <TabButton active={tab === "heatmap"} onClick={() => setTab("heatmap")}>Region × Industry heatmap</TabButton>
       </div>
@@ -203,7 +203,7 @@ function Chip({ children, active, onClick }: { children: React.ReactNode; active
       className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
         active
           ? "border-emerald-600 bg-emerald-600 text-white dark:border-emerald-500 dark:bg-emerald-500"
-          : "border-[#e6dcc3] bg-white text-[#13294b] hover:bg-[#f3ead2] dark:border-[#2a4a6b] dark:bg-[#0c2238] dark:text-[#d8e2ec] dark:hover:bg-[#143049]"
+          : "border-[#e6dcc3] bg-white text-[#123d2c] hover:bg-[#f3ead2] dark:border-[#2a4a6b] dark:bg-[#0d1f17] dark:text-[#d8e2ec] dark:hover:bg-[#143049]"
       }`}
     >
       {children}
@@ -219,7 +219,7 @@ function TabButton({ active, onClick, children }: { active: boolean; onClick: ()
       className={`relative -mb-px px-4 py-2 text-sm font-medium transition-colors ${
         active
           ? "border-b-2 border-emerald-600 text-emerald-700 dark:border-emerald-400 dark:text-emerald-300"
-          : "text-[#4c5d75] hover:text-[#15263c] dark:hover:text-[#eef3f8]"
+          : "text-[#4c5d75] hover:text-[#123d2c] dark:hover:text-[#eef3f8]"
       }`}
     >
       {children}
@@ -231,18 +231,18 @@ function TabButton({ active, onClick, children }: { active: boolean; onClick: ()
 function VendorBarChart({ rows }: { rows: UptakeAggregateRow[] }) {
   if (rows.length === 0) {
     return (
-      <div className="rounded-xl border border-dashed border-[#e6dcc3] bg-[#fafbf8] p-8 text-center text-sm text-[#56657b] dark:border-[#2a4a6b] dark:bg-[#0c2238]/50 dark:text-[#a7bacd]">
+      <div className="rounded-xl border border-dashed border-[#e6dcc3] bg-[#fafbf8] p-8 text-center text-sm text-[#56657b] dark:border-[#2a4a6b] dark:bg-[#0d1f17]/50 dark:text-[#a7bacd]">
         No data for this filter combination.
       </div>
     );
   }
   const max = Math.max(...rows.map((r) => r.share));
   return (
-    <div className="rounded-xl border border-[#e6dcc3] bg-white p-4 dark:border-[#1d3a57] dark:bg-[#0c2238]">
+    <div className="rounded-xl border border-[#e6dcc3] bg-white p-4 dark:border-[#223a2e] dark:bg-[#0d1f17]">
       <ul className="space-y-2">
         {rows.map((r) => (
           <li key={r.vendor} className="grid grid-cols-[140px_1fr_70px_80px] items-center gap-3">
-            <div className="flex items-center gap-2 truncate text-sm font-medium text-[#13294b] dark:text-[#eef3f8]">
+            <div className="flex items-center gap-2 truncate text-sm font-medium text-[#123d2c] dark:text-[#eef3f8]">
               <span className="h-3 w-3 flex-none rounded-sm" style={{ background: colorFor(r.vendor) }} />
               <span className="truncate">{r.vendor}</span>
             </div>
@@ -252,7 +252,7 @@ function VendorBarChart({ rows }: { rows: UptakeAggregateRow[] }) {
                 style={{ width: `${max > 0 ? (r.share / max) * 100 : 0}%`, background: colorFor(r.vendor) }}
               />
             </div>
-            <div className="text-right font-mono text-sm font-semibold text-[#13294b] dark:text-[#eef3f8]">{pct(r.share)}</div>
+            <div className="text-right font-mono text-sm font-semibold text-[#123d2c] dark:text-[#eef3f8]">{pct(r.share)}</div>
             <div className="flex items-center justify-end gap-1 text-xs text-[#56657b] dark:text-[#a7bacd]">
               <span className={`h-1.5 w-1.5 rounded-full ${CONF_DOT[r.confidence] ?? "bg-[#6b7d93]"}`} />
               {r.confidence}
@@ -290,13 +290,13 @@ function RegionIndustryHeatmap({ focusVendor }: { focusVendor: string }) {
   }
 
   return (
-    <div className="rounded-xl border border-[#e6dcc3] bg-white p-4 dark:border-[#1d3a57] dark:bg-[#0c2238]">
+    <div className="rounded-xl border border-[#e6dcc3] bg-white p-4 dark:border-[#223a2e] dark:bg-[#0d1f17]">
       <div className="mb-3 flex flex-wrap items-center gap-3">
         <span className="text-xs font-semibold uppercase tracking-wider text-[#5b6b7f] dark:text-[#8fa5bb]">Vendor focus</span>
         <select
           value={vendor}
           onChange={(e) => setVendor(e.target.value)}
-          className="rounded-md border border-[#e6dcc3] bg-white px-3 py-1.5 text-sm font-medium text-[#13294b] dark:border-[#2a4a6b] dark:bg-[#0c2238] dark:text-[#eef3f8]"
+          className="rounded-md border border-[#e6dcc3] bg-white px-3 py-1.5 text-sm font-medium text-[#123d2c] dark:border-[#2a4a6b] dark:bg-[#0d1f17] dark:text-[#eef3f8]"
         >
           {UPTAKE_VENDORS.map((v) => (
             <option key={v} value={v}>{v}</option>
@@ -316,17 +316,17 @@ function RegionIndustryHeatmap({ focusVendor }: { focusVendor: string }) {
           <tbody>
             {REGIONS.map((r) => (
               <tr key={r} className="border-t border-[#efe9d9]/60">
-                <td className="whitespace-nowrap px-2 py-2 text-xs font-semibold text-[#13294b] dark:text-[#eef3f8]">{r}</td>
+                <td className="whitespace-nowrap px-2 py-2 text-xs font-semibold text-[#123d2c] dark:text-[#eef3f8]">{r}</td>
                 {INDUSTRIES.map((i) => {
                   const v = matrix[r]?.[i] ?? 0;
                   return (
                     <td key={i} className="px-1 py-1 text-center align-middle">
                       <div
-                        className="flex h-12 items-center justify-center rounded-md border border-[#e6dcc3] dark:border-[#1d3a57]"
+                        className="flex h-12 items-center justify-center rounded-md border border-[#e6dcc3] dark:border-[#223a2e]"
                         style={{ background: cellColor(v) }}
                         title={`${vendor} · ${r} · ${i} → ${pct(v)}`}
                       >
-                        <span className="font-mono text-xs font-medium text-[#13294b] dark:text-[#eef3f8]">{v > 0 ? pct(v) : "—"}</span>
+                        <span className="font-mono text-xs font-medium text-[#123d2c] dark:text-[#eef3f8]">{v > 0 ? pct(v) : "—"}</span>
                       </div>
                     </td>
                   );

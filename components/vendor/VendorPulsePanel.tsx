@@ -6,7 +6,7 @@
 // a verdict. Reads canonical, writes nothing. No new feed, no fabricated
 // narrative: it only arranges cited news + the real evidence standing.
 
-const MUTED = "text-[#15263c]/65 dark:text-[#eef3f8]/60";
+const MUTED = "text-[#123d2c]/65 dark:text-[#eef3f8]/60";
 
 export interface PulseNews {
   title: string;

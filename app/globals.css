@@ -2,15 +2,17 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* ── Brand palette: navy / gold / cream ─────────────────────────────────────
-   Navy  #13294b (ink) · #0a1f38 (deep) · #071827 (page dark)
-   Gold  #b08d2f (accent) · #d4af37 (bright) · #e8c95c (on-dark)
+/* ── Brand palette: DEEP GREEN / gold / cream ───────────────────────────────
+   Green #123d2c (ink) · #0b2519 (deep) · #081410 (page dark) — the identity.
+   Gold  #b08d2f (accent) · #d4af37 (bright) — retained as the DATA/score accent.
    Cream #faf6ec (page) · #fdfaf1 (panel tint) · #e6dcc3 (border)            */
 :root {
   --background: #faf6ec;
-  --foreground: #13294b;
-  --brand-navy: #13294b;
-  --brand-navy-deep: #0a1f38;
+  --foreground: #123d2c;
+  --brand-navy: #123d2c; /* legacy token name — now the deep-green ink */
+  --brand-navy-deep: #0b2519;
+  --brand-green: #123d2c;
+  --brand-green-bright: #2f8f66;
   --brand-gold: #b08d2f;
   --brand-gold-bright: #d4af37;
   --brand-cream: #faf6ec;
@@ -21,10 +23,11 @@
 }
 
 html.dark {
-  /* Logo navy from /brand/logo-mark-dark.svg — applied across the portal in dark mode. */
-  --background: #071827;
-  --foreground: #f6f0e7;
-  --brand-border: #1a3953;
+  /* Deep green-black canvas (was navy #071827). */
+  --background: #081410;
+  --foreground: #eef3ee;
+  --brand-border: #1e352a;
+  --brand-green-bright: #3f9d76; /* lifted for contrast on the dark canvas */
   color-scheme: dark;
 }
 
@@ -49,21 +52,23 @@ a {
   color: inherit;
 }
 
-/* Editorial display face — Cormorant Garamond, loaded in app/layout.tsx.
-   Used for page mastheads and hero numerals only; UI text stays sans. */
+/* Display face — now the widely-used SaaS sans (Geist), not the Cormorant serif.
+   Mastheads + hero numerals share the UI family; presence comes from weight
+   (extrabold) + tight tracking, not a serif. */
 .font-display {
-  font-family: var(--font-cormorant), Georgia, "Times New Roman", serif;
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  letter-spacing: -0.02em;
 }
 
-/* Text selection carries the gold brand */
+/* Text selection carries the green brand */
 ::selection {
-  background: #d4af37;
-  color: #0a1f38;
+  background: #123d2c;
+  color: #f6f3ea;
 }
 
-/* Gold focus ring for keyboard navigation */
+/* Green focus ring for keyboard navigation */
 :focus-visible {
-  outline: 2px solid #b08d2f;
+  outline: 2px solid #1c5f46;
   outline-offset: 1px;
 }
 
@@ -78,7 +83,7 @@ a {
   border: 2px solid var(--background);
 }
 html.dark ::-webkit-scrollbar-thumb {
-  background: #1a3953;
+  background: #1e352a;
 }
 ::-webkit-scrollbar-track {
   background: transparent;

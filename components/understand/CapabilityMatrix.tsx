@@ -50,7 +50,7 @@ const MODE_LABEL: Record<MatrixCell["mode"], string> = {
 
 const MODE_TONE: Record<MatrixCell["mode"], string> = {
   verified: "text-emerald-700 dark:text-emerald-300",
-  documented: "text-[#13294b] dark:text-[#d8e2ec]",
+  documented: "text-[#123d2c] dark:text-[#d8e2ec]",
   seed: "text-amber-700 dark:text-amber-300",
   stale: "text-amber-700 dark:text-amber-300",
   disputed: "text-rose-700 dark:text-rose-300",
@@ -101,7 +101,7 @@ export default function CapabilityMatrix({
           <select
             value={vendorFilter}
             onChange={(e) => setVendorFilter(e.target.value)}
-            className="rounded-md border border-[#ddd3b6] bg-[#fdfaf1] px-2.5 py-1.5 text-xs font-normal text-[#13294b] focus:outline-none focus:ring-1 focus:ring-[#b08d2f] dark:border-[#2a4a6b] dark:bg-[#0c2238] dark:text-[#eef3f8]"
+            className="rounded-md border border-[#ddd3b6] bg-[#fdfaf1] px-2.5 py-1.5 text-xs font-normal text-[#123d2c] focus:outline-none focus:ring-1 focus:ring-[#b08d2f] dark:border-[#2a4a6b] dark:bg-[#0d1f17] dark:text-[#eef3f8]"
           >
             <option value="">All {vendors.length} vendors</option>
             {vendors.map((v) => (
@@ -114,7 +114,7 @@ export default function CapabilityMatrix({
           <select
             value={capCategory}
             onChange={(e) => setCapCategory(e.target.value)}
-            className="rounded-md border border-[#ddd3b6] bg-[#fdfaf1] px-2.5 py-1.5 text-xs font-normal text-[#13294b] focus:outline-none focus:ring-1 focus:ring-[#b08d2f] dark:border-[#2a4a6b] dark:bg-[#0c2238] dark:text-[#eef3f8]"
+            className="rounded-md border border-[#ddd3b6] bg-[#fdfaf1] px-2.5 py-1.5 text-xs font-normal text-[#123d2c] focus:outline-none focus:ring-1 focus:ring-[#b08d2f] dark:border-[#2a4a6b] dark:bg-[#0d1f17] dark:text-[#eef3f8]"
           >
             <option value="">All areas</option>
             {capCategories.map((c) => (
@@ -139,8 +139,8 @@ export default function CapabilityMatrix({
       <div className="overflow-x-auto">
         <table className="w-full min-w-[640px] text-left text-sm">
           <thead>
-            <tr className="border-b border-[#ece4d0] text-xs uppercase tracking-wide text-[#5b6b7f] dark:border-[#1d3a57] dark:text-[#8fa5bb]">
-              <th className="sticky left-0 z-10 bg-[#fffdf7] py-2 pr-3 dark:bg-[#0c2238]">Vendor</th>
+            <tr className="border-b border-[#ece4d0] text-xs uppercase tracking-wide text-[#5b6b7f] dark:border-[#223a2e] dark:text-[#8fa5bb]">
+              <th className="sticky left-0 z-10 bg-[#fffdf7] py-2 pr-3 dark:bg-[#0d1f17]">Vendor</th>
               {visibleCaps.map((cap) => (
                 <th key={cap.id} className="px-2 py-2 text-center font-semibold" title={cap.category}>
                   {cap.name}
@@ -148,11 +148,11 @@ export default function CapabilityMatrix({
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-[#efe9d9] dark:divide-[#1d3a57]">
+          <tbody className="divide-y divide-[#efe9d9] dark:divide-[#223a2e]">
             {visibleVendors.map((vendor) => (
               <tr key={vendor.id} className="hover:bg-[#faf5e9] dark:hover:bg-[#0e2740]/60">
-                <td className="sticky left-0 z-10 bg-[#fffdf7] py-2 pr-3 dark:bg-[#0c2238]">
-                  <div className="text-xs font-semibold text-[#13294b] dark:text-[#eef3f8]">{vendor.name}</div>
+                <td className="sticky left-0 z-10 bg-[#fffdf7] py-2 pr-3 dark:bg-[#0d1f17]">
+                  <div className="text-xs font-semibold text-[#123d2c] dark:text-[#eef3f8]">{vendor.name}</div>
                   <div className="text-xs text-[#5b6b7f] dark:text-[#8fa5bb]">{vendor.category}</div>
                 </td>
                 {visibleCaps.map((cap) => {
@@ -181,9 +181,9 @@ export default function CapabilityMatrix({
         </table>
       </div>
 
-      <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 border-t border-[#efe9d9] pt-3 text-xs text-[#5b6b7f] dark:border-[#1d3a57] dark:text-[#8fa5bb]">
+      <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 border-t border-[#efe9d9] pt-3 text-xs text-[#5b6b7f] dark:border-[#223a2e] dark:text-[#8fa5bb]">
         <span><strong className="text-emerald-700 dark:text-emerald-300">Verified</strong> E3+ evidence with sources</span>
-        <span><strong className="text-[#13294b] dark:text-[#d8e2ec]">Documented</strong> public docs, unverified</span>
+        <span><strong className="text-[#123d2c] dark:text-[#d8e2ec]">Documented</strong> public docs, unverified</span>
         <span><strong className="text-amber-700 dark:text-amber-300">Seed / Stale</strong> directional only</span>
         <span><strong className="text-rose-700 dark:text-rose-300">Disputed / Validate</strong> human review needed</span>
         <span><strong>Infra-only</strong> capability comparison not applicable</span>

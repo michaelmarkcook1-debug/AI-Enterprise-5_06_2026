@@ -14,12 +14,12 @@ export function Shimmer({ children }: { children: ReactNode }) {
 }
 
 export function Bar({ className = "" }: { className?: string }) {
-  return <div className={`rounded bg-[#13294b]/[0.08] dark:bg-white/[0.09] ${className}`} />;
+  return <div className={`rounded bg-[#123d2c]/[0.08] dark:bg-white/[0.09] ${className}`} />;
 }
 
 export function Card({ className = "" }: { className?: string }) {
   return (
-    <div className={`rounded-xl border border-black/5 bg-[#13294b]/[0.03] dark:border-white/10 dark:bg-white/[0.03] ${className}`} />
+    <div className={`rounded-xl border border-black/5 bg-[#123d2c]/[0.03] dark:border-white/10 dark:bg-white/[0.03] ${className}`} />
   );
 }
 

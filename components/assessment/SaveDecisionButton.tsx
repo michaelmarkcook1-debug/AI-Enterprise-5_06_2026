@@ -91,7 +91,7 @@ export default function SaveDecisionButton({
           placeholder="Name this decision…"
           maxLength={120}
           disabled={state === "saving"}
-          className="w-44 rounded-md border border-[#d6c9a8] bg-white/80 px-2 py-1 text-xs text-[#13294b] placeholder:text-[#9aa7b8] focus:border-[#b08d2f] focus:outline-none dark:border-[#2a4a6b] dark:bg-[#0c2238] dark:text-[#eef3f8]"
+          className="w-44 rounded-md border border-[#d6c9a8] bg-white/80 px-2 py-1 text-xs text-[#123d2c] placeholder:text-[#9aa7b8] focus:border-[#b08d2f] focus:outline-none dark:border-[#2a4a6b] dark:bg-[#0d1f17] dark:text-[#eef3f8]"
         />
         <button
           type="button"
@@ -113,7 +113,7 @@ export default function SaveDecisionButton({
       <button
         type="button"
         onClick={() => setState("naming")}
-        className="rounded-full border border-[#d6c9a8] px-3 py-1 text-xs font-medium text-[#4c5d75] hover:bg-white dark:border-[#2a4a6b] dark:text-[#a7bacd] dark:hover:bg-[#0c2238]"
+        className="rounded-full border border-[#d6c9a8] px-3 py-1 text-xs font-medium text-[#4c5d75] hover:bg-white dark:border-[#2a4a6b] dark:text-[#a7bacd] dark:hover:bg-[#0d1f17]"
       >
         Save this weighting as a decision
       </button>

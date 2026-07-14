@@ -23,9 +23,9 @@ export default function ShortlistCompetitiveAlerts({ alerts }: { alerts: Shortli
             return (
               <li
                 key={`${a.shortlistedId}_${a.challengerId}_${a.capabilityId}`}
-                className="rounded-lg border border-[#e6dcc3] bg-[#faf8f1] p-3 dark:border-[#1d3a57] dark:bg-[#0c2238]"
+                className="rounded-lg border border-[#e6dcc3] bg-[#faf8f1] p-3 dark:border-[#223a2e] dark:bg-[#0d1f17]"
               >
-                <div className="text-sm leading-5 text-[#13294b] dark:text-[#eef3f8]">
+                <div className="text-sm leading-5 text-[#123d2c] dark:text-[#eef3f8]">
                   <strong>{a.challengerName}</strong> now offers <strong>{a.capabilityName}</strong> — overlapping your
                   shortlisted <strong>{a.shortlistedName}</strong>{" "}
                   <span className="text-xs text-[#6b7d93] dark:text-[#8fa5bb]">(maturity {Math.round(a.challengerMaturity)})</span>

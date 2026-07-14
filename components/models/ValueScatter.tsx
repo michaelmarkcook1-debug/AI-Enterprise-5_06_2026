@@ -12,7 +12,7 @@ import type { ValueField } from "@/lib/model-inventory/value-field";
 import { markFrontier } from "@/lib/model-inventory/value-field";
 
 const CARD = "rounded-xl border border-black/10 dark:border-white/10 bg-white/60 dark:bg-white/5 p-5";
-const MUTED = "text-[#15263c]/65 dark:text-[#eef3f8]/60";
+const MUTED = "text-[#123d2c]/65 dark:text-[#eef3f8]/60";
 
 // viewBox geometry — a fixed coordinate space the wrapper scales responsively.
 const W = 760;
@@ -79,14 +79,14 @@ export default function ValueScatter({ field }: { field: ValueField }) {
           {/* y gridlines + labels */}
           {yTicks.map((v) => (
             <g key={`y${v}`}>
-              <line x1={PAD.l} x2={W - PAD.r} y1={y(v)} y2={y(v)} className="stroke-[#13294b]/10 dark:stroke-white/10" strokeWidth={1} />
+              <line x1={PAD.l} x2={W - PAD.r} y1={y(v)} y2={y(v)} className="stroke-[#123d2c]/10 dark:stroke-white/10" strokeWidth={1} />
               <text x={PAD.l - 8} y={y(v) + 3} textAnchor="end" className="fill-[#5e6b7e] text-[10px] dark:fill-[#a7bacd]">{v}</text>
             </g>
           ))}
           {/* x decade gridlines + labels */}
           {xTicks.map((v) => (
             <g key={`x${v}`}>
-              <line x1={x(v)} x2={x(v)} y1={PAD.t} y2={H - PAD.b} className="stroke-[#13294b]/10 dark:stroke-white/10" strokeWidth={1} />
+              <line x1={x(v)} x2={x(v)} y1={PAD.t} y2={H - PAD.b} className="stroke-[#123d2c]/10 dark:stroke-white/10" strokeWidth={1} />
               <text x={x(v)} y={H - PAD.b + 16} textAnchor="middle" className="fill-[#5e6b7e] text-[10px] dark:fill-[#a7bacd]">{money(v)}</text>
             </g>
           ))}
@@ -106,7 +106,7 @@ export default function ValueScatter({ field }: { field: ValueField }) {
           {/* dominated points (drawn first, behind) */}
           {marked.filter((p) => !p.frontier).map((p) => (
             <circle key={`d-${p.vendorId}-${p.modelName}`} cx={x(p.priceInput1m).toFixed(1)} cy={y(p.intelligence).toFixed(1)} r={3}
-              className="fill-none stroke-[#13294b]/40 dark:stroke-white/30" strokeWidth={1}>
+              className="fill-none stroke-[#123d2c]/40 dark:stroke-white/30" strokeWidth={1}>
               <title>{`${p.modelName} — Intelligence ${p.intelligence}, ${money(p.priceInput1m)}/1M in${p.tokPerSec != null ? `, ${Math.round(p.tokPerSec)} tok/s` : ""}`}</title>
             </circle>
           ))}
@@ -119,11 +119,11 @@ export default function ValueScatter({ field }: { field: ValueField }) {
             return (
               <g key={`f-${p.vendorId}-${p.modelName}`}>
                 <circle cx={px.toFixed(1)} cy={py.toFixed(1)} r={4.5}
-                  className="fill-[#b08d2f] stroke-[#0a1f38] dark:fill-[#e8c95c] dark:stroke-[#eef3f8]" strokeWidth={1}>
+                  className="fill-[#b08d2f] stroke-[#0b2519] dark:fill-[#e8c95c] dark:stroke-[#eef3f8]" strokeWidth={1}>
                   <title>{`${p.modelName} — Intelligence ${p.intelligence}, ${money(p.priceInput1m)}/1M in${p.tokPerSec != null ? `, ${Math.round(p.tokPerSec)} tok/s` : ""}${p.ttftSec != null ? `, ${p.ttftSec}s TTFT` : ""}  ·  efficiency frontier`}</title>
                 </circle>
                 <text x={rightEdge ? px - 7 : px + 7} y={py + 3} textAnchor={rightEdge ? "end" : "start"}
-                  className="fill-[#13294b] text-[9.5px] font-medium dark:fill-[#eef3f8]">
+                  className="fill-[#123d2c] text-[9.5px] font-medium dark:fill-[#eef3f8]">
                   {p.modelName.length > 22 ? p.modelName.slice(0, 21) + "…" : p.modelName}
                 </text>
               </g>
@@ -137,7 +137,7 @@ export default function ValueScatter({ field }: { field: ValueField }) {
           <span className="inline-block h-2.5 w-2.5 rounded-full bg-[#b08d2f] dark:bg-[#e8c95c]" /> efficiency frontier (best value at its capability)
         </span>
         <span className="flex items-center gap-1.5">
-          <span className="inline-block h-2.5 w-2.5 rounded-full border border-[#13294b]/40 dark:border-white/30" /> dominated (something cheaper is ≥ as capable)
+          <span className="inline-block h-2.5 w-2.5 rounded-full border border-[#123d2c]/40 dark:border-white/30" /> dominated (something cheaper is ≥ as capable)
         </span>
       </div>
       <p className={`mt-3 text-[11px] leading-4 ${MUTED}`}>

@@ -237,7 +237,7 @@ export default function CategoryCards({ vendors, momentum, provenance }: Props) 
               <div className="flex items-start justify-between gap-3 mb-1.5">
                 <div className="flex items-center gap-2.5">
                   <span className={`h-2.5 w-2.5 rounded-full ${cat.color.dot}`} />
-                  <h3 className="text-lg font-semibold text-[#13294b] dark:text-[#eef3f8]">
+                  <h3 className="text-lg font-semibold text-[#123d2c] dark:text-[#eef3f8]">
                     {cat.id}
                   </h3>
                 </div>
@@ -292,7 +292,7 @@ export default function CategoryCards({ vendors, momentum, provenance }: Props) 
                       return (
                         <span
                           key={`${cat.id}-${vendor.id}-${placement.displayName}`}
-                          className="inline-flex items-center gap-1.5 rounded-full border border-white/60 bg-white/80 px-3 py-1 text-xs font-semibold text-[#13294b] shadow-sm dark:border-[#2a4a6b] dark:bg-[#143049]/80 dark:text-[#eef3f8]"
+                          className="inline-flex items-center gap-1.5 rounded-full border border-white/60 bg-white/80 px-3 py-1 text-xs font-semibold text-[#123d2c] shadow-sm dark:border-[#2a4a6b] dark:bg-[#143049]/80 dark:text-[#eef3f8]"
                           title={placement.roleNote ? `${placement.displayName} — ${placement.roleNote}` : placement.displayName}
                         >
                           {placement.displayName}
@@ -320,7 +320,7 @@ export default function CategoryCards({ vendors, momentum, provenance }: Props) 
                 <>
                   <button
                     onClick={() => toggle(cat.id)}
-                    className="mt-2 flex items-center gap-1.5 text-xs font-medium text-[#5b6b7f] hover:text-[#13294b] dark:text-[#8fa5bb] dark:hover:text-[#d8e2ec] transition-colors"
+                    className="mt-2 flex items-center gap-1.5 text-xs font-medium text-[#5b6b7f] hover:text-[#123d2c] dark:text-[#8fa5bb] dark:hover:text-[#d8e2ec] transition-colors"
                     aria-expanded={isExpanded}
                     aria-controls={`${cat.id}-tier2`}
                   >

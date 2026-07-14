@@ -167,7 +167,7 @@ export default function WatchButton({ vendorId, vendorName }: WatchButtonProps) 
             value={emailInput}
             onChange={(e) => setEmailInput(e.target.value)}
             placeholder="you@company.com"
-            className="rounded border border-[#38587a] bg-[#071827] px-2 py-1 text-xs text-[#eef3f8] placeholder:text-[#4c5d75] focus:outline-none focus:ring-1 focus:ring-emerald-500"
+            className="rounded border border-[#38587a] bg-[#081410] px-2 py-1 text-xs text-[#eef3f8] placeholder:text-[#4c5d75] focus:outline-none focus:ring-1 focus:ring-emerald-500"
           />
           {emailError && (
             <span className="text-xs text-rose-400">{emailError}</span>

@@ -84,7 +84,7 @@ export default function VendorPageShell({
       />
       {verdictExtras}
 
-      <div ref={tabsRef} className="mb-3 flex flex-wrap gap-1 border-b border-[#e3d9c0] dark:border-[#1d3a57]">
+      <div ref={tabsRef} className="mb-3 flex flex-wrap gap-1 border-b border-[#e3d9c0] dark:border-[#223a2e]">
         {availableTabs.map((key) => (
           <button
             key={key}
@@ -93,7 +93,7 @@ export default function VendorPageShell({
             aria-current={activeTab === key ? "true" : undefined}
             className={`rounded-t-md px-3 py-2 text-sm font-medium transition-colors ${
               activeTab === key
-                ? "border-b-2 border-[#b08d2f] text-[#13294b] dark:border-[#d4af37] dark:text-[#eef3f8]"
+                ? "border-b-2 border-[#b08d2f] text-[#123d2c] dark:border-[#d4af37] dark:text-[#eef3f8]"
                 : "text-[#7a8aa0] hover:text-[#4c5d75] dark:text-[#7a9bb8] dark:hover:text-[#eef3f8]"
             }`}
           >

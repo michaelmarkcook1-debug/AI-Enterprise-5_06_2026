@@ -7,7 +7,7 @@ import TheBrief from "@/components/home/TheBrief";
 import BackToMarket from "@/components/home/BackToMarket";
 
 const CARD = "rounded-xl border border-black/10 dark:border-white/10 bg-white/60 dark:bg-white/5 p-5";
-const MUTED = "text-[#15263c]/65 dark:text-[#eef3f8]/60";
+const MUTED = "text-[#123d2c]/65 dark:text-[#eef3f8]/60";
 
 // The personalised dashboard half of the auth-dependent home (Prompt 3). Pure
 // composition over three ALREADY-LIVE reads (watchlist, decisions, monitor) —
@@ -44,7 +44,7 @@ export default function BuyerHome({
 
       <header className="mb-6 flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="font-[var(--font-display)] text-2xl font-extrabold tracking-tight text-[#13294b] dark:text-[#eef3f8]">
+          <h1 className="font-[var(--font-display)] text-2xl font-extrabold tracking-tight text-[#123d2c] dark:text-[#eef3f8]">
             Your workspace
           </h1>
           <p className={`mt-1 text-sm ${MUTED}`}>Your shortlist, your saved decisions, what changed this week.</p>
@@ -60,7 +60,7 @@ export default function BuyerHome({
       <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
         <section className={CARD}>
           <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-[#13294b] dark:text-[#eef3f8]">Your shortlist</h2>
+            <h2 className="text-sm font-semibold text-[#123d2c] dark:text-[#eef3f8]">Your shortlist</h2>
             <Link href="/watchlist" className="text-xs font-medium text-sky-700 hover:underline dark:text-sky-400">
               Edit →
             </Link>
@@ -69,7 +69,7 @@ export default function BuyerHome({
             <ul className="space-y-2">
               {monitor.savedVendors.map((v) => (
                 <li key={v.slug} className="flex items-center justify-between text-sm">
-                  <Link href={`/vendors/${v.slug}`} className="font-medium text-[#13294b] hover:underline dark:text-[#eef3f8]">
+                  <Link href={`/vendors/${v.slug}`} className="font-medium text-[#123d2c] hover:underline dark:text-[#eef3f8]">
                     {v.name}
                   </Link>
                   <span className={`text-xs ${MUTED}`}>tracked</span>
@@ -83,7 +83,7 @@ export default function BuyerHome({
 
         <section className={CARD}>
           <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-[#13294b] dark:text-[#eef3f8]">Your saved decisions</h2>
+            <h2 className="text-sm font-semibold text-[#123d2c] dark:text-[#eef3f8]">Your saved decisions</h2>
             <Link href="/decisions" className="text-xs font-medium text-sky-700 hover:underline dark:text-sky-400">
               View all →
             </Link>
@@ -92,7 +92,7 @@ export default function BuyerHome({
             <ul className="space-y-2">
               {decisions.slice(0, 5).map((d) => (
                 <li key={d.id} className="flex items-center justify-between text-sm">
-                  <Link href={`/decisions/${d.id}`} className="font-medium text-[#13294b] hover:underline dark:text-[#eef3f8]">
+                  <Link href={`/decisions/${d.id}`} className="font-medium text-[#123d2c] hover:underline dark:text-[#eef3f8]">
                     {d.name}
                   </Link>
                   <span className={`text-xs ${MUTED}`}>{d.shortlist.length} vendor{d.shortlist.length === 1 ? "" : "s"}</span>
@@ -106,7 +106,7 @@ export default function BuyerHome({
 
         <section className={`${CARD} md:col-span-2`}>
           <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-[#13294b] dark:text-[#eef3f8]">What changed for you this week</h2>
+            <h2 className="text-sm font-semibold text-[#123d2c] dark:text-[#eef3f8]">What changed for you this week</h2>
             <Link href="/monitor" className="text-xs font-medium text-sky-700 hover:underline dark:text-sky-400">
               Full monitor →
             </Link>
@@ -119,7 +119,7 @@ export default function BuyerHome({
             <ul className="space-y-2">
               {monitor.rankingMoves.slice(0, 4).map((m, i) => (
                 <li key={`rank-${i}`} className="text-sm">
-                  <span className="font-medium text-[#13294b] dark:text-[#eef3f8]">{m.vendorName}</span>{" "}
+                  <span className="font-medium text-[#123d2c] dark:text-[#eef3f8]">{m.vendorName}</span>{" "}
                   <span className={MUTED}>
                     in {m.categoryName}: {m.changePct > 0 ? "+" : ""}
                     {m.changePct.toFixed(1)}% share estimate
@@ -128,7 +128,7 @@ export default function BuyerHome({
               ))}
               {monitor.news.slice(0, 4).map((n, i) => (
                 <li key={`news-${i}`} className="text-sm">
-                  <span className="font-medium text-[#13294b] dark:text-[#eef3f8]">{n.vendorName ?? "Market"}:</span>{" "}
+                  <span className="font-medium text-[#123d2c] dark:text-[#eef3f8]">{n.vendorName ?? "Market"}:</span>{" "}
                   <span className={MUTED}>{n.title}</span>
                   {/* C12 — this news affects YOUR tracked vendor; route into its
                       assessment. State B: pending re-assessment, no number. */}

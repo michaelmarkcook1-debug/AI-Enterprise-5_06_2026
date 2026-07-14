@@ -118,7 +118,7 @@ export default function MarketMovement({ news, provenance }: Props) {
   return (
     <section className="mb-8">
       <div className="mb-5">
-        <h2 className="text-xl font-semibold text-[#13294b] dark:text-[#eef3f8]">What Changed</h2>
+        <h2 className="text-xl font-semibold text-[#123d2c] dark:text-[#eef3f8]">What Changed</h2>
         <p className="mt-1 text-sm text-[#56657b] dark:text-[#a7bacd]">
           The most important developments in the AI market right now.
           Only significant events are shown — routine announcements are filtered out.
@@ -131,7 +131,7 @@ export default function MarketMovement({ news, provenance }: Props) {
             {/* Movement type header */}
             <div className="flex items-center gap-2 mb-3">
               <span className="text-lg" aria-hidden>{type.icon}</span>
-              <h3 className="text-sm font-semibold uppercase tracking-wide text-[#13294b] dark:text-[#eef3f8]">
+              <h3 className="text-sm font-semibold uppercase tracking-wide text-[#123d2c] dark:text-[#eef3f8]">
                 {type.label}
               </h3>
               <span className="rounded-full bg-[#f3ead2] px-2 py-0.5 text-xs font-semibold text-[#455044] dark:bg-[#143049] dark:text-[#c2d1e0]">
@@ -144,11 +144,11 @@ export default function MarketMovement({ news, provenance }: Props) {
               {items.map((item) => (
                 <div
                   key={item.id}
-                  className={`rounded-xl border-l-4 ${type.color} border border-[#e6dcc3] bg-white p-4 dark:border-[#1d3a57] dark:bg-[#0c2238]`}
+                  className={`rounded-xl border-l-4 ${type.color} border border-[#e6dcc3] bg-white p-4 dark:border-[#223a2e] dark:bg-[#0d1f17]`}
                 >
                   {/* Title + impact */}
                   <div className="flex items-start justify-between gap-3">
-                    <h4 className="text-sm font-semibold leading-5 text-[#13294b] dark:text-[#eef3f8]">
+                    <h4 className="text-sm font-semibold leading-5 text-[#123d2c] dark:text-[#eef3f8]">
                       {item.title}
                     </h4>
                     <div className="flex shrink-0 items-center gap-2">
@@ -167,7 +167,7 @@ export default function MarketMovement({ news, provenance }: Props) {
                     <div className="text-xs font-semibold uppercase tracking-wider text-[#5b6b7f] dark:text-[#8fa5bb]">
                       Why it matters
                     </div>
-                    <p className="mt-1 text-sm leading-5 text-[#13294b] dark:text-[#eef3f8]">
+                    <p className="mt-1 text-sm leading-5 text-[#123d2c] dark:text-[#eef3f8]">
                       {item.whyItMatters}
                     </p>
                   </div>

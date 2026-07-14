@@ -63,7 +63,7 @@ export default function ReingestSourcesButton() {
       <div className="text-xs font-semibold uppercase tracking-wider text-[#a07f1f] dark:text-[#d4af37]">
         Live engine · reingest every official-data source
       </div>
-      <h2 className="mt-1 text-xl font-semibold text-[#15263c] dark:text-[#eef3f8]">Reingest sources now</h2>
+      <h2 className="mt-1 text-xl font-semibold text-[#123d2c] dark:text-[#eef3f8]">Reingest sources now</h2>
       <p className="mt-1 max-w-3xl text-sm text-[#3f5068] dark:text-[#a7bacd]">
         Runs a real probe fetch against every connector and reports the true result — green only when
         the source actually connected and returned rows. Connectors missing their API key report{" "}
@@ -75,7 +75,7 @@ export default function ReingestSourcesButton() {
           type="button"
           disabled={busy}
           onClick={run}
-          className="inline-flex items-center gap-2 rounded-full bg-[#13294b] px-6 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[#1d3a5f] disabled:opacity-40 dark:bg-[#d4af37] dark:text-[#0a1f38] dark:hover:bg-[#e8c95c]"
+          className="inline-flex items-center gap-2 rounded-full bg-[#123d2c] px-6 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[#1d3a5f] disabled:opacity-40 dark:bg-[#d4af37] dark:text-[#0b2519] dark:hover:bg-[#e8c95c]"
         >
           {busy ? "Reingesting…" : <>Reingest from sources <span aria-hidden>→</span></>}
         </button>
@@ -84,7 +84,7 @@ export default function ReingestSourcesButton() {
           onChange={(e) => setToken(e.target.value)}
           type="password"
           placeholder="x-admin-token (if ADMIN_API_OPEN is off)"
-          className="w-72 rounded-lg border border-[#d6c9a8] bg-white px-3 py-2 text-sm dark:border-[#2a4a6b] dark:bg-[#071827]"
+          className="w-72 rounded-lg border border-[#d6c9a8] bg-white px-3 py-2 text-sm dark:border-[#2a4a6b] dark:bg-[#081410]"
         />
       </div>
 
@@ -118,7 +118,7 @@ export default function ReingestSourcesButton() {
             </span>
           </div>
 
-          <div className="mt-3 overflow-x-auto rounded-xl border border-[#e3d9c0] bg-white dark:border-[#1d3a57] dark:bg-[#0c2238]">
+          <div className="mt-3 overflow-x-auto rounded-xl border border-[#e3d9c0] bg-white dark:border-[#223a2e] dark:bg-[#0d1f17]">
             <table className="w-full min-w-[640px] text-left text-sm">
               <thead className="text-xs uppercase tracking-wide text-[#4c5d75]">
                 <tr>
@@ -128,7 +128,7 @@ export default function ReingestSourcesButton() {
                   <th className="px-4 py-2">Detail</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#ece4d0] dark:divide-[#1d3a57]">
+              <tbody className="divide-y divide-[#ece4d0] dark:divide-[#223a2e]">
                 {result.rows.map((r) => (
                   <tr key={r.id}>
                     <td className="px-4 py-2 font-medium">{r.label}</td>

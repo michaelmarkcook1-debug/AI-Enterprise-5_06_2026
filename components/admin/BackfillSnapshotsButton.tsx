@@ -74,7 +74,7 @@ export default function BackfillSnapshotsButton() {
             placeholder="Admin token (x-admin-token)"
             value={token}
             onChange={(e) => setToken(e.target.value)}
-            className="mt-3 w-full rounded border border-amber-300 bg-white px-3 py-1.5 text-xs font-mono dark:border-amber-700 dark:bg-[#0c2238]"
+            className="mt-3 w-full rounded border border-amber-300 bg-white px-3 py-1.5 text-xs font-mono dark:border-amber-700 dark:bg-[#0d1f17]"
           />
         )}
         <div className="mt-3 flex gap-2">

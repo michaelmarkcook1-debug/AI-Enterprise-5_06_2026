@@ -83,18 +83,18 @@ export default function CommercialModelsClient({ vendors, models, sources }: Pro
           const vendorModels = visibleModelsForVendor(v.vendorId);
           const isExpanded = expandedVendor === v.vendorId;
           return (
-            <article key={v.vendorId} className="rounded-md border border-[#e6dcc3] bg-white dark:border-[#1d3a57] dark:bg-[#071827]">
+            <article key={v.vendorId} className="rounded-md border border-[#e6dcc3] bg-white dark:border-[#223a2e] dark:bg-[#081410]">
               <button
                 type="button"
                 onClick={() => setExpandedVendor(isExpanded ? null : v.vendorId)}
-                className="flex w-full flex-wrap items-center justify-between gap-3 p-3 text-left hover:bg-[#faf6ec] dark:hover:bg-[#0c2238]"
+                className="flex w-full flex-wrap items-center justify-between gap-3 p-3 text-left hover:bg-[#faf6ec] dark:hover:bg-[#0d1f17]"
                 aria-expanded={isExpanded}
               >
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-sm font-semibold text-[#13294b] dark:text-[#eef3f8]">{v.vendorName}</span>
+                    <span className="text-sm font-semibold text-[#123d2c] dark:text-[#eef3f8]">{v.vendorName}</span>
                     {v.isInfrastructureOnly && (
-                      <span className="rounded-full border border-[#d6c9a8] bg-[#f6f1e3] px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-[#2e3f57] dark:border-[#2a4a6b] dark:bg-[#0c2238] dark:text-[#c2d1e0]">Infrastructure / investment exposure</span>
+                      <span className="rounded-full border border-[#d6c9a8] bg-[#f6f1e3] px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-[#2e3f57] dark:border-[#2a4a6b] dark:bg-[#0d1f17] dark:text-[#c2d1e0]">Infrastructure / investment exposure</span>
                     )}
                     {v.refreshRequired && (
                       <span className="rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-amber-800 dark:border-amber-900/60 dark:bg-amber-950/40 dark:text-amber-300">Source refresh required</span>
@@ -102,11 +102,11 @@ export default function CommercialModelsClient({ vendors, models, sources }: Pro
                     {!v.isInfrastructureOnly && !v.refreshRequired && v.uncertaintyBadge && (
                       <span className="rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-amber-800 dark:border-amber-900/60 dark:bg-amber-950/40 dark:text-amber-300">{v.uncertaintyBadge}</span>
                     )}
-                    <span className="rounded-full border border-[#e6dcc3] bg-[#faf6ec] px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-[#5b6b7f] dark:border-[#2a4a6b] dark:bg-[#0c2238] dark:text-[#a7bacd]">{labelize(v.dataStatus)}</span>
+                    <span className="rounded-full border border-[#e6dcc3] bg-[#faf6ec] px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-[#5b6b7f] dark:border-[#2a4a6b] dark:bg-[#0d1f17] dark:text-[#a7bacd]">{labelize(v.dataStatus)}</span>
                   </div>
                   <div className="mt-1.5 flex flex-wrap items-center gap-3 text-xs text-[#5b6b7f] dark:text-[#8fa5bb]">
-                    <span><strong className="text-[#13294b] dark:text-[#d8e2ec] tabular-nums">{v.firstPartyActiveCount}</strong> first-party</span>
-                    <span><strong className="text-[#13294b] dark:text-[#d8e2ec] tabular-nums">{v.hostedThirdPartyCount}</strong> hosted 3P</span>
+                    <span><strong className="text-[#123d2c] dark:text-[#d8e2ec] tabular-nums">{v.firstPartyActiveCount}</strong> first-party</span>
+                    <span><strong className="text-[#123d2c] dark:text-[#d8e2ec] tabular-nums">{v.hostedThirdPartyCount}</strong> hosted 3P</span>
                     {v.previewBetaCount > 0 && <span>{v.previewBetaCount} preview/beta</span>}
                     {v.deprecatedRetiredCount > 0 && <span className="text-rose-700 dark:text-rose-300">{v.deprecatedRetiredCount} deprecated/retired</span>}
                     {v.primaryModelFamilies.length > 0 && (
@@ -119,7 +119,7 @@ export default function CommercialModelsClient({ vendors, models, sources }: Pro
               </button>
 
               {isExpanded && (
-                <div className="border-t border-[#e6dcc3] bg-[#faf6ec] p-3 dark:border-[#1d3a57] dark:bg-[#081c30]/40">
+                <div className="border-t border-[#e6dcc3] bg-[#faf6ec] p-3 dark:border-[#223a2e] dark:bg-[#081c30]/40">
                   {vendorModels.length === 0 ? (
                     <EmptyVendorState summary={v} />
                   ) : (
@@ -141,10 +141,10 @@ export default function CommercialModelsClient({ vendors, models, sources }: Pro
                             <th className="py-2">Uncertainty</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-[#ece4d0] dark:divide-[#1d3a57]">
+                        <tbody className="divide-y divide-[#ece4d0] dark:divide-[#223a2e]">
                           {vendorModels.map((m) => (
                             <tr key={m.id}>
-                              <td className="py-2 pr-3 font-medium text-[#13294b] dark:text-[#eef3f8]">
+                              <td className="py-2 pr-3 font-medium text-[#123d2c] dark:text-[#eef3f8]">
                                 {m.modelName}
                                 {m.ownershipType === "hosted_third_party" && (
                                   <span className="ml-2 rounded-full bg-sky-100 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-sky-800 dark:bg-sky-950/40 dark:text-sky-300">Hosted third-party — not vendor-owned</span>
@@ -188,8 +188,8 @@ export default function CommercialModelsClient({ vendors, models, sources }: Pro
       </div>
 
       {/* Sources footer */}
-      <details className="rounded-md border border-[#e6dcc3] bg-[#faf6ec] p-3 text-xs dark:border-[#1d3a57] dark:bg-[#0c2238]">
-        <summary className="cursor-pointer font-semibold text-[#13294b] dark:text-[#d8e2ec]">Source registry ({sources.length})</summary>
+      <details className="rounded-md border border-[#e6dcc3] bg-[#faf6ec] p-3 text-xs dark:border-[#223a2e] dark:bg-[#0d1f17]">
+        <summary className="cursor-pointer font-semibold text-[#123d2c] dark:text-[#d8e2ec]">Source registry ({sources.length})</summary>
         <ul className="mt-2 space-y-1">
           {sources.map((s) => (
             <li key={s.id} className="text-xs text-[#54647a] dark:text-[#a7bacd]">
@@ -252,7 +252,7 @@ function FilterSelect({
     <label className="block">
       <span className="text-xs font-semibold uppercase tracking-wide text-[#5b6b7f] dark:text-[#8fa5bb]">{label}</span>
       <select
-        className="mt-1 w-full rounded-md border border-[#e0d6ba] bg-white px-2 py-1.5 text-xs dark:border-[#2a4a6b] dark:bg-[#0c2238] dark:text-[#eef3f8]"
+        className="mt-1 w-full rounded-md border border-[#e0d6ba] bg-white px-2 py-1.5 text-xs dark:border-[#2a4a6b] dark:bg-[#0d1f17] dark:text-[#eef3f8]"
         value={value}
         onChange={(e) => onChange(e.target.value)}
       >

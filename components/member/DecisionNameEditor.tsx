@@ -88,7 +88,7 @@ export default function DecisionNameEditor({
         }}
         maxLength={120}
         disabled={saving}
-        className="rounded-md border border-[#d6c9a8] bg-white/80 px-2 py-1 text-xl font-semibold text-[#13294b] focus:border-[#b08d2f] focus:outline-none dark:border-[#2a4a6b] dark:bg-[#0c2238] dark:text-[#eef3f8]"
+        className="rounded-md border border-[#d6c9a8] bg-white/80 px-2 py-1 text-xl font-semibold text-[#123d2c] focus:border-[#b08d2f] focus:outline-none dark:border-[#2a4a6b] dark:bg-[#0d1f17] dark:text-[#eef3f8]"
       />
       <button
         type="button"

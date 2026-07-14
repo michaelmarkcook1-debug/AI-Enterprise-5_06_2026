@@ -71,11 +71,11 @@ export default function ShortlistVendorCards({
   if (shortlisted.length === 0) {
     return (
       <section className="mb-6">
-        <div className="rounded-lg border border-dashed border-[#d6c9a8] bg-[#fdfaf1] px-4 py-3.5 dark:border-[#2a4a6b] dark:bg-[#0c2238]/60">
+        <div className="rounded-lg border border-dashed border-[#d6c9a8] bg-[#fdfaf1] px-4 py-3.5 dark:border-[#2a4a6b] dark:bg-[#0d1f17]/60">
           <span className="text-xs font-bold uppercase tracking-[0.14em] text-[#a07f1f] dark:text-[#d4af37]">Your assessed shortlist</span>
           <p className="mt-1 text-sm text-[#475a72] dark:text-[#b9c8d9]">
             No shortlist loaded yet. Run an assessment in{" "}
-            <Link href="/assess" className="font-semibold text-[#13294b] underline dark:text-[#eef3f8]">Assess</Link>{" "}
+            <Link href="/assess" className="font-semibold text-[#123d2c] underline dark:text-[#eef3f8]">Assess</Link>{" "}
             and your shortlisted vendors will appear here with their competitive context.
           </p>
         </div>
@@ -100,22 +100,22 @@ export default function ShortlistVendorCards({
               type="button"
               onClick={() => setExpanded(isOpen ? null : v.id)}
               aria-expanded={isOpen}
-              className={`rounded-lg border bg-[#fffdf7] p-4 text-left transition-colors dark:bg-[#0c2238] ${
+              className={`rounded-lg border bg-[#fffdf7] p-4 text-left transition-colors dark:bg-[#0d1f17] ${
                 isOpen
                   ? "border-[#b08d2f] shadow-[inset_0_2px_0_#d4af37] dark:border-[#d4af37]"
-                  : "border-[#e3d9c0] hover:border-[#b08d2f]/60 dark:border-[#1d3a57] dark:hover:border-[#d4af37]/60"
+                  : "border-[#e3d9c0] hover:border-[#b08d2f]/60 dark:border-[#223a2e] dark:hover:border-[#d4af37]/60"
               }`}
             >
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
-                  <div className="truncate text-base font-semibold text-[#13294b] dark:text-[#eef3f8]">{v.name}</div>
+                  <div className="truncate text-base font-semibold text-[#123d2c] dark:text-[#eef3f8]">{v.name}</div>
                   <div className="mt-0.5 truncate text-xs text-[#5b6b7f] dark:text-[#a7bacd]">{v.category}</div>
                 </div>
                 <span aria-hidden className={`mt-1 shrink-0 text-xs text-[#a07f1f] transition-transform dark:text-[#d4af37] ${isOpen ? "rotate-180" : ""}`}>▾</span>
               </div>
               <div className="mt-3 flex items-baseline gap-5 font-mono">
                 <span>
-                  <span className="text-xl font-semibold text-[#13294b] dark:text-[#eef3f8]">{v.score}</span>
+                  <span className="text-xl font-semibold text-[#123d2c] dark:text-[#eef3f8]">{v.score}</span>
                   <span className="ml-1 text-xs uppercase text-[#5b6b7f] dark:text-[#8fa5bb]">score</span>
                 </span>
                 <span>
@@ -130,7 +130,7 @@ export default function ShortlistVendorCards({
 
       {/* Full-width comparison strip — outside the card grid so expanding never distorts the cards */}
       {openVendor && (
-        <div className="mt-3 rounded-lg border border-[#e3d9c0] bg-[#fffdf7] p-4 dark:border-[#1d3a57] dark:bg-[#0c2238]">
+        <div className="mt-3 rounded-lg border border-[#e3d9c0] bg-[#fffdf7] p-4 dark:border-[#223a2e] dark:bg-[#0d1f17]">
           <div className="mb-2 text-xs font-bold uppercase tracking-[0.14em] text-[#a07f1f] dark:text-[#d4af37]">
             Top 3 — {openVendor.category}
           </div>
@@ -142,8 +142,8 @@ export default function ShortlistVendorCards({
                   key={t.id}
                   className={`flex items-center justify-between rounded-md border px-3 py-2 text-sm ${
                     isPick
-                      ? "border-[#b08d2f] bg-[#f7f0dc] font-semibold text-[#13294b] dark:border-[#d4af37] dark:bg-[#0e2740] dark:text-[#eef3f8]"
-                      : "border-[#efe9d9] text-[#3a4a63] dark:border-[#1d3a57] dark:text-[#c2d1e0]"
+                      ? "border-[#b08d2f] bg-[#f7f0dc] font-semibold text-[#123d2c] dark:border-[#d4af37] dark:bg-[#0e2740] dark:text-[#eef3f8]"
+                      : "border-[#efe9d9] text-[#3a4a63] dark:border-[#223a2e] dark:text-[#c2d1e0]"
                   }`}
                 >
                   <span className="min-w-0 truncate">

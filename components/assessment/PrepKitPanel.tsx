@@ -38,7 +38,7 @@ function Section({ s }: { s: KitSection }) {
   return (
     <details className="mt-2 rounded-lg border border-black/10 bg-white/60 p-3 dark:border-white/10 dark:bg-white/5">
       <summary className="cursor-pointer select-none text-sm font-semibold">{s.title}</summary>
-      <p className="mt-1 text-xs italic text-[#15263c]/65 dark:text-[#eef3f8]/60">{s.blurb}</p>
+      <p className="mt-1 text-xs italic text-[#123d2c]/65 dark:text-[#eef3f8]/60">{s.blurb}</p>
       <ul className="mt-2 list-disc space-y-1 pl-5 text-xs leading-5">
         {s.items.map((it, i) => <li key={i}>{it}</li>)}
       </ul>
@@ -68,7 +68,7 @@ export default function PrepKitPanel({
     return (
       <div className={`${CARD} mt-6`}>
         <div className={KICKER}>Vendor-meeting prep kit — premium</div>
-        <p className="mt-1 text-xs leading-5 text-[#15263c]/70 dark:text-[#eef3f8]/70">
+        <p className="mt-1 text-xs leading-5 text-[#123d2c]/70 dark:text-[#eef3f8]/70">
           Walk into the {vendorName} meeting with 8–12 questions grounded in their weak and unevidenced domains, plus
           an RFP, POC success criteria, a reference-check bank and a readiness checklist.{" "}
           <Link href="/signin" className="font-medium text-sky-700 underline underline-offset-2 dark:text-sky-400">
@@ -147,7 +147,7 @@ export default function PrepKitPanel({
       </div>
 
       {!kit && state !== "loading" && (
-        <p className="mt-1 text-xs leading-5 text-[#15263c]/70 dark:text-[#eef3f8]/70">
+        <p className="mt-1 text-xs leading-5 text-[#123d2c]/70 dark:text-[#eef3f8]/70">
           A take-into-the-meeting kit: questions targeting {vendorName}&rsquo;s weak and unevidenced domains, plus
           RFP / POC / reference / readiness templates. Draft — it probes gaps, it doesn&rsquo;t assert vendor facts.
         </p>
@@ -156,7 +156,7 @@ export default function PrepKitPanel({
 
       {kit && (
         <div className="mt-3">
-          <p className="text-xs text-[#15263c]/65 dark:text-[#eef3f8]/60">
+          <p className="text-xs text-[#123d2c]/65 dark:text-[#eef3f8]/60">
             {kit.scoredCount}/12 domains evidenced · {kit.insufficientCount} insufficient ·{" "}
             {kit.targets.weak.length + kit.targets.insufficient.length} gaps targeted
             {kit.targets.contextAdjusted ? " · context-adjusted" : ""}
@@ -168,7 +168,7 @@ export default function PrepKitPanel({
             {kit.questions.map((q, i) => (
               <li key={i} className="text-xs leading-5">
                 <span className="font-mono text-[#1f6b63] dark:text-[#5ec8bd]">{i + 1}.</span>{" "}
-                <span className="font-medium text-[#15263c] dark:text-[#eef3f8]">
+                <span className="font-medium text-[#123d2c] dark:text-[#eef3f8]">
                   {q.domain ? DOMAIN_LABEL[q.domain] : "General"}
                 </span>
                 {q.askTheVendor && (
@@ -176,8 +176,8 @@ export default function PrepKitPanel({
                     ask them
                   </span>
                 )}
-                <div className="mt-0.5 text-[#15263c]/90 dark:text-[#eef3f8]/90">{q.question}</div>
-                {q.rationale && <div className="text-xs text-[#15263c]/55 dark:text-[#eef3f8]/55">{q.rationale}</div>}
+                <div className="mt-0.5 text-[#123d2c]/90 dark:text-[#eef3f8]/90">{q.question}</div>
+                {q.rationale && <div className="text-xs text-[#123d2c]/55 dark:text-[#eef3f8]/55">{q.rationale}</div>}
               </li>
             ))}
           </ol>
@@ -187,7 +187,7 @@ export default function PrepKitPanel({
           <Section s={kit.referenceBank} />
           <Section s={kit.readiness} />
 
-          <p className="mt-3 text-xs italic text-[#15263c]/55 dark:text-[#eef3f8]/55">{kit.draftNote}</p>
+          <p className="mt-3 text-xs italic text-[#123d2c]/55 dark:text-[#eef3f8]/55">{kit.draftNote}</p>
         </div>
       )}
     </div>

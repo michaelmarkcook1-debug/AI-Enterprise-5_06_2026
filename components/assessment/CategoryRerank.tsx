@@ -84,12 +84,12 @@ export default function CategoryRerank({
   return (
     <div className="rounded-xl border border-[#d4af37]/50 bg-[#fbf6e4]/50 p-4 dark:border-[#d4af37]/40 dark:bg-[#1a1605]/30">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h2 className="text-sm font-semibold text-[#13294b] dark:text-[#eef3f8]">Assessment re-rank — your weights</h2>
+        <h2 className="text-sm font-semibold text-[#123d2c] dark:text-[#eef3f8]">Assessment re-rank — your weights</h2>
         <button
           type="button"
           disabled={isDefault}
           onClick={() => setSliders(defaultSliders)}
-          className="rounded-full border border-[#d6c9a8] px-3 py-1 text-xs font-medium text-[#4c5d75] hover:bg-white disabled:opacity-40 dark:border-[#2a4a6b] dark:text-[#a7bacd] dark:hover:bg-[#0c2238]"
+          className="rounded-full border border-[#d6c9a8] px-3 py-1 text-xs font-medium text-[#4c5d75] hover:bg-white disabled:opacity-40 dark:border-[#2a4a6b] dark:text-[#a7bacd] dark:hover:bg-[#0d1f17]"
         >
           Reset to category default
         </button>
@@ -154,7 +154,7 @@ export default function CategoryRerank({
                   </Link>
                 </span>
                 <span className="flex shrink-0 items-baseline gap-3 text-xs">
-                  <span className="font-mono tabular-nums text-[#13294b] dark:text-[#eef3f8]">
+                  <span className="font-mono tabular-nums text-[#123d2c] dark:text-[#eef3f8]">
                     {v.composite.toFixed(2)}<span className="ml-0.5 text-xs text-[#7a8aa0]">/5</span>
                   </span>
                   <span className="font-mono tabular-nums text-[#7a8aa0]">{Math.round(v.coverage * 100)}% cov</span>
@@ -162,7 +162,7 @@ export default function CategoryRerank({
               </div>
               {next && gap && (
                 <details className="mt-0.5">
-                  <summary className="cursor-pointer select-none text-xs text-[#7a8aa0] hover:text-[#13294b] dark:hover:text-[#eef3f8]">
+                  <summary className="cursor-pointer select-none text-xs text-[#7a8aa0] hover:text-[#123d2c] dark:hover:text-[#eef3f8]">
                     ▸ why above {next.vendorName} (+{gap.compositeDelta.toFixed(2)})
                   </summary>
                   {drivers.length === 0 ? (
@@ -173,7 +173,7 @@ export default function CategoryRerank({
                     <ul className="mt-1 space-y-1 pl-3 text-xs text-[#5e6b7e] dark:text-[#a7bacd]">
                       {drivers.map((d) => (
                         <li key={d.domain} className="flex flex-wrap items-center gap-x-1.5">
-                          <span className="font-medium text-[#13294b] dark:text-[#eef3f8]">{DOMAIN_LABEL[d.domain]}</span>
+                          <span className="font-medium text-[#123d2c] dark:text-[#eef3f8]">{DOMAIN_LABEL[d.domain]}</span>
                           {d.note === "leader_only" ? (
                             <span>— {v.vendorName} has reviewed evidence here ({d.leaderScore?.toFixed(1)}/5); {next.vendorName} does not</span>
                           ) : (

@@ -258,13 +258,13 @@ export default function ExposureMapHero(_: { edges?: unknown } = {}) {
   // ──────────────── Render ────────────────
 
   return (
-    <div ref={containerRef} className="relative rounded-2xl border border-[#e3d9c0] bg-gradient-to-br from-white to-[#f6f1e3] p-6 shadow-sm dark:border-[#1d3a57] dark:from-[#0a1521] dark:to-[#071827]">
+    <div ref={containerRef} className="relative rounded-2xl border border-[#e3d9c0] bg-gradient-to-br from-white to-[#f6f1e3] p-6 shadow-sm dark:border-[#223a2e] dark:from-[#0a1521] dark:to-[#081410]">
       {/* Header */}
       <div className="mb-5">
         <div className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700 dark:text-emerald-400">
           AI Ecosystem Navigator
         </div>
-        <h2 className="mt-1 text-2xl font-semibold tracking-tight text-[#15263c] dark:text-[#f6f9fc] md:text-3xl">
+        <h2 className="mt-1 text-2xl font-semibold tracking-tight text-[#123d2c] dark:text-[#f6f9fc] md:text-3xl">
           Understand the AI Market at a Glance
         </h2>
         <p className="mt-1.5 max-w-3xl text-sm leading-relaxed text-[#3f5068] dark:text-[#a7bacd]">
@@ -273,7 +273,7 @@ export default function ExposureMapHero(_: { edges?: unknown } = {}) {
       </div>
 
       {/* Controls */}
-      <div className="mb-4 flex flex-wrap items-center gap-3 border-b border-[#e3d9c0] pb-4 dark:border-[#1d3a57]">
+      <div className="mb-4 flex flex-wrap items-center gap-3 border-b border-[#e3d9c0] pb-4 dark:border-[#223a2e]">
         {/* Relationship-type filter chips */}
         <div className="flex flex-wrap items-center gap-1.5">
           <span className="text-xs font-semibold uppercase tracking-wider text-[#4c5d75] dark:text-[#8fa5bb]">Relationship</span>
@@ -293,8 +293,8 @@ export default function ExposureMapHero(_: { edges?: unknown } = {}) {
                 }
                 className={`rounded-full border px-2.5 py-0.5 text-xs font-medium transition-colors ${
                   active
-                    ? "border-[#0a1f38] bg-[#0c2238] text-white dark:border-[#ece4d0] dark:bg-[#ece3cb] dark:text-[#13294b]"
-                    : "border-[#d6c9a8] bg-white text-[#3f5068] hover:border-[#6b87a3] dark:border-[#2a4a6b] dark:bg-[#0c2238] dark:text-[#a7bacd] dark:hover:border-[#6b87a3]"
+                    ? "border-[#0b2519] bg-[#0d1f17] text-white dark:border-[#ece4d0] dark:bg-[#ece3cb] dark:text-[#123d2c]"
+                    : "border-[#d6c9a8] bg-white text-[#3f5068] hover:border-[#6b87a3] dark:border-[#2a4a6b] dark:bg-[#0d1f17] dark:text-[#a7bacd] dark:hover:border-[#6b87a3]"
                 }`}
                 style={active ? undefined : { borderLeftColor: REL_COLOR[rt], borderLeftWidth: 3 }}
               >
@@ -324,7 +324,7 @@ export default function ExposureMapHero(_: { edges?: unknown } = {}) {
                 className={`rounded-full border px-2.5 py-0.5 text-xs font-medium transition-colors ${
                   active
                     ? "border-emerald-600 bg-emerald-600 text-white"
-                    : "border-[#d6c9a8] bg-white text-[#3f5068] hover:border-emerald-500 dark:border-[#2a4a6b] dark:bg-[#0c2238] dark:text-[#a7bacd]"
+                    : "border-[#d6c9a8] bg-white text-[#3f5068] hover:border-emerald-500 dark:border-[#2a4a6b] dark:bg-[#0d1f17] dark:text-[#a7bacd]"
                 }`}
               >
                 {CONF_LABEL[ct]}
@@ -355,7 +355,7 @@ export default function ExposureMapHero(_: { edges?: unknown } = {}) {
           don't have to guess what an edge means. Investment / subsidiary
           imply ownership-or-control exposure; cloud / hosting / supply
           chain / partnership imply dependency or distribution exposure. */}
-      <div className="mb-3 rounded-lg border border-[#e3d9c0] bg-[#f6f1e3] px-3 py-2 text-xs leading-relaxed text-[#3f5068] dark:border-[#1d3a57] dark:bg-[#0c2238]/50 dark:text-[#a7bacd]">
+      <div className="mb-3 rounded-lg border border-[#e3d9c0] bg-[#f6f1e3] px-3 py-2 text-xs leading-relaxed text-[#3f5068] dark:border-[#223a2e] dark:bg-[#0d1f17]/50 dark:text-[#a7bacd]">
         <span className="font-semibold text-[#2e3f57] dark:text-[#c2d1e0]">Direction:</span>{" "}
         edges run <span className="font-semibold">left → right</span>, from exposure owner to model/API provider.{" "}
         <span className="font-semibold text-amber-700 dark:text-amber-400">Investment</span> and{" "}
@@ -370,7 +370,7 @@ export default function ExposureMapHero(_: { edges?: unknown } = {}) {
       {/* Inline legend strip — always visible. Same content as the
           legend at the bottom of the panel, but anchored near the
           map so colour decoding doesn't require scrolling. */}
-      <div className="mb-3 hidden flex-wrap items-center gap-3 rounded-lg border border-[#e3d9c0] bg-white px-3 py-2 text-xs text-[#3f5068] dark:border-[#1d3a57] dark:bg-[#0c2238] dark:text-[#a7bacd] md:flex">
+      <div className="mb-3 hidden flex-wrap items-center gap-3 rounded-lg border border-[#e3d9c0] bg-white px-3 py-2 text-xs text-[#3f5068] dark:border-[#223a2e] dark:bg-[#0d1f17] dark:text-[#a7bacd] md:flex">
         <span className="text-xs font-semibold uppercase tracking-wider text-[#4c5d75]">Legend</span>
         {ALL_REL_TYPES.map((rt) => (
           <span key={rt} className="inline-flex items-center gap-1.5">
@@ -396,7 +396,7 @@ export default function ExposureMapHero(_: { edges?: unknown } = {}) {
           viewBox={`0 0 ${W} ${height}`}
           width="100%"
           preserveAspectRatio="xMidYMid meet"
-          className="min-h-[460px] cursor-default text-[#15263c] dark:text-[#eef3f8]"
+          className="min-h-[460px] cursor-default text-[#123d2c] dark:text-[#eef3f8]"
           role="img"
           aria-label="Indirect AI market exposure map"
         >
@@ -552,7 +552,7 @@ export default function ExposureMapHero(_: { edges?: unknown } = {}) {
       )}
 
       {/* Legend */}
-      <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-[#e3d9c0] pt-3 text-xs text-[#3f5068] dark:border-[#1d3a57] dark:text-[#a7bacd]">
+      <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-[#e3d9c0] pt-3 text-xs text-[#3f5068] dark:border-[#223a2e] dark:text-[#a7bacd]">
         <span className="text-xs font-semibold uppercase tracking-wider text-[#4c5d75]">Legend</span>
         {ALL_REL_TYPES.map((rt) => (
           <span key={rt} className="inline-flex items-center gap-1.5">
@@ -708,10 +708,10 @@ function MapTooltip({
   if (content.kind === "edge") {
     const e = content.edge;
     return (
-      <div style={style} className="rounded-xl border border-[#e3d9c0] bg-white p-3 text-xs shadow-lg dark:border-[#2a4a6b] dark:bg-[#0c2238]">
+      <div style={style} className="rounded-xl border border-[#e3d9c0] bg-white p-3 text-xs shadow-lg dark:border-[#2a4a6b] dark:bg-[#0d1f17]">
         <div className="mb-1 flex items-center gap-2">
           <span className="inline-block h-2 w-2 rounded-full" style={{ backgroundColor: REL_COLOR[e.relationshipType] }} />
-          <span className="font-semibold text-[#15263c] dark:text-[#eef3f8]">
+          <span className="font-semibold text-[#123d2c] dark:text-[#eef3f8]">
             {content.sourceNode.label} → {content.targetNode.label}
           </span>
         </div>
@@ -732,8 +732,8 @@ function MapTooltip({
     );
   }
   return (
-    <div style={style} className="rounded-xl border border-[#e3d9c0] bg-white p-3 text-xs shadow-lg dark:border-[#2a4a6b] dark:bg-[#0c2238]">
-      <div className="mb-1 font-semibold text-[#15263c] dark:text-[#eef3f8]">{content.node.label}</div>
+    <div style={style} className="rounded-xl border border-[#e3d9c0] bg-white p-3 text-xs shadow-lg dark:border-[#2a4a6b] dark:bg-[#0d1f17]">
+      <div className="mb-1 font-semibold text-[#123d2c] dark:text-[#eef3f8]">{content.node.label}</div>
       <div className="mb-2 text-xs uppercase tracking-wider text-[#4c5d75]">
         {content.node.ticker ? `${content.node.ticker} · ` : ""}{content.node.category}
       </div>
@@ -784,7 +784,7 @@ function MobileStackedView({
   }
   if (grouped.size === 0) {
     return (
-      <div className="rounded-lg border border-[#e3d9c0] bg-[#f6f1e3] p-4 text-center text-xs text-[#4c5d75] dark:border-[#1d3a57] dark:bg-[#0c2238]/40">
+      <div className="rounded-lg border border-[#e3d9c0] bg-[#f6f1e3] p-4 text-center text-xs text-[#4c5d75] dark:border-[#223a2e] dark:bg-[#0d1f17]/40">
         No relationships match the current filters.
       </div>
     );
@@ -794,7 +794,7 @@ function MobileStackedView({
       {[...grouped.entries()].map(([sourceId, sourceEdges]) => {
         const src = getNode(sourceId);
         return (
-          <details key={sourceId} open className="rounded-xl border border-[#e3d9c0] bg-white dark:border-[#1d3a57] dark:bg-[#0c2238]">
+          <details key={sourceId} open className="rounded-xl border border-[#e3d9c0] bg-white dark:border-[#223a2e] dark:bg-[#0d1f17]">
             <summary className="flex cursor-pointer list-none items-center gap-3 p-3">
               <span
                 className="inline-flex h-9 w-9 items-center justify-center rounded-full text-[12px] font-bold text-white"
@@ -804,21 +804,21 @@ function MobileStackedView({
                 {src.monogram}
               </span>
               <div className="flex-1">
-                <div className="text-sm font-semibold text-[#15263c] dark:text-[#eef3f8]">{src.label}</div>
+                <div className="text-sm font-semibold text-[#123d2c] dark:text-[#eef3f8]">{src.label}</div>
                 <div className="text-xs uppercase tracking-wider text-[#4c5d75]">
                   {src.ticker ?? src.category} · {sourceEdges.length} relationship{sourceEdges.length === 1 ? "" : "s"}
                 </div>
               </div>
               <span aria-hidden className="text-[#6b7d93]">▾</span>
             </summary>
-            <ul className="divide-y divide-[#e3d9c0] border-t border-[#e3d9c0] dark:divide-[#1d3a57] dark:border-[#1d3a57]">
+            <ul className="divide-y divide-[#e3d9c0] border-t border-[#e3d9c0] dark:divide-[#223a2e] dark:border-[#223a2e]">
               {sourceEdges.map((e) => {
                 const tgt = getNode(e.targetId);
                 return (
                   <li key={e.id} className="space-y-1.5 p-3 text-xs">
                     <div className="flex items-center gap-2">
                       <span className="inline-block h-2 w-2 rounded-full" style={{ backgroundColor: REL_COLOR[e.relationshipType] }} />
-                      <span className="font-semibold text-[#15263c] dark:text-[#eef3f8]">{tgt.label}</span>
+                      <span className="font-semibold text-[#123d2c] dark:text-[#eef3f8]">{tgt.label}</span>
                       <span className="ml-auto rounded-full bg-[#ece3cb] px-2 py-0.5 text-[9px] uppercase tracking-wider text-[#3f5068] dark:bg-[#143049] dark:text-[#a7bacd]">
                         {CONF_LABEL[e.confidence]}
                       </span>
@@ -887,7 +887,7 @@ function ActiveReadout({
             <div key={id} className="rounded-xl border border-emerald-300 bg-emerald-50/40 p-3 text-sm dark:border-emerald-900/60 dark:bg-emerald-950/20">
               <div className="flex items-baseline justify-between gap-2">
                 <div>
-                  <div className="font-semibold text-[#15263c] dark:text-[#eef3f8]">{node.label}</div>
+                  <div className="font-semibold text-[#123d2c] dark:text-[#eef3f8]">{node.label}</div>
                   <div className="text-xs uppercase tracking-wider text-[#4c5d75]">
                     {node.ticker ? `${node.ticker} · ` : ""}{node.category}
                   </div>
@@ -895,7 +895,7 @@ function ActiveReadout({
                 {profileSlug && (
                   <a
                     href={`/vendors/${profileSlug}`}
-                    className="rounded-full border border-emerald-500 bg-white px-2.5 py-0.5 text-xs font-medium text-emerald-800 hover:bg-emerald-100 dark:border-emerald-700 dark:bg-[#0c2238] dark:text-emerald-300 dark:hover:bg-emerald-950/60"
+                    className="rounded-full border border-emerald-500 bg-white px-2.5 py-0.5 text-xs font-medium text-emerald-800 hover:bg-emerald-100 dark:border-emerald-700 dark:bg-[#0d1f17] dark:text-emerald-300 dark:hover:bg-emerald-950/60"
                   >
                     View vendor profile →
                   </a>
@@ -909,7 +909,7 @@ function ActiveReadout({
                   const isOutgoing = e.sourceId === id;
                   const counterparty = getNode(isOutgoing ? e.targetId : e.sourceId);
                   return (
-                    <li key={e.id} className="rounded-md border border-[#e3d9c0] bg-white/70 p-2 text-xs dark:border-[#1d3a57] dark:bg-[#0c2238]/70">
+                    <li key={e.id} className="rounded-md border border-[#e3d9c0] bg-white/70 p-2 text-xs dark:border-[#223a2e] dark:bg-[#0d1f17]/70">
                       <div className="flex flex-wrap items-center gap-1.5">
                         <span className="inline-block h-2 w-2 rounded-full" style={{ backgroundColor: REL_COLOR[e.relationshipType] }} />
                         <span className="font-semibold text-[#20314a] dark:text-[#d8e2ec]">
@@ -931,7 +931,7 @@ function ActiveReadout({
                           safe-attribute rel. Falls back to a "Evidence
                           pending" line when sourceUrls is empty so the
                           operator never sees a silent gap. */}
-                      <div className="mt-2 border-t border-[#e3d9c0] pt-1.5 dark:border-[#1d3a57]">
+                      <div className="mt-2 border-t border-[#e3d9c0] pt-1.5 dark:border-[#223a2e]">
                         <div className="text-xs font-semibold uppercase tracking-wider text-[#4c5d75]">View evidence</div>
                         {e.sourceUrls.length === 0 ? (
                           <div className="mt-0.5 text-xs italic text-[#4c5d75]">Evidence pending — relationship classified from public reporting; primary source not yet attached.</div>

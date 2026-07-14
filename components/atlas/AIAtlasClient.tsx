@@ -405,7 +405,7 @@ function AtlasMap({
   const visibleRelationships = RELATIONSHIPS.filter(([a, b]) => visibleIds.has(a) && visibleIds.has(b));
 
   return (
-    <section className="overflow-hidden rounded-lg border border-[#1a3953] bg-[linear-gradient(180deg,rgba(11,23,39,0.87),rgba(6,16,28,0.8))] p-3 shadow-2xl shadow-black/30">
+    <section className="overflow-hidden rounded-lg border border-[#1e352a] bg-[linear-gradient(180deg,rgba(11,23,39,0.87),rgba(6,16,28,0.8))] p-3 shadow-2xl shadow-black/30">
       <div className="mb-3 flex items-center justify-between gap-3">
         <div>
           <h2 className="text-base font-semibold text-[#eff8ff]">AI Economy Network</h2>
@@ -507,7 +507,7 @@ export default function AIAtlasClient() {
   return (
     <main className="min-h-screen bg-[radial-gradient(circle_at_65%_0,#173d62,#050b14_44%,#02050a)] text-[#eff8ff]">
       <div className="mx-auto grid max-w-[1660px] gap-4 px-4 py-5 lg:grid-cols-[250px_minmax(0,1fr)]">
-        <aside className="rounded-lg border border-[#1a3953] bg-[#06101b]/90 p-4 lg:sticky lg:top-20 lg:h-[calc(100vh-6rem)]">
+        <aside className="rounded-lg border border-[#1e352a] bg-[#06101b]/90 p-4 lg:sticky lg:top-20 lg:h-[calc(100vh-6rem)]">
           <Link href="/atlas" className="mb-6 flex items-center gap-3">
             <span className="h-9 w-9 rounded-full bg-[radial-gradient(circle,#fff,#d9b662_33%,#0b5b66)] shadow-[0_0_30px_rgba(57,217,200,0.54)]" />
             <span>
@@ -531,7 +531,7 @@ export default function AIAtlasClient() {
               </Link>
             ))}
           </nav>
-          <div className="mt-6 rounded-lg border border-[#1a3953] bg-[#0b1829] p-4">
+          <div className="mt-6 rounded-lg border border-[#1e352a] bg-[#0b1829] p-4">
             <h2 className="text-sm font-semibold text-[#eff8ff]">Atlas-first direction</h2>
             <p className="mt-2 text-xs leading-5 text-[#8aa4b8]">
               Enter through the AI economy map. Rankings and Q.U.A.D become analytical layers, not the whole product.
@@ -564,7 +564,7 @@ export default function AIAtlasClient() {
             </div>
           </header>
 
-          <section className="flex flex-col justify-between gap-4 rounded-lg border border-[#1a3953] bg-[linear-gradient(180deg,rgba(11,23,39,0.87),rgba(6,16,28,0.8))] p-4 shadow-2xl shadow-black/30 lg:flex-row lg:items-center">
+          <section className="flex flex-col justify-between gap-4 rounded-lg border border-[#1e352a] bg-[linear-gradient(180deg,rgba(11,23,39,0.87),rgba(6,16,28,0.8))] p-4 shadow-2xl shadow-black/30 lg:flex-row lg:items-center">
             <div>
               <div className="flex flex-wrap gap-2">
                 <span className="rounded-full border border-[#2d665d] bg-[#0d332f] px-2.5 py-1 text-xs font-semibold text-[#bffff5]">Live-style mockup</span>
@@ -603,7 +603,7 @@ export default function AIAtlasClient() {
 
           <section className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
             <AtlasMap activeLayer={activeLayer} selectedId={selectedId} onSelect={setSelectedId} />
-            <aside className="rounded-lg border border-[#1a3953] bg-[linear-gradient(180deg,rgba(11,23,39,0.87),rgba(6,16,28,0.8))] p-4 shadow-2xl shadow-black/30">
+            <aside className="rounded-lg border border-[#1e352a] bg-[linear-gradient(180deg,rgba(11,23,39,0.87),rgba(6,16,28,0.8))] p-4 shadow-2xl shadow-black/30">
               <div className="flex items-center gap-3">
                 <span className="grid h-11 w-11 place-items-center rounded-full border border-[#d9b662] bg-[#133948] font-bold text-[#eff8ff]">{selected.name[0]}</span>
                 <div>
@@ -654,15 +654,15 @@ export default function AIAtlasClient() {
           </section>
 
           <section className="grid gap-4 xl:grid-cols-3">
-            <div className="rounded-lg border border-[#1a3953] bg-[linear-gradient(180deg,rgba(11,23,39,0.87),rgba(6,16,28,0.8))] p-4 shadow-xl shadow-black/20">
+            <div className="rounded-lg border border-[#1e352a] bg-[linear-gradient(180deg,rgba(11,23,39,0.87),rgba(6,16,28,0.8))] p-4 shadow-xl shadow-black/20">
               <h2 className="mb-3 text-base font-semibold text-[#eff8ff]">Dependency heat</h2>
               <DependencyHeat selectedId={selectedId} />
             </div>
-            <div className="rounded-lg border border-[#1a3953] bg-[linear-gradient(180deg,rgba(11,23,39,0.87),rgba(6,16,28,0.8))] p-4 shadow-xl shadow-black/20">
+            <div className="rounded-lg border border-[#1e352a] bg-[linear-gradient(180deg,rgba(11,23,39,0.87),rgba(6,16,28,0.8))] p-4 shadow-xl shadow-black/20">
               <h2 className="mb-3 text-base font-semibold text-[#eff8ff]">Category exposure</h2>
               <CategoryBars entity={selected} />
             </div>
-            <div className="rounded-lg border border-[#1a3953] bg-[linear-gradient(180deg,rgba(11,23,39,0.87),rgba(6,16,28,0.8))] p-4 shadow-xl shadow-black/20">
+            <div className="rounded-lg border border-[#1e352a] bg-[linear-gradient(180deg,rgba(11,23,39,0.87),rgba(6,16,28,0.8))] p-4 shadow-xl shadow-black/20">
               <h2 className="mb-3 text-base font-semibold text-[#eff8ff]">Board readout</h2>
               <p className="text-sm leading-6 text-[#c8d7e1]">
                 {selected.name} should be assessed as {selected.role.toLowerCase()} with {selected.risk.toLowerCase()} dependency risk and {selected.reach}/100 ecosystem reach. The decision is not just whether to buy {selected.name}; it is whether to accept the surrounding ecosystem dependencies.
@@ -670,7 +670,7 @@ export default function AIAtlasClient() {
             </div>
           </section>
 
-          <section className="rounded-lg border border-[#1a3953] bg-[linear-gradient(180deg,rgba(11,23,39,0.87),rgba(6,16,28,0.8))] p-4 shadow-xl shadow-black/20">
+          <section className="rounded-lg border border-[#1e352a] bg-[linear-gradient(180deg,rgba(11,23,39,0.87),rgba(6,16,28,0.8))] p-4 shadow-xl shadow-black/20">
             <h2 className="mb-3 text-base font-semibold text-[#eff8ff]">Q.U.A.D as layers</h2>
             <div className="grid gap-3 md:grid-cols-4">
               {[

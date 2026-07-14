@@ -88,7 +88,7 @@ export default function WeightedScorecard({
       <div className="mb-4 flex items-center gap-2 text-xs text-[#7a8aa0] dark:text-[#7a9bb8]">
         <span className="relative inline-block h-3.5 w-9 shrink-0 overflow-hidden rounded-sm bg-[#e9e0c9] align-middle dark:bg-[#102135]">
           <span className="absolute bottom-[2px] left-0 top-[2px] w-5 rounded-sm bg-[#b08d2f] dark:bg-[#e8c95c]" />
-          <span className="absolute bottom-0 left-[80%] top-0 w-[2px] bg-[#13294b] opacity-70 dark:bg-[#eef3f8]" />
+          <span className="absolute bottom-0 left-[80%] top-0 w-[2px] bg-[#123d2c] opacity-70 dark:bg-[#eef3f8]" />
         </span>
         Bar = 0–5 score · the ink tick marks the{" "}
         <strong className="font-semibold text-[#5e6b7e] dark:text-[#a7bacd]">audit-grade line (4.0)</strong> — only
@@ -101,7 +101,7 @@ export default function WeightedScorecard({
           <div className="text-xs font-semibold uppercase tracking-wider text-[#a07f1f] dark:text-[#d4af37]">
             Your weighted composite — global view
           </div>
-          <div className="font-mono text-2xl font-bold tabular-nums text-[#13294b] dark:text-[#eef3f8]">
+          <div className="font-mono text-2xl font-bold tabular-nums text-[#123d2c] dark:text-[#eef3f8]">
             {result.composite.toFixed(2)}<span className="text-sm text-[#7a8aa0]">/5</span>
           </div>
           <div className="mt-0.5 text-xs text-[#7a8aa0]">
@@ -117,7 +117,7 @@ export default function WeightedScorecard({
           type="button"
           disabled={isDefault}
           onClick={() => setSliders(defaultSliders())}
-          className="ml-auto rounded-full border border-[#d6c9a8] px-3 py-1 text-xs font-medium text-[#4c5d75] hover:bg-white disabled:opacity-40 dark:border-[#2a4a6b] dark:text-[#a7bacd] dark:hover:bg-[#0c2238]"
+          className="ml-auto rounded-full border border-[#d6c9a8] px-3 py-1 text-xs font-medium text-[#4c5d75] hover:bg-white disabled:opacity-40 dark:border-[#2a4a6b] dark:text-[#a7bacd] dark:hover:bg-[#0d1f17]"
         >
           Reset to framework default
         </button>
@@ -128,19 +128,19 @@ export default function WeightedScorecard({
           your weights); no fabricated steps, no fake timing. The composite/coverage
           terms update live as you re-weight. The honest answer to "why so fast?" —
           it's a rubric, and this is the rubric. */}
-      <details className="mb-4 rounded-lg border border-[#e3d9c0] bg-white/60 text-xs leading-5 text-[#3f5068] dark:border-[#1d3a57] dark:bg-[#0c2238]/40 dark:text-[#a7bacd]">
+      <details className="mb-4 rounded-lg border border-[#e3d9c0] bg-white/60 text-xs leading-5 text-[#3f5068] dark:border-[#223a2e] dark:bg-[#0d1f17]/40 dark:text-[#a7bacd]">
         <summary className="cursor-pointer select-none px-3 py-2 font-semibold text-[#5e6b7e] dark:text-[#a7bacd]">
           How this was computed — deterministic rubric, no model call
         </summary>
         <p className="px-3 pb-2">
-        <span className="font-semibold text-[#13294b] dark:text-[#eef3f8]">{scorecard.totalEvidenceRows.toLocaleString()}</span> reviewed,
+        <span className="font-semibold text-[#123d2c] dark:text-[#eef3f8]">{scorecard.totalEvidenceRows.toLocaleString()}</span> reviewed,
         source-backed records →{" "}
-        <span className="font-semibold text-[#13294b] dark:text-[#eef3f8]">{result.scoredCount}/12 domains</span> scored from cited
-        evidence (best grade caps each band) → <span className="font-semibold text-[#13294b] dark:text-[#eef3f8]">your weights</span> applied →
-        composite <span className="font-semibold text-[#13294b] dark:text-[#eef3f8]">{result.composite.toFixed(2)}/5</span> at{" "}
-        <span className="font-semibold text-[#13294b] dark:text-[#eef3f8]">{Math.round(result.rawCoverage * 100)}%</span> coverage →{" "}
-        <span className="font-semibold text-[#13294b] dark:text-[#eef3f8]">{lowConfidenceCount}</span> low-confidence,{" "}
-        <span className="font-semibold text-[#13294b] dark:text-[#eef3f8]">{result.insufficientCount}</span> insufficient-evidence.
+        <span className="font-semibold text-[#123d2c] dark:text-[#eef3f8]">{result.scoredCount}/12 domains</span> scored from cited
+        evidence (best grade caps each band) → <span className="font-semibold text-[#123d2c] dark:text-[#eef3f8]">your weights</span> applied →
+        composite <span className="font-semibold text-[#123d2c] dark:text-[#eef3f8]">{result.composite.toFixed(2)}/5</span> at{" "}
+        <span className="font-semibold text-[#123d2c] dark:text-[#eef3f8]">{Math.round(result.rawCoverage * 100)}%</span> coverage →{" "}
+        <span className="font-semibold text-[#123d2c] dark:text-[#eef3f8]">{lowConfidenceCount}</span> low-confidence,{" "}
+        <span className="font-semibold text-[#123d2c] dark:text-[#eef3f8]">{result.insufficientCount}</span> insufficient-evidence.
         </p>
       </details>
 
@@ -152,10 +152,10 @@ export default function WeightedScorecard({
           const weightPct = Math.round(norm[domain] * 100);
           const scored = d && d.state === "scored";
           return (
-            <div key={domain} className="border-t border-[#ece4d0] py-3 dark:border-[#1d3a57]">
+            <div key={domain} className="border-t border-[#ece4d0] py-3 dark:border-[#223a2e]">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <div className="min-w-0">
-                  <div className="text-sm font-medium text-[#13294b] dark:text-[#eef3f8]">{DOMAIN_LABEL[domain]}</div>
+                  <div className="text-sm font-medium text-[#123d2c] dark:text-[#eef3f8]">{DOMAIN_LABEL[domain]}</div>
                   <div className="text-xs uppercase tracking-wide text-[#7a8aa0] dark:text-[#7a9bb8]">
                     {PILLAR_LABEL[c.pillar] ?? c.pillar}
                   </div>
@@ -164,7 +164,7 @@ export default function WeightedScorecard({
                   {scored ? (
                     // Neutral ink number (no red↔green) — certainty carried by the veil, not hue.
                     <ConfidenceVeil confidence={d!.state === "scored" ? d!.confidence : null} label={`${DOMAIN_LABEL[domain]} score`} as="div" className="text-right">
-                      <div className="font-mono text-lg font-semibold tabular-nums text-[#13294b] dark:text-[#eef3f8]">
+                      <div className="font-mono text-lg font-semibold tabular-nums text-[#123d2c] dark:text-[#eef3f8]">
                         {d!.state === "scored" ? d!.score.toFixed(1) : "—"}<span className="text-xs text-[#7a8aa0]">/5</span>
                       </div>
                       <div className="text-xs text-[#5e6b7e] dark:text-[#a7bacd]">
@@ -172,7 +172,7 @@ export default function WeightedScorecard({
                       </div>
                     </ConfidenceVeil>
                   ) : (
-                    <span className="rounded-full border border-[#d6c9a8] bg-[#f6f1e3] px-2 py-0.5 text-xs font-semibold text-[#5e6b7e] dark:border-[#2a4a6b] dark:bg-[#0c2238] dark:text-[#a7bacd]">
+                    <span className="rounded-full border border-[#d6c9a8] bg-[#f6f1e3] px-2 py-0.5 text-xs font-semibold text-[#5e6b7e] dark:border-[#2a4a6b] dark:bg-[#0d1f17] dark:text-[#a7bacd]">
                       Insufficient evidence
                     </span>
                   )}
@@ -226,7 +226,7 @@ export default function WeightedScorecard({
                   <span>{d!.evidenceCount} reviewed {d!.evidenceCount === 1 ? "source" : "sources"}</span>
                   {d!.citations.length > 0 && (
                     <details className="w-full">
-                      <summary className="cursor-pointer select-none font-medium text-[#4c5d75] hover:text-[#13294b] dark:text-[#7a9bb8] dark:hover:text-[#eef3f8]">
+                      <summary className="cursor-pointer select-none font-medium text-[#4c5d75] hover:text-[#123d2c] dark:text-[#7a9bb8] dark:hover:text-[#eef3f8]">
                         ▸ {d!.citations.length} {d!.citations.length === 1 ? "citation" : "citations"}
                       </summary>
                       <ul className="mt-1 space-y-1 pl-3">

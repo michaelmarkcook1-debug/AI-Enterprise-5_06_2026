@@ -18,7 +18,7 @@ interface ShareView {
 }
 
 const CARD = "rounded-xl border border-black/10 dark:border-white/10 bg-white/60 dark:bg-white/5 p-4";
-const MUTED = "text-[#15263c]/65 dark:text-[#eef3f8]/60";
+const MUTED = "text-[#123d2c]/65 dark:text-[#eef3f8]/60";
 
 function fmtDate(iso: string): string {
   const d = new Date(iso);
@@ -105,7 +105,7 @@ export default function ShareManager({ decisionId }: { decisionId: string }) {
 
   return (
     <section className={CARD}>
-      <h2 className="text-sm font-semibold text-[#13294b] dark:text-[#eef3f8]">Share (read-only)</h2>
+      <h2 className="text-sm font-semibold text-[#123d2c] dark:text-[#eef3f8]">Share (read-only)</h2>
       <p className={`mt-1 text-xs ${MUTED}`}>
         Anyone with the link can view this decision&apos;s weighting, shortlist, and evidence — no account, no edit
         access. They can never reach your other decisions.
@@ -121,7 +121,7 @@ export default function ShareManager({ decisionId }: { decisionId: string }) {
               readOnly
               value={newLink}
               onFocus={(e) => e.currentTarget.select()}
-              className="w-full min-w-0 rounded-md border border-[#d6c9a8] bg-white/80 px-2 py-1 text-xs text-[#13294b] dark:border-[#2a4a6b] dark:bg-[#0c2238] dark:text-[#eef3f8]"
+              className="w-full min-w-0 rounded-md border border-[#d6c9a8] bg-white/80 px-2 py-1 text-xs text-[#123d2c] dark:border-[#2a4a6b] dark:bg-[#0d1f17] dark:text-[#eef3f8]"
             />
             <button
               type="button"
@@ -142,7 +142,7 @@ export default function ShareManager({ decisionId }: { decisionId: string }) {
             onChange={(e) => setDisplayName(e.target.value)}
             placeholder="e.g. procurement team"
             maxLength={80}
-            className="w-44 rounded-md border border-[#d6c9a8] bg-white/80 px-2 py-1 text-xs dark:border-[#2a4a6b] dark:bg-[#0c2238]"
+            className="w-44 rounded-md border border-[#d6c9a8] bg-white/80 px-2 py-1 text-xs dark:border-[#2a4a6b] dark:bg-[#0d1f17]"
           />
         </label>
         <label className="flex flex-col gap-1 text-xs">
@@ -150,7 +150,7 @@ export default function ShareManager({ decisionId }: { decisionId: string }) {
           <select
             value={expiresInDays}
             onChange={(e) => setExpiresInDays(Number(e.target.value))}
-            className="rounded-md border border-[#d6c9a8] bg-white/80 px-2 py-1 text-xs dark:border-[#2a4a6b] dark:bg-[#0c2238]"
+            className="rounded-md border border-[#d6c9a8] bg-white/80 px-2 py-1 text-xs dark:border-[#2a4a6b] dark:bg-[#0d1f17]"
           >
             <option value={7}>7 days</option>
             <option value={30}>30 days</option>

@@ -13,7 +13,7 @@ import type { IndustryUsageRow, UseCaseOption, VendorUsageCell } from "@/lib/pee
 import { SimpleBarChart, assignVendorColors } from "./UsageBarChart";
 import IndustryVendorHeatmap from "./IndustryVendorHeatmap";
 
-const MUTED = "text-[#15263c]/65 dark:text-[#eef3f8]/60";
+const MUTED = "text-[#123d2c]/65 dark:text-[#eef3f8]/60";
 const CARD = "rounded-xl border border-black/10 dark:border-white/10 bg-white/60 dark:bg-white/5";
 
 export interface PeerUsageOverviewProps {
@@ -98,7 +98,7 @@ export default function PeerUsageOverview({
           <select
             value={useCase}
             onChange={(e) => setUseCase(e.target.value)}
-            className="rounded-md border border-black/15 bg-white/80 px-2 py-1.5 text-sm dark:border-white/15 dark:bg-[#0a1f38]"
+            className="rounded-md border border-black/15 bg-white/80 px-2 py-1.5 text-sm dark:border-white/15 dark:bg-[#0b2519]"
           >
             <option value="">All use-cases</option>
             {useCases.map((u) => (
@@ -137,7 +137,7 @@ export default function PeerUsageOverview({
       {useCase && (
         <div className="mt-3 space-y-1">
           <p className={`text-xs ${MUTED}`}>
-            Showing industries where <strong className="text-[#13294b] dark:text-[#eef3f8]">{useCase}</strong> is a
+            Showing industries where <strong className="text-[#123d2c] dark:text-[#eef3f8]">{useCase}</strong> is a
             top cited deployed use-case. This filters industries — it is not a claim that a specific vendor
             is used for this use-case.
           </p>
@@ -185,7 +185,7 @@ function IndustryRow({
   return (
     <div className="rounded-lg border border-black/5 p-3 dark:border-white/10">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <span className="text-sm font-semibold text-[#13294b] dark:text-[#eef3f8]">{row.label}</span>
+        <span className="text-sm font-semibold text-[#123d2c] dark:text-[#eef3f8]">{row.label}</span>
         {row.adoptionStat && (
           <span className={`text-xs ${MUTED}`}>
             {row.adoptionStat.headline}
@@ -196,7 +196,7 @@ function IndustryRow({
                   href={row.adoptionStat.source.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="underline underline-offset-2 hover:text-[#13294b] dark:hover:text-[#eef3f8]"
+                  className="underline underline-offset-2 hover:text-[#123d2c] dark:hover:text-[#eef3f8]"
                 >
                   {row.adoptionStat.source.publisher}
                 </a>

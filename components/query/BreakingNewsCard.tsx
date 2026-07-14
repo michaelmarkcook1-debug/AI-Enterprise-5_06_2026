@@ -66,12 +66,12 @@ function NewsRow({ item }: { item: BreakingNewsItem }) {
             target="_blank"
             rel="noreferrer"
             title={synopsis || undefined}
-            className="text-[13px] font-semibold leading-5 text-[#13294b] hover:underline dark:text-[#eef3f8]"
+            className="text-[13px] font-semibold leading-5 text-[#123d2c] hover:underline dark:text-[#eef3f8]"
           >
             {title} <span aria-hidden className="text-xs text-[#6b7d93]">↗</span>
           </a>
         ) : (
-          <span title={synopsis || undefined} className="text-[13px] font-semibold leading-5 text-[#13294b] dark:text-[#eef3f8]">
+          <span title={synopsis || undefined} className="text-[13px] font-semibold leading-5 text-[#123d2c] dark:text-[#eef3f8]">
             {title}
           </span>
         )}
@@ -119,14 +119,14 @@ export default function BreakingNewsCard({ news }: { news: BreakingNews }) {
   })).filter((g) => g.rows.length > 0);
 
   return (
-    <section className="flex flex-col rounded-xl border border-[#e3d9c0] bg-white p-4 dark:border-[#1d3a57] dark:bg-[#0c2238]">
+    <section className="flex flex-col rounded-xl border border-[#e3d9c0] bg-white p-4 dark:border-[#223a2e] dark:bg-[#0d1f17]">
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <span className="relative flex h-2 w-2">
             <span className={`absolute inline-flex h-full w-full rounded-full ${stale ? "bg-amber-400" : "bg-rose-500"} opacity-75 ${stale ? "" : "animate-ping"}`} />
             <span className={`relative inline-flex h-2 w-2 rounded-full ${stale ? "bg-amber-500" : "bg-rose-600"}`} />
           </span>
-          <h3 className="text-sm font-bold uppercase tracking-wide text-[#15263c] dark:text-[#eef3f8]">Breaking news</h3>
+          <h3 className="text-sm font-bold uppercase tracking-wide text-[#123d2c] dark:text-[#eef3f8]">Breaking news</h3>
         </div>
         <span className="text-xs font-medium text-[#6b7d93] dark:text-[#7a9bb8]">
           Last {windowDays} days · top {items.length}{vendorsCovered > 0 ? ` · ${vendorsCovered} vendors` : ""}
@@ -145,7 +145,7 @@ export default function BreakingNewsCard({ news }: { news: BreakingNews }) {
       )}
 
       {items.length === 0 ? (
-        <div className="mt-4 rounded-lg border border-dashed border-[#e3d9c0] p-6 text-center dark:border-[#1d3a57]">
+        <div className="mt-4 rounded-lg border border-dashed border-[#e3d9c0] p-6 text-center dark:border-[#223a2e]">
           <p className="text-xs leading-5 text-[#6b7d93] dark:text-[#7a9bb8]">
             No high-impact AI-market news in the last {windowDays} days.
             {latestPublishedAt ? ` Latest tracked story: ${fmtDate(latestPublishedAt)}.` : ""}

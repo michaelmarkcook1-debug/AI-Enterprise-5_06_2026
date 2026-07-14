@@ -6,7 +6,7 @@ import { DEV_SENTIMENT_COMPILED_AT } from "@/lib/dev-sentiment/data";
 // three cited sources + top cited threads, or an honest "insufficient" state.
 // Never rendered for out-of-scope vendors (caller gates on aggregate !== null).
 
-const MUTED = "text-[#15263c]/65 dark:text-[#eef3f8]/60";
+const MUTED = "text-[#123d2c]/65 dark:text-[#eef3f8]/60";
 
 const TAG_STYLE: Record<string, string> = {
   positive: "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300",
@@ -88,7 +88,7 @@ export default function DevSentimentPanel({ agg }: { agg: DevSentimentAggregate 
             <ul className={`mt-1 space-y-0.5 text-xs ${MUTED}`}>
               {s.citations.map((c) => (
                 <li key={c.url}>
-                  <a href={c.url} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-[#15263c] dark:hover:text-[#eef3f8]">
+                  <a href={c.url} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-[#123d2c] dark:hover:text-[#eef3f8]">
                     {c.title}
                   </a>
                   {c.date ? ` · ${c.date}` : ""}

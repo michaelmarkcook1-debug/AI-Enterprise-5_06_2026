@@ -12,7 +12,7 @@ const BAND_STYLE: Record<CalibrationBand, string> = {
   Strong:
     "border-sky-300 bg-sky-50 text-sky-800 dark:border-sky-700/60 dark:bg-sky-950/50 dark:text-sky-300",
   Contender:
-    "border-[#d6c9a8] bg-[#f6f1e3] text-[#3f5068] dark:border-[#2a4a6b] dark:bg-[#0c2238] dark:text-[#c2d1e0]",
+    "border-[#d6c9a8] bg-[#f6f1e3] text-[#3f5068] dark:border-[#2a4a6b] dark:bg-[#0d1f17] dark:text-[#c2d1e0]",
   Emerging:
     "border-[#e0d6ba] bg-[#faf6ec] text-[#5b6b7f] dark:border-[#24425f] dark:bg-[#0a1e33] dark:text-[#8fa5bb]",
 };

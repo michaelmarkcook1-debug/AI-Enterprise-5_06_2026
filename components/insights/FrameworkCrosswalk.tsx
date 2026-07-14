@@ -12,7 +12,7 @@ import {
   type MappingStrength,
 } from "@/lib/insights/framework-crosswalk";
 
-const MUTED = "text-[#15263c]/65 dark:text-[#eef3f8]/60";
+const MUTED = "text-[#123d2c]/65 dark:text-[#eef3f8]/60";
 
 function StrengthChip({ strength }: { strength: MappingStrength }) {
   const map: Record<MappingStrength, { label: string; cls: string }> = {

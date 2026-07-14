@@ -32,8 +32,8 @@ export default function AdminUnlock() {
   }
 
   return (
-    <div className="flex min-h-[70vh] items-center justify-center px-4 text-[#15263c] dark:text-[#eef3f8]">
-      <form onSubmit={onSubmit} className="w-full max-w-sm rounded-2xl border border-[#e3d9c0] dark:border-[#1d3a57] bg-white/70 dark:bg-white/5 p-6">
+    <div className="flex min-h-[70vh] items-center justify-center px-4 text-[#123d2c] dark:text-[#eef3f8]">
+      <form onSubmit={onSubmit} className="w-full max-w-sm rounded-2xl border border-[#e3d9c0] dark:border-[#223a2e] bg-white/70 dark:bg-white/5 p-6">
         <h1 className="text-lg font-semibold">Admin access</h1>
         <p className="mt-1 text-xs text-[#4c5d75] dark:text-[#8fa5bb]">
           Enter the admin token to view operator tooling.
@@ -51,7 +51,7 @@ export default function AdminUnlock() {
         <button
           type="submit"
           disabled={busy || token.length === 0}
-          className="mt-4 w-full rounded-lg bg-[#15263c] px-4 py-2 text-sm font-medium text-white disabled:opacity-60 dark:bg-[#eef3f8] dark:text-[#071827]"
+          className="mt-4 w-full rounded-lg bg-[#123d2c] px-4 py-2 text-sm font-medium text-white disabled:opacity-60 dark:bg-[#eef3f8] dark:text-[#081410]"
         >
           {busy ? "Unlocking…" : "Unlock"}
         </button>

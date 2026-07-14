@@ -24,7 +24,7 @@ export default function BrandLogo({ size = 28, showWordmark = true, className, o
         </>
       )}
       {showWordmark && (
-        <span className={`font-semibold tracking-tight ${onDark ? "text-[#f6f1e3]" : "text-[#13294b] dark:text-[#eef3f8]"}`}>
+        <span className={`font-semibold tracking-tight ${onDark ? "text-[#f6f1e3]" : "text-[#123d2c] dark:text-[#eef3f8]"}`}>
           AI Enterprise
         </span>
       )}
