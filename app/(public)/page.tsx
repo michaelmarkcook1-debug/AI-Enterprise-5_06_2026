@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import ExposureMapHero from "@/components/dashboard/ExposureMapHero";
+import DeliveryMatrix from "@/components/delivery/DeliveryMatrix";
 import BreakingNewsHero from "@/components/home/BreakingNewsHero";
 import CategoryCompositeRail from "@/components/home/CategoryCompositeRail";
 import MarketByCategoryComposite from "@/components/home/MarketByCategoryComposite";
@@ -396,6 +397,31 @@ export default async function HomePage() {
           </div>
         )}
       </section>
+
+      {/* ── Delivery matrix — the expanded GSI × AI-vendor graphic ── */}
+      {deliveryGraph.edges.length > 0 && (
+        <section className="mb-10">
+          <div className="rounded-xl border border-black/10 bg-white/60 p-5 dark:border-white/10 dark:bg-white/5">
+            <div className="mb-3 flex items-start justify-between gap-3">
+              <div>
+                <h2 className="font-[var(--font-display)] text-lg font-bold tracking-tight">
+                  Delivery matrix — integrator × AI vendor
+                </h2>
+                <p className={`mt-0.5 text-xs ${MUTED}`}>
+                  Which system integrators deliver which AI vendors — and how deep the relationship runs.
+                </p>
+              </div>
+              <span className="shrink-0 rounded-full border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-xs font-semibold uppercase tracking-wide text-amber-800 dark:text-amber-200">
+                Analyst-curated
+              </span>
+            </div>
+            <DeliveryMatrix edges={deliveryGraph.edges} vendorNames={TRACKED_VENDOR_NAMES} />
+            <p className={`mt-3 text-xs ${MUTED}`}>
+              Analyst-curated · pending external confirmation · firewalled from vendor scores — a channel signal, never an input to a ranking.
+            </p>
+          </div>
+        </section>
+      )}
 
       {/* ── Latest insight (honestly empty when none) ── */}
       {articles.length > 0 && (
