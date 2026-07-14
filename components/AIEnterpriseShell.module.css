@@ -11,8 +11,8 @@
   text-rendering: optimizeLegibility;
 
   /* CSS custom properties switched by data-theme */
-  --bg-1: #0a1628;
-  --bg-2: #050d1a;
+  --bg-1: #0d1f17;
+  --bg-2: #081410;
   --text-strong: #f4eedf;
   --text-mute: rgba(244, 238, 223, 0.62);
   --text-soft: rgba(244, 238, 223, 0.45);
@@ -32,7 +32,7 @@
 .root[data-theme="light"] {
   --bg-1: #ece8de;
   --bg-2: #d8d4ca;
-  --text-strong: #13294b;
+  --text-strong: #123d2c;
   --text-mute: rgba(24, 32, 27, 0.62);
   --text-soft: rgba(24, 32, 27, 0.42);
   --accent: #b8923c;
@@ -42,7 +42,7 @@
   --ring-glow: #d4b97a;
   --pill-bg: rgba(255, 255, 255, 0.5);
   --pill-border: rgba(24, 32, 27, 0.18);
-  --pill-text: #13294b;
+  --pill-text: #123d2c;
 }
 
 .bgWash {
@@ -351,7 +351,7 @@
     color-mix(in srgb, var(--accent) 88%, black 6%));
   border: 1px solid color-mix(in srgb, var(--accent) 90%, white 10%);
   /* Inverse text — near-black so the bg can carry the visual weight. */
-  color: #14181f;
+  color: #101711;
   box-shadow:
     0 0 0 1px color-mix(in srgb, var(--accent) 40%, transparent),
     0 0 48px color-mix(in srgb, var(--accent) 55%, transparent),
@@ -373,7 +373,7 @@
   width: 7px;
   height: 7px;
   border-radius: 999px;
-  background: #14181f;
+  background: #101711;
   box-shadow: 0 0 6px rgba(20, 24, 31, 0.35);
 }
 
