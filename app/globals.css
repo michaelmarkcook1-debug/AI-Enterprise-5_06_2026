@@ -48,8 +48,16 @@ body {
   font-family: var(--font-sans);
 }
 
-a {
-  color: inherit;
+/* MUST be in @layer base: unlayered CSS in Tailwind v4 beats every utility
+   class regardless of specificity, so a bare `a { color: inherit }` here would
+   silently defeat every text-* color utility applied to a link, app-wide (this
+   is exactly what broke the nav tabs — text-white/text-[#c8d7e9] were both
+   losing to the inherited --foreground green). Layering it into `base` lets
+   `@layer utilities` (where Tailwind's color classes live) win normally. */
+@layer base {
+  a {
+    color: inherit;
+  }
 }
 
 /* Display face — now the widely-used SaaS sans (Geist), not the Cormorant serif.
