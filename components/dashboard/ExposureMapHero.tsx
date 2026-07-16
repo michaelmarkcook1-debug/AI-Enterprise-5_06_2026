@@ -119,12 +119,22 @@ function thicknessFor(score: number): number {
 const MAX_PINS = 3;
 const ALL_REL_TYPES: RelationshipType[] = ["investment", "cloud", "model_hosting", "commercial_partnership", "supply_chain", "subsidiary"];
 const ALL_CONF_TIERS: ConfidenceTier[] = ["high", "medium", "seed"];
+// The right-hand column's full roster — labs / model owners. Used to build the
+// "AI labs" multi-select so a user can narrow a genuinely tangled 20-provider
+// graph down to just the labs they care about.
+const RIGHT_SIDE_NODES = EXPOSURE_NODES.filter((n) => n.side === "right");
+const ALL_PROVIDER_IDS = new Set(RIGHT_SIDE_NODES.map((n) => n.id));
 
 export default function ExposureMapHero(_: { edges?: unknown } = {}) {
   // Filter state
   const [activeRelTypes, setActiveRelTypes] = useState<Set<RelationshipType>>(new Set(ALL_REL_TYPES));
   const [activeConfTiers, setActiveConfTiers] = useState<Set<ConfidenceTier>>(new Set(ALL_CONF_TIERS));
   const [showExtended, setShowExtended] = useState(false);
+  // Which AI labs / model owners to show — defaults to all (today's behavior).
+  // Narrowing this is the main declutter lever for a 20-provider graph.
+  const [selectedProviders, setSelectedProviders] = useState<Set<string>>(() => new Set(ALL_PROVIDER_IDS));
+  const [providerMenuOpen, setProviderMenuOpen] = useState(false);
+  const providerMenuRef = useRef<HTMLDivElement>(null);
 
   // Interaction state
   const [hovered, setHovered] = useState<string | null>(null);
@@ -143,11 +153,34 @@ export default function ExposureMapHero(_: { edges?: unknown } = {}) {
     return () => mq.removeEventListener("change", onChange);
   }, []);
 
-  // Filter nodes by extended-ecosystem toggle.
+  // Close the provider dropdown on an outside click (native <details> only
+  // closes on re-clicking its own summary).
+  useEffect(() => {
+    if (!providerMenuOpen) return;
+    function onDocClick(e: MouseEvent) {
+      if (providerMenuRef.current && !providerMenuRef.current.contains(e.target as Node)) {
+        setProviderMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", onDocClick);
+    return () => document.removeEventListener("mousedown", onDocClick);
+  }, [providerMenuOpen]);
+
+  const toggleProvider = useCallback((id: string) => {
+    setSelectedProviders((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      if (next.size === 0) return new Set(ALL_PROVIDER_IDS); // never empty — same guard as the other chip filters
+      return next;
+    });
+  }, []);
+
+  // Filter nodes by extended-ecosystem toggle + the AI-labs selection (right
+  // side only — left-side "exposure owner" nodes are never filtered by it).
   const visibleNodes = useMemo(() => {
-    if (showExtended) return EXPOSURE_NODES;
-    return EXPOSURE_NODES.filter((n) => !EXTENDED_ECOSYSTEM_NODE_IDS.has(n.id));
-  }, [showExtended]);
+    const base = showExtended ? EXPOSURE_NODES : EXPOSURE_NODES.filter((n) => !EXTENDED_ECOSYSTEM_NODE_IDS.has(n.id));
+    return base.filter((n) => n.side === "left" || selectedProviders.has(n.id));
+  }, [showExtended, selectedProviders]);
   const visibleNodeIds = useMemo(() => new Set(visibleNodes.map((n) => n.id)), [visibleNodes]);
   const nodeSideById = useMemo(() => new Map(EXPOSURE_NODES.map((n) => [n.id, n.side])), []);
 
@@ -302,6 +335,59 @@ export default function ExposureMapHero(_: { edges?: unknown } = {}) {
               </button>
             );
           })}
+        </div>
+
+        {/* AI labs / model providers — multi-select dropdown. Narrows the
+            right-hand column; the main declutter lever for a busy graph. */}
+        <div ref={providerMenuRef} className="relative">
+          <button
+            type="button"
+            onClick={() => setProviderMenuOpen((o) => !o)}
+            aria-expanded={providerMenuOpen}
+            aria-haspopup="listbox"
+            className={`flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium transition-colors ${
+              selectedProviders.size < ALL_PROVIDER_IDS.size
+                ? "border-[#0b2519] bg-[#0d1f17] text-white dark:border-[#ece4d0] dark:bg-[#ece3cb] dark:text-[#123d2c]"
+                : "border-[#d6c9a8] bg-white text-[#3f5068] hover:border-[#6b87a3] dark:border-[#2a4a6b] dark:bg-[#0d1f17] dark:text-[#a7bacd] dark:hover:border-[#6b87a3]"
+            }`}
+          >
+            AI labs · {selectedProviders.size}/{ALL_PROVIDER_IDS.size}
+            <span aria-hidden className="text-[9px]">▾</span>
+          </button>
+          {providerMenuOpen && (
+            <div
+              role="listbox"
+              aria-label="AI labs / model providers"
+              className="absolute left-0 top-full z-20 mt-1.5 max-h-72 w-56 overflow-y-auto rounded-xl border border-[#e3d9c0] bg-white p-2 shadow-lg dark:border-[#223a2e] dark:bg-[#0d1f17]"
+            >
+              <div className="mb-1.5 flex items-center justify-between border-b border-[#e3d9c0] px-1 pb-1.5 dark:border-[#223a2e]">
+                <span className="text-xs font-semibold uppercase tracking-wider text-[#4c5d75] dark:text-[#8fa5bb]">Labs</span>
+                <button
+                  type="button"
+                  onClick={() => setSelectedProviders(new Set(ALL_PROVIDER_IDS))}
+                  className="text-xs font-medium text-emerald-700 hover:underline dark:text-emerald-400"
+                >
+                  Select all
+                </button>
+              </div>
+              <ul className="space-y-0.5">
+                {RIGHT_SIDE_NODES.map((n) => (
+                  <li key={n.id}>
+                    <label className="flex cursor-pointer items-center gap-2 rounded-md px-1.5 py-1 text-xs text-[#2e3f57] hover:bg-[#f6f1e3] dark:text-[#c2d1e0] dark:hover:bg-[#143049]">
+                      <input
+                        type="checkbox"
+                        checked={selectedProviders.has(n.id)}
+                        onChange={() => toggleProvider(n.id)}
+                        className="h-3.5 w-3.5 accent-emerald-600"
+                      />
+                      <span className="inline-block h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: n.brandColor }} aria-hidden />
+                      {n.label}
+                    </label>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
 
         {/* Confidence filter */}
