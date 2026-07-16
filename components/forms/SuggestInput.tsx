@@ -90,7 +90,7 @@ export default function SuggestInput({
 
   const OPT_BASE =
     "cursor-pointer px-2 py-1.5 text-xs leading-snug text-[#123d2c] dark:text-[#eef3f8]";
-  const OPT_ACTIVE = "bg-[#f3ead0] dark:bg-[#153a5c]";
+  const OPT_ACTIVE = "bg-[#f3ead0] dark:bg-[#1a4a34]";
 
   return (
     <div className="relative">
@@ -133,7 +133,7 @@ export default function SuggestInput({
         <ul
           role="listbox"
           id={listId}
-          className="absolute z-20 mt-1 max-h-56 w-full overflow-auto rounded-md border border-[#d6c9a8] bg-white py-1 shadow-lg dark:border-[#2a4a6b] dark:bg-[#0d1f17]"
+          className="absolute z-20 mt-1 max-h-56 w-full overflow-auto rounded-md border border-[#d6c9a8] bg-white py-1 shadow-lg dark:border-[#223a2e] dark:bg-[#0d1f17]"
         >
           <li
             role="option"
@@ -160,7 +160,7 @@ export default function SuggestInput({
                 e.preventDefault();
                 commit(i + 1);
               }}
-              className={`${OPT_BASE} ${active === i + 1 ? OPT_ACTIVE : "hover:bg-[#f7f1e2] dark:hover:bg-[#0f2b44]"}`}
+              className={`${OPT_BASE} ${active === i + 1 ? OPT_ACTIVE : "hover:bg-[#f7f1e2] dark:hover:bg-[#143028]"}`}
             >
               {s}
             </li>

@@ -1,10 +1,10 @@
 "use client";
 
-// "Start here" launchpad. Rebuilt 2026-07-13 (owner): the front door now routes
-// DIRECTLY to the two things that ARE the product — the tailored Interrogate
-// finding and the deep 12-domain vendor assessment — then three honest quick
-// jumps. Every card lands on the functionality it names (the old cards dumped
-// you on a list; Interrogate wasn't linked at all). Client-side only for the
+// "Start here" secondary launchpad. Rebuilt 2026-07-16 (owner): the interrogation
+// flow now runs INLINE above this component on /use-cases (see that page), so the
+// "tailored finding" card that used to live here was redundant and is gone. This
+// section is now framed as "other ways in" — the deep vendor assessment gets its
+// own wide card, then three honest quick jumps. Client-side only for the
 // peer-benchmark resume chip; nothing here reads or writes canonical data.
 
 import { useEffect, useState } from "react";
@@ -14,22 +14,13 @@ import { VERTICALS, SIZE_BANDS, REGIONS, type Segment } from "@/lib/peer/segment
 const MUTED = "text-[#123d2c]/65 dark:text-[#eef3f8]/60";
 const SEGMENT_KEY = "ae_peer_segment";
 
-const PRIMARY = [
-  {
-    href: "/interrogate",
-    title: "Interrogate — get a tailored finding",
-    detail:
-      "Tell it your situation in plain words. It asks a few sharp questions, each shaped by your last answer — never a fixed form — then writes a source-cited finding for your case. Nothing invented; where the data is thin it says so.",
-    cta: "Start interrogating",
-  },
-  {
-    href: "/vendors",
-    title: "Assess a vendor",
-    detail:
-      "Open any vendor for its 12-domain evidence scorecard — every score 0–5 and cited — then re-weight the domains to your priorities and save or export the decision for your meeting.",
-    cta: "Browse & assess",
-  },
-];
+const PRIMARY = {
+  href: "/vendors",
+  title: "Assess a vendor",
+  detail:
+    "Open any vendor for its 12-domain evidence scorecard — every score 0–5 and cited — then re-weight the domains to your priorities and save or export the decision for your meeting.",
+  cta: "Browse & assess",
+};
 
 const SECONDARY: { href: string; title: string; detail: string; note?: string; resume?: boolean }[] = [
   { href: "/", title: "Watch the market", detail: "What moved today, who leads each category, who depends on whom." },
@@ -55,27 +46,22 @@ export default function JobsHub() {
   }, []);
 
   return (
-    <section className="mb-10" aria-label="What do you want to do?">
+    <section className="mb-10" aria-label="Other ways in">
       <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-[#b08d2f] dark:text-[#d4af37]">
-        What do you want to do?
+        Or skip straight to
       </h2>
 
-      {/* The two deep tools — the tailored finding + the evidence assessment. */}
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-        {PRIMARY.map((j) => (
-          <Link
-            key={j.title}
-            href={j.href}
-            className="group flex flex-col rounded-2xl border border-[#d4af37]/40 bg-[#fbf6e4]/40 p-5 transition-colors hover:border-[#d4af37] dark:border-[#d4af37]/30 dark:bg-[#1a1605]/20"
-          >
-            <h3 className="text-lg font-semibold text-[#123d2c] dark:text-[#eef3f8]">{j.title}</h3>
-            <p className={`mt-1.5 flex-1 text-sm leading-6 ${MUTED}`}>{j.detail}</p>
-            <span className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-[#a07f1f] dark:text-[#d4af37]">
-              {j.cta} <span aria-hidden className="transition-transform group-hover:translate-x-0.5">→</span>
-            </span>
-          </Link>
-        ))}
-      </div>
+      {/* The deep vendor assessment — the other thing that IS the product. */}
+      <Link
+        href={PRIMARY.href}
+        className="group flex flex-col rounded-2xl border border-[#d4af37]/40 bg-[#fbf6e4]/40 p-5 transition-colors hover:border-[#d4af37] dark:border-[#d4af37]/30 dark:bg-[#1a1605]/20"
+      >
+        <h3 className="text-lg font-semibold text-[#123d2c] dark:text-[#eef3f8]">{PRIMARY.title}</h3>
+        <p className={`mt-1.5 text-sm leading-6 ${MUTED}`}>{PRIMARY.detail}</p>
+        <span className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-[#a07f1f] dark:text-[#d4af37]">
+          {PRIMARY.cta} <span aria-hidden className="transition-transform group-hover:translate-x-0.5">→</span>
+        </span>
+      </Link>
 
       {/* Three quick jumps. */}
       <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
