@@ -1,0 +1,95 @@
+{
+  "findings": [
+    {
+      "vendorId": "openai",
+      "title": "OpenAI launches Deployment Company and acquires Tomoro",
+      "summary": "On May 11, 2026, OpenAI launched the OpenAI Deployment Company, a joint venture led by TPG with Advent, Bain Capital and Brookfield to help enterprises build on its AI, and acquired consultancy Tomoro to seed it with forward-deployed engineers.",
+      "whyItMatters": "Moving into enterprise services/channel puts OpenAI in direct competition with Anthropic's parallel enterprise push and traditional system integrators.",
+      "sourceName": "OpenAI",
+      "sourceUrl": "https://openai.com/index/openai-launches-the-deployment-company/",
+      "publishedAt": "2026-05-11"
+    },
+    {
+      "vendorId": "openai",
+      "title": "OpenAI reportedly weighs legal action against Apple",
+      "summary": "In mid-May 2026, reports emerged that OpenAI, frustrated that its ChatGPT integration with Apple failed to deliver expected subscribers and prominence, is exploring legal action against the iPhone maker.",
+      "whyItMatters": "Signals fraying of a marquee distribution partnership and the high stakes of platform-level access for consumer AI reach.",
+      "sourceName": "TechCrunch",
+      "sourceUrl": "https://techcrunch.com/2026/05/14/openai-is-reportedly-preparing-legal-action-against-apple-it-wouldnt-be-the-first-partner-to-feel-burned/",
+      "publishedAt": "2026-05-14"
+    },
+    {
+      "vendorId": "anthropic",
+      "title": "Anthropic confidentially files for IPO",
+      "summary": "On June 1, 2026, Anthropic confirmed it confidentially filed a draft registration statement with the SEC for a proposed IPO, with the company valued near $1 trillion and revenue reportedly more than doubling quarter over quarter.",
+      "whyItMatters": "Sets up a head-to-head public-market race with OpenAI and validates Anthropic's rapid revenue scaling.",
+      "sourceName": "TechCrunch",
+      "sourceUrl": "https://techcrunch.com/2026/06/01/anthropic-files-to-go-public/",
+      "publishedAt": "2026-06-01"
+    },
+    {
+      "vendorId": "anthropic",
+      "title": "TCS becomes Global Premier Partner in Claude Partner Network",
+      "summary": "On June 11, 2026, Tata Consultancy Services announced a global strategic partnership with Anthropic to scale enterprise Claude adoption, committing to equip 50,000 associates with Claude and co-develop industry solutions for regulated sectors.",
+      "whyItMatters": "Locking in a top global system integrator dramatically expands Anthropic's enterprise deployment reach against OpenAI's channel push.",
+      "sourceName": "TechCrunch",
+      "sourceUrl": "https://techcrunch.com/2026/06/11/anthropic-taps-tcs-to-scale-its-enterprise-ai-deployments/",
+      "publishedAt": "2026-06-11"
+    },
+    {
+      "vendorId": "xai",
+      "title": "Gopuff launches 'Go' shopping agent powered by Grok",
+      "summary": "On June 9, 2026, Gopuff and xAI launched Go, an AI shopping assistant built into the Gopuff app using Grok's text, audio, and image models.",
+      "whyItMatters": "A consumer commerce deployment shows xAI landing real enterprise product integrations beyond the X platform.",
+      "sourceName": "xAI",
+      "sourceUrl": "https://x.ai/news/grok-gopuff",
+      "publishedAt": "2026-06-09"
+    },
+    {
+      "vendorId": "xai",
+      "title": "xAI co-founder Igor Babuschkin unveils startup River AI",
+      "summary": "On June 10, 2026, Bloomberg reported that xAI co-founder Igor Babuschkin launched River AI, a new startup focused on developing personalized AI agents.",
+      "whyItMatters": "Continued founder departures from xAI signal internal turnover during the SpaceX integration and spin up a new competitor in agentic AI.",
+      "sourceName": "Bloomberg",
+      "sourceUrl": "https://www.bloomberg.com/news/articles/2026-06-10/xai-co-founder-babuschkin-unveils-new-startup-for-personalized-ai",
+      "publishedAt": "2026-06-10"
+    },
+    {
+      "vendorId": "google",
+      "title": "Google delays Gemini 3.5 Pro launch to July 2026",
+      "summary": "Google postponed the general availability of its frontier Gemini 3.5 Pro model from June to July 2026 to refine coding, token efficiency and long-task performance; the model reportedly features a 2M-token context window and Deep Think reasoning. It remained in limited Vertex AI preview as of late June.",
+      "whyItMatters": "A slip in the flagship frontier model timing gives OpenAI and Anthropic breathing room at the top of the model market.",
+      "sourceName": "Reuters",
+      "sourceUrl": "https://www.tradingview.com/news/reuters.com,2026:newsml_FWN42W0FW:0-google-delays-gemini-3-5-pro-launch-to-july-as-it-tweaks-its-new-frontier-ai-model-business-insider/",
+      "publishedAt": "2026-06-26"
+    },
+    {
+      "vendorId": "harvey",
+      "title": "Harvey announces development of custom legal-specific AI models",
+      "summary": "Harvey said in June 2026 that it is building its own legal foundation model series, starting with what it calls the first legal-specific AI model, to power its agentic legal workflows.",
+      "whyItMatters": "Moving from an orchestrator of third-party models toward proprietary legal models could deepen Harvey's moat and reduce dependence on OpenAI/Anthropic/Mistral.",
+      "sourceName": "Law.com (Legaltech News)",
+      "sourceUrl": "https://www.law.com/legaltechnews/2026/06/18/harvey-announces-development-of-custom-legal-specific-ai-models-/",
+      "publishedAt": "2026-06-18"
+    },
+    {
+      "vendorId": "meta",
+      "title": "Meta rolls out AI shopping upgrades powered by Muse Spark",
+      "summary": "Meta introduced new commerce and shopping features built on the Muse Spark model, deepening AI-assisted product discovery across its apps.",
+      "whyItMatters": "Shows Meta moving quickly to monetize its new model through commerce, its core ad-and-shopping business, rather than model licensing.",
+      "sourceName": "Retail Brew",
+      "sourceUrl": "https://www.retailbrew.com/stories/2026/04/16/meta-introduces-new-shopping-upgrades-under-ai-model-muse-spark",
+      "publishedAt": "2026-04-16"
+    },
+    {
+      "vendorId": "cohere",
+      "title": "Cohere sees surge of inbounds after US scrutiny of Anthropic",
+      "summary": "Bloomberg reported that Cohere is fielding a wave of inbound interest from governments and investors seeking non-US AI models after Washington moved to restrict foreign-national access to Anthropic's most advanced platforms.",
+      "whyItMatters": "US AI export/access restrictions are becoming a tailwind for Cohere's sovereign-AI pitch, potentially reshaping enterprise and government buyer behavior.",
+      "sourceName": "Bloomberg",
+      "sourceUrl": "https://www.bloomberg.com/news/videos/2026-06-15/cohere-seeing-inbounds-after-dc-s-anthropic-scrutiny-video",
+      "publishedAt": "2026-06-15"
+    }
+  ],
+  "proposals": []
+}
