@@ -74,8 +74,18 @@ export function hashContext(input: AssessmentInput): string {
 // `asOf` MUST default to the live clock — a hardcoded date freezes the decay so
 // evidence never ages (the P0 "frozen clock" defect). Pass an explicit `asOf`
 // only in tests that need a deterministic reference point.
+//
+// AGE IS RESOLVED TO WHOLE DAYS, deliberately. This decay is defined by day-scale
+// thresholds (90 / 365), so evidence read at 09:00 and at 17:00 on the same day is
+// equally fresh — carrying the fractional remainder would assert a precision the
+// model does not have. It also had a real cost: because the default `asOf` is
+// evaluated per call, that fractional tail let the wall clock leak into every
+// score, so two runs on identical input produced different numbers (~1e-8 apart)
+// and a single run dated its first vendor against a different instant than its
+// last. Flooring removes the false precision, and determinism follows from it —
+// evidence still ages, one day at a time. See "determinism (spec §22)".
 export function freshnessFactor(capturedAt: string, asOf: Date = new Date()): number {
-  const days = Math.max(0, (asOf.getTime() - new Date(capturedAt).getTime()) / 86_400_000);
+  const days = Math.max(0, Math.floor((asOf.getTime() - new Date(capturedAt).getTime()) / 86_400_000));
   if (days <= 90) return 1.0;
   if (days >= 365) return 0.7;
   return 1.0 - 0.3 * ((days - 90) / (365 - 90));
