@@ -31,6 +31,7 @@ interface NavItem {
 const JOBS_BASE: NavItem[] = [
   { href: "/use-cases", label: "Start here" },
   { href: "/vendors", label: "Assess & decide" },
+  { href: "/shield", label: "Trust Rank" },
   { href: "/peers", label: "Peer benchmark" },
 ];
 
