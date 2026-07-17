@@ -7,6 +7,14 @@ import type { EvidenceItem, Vendor } from "../types";
 
 const vendorProfileInclude = {
   evidence: {
+    // Only reviewed, source-backed rows may score a vendor — the same bar the
+    // composite path enforces (lib/assessment/domain-scores.ts). Without this
+    // filter /assess scored on EVERY row regardless of review status, including
+    // `curated` (the schema default, and what seed fixtures write). That let
+    // unreviewed placeholder rows move a real vendor's score: fabrication by
+    // omission. The two scoring paths must answer to one evidence bar, or the
+    // stricter one is theatre.
+    where: { reviewStatus: "analyst_verified" as const },
     orderBy: [{ domain: "asc" }, { subfactor: "asc" }],
   },
   risks: {
