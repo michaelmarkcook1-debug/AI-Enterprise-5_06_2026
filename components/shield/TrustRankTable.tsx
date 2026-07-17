@@ -23,24 +23,12 @@ import {
   SHIELD_DIM_INFO,
   SHIELD_VERSION,
   type Mark,
-  type MarkState,
   type ShieldDim,
   type ShieldWeights,
 } from "@/lib/shield/data";
 import { vendorIdForShieldSlug } from "@/lib/shield/vendor-map";
+import { MARK_GLYPH, MARK_TONE } from "@/lib/shield/marks";
 import Link from "next/link";
-
-const GLYPH: Record<MarkState, string> = { protective: "✓", conditional: "◐", adverse: "✗", unverified: "—" };
-
-// The glyph carries the meaning; colour only reinforces it. That ordering is
-// deliberate — it survives colour-blindness and greyscale printing, which a
-// board pack will eventually get put through.
-const TONE: Record<MarkState, string> = {
-  protective: "border-[#3f9d76]/50 text-[#2f8f66] dark:text-[#3f9d76]",
-  conditional: "border-[#d4af37]/50 text-[#b08d2f] dark:text-[#d4af37]",
-  adverse: "border-[#c2410c]/40 text-[#c2410c] dark:border-[#ea7317]/40 dark:text-[#ea7317]",
-  unverified: "border-black/12 text-[#123d2c]/40 dark:border-white/12 dark:text-[#eef3f8]/35",
-};
 
 const WEIGHT_LABEL = ["off", "standard", "high priority", "must-have"];
 
@@ -91,9 +79,9 @@ function MarkChip({ mark }: { mark: Mark }) {
   const inner = (
     <span
       title={mark.note}
-      className={`inline-flex h-7 min-w-11 items-center justify-center rounded-lg border bg-white/60 px-2 font-mono text-[12px] dark:bg-white/5 ${TONE[mark.state]}`}
+      className={`inline-flex h-7 min-w-11 items-center justify-center rounded-lg border bg-white/60 px-2 font-mono text-[12px] dark:bg-white/5 ${MARK_TONE[mark.state]}`}
     >
-      {GLYPH[mark.state]}
+      {MARK_GLYPH[mark.state]}
     </span>
   );
   return mark.source ? (

@@ -211,8 +211,16 @@ export const SHIELD: VendorShield[] = [
       },
       indemnity: {
         state: "adverse",
-        note: "Verified absence: no output IP indemnity, warranty, or ownership language anywhere in the published policy — none offered, not a gap in our receipts.",
-        source: { name: `DeepSeek · Privacy Policy (${V})`, url: "https://cdn.deepseek.com/policies/en-US/deepseek-privacy-policy.html" },
+        // Re-verified 2026-07-17 against the governing document. The prior mark cited
+        // the Privacy Policy — the wrong instrument for indemnity, which lives in the
+        // platform terms. Verdict unchanged, but the receipt now resolves and the note
+        // states what the terms actually do, which is stronger than "none offered":
+        // the indemnity runs the OTHER way, and non-infringement is expressly disclaimed.
+        note: "Reverse indemnity — the customer indemnifies the vendor: “You agree to indemnify, defend, and hold us and our affiliates and licensors (if any) harmless against any liabilities, damages, and costs” (§7.7). DeepSeek expressly does NOT warrant that any Output will be “accurate, up-to-date, reliable, non-infringing or secure” (§7.4(3); Services are “AS IS”). Output rights are assigned to you (“any rights, title, and interests—if any”, §4.2(2)) — so you own the output and carry its IP risk alone.",
+        source: {
+          name: "DeepSeek · Open Platform Terms of Service, eff. 29 Apr 2026 (verified 2026-07-17)",
+          url: "https://cdn.deepseek.com/policies/en-US/deepseek-open-platform-terms-of-service.html",
+        },
       },
       residency: {
         state: "adverse",

@@ -23,6 +23,7 @@ import DecisionNameEditor from "@/components/member/DecisionNameEditor";
 import DeleteDecisionButton from "@/components/member/DeleteDecisionButton";
 import ExportPackLinks from "@/components/export/ExportPackLinks";
 import ShareManager from "@/components/member/ShareManager";
+import ShieldShortlistPanel from "@/components/shield/ShieldShortlistPanel";
 
 export const dynamic = "force-dynamic";
 
@@ -34,7 +35,7 @@ export const metadata: Metadata = {
 type Params = { id: string };
 
 const CARD = "rounded-xl border border-black/10 dark:border-white/10 bg-white/60 dark:bg-white/5 p-5";
-const MUTED = "text-[#15263c]/65 dark:text-[#eef3f8]/60";
+const MUTED = "text-[#123d2c]/65 dark:text-[#eef3f8]/60";
 
 function fmtDate(iso: string): string {
   const d = new Date(iso);
@@ -135,7 +136,7 @@ export default async function DecisionDetailPage({ params }: { params: Promise<P
           </div>
 
           <section className={CARD}>
-            <h2 className="text-sm font-semibold text-[#13294b] dark:text-[#eef3f8]">Your saved weights</h2>
+            <h2 className="text-sm font-semibold text-[#123d2c] dark:text-[#eef3f8]">Your saved weights</h2>
             <div className="mt-3 grid grid-cols-1 gap-x-4 gap-y-1 sm:grid-cols-2">
               {weightDomains.map((d: DomainId) => (
                 <div key={d} className="flex items-center justify-between gap-2 text-[11px]">
@@ -149,7 +150,7 @@ export default async function DecisionDetailPage({ params }: { params: Promise<P
           </section>
 
           <section className={`${CARD} mt-4`}>
-            <h2 className="text-sm font-semibold text-[#13294b] dark:text-[#eef3f8]">Shortlist — re-ranked on current scores</h2>
+            <h2 className="text-sm font-semibold text-[#123d2c] dark:text-[#eef3f8]">Shortlist — re-ranked on current scores</h2>
             {droppedCount > 0 && (
               <p className={`mt-1 text-[11px] ${MUTED}`}>
                 {droppedCount} vendor{droppedCount === 1 ? "" : "s"} from the original shortlist could not be re-resolved and{" "}
@@ -174,13 +175,13 @@ export default async function DecisionDetailPage({ params }: { params: Promise<P
                             {entity?.name ?? v.vendorId}
                           </Link>
                           {!v.ranked && (
-                            <span className="rounded-full border border-black/10 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-[#15263c]/70 dark:border-white/15 dark:text-[#eef3f8]/70">
+                            <span className="rounded-full border border-black/10 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-[#123d2c]/70 dark:border-white/15 dark:text-[#eef3f8]/70">
                               held
                             </span>
                           )}
                         </span>
                         <span className="flex shrink-0 items-baseline gap-3 text-xs">
-                          <span className="font-mono tabular-nums text-[#13294b] dark:text-[#eef3f8]">
+                          <span className="font-mono tabular-nums text-[#123d2c] dark:text-[#eef3f8]">
                             {v.composite.toFixed(2)}<span className="ml-0.5 text-[10px] text-[#7a8aa0]">/5</span>
                           </span>
                           <span className="font-mono tabular-nums text-[#7a8aa0]">{Math.round(v.coverage * 100)}% cov</span>
@@ -193,6 +194,14 @@ export default async function DecisionDetailPage({ params }: { params: Promise<P
               </ol>
             )}
           </section>
+
+          {/* The privacy/IP cut of this shortlist. Curated cited reference, firewalled
+              from the ranking above — it reports the vendors' own terms, it never
+              reorders the decision or touches a composite. */}
+          <ShieldShortlistPanel
+            vendorIds={shortlistIds}
+            nameFor={(vid) => entityById.get(vid)?.name ?? vid}
+          />
         </>
       )}
     </main>
