@@ -262,13 +262,17 @@ export default function InterrogationFlow() {
           <p className="mt-1 text-sm font-medium">{question}</p>
           {/* Free-text-FIRST answer: type anything, or open the dropdown for a few
               relevant starting points (first row is always "type your own"). Same
-              accessible combobox as the context form; suggestions are additive. */}
+              accessible combobox as the context form; suggestions are additive and
+              MULTI-select — many questions (jurisdictions, objectives, constraints)
+              have several right answers. `key` resets the picks each new question. */}
           <div className="mt-3">
             <SuggestInput
+              key={questionsAsked}
+              multiple
               value={answer}
               onChange={setAnswer}
               suggestions={options}
-              placeholder={options.length > 0 ? "Type your answer, or pick a starting point" : "Your answer"}
+              placeholder={options.length > 0 ? "Type your answer, or pick one or more" : "Your answer"}
               ariaLabel={question || "Your answer"}
               inputClassName="w-full rounded-md border border-black/15 bg-white/80 px-3 py-2 pr-8 text-sm dark:border-white/15 dark:bg-[#0b2519]"
             />
