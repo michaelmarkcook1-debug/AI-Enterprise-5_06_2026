@@ -151,11 +151,25 @@ export function validateFinding(raw: unknown, finding: Finding, bundle: Evidence
     return { ok: false, reason: "empty finding" };
   }
 
-  const evidenceText = bundle.items
-    .map((i) => `${i.headline} ${i.detail ?? ""} ${i.fitNote ?? ""} ${i.sourcePublisher ?? ""} ${i.sourceDate ?? ""}`)
-    .join(" ");
+  // Two things get sanitised before we treat a prose number as a factual claim,
+  // both established empirically (fault-log run 2026-07-17, 11/11 numeric-guard
+  // rejections were one of these, ZERO were real fabrications):
+  //   1. INLINE CITATION MARKERS. The prompt renders evidence items as [1]…[N];
+  //      the synthesizer cites them inline ("Deutsche Bank's DB Lumina [11]").
+  //      A bundle with ≥10 items therefore yields double-digit markers that clear
+  //      the >9 noise floor and read as invented statistics. Strip [N] runs first
+  //      — a genuine fabricated stat ("ROI was 40%") is never bracketed, so this
+  //      cannot mask one. This is why rich bundles failed and thin ones passed.
+  //   2. THE USER'S OWN STATED NUMBERS. Echoing back a constraint the user
+  //      supplied ("a 12-week pilot") is not a market claim, so the intent text
+  //      counts as grounding alongside the evidence items.
+  const evidenceText = [
+    ...bundle.items.map((i) => `${i.headline} ${i.detail ?? ""} ${i.fitNote ?? ""} ${i.sourcePublisher ?? ""} ${i.sourceDate ?? ""}`),
+    bundle.intent.goal,
+    bundle.intent.constraints.join(" "),
+  ].join(" ");
   const evidenceTokens = extractNumericTokens(evidenceText);
-  const proseTokens = extractNumericTokens(finding.markdown);
+  const proseTokens = extractNumericTokens(finding.markdown.replace(/\[\d+\]/g, " "));
   const unsupported = proseTokens.filter((t) => !numericTokenGrounded(t, evidenceTokens));
   if (unsupported.length > 0) {
     return { ok: false, reason: `prose states figure(s) not present in the evidence bundle: ${unsupported.map((t) => t.raw).join(", ")}` };

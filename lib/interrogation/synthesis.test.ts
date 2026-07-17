@@ -134,6 +134,46 @@ describe("validateFinding — prose-level fabrication guard (numbers, not just c
   });
 });
 
+// Regression: a fault-log run (2026-07-17, real Opus × 30 sessions) found that
+// 11/11 numeric-guard rejections were NOT fabrications — they were inline
+// citation markers [11]/[14][15] (the prompt numbers evidence items [1]…[N], the
+// model cites them inline, and a ≥10-item bundle yields double-digit markers that
+// cleared the >9 noise floor) or the user's OWN stated constraint number echoed
+// back. Rich bundles failed, thin ones passed. These pin the fix without an LLM.
+describe("validateFinding — citation markers & user-supplied numbers are not fabrications", () => {
+  it("PASSES a finding whose only 'unbacked figures' are inline citation markers [11], [12]", () => {
+    const b = bundle([
+      item(ALLOWED, "peer_public", "Deutsche Bank runs DB Lumina."),
+      item(ALLOWED, "peer_public", "NatWest runs Cora+."),
+    ]);
+    const raw = {
+      markdown: `Named adopters: Deutsche Bank's DB Lumina [11], NatWest's Cora+ [12].${CONF}`,
+      citedSourceUrls: [ALLOWED],
+    };
+    const parsed = parseFinding(raw, new Set([ALLOWED]));
+    expect(validateFinding(raw, parsed, b).ok).toBe(true);
+  });
+
+  it("PASSES a number the USER supplied in their own constraints ('12-week pilot')", () => {
+    const b: EvidenceBundle = {
+      ...bundle([item(ALLOWED, "peer_public", "some cited fact")]),
+      intent: { ...intent, constraints: ["a 12-week pilot"] },
+    };
+    const raw = { markdown: `A 12-week pilot is realistic for your band.${CONF}`, citedSourceUrls: [ALLOWED] };
+    const parsed = parseFinding(raw, new Set([ALLOWED]));
+    expect(validateFinding(raw, parsed, b).ok).toBe(true);
+  });
+
+  it("STILL FAILS a real fabricated stat even when a citation marker sits next to it (the strip opens no hole)", () => {
+    const b = bundle([item(ALLOWED, "peer_public", "Adoption is discussed, no figure given.")]);
+    const raw = { markdown: `Peers see 47% ROI [3].${CONF}`, citedSourceUrls: [ALLOWED] };
+    const parsed = parseFinding(raw, new Set([ALLOWED]));
+    const v = validateFinding(raw, parsed, b);
+    expect(v.ok).toBe(false);
+    expect(v.reason).toMatch(/47/);
+  });
+});
+
 describe("synthesizeFinding — a stub result (no API key) is NOT exempt from validation", () => {
   it("does not ship an empty stub finding as valid — it falls through like any real attempt", async () => {
     const b = bundle([item(ALLOWED)]);
