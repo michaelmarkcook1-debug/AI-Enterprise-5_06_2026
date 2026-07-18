@@ -32,6 +32,7 @@ import {
   type EvidenceBundle,
   type EvidenceItem,
   type CoverageFlags,
+  type FindingVendor,
 } from "./types";
 
 const ARTIFICIAL_ANALYSIS_FALLBACK_URL = "https://artificialanalysis.ai/models";
@@ -156,7 +157,19 @@ export function assembleEvidenceBundle(
     hasModelData: model.length > 0,
   };
 
-  return { intent, items, coverage };
+  // The tracked model providers actually present in the frontier evidence — the
+  // grounded seed for the "save to a shortlist" handoff. Deduped, ranked best-
+  // first, capped. These are real vendorIds from the comparison, never parsed out
+  // of the finding prose, so the shortlist can only ever contain vendors the
+  // finding genuinely rested on.
+  const seen = new Set<string>();
+  const vendors: FindingVendor[] = frontier.columns
+    .filter((c) => c.present && c.vendorId && c.vendorName)
+    .sort((a, b) => (a.overallRank ?? 99) - (b.overallRank ?? 99))
+    .flatMap((c) => (seen.has(c.vendorId) ? [] : (seen.add(c.vendorId), [{ id: c.vendorId, name: c.vendorName }])))
+    .slice(0, 8);
+
+  return { intent, items, coverage, vendors };
 }
 
 /** Private anonymised contribution pool (AIE-07). Below the minimum-count

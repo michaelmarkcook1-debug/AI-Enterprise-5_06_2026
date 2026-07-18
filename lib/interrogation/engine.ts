@@ -20,11 +20,11 @@ import {
   countQuestions,
   type SessionRow,
 } from "./session-store";
-import type { Finding, TranscriptTurn, InterrogationMode } from "./types";
+import type { Finding, FindingVendor, TranscriptTurn, InterrogationMode } from "./types";
 
 export type AdvanceResult =
   | { kind: "question"; sessionId: string; question: string; options?: string[]; questionsAsked: number }
-  | { kind: "finding"; sessionId: string; finding: Finding }
+  | { kind: "finding"; sessionId: string; finding: Finding; vendors: FindingVendor[] }
   | { kind: "failed"; sessionId: string; reason: string };
 
 /** Conversational transcript (excludes cost-only meter rows). */
@@ -67,7 +67,9 @@ async function synthesize(session: SessionRow, concludingUsage: LLMUsage): Promi
   // synthesizeFinding's doc comment. Only a genuinely grounded finding ships.
   if (last.validation.ok) {
     await saveFinding({ sessionId: session.id, finding: last.finding, evidenceRefs: bundle.items, cost: synthesisCost });
-    return { kind: "finding", sessionId: session.id, finding: last.finding };
+    // The grounded shortlist seed — the tracked vendors this finding actually
+    // rested on, so "save to a shortlist" can hand off into MemberDecision.
+    return { kind: "finding", sessionId: session.id, finding: last.finding, vendors: bundle.vendors };
   }
 
   // Ungrounded → do NOT ship. Still bank the burned cost, then fail honestly.

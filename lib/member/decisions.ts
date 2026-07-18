@@ -18,6 +18,7 @@ import type { Prisma } from "../../generated/prisma/client";
 import { ENTITIES } from "../intelligence/entities";
 import { MARKET_CATEGORIES } from "../intelligence/seed";
 import { ASSESSMENT_DOMAINS } from "../assessment/domain-rubric";
+import { DEFAULT_DOMAIN_WEIGHTS } from "../assessment/composite";
 import type { DomainId } from "../types";
 
 function toInputJson(value: unknown): Prisma.InputJsonValue {
@@ -76,7 +77,15 @@ export function sanitizeDecision(input: unknown): SanitizeResult {
   const category = typeof i.category === "string" ? i.category.trim() : "";
   if (!category || !VALID_CATEGORY_IDS.has(category)) return { ok: false, error: "category is invalid" };
 
-  const rawWeights = (i.weights ?? {}) as Record<string, unknown>;
+  // Weights are optional: a caller that has no per-domain priorities yet (e.g.
+  // the interrogation → shortlist handoff, which seeds a decision straight from a
+  // finding) may omit them and get the even-handed framework default. A caller
+  // that DOES send weights must still send all 12 — a partial set is a bug, not a
+  // default request, so it stays an error.
+  const rawWeights = (i.weights && typeof i.weights === "object" ? i.weights : DEFAULT_DOMAIN_WEIGHTS) as Record<
+    string,
+    unknown
+  >;
   const weights = {} as Record<DomainId, number>;
   for (const domain of ASSESSMENT_DOMAINS) {
     const v = rawWeights[domain];

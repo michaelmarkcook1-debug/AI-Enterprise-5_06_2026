@@ -59,6 +59,12 @@ describe("sanitizeDecision", () => {
     expect(sanitizeDecision(base({ weights: { ...FULL_WEIGHTS, [ASSESSMENT_DOMAINS[1]!]: NaN } })).ok).toBe(false);
   });
 
+  it("defaults to framework weights when weights are OMITTED entirely (the interrogation→shortlist handoff seeds a decision with no priorities yet)", () => {
+    const out = sanitizeDecision(base({ weights: undefined }));
+    expect(out.ok).toBe(true);
+    if (out.ok) expect(Object.keys(out.data.weights)).toHaveLength(ASSESSMENT_DOMAINS.length);
+  });
+
   it("accepts a zero weight (a domain the member deliberately zeroed out, not omitted)", () => {
     const out = sanitizeDecision(base({ weights: { ...FULL_WEIGHTS, [ASSESSMENT_DOMAINS[0]!]: 0 } }));
     expect(out.ok).toBe(true);

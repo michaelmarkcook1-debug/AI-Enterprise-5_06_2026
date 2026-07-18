@@ -29,6 +29,11 @@ interface EvidenceRef {
 
 type Phase = "opening" | "questioning" | "synthesizing" | "finding" | "failed";
 
+interface FindingVendor {
+  id: string;
+  name: string;
+}
+
 interface QAResult {
   kind: "question" | "finding" | "failed";
   sessionId: string;
@@ -36,6 +41,7 @@ interface QAResult {
   options?: string[];
   questionsAsked?: number;
   finding?: { markdown: string; citedSourceUrls: string[] };
+  vendors?: FindingVendor[];
   reason?: string;
 }
 
@@ -97,6 +103,75 @@ async function postJson(url: string, body: unknown): Promise<QAResult> {
   return data;
 }
 
+/** The interrogation → shortlist handoff. The finding named some model providers;
+ *  this saves exactly the ones it RESTED ON (the grounded `vendors` from the
+ *  evidence, never scraped from prose) as a real MemberDecision, then hands off
+ *  to /decisions/[id] where the buyer re-weights, sees the privacy & IP Shield
+ *  cut, and exports a pack. This is the link the audit found missing — the finding
+ *  used to dead-end here. Weights are omitted so the API seeds the framework
+ *  default; the buyer sets their own priorities on the decision page. */
+function ShortlistSave({ vendors, decisionName }: { vendors: FindingVendor[]; decisionName: string }) {
+  const [status, setStatus] = useState<"idle" | "saving" | "error">("idle");
+  const [error, setError] = useState("");
+  if (vendors.length === 0) return null;
+
+  async function save() {
+    setStatus("saving");
+    setError("");
+    try {
+      const res = await fetch("/api/member/decisions", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          name: decisionName,
+          category: "frontier_model_api",
+          shortlist: vendors.map((v) => ({ vendorId: v.id })),
+          asOfDate: null,
+        }),
+      });
+      const data = (await res.json().catch(() => ({}))) as { decision?: { id: string }; error?: string };
+      if (res.status === 401) {
+        setError("Saving a shortlist needs a member session, which isn't enabled here.");
+        setStatus("error");
+        return;
+      }
+      if (!res.ok || !data.decision) {
+        setError(data.error || "Couldn't save the shortlist.");
+        setStatus("error");
+        return;
+      }
+      window.location.href = `/decisions/${data.decision.id}`;
+    } catch (e) {
+      setError((e as Error).message);
+      setStatus("error");
+    }
+  }
+
+  return (
+    <div className="mt-4 border-t border-black/5 pt-3 dark:border-white/10">
+      <div className={`mb-1.5 text-xs font-semibold uppercase tracking-wide ${MUTED}`}>Take this further</div>
+      <p className={`text-sm ${MUTED}`}>
+        Save the model providers this finding rested on as a tracked shortlist — then re-weight the 12 assessment
+        domains to your priorities, see each vendor&apos;s privacy &amp; IP Shield posture, and export a decision pack.
+      </p>
+      <div className="mt-2 flex flex-wrap gap-1.5">
+        {vendors.map((v) => (
+          <span
+            key={v.id}
+            className="rounded-full border border-[#d4af37]/40 bg-[#fbf6e4]/50 px-2.5 py-0.5 text-xs dark:border-[#d4af37]/30 dark:bg-[#1a1605]/30"
+          >
+            {v.name}
+          </span>
+        ))}
+      </div>
+      {status === "error" && <p className="mt-2 text-xs text-amber-700 dark:text-amber-300">{error}</p>}
+      <button onClick={save} disabled={status === "saving"} className={`${BTN} mt-3`}>
+        {status === "saving" ? "Saving…" : `Save ${vendors.length} as a shortlist →`}
+      </button>
+    </div>
+  );
+}
+
 export default function InterrogationFlow() {
   const [phase, setPhase] = useState<Phase>("opening");
   const [sessionId, setSessionId] = useState<string>("");
@@ -107,6 +182,7 @@ export default function InterrogationFlow() {
   const [questionsAsked, setQuestionsAsked] = useState(0);
   const [answer, setAnswer] = useState("");
   const [finding, setFinding] = useState<{ markdown: string; citedSourceUrls: string[] } | null>(null);
+  const [vendors, setVendors] = useState<FindingVendor[]>([]);
   const [evidenceRefs, setEvidenceRefs] = useState<EvidenceRef[]>([]);
   const [costUsd, setCostUsd] = useState<number | null>(null);
   const [error, setError] = useState<string>("");
@@ -125,6 +201,7 @@ export default function InterrogationFlow() {
       setPhase("questioning");
     } else if (r.kind === "finding") {
       setFinding(r.finding ?? null);
+      setVendors(r.vendors ?? []);
       setPhase("finding");
       void enrichFinding(r.sessionId);
     } else {
@@ -145,6 +222,7 @@ export default function InterrogationFlow() {
     setAnswer("");
     setQuestionsAsked(0);
     setFinding(null);
+    setVendors([]);
     setEvidenceRefs([]);
     setCostUsd(null);
     setError("");
@@ -312,6 +390,10 @@ export default function InterrogationFlow() {
               </ul>
             </div>
           )}
+          <ShortlistSave
+            vendors={vendors}
+            decisionName={(opening.trim() ? `Interrogation: ${opening.trim().slice(0, 48)}` : "Interrogation shortlist").trim()}
+          />
           <div className="mt-4 flex items-center justify-between">
             <span className={`text-xs ${MUTED}`}>
               {costUsd !== null ? `Session inference cost: $${costUsd.toFixed(4)}` : ""}

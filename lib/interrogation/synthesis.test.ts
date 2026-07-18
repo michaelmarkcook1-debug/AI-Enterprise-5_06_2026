@@ -23,6 +23,7 @@ function bundle(items: EvidenceItem[]): EvidenceBundle {
       poolContributors: 0,
       hasModelData: items.some((i) => i.layer === "model"),
     },
+    vendors: [],
   };
 }
 

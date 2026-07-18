@@ -20,6 +20,10 @@
   --font-sans: var(--font-geist-sans), Arial, Helvetica, sans-serif;
   --font-mono: var(--font-geist-mono), "SFMono-Regular", Consolas, monospace;
   color-scheme: light;
+  /* Ambient brand illustration (the deep-green Möbius globe). In LIGHT the page
+     bg IS this image's cream (#faf6ec), so its rectangle vanishes cream-on-cream
+     and only the ring/map/chart read — it can sit at real strength. */
+  --ambient-opacity: 0.42;
 }
 
 html.dark {
@@ -29,6 +33,9 @@ html.dark {
   --brand-border: #1e352a;
   --brand-green-bright: #3f9d76; /* lifted for contrast on the dark canvas */
   color-scheme: dark;
+  /* On the dark canvas the same cream image would glare, so it drops to a faint
+     masked glow in the right gutter — atmosphere, not a picture behind text. */
+  --ambient-opacity: 0.08;
 }
 
 * {
@@ -46,6 +53,47 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
+}
+
+/* Ambient brand backdrop — the deep-green Möbius globe, fixed behind all content.
+   ── Craft rules it obeys ──────────────────────────────────────────────────────
+   • Anchored into the RIGHT GUTTER and bled off-edge, so on wide screens it sits
+     beside the centered reading column, never behind body copy.
+   • A radial mask fades every edge to transparent, so the image's rectangular
+     crop is never visible — it reads as atmosphere, not a pasted picture.
+   • Opacity is theme-driven (--ambient-opacity): assertive in light where it
+     blends cream-on-cream, a faint glow in dark.
+   • pointer-events:none + z-index:-1 → purely decorative, never intercepts a
+     click and never sits above content or the body background colour.
+   • Degrades silently: if /brand/ambient-ring.png is absent the layer is simply
+     blank, so shipping this before the asset lands harms nothing.
+   The asset itself is drop-in — see the file the owner saves to public/brand/. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  /* Two layers: the illustration on top, a faint green→gold glow beneath it as a
+     permanent on-brand base. So the backdrop is never invisible — before the PNG
+     is saved the glow carries it; once saved, the ring sits over the same glow. */
+  background-image: url("/brand/ambient-ring.png"),
+    radial-gradient(68% 62% at 95% 27%, color-mix(in oklab, var(--brand-green) 20%, transparent), transparent 66%);
+  background-repeat: no-repeat, no-repeat;
+  background-position: right -8% top 28%, right top;
+  background-size: clamp(420px, 56vw, 940px), 120% 120%;
+  opacity: var(--ambient-opacity);
+  -webkit-mask-image: radial-gradient(88% 82% at 94% 30%, #000 32%, transparent 70%);
+  mask-image: radial-gradient(88% 82% at 94% 30%, #000 32%, transparent 70%);
+}
+
+@media (max-width: 640px) {
+  /* On phones there is no gutter to hide in — pull it further off-edge and
+     lighten it so it can never compete with the single content column. */
+  body::before {
+    background-position: right -30% top 20%;
+    opacity: calc(var(--ambient-opacity) * 0.6);
+  }
 }
 
 /* MUST be in @layer base: unlayered CSS in Tailwind v4 beats every utility

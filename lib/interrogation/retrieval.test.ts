@@ -110,6 +110,21 @@ describe("assembleEvidenceBundle — deterministic, honest, cited", () => {
     expect(assembleEvidenceBundle(intent, empty, composedExact, []).coverage.hasModelData).toBe(false);
   });
 
+  it("surfaces the tracked vendors PRESENT in the frontier evidence, best-first — the grounded shortlist seed", () => {
+    // These are the real vendorIds the finding rests on; the handoff can only ever
+    // shortlist a vendor that was actually in the evidence (never scraped from prose).
+    const b = assembleEvidenceBundle(intent, frontier, composedExact, []);
+    expect(b.vendors).toEqual([
+      { id: "anthropic", name: "Anthropic" }, // overallRank 1
+      { id: "openai", name: "OpenAI" }, // overallRank 2
+    ]);
+  });
+
+  it("carries no shortlist seed when the frontier evidence is empty (nothing to ground it)", () => {
+    const empty: FrontierComparison = { ...frontier, columns: [], presentCount: 0, categoryLeaders: {}, sourceUrl: null, asOf: null };
+    expect(assembleEvidenceBundle(intent, empty, composedExact, []).vendors).toEqual([]);
+  });
+
   it("the allowlist is exactly the set of item sourceUrls (the synthesis gate's basis)", () => {
     const b = assembleEvidenceBundle(intent, frontier, composedExact, [exemplarCited]);
     const allow = bundleAllowlist(b);

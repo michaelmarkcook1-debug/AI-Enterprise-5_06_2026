@@ -76,10 +76,21 @@ export interface CoverageFlags {
   hasModelData: boolean;
 }
 
+/** A tracked vendor that actually appeared in this finding's evidence — the
+ *  grounded seed for "save these to a shortlist". NEVER scraped from the finding
+ *  prose (that would risk a hallucinated name); only the real vendorIds present
+ *  in the model-layer evidence, so the handoff can't invent a vendor. */
+export interface FindingVendor {
+  id: string;
+  name: string;
+}
+
 export interface EvidenceBundle {
   intent: IntentProfile;
   items: EvidenceItem[];
   coverage: CoverageFlags;
+  /** Tracked model providers present in the evidence (frontier columns). */
+  vendors: FindingVendor[];
 }
 
 /** The set of citable URLs — the anti-fabrication allowlist for synthesis. */
