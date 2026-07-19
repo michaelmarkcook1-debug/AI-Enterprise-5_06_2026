@@ -145,6 +145,16 @@ export default async function AdminHome() {
             title="Buyer-intent demand"
             body="Aggregated anonymous demand signal — most-viewed vendors, comparisons run, category interest. The data asset forming."
           />
+          <AdminCard
+            href="/admin/category-changes"
+            title="Category re-classifications"
+            body="Review proposed changes to a vendor's market category before they alter how it's ranked. Nothing moves until you approve it."
+          />
+          <AdminCard
+            href="/admin/news-corrections"
+            title="News classification corrections"
+            body="Fix mis-classified news items feeding the signal feed — the human check on automated tagging."
+          />
         </div>
 
         {/* Bottom strip: dev-mode note. */}
