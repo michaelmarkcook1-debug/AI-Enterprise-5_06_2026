@@ -6,6 +6,7 @@ import { getMemberDecision } from "@/lib/member/decisions";
 import { getCategoryCompositeWithMeta } from "@/lib/ranking/category-composite";
 import { getVendorScorecardsBatch, type VendorScorecard } from "@/lib/assessment/domain-scores";
 import { ENTITIES } from "@/lib/intelligence/entities";
+import { intelVendorId } from "@/lib/intelligence/vendor-id";
 import { MARKET_CATEGORIES } from "@/lib/intelligence/seed";
 import { DOMAIN_LABEL } from "@/lib/assessment/domain-labels";
 import { categoryModelQualityDriver } from "@/lib/assessment/category-weights";
@@ -63,6 +64,17 @@ export default async function DecisionDetailPage({ params }: { params: Promise<P
 
   const entityById = new Map(ENTITIES.map((e) => [e.id, e]));
   const shortlistIds = decision.shortlist.map((s) => s.vendorId).filter((vid) => entityById.has(vid));
+
+  // The Shield keys on the intel-spine id (alibaba-qwen → alibaba, moonshot-kimi →
+  // moonshot, zhipu-glm → zai), so feed it normalized ids — otherwise those three
+  // render "not covered" despite having real marks. Kept SEPARATE from shortlistIds
+  // above, which must stay entity.id to match EvidenceRecord for the scorecards.
+  const shieldShortlist = shortlistIds
+    .map((vid) => entityById.get(vid))
+    .filter((e): e is NonNullable<typeof e> => !!e)
+    .map((e) => ({ intelId: intelVendorId(e), name: e.name }));
+  const shieldVendorIds = shieldShortlist.map((s) => s.intelId);
+  const shieldNameById = new Map(shieldShortlist.map((s) => [s.intelId, s.name]));
 
   const scorecards: Map<string, VendorScorecard> =
     composite && shortlistIds.length > 0
@@ -199,8 +211,8 @@ export default async function DecisionDetailPage({ params }: { params: Promise<P
               from the ranking above — it reports the vendors' own terms, it never
               reorders the decision or touches a composite. */}
           <ShieldShortlistPanel
-            vendorIds={shortlistIds}
-            nameFor={(vid) => entityById.get(vid)?.name ?? vid}
+            vendorIds={shieldVendorIds}
+            nameFor={(vid) => shieldNameById.get(vid) ?? vid}
           />
         </>
       )}

@@ -13,8 +13,13 @@
 
 import type { Metadata } from "next";
 import TrustRankTable from "@/components/shield/TrustRankTable";
+import ShieldTabs from "@/components/shield/ShieldTabs";
+import ShortlistMonitorPanel from "@/components/shield/ShortlistMonitorPanel";
 import { SHIELD, SHIELD_VERSION } from "@/lib/shield/data";
 import { shieldCoveredVendorIds } from "@/lib/shield/vendor-map";
+import { getMemberOrTest } from "@/lib/member/auth";
+import { MEMBER_AUTH_ENABLED } from "@/lib/availability";
+import { buildShortlistMonitor, type ShortlistMonitorView } from "@/lib/shortlist/groups";
 
 export const metadata: Metadata = {
   title: "The Trust Rank — privacy & IP terms, with receipts",
@@ -25,7 +30,12 @@ export const metadata: Metadata = {
 
 const MUTED = "text-[#123d2c]/65 dark:text-[#eef3f8]/60";
 
-export default function ShieldPage() {
+// Reading the member cookie (for the personal shortlist tab) makes this dynamic —
+// same posture as every app/(member)/* page. The Trust Rank half is still static
+// content; only the monitor tab depends on the request.
+export const dynamic = "force-dynamic";
+
+export default async function ShieldPage() {
   const gaps = SHIELD.reduce(
     (n, v) => n + Object.values(v.marks).filter((m) => m.state === "unverified").length,
     0,
@@ -33,8 +43,16 @@ export default function ShieldPage() {
   const total = SHIELD.length * 4;
   const covered = shieldCoveredVendorIds().length;
 
-  return (
-    <main className="mx-auto max-w-6xl px-4 py-10">
+  // Personal shortlist monitor — resolves the current member (a shared test seat
+  // on prod today, per the standing MEMBER_TEST_OPEN instruction) and builds the
+  // grouped four-axis view. Fails soft to an empty monitor, never an error page.
+  const member = await getMemberOrTest().catch(() => null);
+  const monitor: ShortlistMonitorView | null = member
+    ? await buildShortlistMonitor(member.subscriberId).catch(() => null)
+    : null;
+
+  const trustRank = (
+    <>
       <header className="mb-8 max-w-3xl">
         <h1 className="font-[var(--font-display)] text-3xl font-extrabold tracking-tight">The Trust Rank</h1>
         <p className={`mt-3 text-sm leading-6 ${MUTED}`}>
@@ -76,6 +94,16 @@ export default function ShieldPage() {
           not weak here — the Shield simply doesn&apos;t apply to them.
         </p>
       </section>
+    </>
+  );
+
+  return (
+    <main className="mx-auto max-w-6xl px-4 py-10">
+      <ShieldTabs
+        trustRank={trustRank}
+        monitor={<ShortlistMonitorPanel monitor={monitor} sharedSeat={!MEMBER_AUTH_ENABLED} />}
+        monitorCount={monitor?.vendorCount ?? 0}
+      />
     </main>
   );
 }
