@@ -15,7 +15,7 @@ const edge = (from: string, to: string, strength = 50): DependencyEdge => ({
   sourceUrls: [`https://example.com/${from}-${to}`],
   confidence: 40,
   evidenceGrade: "E2",
-  relationshipType: "commercial",
+  relationshipType: "commercial_partnership",
 });
 
 describe("splitEncroachmentByVendor — directional per-vendor split", () => {

@@ -19,7 +19,9 @@ import { listMemberDecisions } from "../member/decisions";
 import { getMemberWatchlist } from "../member/watchlist";
 import { shortlistScorecards, type ShortlistVendorCard } from "./scorecard";
 
-const CATEGORY_LABEL = new Map(MARKET_CATEGORIES.map((c) => [c.id, c.name]));
+// Widened to string keys: a decision's stored `category` is a plain string, so
+// the lookup must accept one (the map's values are the human labels).
+const CATEGORY_LABEL = new Map<string, string>(MARKET_CATEGORIES.map((c) => [c.id, c.name]));
 const ENTITY_BY_ID = new Map(ENTITIES.map((e) => [e.id, e]));
 const ENTITY_BY_SLUG = new Map(ENTITIES.map((e) => [e.slug, e]));
 

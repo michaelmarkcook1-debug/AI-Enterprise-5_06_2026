@@ -246,7 +246,9 @@ export interface VendorCardInput {
 
 /** PURE: assemble one vendor's four-axis card. Deterministic + unit-tested. */
 export function buildVendorCard(input: VendorCardInput): ShortlistVendorCard {
-  const byDomain = new Map<DomainId, DomainScore>(input.scorecard.domains.map((d) => [d.domain, d]));
+  const byDomain = new Map<DomainId, DomainScore>(
+    input.scorecard.domains.map((d): [DomainId, DomainScore] => [d.domain, d]),
+  );
   const risk = riskAxis(byDomain);
   const privacy = privacyAxis(input.shield, byDomain.get(PRIVACY_DOMAIN));
   const encroachment = encroachmentAxis(input.encroachment, input.shortlistSlugs, input.nameBySlug);
