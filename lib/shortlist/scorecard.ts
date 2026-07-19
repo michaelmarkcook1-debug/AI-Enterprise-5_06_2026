@@ -13,6 +13,15 @@
 //                   honest insufficient (model-provider category standing is a
 //                   planned follow-up, not faked here).
 //
+// A fifth, axis-independent field — `momentum` — answers "has anything changed"
+// directly, using the SAME real score-history the ranking hover charts already
+// track (lib/ranking/score-history.ts). No new storage: momentum is the delta
+// between the two most recent REAL snapshots (never a reconstructed point, which
+// would manufacture a trend from interpolation). This also sidesteps the shared
+// test-seat limitation a per-member "since you last looked" timestamp would hit
+// (MEMBER_AUTH_ENABLED=false today) — momentum is the vendor's own movement, the
+// same for every viewer, not a per-visit diff.
+//
 // NON-NEGOTIABLE HONESTY (per the project brief): nothing here manufactures a
 // value. Every axis maps ONLY what its source already asserts; absence → the
 // distinct `insufficient` state, never an optimistic default. The Shield stays a
@@ -28,6 +37,7 @@ import { shieldForVendorId } from "../shield/vendor-map";
 import { intelVendorId } from "../intelligence/vendor-id";
 import type { Entity } from "../intelligence/entities";
 import { encroachmentForVendors, type VendorEncroachment } from "../graph/encroachment-by-vendor";
+import { getScoreHistory, type ScoreHistoryPoint } from "../ranking/score-history";
 
 /** The 4th state sits OFF the good→watch ramp — a missing signal is never scored. */
 export type AxisState = "clear" | "caution" | "watch" | "insufficient";
@@ -62,6 +72,33 @@ export interface ShortlistVendorCard {
   headline: { text: string; derived: boolean } | null;
   /** Honest coverage: how many of the four axes have any evidence. */
   coverage: { evidenced: number; total: 4 };
+  /** Real movement since the previous tracked snapshot (follow-up 2) — never a
+   *  per-visitor "since you last looked" (no such store exists; the shared prod
+   *  seat couldn't honor one anyway), but the vendor's own objective change. null
+   *  with fewer than two REAL snapshots — never inferred from a reconstructed point. */
+  momentum: Momentum | null;
+}
+
+export interface Momentum {
+  /** Composite delta, most-recent real snapshot minus the one before it. */
+  delta: number;
+  fromDate: string;
+  toDate: string;
+  /** delta magnitude ≥ 0.15 (0–5 scale) — enough to headline, not chart noise. */
+  material: boolean;
+}
+
+/** PURE: the delta between the two most recent REAL (non-reconstructed) points
+ *  with a non-null composite. Reconstructed points are excluded — comparing
+ *  against a replayed-history point would present interpolation as movement. */
+export function computeMomentum(points: ScoreHistoryPoint[]): Momentum | null {
+  const real = points.filter((p) => p.source === "snapshot" && p.composite != null) as (ScoreHistoryPoint & {
+    composite: number;
+  })[];
+  if (real.length < 2) return null;
+  const [prev, latest] = real.slice(-2);
+  const delta = Math.round((latest.composite - prev.composite) * 100) / 100;
+  return { delta, fromDate: prev.date, toDate: latest.date, material: Math.abs(delta) >= 0.15 };
 }
 
 const RISK_DOMAINS: DomainId[] = ["model_reliability", "security_threat", "capital_resilience"] as DomainId[];
@@ -220,8 +257,14 @@ function positioningAxis(marketPosition: DomainScore | null): AxisRead {
 
 /** Answer-first: the single sharpest current signal. A cross-shortlist
  *  encroachment beats a lone watch, which beats a caution; else null. */
+function momentumText(m: Momentum): string {
+  const dir = m.delta > 0 ? "up" : "down";
+  return `Score moved ${dir} ${Math.abs(m.delta).toFixed(2)} since ${m.toDate} (was ${m.fromDate}).`;
+}
+
 function headlineFor(
   card: Pick<ShortlistVendorCard, "risk" | "privacy" | "encroachment" | "positioning">,
+  momentum?: Momentum | null,
 ): { text: string; derived: boolean } | null {
   if (card.encroachment.state === "watch") {
     return { text: card.encroachment.summary, derived: !!card.encroachment.derived };
@@ -229,8 +272,12 @@ function headlineFor(
   const watch = ([["Risk", card.risk], ["Privacy", card.privacy], ["Positioning", card.positioning]] as [string, AxisRead][])
     .find(([, a]) => a.state === "watch");
   if (watch) return { text: `${watch[0]} — ${watch[1].summary}`, derived: !!watch[1].derived };
+  // A material drop is worth surfacing above a routine caution — it's the
+  // clearest "something changed" signal a shortlist watcher can get.
+  if (momentum?.material && momentum.delta < 0) return { text: momentumText(momentum), derived: false };
   const caution = [card.risk, card.privacy, card.encroachment, card.positioning].find((a) => a.state === "caution");
   if (caution) return { text: caution.summary, derived: !!caution.derived };
+  if (momentum?.material) return { text: momentumText(momentum), derived: false };
   return null;
 }
 
@@ -263,7 +310,52 @@ export function buildVendorCard(input: VendorCardInput): ShortlistVendorCard {
     ...axes,
     headline: headlineFor(axes),
     coverage: { evidenced, total: 4 },
+    momentum: null, // filled by applyMomentum once history is fetched (async)
   };
+}
+
+/** Attach a fetched momentum reading and recompute the headline so a material
+ *  move can surface even when no axis is watch/caution. Pure; new card object. */
+export function applyMomentum(card: ShortlistVendorCard, momentum: Momentum | null): ShortlistVendorCard {
+  const axes = { risk: card.risk, privacy: card.privacy, encroachment: card.encroachment, positioning: card.positioning };
+  return { ...card, momentum, headline: headlineFor(axes, momentum) };
+}
+
+/**
+ * Positioning derived from a vendor's standing in a category composite — used for
+ * a DECISION group, whose `category` supplies the context. Applied ONLY when the
+ * cited market_position band is absent (model providers have no band), never over
+ * a real band. This is OUR within-category composite, labelled as such — not a
+ * restated (licensed) analyst placement. Leaders → clear, Contenders → caution,
+ * Emerging → watch; an unranked vendor is left insufficient by the caller.
+ */
+export function positioningFromCategoryRank(
+  rank: number,
+  tier: string | null,
+  total: number,
+  categoryLabel: string,
+): AxisRead {
+  const state: AxisState =
+    tier === "Leaders" ? "clear" : tier === "Emerging" ? "watch" : "caution";
+  return {
+    state,
+    summary: `#${rank} of ${total} in ${categoryLabel}${tier ? ` — ${tier}` : ""}, on our within-category composite.`,
+    coverageNote: "within-category rank",
+    citations: [],
+  };
+}
+
+/**
+ * Swap a card's positioning axis (e.g. with a category-rank read) and recompute
+ * the fields that depend on it — the coverage count and the answer-first headline.
+ * Pure; returns a NEW card so the shared base card is never mutated.
+ */
+export function applyPositioning(card: ShortlistVendorCard, positioning: AxisRead): ShortlistVendorCard {
+  const axes = { risk: card.risk, privacy: card.privacy, encroachment: card.encroachment, positioning };
+  const evidenced = [card.risk, card.privacy, card.encroachment, positioning].filter((a) => a.state !== "insufficient").length;
+  // Carry any already-applied momentum through the headline recompute — the two
+  // overlays (positioning, momentum) can be applied in either order.
+  return { ...card, positioning, headline: headlineFor(axes, card.momentum), coverage: { evidenced, total: 4 } };
 }
 
 /**

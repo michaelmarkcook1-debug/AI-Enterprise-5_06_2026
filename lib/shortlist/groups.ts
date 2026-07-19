@@ -14,10 +14,20 @@
 // vendor keys are skipped (honest — we show what resolves, nothing invented).
 
 import { ENTITIES, type Entity } from "../intelligence/entities";
+import { intelVendorId } from "../intelligence/vendor-id";
 import { MARKET_CATEGORIES } from "../intelligence/seed";
 import { listMemberDecisions } from "../member/decisions";
 import { getMemberWatchlist } from "../member/watchlist";
-import { shortlistScorecards, type ShortlistVendorCard } from "./scorecard";
+import { getCategoryCompositeWithMeta } from "../ranking/category-composite";
+import { getScoreHistory } from "../ranking/score-history";
+import {
+  shortlistScorecards,
+  positioningFromCategoryRank,
+  applyPositioning,
+  computeMomentum,
+  applyMomentum,
+  type ShortlistVendorCard,
+} from "./scorecard";
 
 // Widened to string keys: a decision's stored `category` is a plain string, so
 // the lookup must accept one (the map's values are the human labels).
@@ -77,14 +87,73 @@ export async function buildShortlistMonitor(
   for (const e of watchlistEntities) unionById.set(e.id, e);
   const cards = await shortlistScorecards([...unionById.values()].map(lite), now);
 
+  // Category-rank positioning overlay (follow-up 1): a decision group's vendors
+  // that have NO cited market_position band (model providers) get their standing
+  // in that decision's OWN category composite — the standing the buyer is actually
+  // deciding on — instead of a blank "insufficient". Deduped per category; any
+  // failure leaves the honest insufficient base untouched (never fabricates).
+  const rankCache = new Map<string, Map<string, { rank: number; tier: string | null; total: number }>>();
+  async function rankInfoFor(categoryId: string) {
+    const hit = rankCache.get(categoryId);
+    if (hit) return hit;
+    const m = new Map<string, { rank: number; tier: string | null; total: number }>();
+    try {
+      const { composite } = await getCategoryCompositeWithMeta(categoryId);
+      if (composite) {
+        const total = composite.ranked.length;
+        for (const r of composite.ranked) if (r.rank != null) m.set(r.vendorId, { rank: r.rank, tier: r.tier, total });
+      }
+    } catch {
+      /* leave empty → the base insufficient positioning stands */
+    }
+    rankCache.set(categoryId, m);
+    return m;
+  }
+
+  // Momentum overlay (follow-up 2): "has anything changed" from the SAME real
+  // score-history the ranking hover charts already track — never a per-visitor
+  // "since you last looked" (no such store exists, and the shared prod test seat
+  // couldn't honor a per-user one anyway). Scoped to a decision's category, same
+  // reasoning as positioning above; the Watchlist has no single category context,
+  // so its vendors honestly get no momentum rather than a guessed one.
+  const momentumCache = new Map<string, ReturnType<typeof computeMomentum>>();
+  async function momentumFor(vendorId: string, categoryId: string) {
+    const key = `${categoryId}:${vendorId}`;
+    if (momentumCache.has(key)) return momentumCache.get(key) ?? null;
+    let m: ReturnType<typeof computeMomentum> = null;
+    try {
+      m = computeMomentum(await getScoreHistory(vendorId, categoryId));
+    } catch {
+      /* leave null — the card stays without a momentum read, never fabricated */
+    }
+    momentumCache.set(key, m);
+    return m;
+  }
+
   const groups: MonitorGroup[] = [];
   for (const g of decisionGroups) {
+    const catLabel = CATEGORY_LABEL.get(g.decision.category) ?? g.decision.category;
+    const rankInfo = await rankInfoFor(g.decision.category);
+    const groupCards: ShortlistVendorCard[] = [];
+    for (const e of g.entities) {
+      let card = cards.get(e.id);
+      if (!card) continue;
+      // Look up by both id vocabularies — the composite may key on the entity id
+      // or the intel-spine id (they diverge for alibaba/moonshot/zhipu).
+      const ri = rankInfo.get(e.id) ?? rankInfo.get(intelVendorId(e));
+      if (card.positioning.state === "insufficient" && ri) {
+        card = applyPositioning(card, positioningFromCategoryRank(ri.rank, ri.tier, ri.total, catLabel));
+      }
+      const momentum = await momentumFor(e.id, g.decision.category);
+      if (momentum) card = applyMomentum(card, momentum);
+      groupCards.push(card);
+    }
     groups.push({
       kind: "decision",
       decisionId: g.decision.id,
       title: g.decision.name,
-      typeLabel: CATEGORY_LABEL.get(g.decision.category) ?? g.decision.category,
-      cards: g.entities.map((e) => cards.get(e.id)).filter((c): c is ShortlistVendorCard => !!c),
+      typeLabel: catLabel,
+      cards: groupCards,
     });
   }
   if (watchlistEntities.length > 0) {

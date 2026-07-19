@@ -1,5 +1,13 @@
 import { describe, it, expect } from "vitest";
-import { buildVendorCard, type VendorCardInput } from "./scorecard";
+import {
+  buildVendorCard,
+  positioningFromCategoryRank,
+  applyPositioning,
+  computeMomentum,
+  applyMomentum,
+  type VendorCardInput,
+} from "./scorecard";
+import type { ScoreHistoryPoint } from "../ranking/score-history";
 import type { VendorScorecard } from "../assessment/domain-scores";
 import type { DomainScore } from "../assessment/domain-rubric";
 import type { DomainId } from "../types";
@@ -148,5 +156,113 @@ describe("buildVendorCard — positioning + coverage", () => {
       encroachment: { encroachesOn: [], encroachedBy: [], mapped: true },
     }));
     expect(c.coverage).toEqual({ evidenced: 4, total: 4 });
+  });
+});
+
+describe("category-rank positioning (follow-up 1)", () => {
+  it("maps tiers to states: Leaders→clear, Contenders→caution, Emerging→watch, none→caution", () => {
+    expect(positioningFromCategoryRank(1, "Leaders", 12, "Frontier model/API").state).toBe("clear");
+    expect(positioningFromCategoryRank(5, "Contenders", 12, "Frontier model/API").state).toBe("caution");
+    expect(positioningFromCategoryRank(10, "Emerging", 12, "Frontier model/API").state).toBe("watch");
+    expect(positioningFromCategoryRank(3, null, 12, "Frontier model/API").state).toBe("caution");
+  });
+  it("summary names rank, total, category and tier", () => {
+    const r = positioningFromCategoryRank(2, "Leaders", 14, "Frontier model/API");
+    expect(r.summary).toContain("#2 of 14");
+    expect(r.summary).toContain("Frontier model/API");
+    expect(r.summary).toContain("Leaders");
+  });
+  it("applyPositioning swaps the axis, recomputes coverage, and never mutates the base card", () => {
+    // base has a null market position → positioning insufficient (3 of 4 axes here)
+    const b = buildVendorCard(base({
+      scorecard: scorecard([scored("model_reliability", 4)]),
+      shield: shield(["protective", "protective", "protective", "protective"]),
+      encroachment: { encroachesOn: [], encroachedBy: [], mapped: true },
+    }));
+    expect(b.positioning.state).toBe("insufficient");
+    expect(b.coverage.evidenced).toBe(3);
+
+    const next = applyPositioning(b, positioningFromCategoryRank(2, "Leaders", 14, "Frontier model/API"));
+    expect(next.positioning.state).toBe("clear");
+    expect(next.coverage.evidenced).toBe(4); // +1 now that positioning is evidenced
+    expect(b.positioning.state).toBe("insufficient"); // base object untouched
+    expect(b.coverage.evidenced).toBe(3);
+  });
+});
+
+describe("computeMomentum — real-snapshot movement (follow-up 2)", () => {
+  const pt = (date: string, composite: number | null, source: ScoreHistoryPoint["source"] = "snapshot"): ScoreHistoryPoint => ({
+    date, composite, rank: null, pillars: [], source,
+  });
+
+  it("returns null with fewer than two real points", () => {
+    expect(computeMomentum([])).toBeNull();
+    expect(computeMomentum([pt("2026-07-01", 3.2)])).toBeNull();
+  });
+
+  it("computes the delta between the two most recent REAL snapshots", () => {
+    const m = computeMomentum([pt("2026-06-01", 3.0), pt("2026-06-15", 3.2), pt("2026-07-01", 3.5)]);
+    expect(m).toMatchObject({ delta: 0.3, fromDate: "2026-06-15", toDate: "2026-07-01" });
+  });
+
+  it("NEVER compares against a reconstructed point — only real snapshots count", () => {
+    // A reconstructed point sits between two real ones; it must be skipped, not
+    // used as "the previous point" (that would present interpolation as movement).
+    const m = computeMomentum([
+      pt("2026-05-01", 2.0),
+      pt("2026-06-01", 4.0, "reconstructed"), // must be ignored
+      pt("2026-07-01", 2.1),
+    ]);
+    expect(m).toMatchObject({ delta: 0.1, fromDate: "2026-05-01", toDate: "2026-07-01" });
+  });
+
+  it("flags material only at/above the 0.15 threshold, in either direction", () => {
+    expect(computeMomentum([pt("2026-06-01", 3.0), pt("2026-07-01", 3.10)])!.material).toBe(false);
+    expect(computeMomentum([pt("2026-06-01", 3.0), pt("2026-07-01", 3.15)])!.material).toBe(true);
+    expect(computeMomentum([pt("2026-06-01", 3.0), pt("2026-07-01", 2.80)])!.material).toBe(true);
+  });
+
+  it("null composite points are excluded from the real-snapshot set", () => {
+    const m = computeMomentum([pt("2026-06-01", 3.0), pt("2026-06-20", null), pt("2026-07-01", 3.4)]);
+    expect(m).toMatchObject({ fromDate: "2026-06-01", toDate: "2026-07-01" });
+  });
+});
+
+describe("applyMomentum — headline interaction", () => {
+  it("a material DROP outranks a routine caution in the headline", () => {
+    const b = buildVendorCard(base({ scorecard: scorecard([scored("model_reliability", 2.5)]) })); // → caution
+    expect(b.headline?.text).toContain("reliability"); // sanity: caution is the headline pre-momentum
+    const withDrop = applyMomentum(b, { delta: -0.4, fromDate: "2026-06-01", toDate: "2026-07-01", material: true });
+    expect(withDrop.headline?.text).toContain("down 0.40");
+  });
+
+  it("a material RISE surfaces as the headline when nothing else does", () => {
+    const b = buildVendorCard(base({})); // no axes evidenced → no headline pre-momentum
+    expect(b.headline).toBeNull();
+    const withRise = applyMomentum(b, { delta: 0.5, fromDate: "2026-06-01", toDate: "2026-07-01", material: true });
+    expect(withRise.headline?.text).toContain("up 0.50");
+  });
+
+  it("cross-shortlist encroachment still wins over momentum (the flagship stays first)", () => {
+    const rival = { vendorSlug: "cursor", rationale: "…", sourceUrls: ["https://src"], strength: 55, confidence: 40 };
+    const b = buildVendorCard(base({
+      encroachment: { encroachesOn: [rival], encroachedBy: [], mapped: true },
+      shortlistSlugs: new Set(["acme", "cursor"]),
+      nameBySlug: new Map([["acme", "Acme"], ["cursor", "Cursor"]]),
+    }));
+    const withDrop = applyMomentum(b, { delta: -0.8, fromDate: "2026-06-01", toDate: "2026-07-01", material: true });
+    expect(withDrop.headline?.text).toContain("Cursor");
+  });
+
+  it("a non-material delta never becomes the headline", () => {
+    const b = buildVendorCard(base({}));
+    const withTiny = applyMomentum(b, { delta: 0.05, fromDate: "2026-06-01", toDate: "2026-07-01", material: false });
+    expect(withTiny.headline).toBeNull();
+  });
+
+  it("does not mutate the base card", () => {
+    const b = buildVendorCard(base({}));
+    applyMomentum(b, { delta: 0.5, fromDate: "2026-06-01", toDate: "2026-07-01", material: true });
+    expect(b.momentum).toBeNull();
   });
 });

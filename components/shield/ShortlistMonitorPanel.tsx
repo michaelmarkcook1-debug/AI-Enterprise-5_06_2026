@@ -103,6 +103,20 @@ function VendorCard({
         {AXES.map((a) => (
           <AxisChip key={a.key} label={a.label} read={card[a.key]} />
         ))}
+        {card.momentum && (
+          <span
+            className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs ${
+              card.momentum.delta > 0
+                ? "border-sky-200 bg-sky-50 text-sky-800 dark:border-sky-900 dark:bg-sky-950/40 dark:text-sky-300"
+                : card.momentum.delta < 0
+                  ? "border-amber-300 bg-amber-50 text-amber-800 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-300"
+                  : `border-black/10 dark:border-white/15 ${MUTED}`
+            }`}
+            title={`${card.momentum.fromDate} → ${card.momentum.toDate}`}
+          >
+            {card.momentum.delta > 0 ? "▲" : card.momentum.delta < 0 ? "▼" : "—"} {Math.abs(card.momentum.delta).toFixed(2)}
+          </span>
+        )}
       </div>
 
       {card.headline && (
