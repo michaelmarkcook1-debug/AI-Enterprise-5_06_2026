@@ -65,8 +65,7 @@ import { fetchLiveGitHubSignals } from "../reputation/live-github";
 import { fetchAllMacroSignals } from "../market-signals/live-macro";
 import { sweepMemberAuth } from "../member/auth";
 import { deriveVendorScores } from "./derive-scores";
-import { seedEloPillarScores } from "./elo-scores";
-import { seedModelQualityBenchmarks } from "./model-quality-seed";
+import { seedModelQualityBenchmarks, seedModelQualityPillar } from "./model-quality-seed";
 import { deriveMarketShareMovement } from "./derive-market-share";
 import { deriveDependencySignals } from "../graph/derive-dependencies";
 import { runDeliveryUpdateFromRecentNews } from "../delivery/news-update";
@@ -394,29 +393,10 @@ export async function runDailyRefresh(
     return r as unknown as Record<string, unknown>;
   });
 
-  // ── 4c. Model-quality pillar fallback (legacy Arena ELO) ────
-  //     Writes the model_quality pillar (openlm.ai Arena ELO, bare ids) — kept
-  //     ONLY as a transition safety net for a vendor Artificial Analysis (4d,
-  //     the primary source since 2026-07) doesn't track; domain-scores.ts reads
-  //     this exclusively when a vendor has zero benchmark rows from 4d. Must run
-  //     BEFORE derive_scores so overallScore folds it in this run. The evidence
-  //     projector never touches model_quality, so this is the only writer.
-  await trackedStep("model_quality_elo", async () => {
-    if (!dbConfigured) return { skipped: "no_database" };
-    const r = await seedEloPillarScores();
-    return {
-      updated: r.updated,
-      skipped: r.skipped,
-      notFound: r.notFound.length,
-      source: r.source,
-      vendorsSourced: r.vendorsSourced,
-      covered: r.covered,
-      unmappedOrgs: r.unmappedOrgs,
-      unmappedCount: r.unmappedOrgs.length,
-    };
-  });
-
-  // ── 4d. Model-quality capability benchmarks (broadened signal) ─────────
+  // ── 4c. Model-quality capability benchmarks (broadened signal) ─────────
+  //     (The legacy Arena-ELO pillar fallback was RETIRED 2026-07-19 — model
+  //      quality is now Artificial Analysis only; a vendor AA doesn't cover shows
+  //      honest "insufficient evidence" rather than an ELO backfill.)
   //     Persists real per-model Artificial Analysis indices (Intelligence /
   //     Coding / Agentic, all from that vendor's flagship model) →
   //     model_quality_benchmarks. These are the cited inputs the broadened
@@ -435,6 +415,17 @@ export async function runDailyRefresh(
       unmappedCount: r.unmappedCreators.length,
       notFound: r.notFound.length,
     };
+  });
+
+  // ── 4d. Model-quality PILLAR from those AA benchmarks (replaces the retired
+  //     Arena-ELO pillar). Turns the just-persisted AA rows into the
+  //     model_quality capabilityScore that derive_scores folds into overallScore
+  //     — so ELO is gone from the headline ranking too, not just the composite.
+  //     Runs AFTER the benchmarks (reads them) and BEFORE derive_scores.
+  await trackedStep("model_quality_pillar", async () => {
+    if (!dbConfigured) return { skipped: "no_database" };
+    const r = await seedModelQualityPillar();
+    return { updated: r.updated, skipped: r.skipped, cleared: r.cleared };
   });
 
   // ── 5. Derive headline scores from fresh evidence ──────────

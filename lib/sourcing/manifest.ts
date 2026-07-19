@@ -659,12 +659,14 @@ export const SOURCE_MANIFEST: SourceManifestEntry[] = [
     expectedDomains: ["cost_finops"],
     freshnessHorizonDays: PRICING_HORIZON },
 
-  // ─ Arena ELO benchmark (openlm.ai/chatbot-arena/) ───────────────────────
+  // ─ Arena ELO leaderboard (openlm.ai/chatbot-arena/) ─────────────────────
   // Registered as a linked analyst data source for Model Provider vendors.
-  // overallScore is seeded via /api/admin/elo/seed using VENDOR_ELO_MAP
-  // (top-2 ELO average per vendor, fixed-anchor normalised). These manifest
-  // entries allow the admin UI to surface the source and let the evidence
-  // pipeline extract any supporting model-capability signals from the page.
+  // NOTE: this NO LONGER seeds any score. Arena ELO was retired as a scoring
+  // source on 2026-07-19 — model_quality is now solely the Artificial Analysis
+  // index (model-quality-blend / seedModelQualityPillar), and /api/admin/elo/seed
+  // is a removed 410 stub. These manifest entries remain only so the admin UI can
+  // surface the leaderboard and the evidence pipeline can cite it as one graded
+  // benchmark signal among others — never a direct overallScore write.
   { vendorId: "vendor_anthropic", category: "analyst_report",
     url: "https://openlm.ai/chatbot-arena/",
     label: "Arena ELO leaderboard — Anthropic",

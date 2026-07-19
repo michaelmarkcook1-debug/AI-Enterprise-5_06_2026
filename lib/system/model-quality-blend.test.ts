@@ -94,4 +94,25 @@ describe("blendModelQuality — one driver index per score", () => {
     ])!;
     expect(r.contributions.map((c) => c.category)).toEqual(["intelligence"]);
   });
+
+  // Calibration guard for the model_quality PILLAR bridge (seedModelQualityPillar).
+  // The pillar feeds derive-scores → overallScore, where every canonical pillar is
+  // on a 0–100 scale. The bridge therefore MUST use blend.normalized × 100, NOT
+  // blend.score (which is 0..MODEL_QUALITY_CAP=4). Using `score` would silently
+  // collapse model_quality to a max of 4/100 for EVERY vendor — a ranking
+  // regression that looks like "model quality suddenly stopped mattering". Pin the
+  // two scales apart so that swap can never pass review unnoticed.
+  it("pillar scale: normalized×100 is 0–100 and distinct from the 0–4 score", () => {
+    const r = blendModelQuality(rows({ intelligence: 55.7 }))!;
+    expect(r.normalized).toBeGreaterThanOrEqual(0);
+    expect(r.normalized).toBeLessThanOrEqual(1);
+    const pillar = r.normalized * 100; // exactly what seedModelQualityPillar writes
+    expect(pillar).toBeGreaterThan(MODEL_QUALITY_CAP); // a mid/frontier vendor lands well above 4…
+    expect(pillar).toBeLessThanOrEqual(100);
+    expect(pillar).not.toBeCloseTo(r.score, 5); // …so pillar (0–100) ≠ score (0–4)
+    // Anchor endpoints: an at/above-frontier index pins the pillar near 100.
+    expect(blendModelQuality(rows({ intelligence: 9999 }))!.normalized * 100).toBeCloseTo(100, 5);
+    // A below-window index floors the pillar at 0 (honest "off-frontier"), not 4.
+    expect(blendModelQuality(rows({ intelligence: 1 }))!.normalized * 100).toBe(0);
+  });
 });

@@ -32,7 +32,6 @@ const SANCTIONED = new Set<string>([
   "lib/scores/score-writer.ts", // the sanctioned chokepoint (rubric_derive / evidence_projection)
   "app/api/admin/seed-missing-vendors/route.ts", // init-only, admin-gated seed
   "lib/intelligence/load-universe.ts", // idempotent deterministic-seed universe loader
-  "lib/system/elo-scores.ts", // Arena ELO (openlm.ai public benchmark) → model_quality pillar; a benchmark/rubric path, never commercial
 ]);
 
 // Score models + the fields that make a write a "score write".

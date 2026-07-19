@@ -24,14 +24,17 @@ import { writeVendorScore } from "../scores/score-writer";
 // longer drift apart on a duplicated constant. The dashboard score is the
 // context-free baseline (these base weights); the per-buyer assessment engine
 // then layers industry + tier deltas on top — that's the legitimate difference.
-// Model quality (Arena ELO, written as a `model_quality` pillar row by
-// seedEloPillarScores) is folded into the dashboard ranking at a fixed weight,
+// Model quality (the Artificial Analysis Intelligence index, written as a
+// `model_quality` pillar row by seedModelQualityPillar — the Arena-ELO pillar was
+// retired 2026-07-19) is folded into the dashboard ranking at a fixed weight,
 // with the canonical six scaled down to leave room for it, so a model
 // provider's overallScore reflects raw model capability — not just enterprise/
 // market pillars. Only model providers carry a model_quality row; derive-scores
 // normalizes by the weights of the pillars each vendor actually has, so a vendor
 // WITHOUT model_quality is simply scored over the six rebalanced base weights
-// (relative ranking unchanged). This is a dashboard-scoring concern only — the
+// (relative ranking unchanged). A model provider Artificial Analysis doesn't
+// cover has NO model_quality row (the bridge clears any stale one) — honest
+// absence, not a backfill. This is a dashboard-scoring concern only — the
 // canonical PILLARS set (and the per-buyer assessment engine) stays at six.
 const MODEL_QUALITY_WEIGHT = 0.2;
 const BASE_PILLAR_SCALE = 1 - MODEL_QUALITY_WEIGHT; // 0.80
@@ -41,7 +44,7 @@ const PILLAR_WEIGHTS: Record<string, number> = {
 };
 
 // Minimum distinct pillar rows before pillar average overrides overallScore.
-// Prevents a single sourcing run from crashing an ELO-anchored score.
+// Prevents a single sourcing run from crashing a thinly-covered score.
 const MIN_PILLAR_COUNT = 3;
 
 /** Cut-off windows used by the velocity inputs. */

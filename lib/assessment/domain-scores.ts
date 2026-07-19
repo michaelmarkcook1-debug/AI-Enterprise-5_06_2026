@@ -15,7 +15,6 @@ import {
   type RubricEvidenceRow,
 } from "./domain-rubric";
 import { accreditedCorrectedGrade } from "./accredited-sources";
-import { ARENA_ELO_SOURCE_URL } from "../system/elo-fetch";
 import { loadModelQualityDetails } from "./model-quality-score";
 import type { MqBlendResult } from "../system/model-quality-blend";
 import { synthesizeDevSentimentDomain } from "../dev-sentiment/ranking-signal";
@@ -149,17 +148,13 @@ const EVIDENCE_SELECT = {
 
 /**
  * Synthesize the model_quality DomainScores (both drivers) for each vendor.
- * PRIMARY: the Artificial Analysis index blends from the cited
+ * SOLE SOURCE: the Artificial Analysis index blends from the cited
  * ModelQualityBenchmark rows — intelligence-driven (frontier ranking, vendor
  * profile) and coding-driven (developer_coding_agent ranking), each from the
  * vendor's best model on THAT index (model-quality-score.ts).
- * FALLBACK (INTELLIGENCE driver only, per vendor with no rows yet — e.g.
- * Artificial Analysis doesn't track it): the legacy single Arena-Elo pillar
- * through the rubric, so nothing regresses before the first benchmark seed
- * runs. The coding driver has NO fallback — the Elo pillar has no coding
- * measure, and a coding score must never be inferred from an overall reading.
- * Vendors with neither are absent → model_quality stays insufficient wherever
- * active (no default, no fabrication). Never writes anything.
+ * A vendor with no benchmark rows is absent → model_quality stays insufficient
+ * wherever active (no default, no fabrication, no ELO backfill). Never writes.
+ * (The legacy Arena-ELO pillar fallback was retired 2026-07-19.)
  */
 async function fetchModelQualityScores(
   vendorIds: string[],
@@ -167,35 +162,13 @@ async function fetchModelQualityScores(
 ): Promise<Map<string, { intelligence: DomainScore | null; coding: DomainScore | null }>> {
   const out = new Map<string, { intelligence: DomainScore | null; coding: DomainScore | null }>();
   if (!hasDatabase() || vendorIds.length === 0) return out;
-  // 1. Primary: index blends from cited benchmark rows (one query, both drivers).
+  // Index blends from cited Artificial Analysis benchmark rows (one query, both
+  // drivers). A vendor with no rows is absent → model_quality stays insufficient.
+  // (The legacy Arena-ELO pillar fallback was RETIRED 2026-07-19: an AA-uncovered
+  // vendor now reads as honest "insufficient evidence", never an ELO backfill.)
   const details = await loadModelQualityDetails(vendorIds, now);
   for (const [vendorId, d] of details) {
     out.set(vendorId, { intelligence: d.intelligence?.score ?? null, coding: d.coding?.score ?? null });
-  }
-  // 2. Legacy fallback for vendors with no INTELLIGENCE score yet (single Arena Elo).
-  const missing = vendorIds.filter((id) => !out.get(id)?.intelligence);
-  if (missing.length > 0) {
-    try {
-      const rows = await getPrisma().intelligencePillarScore.findMany({
-        where: { vendorId: { in: missing }, pillar: "model_quality" },
-        select: { vendorId: true, capabilityScore: true, evidenceGrade: true, confidence: true },
-      });
-      for (const r of rows) {
-        const evRow: RubricEvidenceRow = {
-          evidenceGrade: r.evidenceGrade,
-          rawScore: r.capabilityScore,
-          confidence: r.confidence,
-          // Single row: freshnessFactor(now,now) cancels → no inflation.
-          capturedAt: now,
-          sourceUrl: ARENA_ELO_SOURCE_URL,
-        };
-        const cur = out.get(r.vendorId) ?? { intelligence: null, coding: null };
-        cur.intelligence = scoreDomainFromEvidence("model_quality", [evRow], now);
-        out.set(r.vendorId, cur);
-      }
-    } catch {
-      // Honest absence on read failure — those vendors stay insufficient.
-    }
   }
   return out;
 }

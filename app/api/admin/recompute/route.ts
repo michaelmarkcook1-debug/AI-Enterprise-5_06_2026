@@ -14,10 +14,10 @@ import { isAdminRequest, unauthorized } from "@/lib/admin-auth";
 import { getPrisma, hasDatabase } from "@/lib/prisma";
 import { projectEvidenceToIntelligence, projectEvidenceToPillarScores } from "@/lib/services/intelligence-projector";
 import { deriveVendorScores } from "@/lib/system/derive-scores";
+import { seedModelQualityPillar } from "@/lib/system/model-quality-seed";
 import { deriveMarketShareMovement } from "@/lib/system/derive-market-share";
 import { captureRankingSnapshots } from "@/lib/intelligence/ranking-snapshots";
 import { detectCategoryChanges } from "@/lib/services/category-change";
-import { seedEloPillarScores } from "@/lib/system/elo-scores";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -32,9 +32,10 @@ async function handle(request: Request) {
   try {
     const projection = await projectEvidenceToIntelligence(prisma);
     const pillars = await projectEvidenceToPillarScores(prisma, now);
-    // Refresh the model_quality (Arena ELO) pillar BEFORE derive so overallScore
-    // folds in current model quality in the same run.
-    const eloPillars = await seedEloPillarScores();
+    // Refresh the model_quality pillar from the persisted Artificial Analysis
+    // benchmarks BEFORE derive, so overallScore folds current model quality in the
+    // same run (replaces the retired Arena-ELO pillar refresh).
+    const mqPillar = await seedModelQualityPillar();
     // Raise admin-review proposals for any vendor whose new capabilities imply a
     // role it doesn't hold (never auto-applied — surfaces in /admin/category-changes).
     const categoryChanges = await detectCategoryChanges();
@@ -56,10 +57,10 @@ async function handle(request: Request) {
         vendorsTouched: pillars.vendorsTouched,
         shifts: pillars.shifts,
       },
-      modelQualityElo: {
-        updated: eloPillars.updated,
-        skipped: eloPillars.skipped,
-        notFound: eloPillars.notFound,
+      modelQuality: {
+        pillarsUpdated: mqPillar.updated,
+        skippedNoIntelligenceIndex: mqPillar.skipped,
+        stalePillarsCleared: mqPillar.cleared,
       },
       scores: {
         vendorsUpdated: derive.vendorsUpdated,

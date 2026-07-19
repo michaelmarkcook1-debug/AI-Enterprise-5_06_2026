@@ -25,7 +25,6 @@
 
 import { DEFAULT_DOMAIN_WEIGHTS, ASSESSMENT_COVERAGE_FLOOR, type DomainWeights } from "./composite";
 import { DOMAIN_LABEL } from "./domain-labels";
-import { ARENA_ELO_SOURCE_URL } from "../system/elo-fetch";
 import { DEV_SENTIMENT_IN_RANKING } from "../availability";
 import { isDevSentimentCategory } from "../dev-sentiment/scope";
 
@@ -370,9 +369,8 @@ export function buildMethodologyNote(categoryId: string): string {
         `score inferred from a general-capability reading.`
       : ` Model quality is a real, source-cited signal here: each vendor's flagship model's Artificial ` +
         `Analysis Intelligence Index (artificialanalysis.ai), graded E4 and band-capped — a weighted composite ` +
-        `of 9 evaluations, not a fully independent audit, and vendors with no Artificial-Analysis-tracked ` +
-        `model fall back to a legacy Arena Elo pillar (${ARENA_ELO_SOURCE_URL}) or show insufficient evidence ` +
-        `rather than a default.`
+        `of 9 evaluations, not a fully independent audit. A vendor with no Artificial-Analysis-tracked ` +
+        `model shows insufficient evidence rather than a default.`
     : "";
 
   // Public documentation of the dev-sentiment ranking variable (spec lock #1:

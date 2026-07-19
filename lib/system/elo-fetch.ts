@@ -1,14 +1,16 @@
-// Live Arena ELO fetch — replaces the hand-maintained snapshot.
+// Arena org→vendor map (+ dormant live Arena-ELO fetch/parse).
 // ─────────────────────────────────────────────────────────────
-// Fetches openlm.ai/chatbot-arena/ (a static HTML <table class=sortable>),
-// parses every ranked model's Arena Elo + organization, maps each org to a
-// roster vendor id, and returns the top-2 Elo average per vendor. Deterministic
-// parse — no LLM, no fabrication: it reads the real published numbers. Vendors
-// whose org isn't on the leaderboard (or isn't in the roster) get nothing —
-// honest absence, not an invented score.
+// RETIRED as a scoring source 2026-07-19: model_quality now comes solely from
+// Artificial Analysis (model-quality-blend / seedModelQualityPillar), and the ELO
+// pillar + its manual seed (elo-scores.ts) were deleted. This module is RETAINED
+// only for its org→vendor mapping (ORG_TO_VENDOR / normOrg), which
+// artificial-analysis-fetch.ts reuses to map AA's model-creator names to roster
+// vendor ids.
 //
-// Used by seedEloPillarScores() as the PRIMARY source; the static VENDOR_ELO_MAP
-// in elo-scores.ts is the fallback if the fetch/parse fails.
+// The fetch/parse helpers below (fetchArenaElo, parseArenaLeaderboard,
+// mapRowsToVendors, ARENA_ELO_SOURCE_URL) have NO remaining caller — they no
+// longer feed any score. Kept as dormant, deterministic (no-LLM) reference until
+// a follow-up removes them; they read the real published numbers, never invent.
 
 export const ARENA_ELO_SOURCE_URL = "https://openlm.ai/chatbot-arena/";
 

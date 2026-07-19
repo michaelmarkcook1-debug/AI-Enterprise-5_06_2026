@@ -8,11 +8,12 @@ import { NextResponse } from "next/server";
 // it presented ELO as a current primary scoring method, which it is not.
 //
 // What model-quality scoring actually is: the Artificial Analysis Intelligence /
-// Coding / Agentic indices are the primary, cited source (model_quality_benchmarks
-// in daily-refresh; preferred at read-time by model-quality-blend). A LIVE-fetched
-// openlm.ai ELO pillar (seedEloPillarScores) is retained ONLY as a labelled
-// read-time fallback for vendors Artificial Analysis doesn't cover, maintained by
-// the nightly refresh — so there is nothing to seed manually here.
+// Coding / Agentic indices are the SOLE source (model_quality_benchmarks in
+// daily-refresh → the model_quality pillar via seedModelQualityPillar, and the
+// read-time composite via model-quality-blend). The Arena-ELO pillar was retired
+// entirely on 2026-07-19 (seedEloPillarScores + elo-scores.ts deleted): a model
+// provider Artificial Analysis doesn't cover now shows insufficient evidence, NOT
+// an ELO backfill. So there is nothing to seed — manually or otherwise — here.
 //
 // Stub refuses so no bookmarked call can resurrect the synthetic-overallScore path.
 
