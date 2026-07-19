@@ -57,6 +57,7 @@ import DomainScorecard from "@/components/assessment/DomainScorecard";
 import WeightedScorecard from "@/components/assessment/WeightedScorecard";
 import ExportPackLinks from "@/components/export/ExportPackLinks";
 import PrepKitPanel from "@/components/assessment/PrepKitPanel";
+import VendorShieldPanel from "@/components/shield/VendorShieldPanel";
 import VendorPageShell, { type VendorTabKey } from "@/components/vendor/VendorPageShell";
 import type { VerdictStanding } from "@/components/vendor/VerdictCard";
 import EvidenceTrail from "@/components/vendor/EvidenceTrail";
@@ -835,11 +836,14 @@ export default async function VendorDeepDivePage({
               whySentence={verdictWhySentence(verdictSummary)}
               availableTabs={availableTabs}
               verdictExtras={
-                <PrepKitPanel
-                  config={{ enabled: PREP_KIT_ENABLED, signedIn: !!interrogateMember }}
-                  vendorId={entity.id}
-                  vendorName={entity.name}
-                />
+                <>
+                  <VendorShieldPanel vendorId={intelId} />
+                  <PrepKitPanel
+                    config={{ enabled: PREP_KIT_ENABLED, signedIn: !!interrogateMember }}
+                    vendorId={entity.id}
+                    vendorName={entity.name}
+                  />
+                </>
               }
               tabs={{
                 assessment: (
