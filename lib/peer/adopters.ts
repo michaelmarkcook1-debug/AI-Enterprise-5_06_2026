@@ -11,7 +11,7 @@ import { PEER_COMPANIES } from "./peer-adoption-data";
 import type { PeerCitation, PeerCompany, PeerSignal } from "./types";
 
 export interface DisclosedAdopter {
-  company: Pick<PeerCompany, "id" | "name" | "industry">;
+  company: Pick<PeerCompany, "id" | "name" | "industry" | "segment">;
   /** The platform_integration signal that names the vendor (cited). */
   summary?: string;
   status: PeerSignal["status"];
@@ -35,7 +35,7 @@ export function disclosedAdoptersOf(vendorId: string): DisclosedAdopter[] {
     if (!s || s.status !== "disclosed") continue;
     if (!(s.vendorIds ?? []).includes(bare)) continue;
     out.push({
-      company: { id: c.id, name: c.name, industry: c.industry },
+      company: { id: c.id, name: c.name, industry: c.industry, segment: c.segment },
       summary: s.summary,
       status: s.status,
       citations: s.citations ?? [],

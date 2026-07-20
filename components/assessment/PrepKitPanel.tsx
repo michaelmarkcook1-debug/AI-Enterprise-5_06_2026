@@ -11,6 +11,7 @@ import Link from "next/link";
 import { DOMAIN_LABEL } from "@/lib/assessment/domain-labels";
 import type { PrepKit, KitSection } from "@/lib/assessment/prep-kit";
 import { MEMBER_FEATURES_VISIBLE } from "@/lib/availability";
+import { useWeakDomains } from "./InterrogateContextBridge";
 
 export interface PrepKitConfig {
   enabled: boolean;
@@ -59,6 +60,7 @@ export default function PrepKitPanel({
   const [error, setError] = useState("");
   const [kit, setKit] = useState<PrepKit | null>(null);
   const [copied, setCopied] = useState(false);
+  const { weakDomains } = useWeakDomains();
 
   if (!config.enabled) return null;
 
@@ -89,7 +91,7 @@ export default function PrepKitPanel({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "same-origin",
-        body: JSON.stringify({ vendorId, vendorName }),
+        body: JSON.stringify({ vendorId, vendorName, contextWeakDomains: weakDomains }),
       });
       const json = await res.json().catch(() => ({}));
       if (!res.ok) {
@@ -147,10 +149,17 @@ export default function PrepKitPanel({
       </div>
 
       {!kit && state !== "loading" && (
-        <p className="mt-1 text-xs leading-5 text-[#123d2c]/70 dark:text-[#eef3f8]/70">
-          A take-into-the-meeting kit: questions targeting {vendorName}&rsquo;s weak and unevidenced domains, plus
-          RFP / POC / reference / readiness templates. Draft — it probes gaps, it doesn&rsquo;t assert vendor facts.
-        </p>
+        <>
+          <p className="mt-1 text-xs leading-5 text-[#123d2c]/70 dark:text-[#eef3f8]/70">
+            A take-into-the-meeting kit: questions targeting {vendorName}&rsquo;s weak and unevidenced domains, plus
+            RFP / POC / reference / readiness templates. Draft — it probes gaps, it doesn&rsquo;t assert vendor facts.
+          </p>
+          {weakDomains.length > 0 && (
+            <p className="mt-1 text-xs leading-5 text-[#1f6b63] dark:text-[#5ec8bd]">
+              Using the context you added in Interrogate — questions will target what your situation makes decisive.
+            </p>
+          )}
+        </>
       )}
       {state === "error" && <p className="mt-2 text-xs text-rose-600 dark:text-rose-400">{error}</p>}
 

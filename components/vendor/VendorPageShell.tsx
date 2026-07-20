@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import VerdictCard, { type VerdictStanding } from "@/components/vendor/VerdictCard";
 import { bumpJourneyStepClient, readJourneyStepClient } from "@/lib/member/journey-client";
+import { WeakDomainsProvider } from "@/components/assessment/InterrogateContextBridge";
 
 export type VendorTabKey = "assessment" | "evidence" | "market" | "dependencies" | "peers" | "financials";
 
@@ -68,7 +69,7 @@ export default function VendorPageShell({
   }
 
   return (
-    <>
+    <WeakDomainsProvider>
       <VerdictCard
         vendorId={vendorId}
         vendorName={vendorName}
@@ -103,6 +104,6 @@ export default function VendorPageShell({
       </div>
 
       <div>{tabs[activeTab]}</div>
-    </>
+    </WeakDomainsProvider>
   );
 }

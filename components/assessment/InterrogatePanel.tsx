@@ -16,6 +16,7 @@ import { DOMAIN_LABEL } from "@/lib/assessment/domain-labels";
 import type { DomainId } from "@/lib/types";
 import type { SessionLens } from "@/lib/assessment/session-lens";
 import { MEMBER_FEATURES_VISIBLE } from "@/lib/availability";
+import { useWeakDomains } from "./InterrogateContextBridge";
 import SaveDecisionButton from "./SaveDecisionButton";
 import { bumpJourneyStepClient } from "@/lib/member/journey-client";
 import SuggestInput from "@/components/forms/SuggestInput";
@@ -113,6 +114,7 @@ export default function InterrogatePanel({
   const [lens, setLens] = useState<SessionLens | null>(null);
   const [stubbed, setStubbed] = useState(false);
   const [truncated, setTruncated] = useState(false);
+  const { setWeakDomains } = useWeakDomains();
 
   if (!config.enabled) return null;
 
@@ -139,6 +141,10 @@ export default function InterrogatePanel({
   async function run() {
     setState("loading");
     setError("");
+    // Reset immediately, before the fetch: a failed/erroring re-run must not
+    // leave an EARLIER successful run's weak domains lingering and silently
+    // tailoring Prep Kit off a context this attempt never confirmed.
+    setWeakDomains([]);
     const scopeBody =
       config.scope.kind === "vendor"
         ? { kind: "vendor", vendorId: config.scope.vendorId }
@@ -162,9 +168,20 @@ export default function InterrogatePanel({
         return;
       }
       const sl = json.sessionLens as SessionLens;
+      const isStub = json.source === "stub";
       setLens(sl);
-      setStubbed(json.source === "stub");
+      setStubbed(isStub);
       setTruncated(Boolean(json.truncated));
+      // Publish this vendor's context-adjusted weak domains for Prep Kit (a
+      // separate panel, no shared component state — see
+      // InterrogateContextBridge). Only from a REAL context-adjusted run: a
+      // stubbed or insufficient-context result carries no genuine tailoring, and
+      // always overwrites any earlier run's value rather than leaving it stale.
+      setWeakDomains(
+        config.scope.kind === "vendor" && !isStub && !sl.insufficientContext
+          ? [...new Set(sl.vendorLens.flatMap((v) => v.weakDecisiveDomains))]
+          : [],
+      );
       onApplyLens(sl.adjustedSliders);
       setState("idle");
       setOpen(false);
