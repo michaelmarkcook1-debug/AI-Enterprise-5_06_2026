@@ -104,14 +104,19 @@ export default function DeliveryMatrix({
                 {vendors.map((v) => {
                   const e = cell.get(`${pid}|${v}`);
                   if (!e) {
-                    return <div key={v} className="min-h-[26px] rounded-[3px] bg-[#123d2c]/[0.04] dark:bg-white/[0.03]" />;
+                    return (
+                      <div
+                        key={v}
+                        className="min-h-[26px] rounded-[3px] border border-[#123d2c]/10 bg-[#123d2c]/[0.04] dark:border-white/10 dark:bg-white/[0.03]"
+                      />
+                    );
                   }
                   const t = TIER[e.partnershipTier];
                   const faint = e.evidenceTier === "plausible_unverified";
                   return (
                     <div
                       key={v}
-                      className="relative min-h-[26px] rounded-[3px]"
+                      className="relative min-h-[26px] rounded-[3px] border border-[#123d2c]/10 dark:border-white/10"
                       style={{ background: t.fill, opacity: faint ? 0.72 : 1 }}
                       title={`${meta.name} → ${vendorNames[v] ?? v}\n${t.label} · ${e.evidenceTier.replace(/_/g, " ")} evidence${e.encroachment ? " · ENCROACHMENT (delivers a rival to its own platform)" : ""}\n${e.rationale}`}
                     >
