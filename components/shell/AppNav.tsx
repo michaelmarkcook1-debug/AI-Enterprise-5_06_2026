@@ -81,6 +81,7 @@ export default function AppNav({
     JOBS_BASE[0],
     JOBS_BASE[1],
     JOBS_BASE[2],
+    { href: "/alliances", label: "Alliances" },
     ...(pricingEnabled ? [{ href: "/pricing", label: "Pricing" }] : []),
   ];
 

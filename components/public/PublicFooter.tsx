@@ -28,6 +28,7 @@ export default function PublicFooter() {
             <Link href="/vendors" className="text-[#4c5d75] hover:underline dark:text-[#8fa5bb]">Rankings</Link>
             <Link href="/models" className="text-[#4c5d75] hover:underline dark:text-[#8fa5bb]">Model inventory</Link>
             <Link href="/dependencies" className="text-[#4c5d75] hover:underline dark:text-[#8fa5bb]">Dependency graph</Link>
+            <Link href="/alliances" className="text-[#4c5d75] hover:underline dark:text-[#8fa5bb]">Alliances</Link>
           </div>
           <div className="flex flex-col gap-2">
             <Link href="/interrogate" className="text-[#4c5d75] hover:underline dark:text-[#8fa5bb]">Interrogate</Link>
