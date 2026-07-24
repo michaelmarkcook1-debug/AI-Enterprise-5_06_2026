@@ -109,62 +109,40 @@ export default function AllianceWorkspace({
   const [showInfo, setShowInfo] = useState(false);
 
   return (
-    <div
-      className="flex flex-col overflow-hidden rounded-2xl border shadow-2xl"
-      style={{ background: C.canvas, borderColor: C.line }}
-    >
-      {/* ── Header ── */}
-      <header
-        className="flex flex-col gap-4 border-b px-5 py-4 md:flex-row md:items-center md:justify-between"
-        style={{ borderColor: C.line, background: "rgba(11,37,25,0.75)" }}
+    // Full-bleed, no frame. The page's own <h1> introduces this; a second
+    // titled header bar here made the tool read as a separate app embedded
+    // inside AI Enterprise.
+    <div className="flex flex-col" style={{ background: C.canvas }}>
+      {/* Slim context line — counts + provenance entry point, no title/logo. */}
+      <div
+        className="flex flex-wrap items-center justify-end gap-x-4 gap-y-2 border-b px-4 py-2 sm:px-6"
+        style={{ borderColor: C.line }}
       >
-        <div className="flex items-center gap-3">
-          <div
-            className="flex h-10 w-10 items-center justify-center rounded-xl"
-            style={{ background: `linear-gradient(135deg, ${C.green}, ${C.gold})` }}
-          >
-            <Icon name="map" className="h-5 w-5 text-[#071410]" />
-          </div>
-          <div>
-            <h1 className="font-[var(--font-display)] text-xl font-extrabold tracking-tight" style={{ color: C.ink }}>
-              ALLIANCES
-            </h1>
-            <p className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: C.dim }}>
-              AI &amp; GSI strategic integration ecosystem
-            </p>
-          </div>
+        {/* Real counts only — the prototype's market/margin/cert figures were unsourceable and are not reproduced. */}
+        <div className="mr-auto flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-[11px]">
+          <span>
+            <span style={{ color: C.faint }}>CITED ALLIANCES: </span>
+            <span className="font-bold" style={{ color: C.gold }}>{summary.citedTotal}</span>
+          </span>
+          <span>
+            <span style={{ color: C.faint }}>INTEGRATORS: </span>
+            <span className="font-bold" style={{ color: C.greenLt }}>{summary.partners}</span>
+          </span>
+          <span>
+            <span style={{ color: C.faint }}>CHANNEL LINKS: </span>
+            <span className="font-bold" style={{ color: C.greenLt }}>{summary.links}</span>
+          </span>
         </div>
-
-        <div className="flex flex-wrap items-center gap-4">
-          {/* Real counts only — the prototype's market/margin/cert figures were unsourceable and are not reproduced. */}
-          <div className="hidden items-center gap-4 border-r pr-6 font-mono text-[11px] lg:flex" style={{ borderColor: C.line }}>
-            <div>
-              <span style={{ color: C.faint }}>CITED ALLIANCES: </span>
-              <span className="font-bold" style={{ color: C.gold }}>{summary.citedTotal}</span>
-            </div>
-            <span className="h-1.5 w-1.5 rounded-full" style={{ background: C.line }} />
-            <div>
-              <span style={{ color: C.faint }}>INTEGRATORS: </span>
-              <span className="font-bold" style={{ color: C.greenLt }}>{summary.partners}</span>
-            </div>
-            <span className="h-1.5 w-1.5 rounded-full" style={{ background: C.line }} />
-            <div>
-              <span style={{ color: C.faint }}>CHANNEL LINKS: </span>
-              <span className="font-bold" style={{ color: C.greenLt }}>{summary.links}</span>
-            </div>
-          </div>
-
-          <button
-            type="button"
-            onClick={() => setShowInfo(true)}
-            className="flex items-center gap-2 rounded-lg border px-4 py-2 text-sm transition-colors hover:bg-white/[0.06]"
-            style={{ borderColor: C.line, background: "rgba(255,255,255,0.04)", color: C.dim }}
-          >
-            <Icon name="info" className="h-4 w-4" />
-            How to read this
-          </button>
-        </div>
-      </header>
+        <button
+          type="button"
+          onClick={() => setShowInfo(true)}
+          className="flex items-center gap-1.5 text-xs underline underline-offset-2 transition-colors hover:opacity-80"
+          style={{ color: C.dim }}
+        >
+          <Icon name="info" className="h-3.5 w-3.5" />
+          How to read this
+        </button>
+      </div>
 
       {/* ── Workspace ── */}
       <div className="flex min-h-0 flex-col xl:flex-row">
@@ -642,9 +620,11 @@ function MapTab({ rows }: { rows: AllianceRow[] }) {
       </div>
 
       {/* Canvas */}
+      {/* Definite height (not just min-height): the canvas is absolutely
+          positioned inside, so this box alone decides the map's size. */}
       <div
         ref={wrapRef}
-        className="relative min-h-[440px] flex-1 overflow-hidden rounded-2xl border xl:min-h-[600px]"
+        className="relative h-[70vh] min-h-[420px] flex-1 overflow-hidden rounded-xl border"
         style={{ background: "#04100b", borderColor: C.line }}
       >
         <div className="absolute left-4 top-4 z-10 flex gap-2">
@@ -673,7 +653,11 @@ function MapTab({ rows }: { rows: AllianceRow[] }) {
           </span>
         </div>
 
-        <canvas ref={canvasRef} className="h-full w-full cursor-grab active:cursor-grabbing" role="img" aria-label={`Force-directed map of ${rows.length} delivery relationships. The same data is listed in the Directory tab.`} />
+        {/* MUST stay absolutely positioned. In normal flow the canvas's own
+            height feeds back into the wrapper it is measured from, so every
+            ResizeObserver tick grew it again (it reached ~2600x8208) and each
+            canvas.width assignment wiped the bitmap — the map rendered blank. */}
+        <canvas ref={canvasRef} className="absolute inset-0 h-full w-full cursor-grab active:cursor-grabbing" role="img" aria-label={`Force-directed map of ${rows.length} delivery relationships. The same data is listed in the Directory tab.`} />
 
         {/* Dossier drawer */}
         {detail && (

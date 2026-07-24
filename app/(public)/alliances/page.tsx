@@ -43,7 +43,17 @@ export default function AlliancesPage() {
   };
 
   return (
-    <main className="mx-auto max-w-[1600px] px-3 py-6 sm:px-5">
+    <main className="py-8">
+      {/* The page owns the title, so the workspace below is a tool on this page
+          rather than a second app with its own branded header bar. */}
+      <header className="mx-auto mb-5 max-w-4xl px-4">
+        <h1 className="font-[var(--font-display)] text-3xl font-extrabold tracking-tight text-[#123d2c] dark:text-[#eef3f8]">
+          {TITLE}
+        </h1>
+        <p className="mt-2 text-base text-[#123d2c]/65 dark:text-[#eef3f8]/60">{DESCRIPTION}</p>
+      </header>
+
+      {/* Full-bleed: the map wants the width. */}
       <AllianceWorkspace rows={rows} summary={summary} ventures={VENDOR_VENTURES} />
 
       {/* Server-rendered cited spotlights — indexable, readable without JS, and
