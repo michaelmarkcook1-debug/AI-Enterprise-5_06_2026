@@ -101,6 +101,18 @@ export function buildAllianceRows(vendorNames: Record<string, string>): Alliance
   );
 }
 
+/**
+ * Cited alliances that do NOT correspond to a curated channel row — either the
+ * integrator is outside the 21-house roster, or the seed carries no such edge.
+ * Reported openly rather than silently dropped from the counts.
+ */
+export function citedOffChannel(rows: AllianceRow[]): string[] {
+  const present = new Set(rows.map((r) => r.key));
+  return ALLIANCE_SPOTLIGHTS.filter(
+    (s) => !s.partnerId || !present.has(`${s.partnerId}|${s.vendorId}`),
+  ).map((s) => `${s.partnerName} × ${s.vendorName}`);
+}
+
 /** Counts measured off the rows themselves — never authored constants. */
 export function summariseRows(rows: AllianceRow[]) {
   const byVendor = new Map<string, number>();

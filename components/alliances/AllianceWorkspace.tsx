@@ -29,7 +29,12 @@ interface Summary {
   links: number;
   partners: number;
   vendors: number;
+  /** Channel rows that carry a citation (≤ citedTotal — some cited alliances sit outside the roster). */
   spotlit: number;
+  /** TRUE total of source-cited alliances published on this page. */
+  citedTotal: number;
+  /** Cited alliances with no matching channel row, named so the gap is visible. */
+  offChannel: string[];
   encroaching: number;
   vendorCoverage: { vendorId: string; vendorName: string; count: number }[];
   byTier: Record<string, number>;
@@ -135,7 +140,7 @@ export default function AllianceWorkspace({
           <div className="hidden items-center gap-4 border-r pr-6 font-mono text-[11px] lg:flex" style={{ borderColor: C.line }}>
             <div>
               <span style={{ color: C.faint }}>CITED ALLIANCES: </span>
-              <span className="font-bold" style={{ color: C.gold }}>{summary.spotlit + ventures.length}</span>
+              <span className="font-bold" style={{ color: C.gold }}>{summary.citedTotal}</span>
             </div>
             <span className="h-1.5 w-1.5 rounded-full" style={{ background: C.line }} />
             <div>
@@ -1005,7 +1010,7 @@ function StatsTab({ summary, ventures }: { summary: Summary; ventures: VendorVen
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         {[
-          [summary.spotlit + ventures.length, "Source-cited alliances", C.gold],
+          [summary.citedTotal, "Source-cited alliances", C.gold],
           [summary.partners, "Integrators tracked", C.greenLt],
           [summary.vendors, "AI vendors covered", C.greenLt],
           [summary.links, "Curated channel links", C.greenLt],
@@ -1102,9 +1107,18 @@ function StatsTab({ summary, ventures }: { summary: Summary; ventures: VendorVen
             )}
           </li>
           <li>
-            <strong style={{ color: C.ink }}>{summary.spotlit + ventures.length} relationships are source-cited</strong>; the remaining{" "}
-            {summary.links - summary.spotlit} are analyst-curated breadth — directional, confidence-tiered, and never presented as audited fact.
+            <strong style={{ color: C.ink }}>{summary.citedTotal} alliances are source-cited.</strong>{" "}
+            {summary.spotlit} of them sit on a curated channel link; the other {summary.links - summary.spotlit} links are
+            analyst-curated breadth — directional, confidence-tiered, never audited fact.
           </li>
+          {summary.offChannel.length > 0 && (
+            <li>
+              <strong style={{ color: C.ink }}>{summary.offChannel.length} cited alliances fall outside the curated channel</strong>{" "}
+              ({summary.offChannel.join("; ")}) — the integrator isn&apos;t in the tracked roster, or the curated edge set carries no
+              such relationship. They are counted and shown, not quietly dropped, and the curated data was left as transcribed
+              rather than edited to match.
+            </li>
+          )}
         </ul>
       </div>
     </div>
@@ -1136,7 +1150,7 @@ function InfoModal({ onClose, summary, ventures }: { onClose: () => void; summar
         </div>
         <div className="space-y-3 text-sm" style={{ color: C.dim }}>
           <p>
-            <strong style={{ color: C.gold }}>Source-cited</strong> — {summary.spotlit + ventures} alliances trace to a named press or vendor
+            <strong style={{ color: C.gold }}>Source-cited</strong> — {summary.citedTotal} alliances trace to a named press or vendor
             source, fact-checked against live reporting. Figures that couldn&apos;t be sourced were dropped, not softened.
           </p>
           <p>

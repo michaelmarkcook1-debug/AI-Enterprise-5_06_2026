@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { TRACKED_VENDOR_NAMES } from "@/lib/sourcing/ai-news-manifest";
-import { buildAllianceRows, summariseRows } from "@/lib/delivery/alliance-rows";
+import { buildAllianceRows, summariseRows, citedOffChannel } from "@/lib/delivery/alliance-rows";
 import { VENDOR_VENTURES, ALLIANCE_SPOTLIGHTS } from "@/lib/delivery/alliance-highlights";
 import AllianceWorkspace from "@/components/alliances/AllianceWorkspace";
 import { absoluteUrl } from "@/lib/site";
@@ -31,7 +31,16 @@ export const metadata: Metadata = {
 
 export default function AlliancesPage() {
   const rows = buildAllianceRows(TRACKED_VENDOR_NAMES);
-  const summary = summariseRows(rows);
+  // `spotlit` counts channel rows carrying a citation; `citedTotal` is the true
+  // number of cited alliances published here. They differ because a cited
+  // alliance can sit outside the curated roster (EY isn't a tracked integrator;
+  // the curated edge set carries no Capgemini×Mistral link). Report the real
+  // total and name the gap — never let a join silently shrink the count.
+  const summary = {
+    ...summariseRows(rows),
+    citedTotal: ALLIANCE_SPOTLIGHTS.length + VENDOR_VENTURES.length,
+    offChannel: citedOffChannel(rows),
+  };
 
   return (
     <main className="mx-auto max-w-[1600px] px-3 py-6 sm:px-5">
