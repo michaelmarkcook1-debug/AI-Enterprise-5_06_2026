@@ -201,12 +201,15 @@ export default function AllianceWorkspace({
           </div>
         </aside>
 
-        {/* Content */}
+        {/* Content — all four panes stay mounted and are toggled with `hidden`,
+            exactly as the original's .tab-pane did. That keeps the full registry
+            in the server-rendered HTML (indexable, readable without JS) instead
+            of unmounting three quarters of the page. */}
         <div className="min-h-0 flex-1">
-          {tab === "map" && <MapTab rows={rows} />}
-          {tab === "directory" && <DirectoryTab rows={rows} />}
-          {tab === "compare" && <CompareTab rows={rows} />}
-          {tab === "stats" && <StatsTab summary={summary} ventures={ventures} />}
+          <div className={tab === "map" ? undefined : "hidden"}><MapTab rows={rows} /></div>
+          <div className={tab === "directory" ? undefined : "hidden"}><DirectoryTab rows={rows} /></div>
+          <div className={tab === "compare" ? undefined : "hidden"}><CompareTab rows={rows} /></div>
+          <div className={tab === "stats" ? undefined : "hidden"}><StatsTab summary={summary} ventures={ventures} /></div>
         </div>
       </div>
 
@@ -286,6 +289,10 @@ function MapTab({ rows }: { rows: AllianceRow[] }) {
     let W = 0, H = 0;
     const resize = () => {
       const rect = wrap.getBoundingClientRect();
+      // The map pane is `hidden` while another tab is active → 0×0. Keep the last
+      // good size so the layout doesn't collapse into the corner and then have to
+      // re-settle every time the user comes back to the tab.
+      if (rect.width === 0 || rect.height === 0) return;
       W = rect.width; H = rect.height;
       canvas.width = W * dpr; canvas.height = H * dpr;
       canvas.style.width = `${W}px`; canvas.style.height = `${H}px`;
@@ -433,7 +440,10 @@ function MapTab({ rows }: { rows: AllianceRow[] }) {
       for (let i = 0; i < 260; i++) physics(); // settle instantly, then draw statically
       draw();
     } else {
-      const loop = () => { physics(); draw(); raf = requestAnimationFrame(loop); };
+      const loop = () => {
+        if (W && H) { physics(); draw(); }
+        raf = requestAnimationFrame(loop);
+      };
       loop();
     }
 
