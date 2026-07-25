@@ -94,7 +94,17 @@ function CorrectionForm({ bridge, onDone }: { bridge: NewsBridge; onDone: () => 
   );
 }
 
-export default function NewsBridgePanel({ bridge, compact = false }: { bridge: NewsBridge; compact?: boolean }) {
+export default function NewsBridgePanel({
+  bridge,
+  compact = false,
+  triage,
+}: {
+  bridge: NewsBridge;
+  compact?: boolean;
+  /** Real depth/age of the pre-approval queue, so "pending" ages visibly
+   *  instead of reading as a permanent placeholder. Omitted = badge unchanged. */
+  triage?: string;
+}) {
   const [correcting, setCorrecting] = useState(false);
   if (bridge.vendors.length === 0) return null; // no tracked vendor matched → invent nothing
 
@@ -117,6 +127,7 @@ export default function NewsBridgePanel({ bridge, compact = false }: { bridge: N
           title={PENDING_LABEL}
         >
           pending re-assessment
+          {triage && <span className="ml-1 font-normal opacity-80">{triage}</span>}
         </span>
         {!correcting && (
           <button type="button" onClick={() => setCorrecting(true)} className={`underline underline-offset-2 ${MUTED}`}>

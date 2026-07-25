@@ -26,6 +26,7 @@ import { getMember, getMemberOrTest } from "@/lib/member/auth";
 import { ensureTestBuyerSeeded } from "@/lib/member/seed-test-buyer";
 import { getMemberWatchlist } from "@/lib/member/watchlist";
 import { assessNewsExposure, type NewsExposure } from "@/lib/news/exposure";
+import { getTriageStatus, triageSuffix } from "@/lib/news-bridge/triage-status";
 import { listMemberDecisions } from "@/lib/member/decisions";
 import { buildMonitor } from "@/lib/member/monitor";
 import BuyerHome from "@/components/home/BuyerHome";
@@ -134,6 +135,10 @@ export default async function HomePage() {
   // C12 — news→assessment bridge (State B): resolve which vendor(s) each breaking
   // item touches → route into their assessment. Deterministic JOIN, no score.
   const newsBridges = news ? await buildNewsBridges(news.items).catch(() => undefined) : undefined;
+  // Real depth/age of the pre-approval queue, so the "pending re-assessment"
+  // badge either resolves or visibly ages. Empty string when we have nothing
+  // real to report — we never invent a turnaround.
+  const triageLabel = triageSuffix(await getTriageStatus().catch(() => null));
 
   // "Does this land on MY ecosystem?" — computed only from context the viewer
   // themselves supplied (saved watchlist + named current stack). A visitor with
@@ -211,7 +216,7 @@ export default async function HomePage() {
 
       {/* ── Hero: breaking news is the first substantial thing a visitor sees —
             promoted here from the old mid-page "Market today" tile. ── */}
-      <BreakingNewsHero news={news} bridges={newsBridges} exposures={newsExposures} />
+      <BreakingNewsHero news={news} bridges={newsBridges} exposures={newsExposures} triage={triageLabel} />
 
       {/* The Brief — market-wide "since you last looked" digest of real, dated
           moves (news + new models) + the regulatory horizon. MarkBriefSeen stamps

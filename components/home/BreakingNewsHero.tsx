@@ -75,6 +75,7 @@ export default function BreakingNewsHero({
   news,
   bridges,
   exposures,
+  triage,
 }: {
   news: BreakingNews | null;
   /** C12 — per-item news→assessment bridge (State B), keyed by news-item id. */
@@ -82,6 +83,9 @@ export default function BreakingNewsHero({
   /** Per-item "affects your ecosystem" verdict, keyed by news-item id. Absent
    *  for visitors with no saved context — which renders no badge at all. */
   exposures?: Map<string, NewsExposure>;
+  /** Queue-depth suffix for the pending badge (e.g. "· 12 in queue, oldest 6d"),
+   *  so "pending re-assessment" ages visibly instead of reading as permanent. */
+  triage?: string;
 }) {
   const items = news?.items ?? [];
 
@@ -136,7 +140,7 @@ export default function BreakingNewsHero({
             <ExposureBadge exposure={exposures?.get(items[0].id)} />
           </p>
           {/* C12 bridge — outside the story anchor (no nested links). */}
-          {bridges?.get(items[0].id) && <NewsBridgePanel bridge={bridges.get(items[0].id)!} />}
+          {bridges?.get(items[0].id) && <NewsBridgePanel bridge={bridges.get(items[0].id)!} triage={triage} />}
 
           {/* Rest of the field — compact, secondary to the lead story. */}
           {items.length > 1 && (
@@ -156,7 +160,7 @@ export default function BreakingNewsHero({
                     <AlsoReportedBy sources={n.alsoReportedBy} />
                     <ExposureBadge exposure={exposures?.get(n.id)} />
                   </span>
-                  {bridges?.get(n.id) && <NewsBridgePanel bridge={bridges.get(n.id)!} compact />}
+                  {bridges?.get(n.id) && <NewsBridgePanel bridge={bridges.get(n.id)!} compact triage={triage} />}
                 </li>
               ))}
             </ul>

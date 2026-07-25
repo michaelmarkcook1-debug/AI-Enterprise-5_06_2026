@@ -24,6 +24,7 @@ import {
   type ExternalProposal,
   type RejectedItem,
 } from "@/lib/ingest/competitive-intel";
+import { recordMarketEdgeMention } from "@/lib/ingest/market-edge";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -65,10 +66,25 @@ export async function POST(request: Request) {
 
   const findingsRejected: RejectedItem[] = [];
   let findingsAccepted = 0;
+  let edgeCaptured = 0;
   for (let i = 0; i < findings.length; i++) {
     const reason = validateFinding(findings[i], knownVendors);
     if (reason) {
       findingsRejected.push({ index: i, reason });
+      // The roster guard stays absolute — but a rejected UNKNOWN-ENTITY item is
+      // still a real signal that the market moved outside our coverage. Keep the
+      // cited sighting in the market-edge queue instead of discarding it. This
+      // creates no vendor, no score and no evidence; promotion stays a human act.
+      if (reason.startsWith("unknown vendorId")) {
+        const f = findings[i];
+        const ok = await recordMarketEdgeMention({
+          entity: f?.vendorId ?? "",
+          title: f?.title,
+          sourceName: f?.sourceName,
+          sourceUrl: f?.sourceUrl,
+        }).catch(() => false);
+        if (ok) edgeCaptured += 1;
+      }
       continue;
     }
     try {
@@ -111,6 +127,9 @@ export async function POST(request: Request) {
     findingsRejected,
     proposalsAccepted,
     proposalsRejected,
+    /** Cited sightings of entities outside the roster, kept as a coverage gap
+     *  rather than dropped. Creates no vendor and affects no score. */
+    marketEdgeCaptured: edgeCaptured,
     note:
       proposalsAccepted > 0
         ? `proposals land in the admin triage queue (${jobId}) — they affect no score until approved`
