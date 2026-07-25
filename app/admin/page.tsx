@@ -37,7 +37,7 @@ export default async function AdminHome() {
   });
 
   return (
-    <div className="min-h-screen bg-[#f6f1e3] dark:bg-[#071827] text-[#15263c] dark:text-[#eef3f8]">
+    <div className="min-h-screen bg-[#f6f1e3] dark:bg-[#081410] text-[#123d2c] dark:text-[#eef3f8]">
       <main className="mx-auto max-w-5xl px-6 py-12">
         <Link href="/" className="text-sm text-[#4c5d75] hover:underline">← Home</Link>
         <h1 className="mt-4 text-3xl font-semibold tracking-tight">Admin console</h1>
@@ -155,6 +155,16 @@ export default async function AdminHome() {
             title="News classification corrections"
             body="Fix mis-classified news items feeding the signal feed — the human check on automated tagging."
           />
+          <AdminCard
+            href="/admin/material-events"
+            title="Material events — acquisitions & investments"
+            body="Deal-shaped headlines flagged for review. News can't move a score on its own, so an ownership change or a new backer would otherwise scroll past unseen."
+          />
+          <AdminCard
+            href="/admin/market-edge"
+            title="Market edge — untracked entities"
+            body="Cited mentions of companies outside the vendor roster, ranked by how often they recur. The coverage gap, made visible; promotion stays your call."
+          />
         </div>
 
         {/* Bottom strip: dev-mode note. */}
@@ -217,7 +227,7 @@ function pickHeadline(args: {
 }
 
 const STAT_TONE: Record<"neutral" | "green" | "amber" | "red", { card: string; value: string }> = {
-  neutral: { card: "border-[#e3d9c0] bg-white dark:border-[#1d3a57] dark:bg-[#0c2238]",                                 value: "text-[#15263c] dark:text-[#eef3f8]" },
+  neutral: { card: "border-[#e3d9c0] bg-white dark:border-[#223a2e] dark:bg-[#0d1f17]",                                 value: "text-[#123d2c] dark:text-[#eef3f8]" },
   green:   { card: "border-emerald-200 bg-emerald-50 dark:border-emerald-900/60 dark:bg-emerald-950/30",             value: "text-emerald-900 dark:text-emerald-200" },
   amber:   { card: "border-amber-200 bg-amber-50 dark:border-amber-900/60 dark:bg-amber-950/30",                     value: "text-amber-900 dark:text-amber-200" },
   red:     { card: "border-red-300 bg-red-50 dark:border-red-900/60 dark:bg-red-950/30",                             value: "text-red-900 dark:text-red-200" },
@@ -314,7 +324,7 @@ function IngestionHealthPanel({
 }) {
   if (!lastRun) {
     return (
-      <div className="mt-6 rounded-2xl border border-[#e3d9c0] bg-white p-6 dark:border-[#1d3a57] dark:bg-[#0c2238]">
+      <div className="mt-6 rounded-2xl border border-[#e3d9c0] bg-white p-6 dark:border-[#223a2e] dark:bg-[#0d1f17]">
         <div className="text-[10px] font-semibold uppercase tracking-wider text-[#4c5d75]">Ingestion health</div>
         <p className="mt-2 text-sm text-[#3f5068] dark:text-[#a7bacd]">No pipeline runs recorded yet.</p>
       </div>
@@ -362,7 +372,7 @@ function IngestionHealthPanel({
           <div className="text-[10px] font-semibold uppercase tracking-wider text-[#4c5d75] dark:text-[#a7bacd]">
             Ingestion health
           </div>
-          <h2 className="mt-1 text-lg font-semibold text-[#15263c] dark:text-[#eef3f8]">
+          <h2 className="mt-1 text-lg font-semibold text-[#123d2c] dark:text-[#eef3f8]">
             Last refresh: {timeAgo(lastRun.finishedAt)}
           </h2>
           <p className="mt-0.5 text-xs text-[#4c5d75] dark:text-[#a7bacd]">
@@ -525,7 +535,7 @@ function AdminCard({
       className={`block rounded-2xl border p-5 transition-colors ${
         primary
           ? "border-emerald-300 bg-emerald-50 hover:border-emerald-500 dark:border-emerald-700 dark:bg-emerald-950/30 dark:hover:border-emerald-400"
-          : "border-[#e3d9c0] bg-white hover:border-[#9fb0c4] dark:border-[#1d3a57] dark:bg-[#0c2238] dark:hover:border-[#38587a]"
+          : "border-[#e3d9c0] bg-white hover:border-[#9fb0c4] dark:border-[#223a2e] dark:bg-[#0d1f17] dark:hover:border-[#38587a]"
       }`}
     >
       <div className="flex items-baseline justify-between gap-2">
