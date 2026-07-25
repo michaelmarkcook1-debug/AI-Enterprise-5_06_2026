@@ -54,8 +54,10 @@ describe("segment vocabulary + exemplar tagging", () => {
     expect(resolveBenchmark(empty)).toBeNull();
     const composed = composeBenchmark(empty);
     expect(composed.exact).toBeNull();
-    // education has a BTOS vertical layer; latam/smb have none; global always applies.
-    expect(composed.layers.map((l) => l.scope)).toEqual(["vertical", "global"]);
+    // education has a BTOS vertical layer; smb now has one too (a cited BTOS
+    // size-gradient stat, added after this expectation was first written); latam
+    // still has none; global always applies. Most-specific-first ordering.
+    expect(composed.layers.map((l) => l.scope)).toEqual(["vertical", "size", "global"]);
   });
 
   it("EVERY vertical × region composes at least the global baseline — no dead segments", () => {

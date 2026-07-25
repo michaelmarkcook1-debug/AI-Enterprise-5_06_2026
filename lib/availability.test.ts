@@ -122,19 +122,33 @@ describe("demoHeroOpen / heroDemoActive — the prod demo opening for the two he
     expect(demoHeroOpen()).toBe(false);
   });
 
-  it("CRITICAL scoping: on REAL production, DEMO_HERO_OPEN=1 opens the hero gate but does NOT reopen the rest of the member surface", () => {
+  // These two previously asserted that real production stayed CLOSED — encoding
+  // the `&& !isRealProductionEnv()` scoping that was REVERTED on owner instruction
+  // (2026-07-10: member surfaces stay ungated, including on the production URL the
+  // owner actually tests on). The scoping went; the tests didn't, so they failed
+  // against intended behaviour. Rewritten to assert the current ruling, and still
+  // to fail loudly if anyone re-scopes prod without that being a decision.
+  it("on REAL production the member surface is OPEN by owner instruction — not because of DEMO_HERO_OPEN", () => {
     vi.stubEnv("VERCEL_ENV", "production");
     vi.stubEnv("DEMO_HERO_OPEN", "1");
-    expect(heroDemoActive()).toBe(true); // the two hero features get the demo member…
-    expect(memberTestOpenEffective()).toBe(false); // …but watchlist/decisions/monitor/chat stay closed on prod
+    expect(heroDemoActive()).toBe(true);
+    // Open via MEMBER_TEST_OPEN itself. If this flips to false, someone re-added
+    // prod scoping — revisit deliberately rather than "fixing" the test.
+    expect(memberTestOpenEffective()).toBe(true);
   });
 
-  it("real production stays fully closed by default (flag unset) — nothing opens on merge", () => {
+  it("with the prod demo flag UNSET the hero gate is still open — MEMBER_TEST_OPEN carries it", () => {
     vi.stubEnv("VERCEL_ENV", "production");
     vi.stubEnv("DEMO_HERO_OPEN", "");
-    expect(heroDemoActive()).toBe(false);
-    expect(memberTestOpenEffective()).toBe(false);
+    expect(demoHeroOpen()).toBe(false); // the flag itself stays strictly env-gated
+    expect(heroDemoActive()).toBe(true); // …but test-open already opens the gate
+    expect(memberTestOpenEffective()).toBe(true);
   });
+
+  // The pre-launch invariant this pair protects: before a genuine public launch,
+  // MEMBER_TEST_OPEN goes false and MEMBER_AUTH_ENABLED comes on — at which point
+  // heroDemoActive() must depend on DEMO_HERO_OPEN alone. These expectations are
+  // meant to be revisited at that point, not quietly deleted.
 
   it("on preview/local the hero gate is already open via test-open, with or without the flag", () => {
     vi.stubEnv("VERCEL_ENV", "preview");

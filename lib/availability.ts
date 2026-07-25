@@ -159,8 +159,14 @@ export const ADMIN_OPEN: boolean = true;
 
 /**
  * DEMO override for the two HERO LLM features ONLY (Interrogate + prep kit), so a
- * public demo audience on the REAL production URL can run them without sign-in —
- * unlike memberTestOpenEffective(), which is deliberately OFF on real production.
+ * public demo audience on the REAL production URL can run them without sign-in.
+ *
+ * STATE NOTE (corrected 2026-07-25): this flag is currently REDUNDANT. It was
+ * written when memberTestOpenEffective() was scoped OFF on real production; that
+ * scoping was reverted on owner instruction (2026-07-10), so member test-open is
+ * on everywhere and heroDemoActive() is already true without it. The flag is kept
+ * because it becomes the sole hero gate again the moment MEMBER_TEST_OPEN goes
+ * false for a real launch.
  *
  * Env-gated + default OFF (like PRICING_ENABLED / BILLING_ENABLED): merging this
  * changes NOTHING until the owner sets DEMO_HERO_OPEN=1 on the Vercel environment,
@@ -169,8 +175,10 @@ export const ADMIN_OPEN: boolean = true;
  * into a client bundle. NARROW BY DESIGN: it feeds ONLY getMemberOrHeroDemo (the
  * two hero routes + their two page panels). Every other member feature — watchlist,
  * decisions, monitor, Ask AI chat, the buyer/home toggle — keeps
- * memberTestOpenEffective() and stays correctly closed on real production, so this
- * does NOT reopen the member surface the MEMBER_TEST_OPEN scoping fix locked down.
+ * memberTestOpenEffective(); setting this flag never widens their access beyond
+ * whatever that already grants. (It previously said those stay "closed on real
+ * production" — no longer true once the prod scoping was reverted, so that claim
+ * is removed rather than left to mislead.)
  * Spend is bounded: both hero routes already carry a per-IP rate limit + the inert
  * credit meter, and their output is citation-gated (no fabrication, no score write).
  */
