@@ -55,6 +55,7 @@ import {
 } from "./mock-repositories";
 import { calculateRiskPenalty, riskStatusForVendor } from "./metrics";
 import { isDataVendorSource, isSuppressedNewsItem } from "./source-quality";
+import { clusterNewsStories } from "./story-cluster";
 import { isSeedSignedSource } from "./provenance";
 import { DataUnavailableError, seedFallbackAllowed } from "../availability";
 import { evidenceDepthBand } from "./entities";
@@ -454,6 +455,11 @@ export interface BreakingNewsItem extends NewsItem {
    *  spread coverage across vendors and to label each story. */
   primaryVendorId: string | null;
   primaryVendorName: string | null;
+  /** OTHER outlets that covered this same event. The dedup keys below catch
+   *  re-ingestion and machine-titled twins, but not the same story written up
+   *  independently by two publishers — those are collapsed by story clustering
+   *  and their citations preserved here, never dropped. */
+  alsoReportedBy: { name: string; url?: string }[];
 }
 
 export interface BreakingNews {
@@ -646,6 +652,23 @@ export async function getBreakingNews(
     return picked;
   };
 
+  // Cross-publisher collapse. `dedupe` above keys on title/content/URL, which
+  // misses one event independently written up by two outlets (Bloomberg and
+  // Latent.Space on the same Claude launch). Cluster those, keep the clearest
+  // headline, and carry every other outlet's citation on the survivor. Runs
+  // BEFORE selectSpread so one story consumes one vendor slot, not two.
+  const collapse = (list: NewsItem[]): { leads: NewsItem[]; alsoBy: Map<string, { name: string; url?: string }[]> } => {
+    const clusters = clusterNewsStories(list);
+    const alsoBy = new Map<string, { name: string; url?: string }[]>();
+    for (const c of clusters) {
+      if (c.duplicates.length > 0) {
+        // sources[0] is the lead's own outlet — list only the others.
+        alsoBy.set(c.lead.id, c.sources.slice(1));
+      }
+    }
+    return { leads: clusters.map((c) => c.lead), alsoBy };
+  };
+
   const cutoff = Date.now() - days * 86_400_000;
   const windowed = ranked.filter((n) => Date.parse(n.publishedAt) >= cutoff && n.impactScore >= minImpact);
 
@@ -653,11 +676,13 @@ export async function getBreakingNews(
   // ingest is a few days behind), fall back to the most recent meaningful real
   // items (relaxed impact floor) and flag the feed as stale rather than showing
   // an empty "0 signals" card while we actually hold real intel.
-  let chosen = selectSpread(dedupe(windowed));
+  let collapsed = collapse(dedupe(windowed));
+  let chosen = selectSpread(collapsed.leads);
   let usedFallback = false;
   if (chosen.length === 0 && all.length > 0) {
     const relaxed = Math.max(40, minImpact - 15);
-    chosen = selectSpread(dedupe(ranked.filter((n) => n.impactScore >= relaxed)));
+    collapsed = collapse(dedupe(ranked.filter((n) => n.impactScore >= relaxed)));
+    chosen = selectSpread(collapsed.leads);
     usedFallback = chosen.length > 0;
   }
 
@@ -668,6 +693,7 @@ export async function getBreakingNews(
       importance: importanceOf(n.impactScore),
       primaryVendorId,
       primaryVendorName: resolveVendorName(primaryVendorId),
+      alsoReportedBy: collapsed.alsoBy.get(n.id) ?? [],
     };
   });
 

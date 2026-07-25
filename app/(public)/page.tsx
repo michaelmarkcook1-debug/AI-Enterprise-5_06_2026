@@ -25,6 +25,7 @@ import { resolveHomeViewMode } from "@/lib/member/view-mode";
 import { getMember, getMemberOrTest } from "@/lib/member/auth";
 import { ensureTestBuyerSeeded } from "@/lib/member/seed-test-buyer";
 import { getMemberWatchlist } from "@/lib/member/watchlist";
+import { assessNewsExposure, type NewsExposure } from "@/lib/news/exposure";
 import { listMemberDecisions } from "@/lib/member/decisions";
 import { buildMonitor } from "@/lib/member/monitor";
 import BuyerHome from "@/components/home/BuyerHome";
@@ -133,6 +134,29 @@ export default async function HomePage() {
   // C12 — news→assessment bridge (State B): resolve which vendor(s) each breaking
   // item touches → route into their assessment. Deterministic JOIN, no score.
   const newsBridges = news ? await buildNewsBridges(news.items).catch(() => undefined) : undefined;
+
+  // "Does this land on MY ecosystem?" — computed only from context the viewer
+  // themselves supplied (saved watchlist + named current stack). A visitor with
+  // no session, or a member who has saved nothing, gets NO badges: we never
+  // infer an ecosystem from a default segment or a guess. See lib/news/exposure.
+  const newsExposures = await (async (): Promise<Map<string, NewsExposure> | undefined> => {
+    if (!news || news.items.length === 0) return undefined;
+    try {
+      const member = await getMemberOrTest();
+      if (!member) return undefined;
+      const wl = await getMemberWatchlist(member.subscriberId);
+      const ctx = { watchlist: wl.vendors ?? [], stack: wl.currentStack ?? [] };
+      if (ctx.watchlist.length === 0 && ctx.stack.length === 0) return undefined;
+      const map = new Map<string, NewsExposure>();
+      for (const n of news.items) {
+        const e = assessNewsExposure({ vendors: n.vendors, primaryVendorId: n.primaryVendorId }, ctx);
+        if (e) map.set(n.id, e);
+      }
+      return map.size > 0 ? map : undefined;
+    } catch {
+      return undefined; // never block the feed on personalisation
+    }
+  })();
   // Rankings are a weighted multi-pillar composite, within category, computed only
   // when backed by verified evidence (else honest "insufficient evidence").
   const categoryComposites = isLive ? await getCategoryComposites().catch(() => []) : [];
@@ -183,7 +207,7 @@ export default async function HomePage() {
 
       {/* ── Hero: breaking news is the first substantial thing a visitor sees —
             promoted here from the old mid-page "Market today" tile. ── */}
-      <BreakingNewsHero news={news} bridges={newsBridges} />
+      <BreakingNewsHero news={news} bridges={newsBridges} exposures={newsExposures} />
 
       {/* The Brief — market-wide "since you last looked" digest of real, dated
           moves (news + new models) + the regulatory horizon. MarkBriefSeen stamps

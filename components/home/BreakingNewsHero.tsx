@@ -1,5 +1,6 @@
 import type { BreakingNews } from "@/lib/intelligence/repository";
 import type { NewsBridge } from "@/lib/news-bridge/bridge";
+import type { NewsExposure } from "@/lib/news/exposure";
 import NewsBridgePanel from "@/components/news/NewsBridgePanel";
 
 // Front-page hero. Breaking news is the first substantial thing a visitor
@@ -22,13 +23,65 @@ function itemMeta(n: BreakingNews["items"][number]): string {
   return parts.join(" · ");
 }
 
+/** Other outlets that covered the same event. Story clustering collapses those
+ *  rows into one headline; the citations are surfaced here so nothing a reader
+ *  could previously click disappears. */
+function AlsoReportedBy({ sources }: { sources: { name: string; url?: string }[] }) {
+  if (sources.length === 0) return null;
+  return (
+    <span className={`text-xs ${MUTED}`}>
+      {" · also reported by "}
+      {sources.map((s, i) => (
+        <span key={`${s.name}-${i}`}>
+          {i > 0 && ", "}
+          {s.url ? (
+            <a href={s.url} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2">
+              {s.name}
+            </a>
+          ) : (
+            s.name
+          )}
+        </span>
+      ))}
+    </span>
+  );
+}
+
+/** "Does this land on me?" — shown ONLY when the viewer supplied a watchlist or
+ *  stack. No stored context means no badge; we never infer an ecosystem. */
+function ExposureBadge({ exposure }: { exposure: NewsExposure | undefined }) {
+  if (!exposure) return null;
+  const direct = exposure.tier === "direct";
+  return (
+    <span
+      title={
+        direct
+          ? exposure.detail
+          : `${exposure.detail} — derived from a cited dependency edge (confidence ${exposure.confidence ?? "n/a"}), not a stated claim.`
+      }
+      className={`ml-2 inline-flex items-center gap-1 rounded-full border px-1.5 py-0.5 text-xs font-semibold ${
+        direct
+          ? "border-[#b08d2f]/50 bg-[#b08d2f]/15 text-[#8a6d1f] dark:text-[#e8c95c]"
+          : "border-[#123d2c]/25 bg-[#123d2c]/[0.06] text-[#123d2c]/75 dark:border-white/20 dark:bg-white/[0.06] dark:text-[#c8d7e9]"
+      }`}
+    >
+      {exposure.label}
+      {!direct && <span className="font-normal opacity-70">· derived</span>}
+    </span>
+  );
+}
+
 export default function BreakingNewsHero({
   news,
   bridges,
+  exposures,
 }: {
   news: BreakingNews | null;
   /** C12 — per-item news→assessment bridge (State B), keyed by news-item id. */
   bridges?: Map<string, NewsBridge>;
+  /** Per-item "affects your ecosystem" verdict, keyed by news-item id. Absent
+   *  for visitors with no saved context — which renders no badge at all. */
+  exposures?: Map<string, NewsExposure>;
 }) {
   const items = news?.items ?? [];
 
@@ -72,12 +125,16 @@ export default function BreakingNewsHero({
             {items[0].whyItMatters && (
               <p className={`mt-2 max-w-3xl text-sm leading-6 ${MUTED}`}>{items[0].whyItMatters}</p>
             )}
-            <p className={`mt-2 text-xs ${MUTED}`}>
-              {itemMeta(items[0])}
-              {itemMeta(items[0]) ? " · " : ""}
-              {ageLabel(Math.floor((Date.now() - Date.parse(items[0].publishedAt)) / 86_400_000))}
-            </p>
           </a>
+          {/* Meta sits outside the story anchor so the other outlets' links are
+              real links, not nested inside one. */}
+          <p className={`mt-2 text-xs ${MUTED}`}>
+            {itemMeta(items[0])}
+            {itemMeta(items[0]) ? " · " : ""}
+            {ageLabel(Math.floor((Date.now() - Date.parse(items[0].publishedAt)) / 86_400_000))}
+            <AlsoReportedBy sources={items[0].alsoReportedBy} />
+            <ExposureBadge exposure={exposures?.get(items[0].id)} />
+          </p>
           {/* C12 bridge — outside the story anchor (no nested links). */}
           {bridges?.get(items[0].id) && <NewsBridgePanel bridge={bridges.get(items[0].id)!} />}
 
@@ -94,7 +151,11 @@ export default function BreakingNewsHero({
                   >
                     {n.title}
                   </a>
-                  <span className={`mt-0.5 block text-xs ${MUTED}`}>{itemMeta(n)}</span>
+                  <span className={`mt-0.5 block text-xs ${MUTED}`}>
+                    {itemMeta(n)}
+                    <AlsoReportedBy sources={n.alsoReportedBy} />
+                    <ExposureBadge exposure={exposures?.get(n.id)} />
+                  </span>
                   {bridges?.get(n.id) && <NewsBridgePanel bridge={bridges.get(n.id)!} compact />}
                 </li>
               ))}
