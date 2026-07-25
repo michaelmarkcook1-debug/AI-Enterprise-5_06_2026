@@ -142,7 +142,11 @@ export default async function HomePage() {
   const newsExposures = await (async (): Promise<Map<string, NewsExposure> | undefined> => {
     if (!news || news.items.length === 0) return undefined;
     try {
-      const member = await getMemberOrTest();
+      // getMember(), NOT getMemberOrTest(): the test-buyer fallback is a SHARED
+      // demo account, so using it here labelled a stranger's feed "On your
+      // shortlist" for vendors they never saved. The badge speaks for the
+      // viewer, so it needs the viewer's own session or nothing at all.
+      const member = await getMember();
       if (!member) return undefined;
       const wl = await getMemberWatchlist(member.subscriberId);
       const ctx = { watchlist: wl.vendors ?? [], stack: wl.currentStack ?? [] };
