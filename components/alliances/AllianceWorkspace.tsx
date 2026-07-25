@@ -270,6 +270,11 @@ function MapTab({ rows }: { rows: AllianceRow[] }) {
 
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     let W = 0, H = 0;
+    // Assigning canvas.width CLEARS the bitmap. With the rAF loop running the
+    // next frame repaints it, but under prefers-reduced-motion there is no loop
+    // — so a resize would blank the map permanently. Wired up after draw() is
+    // defined; the no-op covers the initial call below.
+    let repaint = () => {};
     const resize = () => {
       const rect = wrap.getBoundingClientRect();
       // The map pane is `hidden` while another tab is active → 0×0. Keep the last
@@ -285,6 +290,7 @@ function MapTab({ rows }: { rows: AllianceRow[] }) {
       canvas.width = Math.round(W * dpr);
       canvas.height = Math.round(H * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      repaint(); // the assignments above wiped the bitmap
     };
     resize();
     buildTopology(W, H);
@@ -419,6 +425,9 @@ function MapTab({ rows }: { rows: AllianceRow[] }) {
         ctx.globalAlpha = 1;
       }
     };
+
+    // draw() exists from here on, so resize() can safely repaint after clearing.
+    repaint = () => { if (W && H) draw(); };
 
     let raf = 0;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
