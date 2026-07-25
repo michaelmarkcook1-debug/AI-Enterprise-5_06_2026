@@ -277,8 +277,13 @@ function MapTab({ rows }: { rows: AllianceRow[] }) {
       // re-settle every time the user comes back to the tab.
       if (rect.width === 0 || rect.height === 0) return;
       W = rect.width; H = rect.height;
-      canvas.width = W * dpr; canvas.height = H * dpr;
-      canvas.style.width = `${W}px`; canvas.style.height = `${H}px`;
+      // Set ONLY the backing store. Writing canvas.style.width/height would
+      // override the `absolute inset-0` sizing with a fixed px value — and once
+      // that value is captured while the pane is collapsed, the element stays
+      // pinned at that size forever (it got stuck 2px wide). Letting CSS own the
+      // box means a missed observer tick only costs sharpness, never layout.
+      canvas.width = Math.round(W * dpr);
+      canvas.height = Math.round(H * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     };
     resize();
@@ -286,6 +291,9 @@ function MapTab({ rows }: { rows: AllianceRow[] }) {
 
     const ro = new ResizeObserver(resize);
     ro.observe(wrap);
+    // Belt-and-braces: a ResizeObserver tick was observed to be missed when the
+    // viewport changed dramatically, leaving the backing store stale.
+    window.addEventListener("resize", resize);
 
     // original force constants
     const kForce = 0.04, kRepulsion = 1200, kGravity = 0.01, kDamping = 0.85;
@@ -481,6 +489,7 @@ function MapTab({ rows }: { rows: AllianceRow[] }) {
       cancelAnimationFrame(raf);
       repaintRef.current = null;
       ro.disconnect();
+      window.removeEventListener("resize", resize);
       canvas.removeEventListener("pointerdown", onDown);
       canvas.removeEventListener("pointermove", onMove);
       canvas.removeEventListener("pointerup", onUp);
