@@ -36,7 +36,11 @@ export async function getTriageStatus(now: Date = new Date()): Promise<TriageSta
       ? Math.max(0, Math.floor((now.getTime() - oldest.capturedAt.getTime()) / 86_400_000))
       : null;
     return { pending, oldestDays };
-  } catch {
+  } catch (err) {
+    // Log it: a failed query and an empty queue both render no suffix, so
+    // without this a broken lookup would be indistinguishable from "nothing
+    // pending" — the exact permanent-placeholder problem this set out to fix.
+    console.error(`[triage-status] queue lookup failed: ${(err as Error).message}`);
     return null; // never block a page on queue telemetry
   }
 }
