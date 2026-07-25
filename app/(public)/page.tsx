@@ -27,6 +27,7 @@ import { ensureTestBuyerSeeded } from "@/lib/member/seed-test-buyer";
 import { getMemberWatchlist } from "@/lib/member/watchlist";
 import { assessNewsExposure, type NewsExposure } from "@/lib/news/exposure";
 import { getTriageStatus, triageSuffix } from "@/lib/news-bridge/triage-status";
+import { memberTestOpenEffective } from "@/lib/availability";
 import { listMemberDecisions } from "@/lib/member/decisions";
 import { buildMonitor } from "@/lib/member/monitor";
 import BuyerHome from "@/components/home/BuyerHome";
@@ -144,14 +145,25 @@ export default async function HomePage() {
   // themselves supplied (saved watchlist + named current stack). A visitor with
   // no session, or a member who has saved nothing, gets NO badges: we never
   // infer an ecosystem from a default segment or a guess. See lib/news/exposure.
+  // Whose context produced the badge — drives the wording, so a shared demo
+  // watchlist is never presented as the viewer's own. See exposureIsDemo below.
+  let exposureIsDemo = false;
   const newsExposures = await (async (): Promise<Map<string, NewsExposure> | undefined> => {
     if (!news || news.items.length === 0) return undefined;
     try {
-      // getMember(), NOT getMemberOrTest(): the test-buyer fallback is a SHARED
-      // demo account, so using it here labelled a stranger's feed "On your
-      // shortlist" for vendors they never saved. The badge speaks for the
-      // viewer, so it needs the viewer's own session or nothing at all.
-      const member = await getMember();
+      // Prefer the viewer's OWN session. Falling straight through to
+      // getMemberOrTest() previously told anonymous strangers a vendor was on
+      // "your shortlist" — a false first-person claim.
+      //
+      // But requiring a real session alone made the badge unreachable: prod has
+      // no working sign-in, so getMember() is always null and the feature never
+      // rendered at all. So we also accept the SHARED demo watchlist while
+      // member test-open is on — and label it as the demo's, not the viewer's.
+      let member = await getMember();
+      if (!member && memberTestOpenEffective()) {
+        member = await getMemberOrTest();
+        exposureIsDemo = Boolean(member);
+      }
       if (!member) return undefined;
       const wl = await getMemberWatchlist(member.subscriberId);
       const ctx = { watchlist: wl.vendors ?? [], stack: wl.currentStack ?? [] };
@@ -216,7 +228,7 @@ export default async function HomePage() {
 
       {/* ── Hero: breaking news is the first substantial thing a visitor sees —
             promoted here from the old mid-page "Market today" tile. ── */}
-      <BreakingNewsHero news={news} bridges={newsBridges} exposures={newsExposures} triage={triageLabel} />
+      <BreakingNewsHero news={news} bridges={newsBridges} exposures={newsExposures} exposuresAreDemo={exposureIsDemo} triage={triageLabel} />
 
       {/* The Brief — market-wide "since you last looked" digest of real, dated
           moves (news + new models) + the regulatory horizon. MarkBriefSeen stamps

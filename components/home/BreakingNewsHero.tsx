@@ -49,15 +49,23 @@ function AlsoReportedBy({ sources }: { sources: { name: string; url?: string }[]
 
 /** "Does this land on me?" — shown ONLY when the viewer supplied a watchlist or
  *  stack. No stored context means no badge; we never infer an ecosystem. */
-function ExposureBadge({ exposure }: { exposure: NewsExposure | undefined }) {
+function ExposureBadge({ exposure, demo }: { exposure: NewsExposure | undefined; demo?: boolean }) {
   if (!exposure) return null;
   const direct = exposure.tier === "direct";
+  // The label must name WHOSE context this is. When it comes from the shared
+  // demo watchlist (no real session), "your" would be a false first-person claim.
+  const label = demo
+    ? direct
+      ? "On the demo shortlist"
+      : "Demo: touches a dependency"
+    : exposure.label;
   return (
     <span
       title={
-        direct
+        (demo ? "Matched against the shared demo watchlist, not your own account. " : "") +
+        (direct
           ? exposure.detail
-          : `${exposure.detail} — derived from a cited dependency edge (confidence ${exposure.confidence ?? "n/a"}), not a stated claim.`
+          : `${exposure.detail} — derived from a cited dependency edge (confidence ${exposure.confidence ?? "n/a"}), not a stated claim.`)
       }
       className={`ml-2 inline-flex items-center gap-1 rounded-full border px-1.5 py-0.5 text-xs font-semibold ${
         direct
@@ -65,7 +73,7 @@ function ExposureBadge({ exposure }: { exposure: NewsExposure | undefined }) {
           : "border-[#123d2c]/25 bg-[#123d2c]/[0.06] text-[#123d2c]/75 dark:border-white/20 dark:bg-white/[0.06] dark:text-[#c8d7e9]"
       }`}
     >
-      {exposure.label}
+      {label}
       {!direct && <span className="font-normal opacity-70">· derived</span>}
     </span>
   );
@@ -75,6 +83,7 @@ export default function BreakingNewsHero({
   news,
   bridges,
   exposures,
+  exposuresAreDemo,
   triage,
 }: {
   news: BreakingNews | null;
@@ -83,6 +92,9 @@ export default function BreakingNewsHero({
   /** Per-item "affects your ecosystem" verdict, keyed by news-item id. Absent
    *  for visitors with no saved context — which renders no badge at all. */
   exposures?: Map<string, NewsExposure>;
+  /** True when exposures came from the SHARED demo watchlist rather than the
+   *  viewer's own session — changes the wording so "your" is never claimed. */
+  exposuresAreDemo?: boolean;
   /** Queue-depth suffix for the pending badge (e.g. "· 12 in queue, oldest 6d"),
    *  so "pending re-assessment" ages visibly instead of reading as permanent. */
   triage?: string;
@@ -137,7 +149,7 @@ export default function BreakingNewsHero({
             {itemMeta(items[0]) ? " · " : ""}
             {ageLabel(Math.floor((Date.now() - Date.parse(items[0].publishedAt)) / 86_400_000))}
             <AlsoReportedBy sources={items[0].alsoReportedBy} />
-            <ExposureBadge exposure={exposures?.get(items[0].id)} />
+            <ExposureBadge exposure={exposures?.get(items[0].id)} demo={exposuresAreDemo} />
           </p>
           {/* C12 bridge — outside the story anchor (no nested links). */}
           {bridges?.get(items[0].id) && <NewsBridgePanel bridge={bridges.get(items[0].id)!} triage={triage} />}
@@ -158,7 +170,7 @@ export default function BreakingNewsHero({
                   <span className={`mt-0.5 block text-xs ${MUTED}`}>
                     {itemMeta(n)}
                     <AlsoReportedBy sources={n.alsoReportedBy} />
-                    <ExposureBadge exposure={exposures?.get(n.id)} />
+                    <ExposureBadge exposure={exposures?.get(n.id)} demo={exposuresAreDemo} />
                   </span>
                   {bridges?.get(n.id) && <NewsBridgePanel bridge={bridges.get(n.id)!} compact triage={triage} />}
                 </li>
