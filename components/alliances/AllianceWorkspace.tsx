@@ -231,21 +231,38 @@ function MapTab({ rows }: { rows: AllianceRow[] }) {
     const partners = [...new Map(rows.map((r) => [r.partnerId, r])).values()];
     const nodes: GNode[] = [];
 
+    // Degree = how many relationships the node carries. Drives node size, so the
+    // map reads at a glance: the widest-delivered vendors and the broadest
+    // integrators are visibly the biggest.
+    const degree = new Map<string, number>();
+    for (const r of rows) {
+      degree.set(`v:${r.vendorId}`, (degree.get(`v:${r.vendorId}`) ?? 0) + 1);
+      degree.set(`p:${r.partnerId}`, (degree.get(`p:${r.partnerId}`) ?? 0) + 1);
+    }
+    // Ring radii scale with the canvas so the graph fills whatever space it has
+    // instead of clumping in the middle of a wide viewport.
+    const span = Math.min(w, h);
+    const rInner = Math.max(90, span * 0.22);
+    const rOuter = Math.max(190, span * 0.44);
+
     vendors.forEach((r, i) => {
-      const a = (i / vendors.length) * Math.PI * 2;
+      const a = (i / vendors.length) * Math.PI * 2 - Math.PI / 2;
+      const deg = degree.get(`v:${r.vendorId}`) ?? 1;
       nodes.push({
         id: `v:${r.vendorId}`, name: r.vendorName, type: "model", kind: "model",
-        color: NODE_COLOR.model, radius: 24,
-        x: w / 2 + Math.cos(a) * 170, y: h / 2 + Math.sin(a) * 170,
+        color: NODE_COLOR.model, radius: Math.max(20, Math.min(34, 17 + deg * 1.3)),
+        x: w / 2 + Math.cos(a) * rInner, y: h / 2 + Math.sin(a) * rInner,
         vx: 0, vy: 0, fx: null, fy: null,
       });
     });
     partners.forEach((r, i) => {
-      const a = (i / partners.length) * Math.PI * 2;
+      const a = (i / partners.length) * Math.PI * 2 - Math.PI / 2;
+      const deg = degree.get(`p:${r.partnerId}`) ?? 1;
       nodes.push({
         id: `p:${r.partnerId}`, name: r.partnerName, type: "gsi", kind: r.partnerKind,
-        color: NODE_COLOR[r.partnerKind] ?? C.green, radius: 17,
-        x: w / 2 + Math.cos(a) * 320, y: h / 2 + Math.sin(a) * 320,
+        color: NODE_COLOR[r.partnerKind] ?? C.green,
+        radius: Math.max(12, Math.min(21, 10 + deg * 1.6)),
+        x: w / 2 + Math.cos(a) * rOuter, y: h / 2 + Math.sin(a) * rOuter,
         vx: 0, vy: 0, fx: null, fy: null,
       });
     });
@@ -301,8 +318,10 @@ function MapTab({ rows }: { rows: AllianceRow[] }) {
     // viewport changed dramatically, leaving the backing store stale.
     window.addEventListener("resize", resize);
 
-    // original force constants
-    const kForce = 0.04, kRepulsion = 1200, kGravity = 0.01, kDamping = 0.85;
+    // Force constants. Repulsion and link lengths are scaled to the canvas at
+    // run time (see physics) — the prototype's fixed pixel values collapsed the
+    // whole graph into a blob in the middle of a wide viewport.
+    const kForce = 0.035, kGravity = 0.007, kDamping = 0.86;
 
     const matches = (n: GNode) => {
       const { query: q, category: cat, tag: tg } = filt.current;
@@ -337,13 +356,22 @@ function MapTab({ rows }: { rows: AllianceRow[] }) {
     const physics = () => {
       const nodes = nodesRef.current;
       if (dragRef.current) return;
+
+      // Scale to the available area so the graph spreads across the canvas
+      // rather than bunching at a fixed pixel radius.
+      const span = Math.min(W, H) || 600;
+      const kRepulsion = span * span * 0.055;
+      const reach = span * 0.9;
+      const linkDirect = span * 0.24;
+      const linkOther = span * 0.36;
+
       for (let i = 0; i < nodes.length; i++) {
         const n1 = nodes[i];
         for (let j = i + 1; j < nodes.length; j++) {
           const n2 = nodes[j];
           const dx = n2.x - n1.x, dy = n2.y - n1.y;
           const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-          if (dist < 400) {
+          if (dist < reach) {
             const f = kRepulsion / (dist * dist);
             const fx = (dx / dist) * f, fy = (dy / dist) * f;
             n1.vx -= fx; n1.vy -= fy;
@@ -354,7 +382,7 @@ function MapTab({ rows }: { rows: AllianceRow[] }) {
       for (const l of linksRef.current) {
         const dx = l.target.x - l.source.x, dy = l.target.y - l.source.y;
         const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-        const desired = l.isElite ? 120 : 180;
+        const desired = l.isElite ? linkDirect : linkOther;
         const f = (dist - desired) * kForce;
         const fx = (dx / dist) * f, fy = (dy / dist) * f;
         l.source.vx += fx; l.source.vy += fy;
@@ -365,8 +393,33 @@ function MapTab({ rows }: { rows: AllianceRow[] }) {
         n.vy += (H / 2 - n.y) * kGravity;
         n.vx *= kDamping; n.vy *= kDamping;
         n.x += n.vx; n.y += n.vy;
-        n.x = Math.max(n.radius + 10, Math.min(W - n.radius - 10, n.x));
-        n.y = Math.max(n.radius + 10, Math.min(H - n.radius - 10, n.y));
+      }
+
+      // Hard collision pass — springs alone let discs sit on top of each other,
+      // which is what made the map unreadable. Separate any overlapping pair
+      // (plus room for the label under integrator nodes).
+      for (let pass = 0; pass < 2; pass++) {
+        for (let i = 0; i < nodes.length; i++) {
+          const n1 = nodes[i];
+          for (let j = i + 1; j < nodes.length; j++) {
+            const n2 = nodes[j];
+            const dx = n2.x - n1.x, dy = n2.y - n1.y;
+            const dist = Math.sqrt(dx * dx + dy * dy) || 0.01;
+            const min = n1.radius + n2.radius + 16;
+            if (dist < min) {
+              const push = (min - dist) / 2;
+              const ux = dx / dist, uy = dy / dist;
+              n1.x -= ux * push; n1.y -= uy * push;
+              n2.x += ux * push; n2.y += uy * push;
+            }
+          }
+        }
+      }
+
+      for (const n of nodes) {
+        const pad = n.radius + 14;
+        n.x = Math.max(pad, Math.min(W - pad, n.x));
+        n.y = Math.max(pad, Math.min(H - pad - (n.type === "gsi" ? 10 : 0), n.y));
       }
     };
 
@@ -410,17 +463,28 @@ function MapTab({ rows }: { rows: AllianceRow[] }) {
         ctx.lineWidth = 2;
         ctx.strokeStyle = n.color;
         ctx.stroke();
-        // label
-        ctx.globalAlpha = lit ? 1 : 0.2;
-        ctx.fillStyle = n.type === "model" ? "#071410" : C.ink;
-        ctx.font = n.type === "model" ? "700 10px Geist, system-ui, sans-serif" : "600 9px Geist, system-ui, sans-serif";
+        // Label. Vendor names sit inside the disc when they fit, otherwise they
+        // drop underneath like the integrators — long names ("Microsoft") used
+        // to overflow their circle.
+        ctx.globalAlpha = lit ? 1 : 0.22;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        const label = n.name.length > 11 ? `${n.name.slice(0, 10)}…` : n.name;
-        if (n.type === "model") {
+        const isVendor = n.type === "model";
+        ctx.font = isVendor ? "700 11px Geist, system-ui, sans-serif" : "600 10px Geist, system-ui, sans-serif";
+        const label = n.name.length > 13 ? `${n.name.slice(0, 12)}…` : n.name;
+        const fits = isVendor && ctx.measureText(label).width < n.radius * 1.85;
+
+        if (isVendor && fits) {
+          ctx.fillStyle = "#071410";
           ctx.fillText(label, n.x, n.y);
         } else {
-          ctx.fillText(label, n.x, n.y + n.radius + 10);
+          const ly = n.y + n.radius + 11;
+          // Legibility plate so names stay readable over links and neighbours.
+          const tw = ctx.measureText(label).width;
+          ctx.fillStyle = "rgba(4,16,11,0.72)";
+          ctx.fillRect(n.x - tw / 2 - 3, ly - 7, tw + 6, 14);
+          ctx.fillStyle = isVendor ? C.gold : C.ink;
+          ctx.fillText(label, n.x, ly);
         }
         ctx.globalAlpha = 1;
       }
@@ -513,13 +577,18 @@ function MapTab({ rows }: { rows: AllianceRow[] }) {
     const { width: w, height: h } = wrap.getBoundingClientRect();
     const vendors = nodes.filter((n) => n.type === "model");
     const partners = nodes.filter((n) => n.type === "gsi");
+    // Same canvas-scaled rings buildTopology uses, so "Stabilise" reproduces the
+    // initial layout at the current size rather than an old fixed-pixel one.
+    const span = Math.min(w, h);
+    const rInner = Math.max(90, span * 0.22);
+    const rOuter = Math.max(190, span * 0.44);
     vendors.forEach((n, i) => {
-      const a = (i / vendors.length) * Math.PI * 2;
-      n.x = w / 2 + Math.cos(a) * 170; n.y = h / 2 + Math.sin(a) * 170; n.vx = 0; n.vy = 0;
+      const a = (i / vendors.length) * Math.PI * 2 - Math.PI / 2;
+      n.x = w / 2 + Math.cos(a) * rInner; n.y = h / 2 + Math.sin(a) * rInner; n.vx = 0; n.vy = 0;
     });
     partners.forEach((n, i) => {
-      const a = (i / partners.length) * Math.PI * 2;
-      n.x = w / 2 + Math.cos(a) * 320; n.y = h / 2 + Math.sin(a) * 320; n.vx = 0; n.vy = 0;
+      const a = (i / partners.length) * Math.PI * 2 - Math.PI / 2;
+      n.x = w / 2 + Math.cos(a) * rOuter; n.y = h / 2 + Math.sin(a) * rOuter; n.vx = 0; n.vy = 0;
     });
     repaintRef.current?.();
   };

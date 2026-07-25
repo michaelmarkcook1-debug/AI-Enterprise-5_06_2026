@@ -32,7 +32,7 @@ export default function AmbientHeroBackdrop() {
         className="absolute inset-[-18%]"
         style={{
           background:
-            "radial-gradient(circle at 22% 16%, rgba(212,175,55,0.22), transparent 26%), radial-gradient(circle at 78% 10%, rgba(56,108,176,0.20), transparent 24%), radial-gradient(circle at 55% 70%, rgba(176,141,47,0.14), transparent 30%)",
+            "radial-gradient(circle at 22% 16%, rgba(212,175,55,0.22), transparent 26%), radial-gradient(circle at 78% 10%, rgba(63,157,118,0.20), transparent 24%), radial-gradient(circle at 55% 70%, rgba(176,141,47,0.14), transparent 30%)",
           filter: "blur(84px) saturate(0.85)",
           opacity,
         }}
@@ -43,7 +43,7 @@ export default function AmbientHeroBackdrop() {
         style={{
           background:
             theme === "dark"
-              ? "linear-gradient(180deg, rgba(7,24,39,0.78) 0%, rgba(7,24,39,0.94) 100%)"
+              ? "linear-gradient(180deg, rgba(8,20,16,0.82) 0%, rgba(8,20,16,0.96) 100%)"
               : "linear-gradient(180deg, rgba(250,246,236,0.88) 0%, rgba(250,246,236,0.95) 100%)",
         }}
       />
