@@ -156,6 +156,9 @@ export function buildFactsPrompt(facts: EncroachmentFacts): string {
   L.push("");
   const depth = evidenceDepth(facts);
   L.push(`INPUT DEPTH: ${depth.count}/3 classes present — ${depth.label}. Calibrate assessedLevel to this, per your constraints.`);
+  if (depth.oneSided) {
+    L.push("NOTE: at least one input class covers only ONE of the two vendors. Say so — a one-sided read is weaker, and treating it as symmetric would overstate what we hold.");
+  }
   return L.join("\n");
 }
 
@@ -206,6 +209,42 @@ export function checkNumericGrounding(
   return { ok: true };
 }
 
+/**
+ * Coerce a model response to the declared shape.
+ *
+ * The tool schema is a REQUEST, not a contract — observed in prod: `watchFor`
+ * came back as a bare string despite `type: "array"`, which reaches the popover
+ * as `"…".map is not a function` and blanks the panel. The build is green and
+ * the API returns 200 either way, so nothing upstream catches it. Normalise
+ * every field we render before it leaves this module.
+ */
+export function normaliseReview(raw: unknown, fallback: () => EncroachmentReview): EncroachmentReview {
+  if (typeof raw !== "object" || raw === null) return fallback();
+  const r = raw as Record<string, unknown>;
+  const str = (v: unknown, d = ""): string => (typeof v === "string" ? v : d);
+  const list = (v: unknown): string[] =>
+    Array.isArray(v)
+      ? v.filter((x): x is string => typeof x === "string")
+      : typeof v === "string" && v.trim()
+        ? [v] // a single item returned unwrapped — keep it rather than drop it
+        : [];
+
+  const level = r.assessedLevel;
+  const base = fallback();
+  return {
+    headline: str(r.headline) || base.headline,
+    structuralRead: str(r.structuralRead) || base.structuralRead,
+    movementRead: str(r.movementRead) || base.movementRead,
+    statementRead: str(r.statementRead) || base.statementRead,
+    watchFor: list(r.watchFor).length > 0 ? list(r.watchFor) : base.watchFor,
+    assessedLevel:
+      level === "watch" || level === "credible" || level === "material" ? level : "watch",
+    insufficientContext:
+      typeof r.insufficientContext === "boolean" ? r.insufficientContext : true,
+    citations: list(r.citations),
+  };
+}
+
 /** Deterministic structural-only read. Used when there's no API key and when
  *  the guard rejects a generation — never a fabricated narrative, just the
  *  honest statement of what the derivation does and does not support. */
@@ -247,7 +286,7 @@ export async function reviewEncroachment(
     schema: TOOL_SCHEMA,
     model: REVIEW_MODEL,
     maxTokens: REVIEW_MAX_TOKENS,
-    parse: (raw) => raw as EncroachmentReview,
+    parse: (raw) => normaliseReview(raw, fallback),
     fallback,
   });
 
@@ -277,7 +316,9 @@ export async function reviewEncroachment(
   if (depth.count < 2) {
     review.assessedLevel = "watch";
     review.insufficientContext = true;
-  } else if (depth.count < 3 && review.assessedLevel === "material") {
+  } else if ((depth.count < 3 || depth.oneSided) && review.assessedLevel === "material") {
+    // One-sided coverage cannot be "material" either: 3/3 where every quote
+    // belongs to one vendor is not corroboration across the pair.
     review.assessedLevel = "credible";
   }
 

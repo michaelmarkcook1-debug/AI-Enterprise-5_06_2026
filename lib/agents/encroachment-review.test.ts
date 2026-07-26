@@ -9,6 +9,7 @@ import { describe, expect, it } from "vitest";
 import {
   buildFactsPrompt,
   checkNumericGrounding,
+  normaliseReview,
   structuralFallback,
   type EncroachmentReview,
 } from "./encroachment-review";
@@ -127,14 +128,92 @@ describe("facts prompt", () => {
   });
 });
 
+describe("response normalisation", () => {
+  const fb = () => structuralFallback(baseFacts);
+
+  it("wraps a bare-string watchFor — observed in prod despite the array schema", () => {
+    // The live model returned watchFor as a single string. The component calls
+    // .map() on it, which throws and blanks the panel; the build stays green
+    // and the API still returns 200, so nothing else catches this.
+    const out = normaliseReview(
+      { ...fb(), watchFor: "Microsoft shipping its own model into Copilot surfaces" },
+      fb,
+    );
+    expect(Array.isArray(out.watchFor)).toBe(true);
+    expect(out.watchFor).toEqual(["Microsoft shipping its own model into Copilot surfaces"]);
+  });
+
+  it("drops non-string entries rather than rendering [object Object]", () => {
+    const out = normaliseReview({ ...fb(), watchFor: ["real", { a: 1 }, null, "also real"] }, fb);
+    expect(out.watchFor).toEqual(["real", "also real"]);
+  });
+
+  it("falls back on a non-object response", () => {
+    expect(normaliseReview("not an object", fb).headline).toBe(fb().headline);
+    expect(normaliseReview(null, fb).headline).toBe(fb().headline);
+  });
+
+  it("coerces an unknown assessedLevel down to 'watch' — never up", () => {
+    expect(normaliseReview({ ...fb(), assessedLevel: "critical" }, fb).assessedLevel).toBe("watch");
+    expect(normaliseReview({ ...fb(), assessedLevel: "material" }, fb).assessedLevel).toBe("material");
+  });
+
+  it("defaults insufficientContext to true when the model omits it", () => {
+    const out = normaliseReview({ headline: "x" }, fb);
+    expect(out.insufficientContext).toBe(true);
+  });
+});
+
 describe("evidence depth", () => {
+  const movement = (side: "threatener" | "threatened") => ({
+    side,
+    vendorLabel: side,
+    headline: "h",
+    publishedAt: "2026-07-01",
+    sourceName: "s",
+    sourceUrl: "https://example.com/a",
+    eventKind: null,
+  });
+  const statement = (side: "threatener" | "threatened") => ({
+    side,
+    vendorLabel: side,
+    dimension: "data retention",
+    quote: "q",
+    sourceName: "s",
+    sourceUrl: "https://example.com/b",
+  });
+
   it("counts only the classes that actually fired", () => {
-    expect(evidenceDepth(baseFacts)).toEqual({ count: 1, label: "Structural position only" });
-    expect(
-      evidenceDepth({
-        ...baseFacts,
-        inputsPresent: { structural: true, movements: true, statements: true },
-      }).count,
-    ).toBe(3);
+    expect(evidenceDepth(baseFacts)).toEqual({
+      count: 1,
+      label: "Structural position only",
+      oneSided: false,
+    });
+  });
+
+  it("flags one-sided coverage — 3/3 with every quote from one vendor is not corroboration", () => {
+    const d = evidenceDepth({
+      ...baseFacts,
+      movements: [movement("threatener"), movement("threatened")],
+      statements: [statement("threatener")], // only one side
+      inputsPresent: { structural: true, movements: true, statements: true },
+    });
+    expect(d.count).toBe(3);
+    expect(d.oneSided).toBe(true);
+    expect(d.label).toMatch(/one side only/);
+  });
+
+  it("does not flag one-sided when both vendors are covered in every present class", () => {
+    const d = evidenceDepth({
+      ...baseFacts,
+      movements: [movement("threatener"), movement("threatened")],
+      statements: [statement("threatener"), statement("threatened")],
+      inputsPresent: { structural: true, movements: true, statements: true },
+    });
+    expect(d).toEqual({
+      count: 3,
+      label: "Structure, movements and stated positions",
+      oneSided: false,
+    });
   });
 });

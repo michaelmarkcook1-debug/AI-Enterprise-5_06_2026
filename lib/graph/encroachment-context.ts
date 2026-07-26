@@ -263,17 +263,31 @@ export async function buildEncroachmentFacts(
   };
 }
 
-/** How many of the three input classes fired. Drives the honest depth label —
- *  a structure-only claim must never read like a fully-evidenced one. */
+/** How many of the three input classes fired, and whether each actually covers
+ *  BOTH sides of the pair.
+ *
+ *  The both-sides part matters: a pair can score 3/3 while every stated position
+ *  we hold belongs to one vendor, which reads as fuller coverage than we have.
+ *  The generated prose says so, but a bare "3/3" chip beside it would not — and
+ *  under-claiming is the standard here. */
 export function evidenceDepth(facts: EncroachmentFacts): {
   count: number;
   label: string;
+  /** True when a present class only has evidence for one of the two vendors. */
+  oneSided: boolean;
 } {
   const count =
     (facts.inputsPresent.structural ? 1 : 0) +
     (facts.inputsPresent.movements ? 1 : 0) +
     (facts.inputsPresent.statements ? 1 : 0);
-  const label =
+
+  const bothSides = (rows: { side: "threatener" | "threatened" }[]) =>
+    rows.some((r) => r.side === "threatener") && rows.some((r) => r.side === "threatened");
+  const oneSided =
+    (facts.inputsPresent.movements && !bothSides(facts.movements)) ||
+    (facts.inputsPresent.statements && !bothSides(facts.statements));
+
+  const base =
     count >= 3
       ? "Structure, movements and stated positions"
       : count === 2
@@ -281,5 +295,5 @@ export function evidenceDepth(facts: EncroachmentFacts): {
           ? "Structure and recent movements"
           : "Structure and stated positions"
         : "Structural position only";
-  return { count, label };
+  return { count, label: oneSided ? `${base} (one side only)` : base, oneSided };
 }

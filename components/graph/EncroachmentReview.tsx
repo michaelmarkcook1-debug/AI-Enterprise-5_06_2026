@@ -172,7 +172,11 @@ export function EncroachmentReview({
                 </div>
               </dl>
 
-              {data.review.watchFor.length > 0 && (
+              {/* Array.isArray, not .length: an LLM returning a bare string
+                  where the schema says array is a real, observed response —
+                  .map() on it throws and blanks the whole panel. The agent
+                  normalises it too; this is the second line of defence. */}
+              {Array.isArray(data.review.watchFor) && data.review.watchFor.length > 0 && (
                 <div className="mt-3">
                   <p className="text-[11px] font-semibold uppercase tracking-wide">
                     What would confirm or kill this
