@@ -4,6 +4,7 @@ import { PageFrame } from "@/components/app-shell";
 import { getCategoryComposites } from "@/lib/ranking/category-composite";
 import { isLiveData } from "@/lib/intelligence/provenance";
 import PillarContributionTable from "@/components/ranking/PillarContributionTable";
+import { ScoreTrendChart } from "@/components/ranking/ScoreTrendChart";
 import TrackButton from "@/components/member/TrackButton";
 import CalibrationBadge from "@/components/ranking/CalibrationBadge";
 import { calibrationBand } from "@/lib/ranking/calibration";
@@ -147,7 +148,21 @@ export default async function VendorsPage() {
                         <span className="flex shrink-0 items-baseline gap-3">
                           <ConfidenceVeil confidence={v.compositeConfidence} label={`${v.vendorName} composite`}>
                             <span className="font-mono text-base tabular-nums">
-                              {v.assessmentComposite == null ? "—" : v.assessmentComposite.toFixed(2)}
+                              {/* Hover/focus the score for its real recorded history.
+                                  This is the RANKINGS page — the chart existed but was
+                                  only ever mounted on the profile/category/home surfaces,
+                                  so the gesture did nothing here. */}
+                              {v.assessmentComposite == null ? (
+                                "—"
+                              ) : (
+                                <ScoreTrendChart
+                                  vendorId={v.vendorId}
+                                  categoryId={c.category.id}
+                                  vendorName={v.vendorName}
+                                >
+                                  {v.assessmentComposite.toFixed(2)}
+                                </ScoreTrendChart>
+                              )}
                               <span className={`ml-1 text-xs ${MUTED}`}>/5</span>
                             </span>
                           </ConfidenceVeil>
