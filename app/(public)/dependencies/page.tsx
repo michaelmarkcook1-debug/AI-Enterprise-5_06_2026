@@ -95,8 +95,10 @@ export default async function DependenciesPage() {
       <section className={CARD}>
         <h2 className="mb-1 text-lg font-semibold">Most depended-upon, by layer</h2>
         <p className={`mb-4 text-xs ${MUTED}`}>
-          The providers the rest of the market leans on most — concentration here is where systemic
-          risk (and pricing power) lives.
+          The providers the rest of the market leans on most. In compute, cloud and capital,
+          concentration is where systemic risk (and pricing power) lives — but a count means
+          something different per layer, so each shows its own unit. Model availability counts clouds
+          that host a model, which rises with OPEN weights and so indicates low lock-in, not power.
         </p>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {byKind.map((k) => (
@@ -109,10 +111,17 @@ export default async function DependenciesPage() {
                 {k.topProviders.map((p) => (
                   <li key={p.id} className="flex items-baseline justify-between">
                     <span>{label(p.id)}</span>
-                    <span className={`tabular-nums text-xs ${MUTED}`}>{p.dependents} rely on</span>
+                    <span className={`tabular-nums text-xs ${MUTED}`}>
+                      {p.dependents} {k.countNoun}
+                    </span>
                   </li>
                 ))}
               </ul>
+              {k.providerTotal > k.topProviders.length && (
+                <p className={`mt-1.5 text-xs ${MUTED}`}>
+                  +{k.providerTotal - k.topProviders.length} more not shown
+                </p>
+              )}
             </div>
           ))}
         </div>

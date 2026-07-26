@@ -328,9 +328,16 @@ export default async function HomePage() {
             Explore the full graph →
           </Link>
         </div>
+        {/* "source-backed" used to head this line while the same sentence
+            admitted {seed} were "not yet verified" — the blanket claim was wrong
+            for those. And "concentration = pricing power" does not hold in every
+            layer: in model availability a high count means the weights are open
+            and every cloud can host them, i.e. LOW lock-in. Both corrected. */}
         <p className={`mb-4 text-xs ${MUTED}`}>
-          {total} source-backed relationships — {high} high-confidence, {medium} medium, {seed} seed
-          (plausible, not yet verified). Concentration here is where pricing power and systemic risk live.
+          {total} mapped relationships — {high} high-confidence, {medium} medium, {seed} seed
+          (plausible, not yet verified). In the compute, cloud and capital layers, concentration is
+          where pricing power and systemic risk live; counts read differently per layer, so each
+          shows its own unit.
         </p>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {byKind.map((k) => (
@@ -343,10 +350,19 @@ export default async function HomePage() {
                 {k.topProviders.map((p) => (
                   <li key={p.id} className="flex items-baseline justify-between">
                     <span>{label(p.id)}</span>
-                    <span className={`tabular-nums text-xs ${MUTED}`}>{p.dependents} rely on</span>
+                    <span className={`tabular-nums text-xs ${MUTED}`}>
+                      {p.dependents} {k.countNoun}
+                    </span>
                   </li>
                 ))}
               </ul>
+              {/* Never let a top-5 read as the whole list — the cut is decided by
+                  an alphabetical tiebreak, which was silently hiding OpenAI. */}
+              {k.providerTotal > k.topProviders.length && (
+                <p className={`mt-1.5 text-xs ${MUTED}`}>
+                  +{k.providerTotal - k.topProviders.length} more not shown
+                </p>
+              )}
             </div>
           ))}
         </div>

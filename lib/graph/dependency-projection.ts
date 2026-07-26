@@ -58,7 +58,12 @@ const CONFIDENCE_MAP: Record<ConfidenceTier, number> = {
 /** Human label for a dependency kind (page copy). */
 export const KIND_LABEL: Record<DependencyKind, string> = {
   compute: "Compute / silicon",
-  model: "Models",
+  // NOT "Models". Every edge in this layer is "cloud X lists model Y in its
+  // catalogue", sourced from just three clouds (AWS, Azure, OCI). Labelling it
+  // "Models" under a "most depended-upon" heading told readers Meta was the
+  // most depended-upon model in the industry, when the count really says Llama
+  // is open-weight and therefore hostable by everyone.
+  model: "Model availability (tracked clouds)",
   infra: "Cloud / infrastructure",
   capital: "Capital / ownership",
   distribution: "Distribution / partnership",
@@ -141,7 +146,28 @@ export interface KindSummary {
   edgeCount: number;
   /** Distinct depended-upon targets, most-depended-upon first. */
   topProviders: { id: string; dependents: number }[];
+  /** TOTAL distinct providers in this layer. topProviders is capped at 5, so the
+   *  UI must show "+N more" — a silent top-5 reads as "this is all of them", and
+   *  the cut is decided by an alphabetical tiebreak (it was hiding OpenAI in the
+   *  model layer, where every provider except Meta ties on 1). */
+  providerTotal: number;
+  /** What a count MEANS in this layer. The model layer's edges are "this cloud
+   *  offers that model in its catalogue" — breadth of availability, NOT reliance.
+   *  Saying "N rely on" there inverts it: a model is listed everywhere BECAUSE
+   *  it is open-weight and cheap to host, which implies low lock-in, not pricing
+   *  power. Each layer therefore carries its own honest unit. */
+  countNoun: string;
 }
+
+/** Per-layer wording for what one counted edge actually represents. */
+const KIND_COUNT_NOUN: Record<DependencyKind, string> = {
+  compute: "rely on",
+  infra: "rely on",
+  capital: "backed by",
+  distribution: "distribute",
+  model: "clouds host", // catalogue availability, not reliance — see countNoun above
+  encroachment: "overlap with",
+};
 
 /** Group projected edges by kind for the page's server-rendered summary. */
 export function summariseByKind(edges: DependencyEdge[]): KindSummary[] {
@@ -159,7 +185,14 @@ export function summariseByKind(edges: DependencyEdge[]): KindSummary[] {
       .map(([id, dependents]) => ({ id, dependents }))
       .sort((a, b) => b.dependents - a.dependents || a.id.localeCompare(b.id))
       .slice(0, 5);
-    out.push({ kind, label: KIND_LABEL[kind], edgeCount: list.length, topProviders });
+    out.push({
+      kind,
+      label: KIND_LABEL[kind],
+      edgeCount: list.length,
+      topProviders,
+      providerTotal: providerCounts.size,
+      countNoun: KIND_COUNT_NOUN[kind],
+    });
   }
   return out.sort((a, b) => b.edgeCount - a.edgeCount);
 }
