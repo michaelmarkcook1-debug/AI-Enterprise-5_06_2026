@@ -9,6 +9,7 @@ import {
 } from "@/lib/graph/dependency-projection";
 import { deriveEncroachmentEdges, buildRolesByNodeId } from "@/lib/graph/encroachment";
 import { deriveGraphTakeaway } from "@/lib/graph/takeaway";
+import { EncroachmentReview } from "@/components/graph/EncroachmentReview";
 import TabChat from "@/components/chat/TabChat";
 
 // ISR: server-rendered + CDN-cached, revalidated hourly. STRICT mode: the graph
@@ -150,10 +151,19 @@ export default async function DependenciesPage() {
                 key={`${e.fromVendorId}->${e.toVendorId}`}
                 className="rounded-lg border border-amber-500/20 bg-amber-500/5 px-3 py-2 text-sm"
               >
-                <span className="font-medium">{label(e.fromVendorId)}</span>
-                <span className={MUTED}> could encroach on </span>
-                <span className="font-medium">{label(e.toVendorId)}</span>
-                <p className={`mt-0.5 text-xs ${MUTED}`}>{e.rationale}</p>
+                {/* Hover/focus for the assessed analyst read — the structural
+                    line alone doesn't tell you whether anyone is actually
+                    moving. The review interprets it against each side's real
+                    recorded movements and verbatim stated positions. */}
+                <EncroachmentReview from={e.fromVendorId} to={e.toVendorId}>
+                  <span className="font-medium">{label(e.fromVendorId)}</span>
+                  <span className={MUTED}> could encroach on </span>
+                  <span className="font-medium">{label(e.toVendorId)}</span>
+                  <span className={`mt-0.5 block text-xs ${MUTED}`}>{e.rationale}</span>
+                  <span className="mt-1 block text-[11px] text-amber-700 dark:text-amber-300">
+                    Hover for the analyst review →
+                  </span>
+                </EncroachmentReview>
               </li>
             ))}
           </ul>

@@ -11,6 +11,7 @@ import SubscribeForm from "@/components/SubscribeForm";
 import { EXPOSURE_NODES } from "@/lib/investing/exposure-map-data";
 import { projectExposureToDependencyEdges, summariseByKind } from "@/lib/graph/dependency-projection";
 import { deriveEncroachmentEdges, buildRolesByNodeId } from "@/lib/graph/encroachment";
+import { EncroachmentReview } from "@/components/graph/EncroachmentReview";
 import { deriveGraphTakeaway } from "@/lib/graph/takeaway";
 import { getBreakingNews } from "@/lib/intelligence/repository";
 import { getCachedProvenance } from "@/lib/intelligence/provenance";
@@ -379,9 +380,16 @@ export default async function HomePage() {
             <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
               {encroachments.slice(0, 4).map((e) => (
                 <li key={`${e.fromVendorId}->${e.toVendorId}`} className="rounded-lg border border-amber-500/20 bg-amber-500/5 px-3 py-2 text-sm">
-                  <span className="font-medium">{label(e.fromVendorId)}</span>
-                  <span className={MUTED}> could encroach on </span>
-                  <span className="font-medium">{label(e.toVendorId)}</span>
+                  {/* Hover/focus for the assessed read — the pairing alone
+                      carries no information about whether anyone is moving. */}
+                  <EncroachmentReview from={e.fromVendorId} to={e.toVendorId}>
+                    <span className="font-medium">{label(e.fromVendorId)}</span>
+                    <span className={MUTED}> could encroach on </span>
+                    <span className="font-medium">{label(e.toVendorId)}</span>
+                    <span className="mt-1 block text-[11px] text-amber-700 dark:text-amber-300">
+                      Hover for the analyst review →
+                    </span>
+                  </EncroachmentReview>
                 </li>
               ))}
             </ul>
