@@ -44,10 +44,18 @@ export default function AlliancesPage() {
 
   return (
     <main className="pb-8">
-      {/* No page header: the on-page title + strap sat in a band of page
-          background between the nav and the tool, which read as a second
+      {/* No VISIBLE page header: the on-page title + strap sat in a band of
+          page background between the nav and the tool, which read as a second
           header bar. The workspace now starts directly under the site nav.
-          TITLE/DESCRIPTION stay — they still drive metadata/OG above. */}
+          TITLE/DESCRIPTION stay — they still drive metadata/OG above.
+
+          The h1 stays in the DOM but renders zero pixels. Without one this
+          page's headings started at h2 ("Ecosystem alliance registry"), so a
+          screen reader had nothing announcing what the page IS and the outline
+          read as a subsection of a parent that doesn't exist. sr-only keeps
+          that anchor for assistive tech and crawlers without bringing the
+          band back. */}
+      <h1 className="sr-only">{TITLE}</h1>
 
       {/* Full-bleed: the map wants the width. */}
       <AllianceWorkspace rows={rows} summary={summary} ventures={VENDOR_VENTURES} />
