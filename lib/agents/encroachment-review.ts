@@ -27,6 +27,24 @@ import { evidenceDepth, type EncroachmentFacts } from "../graph/encroachment-con
 const REVIEW_MODEL = process.env.ANTHROPIC_ENCROACHMENT_MODEL ?? "claude-opus-4-8";
 const REVIEW_MAX_TOKENS = 1400;
 
+/**
+ * OFF BY DEFAULT — owner instruction 2026-07-26: do not automate Anthropic API usage.
+ *
+ * This path is the sharpest version of that risk in the codebase: an Opus call
+ * reachable from a PUBLIC page by anonymous traffic, one per vendor pair, with
+ * no rate limit. The 6h cache bounds repeat hits but nothing bounds first hits
+ * across the 7 pairs, and nothing stops a crawler walking them.
+ *
+ * With the flag unset the surface still works — it renders the deterministic
+ * `structuralFallback`, which is honest by construction and states plainly that
+ * the analyst layer did not run. No fabrication, no spend, no silent blank.
+ *
+ * Set ANTHROPIC_ENCROACHMENT_REVIEW=1 to re-enable, and add a rate limit first.
+ */
+export function encroachmentReviewEnabled(): boolean {
+  return process.env.ANTHROPIC_ENCROACHMENT_REVIEW === "1";
+}
+
 export interface EncroachmentReview {
   /** One-line assessed read. Never a stated market fact. */
   headline: string;
@@ -279,6 +297,11 @@ export async function reviewEncroachment(
   const depth = evidenceDepth(facts);
   const factsPrompt = buildFactsPrompt(facts);
   const fallback = () => structuralFallback(facts);
+
+  // Gate BEFORE the call, not after — the point is to make no request at all.
+  if (!encroachmentReviewEnabled()) {
+    return { review: fallback(), depth, source: "structural" };
+  }
 
   const result = await extractStructured<EncroachmentReview>({
     systemPrompt: SYSTEM_PROMPT,
