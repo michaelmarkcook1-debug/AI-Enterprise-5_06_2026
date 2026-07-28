@@ -277,6 +277,19 @@ export function billedLlmRoutesEnabled(): boolean {
 }
 
 /**
+ * Encroachment analyst review (Opus on hover, public graph pages). Gated
+ * SEPARATELY from BILLED_LLM_ROUTES: it is the only billed path whose off-state
+ * still renders something truthful — a deterministic structural read that says
+ * plainly the analyst layer did not run — so it can be switched independently
+ * of the three routes that simply become unavailable.
+ *
+ * Mirrors encroachmentReviewEnabled() in lib/agents/encroachment-review.ts,
+ * re-exported here so the back-office inventory reads every gate from one place.
+ */
+export const ENCROACHMENT_REVIEW_ENABLED: boolean =
+  process.env.ANTHROPIC_ENCROACHMENT_REVIEW === "1";
+
+/**
  * Developer-sentiment AS A RANKING VARIABLE (dev-sentiment spec, consumer #2).
  * OFF by default and deliberately so: the dev-sentiment SIGNAL is compiled,
  * cited, and surfaced today (Developer-sentiment panel on coding-vendor

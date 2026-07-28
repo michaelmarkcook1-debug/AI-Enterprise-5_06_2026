@@ -15,7 +15,7 @@
 // daily cadence with consolidated logging.
 
 import { after } from "next/server";
-import { isCronOrAdminRequest, cronUnauthorized } from "@/lib/cron/auth";
+import { isCronOrAdminRequest, cronUnauthorized, isSpendAuthorized, spendUnauthorized } from "@/lib/cron/auth";
 import { runDailyRefresh, DuplicateRunError } from "@/lib/system/daily-refresh";
 import { getLastRefreshRun, isRunActive } from "@/lib/system/daily-refresh-store";
 
@@ -41,6 +41,15 @@ async function handle(request: Request): Promise<Response> {
   // regardless of weekday — used by the admin "Run full ingestion" button.
   // Scheduled cron invocations omit it and follow the weekly cadence.
   const force = url.searchParams.get("full") === "1";
+
+  // ── SPEND GATE ─────────────────────────────────────────────────────────
+  // Everything past this point costs money, so it needs a real secret. The
+  // check above (isCronOrAdminRequest) is NOT enough: ADMIN_OPEN is hardcoded
+  // true and short-circuits it, which made this route an anonymous-triggerable
+  // spend endpoint — a crawler following the URL would have billed a full
+  // pipeline run. The status poll above stays on the permissive gate so the
+  // admin UI can show progress without a token.
+  if (!isSpendAuthorized(request)) return spendUnauthorized();
 
   // ── Admin full run → BACKGROUND (fire-and-forget) ──────────────────────
   // The full universe (43-vendor competitive intel + analyst coverage + IPO

@@ -27,6 +27,41 @@ export function isCronOrAdminRequest(request: Request): boolean {
   return safeEqual(headerToken, adminToken);
 }
 
+/**
+ * Auth for requests that SPEND MONEY — deliberately stricter than
+ * isCronOrAdminRequest, and the only gate that ignores ADMIN_OPEN.
+ *
+ * Why a second function: ADMIN_OPEN is hardcoded `true` (owner instruction
+ * 2026-07-10, so it cannot silently revert) and short-circuits
+ * isCronOrAdminRequest before any token is checked. That is fine for reading
+ * admin pages. It is not fine for `/api/cron/daily-refresh`, where the same
+ * bypass means ANY anonymous GET runs the full pipeline — a spend endpoint open
+ * to the internet, bounded only by the $25/day cap. A crawler following the URL
+ * would bill it.
+ *
+ * So the real trigger requires a real secret: Vercel's CRON_SECRET, or the
+ * admin token the back-office button sends. Reads (`?status=1`) keep using the
+ * permissive gate, so the admin UI still shows progress without a token.
+ */
+export function isSpendAuthorized(request: Request): boolean {
+  const cronSecret = process.env.CRON_SECRET;
+  if (cronSecret && request.headers.get("authorization") === `Bearer ${cronSecret}`) return true;
+
+  const adminToken = process.env.ADMIN_API_TOKEN ?? "";
+  if (!adminToken) return false; // no token configured ⇒ nothing may spend
+  return safeEqual(request.headers.get("x-admin-token") ?? "", adminToken);
+}
+
+export function spendUnauthorized() {
+  return Response.json(
+    {
+      error: "unauthorized",
+      hint: "This action spends money and needs a real secret: Authorization: Bearer $CRON_SECRET (Vercel Cron sets this) or x-admin-token. ADMIN_OPEN does not grant it.",
+    },
+    { status: 401 },
+  );
+}
+
 export function cronUnauthorized() {
   return Response.json(
     {
