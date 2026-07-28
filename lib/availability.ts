@@ -209,7 +209,8 @@ export function heroDemoActive(): boolean {
  * score-writer firewall test, which pins lib/agents/composite-lens.ts and
  * lib/assessment/session-lens.ts read-only.
  */
-export const INTERROGATE_ENABLED: boolean = true;
+// Billed + anonymous-reachable → behind the master gate. See billedLlmRoutesEnabled().
+export const INTERROGATE_ENABLED: boolean = billedLlmRoutesEnabled();
 
 /**
  * AIE-05 interrogation ENGINE (Phase 2) gate — the adaptive Q&A → tailored
@@ -231,7 +232,8 @@ export const INTERROGATION_ENGINE_ENABLED: boolean = true;
  * invents evidence, scores, or vendor facts; the score-writer firewall test pins
  * lib/agents/prep-kit.ts and lib/assessment/prep-kit.ts read-only.
  */
-export const PREP_KIT_ENABLED: boolean = true;
+// Billed + anonymous-reachable → behind the master gate. See billedLlmRoutesEnabled().
+export const PREP_KIT_ENABLED: boolean = billedLlmRoutesEnabled();
 
 /**
  * Per-tab grounded chat (AnalystGenius batch, piece 3) gate — the third premium
@@ -243,7 +245,36 @@ export const PREP_KIT_ENABLED: boolean = true;
  * the parser), a question beyond the evidence returns an honest "no evidence"
  * — and the route writes nothing canonical, ever.
  */
-export const TAB_CHAT_ENABLED: boolean = true;
+export const TAB_CHAT_ENABLED: boolean = billedLlmRoutesEnabled();
+
+/**
+ * MASTER GATE FOR BILLED, ANONYMOUS-REACHABLE LLM ROUTES — OFF by default.
+ * Owner instruction 2026-07-28: costs were racking up with no visible source.
+ *
+ * WHY THIS EXISTS (measured on prod 2026-07-28, not assumed):
+ * TabChat and Interrogate both claim in their own headers to be "member-gated,
+ * so anonymous drive-by LLM spend is impossible". They are not. An anonymous
+ * POST carrying an ordinary browser `Origin` header passes isSameOrigin, then
+ * passes `getMemberOrTest()` — whose demo fallback IS live on this prod — and
+ * reaches input validation. Probe: both returned 400 invalid_question /
+ * invalid_scope, i.e. auth did not stop them; only a malformed body did.
+ *
+ * WORSE, IT IS INVISIBLE: these routes write nothing to refresh_spend_ledger,
+ * which only the daily-refresh pipeline populates. So this spend never appears
+ * in /api/admin/refresh-guards `todayUsd` and cannot be reconciled against a
+ * bill. Unmetered AND unrecorded is the combination that lets cost accumulate
+ * unnoticed.
+ *
+ * The credit meter in lib/billing/* is the real long-term answer, but it is
+ * INERT while BILLING_ENABLED is off, so it caps nothing today.
+ *
+ * Set BILLED_LLM_ROUTES=1 to restore. Before doing so, fix the auth (use
+ * getMember, not getMemberOrTest) or add a per-IP rate limit — otherwise the
+ * hole reopens exactly as it was.
+ */
+export function billedLlmRoutesEnabled(): boolean {
+  return process.env.BILLED_LLM_ROUTES === "1";
+}
 
 /**
  * Developer-sentiment AS A RANKING VARIABLE (dev-sentiment spec, consumer #2).
