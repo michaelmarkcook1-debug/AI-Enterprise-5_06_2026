@@ -160,7 +160,7 @@ export default async function CostsPage() {
                 <div className="mt-3 border-t border-black/5 pt-3 dark:border-white/10">
                   <RunPaidAction
                     label={fn.label}
-                    path={fn.runPath}
+                    full={fn.runPath.includes("full=1")}
                     costHint={fn.recordedBasis ?? "cost varies with how much new data is found"}
                     estimatedUsd={fn.estimatedRunUsd}
                     estimateBasis={fn.estimateBasis}

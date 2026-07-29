@@ -2,113 +2,62 @@
 
 // Manual trigger for a paid action.
 // ─────────────────────────────────────────────────────────────────────────────
-// Two things this must get right, because pressing it spends real money:
+// NO CREDENTIAL. It calls a Server Action, which runs the pipeline in server
+// code — nothing to paste, nothing held in localStorage, no header. An earlier
+// version made the operator type an admin token into their own back office to
+// press their own button; that was friction, not security.
 //
-// 1. NOT PRESSABLE BY STRANGERS. Every /admin page on this deployment is public
-//    (isAdminPageAuthed() returns true unconditionally, owner instruction
-//    2026-07-10). A bare button here would be a spend endpoint anyone could
-//    click. So the action carries an admin token, entered once and kept in
-//    localStorage on this device only — never baked into the page, never sent
-//    to the server as part of the HTML.
-//
-// 2. NOT PRESSABLE BY ACCIDENT. It costs money, so it asks first, and the
-//    confirmation states what it will cost before it runs — not after.
+// The one guard kept is the confirm step, because the price should be known
+// BEFORE the spend, not discovered on the invoice. It states the figure twice:
+// on the button, and again in the confirmation.
 
-import { useCallback, useEffect, useState } from "react";
-
-const TOKEN_KEY = "ae_admin_api_token";
+import { useCallback, useState, useTransition } from "react";
+import { runRefresh, type RunResult } from "@/app/admin/costs/actions";
 
 export default function RunPaidAction({
   label,
-  path,
+  full,
   costHint,
   estimatedUsd,
   estimateBasis,
 }: {
   label: string;
-  path: string;
+  /** true = force every step (the web-search-heavy ones). */
+  full: boolean;
   costHint: string;
   /** Expected cost of one run. Null = never measured; the button says so
    *  rather than implying it is free or printing an invented figure. */
   estimatedUsd: number | null;
   estimateBasis: string | null;
 }) {
+  const [armed, setArmed] = useState(false);
+  const [result, setResult] = useState<RunResult | null>(null);
+  const [pending, startTransition] = useTransition();
+
   const priceTag =
     estimatedUsd === null ? "cost not yet measured" : `~$${estimatedUsd.toFixed(2)}`;
-  const [token, setToken] = useState("");
-  const [armed, setArmed] = useState(false);
-  const [busy, setBusy] = useState(false);
-  const [result, setResult] = useState<string | null>(null);
 
-  // Read on mount only — localStorage isn't available during SSR.
-  useEffect(() => {
-    try {
-      setToken(window.localStorage.getItem(TOKEN_KEY) ?? "");
-    } catch {
-      /* private mode — the field just stays empty and must be typed each time */
-    }
-  }, []);
-
-  const remember = useCallback((v: string) => {
-    setToken(v);
-    try {
-      if (v) window.localStorage.setItem(TOKEN_KEY, v);
-      else window.localStorage.removeItem(TOKEN_KEY);
-    } catch {
-      /* non-fatal */
-    }
-  }, []);
-
-  const run = useCallback(async () => {
-    setBusy(true);
+  const run = useCallback(() => {
     setResult(null);
-    try {
-      const res = await fetch(path, {
-        method: "POST",
-        headers: { "x-admin-token": token, "Content-Type": "application/json" },
-      });
-      const body = await res.json().catch(() => ({}));
-      setResult(
-        res.ok
-          ? `Started (HTTP ${res.status}). ${body.started ? "Running in the background — spend appears in the ledger as steps complete." : ""}`
-          : `HTTP ${res.status} — ${body.error ?? "failed"}${res.status === 401 ? ". Check the admin token." : ""}`,
-      );
-    } catch (err) {
-      setResult(`Request failed: ${(err as Error).message}`);
-    } finally {
-      setBusy(false);
+    startTransition(async () => {
+      setResult(await runRefresh(full));
       setArmed(false);
-    }
-  }, [path, token]);
+    });
+  }, [full]);
 
   return (
     <div className="text-[13px]">
-      <label className="block">
-        <span className="text-[11px] font-semibold uppercase tracking-wide">Admin token</span>
-        <input
-          type="password"
-          value={token}
-          onChange={(e) => remember(e.target.value)}
-          placeholder="ADMIN_API_TOKEN"
-          autoComplete="off"
-          className="mt-1 block w-full max-w-sm rounded-md border border-black/15 bg-white/70 px-2 py-1 font-mono text-[12px] dark:border-white/20 dark:bg-white/10"
-        />
-      </label>
-      <p className="mt-1 text-[11px] text-[#15263c]/60 dark:text-[#eef3f8]/55">
-        Held in this browser only. Required — without it the run is rejected.
-      </p>
-
       {!armed ? (
         <button
           type="button"
-          disabled={!token || busy}
+          disabled={pending}
           onClick={() => setArmed(true)}
-          className="mt-2 rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-1.5 text-[13px] font-medium disabled:cursor-not-allowed disabled:opacity-40"
+          className="rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-1.5 text-[13px] font-medium disabled:cursor-not-allowed disabled:opacity-40"
         >
           Run now <span className="font-mono tabular-nums">· {priceTag}</span>
         </button>
       ) : (
-        <div className="mt-2 rounded-md border border-amber-500/40 bg-amber-500/5 p-3">
+        <div className="rounded-md border border-amber-500/40 bg-amber-500/5 p-3">
           <p className="font-medium">
             This spends about <span className="font-mono tabular-nums">{priceTag}</span>. Run {label}?
           </p>
@@ -118,15 +67,15 @@ export default function RunPaidAction({
           <div className="mt-2 flex gap-2">
             <button
               type="button"
-              disabled={busy}
+              disabled={pending}
               onClick={run}
               className="rounded-md border border-amber-600/50 bg-amber-500/20 px-3 py-1.5 text-[13px] font-semibold disabled:opacity-40"
             >
-              {busy ? "Starting…" : "Yes, run it"}
+              {pending ? "Running…" : "Yes, run it"}
             </button>
             <button
               type="button"
-              disabled={busy}
+              disabled={pending}
               onClick={() => setArmed(false)}
               className="rounded-md border border-black/15 px-3 py-1.5 text-[13px] dark:border-white/20"
             >
@@ -137,8 +86,14 @@ export default function RunPaidAction({
       )}
 
       {result && (
-        <p className="mt-2 rounded-md border border-black/10 bg-black/[0.03] px-3 py-2 font-mono text-[12px] dark:border-white/15 dark:bg-white/5">
-          {result}
+        <p
+          className={`mt-2 rounded-md border px-3 py-2 text-[12px] leading-5 ${
+            result.ok
+              ? "border-black/10 bg-black/[0.03] dark:border-white/15 dark:bg-white/5"
+              : "border-amber-500/40 bg-amber-500/10"
+          }`}
+        >
+          {result.message}
         </p>
       )}
     </div>
