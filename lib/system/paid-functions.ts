@@ -58,7 +58,38 @@ export interface PaidFunction {
   recordedBasis: string | null;
   /** Anything the reader needs in order not to be misled. */
   caveat: string | null;
+  /** What one manual run is expected to cost, in USD — shown ON the button so
+   *  the price is known BEFORE the spend, not after. Null when never measured;
+   *  the UI then says so rather than printing a guess. */
+  estimatedRunUsd: number | null;
+  /** Where estimatedRunUsd came from. Required whenever it is non-null — a
+   *  price with no stated provenance is exactly the kind of number this
+   *  codebase refuses to ship. */
+  estimateBasis: string | null;
 }
+
+/**
+ * MEASURED, not modelled — the owner's own Anthropic console, 27/07/2026,
+ * API key "AI Enterpise Vercel", one scheduled (non-full) pipeline run:
+ *
+ *   1,387,341 input tok  × $1/M   = $1.387   (claude-haiku-4-5)
+ *     201,954 output tok × $5/M   = $1.010
+ *         145 web searches × $10/1k = $1.450
+ *                                   ─────────
+ *                                     $3.847
+ *
+ * This supersedes the coefficients inside daily-refresh.ts, which recorded
+ * $1.88 for a comparable day — they UNDER-report by roughly half. The caps are
+ * measured against those coefficients, so they are looser in practice than they
+ * look; that is tracked separately and not corrected here.
+ *
+ * Caveat kept with the number: list-price arithmetic, so prompt-cache discounts
+ * (cached reads bill at 0.1×) are not modelled and the true figure may be lower.
+ * One observation, not an average.
+ */
+const MEASURED_STANDARD_RUN_USD = 3.85;
+const MEASURED_BASIS =
+  "measured from the Anthropic console, 27/07/2026: 1.39M in + 202k out (Haiku 4.5) + 145 web searches = $3.85. One observation, list prices, cache discounts not modelled.";
 
 const OPUS = process.env.ANTHROPIC_COMPOSITE_MODEL ?? "claude-opus-4-8";
 
@@ -66,19 +97,44 @@ export function paidFunctions(): PaidFunction[] {
   return [
     {
       id: "daily-refresh",
-      label: "Daily refresh pipeline",
+      label: "Refresh pipeline — standard run",
       what: "Sources news, extracts and grades evidence, refreshes rankings. The thing that keeps the app's data current.",
       module: "lib/system/daily-refresh.ts",
-      model: "mixed (Haiku extract → Opus synthesis) + web search",
+      // Haiku 4.5 is what the console actually showed for a standard run on
+      // 27/07/2026 — no Opus at all. The heavier synthesis steps are weekly or
+      // full-run only, so don't describe this as routinely mixed-model.
+      model: "claude-haiku-4-5 + web search",
       maxOutputTokens: null,
-      trigger: "scheduled",
+      trigger: "manual",
+      gateEnv: "REFRESH_KILL_SWITCH (inverted)",
+      enabled: process.env.REFRESH_KILL_SWITCH !== "1",
+      runPath: "/api/cron/daily-refresh",
+      recordedBasis:
+        "app's own coefficients (searches × $0.01 + vendors × $0.013, etc.) recorded $1.88 for a comparable day — roughly HALF the measured figure. Treat the ledger as a floor.",
+      caveat:
+        "No longer scheduled. Data is only as fresh as your last run here. Web search is the biggest single line ($1.45 of $3.85) — the lever if you want it cheaper.",
+      estimatedRunUsd: MEASURED_STANDARD_RUN_USD,
+      estimateBasis: MEASURED_BASIS,
+    },
+    {
+      id: "daily-refresh-full",
+      label: "Refresh pipeline — FULL run",
+      what: "Forces every step regardless of the weekly cadence: full 43-vendor competitive set, analyst coverage, IPO estimation.",
+      module: "lib/system/daily-refresh.ts (force: true)",
+      model: "claude-haiku-4-5 + Opus synthesis + web search",
+      maxOutputTokens: null,
+      trigger: "manual",
       gateEnv: "REFRESH_KILL_SWITCH (inverted)",
       enabled: process.env.REFRESH_KILL_SWITCH !== "1",
       runPath: "/api/cron/daily-refresh?full=1",
-      recordedBasis:
-        "searches × $0.01 + vendors × $0.013; scored items ÷ 10 × $0.0065; articles × $0.014 — daily-refresh.ts, written to refresh_spend_ledger",
+      recordedBasis: null,
       caveat:
-        "The only path with real caps ($5/cycle, $25/day) and per-step cost recording. Expensive web-search steps run Mondays UTC only.",
+        "Runs in the background and returns immediately; watch the ledger for the real figure. Costs MORE than a standard run — it forces the web-search-heavy steps that normally wait for Monday.",
+      // Deliberately null: no full run has been measured against the console, and
+      // scaling the standard run by a guessed multiplier would be inventing a
+      // price. Better to say "not measured" on the button than print a fiction.
+      estimatedRunUsd: null,
+      estimateBasis: null,
     },
     {
       id: "tab-chat",
@@ -94,6 +150,11 @@ export function paidFunctions(): PaidFunction[] {
       recordedBasis: null,
       caveat:
         "Was anonymous-reachable and wrote nothing to the ledger — invisible spend. Fix auth before re-enabling.",
+      // Per-visitor path, not a back-office action — nothing to price a
+      // "run" of, because a run is one visitor interaction. The per-call
+      // ceiling above is the meaningful figure for these.
+      estimatedRunUsd: null,
+      estimateBasis: null,
     },
     {
       id: "interrogate",
@@ -109,6 +170,11 @@ export function paidFunctions(): PaidFunction[] {
       recordedBasis: null,
       caveat:
         "Costs MULTIPLE calls per session — one per question turn, plus a synthesis call. The priciest per-user path here.",
+      // Per-visitor path, not a back-office action — nothing to price a
+      // "run" of, because a run is one visitor interaction. The per-call
+      // ceiling above is the meaningful figure for these.
+      estimatedRunUsd: null,
+      estimateBasis: null,
     },
     {
       id: "prep-kit",
@@ -123,6 +189,11 @@ export function paidFunctions(): PaidFunction[] {
       runPath: null,
       recordedBasis: null,
       caveat: "Also covered by REFRESH_KILL_SWITCH.",
+      // Per-visitor path, not a back-office action — nothing to price a
+      // "run" of, because a run is one visitor interaction. The per-call
+      // ceiling above is the meaningful figure for these.
+      estimatedRunUsd: null,
+      estimateBasis: null,
     },
     {
       id: "encroachment-review",
@@ -138,6 +209,11 @@ export function paidFunctions(): PaidFunction[] {
       recordedBasis: null,
       caveat:
         "Public page, no rate limit. 6h cache bounds repeat hits only — 7 pairs × first hits is unbounded. Falls back to a deterministic read when off.",
+      // Per-visitor path, not a back-office action — nothing to price a
+      // "run" of, because a run is one visitor interaction. The per-call
+      // ceiling above is the meaningful figure for these.
+      estimatedRunUsd: null,
+      estimateBasis: null,
     },
   ];
 }

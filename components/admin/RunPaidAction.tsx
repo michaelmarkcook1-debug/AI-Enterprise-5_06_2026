@@ -22,11 +22,19 @@ export default function RunPaidAction({
   label,
   path,
   costHint,
+  estimatedUsd,
+  estimateBasis,
 }: {
   label: string;
   path: string;
   costHint: string;
+  /** Expected cost of one run. Null = never measured; the button says so
+   *  rather than implying it is free or printing an invented figure. */
+  estimatedUsd: number | null;
+  estimateBasis: string | null;
 }) {
+  const priceTag =
+    estimatedUsd === null ? "cost not yet measured" : `~$${estimatedUsd.toFixed(2)}`;
   const [token, setToken] = useState("");
   const [armed, setArmed] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -97,13 +105,15 @@ export default function RunPaidAction({
           onClick={() => setArmed(true)}
           className="mt-2 rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-1.5 text-[13px] font-medium disabled:cursor-not-allowed disabled:opacity-40"
         >
-          Run {label} now
+          Run now <span className="font-mono tabular-nums">· {priceTag}</span>
         </button>
       ) : (
         <div className="mt-2 rounded-md border border-amber-500/40 bg-amber-500/5 p-3">
-          <p className="font-medium">This spends money. Run {label}?</p>
+          <p className="font-medium">
+            This spends about <span className="font-mono tabular-nums">{priceTag}</span>. Run {label}?
+          </p>
           <p className="mt-1 text-[12px] text-[#15263c]/70 dark:text-[#eef3f8]/65">
-            Billed as: {costHint}. Capped by the daily limit shown above.
+            {estimateBasis ?? costHint}
           </p>
           <div className="mt-2 flex gap-2">
             <button

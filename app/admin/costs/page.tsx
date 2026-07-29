@@ -162,6 +162,8 @@ export default async function CostsPage() {
                     label={fn.label}
                     path={fn.runPath}
                     costHint={fn.recordedBasis ?? "cost varies with how much new data is found"}
+                    estimatedUsd={fn.estimatedRunUsd}
+                    estimateBasis={fn.estimateBasis}
                   />
                 </div>
               )}

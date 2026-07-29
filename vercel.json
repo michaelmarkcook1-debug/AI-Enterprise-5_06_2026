@@ -1,11 +1,5 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "buildCommand": "prisma generate && node scripts/generate-expected-migrations.mjs && PRISMA_SCHEMA_DISABLE_ADVISORY_LOCK=1 prisma migrate deploy && next build",
-  "ignoreCommand": "if [ \"$VERCEL_GIT_COMMIT_REF\" = \"routine-intel-inbox\" ]; then exit 0; else exit 1; fi",
-  "crons": [
-    {
-      "path": "/api/cron/daily-refresh",
-      "schedule": "5 3 * * *"
-    }
-  ]
+  "ignoreCommand": "if [ \"$VERCEL_GIT_COMMIT_REF\" = \"routine-intel-inbox\" ]; then exit 0; else exit 1; fi"
 }
