@@ -89,6 +89,7 @@ import { notifyMigrationDriftIfNeeded } from "../db/migration-drift-alert";
 import { getKillSwitchState } from "./refresh-killswitch";
 import { makeSpendGuard, recordCycleSpend } from "./spend-ledger";
 import { INVESTOR_TOOLS_ENABLED } from "../availability";
+import { inspectSummary } from "./step-health";
 
 interface StepReport {
   step: string;
@@ -108,40 +109,6 @@ export interface DailyRefreshReport {
   totalTokensIn: number;
   totalTokensOut: number;
   estimatedCostUsd: number;
-}
-
-/**
- * Does a step's own summary admit that it failed?
- *
- * `timed()` used to mark ANY step that returned as ok:true — it only caught
- * throws. But several steps swallow their exception and report it as a field
- * instead (`error`, `errorCount`, `failed`). Those ran as green while broken:
- * routine_inbox_pull spent weeks reporting ok:true with a Prisma foreign-key
- * violation inside its summary, so "27/27 steps OK" and the 96% health figure
- * were both overstating what actually happened.
- *
- * A hard `error` string means the step did not do its job → not ok.
- * Partial counts (`errorCount`, `failed` > 0) mean it partly worked; those stay
- * ok but are surfaced via `partialErrors` so the health view can show them
- * rather than rounding them away to green.
- */
-export function inspectSummary(summary: Record<string, unknown>): {
-  hardError: string | null;
-  partialErrors: number;
-} {
-  const raw = summary.error;
-  const hardError =
-    typeof raw === "string" && raw.trim().length > 0
-      ? raw.trim()
-      : raw instanceof Error
-        ? raw.message
-        : null;
-
-  const num = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? v : 0);
-  // `errors` is a count here; steps that carry arrays already map to errorCount.
-  const partialErrors = num(summary.errorCount) + num(summary.failed) + num(summary.errors);
-
-  return { hardError, partialErrors };
 }
 
 async function timed<T>(step: string, fn: () => Promise<T>): Promise<StepReport> {

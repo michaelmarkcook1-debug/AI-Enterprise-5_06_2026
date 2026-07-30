@@ -10,7 +10,9 @@
 // not ok — however it chose to return.
 
 import { describe, expect, it } from "vitest";
-import { inspectSummary } from "./daily-refresh";
+// Import the PURE module, not daily-refresh — that pulls in next/headers and
+// Prisma at import time, which blocked the vitest worker for 537s.
+import { inspectSummary } from "./step-health";
 
 describe("inspectSummary — hard errors", () => {
   it("catches the exact shape that shipped broken (error string in summary)", () => {
