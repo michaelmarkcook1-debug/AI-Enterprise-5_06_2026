@@ -8,7 +8,8 @@ export type AiNewsCategory =
   | "news"        // AI press / tech-news desks
   | "commentary"  // independent analyst + expert newsletters
   | "testing"     // model evaluation / benchmarking / eval-lab sites
-  | "analyst";    // enterprise-AI analyst + VC + market-research
+  | "analyst"     // enterprise-AI analyst + VC + market-research
+  | "infrastructure"; // GPU/datacenter/inference-capacity trade press + neocloud vendor blogs
 
 export interface AiNewsSource {
   feedUrl: string;
@@ -65,6 +66,32 @@ export const AI_NEWS_SOURCES: AiNewsSource[] = [
   { feedUrl: "https://feeds.bloomberg.com/technology/news.rss", sourceName: "Bloomberg Technology", category: "analyst", tier: "tier1", notes: "AI deal + market coverage" },
   { feedUrl: "https://siliconangle.com/feed/", sourceName: "SiliconANGLE", category: "analyst", tier: "tier2", notes: "Enterprise cloud + AI infra, funding" },
   { feedUrl: "https://spectrum.ieee.org/feeds/topic/artificial-intelligence.rss", sourceName: "IEEE Spectrum AI", category: "analyst", tier: "tier2", notes: "Technical-depth AI coverage" },
+
+  // ── GPU / datacenter / inference-capacity ─────────────────────────────────
+  // Added 2026-07-30. The Neocloud & inference category (Groq, Together AI,
+  // Lambda, CoreWeave) had NO feed that routinely covers it: the desks above
+  // report model launches and enterprise deals, not GPU supply, capacity
+  // buildout or inference unit economics — which is what actually moves these
+  // vendors. Every URL below curl-verified 2026-07-30 (HTTP 200 + parseable
+  // feed with items), same bar as the rest of this file.
+  //
+  // Trade press first — independent, and the only sources here that will report
+  // badly on a vendor. The vendor blogs after are primary sources: useful for
+  // capacity/product facts, but they are marketing and the scorer should treat
+  // them as such, never as independent corroboration.
+  { feedUrl: "https://www.nextplatform.com/feed/", sourceName: "The Next Platform", category: "infrastructure", tier: "tier1", notes: "HPC/datacenter + AI silicon economics; deepest independent neocloud coverage" },
+  { feedUrl: "https://semianalysis.com/feed/", sourceName: "SemiAnalysis", category: "infrastructure", tier: "tier1", notes: "GPU supply, datacenter cost models, inference unit economics" },
+  { feedUrl: "https://www.datacenterdynamics.com/en/rss/", sourceName: "Data Center Dynamics", category: "infrastructure", tier: "tier2", notes: "Capacity buildout, power, site announcements" },
+  { feedUrl: "https://blogs.nvidia.com/feed/", sourceName: "NVIDIA Blog", category: "infrastructure", tier: "tier2", notes: "Supply side — every neocloud here depends on NVIDIA silicon" },
+  // Vendor primary sources — first-party, treat as claims not evidence.
+  { feedUrl: "https://www.together.ai/blog/rss.xml", sourceName: "Together AI Blog", category: "infrastructure", tier: "tier2", notes: "Vendor primary — Together AI" },
+  { feedUrl: "https://lambda.ai/blog/rss.xml", sourceName: "Lambda Blog", category: "infrastructure", tier: "tier2", notes: "Vendor primary — Lambda" },
+  { feedUrl: "https://www.coreweave.com/blog/rss.xml", sourceName: "CoreWeave Blog", category: "infrastructure", tier: "tier2", notes: "Vendor primary — CoreWeave" },
+  // GAP, deliberately not filled: Groq publishes no working feed. groq.com/blog/rss.xml
+  // 404s and groq.com/feed returns HTTP 200 with ZERO items — a 200 alone is not a
+  // feed, and adding a URL that yields nothing would look like coverage we do not
+  // have. Groq is therefore covered only by the trade press above. Re-check
+  // periodically; if a real feed appears, add it here.
 ];
 
 // Tracked vendor names for Haiku mention-matching.
@@ -103,4 +130,16 @@ export const TRACKED_VENDOR_NAMES: Record<string, string> = {
   xai:        "xAI",
   perplexity: "Perplexity",
   nvidia:     "NVIDIA",
+  // ── Neocloud & inference ──────────────────────────────────────────────────
+  // Added 2026-07-30. These four were ranked in the Neocloud & inference
+  // category but were MISSING from this map — which is the real reason the
+  // category looked starved. This map is what the Haiku scorer is given as the
+  // set of vendors it may tag; a vendor absent from it can never be attributed
+  // to a story, however many feeds mention it. Adding feeds without this would
+  // have changed nothing.
+  // Keys must match the entity slugs in lib/intelligence/entities.ts.
+  groq:          "Groq",
+  "together-ai": "Together AI",
+  lambda:        "Lambda",
+  coreweave:     "CoreWeave",
 };

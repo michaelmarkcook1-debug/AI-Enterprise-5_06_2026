@@ -88,6 +88,11 @@ const SOURCE_KIND_HINT: Record<AiNewsCategory, string> = {
   commentary: "expert analyst commentary",
   testing: "model evaluation / benchmark source",
   analyst: "enterprise-AI analyst / market research",
+  // Covers both independent GPU/datacenter trade press and neocloud vendor
+  // blogs. The hint names the vendor-blog case explicitly so the scorer does
+  // not read a first-party capacity announcement as independent corroboration.
+  infrastructure:
+    "GPU / datacenter / inference-capacity source (trade press, or a vendor's own blog — first-party claims, not independent evidence)",
 };
 
 async function scoreBatch(items: CandidateItem[], client: Anthropic, errors: string[]): Promise<ScoredItem[]> {

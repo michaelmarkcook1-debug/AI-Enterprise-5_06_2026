@@ -1,8 +1,9 @@
 // Daily-refresh orchestrator — THE single data pipeline.
 // ──────────────────────────────────────────────────────
-// One function runs the ENTIRE data refresh in order. There is no other
-// scheduled pipeline: one daily cron (/api/cron/daily-refresh) calls this,
-// the "Run full ingestion" admin button calls this, and /admin/pipeline-health
+// One function runs the ENTIRE data refresh in order. NOTHING IS SCHEDULED —
+// the daily cron was removed 2026-07-28 (owner: every paid call is manual), so
+// this only runs when someone presses a button in the back office. Data is
+// therefore exactly as fresh as the last manual run. /admin/pipeline-health
 // shows every step's pass/fail + reason. Nothing ingests outside this.
 //
 //   1.  Sourcing          — fetch + extract evidence proposals from the manifest.
@@ -19,9 +20,11 @@
 //   10. Macro signals     — FRED + GDELT.
 //   11. Watchlist alerts  — notify on triggered watchlist conditions.
 //
-// Cost tiering: heavy web-search steps (full 43-vendor competitive set, analyst
-// coverage, IPO estimates) run weekly (Monday UTC) or on a forced run; daily
-// runs cover the core-vendor news + all the cheap deterministic steps.
+// Cost tiering: heavy web-search steps (full 43-vendor competitive set, WEB
+// EVIDENCE, analyst coverage, IPO estimates) run ONLY on a full run. A standard
+// run covers core-vendor news + the cheap deterministic steps and gathers NO
+// new web evidence — it says so in that step's skip reason rather than looking
+// like it did the work.
 //
 // Every step is independently failure-tolerant: a failure in one step records
 // its error and the next step still runs. The function returns a structured
@@ -107,15 +110,52 @@ export interface DailyRefreshReport {
   estimatedCostUsd: number;
 }
 
+/**
+ * Does a step's own summary admit that it failed?
+ *
+ * `timed()` used to mark ANY step that returned as ok:true — it only caught
+ * throws. But several steps swallow their exception and report it as a field
+ * instead (`error`, `errorCount`, `failed`). Those ran as green while broken:
+ * routine_inbox_pull spent weeks reporting ok:true with a Prisma foreign-key
+ * violation inside its summary, so "27/27 steps OK" and the 96% health figure
+ * were both overstating what actually happened.
+ *
+ * A hard `error` string means the step did not do its job → not ok.
+ * Partial counts (`errorCount`, `failed` > 0) mean it partly worked; those stay
+ * ok but are surfaced via `partialErrors` so the health view can show them
+ * rather than rounding them away to green.
+ */
+export function inspectSummary(summary: Record<string, unknown>): {
+  hardError: string | null;
+  partialErrors: number;
+} {
+  const raw = summary.error;
+  const hardError =
+    typeof raw === "string" && raw.trim().length > 0
+      ? raw.trim()
+      : raw instanceof Error
+        ? raw.message
+        : null;
+
+  const num = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? v : 0);
+  // `errors` is a count here; steps that carry arrays already map to errorCount.
+  const partialErrors = num(summary.errorCount) + num(summary.failed) + num(summary.errors);
+
+  return { hardError, partialErrors };
+}
+
 async function timed<T>(step: string, fn: () => Promise<T>): Promise<StepReport> {
   const t0 = Date.now();
   try {
-    const summary = await fn();
+    const summary = ((await fn()) as Record<string, unknown>) ?? {};
+    const { hardError, partialErrors } = inspectSummary(summary);
     return {
       step,
-      ok: true,
+      // A step that reported a hard error did NOT succeed, however it returned.
+      ok: hardError === null,
       durationMs: Date.now() - t0,
-      summary: (summary as Record<string, unknown>) ?? {},
+      summary: partialErrors > 0 ? { ...summary, partialErrors } : summary,
+      ...(hardError ? { error: hardError } : {}),
     };
   } catch (err) {
     return {
@@ -210,13 +250,21 @@ export async function runDailyRefresh(
       await updateRunProgress(progressId, steps).catch(() => {});
     }
   }
-  // Cost control (cadence tiering): the expensive web-search steps —
-  // full-universe competitive news, analyst coverage, IPO estimates — run only
-  // on the weekly day (Monday UTC). Daily runs cover the core vendor news plus
-  // all the deterministic/cheap steps (SEC financials, valuations, GitHub, macro).
-  // A manual/forced run (the admin "Run full ingestion" button) executes
-  // everything regardless of weekday.
-  const isWeekly = opts.force === true || now.getUTCDay() === 1;
+  // Cost control: the expensive web-search steps — full-universe competitive
+  // news, ANALYST/WEB EVIDENCE, IPO estimates — run only on a FULL run.
+  //
+  // This used to also fire on Monday UTC (`now.getUTCDay() === 1`), because a
+  // cron ran this daily and you did not want the costly steps seven times a
+  // week. That cron was removed 2026-07-28 — every run is now a human pressing
+  // a button. The weekday rule then became a trap: the same button did
+  // materially different work depending on what day you pressed it, with no
+  // way for the operator to see why. Worse, `web_evidence` — the step that
+  // actually gathers vendor evidence — sat behind it, so a "run ingestion" on a
+  // Tuesday quietly refreshed almost no evidence at all.
+  //
+  // Now it depends solely on explicit intent. Standard run = cheap steps.
+  // Full run = everything. Nothing changes behind the operator's back.
+  const isFullRun = opts.force === true;
 
   // ── 0. Schema-drift guard ───────────────────────────────────
   //     Runs FIRST, before any data step. Fails LOUD if the live DB is behind
@@ -257,7 +305,7 @@ export async function runDailyRefresh(
     // cycle. Default OFF → the proven synchronous runner below is used as-is.
     if (process.env.SOURCING_BATCH_MODE === "1") {
       const collected = await collectExtractionBatches();
-      const submitted = await submitExtractionBatch({ allVendors: isWeekly });
+      const submitted = await submitExtractionBatch({ allVendors: isFullRun });
       return {
         mode: "batch",
         batchSubmitted: submitted.submitted,
@@ -300,7 +348,7 @@ export async function runDailyRefresh(
   //     to bound web_search cost (or on a forced run).
   await trackedStep("web_evidence", async () => {
     if (!dbConfigured) return { skipped: "no_database" };
-    if (!isWeekly) return { skipped: "weekly-only step (skipped on daily run)" };
+    if (!isFullRun) return { skipped: "FULL-RUN ONLY — this standard run gathered no new web evidence. Use \"Run FULL\" to refresh it." };
     // The single most expensive weekly step — it must respect the caps like every
     // other LLM step (2026-07 audit: it was neither gated nor counted).
     if (spend.exhausted()) return { skipped: "spend_cap", ...spend.status() };
@@ -506,9 +554,9 @@ export async function runDailyRefresh(
   await trackedStep("competitive_intel", async () => {
     if (spend.exhausted()) return { skipped: "spend_cap", ...spend.status() };
     // Daily: core vendors only. Weekly (Monday): full universe.
-    const r = await runCompetitiveIntelMonitor(now, isWeekly ? {} : { targets: COMPETITIVE_CORE });
+    const r = await runCompetitiveIntelMonitor(now, isFullRun ? {} : { targets: COMPETITIVE_CORE });
     return {
-      cadence: isWeekly ? "weekly_full" : "daily_core",
+      cadence: isFullRun ? "full_run" : "standard_run_core_vendors_only",
       vendorsAttempted: r.vendorsAttempted,
       vendorsWithFindings: r.vendorsWithFindings,
       itemsUpserted: r.itemsUpserted,
@@ -614,8 +662,8 @@ export async function runDailyRefresh(
     let ipoFromLlm = 0, ipoFromDeterministic = 0, acItems = 0, acVendorsWithCoverage = 0, acErrors = 0;
     // The weekly web-search/LLM sub-steps respect the spend cap; the cheap
     // deterministic financials/valuations above always run.
-    const runWeeklyLlm = isWeekly && !spend.exhausted();
-    if (runWeeklyLlm) {
+    const runFullLlm = isFullRun && !spend.exhausted();
+    if (runFullLlm) {
       // 8c. IPO forecasts — LLM + news, deterministic fallback.
       const ipo = await estimateAllIpoForecasts();
       await saveIpoForecasts(ipo.forecasts);
@@ -631,7 +679,7 @@ export async function runDailyRefresh(
     }
 
     return {
-      cadence: runWeeklyLlm ? "weekly_full" : isWeekly ? "weekly_spend_capped" : "daily_financials_only",
+      cadence: runFullLlm ? "full_run" : isFullRun ? "full_run_spend_capped" : "standard_run_financials_only",
       financialsFromSec: finFromSec,
       financialsFromIrFallback: finFromIr,
       financialsErrors: finErrors,

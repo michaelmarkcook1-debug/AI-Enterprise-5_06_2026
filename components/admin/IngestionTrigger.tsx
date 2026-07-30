@@ -14,6 +14,7 @@
 // run finishes. /admin/pipeline-health remains the authoritative live view.
 
 import { useEffect, useRef, useState } from "react";
+import { runRefresh } from "@/app/admin/costs/actions";
 
 // Itemised estimate for a forced FULL run (full 43-vendor competitive news at
 // 3 searches each + analyst coverage + IPO forecasts + sourcing/financials on
@@ -46,7 +47,6 @@ type Phase = "idle" | "confirming" | "running" | "done" | "error";
 
 export default function IngestionTrigger() {
   const [phase, setPhase] = useState<Phase>("idle");
-  const [token, setToken] = useState("");
   const [result, setResult] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [steps, setSteps] = useState<StepReport[]>([]);
@@ -83,9 +83,9 @@ export default function IngestionTrigger() {
   async function pollStatus() {
     const overTime = Date.now() - triggeredAtRef.current > ABSOLUTE_TIMEOUT_MS;
     try {
-      const res = await fetch("/api/cron/daily-refresh?status=1", {
-        headers: token ? { "x-admin-token": token } : {},
-      });
+      // Status poll stays on the permissive gate (reads are free and
+      // side-effect-free), so it needs no credential either.
+      const res = await fetch("/api/cron/daily-refresh?status=1");
       if (!res.ok) {
         if (overTime) finishUnconfirmed();
         return;
@@ -145,21 +145,21 @@ export default function IngestionTrigger() {
     // advances a step still releases via the stall path (not just the absolute one).
     lastChangeAtRef.current = Date.now();
     try {
-      const res = await fetch("/api/cron/daily-refresh?full=1", {
-        method: "POST",
-        headers: token ? { "x-admin-token": token } : {},
-      });
-      const body = await res.json().catch(() => ({}));
-      if (res.status === 409) {
-        // A run is already in progress — attach to it and show its progress
-        // instead of erroring out.
+      // Server Action, not a fetch to the cron route. That route is now behind
+      // isSpendAuthorized() (no ADMIN_OPEN bypass), which this button could not
+      // satisfy — it sent no secret, so it 401'd "unauthorized". Routing through
+      // the same action /admin/costs uses means no credential is needed here at
+      // all, and the two buttons can't drift apart.
+      const res = await runRefresh(true);
+      if (!res.ok && /already in progress/i.test(res.message)) {
+        // A run is already going — attach to it and show its progress rather
+        // than erroring out.
         acceptActiveRef.current = true;
         return;
       }
-      if (!res.ok && res.status !== 202) {
-        throw new Error(body.error ?? `HTTP ${res.status}`);
-      }
-      // 202 accepted — the polling effect (phase === "running") tracks it.
+      if (!res.ok) throw new Error(res.message);
+      // Started in the background — the polling effect (phase === "running")
+      // tracks it from here.
     } catch (e) {
       setError((e as Error).message);
       setPhase("error");
@@ -252,18 +252,8 @@ export default function IngestionTrigger() {
             </p>
           </div>
 
-          {/* Admin token (only when ADMIN_API_OPEN is off) */}
-          <label className="mt-3 block">
-            <div className="mb-1 text-xs font-medium text-red-800 dark:text-red-300">
-              x-admin-token (only required when ADMIN_API_OPEN is off)
-            </div>
-            <input
-              value={token}
-              onChange={(e) => setToken(e.target.value)}
-              type="password"
-              className="w-full rounded-lg border border-red-300 bg-white px-3 py-2 text-sm dark:border-red-800 dark:bg-[#0d1f17]"
-            />
-          </label>
+          {/* No token field. The run goes through a Server Action, which needs
+              no credential from the operator. */}
 
           <div className="mt-4 flex items-center gap-3">
             <button
