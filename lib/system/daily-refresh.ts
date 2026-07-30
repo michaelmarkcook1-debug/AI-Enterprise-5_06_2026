@@ -315,6 +315,30 @@ export async function runDailyRefresh(
   //     to bound web_search cost (or on a forced run).
   await trackedStep("web_evidence", async () => {
     if (!dbConfigured) return { skipped: "no_database" };
+    // ⚠️ OFF BY DEFAULT — 2026-07-30. THIS STEP KILLS THE RUN.
+    //
+    // Evidence, in order:
+    //   19:43 run — web_evidence SKIPPED → 27/27 steps, ok:true, zero errors.
+    //   Then I un-gated it so full runs would actually gather evidence.
+    //   23:14 → died after 2 steps.  23:24 → died after 3.  23:36 → died after 3.
+    //   Every single one stopped the instant `sourcing` finished, i.e. entering
+    //   this step. No error was ever recorded — the process just went away.
+    //
+    // So the pipeline is fine and the background mechanism is fine; THIS step
+    // is what takes the run down. Re-gating it restores the 27/27 behaviour and
+    // gets the other 26 steps — rankings, models, news, graphs — refreshing
+    // again, which is what the operator actually needs tonight.
+    //
+    // It is NOT fixed, only contained. It needs to be run in isolation and
+    // instrumented to find out why it dies (likely unbounded fan-out of
+    // web-search calls with no per-call timeout). Set WEB_EVIDENCE_SWEEP=1 to
+    // re-enable once that is understood — not before.
+    if (process.env.WEB_EVIDENCE_SWEEP !== "1") {
+      return {
+        skipped:
+          "DISABLED — this step terminated 3 consecutive runs on 2026-07-30 (no error recorded). Contained so the rest of the pipeline completes. Set WEB_EVIDENCE_SWEEP=1 to re-enable.",
+      };
+    }
     if (!isFullRun) return { skipped: "FULL-RUN ONLY — this standard run gathered no new web evidence. Use \"Run FULL\" to refresh it." };
     // The single most expensive weekly step — it must respect the caps like every
     // other LLM step (2026-07 audit: it was neither gated nor counted).
