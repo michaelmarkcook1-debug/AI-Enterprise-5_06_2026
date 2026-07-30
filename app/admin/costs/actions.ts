@@ -2,33 +2,26 @@
 
 // Server Actions for the paid-action buttons.
 // ─────────────────────────────────────────────────────────────────────────────
-// Owner 2026-07-28: "stop asking for the admin token!!!!" — correct. Pasting a
-// secret into your own back office to press your own button is friction I
-// added, not security you asked for.
+// Owner 2026-07-28: "stop asking for the admin token!!!!" — correct. So the
+// button carries no credential; this action supplies it server-side.
 //
-// So the button no longer carries a credential at all. It calls a Server Action
-// which invokes the pipeline DIRECTLY in server code — no HTTP hop, no header,
-// nothing to type.
+// ⚠️ THE BUG THIS FILE EXISTS TO NOT REPEAT (2026-07-30):
+// The first version called runDailyRefresh() directly and returned immediately
+// with `void promise.catch(...)`. That is a floating promise in a serverless
+// invocation. The moment the action returned its response, Vercel was free to
+// freeze the function — the run died 17 SECONDS IN, after 2 of 27 steps, while
+// the UI told the operator they could close the tab and it would keep going.
 //
-// WHY THIS IS STILL NOT THE HOLE I CLOSED. The original problem was that a
-// plain GET to /api/cron/daily-refresh ran the pipeline, so any crawler
-// following the URL billed a run. A Server Action is not reachable that way:
-// Next.js only dispatches it on a POST carrying a build-generated action id,
-// and enforces same-origin. A crawler cannot trigger it by walking links.
+// Next's `after()` is what keeps an invocation alive past the response, and
+// /api/cron/daily-refresh ALREADY does this correctly, with maxDuration = 600
+// and the duplicate-run guard. That mechanism worked before I replaced it.
 //
-// The HTTP route keeps its isSpendAuthorized() gate for cron/CLI callers, so
-// that path stays closed to anonymous GETs. This action is the human path.
-//
-// Honest limit: a Server Action is not an authentication boundary. Anyone who
-// loads this public /admin page could press the button. That is the same
-// exposure every other admin control here already has (admin pages are public
-// by owner instruction 2026-07-10), it needs a deliberate POST rather than a
-// stray GET, and the $5/cycle + $25/day caps and duplicate-run guard still
-// bound the damage. If that changes, the fix is a real admin session, not a
-// token field.
+// So this action no longer reimplements background execution. It is now a
+// server-side authenticated PROXY to that route: it attaches ADMIN_API_TOKEN
+// (which never reaches the browser) and lets the route do the work it was
+// already built to do. One background mechanism, in one place, already proven.
 
-import { runDailyRefresh, DuplicateRunError } from "@/lib/system/daily-refresh";
-import { isRunActive } from "@/lib/system/daily-refresh-store";
+import { absoluteUrl } from "@/lib/site";
 
 export interface RunResult {
   ok: boolean;
@@ -36,43 +29,54 @@ export interface RunResult {
 }
 
 /**
- * Run the refresh pipeline. `full` forces every step (the web-search-heavy
- * ones that otherwise wait for the weekly cadence).
+ * Run the refresh pipeline via the cron route.
  *
- * The full run is fire-and-forget because it outlives a request; the standard
- * run is awaited so the button can report a real outcome.
+ * `full` forces every step — including web_evidence, which is what actually
+ * refreshes vendor evidence. The route returns 202 immediately and continues
+ * under after(); a standard run completes within the request.
  */
 export async function runRefresh(full: boolean): Promise<RunResult> {
-  // Pre-check the duplicate guard so a double-click reports honestly instead of
-  // throwing — and, more to the point, never bills twice.
-  if (await isRunActive()) {
-    return { ok: false, message: "A run is already in progress — not starting another." };
+  const token = process.env.ADMIN_API_TOKEN;
+  if (!token) {
+    return {
+      ok: false,
+      message: "ADMIN_API_TOKEN is not configured on this deployment — the pipeline cannot be triggered.",
+    };
   }
 
-  try {
-    if (full) {
-      // Deliberately not awaited: a full run takes many minutes. Errors are
-      // logged rather than surfaced, so the ledger is where you confirm cost.
-      void runDailyRefresh(new Date(), { force: true }).catch((err) => {
-        console.error("[admin/costs] full run failed:", err);
-      });
-      return {
-        ok: true,
-        message: "Full run started in the background. Cost appears in the ledger as steps complete.",
-      };
-    }
+  const url = absoluteUrl(`/api/cron/daily-refresh${full ? "?full=1" : ""}`);
 
-    const report = await runDailyRefresh(new Date(), { force: false });
-    return {
-      ok: report.ok,
-      message: report.ok
-        ? "Standard run finished. Check the recorded figure above — the ledger under-reports, so treat it as a floor."
-        : "Run finished with errors — see the pipeline logs.",
-    };
-  } catch (err) {
-    if (err instanceof DuplicateRunError) {
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "x-admin-token": token },
+      cache: "no-store",
+    });
+    const body = (await res.json().catch(() => ({}))) as Record<string, unknown>;
+
+    // 409 = a run is already going. Not an error; the caller attaches to it.
+    if (res.status === 409) {
       return { ok: false, message: "A run is already in progress — not starting another." };
     }
-    return { ok: false, message: `Failed: ${(err as Error).message}` };
+    if (res.status === 401) {
+      return { ok: false, message: "Rejected by the spend gate (401) — check ADMIN_API_TOKEN." };
+    }
+    if (!res.ok && res.status !== 202) {
+      return { ok: false, message: `Failed: HTTP ${res.status} ${String(body.error ?? "")}`.trim() };
+    }
+
+    return full
+      ? {
+          ok: true,
+          message:
+            "Full run started. It continues on the server — you can close this tab. Watch progress on /admin/pipeline-health.",
+        }
+      : {
+          ok: true,
+          message:
+            "Standard run finished. NOTE: a standard run gathers NO new web evidence — use Run FULL to refresh evidence.",
+        };
+  } catch (err) {
+    return { ok: false, message: `Could not reach the pipeline route: ${(err as Error).message}` };
   }
 }
