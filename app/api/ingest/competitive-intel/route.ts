@@ -95,7 +95,40 @@ export async function POST(request: Request) {
     }
   }
 
-  const jobId = `ext-ci-${(body.source ?? "routine").replace(/[^a-z0-9-]/gi, "").slice(0, 24)}-${new Date().toISOString().slice(0, 10)}`;
+  // EvidenceProposal.jobId is a FOREIGN KEY to IngestionJob — a synthesised
+  // string with no matching row makes Postgres reject every proposal insert.
+  // This route was building exactly such a string, so every proposal submitted
+  // here failed with "Foreign key constraint violated" and was reported as a
+  // per-item rejection (the loop catches it), making a systemic breakage look
+  // like ordinary per-proposal validation noise. Same bug as the GitHub inbox.
+  //
+  // Create the parent job first; proposals then reference a row that exists.
+  let jobId: string;
+  const sourceLabel = `ext-ci:${(body.source ?? "routine").replace(/[^a-z0-9._-]/gi, "").slice(0, 40)}`;
+  try {
+    const job = await prisma.ingestionJob.create({
+      data: {
+        vendorId: sourceLabel, // multi-vendor drop; per-proposal vendorId is what matters
+        status: "succeeded",
+        startedAt: new Date(),
+        finishedAt: new Date(),
+        proposalsCount: proposals.length,
+      },
+      select: { id: true },
+    });
+    jobId = job.id;
+  } catch (err) {
+    return Response.json(
+      {
+        ok: false,
+        error: `could not create ingestion job: ${(err as Error).message}`,
+        findingsAccepted,
+        proposalsAccepted: 0,
+      },
+      { status: 500 },
+    );
+  }
+
   const proposalsRejected: RejectedItem[] = [];
   let proposalsAccepted = 0;
   for (let i = 0; i < proposals.length; i++) {

@@ -208,10 +208,46 @@ export async function pullRoutineInbox(now: Date = new Date()): Promise<RoutineI
         findingsAccepted += 1;
       }
 
-      // jobId is a plain label (proposals reference it loosely, same as the
-      // direct-POST route) — one per source file, so triage can trace a
-      // proposal back to which inbox drop it came from.
-      const jobId = `ext-ci-inbox-${file.name.replace(/[^a-z0-9-]/gi, "").slice(0, 40)}`;
+      // ⚠️ jobId is NOT a loose label — it is a FOREIGN KEY.
+      // EvidenceProposal.jobId has @relation(references: [id]) to IngestionJob,
+      // so a synthesised id with no matching row makes Postgres reject every
+      // insert with "Foreign key constraint violated". That is exactly what has
+      // been happening: this step caught the error, returned it as a summary
+      // field instead of throwing, and so reported ok:true for weeks while
+      // persisting NOTHING. (The comment that used to sit here asserted the
+      // opposite and is why it went unnoticed.)
+      //
+      // So create the job row first, then reference it. One job per source
+      // file, which also keeps the original intent — triage can trace a
+      // proposal back to the inbox drop it arrived in.
+      let jobId: string;
+      try {
+        const job = await prisma.ingestionJob.create({
+          data: {
+            // The inbox is a multi-vendor drop; per-proposal vendorId is what
+            // actually matters downstream. Label the job by its source file.
+            vendorId: `ext-ci-inbox:${file.name.replace(/[^a-z0-9._-]/gi, "").slice(0, 60)}`,
+            status: "succeeded",
+            startedAt: new Date(),
+            finishedAt: new Date(),
+            proposalsCount: proposals.length,
+          },
+          select: { id: true },
+        });
+        jobId = job.id;
+      } catch (err) {
+        // Cannot create the parent → cannot create children. Fail this FILE
+        // loudly rather than attempting inserts that are guaranteed to violate
+        // the constraint, which is what produced the silent breakage.
+        proposalsRejected.push({
+          index: -1,
+          reason: `${file.path}: could not create ingestion job — ${(err as Error).message}`,
+        });
+        await markProcessed(prisma, file.path, file.sha);
+        filesProcessed += 1;
+        continue;
+      }
+
       for (let i = 0; i < proposals.length; i++) {
         const p = proposals[i];
         const reason = validateProposal(p, knownVendors);

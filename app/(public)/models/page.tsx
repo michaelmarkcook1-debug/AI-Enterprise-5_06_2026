@@ -79,7 +79,33 @@ export default async function ModelsPage() {
 
       <FrontierFaceOff comparison={frontier} summary={frontierSummary} />
 
-      {valueField && <ValueScatter field={valueField} />}
+      {/* getModelValueField() returns null on a missing key or any fetch/parse
+          failure. Rendering nothing in that case made the whole cost-vs-capability
+          chart silently vanish — the reader saw a page with a table and no chart
+          and no way to know why, which reads as "this feature doesn't exist"
+          rather than "this data is temporarily unavailable". Absence of data is
+          a fact and should be stated, not hidden. */}
+      {valueField ? (
+        <ValueScatter field={valueField} />
+      ) : (
+        <section className="mb-8 rounded-xl border border-black/10 bg-white/60 p-5 dark:border-white/10 dark:bg-white/5">
+          <h2 className="font-[var(--font-display)] text-xl font-extrabold tracking-tight">Cost vs capability</h2>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-[#123d2c]/65 dark:text-[#eef3f8]/60">
+            Temporarily unavailable — we could not reach the{" "}
+            <a
+              href="https://artificialanalysis.ai"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline underline-offset-2"
+            >
+              Artificial Analysis
+            </a>{" "}
+            price + Intelligence Index feed this chart is built from. It plots only real published
+            figures, so rather than show a partial or imputed chart we show none. The benchmark table
+            below is unaffected.
+          </p>
+        </section>
+      )}
 
       <section className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
         <Stat label="Models scored" value={inv.totalModels} />
