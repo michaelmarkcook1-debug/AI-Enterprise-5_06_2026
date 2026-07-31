@@ -110,6 +110,16 @@ export default function ShareManager({ decisionId }: { decisionId: string }) {
         Anyone with the link can view this decision&apos;s weighting, shortlist, and evidence — no account, no edit
         access. They can never reach your other decisions.
       </p>
+      {/* getSharedDecisionView() reads the decision LIVE (toDecisionView of the
+          current row), it does not snapshot at share time. So anything added to
+          this decision later becomes visible to everyone already holding the
+          link. That is reasonable behaviour, but it is not what most people
+          assume a "share link" does, and the surprise lands on private notes
+          added weeks after sharing. State it up front; revoking is the control. */}
+      <p className={`mt-1 text-xs ${MUTED}`}>
+        The link stays live — it always shows this decision as it is <em>now</em>, including anything you add later.
+        Revoke it below if that changes.
+      </p>
 
       {newLink && (
         <div className="mt-3 rounded-lg border border-[#d4af37]/50 bg-[#fbf6e4]/50 p-3 dark:border-[#d4af37]/40 dark:bg-[#1a1605]/30">
