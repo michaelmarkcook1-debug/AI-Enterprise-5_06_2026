@@ -93,6 +93,11 @@ function Icon({ name, className = "" }: { name: string; className?: string }) {
 interface GNode {
   id: string; name: string; type: "model" | "gsi"; kind: string; color: string;
   radius: number; x: number; y: number; vx: number; vy: number; fx: number | null; fy: number | null;
+  /** Half the rendered width of this node's label, measured once against the
+   *  same font the draw pass uses. The boundary clamp needs it so a label
+   *  drawn below the node cannot hang off the canvas edge. Undefined until the
+   *  measure pass runs; the clamp treats that as 0 and falls back to radius. */
+  labelHalfWidth?: number;
 }
 interface GLink { source: GNode; target: GNode; isElite: boolean; tier: string; row: AllianceRow }
 
@@ -291,6 +296,32 @@ function MapTab({ rows }: { rows: AllianceRow[] }) {
     // next frame repaints it, but under prefers-reduced-motion there is no loop
     // — so a resize would blank the map permanently. Wired up after draw() is
     // defined; the no-op covers the initial call below.
+    // Measure each node's label ONCE, using the exact fonts the draw pass uses
+    // (see the label block in draw()). The boundary clamp needs the rendered
+    // width so a label drawn below its node cannot hang off the canvas edge —
+    // clamping on radius alone let long names like "Sopra Steria" overflow by
+    // roughly half their width in the corners.
+    //
+    // Names are truncated to 13 chars there, so measure the SAME truncated
+    // string, not the full name, or the reserve is too generous and pushes
+    // nodes needlessly inward.
+    const measureLabels = () => {
+      // nodesRef, NOT a local `nodes` — the topology array is built in the
+      // buildTopology memo and handed to this effect via the ref. Referencing a
+      // bare `nodes` here compiles (esbuild does no scope analysis) and then
+      // throws at runtime, blanking the canvas.
+      for (const n of nodesRef.current) {
+        const isVendor = n.type === "model";
+        ctx.font = isVendor ? "700 11px Geist, system-ui, sans-serif" : "600 10px Geist, system-ui, sans-serif";
+        const label = n.name.length > 13 ? `${n.name.slice(0, 12)}…` : n.name;
+        // A vendor label that fits inside its disc is drawn centred in the node
+        // and never overhangs, so it needs no extra horizontal reserve.
+        const fitsInside = isVendor && ctx.measureText(label).width < n.radius * 1.85;
+        n.labelHalfWidth = fitsInside ? 0 : ctx.measureText(label).width / 2 + 3;
+      }
+    };
+    measureLabels();
+
     let repaint = () => {};
     const resize = () => {
       const rect = wrap.getBoundingClientRect();
@@ -416,10 +447,27 @@ function MapTab({ rows }: { rows: AllianceRow[] }) {
         }
       }
 
+      // Bound each node so its LABEL stays on canvas, not just its circle.
+      //
+      // This used to clamp with `pad = n.radius + 14`, which reserves room for
+      // the dot alone. But a label that doesn't fit inside its node is drawn
+      // BELOW it, centred on n.x — so it spans n.x ± (textWidth/2 + 3) and
+      // reaches n.y + radius + 18. A node sitting legally at the clamp still
+      // pushed half its label off the edge: "Sopra Steria" (~70px) overflowed
+      // ~38px, and the bottom row clipped by ~4px. Every truncated name in the
+      // corners came from this.
+      //
+      // labelHalfWidth is measured once per node (see the measure pass below)
+      // and cached, so this stays a cheap comparison per frame.
       for (const n of nodes) {
-        const pad = n.radius + 14;
-        n.x = Math.max(pad, Math.min(W - pad, n.x));
-        n.y = Math.max(pad, Math.min(H - pad - (n.type === "gsi" ? 10 : 0), n.y));
+        const half = n.labelHalfWidth ?? 0;
+        const padX = Math.max(n.radius + 14, half + 6);
+        // Top only needs the circle; the label hangs below, so the bottom
+        // reserve is radius + label height + a little breathing room.
+        const padTop = n.radius + 14;
+        const padBottom = n.radius + 22 + (n.type === "gsi" ? 10 : 0);
+        n.x = Math.max(padX, Math.min(W - padX, n.x));
+        n.y = Math.max(padTop, Math.min(H - padBottom, n.y));
       }
     };
 
