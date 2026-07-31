@@ -38,7 +38,16 @@ export default function PublicFooter() {
           </div>
           <div className="flex flex-col gap-0 sm:gap-2">
             <Link href="/subscribe" className="block py-2 -my-0.5 sm:py-0 sm:my-0 text-[#4c5d75] hover:underline dark:text-[#8fa5bb]">Subscribe</Link>
-            <Link href="/admin" className="block py-2 -my-0.5 sm:py-0 sm:my-0 text-[#4c5d75]/70 hover:underline dark:text-[#8fa5bb]/70">Back office</Link>
+            {/* "Back office" link removed 2026-07-31.
+                /admin is intentionally open (owner instruction 2026-07-10) and
+                that is unchanged — but it is now reachable only by typing the
+                URL, not advertised to every visitor on every page.
+                What changed since that instruction: the admin pages now carry
+                buttons that SPEND MONEY (full ingestion, web-evidence sweeps).
+                Measured 2026-07-31 — /admin, /admin/costs and /admin/ingestion
+                all return 200 to an anonymous request and all render spend
+                controls. A footer link put those one click from the homepage.
+                Bookmark /admin for your own use. */}
           </div>
         </nav>
       </div>
