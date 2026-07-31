@@ -889,6 +889,40 @@ export async function createWatchlist(input: Omit<Watchlist, "id" | "createdAt">
  * export surfaces so they all use ONE query + threshold. Returns an empty Map
  * with no database (the seed/no-DB path is honestly all-seed). Read-only.
  */
+/**
+ * DISTINCT DOMAINS with verified evidence, per vendor.
+ *
+ * Why this exists alongside getEvidenceDepthByVendor (a raw row count): the two
+ * answer different questions, and using the row count to find "gap" vendors was
+ * wrong. A vendor can hold 30 verified rows all clustered in two domains — the
+ * count says "plenty", while the product correctly shows "limited evidence"
+ * because coverage is what the ranking and the UI badge actually care about
+ * ("9/10 domains evidenced").
+ *
+ * The consequence was a dead button: /admin/ingestion's "source gap vendors"
+ * asked for vendors under 10 ROWS, every vendor passed, and it always reported
+ * "No vendors below the evidence threshold" — while the category pages
+ * simultaneously flagged those same vendors as thin. Breadth is the honest
+ * measure of a gap, so this is what that button should ask.
+ *
+ * Uses the existing @@index([vendorId, domain]).
+ */
+export async function getEvidenceDomainCoverageByVendor(): Promise<Map<string, number>> {
+  if (!hasDatabase()) return new Map();
+  try {
+    const rows = await getPrisma().evidenceRecord.findMany({
+      where: { reviewStatus: "analyst_verified" },
+      select: { vendorId: true, domain: true },
+      distinct: ["vendorId", "domain"],
+    });
+    const out = new Map<string, number>();
+    for (const r of rows) out.set(r.vendorId, (out.get(r.vendorId) ?? 0) + 1);
+    return out;
+  } catch {
+    return new Map();
+  }
+}
+
 export async function getEvidenceDepthByVendor(): Promise<Map<string, number>> {
   if (!hasDatabase()) return new Map();
   try {
