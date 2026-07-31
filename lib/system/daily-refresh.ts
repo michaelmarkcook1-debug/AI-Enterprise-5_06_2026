@@ -7,6 +7,7 @@
 // shows every step's pass/fail + reason. Nothing ingests outside this.
 //
 //   1.  Sourcing          — fetch + extract evidence proposals from the manifest.
+//       (web_evidence is NOT part of this pipeline — see /admin/ingestion.)
 //   2.  Safe linkage      — auto-attach product scope to high-confidence proposals.
 //   3.  Triage            — auto-approve proposals that pass the strict gate.
 //   4.  Projection        — fold verified evidence into the read tables.
@@ -20,11 +21,13 @@
 //   10. Macro signals     — FRED + GDELT.
 //   11. Watchlist alerts  — notify on triggered watchlist conditions.
 //
-// Cost tiering: heavy web-search steps (full 43-vendor competitive set, WEB
-// EVIDENCE, analyst coverage, IPO estimates) run ONLY on a full run. A standard
-// run covers core-vendor news + the cheap deterministic steps and gathers NO
-// new web evidence — it says so in that step's skip reason rather than looking
-// like it did the work.
+// Cost tiering: heavy web-search steps (full 43-vendor competitive set,
+// analyst coverage, IPO estimates) run ONLY on a full run.
+//
+// WEB EVIDENCE IS DELIBERATELY NOT HERE. Sweeping the roster inside this run
+// blew the 600s function limit and killed three consecutive runs outright.
+// It lives at POST /api/admin/web-evidence (UI: /admin/ingestion), which runs
+// it as a tracked background job and can target only the vendors that need it.
 //
 // Every step is independently failure-tolerant: a failure in one step records
 // its error and the next step still runs. The function returns a structured
@@ -36,7 +39,6 @@
 
 import { runSourcing } from "../sourcing/runner";
 import { submitExtractionBatch, collectExtractionBatches } from "../sourcing/batch-runner";
-import { runWebEvidenceSweep } from "../sourcing/web-evidence-runner";
 import { pullRoutineInbox } from "../ingest/github-inbox";
 import { ensureVendorProfilesForSpine } from "../services/vendor-id-bridge";
 import { runNewsSourcing } from "../sourcing/news-runner";
@@ -315,49 +317,29 @@ export async function runDailyRefresh(
   //     to bound web_search cost (or on a forced run).
   await trackedStep("web_evidence", async () => {
     if (!dbConfigured) return { skipped: "no_database" };
-    // ⚠️ OFF BY DEFAULT — 2026-07-30. THIS STEP KILLS THE RUN.
+    // ── THIS STEP DOES NOT BELONG IN THIS PIPELINE (2026-07-30) ─────────────
+    // It swept ALL 47 vendors here and never passed `onProgress` — the sweep's
+    // own heartbeat, documented as existing "so a long sweep isn't mistaken for
+    // crashed". Without it the sweep ran for minutes writing nothing, the run
+    // record froze on the previous step (the admin panel showed "stuck on step
+    // 3"), and the invocation was killed at the 600s maxDuration. A platform
+    // kill is uncatchable, which is why no error was ever recorded and three
+    // consecutive full runs simply vanished mid-list.
     //
-    // Evidence, in order:
-    //   19:43 run — web_evidence SKIPPED → 27/27 steps, ok:true, zero errors.
-    //   Then I un-gated it so full runs would actually gather evidence.
-    //   23:14 → died after 2 steps.  23:24 → died after 3.  23:36 → died after 3.
-    //   Every single one stopped the instant `sourcing` finished, i.e. entering
-    //   this step. No error was ever recorded — the process just went away.
+    // It already has a proper home: POST /api/admin/web-evidence, with a UI at
+    // /admin/ingestion. That route passes onProgress correctly, runs as a
+    // tracked background job with status polling, and — crucially — supports
+    // `{ gaps: true, limit }` to sweep ONLY vendors below the evidence
+    // threshold, cheapest-first. That is both safer and far cheaper than
+    // rebuilding it inside a 27-step run that has to pay for everything before
+    // it just to reach this step.
     //
-    // So the pipeline is fine and the background mechanism is fine; THIS step
-    // is what takes the run down. Re-gating it restores the 27/27 behaviour and
-    // gets the other 26 steps — rankings, models, news, graphs — refreshing
-    // again, which is what the operator actually needs tonight.
-    //
-    // It is NOT fixed, only contained. It needs to be run in isolation and
-    // instrumented to find out why it dies (likely unbounded fan-out of
-    // web-search calls with no per-call timeout). Set WEB_EVIDENCE_SWEEP=1 to
-    // re-enable once that is understood — not before.
-    if (process.env.WEB_EVIDENCE_SWEEP !== "1") {
-      return {
-        skipped:
-          "DISABLED — this step terminated 3 consecutive runs on 2026-07-30 (no error recorded). Contained so the rest of the pipeline completes. Set WEB_EVIDENCE_SWEEP=1 to re-enable.",
-      };
-    }
-    if (!isFullRun) return { skipped: "FULL-RUN ONLY — this standard run gathered no new web evidence. Use \"Run FULL\" to refresh it." };
-    // The single most expensive weekly step — it must respect the caps like every
-    // other LLM step (2026-07 audit: it was neither gated nor counted).
-    if (spend.exhausted()) return { skipped: "spend_cap", ...spend.status() };
-    const vendors = await getPrisma().intelligenceVendor.findMany({ select: { id: true, name: true } });
-    const r = await runWebEvidenceSweep(vendors);
-    // CONSERVATIVE ledger estimate until the runner is token-instrumented:
-    // web_search $0.01/call + per-vendor Haiku sweep (~8k in / ~1k out ⇒ ~$0.013
-    // at $1/$5 per MTok). Estimated, never displayed to users as measured cost.
-    const estimatedCostUsd = r.totalSearches * 0.01 + r.vendorsAttempted * 0.013;
+    // So this stays out of the pipeline permanently. Run evidence deliberately,
+    // targeted, from /admin/ingestion.
     return {
-      vendorsAttempted: r.vendorsAttempted,
-      vendorsWithFindings: r.vendorsWithFindings,
-      proposalsPersisted: r.proposalsPersisted,
-      totalSearches: r.totalSearches,
-      errorCount: r.errors.length,
-      firstError: r.errors[0]?.error,
-      costBasis: "estimated (runner not token-instrumented)",
-      estimatedCostUsd,
+      skipped:
+        "Not run here by design — use /admin/ingestion (gaps mode) to sweep evidence. Sweeping the full roster inside this pipeline exceeded the function time limit and killed the whole run.",
+      runIt: "POST /api/admin/web-evidence  { gaps: true, limit: 5 }",
     };
   });
 

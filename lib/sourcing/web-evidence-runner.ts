@@ -225,6 +225,10 @@ Use up to ${MAX_SEARCHES_PER_VENDOR} web_search calls to find real enterprise-AI
 }
 
 export interface WebEvidenceSweepResult {
+  /** True when shouldStop() ended the sweep before every vendor was tried. */
+  stoppedEarly: boolean;
+  /** How many vendors were asked for (vs vendorsAttempted, how many ran). */
+  vendorsRequested: number;
   vendorsAttempted: number;
   vendorsWithFindings: number;
   proposalsPersisted: number;
@@ -245,6 +249,13 @@ export async function runWebEvidenceSweep(
     /** Called after each vendor finishes — used as a background-job heartbeat
      *  + progress snapshot so a long sweep isn't mistaken for crashed. */
     onProgress?: (done: number, total: number, vendor: string) => void | Promise<void>;
+    /** Checked before each vendor. Return true to stop cleanly.
+     *
+     *  Added 2026-07-30: without this the sweep ran until the platform killed
+     *  the whole invocation at maxDuration — an uncatchable kill that recorded
+     *  no error and took the remaining pipeline steps down with it. Stopping
+     *  ourselves, early and visibly, is always better than being killed. */
+    shouldStop?: () => boolean;
   } = {},
 ): Promise<WebEvidenceSweepResult> {
   const concurrency = Math.max(1, Math.min(opts.concurrency ?? 4, 8));
@@ -252,8 +263,10 @@ export async function runWebEvidenceSweep(
   const total = vendors.length;
   let cursor = 0;
   let done = 0;
+  let stopped = false;
   async function worker() {
     while (cursor < vendors.length) {
+      if (opts.shouldStop?.()) { stopped = true; return; }
       const v = vendors[cursor++];
       const r = await runWebEvidenceSourcing(v.id, v.name);
       results.push(r);
@@ -264,6 +277,8 @@ export async function runWebEvidenceSweep(
   await Promise.all(Array.from({ length: Math.min(concurrency, vendors.length) }, worker));
 
   return {
+    stoppedEarly: stopped,
+    vendorsRequested: total,
     vendorsAttempted: results.length,
     vendorsWithFindings: results.filter((r) => r.findings > 0).length,
     proposalsPersisted: results.reduce((s, r) => s + r.persisted, 0),
