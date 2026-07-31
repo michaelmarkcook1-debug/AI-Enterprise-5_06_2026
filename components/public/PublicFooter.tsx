@@ -22,23 +22,23 @@ export default function PublicFooter() {
           </p>
           <SubscribeForm source="footer" className="mt-3 max-w-sm" />
         </div>
-        <nav className="grid grid-cols-3 gap-x-8 gap-y-2 text-xs sm:text-right">
-          <div className="flex flex-col gap-2">
-            <Link href="/use-cases" className="text-[#4c5d75] hover:underline dark:text-[#8fa5bb]">Start here</Link>
-            <Link href="/vendors" className="text-[#4c5d75] hover:underline dark:text-[#8fa5bb]">Rankings</Link>
-            <Link href="/models" className="text-[#4c5d75] hover:underline dark:text-[#8fa5bb]">Model inventory</Link>
-            <Link href="/dependencies" className="text-[#4c5d75] hover:underline dark:text-[#8fa5bb]">Dependency graph</Link>
-            <Link href="/alliances" className="text-[#4c5d75] hover:underline dark:text-[#8fa5bb]">Alliances</Link>
+        <nav className="grid grid-cols-3 gap-x-8 gap-y-0 text-xs sm:gap-y-2 sm:text-right">
+          <div className="flex flex-col gap-0 sm:gap-2">
+            <Link href="/use-cases" className="block py-2 -my-0.5 sm:py-0 sm:my-0 text-[#4c5d75] hover:underline dark:text-[#8fa5bb]">Start here</Link>
+            <Link href="/vendors" className="block py-2 -my-0.5 sm:py-0 sm:my-0 text-[#4c5d75] hover:underline dark:text-[#8fa5bb]">Rankings</Link>
+            <Link href="/models" className="block py-2 -my-0.5 sm:py-0 sm:my-0 text-[#4c5d75] hover:underline dark:text-[#8fa5bb]">Model inventory</Link>
+            <Link href="/dependencies" className="block py-2 -my-0.5 sm:py-0 sm:my-0 text-[#4c5d75] hover:underline dark:text-[#8fa5bb]">Dependency graph</Link>
+            <Link href="/alliances" className="block py-2 -my-0.5 sm:py-0 sm:my-0 text-[#4c5d75] hover:underline dark:text-[#8fa5bb]">Alliances</Link>
           </div>
-          <div className="flex flex-col gap-2">
-            <Link href="/interrogate" className="text-[#4c5d75] hover:underline dark:text-[#8fa5bb]">Interrogate</Link>
-            <Link href="/peers" className="text-[#4c5d75] hover:underline dark:text-[#8fa5bb]">Peer AI</Link>
-            <Link href="/insights" className="text-[#4c5d75] hover:underline dark:text-[#8fa5bb]">Insights</Link>
-            <Link href="/legislation" className="text-[#4c5d75] hover:underline dark:text-[#8fa5bb]">Legislation</Link>
+          <div className="flex flex-col gap-0 sm:gap-2">
+            <Link href="/interrogate" className="block py-2 -my-0.5 sm:py-0 sm:my-0 text-[#4c5d75] hover:underline dark:text-[#8fa5bb]">Interrogate</Link>
+            <Link href="/peers" className="block py-2 -my-0.5 sm:py-0 sm:my-0 text-[#4c5d75] hover:underline dark:text-[#8fa5bb]">Peer AI</Link>
+            <Link href="/insights" className="block py-2 -my-0.5 sm:py-0 sm:my-0 text-[#4c5d75] hover:underline dark:text-[#8fa5bb]">Insights</Link>
+            <Link href="/legislation" className="block py-2 -my-0.5 sm:py-0 sm:my-0 text-[#4c5d75] hover:underline dark:text-[#8fa5bb]">Legislation</Link>
           </div>
-          <div className="flex flex-col gap-2">
-            <Link href="/subscribe" className="text-[#4c5d75] hover:underline dark:text-[#8fa5bb]">Subscribe</Link>
-            <Link href="/admin" className="text-[#4c5d75]/70 hover:underline dark:text-[#8fa5bb]/70">Back office</Link>
+          <div className="flex flex-col gap-0 sm:gap-2">
+            <Link href="/subscribe" className="block py-2 -my-0.5 sm:py-0 sm:my-0 text-[#4c5d75] hover:underline dark:text-[#8fa5bb]">Subscribe</Link>
+            <Link href="/admin" className="block py-2 -my-0.5 sm:py-0 sm:my-0 text-[#4c5d75]/70 hover:underline dark:text-[#8fa5bb]/70">Back office</Link>
           </div>
         </nav>
       </div>
