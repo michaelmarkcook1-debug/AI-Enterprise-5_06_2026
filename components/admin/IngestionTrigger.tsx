@@ -27,10 +27,13 @@ const COST_LINES: Array<{ label: string; detail: string; usd: string }> = [
 ];
 const COST_TOTAL = "≈ $10–16";
 
-// Must match the LAST trackedStep in lib/system/daily-refresh.ts. When this step
-// is present the run reached the end (even if some steps errored). If the
-// orchestrator changes, the stall-timeout fallback below still terminates.
-const FINAL_STEP = "competitive_overlap_alerts";
+// Fast-path only: when this step lands we can settle immediately instead of
+// waiting for the next poll. It is NOT the source of truth — it drifted once
+// already (the pipeline gained member_auth_sweep after it, so this name never
+// matched and every clean run reported as a possible timeout). Completion is
+// now decided by the server's `active` flag; if this name goes stale again the
+// only cost is settling one poll later.
+const FINAL_STEP = "member_auth_sweep";
 // The whole run is capped at the route's 600s maxDuration, and a single heavy
 // step (analyst coverage / investor tools) can run several minutes without a
 // heartbeat. Keep the stall window comfortably ABOVE the max run length so it
@@ -114,15 +117,36 @@ export default function IngestionTrigger() {
         lastChangeAtRef.current = now;
       }
 
-      const reachedEnd = stepsArr.length > 0 && stepsArr[stepsArr.length - 1]?.step === FINAL_STEP;
+      // Completion detection. Matching a hard-coded FINAL_STEP name is fragile:
+      // it was "competitive_overlap_alerts" while the pipeline had since gained
+      // member_auth_sweep after it, so reachedEnd NEVER fired and every
+      // successful run fell through to the stall branch — reporting
+      // "Stopped after 27/27 steps — may have hit the time limit" on a run that
+      // finished cleanly. A name-match silently rots the moment a step is added.
+      //
+      // So treat the run as finished when the SERVER says it is no longer
+      // active. That is the same signal isRunActive() uses and it cannot drift.
+      // The name match stays as a fast path so the UI settles the instant the
+      // last step lands, rather than waiting for the next poll.
+      const reachedNamedEnd = stepsArr.length > 0 && stepsArr[stepsArr.length - 1]?.step === FINAL_STEP;
+      // `active` flips false if any single step outruns the 3-minute heartbeat
+      // window, so !active alone could declare "Finished" mid-run. Require the
+      // step list to have been still for a beat as well: a live pipeline writes
+      // progress after every step, which keeps resetting lastChangeAt.
+      const SETTLE_MS = 10_000;
+      const serverSaysDone =
+        !active && stepsArr.length > 0 && now - lastChangeAtRef.current > SETTLE_MS;
+      const finished = reachedNamedEnd || serverSaysDone;
+      // Only a genuine stall — no progress for the stall window, or past the
+      // absolute cap — should carry the time-limit warning.
       const stalled = overTime || (!active && now - lastChangeAtRef.current > STALL_TIMEOUT_MS);
 
-      if (reachedEnd || stalled) {
+      if (finished || stalled) {
         const okCount = stepsArr.filter((s) => s.ok).length;
         const errCount = Array.isArray(run.errors) ? run.errors.length : 0;
         setResult(
-          reachedEnd
-            ? `Finished: ${okCount}/${stepsArr.length} steps OK${errCount ? ` · ${errCount} step error(s)` : ""}`
+          finished
+            ? `Finished: ${okCount}/${stepsArr.length} steps OK${errCount ? ` · ${errCount} step error(s) — see Pipeline health` : ""}`
             : `Stopped after ${okCount}/${stepsArr.length} steps — the run may have hit the time limit. Re-run, or see Pipeline health.`,
         );
         setError(null);
