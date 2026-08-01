@@ -29,6 +29,92 @@ export interface RunResult {
 }
 
 /**
+ * Run the GitHub routine-inbox pull on its own. Costs nothing: it reads JSON
+ * from the GitHub Contents API and writes through the same validation firewall
+ * as the direct POST route. No model is called, so this is safe to press at any
+ * time regardless of Anthropic credit.
+ *
+ * It exists as its own button because of what it proves. This step spent weeks
+ * reporting ok:true while persisting NOTHING — EvidenceProposal.jobId is a
+ * foreign key to IngestionJob and the step was synthesising an id with no
+ * matching row, so every insert violated the constraint and the error was
+ * swallowed into a summary field. The fix creates the parent job first. Until
+ * this step actually runs against production data that fix is unverified, and
+ * the only other way to run it was a full pipeline run — which does spend money.
+ * Verifying a free step should not cost anything.
+ */
+export async function runInboxPull(): Promise<RunResult> {
+  const token = process.env.ADMIN_API_TOKEN;
+  if (!token) {
+    return { ok: false, message: "ADMIN_API_TOKEN is not configured on this deployment." };
+  }
+
+  try {
+    const res = await fetch(absoluteUrl("/api/admin/routine-inbox-pull"), {
+      method: "POST",
+      headers: { "x-admin-token": token },
+      cache: "no-store",
+    });
+    const b = (await res.json().catch(() => ({}))) as Record<string, unknown>;
+
+    if (res.status === 401) {
+      return { ok: false, message: "Rejected by the admin gate (401) — check ADMIN_API_TOKEN." };
+    }
+    if (b.configured === false) {
+      return { ok: false, message: "GITHUB_INBOX_TOKEN is not set, so there is no inbox to read." };
+    }
+    if (typeof b.error === "string" && b.error) {
+      return { ok: false, message: `Inbox pull failed: ${b.error}` };
+    }
+
+    const num = (k: string) => (typeof b[k] === "number" ? (b[k] as number) : 0);
+    const rejected = [
+      ...(Array.isArray(b.proposalsRejected) ? b.proposalsRejected : []),
+      ...(Array.isArray(b.findingsRejected) ? b.findingsRejected : []),
+    ] as Array<{ reason?: string }>;
+
+    // The deciding signal. A foreign-key message here means the fix did not
+    // take; anything else is ordinary per-item validation noise.
+    const fkHit = rejected.find((r) => /foreign key/i.test(String(r?.reason ?? "")));
+    if (fkHit) {
+      return {
+        ok: false,
+        message: `STILL BROKEN — a foreign-key violation came back: ${String(fkHit.reason).slice(0, 200)}`,
+      };
+    }
+
+    const listed = num("filesListed");
+    const processed = num("filesProcessed");
+    const skipped = num("filesSkippedAlreadyProcessed");
+    const proposals = num("proposalsAccepted");
+    const findings = num("findingsAccepted");
+
+    if (listed === 0) {
+      return {
+        ok: true,
+        message:
+          "Inbox reached, but it holds no files — nothing to ingest. No foreign-key error, though with zero rows this run does not yet prove the fix.",
+      };
+    }
+    if (processed === 0 && skipped > 0) {
+      return {
+        ok: true,
+        message: `All ${skipped} file(s) were already ingested, so nothing new was written. Re-running is a safe no-op by design; this run does not exercise an insert.`,
+      };
+    }
+
+    return {
+      ok: true,
+      message: `Ingested ${processed} of ${listed} file(s): ${proposals} proposal(s) into the triage queue, ${findings} finding(s) into the news feed${
+        rejected.length ? `, ${rejected.length} item(s) rejected on validation` : ""
+      }. No foreign-key error — the jobId fix holds.`,
+    };
+  } catch (err) {
+    return { ok: false, message: `Could not reach the inbox route: ${(err as Error).message}` };
+  }
+}
+
+/**
  * Run the refresh pipeline via the cron route.
  *
  * `full` forces every step — including web_evidence, which is what actually

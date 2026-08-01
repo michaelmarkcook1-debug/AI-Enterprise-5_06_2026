@@ -20,6 +20,7 @@ import { paidFunctions, maxOutputUsd, rateLabel } from "@/lib/system/paid-functi
 import { formatUsd, PRICES_AS_OF, PRICES_SOURCE, WEB_SEARCH_PER_1K_USD } from "@/lib/system/llm-pricing";
 import { getSpendCaps, getDaySpendUsd } from "@/lib/system/spend-ledger";
 import RunPaidAction from "@/components/admin/RunPaidAction";
+import RunFreeAction from "@/components/admin/RunFreeAction";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Costs & paid actions", robots: { index: false } };
@@ -89,6 +90,27 @@ export default async function CostsPage() {
             </div>
             <p className={`mt-1 text-[11px] leading-4 ${MUTED}`}>{off.length} switched off.</p>
           </div>
+        </div>
+      </section>
+
+      {/* Free actions. Kept ABOVE the priced inventory on purpose: when a job
+          can be done without spending, that should be the first thing seen. */}
+      <section className={`${CARD} mt-5`}>
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <h2 className="text-base font-bold">Free checks</h2>
+          <span className="rounded-full border border-black/15 px-2 py-0.5 text-[11px] font-medium text-[#15263c]/60 dark:border-white/20 dark:text-[#eef3f8]/60">
+            NO MODEL CALL — $0
+          </span>
+        </div>
+        <p className={`mt-1 text-sm leading-6 ${MUTED}`}>
+          These read data and write to the database. They call no model, so they cost nothing and
+          work regardless of Anthropic credit.
+        </p>
+        <div className="mt-3">
+          <RunFreeAction
+            label="Pull the routine inbox"
+            note="Reads the routine's JSON drops from GitHub into the triage queue and news feed. Also the cheapest way to confirm the proposal-write fix holds — it reports a foreign-key error explicitly instead of swallowing it."
+          />
         </div>
       </section>
 
