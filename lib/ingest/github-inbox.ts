@@ -227,7 +227,7 @@ export async function pullRoutineInbox(now: Date = new Date()): Promise<RoutineI
             // The inbox is a multi-vendor drop; per-proposal vendorId is what
             // actually matters downstream. Label the job by its source file.
             vendorId: `ext-ci-inbox:${file.name.replace(/[^a-z0-9._-]/gi, "").slice(0, 60)}`,
-            status: "succeeded",
+            status: "completed",
             startedAt: new Date(),
             finishedAt: new Date(),
             proposalsCount: proposals.length,

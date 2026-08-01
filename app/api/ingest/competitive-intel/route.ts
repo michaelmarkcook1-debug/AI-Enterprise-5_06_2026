@@ -109,7 +109,7 @@ export async function POST(request: Request) {
     const job = await prisma.ingestionJob.create({
       data: {
         vendorId: sourceLabel, // multi-vendor drop; per-proposal vendorId is what matters
-        status: "succeeded",
+        status: "completed",
         startedAt: new Date(),
         finishedAt: new Date(),
         proposalsCount: proposals.length,
