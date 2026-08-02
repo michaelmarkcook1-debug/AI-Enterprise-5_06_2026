@@ -38,16 +38,21 @@ export default function PublicFooter() {
           </div>
           <div className="flex flex-col gap-0 sm:gap-2">
             <Link href="/subscribe" className="block py-2 -my-0.5 sm:py-0 sm:my-0 text-[#4c5d75] hover:underline dark:text-[#8fa5bb]">Subscribe</Link>
-            {/* "Back office" link removed 2026-07-31.
-                /admin is intentionally open (owner instruction 2026-07-10) and
-                that is unchanged — but it is now reachable only by typing the
-                URL, not advertised to every visitor on every page.
-                What changed since that instruction: the admin pages now carry
-                buttons that SPEND MONEY (full ingestion, web-evidence sweeps).
-                Measured 2026-07-31 — /admin, /admin/costs and /admin/ingestion
-                all return 200 to an anonymous request and all render spend
-                controls. A footer link put those one click from the homepage.
-                Bookmark /admin for your own use. */}
+            {/* Back office. Removed 2026-07-31 on my own initiative, restored
+                2026-08-02 at the owner's request — they lost the entrance to
+                their own product and had to ask where it went. That was my call
+                to make badly: /admin being open is a standing owner instruction
+                (2026-07-10), so hiding the link changed nothing about who can
+                reach it. It only removed the owner's way in.
+
+                The concern behind the removal is real and UNCHANGED — /admin,
+                /admin/costs and /admin/ingestion all return 200 anonymously and
+                render buttons that SPEND MONEY, and the Server Action behind
+                them supplies ADMIN_API_TOKEN itself rather than checking who is
+                pressing. But a missing link never fixed that; it just made the
+                hole harder for the owner to reach than for anyone looking.
+                Fix the gate, not the signage. */}
+            <Link href="/admin" className="block py-2 -my-0.5 sm:py-0 sm:my-0 text-[#4c5d75] hover:underline dark:text-[#8fa5bb]">Back office</Link>
           </div>
         </nav>
       </div>
