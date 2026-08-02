@@ -137,9 +137,39 @@ export const TRACKED_VENDOR_NAMES: Record<string, string> = {
   // set of vendors it may tag; a vendor absent from it can never be attributed
   // to a story, however many feeds mention it. Adding feeds without this would
   // have changed nothing.
-  // Keys must match the entity slugs in lib/intelligence/entities.ts.
-  groq:          "Groq",
-  "together-ai": "Together AI",
-  lambda:        "Lambda",
-  coreweave:     "CoreWeave",
+  // ⚠️ Keys are BARE SPINE vendor ids (COMPETITIVE_TARGETS.vendorId), NOT entity
+  // slugs. The two differ for exactly the vendors carrying a product suffix —
+  // lib/intelligence/vendor-id.ts maps entity "together-ai" → spine "together",
+  // "fireworks-ai" → "fireworks", "zhipu-glm" → "zai", "alibaba-qwen" →
+  // "alibaba", "moonshot-kimi" → "moonshot".
+  groq:      "Groq",
+  together:  "Together AI",
+  lambda:    "Lambda",
+  coreweave: "CoreWeave",
+
+  // ── Silicon, sovereign AI and the rest of the live roster ─────────────────
+  // Added 2026-08-02 after the owner reported "not all vendors are featured in
+  // the news ingestion". They were right, and measurably so: 33 of the 41
+  // vendors on the live roster were listed here, so 10 could never be attributed
+  // to a story no matter what the feeds carried.
+  //
+  // Names are taken verbatim from COMPETITIVE_TARGETS (lib/intelligence/
+  // competitive-targets.ts), which already curates a name + aliases per vendor,
+  // rather than being invented here. The two slashed entries are reduced to
+  // their primary company name so Haiku echoes something matchable:
+  // "Zhipu / Z.ai" → "Zhipu AI", "G42 / Falcon" → "G42".
+  //
+  // This lets a story be TAGGED. It does not conjure stories — coverage still
+  // depends on a feed actually carrying the item, so expect thinner volume for
+  // sovereign-AI names than for the frontier labs.
+  amd:       "AMD",
+  broadcom:  "Broadcom",
+  tsmc:      "TSMC",
+  cerebras:  "Cerebras",
+  fireworks: "Fireworks AI",
+  nscale:    "Nscale",
+  g42:       "G42",
+  humain:    "HUMAIN",
+  zai:       "Zhipu AI",
+  sakana:    "Sakana AI",
 };
