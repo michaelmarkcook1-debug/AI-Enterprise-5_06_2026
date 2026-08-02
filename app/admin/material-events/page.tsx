@@ -14,11 +14,31 @@ import Link from "next/link";
 import { adminPageGuard } from "@/components/admin/AdminPageGuard";
 import { listNewsItems } from "@/lib/intelligence/repository";
 import { flagCorporateEvents, type CorporateEventKind } from "@/lib/intelligence/corporate-events";
+import { listMaterialEventReviews } from "@/lib/intelligence/material-event-review";
+import MaterialEventReview from "@/components/admin/MaterialEventReview";
 
 export const dynamic = "force-dynamic";
 
 const MUTED = "text-[#123d2c]/65 dark:text-[#eef3f8]/60";
 const WINDOW_DAYS = 45;
+
+/** Display host for a source link. `new URL()` THROWS on a malformed string and
+ *  the row filter only checks `startsWith("http")`, so a value like "http:/x"
+ *  would take the whole page down with a server error. Never let a label crash
+ *  a render — fall back to the raw string. */
+function hostOf(url: string): string {
+  try {
+    return new URL(url).hostname;
+  } catch {
+    return url.slice(0, 40);
+  }
+}
+
+const VERDICT_LABEL: Record<string, string> = {
+  confirmed: "Deal is real",
+  not_a_deal: "Not a deal",
+  duplicate: "Already captured",
+};
 
 const KIND_STYLE: Record<CorporateEventKind, { label: string; cls: string }> = {
   acquisition: { label: "Acquisition", cls: "border-[#b08d2f]/50 bg-[#b08d2f]/15 text-[#8a6d1f] dark:text-[#e8c95c]" },
@@ -43,8 +63,15 @@ export default async function MaterialEventsPage() {
   });
   const flagged = flagCorporateEvents(recent);
 
-  const acquisitions = flagged.filter((f) => f.signal.kind === "acquisition").length;
-  const investments = flagged.filter((f) => f.signal.kind === "investment").length;
+  // Split the queue by whether a human has already ruled on the row. Reviewed
+  // items are kept (collapsed) rather than hidden — a verdict you cannot see is
+  // one you cannot correct, and "not a deal" is exactly the call worth auditing.
+  const reviews = await listMaterialEventReviews();
+  const open = flagged.filter((f) => !reviews.has(f.item.id));
+  const done = flagged.filter((f) => reviews.has(f.item.id));
+
+  const acquisitions = open.filter((f) => f.signal.kind === "acquisition").length;
+  const investments = open.filter((f) => f.signal.kind === "investment").length;
 
   return (
     <main className="mx-auto max-w-4xl px-4 py-10 text-[#123d2c] dark:text-[#eef3f8]">
@@ -52,14 +79,15 @@ export default async function MaterialEventsPage() {
       <p className={`mt-2 max-w-2xl text-sm ${MUTED}`}>
         Deal-shaped headlines from the last {WINDOW_DAYS} days. Each row is a <strong>pattern match on the
         headline</strong>, not a verified transaction: we show the phrase that triggered it and any figure exactly
-        as the source wrote it. Nothing here has moved a score, and nothing will until evidence is reviewed —
-        this exists so an ownership change or a new backer doesn&apos;t scroll past unseen.
+        as the source wrote it. Nothing here has moved a score, and nothing will — read the source, then record
+        what you found. This exists so an ownership change or a new backer doesn&apos;t scroll past unseen.
       </p>
 
       {flagged.length > 0 && (
         <p className={`mt-3 text-sm ${MUTED}`}>
-          <strong>{flagged.length}</strong> flagged · {acquisitions} acquisition{acquisitions === 1 ? "" : "s"} ·{" "}
+          <strong>{open.length}</strong> to review · {acquisitions} acquisition{acquisitions === 1 ? "" : "s"} ·{" "}
           {investments} investment{investments === 1 ? "" : "s"}
+          {done.length > 0 && <> · {done.length} already reviewed</>}
           {" · "}
           <Link href="/admin/market-edge" className="underline underline-offset-2">
             untracked entities →
@@ -71,9 +99,14 @@ export default async function MaterialEventsPage() {
         <p className={`mt-6 text-sm ${MUTED}`}>
           No deal-shaped headlines in the last {WINDOW_DAYS} days. {recent.length} cited items scanned.
         </p>
+      ) : open.length === 0 ? (
+        <p className={`mt-6 text-sm ${MUTED}`}>
+          All {done.length} flagged {done.length === 1 ? "headline has" : "headlines have"} been reviewed. Reopen any
+          of them below to change a verdict.
+        </p>
       ) : (
         <ul className="mt-6 space-y-3">
-          {flagged.map(({ item, signal }) => (
+          {open.map(({ item, signal }) => (
             <li key={item.id} className="rounded-xl border border-black/10 p-4 dark:border-white/10">
               <div className="flex flex-wrap items-center gap-2">
                 <span className={`rounded-full border px-2 py-0.5 text-xs font-semibold ${KIND_STYLE[signal.kind].cls}`}>
@@ -104,12 +137,57 @@ export default async function MaterialEventsPage() {
                   rel="noopener noreferrer"
                   className="mt-2 inline-block text-xs underline underline-offset-2"
                 >
-                  {item.sourceName || "source"} ↗
+                  Read the source: {item.sourceName || hostOf(item.sourceUrl)} ↗
                 </a>
               )}
+
+              <MaterialEventReview newsItemId={item.id} />
             </li>
           ))}
         </ul>
+      )}
+
+      {/* Reviewed rows stay reachable. A verdict you cannot see is one you
+          cannot correct, and "not a deal" is the call most worth auditing. */}
+      {done.length > 0 && (
+        <details className="mt-8">
+          <summary className={`cursor-pointer text-sm ${MUTED}`}>
+            Reviewed ({done.length})
+          </summary>
+          <ul className="mt-3 space-y-2">
+            {done.map(({ item, signal }) => {
+              const r = reviews.get(item.id)!;
+              return (
+                <li
+                  key={item.id}
+                  className="rounded-lg border border-black/10 px-3 py-2 dark:border-white/10"
+                >
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="rounded-full border border-black/15 px-2 py-0.5 text-[11px] font-semibold dark:border-white/20">
+                      {VERDICT_LABEL[r.verdict]}
+                    </span>
+                    <span className={`text-xs tabular-nums ${MUTED}`}>{fmt(item.publishedAt)}</span>
+                    {signal.amountText && (
+                      <span className={`font-mono text-xs ${MUTED}`}>{signal.amountText}</span>
+                    )}
+                  </div>
+                  <p className="mt-1 text-sm">{item.title}</p>
+                  {item.sourceUrl && (
+                    <a
+                      href={item.sourceUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-1 inline-block text-xs underline underline-offset-2"
+                    >
+                      {item.sourceName || hostOf(item.sourceUrl)} ↗
+                    </a>
+                  )}
+                  <MaterialEventReview newsItemId={item.id} reviewed={r} />
+                </li>
+              );
+            })}
+          </ul>
+        </details>
       )}
     </main>
   );
